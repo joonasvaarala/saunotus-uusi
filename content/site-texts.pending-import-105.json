@@ -1,0 +1,1114 @@
+[
+  {
+    "key": "ui.admin.accrual.advances_note",
+    "lang": "en",
+    "text": "Paid on or before the period end, with the service date after that. Refunds up to that date are deducted.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 105,
+    "placeholders": [],
+    "reason": "booking_218/219: hyvitysten seuranta, käsin kirjattu hyvitys ja suoriteperusteinen raportti (1.11.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.accrual.advances_note",
+    "lang": "fi",
+    "text": "Maksettu viimeistään jakson lopussa, palvelupäivä sen jälkeen. Hyvitykset siihen päivään asti on vähennetty.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 108,
+    "placeholders": [],
+    "reason": "booking_218/219: hyvitysten seuranta, käsin kirjattu hyvitys ja suoriteperusteinen raportti (1.11.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.accrual.advances_services",
+    "lang": "en",
+    "text": "Advances received, services",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_218/219: hyvitysten seuranta, käsin kirjattu hyvitys ja suoriteperusteinen raportti (1.11.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.accrual.advances_services",
+    "lang": "fi",
+    "text": "Saadut ennakot, palvelut",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_218/219: hyvitysten seuranta, käsin kirjattu hyvitys ja suoriteperusteinen raportti (1.11.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.accrual.advances_total",
+    "lang": "en",
+    "text": "Advances total",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_218/219: hyvitysten seuranta, käsin kirjattu hyvitys ja suoriteperusteinen raportti (1.11.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.accrual.advances_total",
+    "lang": "fi",
+    "text": "Ennakot yhteensä",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_218/219: hyvitysten seuranta, käsin kirjattu hyvitys ja suoriteperusteinen raportti (1.11.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.accrual.advances",
+    "lang": "en",
+    "text": "Advances received",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_218/219: hyvitysten seuranta, käsin kirjattu hyvitys ja suoriteperusteinen raportti (1.11.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.accrual.advances",
+    "lang": "fi",
+    "text": "Saadut ennakot",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_218/219: hyvitysten seuranta, käsin kirjattu hyvitys ja suoriteperusteinen raportti (1.11.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.accrual.as_of",
+    "lang": "en",
+    "text": "Balance on {{var:date}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [
+      "{{var:date}}"
+    ],
+    "reason": "booking_218/219: hyvitysten seuranta, käsin kirjattu hyvitys ja suoriteperusteinen raportti (1.11.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.accrual.as_of",
+    "lang": "fi",
+    "text": "Tilanne {{var:date}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [
+      "{{var:date}}"
+    ],
+    "reason": "booking_218/219: hyvitysten seuranta, käsin kirjattu hyvitys ja suoriteperusteinen raportti (1.11.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.accrual.basis_legend",
+    "lang": "en",
+    "text": "Report basis",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_218/219: hyvitysten seuranta, käsin kirjattu hyvitys ja suoriteperusteinen raportti (1.11.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.accrual.basis_legend",
+    "lang": "fi",
+    "text": "Raportin peruste",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_218/219: hyvitysten seuranta, käsin kirjattu hyvitys ja suoriteperusteinen raportti (1.11.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.accrual.basis_note",
+    "lang": "en",
+    "text": "Service date (booking or event). The cash-basis VAT report is unchanged: VAT on an advance is due on the payment date.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 118,
+    "placeholders": [],
+    "reason": "booking_218/219: hyvitysten seuranta, käsin kirjattu hyvitys ja suoriteperusteinen raportti (1.11.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.accrual.basis_note",
+    "lang": "fi",
+    "text": "Palvelupäivä (varaus tai tapahtuma). Kassaperusteinen ALV-raportti säilyy ennallaan: ennakon vero erääntyy maksupäivänä.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "booking_218/219: hyvitysten seuranta, käsin kirjattu hyvitys ja suoriteperusteinen raportti (1.11.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.accrual.basis_payment",
+    "lang": "en",
+    "text": "Cash basis",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_218/219: hyvitysten seuranta, käsin kirjattu hyvitys ja suoriteperusteinen raportti (1.11.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.accrual.basis_payment",
+    "lang": "fi",
+    "text": "Kassaperuste",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_218/219: hyvitysten seuranta, käsin kirjattu hyvitys ja suoriteperusteinen raportti (1.11.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.accrual.basis_service",
+    "lang": "en",
+    "text": "Service date",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_218/219: hyvitysten seuranta, käsin kirjattu hyvitys ja suoriteperusteinen raportti (1.11.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.accrual.basis_service",
+    "lang": "fi",
+    "text": "Suoriteperuste",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_218/219: hyvitysten seuranta, käsin kirjattu hyvitys ja suoriteperusteinen raportti (1.11.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.accrual.col_count",
+    "lang": "en",
+    "text": "Qty",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_218/219: hyvitysten seuranta, käsin kirjattu hyvitys ja suoriteperusteinen raportti (1.11.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.accrual.col_count",
+    "lang": "fi",
+    "text": "kpl",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_218/219: hyvitysten seuranta, käsin kirjattu hyvitys ja suoriteperusteinen raportti (1.11.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.accrual.col_gross",
+    "lang": "en",
+    "text": "Gross",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_218/219: hyvitysten seuranta, käsin kirjattu hyvitys ja suoriteperusteinen raportti (1.11.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.accrual.col_gross",
+    "lang": "fi",
+    "text": "Brutto",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_218/219: hyvitysten seuranta, käsin kirjattu hyvitys ja suoriteperusteinen raportti (1.11.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.accrual.col_net",
+    "lang": "en",
+    "text": "Net",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_218/219: hyvitysten seuranta, käsin kirjattu hyvitys ja suoriteperusteinen raportti (1.11.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.accrual.col_net",
+    "lang": "fi",
+    "text": "Veroton",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_218/219: hyvitysten seuranta, käsin kirjattu hyvitys ja suoriteperusteinen raportti (1.11.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.accrual.col_product",
+    "lang": "en",
+    "text": "Product",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_218/219: hyvitysten seuranta, käsin kirjattu hyvitys ja suoriteperusteinen raportti (1.11.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.accrual.col_product",
+    "lang": "fi",
+    "text": "Tuote",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_218/219: hyvitysten seuranta, käsin kirjattu hyvitys ja suoriteperusteinen raportti (1.11.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.accrual.col_vat_eur",
+    "lang": "en",
+    "text": "VAT €",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_218/219: hyvitysten seuranta, käsin kirjattu hyvitys ja suoriteperusteinen raportti (1.11.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.accrual.col_vat_eur",
+    "lang": "fi",
+    "text": "ALV €",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_218/219: hyvitysten seuranta, käsin kirjattu hyvitys ja suoriteperusteinen raportti (1.11.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.accrual.col_vat_pct",
+    "lang": "en",
+    "text": "VAT %",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_218/219: hyvitysten seuranta, käsin kirjattu hyvitys ja suoriteperusteinen raportti (1.11.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.accrual.col_vat_pct",
+    "lang": "fi",
+    "text": "ALV %",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_218/219: hyvitysten seuranta, käsin kirjattu hyvitys ja suoriteperusteinen raportti (1.11.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.accrual.csv",
+    "lang": "en",
+    "text": "Service-date CSV",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_218/219: hyvitysten seuranta, käsin kirjattu hyvitys ja suoriteperusteinen raportti (1.11.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.accrual.csv",
+    "lang": "fi",
+    "text": "Suorite CSV",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_218/219: hyvitysten seuranta, käsin kirjattu hyvitys ja suoriteperusteinen raportti (1.11.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.accrual.empty",
+    "lang": "en",
+    "text": "No sales in this service period.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_218/219: hyvitysten seuranta, käsin kirjattu hyvitys ja suoriteperusteinen raportti (1.11.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.accrual.empty",
+    "lang": "fi",
+    "text": "Ei myyntiä tällä palvelujaksolla.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_218/219: hyvitysten seuranta, käsin kirjattu hyvitys ja suoriteperusteinen raportti (1.11.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.accrual.gift_cards_note",
+    "lang": "en",
+    "text": "A gift card issued here is an advance until it is redeemed or expires. VAT was recorded at sale.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 96,
+    "placeholders": [],
+    "reason": "booking_218/219: hyvitysten seuranta, käsin kirjattu hyvitys ja suoriteperusteinen raportti (1.11.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.accrual.gift_cards_note",
+    "lang": "fi",
+    "text": "Oma lahjakortti on ennakko, kunnes se lunastetaan tai vanhenee. Arvonlisävero on kirjattu myynnissä.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 100,
+    "placeholders": [],
+    "reason": "booking_218/219: hyvitysten seuranta, käsin kirjattu hyvitys ja suoriteperusteinen raportti (1.11.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.accrual.gift_cards",
+    "lang": "en",
+    "text": "Unused gift cards",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_218/219: hyvitysten seuranta, käsin kirjattu hyvitys ja suoriteperusteinen raportti (1.11.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.accrual.gift_cards",
+    "lang": "fi",
+    "text": "Käyttämättömät lahjakortit",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_218/219: hyvitysten seuranta, käsin kirjattu hyvitys ja suoriteperusteinen raportti (1.11.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.accrual.no_refunds",
+    "lang": "en",
+    "text": "No refunds in this service period.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_218/219: hyvitysten seuranta, käsin kirjattu hyvitys ja suoriteperusteinen raportti (1.11.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.accrual.no_refunds",
+    "lang": "fi",
+    "text": "Ei hyvityksiä tällä palvelujaksolla.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_218/219: hyvitysten seuranta, käsin kirjattu hyvitys ja suoriteperusteinen raportti (1.11.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.accrual.refunds_vat",
+    "lang": "en",
+    "text": "Refund VAT by service date",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_218/219: hyvitysten seuranta, käsin kirjattu hyvitys ja suoriteperusteinen raportti (1.11.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.accrual.refunds_vat",
+    "lang": "fi",
+    "text": "Hyvitysten ALV palvelupäivän mukaan",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_218/219: hyvitysten seuranta, käsin kirjattu hyvitys ja suoriteperusteinen raportti (1.11.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.accrual.refunds",
+    "lang": "en",
+    "text": "Refunds by service date",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_218/219: hyvitysten seuranta, käsin kirjattu hyvitys ja suoriteperusteinen raportti (1.11.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.accrual.refunds",
+    "lang": "fi",
+    "text": "Hyvitykset palvelupäivän mukaan",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_218/219: hyvitysten seuranta, käsin kirjattu hyvitys ja suoriteperusteinen raportti (1.11.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.accrual.sales_vat",
+    "lang": "en",
+    "text": "Sales VAT by service date",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_218/219: hyvitysten seuranta, käsin kirjattu hyvitys ja suoriteperusteinen raportti (1.11.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.accrual.sales_vat",
+    "lang": "fi",
+    "text": "Myynnin ALV palvelupäivän mukaan",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_218/219: hyvitysten seuranta, käsin kirjattu hyvitys ja suoriteperusteinen raportti (1.11.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.accrual.sales",
+    "lang": "en",
+    "text": "Sales by service date",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_218/219: hyvitysten seuranta, käsin kirjattu hyvitys ja suoriteperusteinen raportti (1.11.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.accrual.sales",
+    "lang": "fi",
+    "text": "Myynti palvelupäivän mukaan",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_218/219: hyvitysten seuranta, käsin kirjattu hyvitys ja suoriteperusteinen raportti (1.11.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.accrual.total",
+    "lang": "en",
+    "text": "Total",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_218/219: hyvitysten seuranta, käsin kirjattu hyvitys ja suoriteperusteinen raportti (1.11.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.accrual.total",
+    "lang": "fi",
+    "text": "Yhteensä",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_218/219: hyvitysten seuranta, käsin kirjattu hyvitys ja suoriteperusteinen raportti (1.11.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.nav.refund_watch",
+    "lang": "en",
+    "text": "Refund follow-up",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_218/219: hyvitysten seuranta, käsin kirjattu hyvitys ja suoriteperusteinen raportti (1.11.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.nav.refund_watch",
+    "lang": "fi",
+    "text": "Hyvitysten seuranta",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_218/219: hyvitysten seuranta, käsin kirjattu hyvitys ja suoriteperusteinen raportti (1.11.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.refund_watch.age_hours",
+    "lang": "en",
+    "text": "{{var:hours}} h",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [
+      "{{var:hours}}"
+    ],
+    "reason": "booking_218/219: hyvitysten seuranta, käsin kirjattu hyvitys ja suoriteperusteinen raportti (1.11.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.refund_watch.age_hours",
+    "lang": "fi",
+    "text": "{{var:hours}} h",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [
+      "{{var:hours}}"
+    ],
+    "reason": "booking_218/219: hyvitysten seuranta, käsin kirjattu hyvitys ja suoriteperusteinen raportti (1.11.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.refund_watch.aging_banner",
+    "lang": "en",
+    "text": "Refunds waiting more than 24 hours: {{var:n}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [
+      "{{var:n}}"
+    ],
+    "reason": "booking_218/219: hyvitysten seuranta, käsin kirjattu hyvitys ja suoriteperusteinen raportti (1.11.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.refund_watch.aging_banner",
+    "lang": "fi",
+    "text": "Yli 24 tuntia odottaneita hyvityksiä: {{var:n}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [
+      "{{var:n}}"
+    ],
+    "reason": "booking_218/219: hyvitysten seuranta, käsin kirjattu hyvitys ja suoriteperusteinen raportti (1.11.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.refund_watch.aging",
+    "lang": "en",
+    "text": "Over 24 h",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_218/219: hyvitysten seuranta, käsin kirjattu hyvitys ja suoriteperusteinen raportti (1.11.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.refund_watch.aging",
+    "lang": "fi",
+    "text": "Yli 24 h",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_218/219: hyvitysten seuranta, käsin kirjattu hyvitys ja suoriteperusteinen raportti (1.11.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.refund_watch.amount",
+    "lang": "en",
+    "text": "Amount",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_218/219: hyvitysten seuranta, käsin kirjattu hyvitys ja suoriteperusteinen raportti (1.11.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.refund_watch.amount",
+    "lang": "fi",
+    "text": "Summa",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_218/219: hyvitysten seuranta, käsin kirjattu hyvitys ja suoriteperusteinen raportti (1.11.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.refund_watch.col.actions",
+    "lang": "en",
+    "text": "Actions",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_218/219: hyvitysten seuranta, käsin kirjattu hyvitys ja suoriteperusteinen raportti (1.11.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.refund_watch.col.actions",
+    "lang": "fi",
+    "text": "Toiminnot",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_218/219: hyvitysten seuranta, käsin kirjattu hyvitys ja suoriteperusteinen raportti (1.11.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.refund_watch.col.age",
+    "lang": "en",
+    "text": "Age",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_218/219: hyvitysten seuranta, käsin kirjattu hyvitys ja suoriteperusteinen raportti (1.11.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.refund_watch.col.age",
+    "lang": "fi",
+    "text": "Ikä",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_218/219: hyvitysten seuranta, käsin kirjattu hyvitys ja suoriteperusteinen raportti (1.11.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.refund_watch.col.amount",
+    "lang": "en",
+    "text": "Amount",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_218/219: hyvitysten seuranta, käsin kirjattu hyvitys ja suoriteperusteinen raportti (1.11.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.refund_watch.col.amount",
+    "lang": "fi",
+    "text": "Summa",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_218/219: hyvitysten seuranta, käsin kirjattu hyvitys ja suoriteperusteinen raportti (1.11.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.refund_watch.col.customer",
+    "lang": "en",
+    "text": "Customer",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_218/219: hyvitysten seuranta, käsin kirjattu hyvitys ja suoriteperusteinen raportti (1.11.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.refund_watch.col.customer",
+    "lang": "fi",
+    "text": "Asiakas",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_218/219: hyvitysten seuranta, käsin kirjattu hyvitys ja suoriteperusteinen raportti (1.11.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.refund_watch.col.order",
+    "lang": "en",
+    "text": "Order",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_218/219: hyvitysten seuranta, käsin kirjattu hyvitys ja suoriteperusteinen raportti (1.11.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.refund_watch.col.order",
+    "lang": "fi",
+    "text": "Tilaus",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_218/219: hyvitysten seuranta, käsin kirjattu hyvitys ja suoriteperusteinen raportti (1.11.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.refund_watch.col.provider",
+    "lang": "en",
+    "text": "Provider",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_218/219: hyvitysten seuranta, käsin kirjattu hyvitys ja suoriteperusteinen raportti (1.11.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.refund_watch.col.provider",
+    "lang": "fi",
+    "text": "Välittäjä",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_218/219: hyvitysten seuranta, käsin kirjattu hyvitys ja suoriteperusteinen raportti (1.11.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.refund_watch.col.status",
+    "lang": "en",
+    "text": "Status",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_218/219: hyvitysten seuranta, käsin kirjattu hyvitys ja suoriteperusteinen raportti (1.11.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.refund_watch.col.status",
+    "lang": "fi",
+    "text": "Tila",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_218/219: hyvitysten seuranta, käsin kirjattu hyvitys ja suoriteperusteinen raportti (1.11.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.refund_watch.date",
+    "lang": "en",
+    "text": "Refund date",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_218/219: hyvitysten seuranta, käsin kirjattu hyvitys ja suoriteperusteinen raportti (1.11.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.refund_watch.date",
+    "lang": "fi",
+    "text": "Hyvityspäivä",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_218/219: hyvitysten seuranta, käsin kirjattu hyvitys ja suoriteperusteinen raportti (1.11.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.refund_watch.done",
+    "lang": "en",
+    "text": "Refund recorded.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_218/219: hyvitysten seuranta, käsin kirjattu hyvitys ja suoriteperusteinen raportti (1.11.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.refund_watch.done",
+    "lang": "fi",
+    "text": "Hyvitys kirjattu.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_218/219: hyvitysten seuranta, käsin kirjattu hyvitys ja suoriteperusteinen raportti (1.11.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.refund_watch.empty",
+    "lang": "en",
+    "text": "No open refunds.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_218/219: hyvitysten seuranta, käsin kirjattu hyvitys ja suoriteperusteinen raportti (1.11.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.refund_watch.empty",
+    "lang": "fi",
+    "text": "Ei avoimia hyvityksiä.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_218/219: hyvitysten seuranta, käsin kirjattu hyvitys ja suoriteperusteinen raportti (1.11.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.refund_watch.intro",
+    "lang": "en",
+    "text": "Refunds the provider has not confirmed. A refund waiting more than 24 hours is flagged. If the automatic refund fails, refund the money in the provider portal and record it here.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 178,
+    "placeholders": [],
+    "reason": "booking_218/219: hyvitysten seuranta, käsin kirjattu hyvitys ja suoriteperusteinen raportti (1.11.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.refund_watch.intro",
+    "lang": "fi",
+    "text": "Hyvitykset, joita välittäjä ei ole vahvistanut. Yli 24 tuntia odottanut hyvitys on merkitty. Jos automaattinen hyvitys ei onnistu, palauta raha välittäjän portaalissa ja kirjaa se tähän.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 186,
+    "placeholders": [],
+    "reason": "booking_218/219: hyvitysten seuranta, käsin kirjattu hyvitys ja suoriteperusteinen raportti (1.11.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.refund_watch.manual_hint",
+    "lang": "en",
+    "text": "Record only a refund already made in the provider portal. The same credit receipt is created as for a successful automatic refund.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 130,
+    "placeholders": [],
+    "reason": "booking_218/219: hyvitysten seuranta, käsin kirjattu hyvitys ja suoriteperusteinen raportti (1.11.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.refund_watch.manual_hint",
+    "lang": "fi",
+    "text": "Kirjaa vain hyvitys, joka on jo tehty välittäjän portaalissa. Sama hyvityskuitti syntyy kuin onnistuneesta automaattihyvityksestä.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 130,
+    "placeholders": [],
+    "reason": "booking_218/219: hyvitysten seuranta, käsin kirjattu hyvitys ja suoriteperusteinen raportti (1.11.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.refund_watch.manual_title",
+    "lang": "en",
+    "text": "Record a manual refund",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_218/219: hyvitysten seuranta, käsin kirjattu hyvitys ja suoriteperusteinen raportti (1.11.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.refund_watch.manual_title",
+    "lang": "fi",
+    "text": "Kirjaa käsin tehty hyvitys",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_218/219: hyvitysten seuranta, käsin kirjattu hyvitys ja suoriteperusteinen raportti (1.11.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.refund_watch.manual",
+    "lang": "en",
+    "text": "Record a manual refund",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_218/219: hyvitysten seuranta, käsin kirjattu hyvitys ja suoriteperusteinen raportti (1.11.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.refund_watch.manual",
+    "lang": "fi",
+    "text": "Kirjaa käsin tehty hyvitys",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_218/219: hyvitysten seuranta, käsin kirjattu hyvitys ja suoriteperusteinen raportti (1.11.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.refund_watch.no_perm",
+    "lang": "en",
+    "text": "Refund follow-up requires bookings.manage or the admin role.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_218/219: hyvitysten seuranta, käsin kirjattu hyvitys ja suoriteperusteinen raportti (1.11.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.refund_watch.no_perm",
+    "lang": "fi",
+    "text": "Hyvitysten seuranta vaatii oikeuden bookings.manage tai admin-roolin.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_218/219: hyvitysten seuranta, käsin kirjattu hyvitys ja suoriteperusteinen raportti (1.11.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.refund_watch.note",
+    "lang": "en",
+    "text": "Note",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_218/219: hyvitysten seuranta, käsin kirjattu hyvitys ja suoriteperusteinen raportti (1.11.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.refund_watch.note",
+    "lang": "fi",
+    "text": "Huomautus",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_218/219: hyvitysten seuranta, käsin kirjattu hyvitys ja suoriteperusteinen raportti (1.11.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.refund_watch.provider_ref",
+    "lang": "en",
+    "text": "Provider reference",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_218/219: hyvitysten seuranta, käsin kirjattu hyvitys ja suoriteperusteinen raportti (1.11.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.refund_watch.provider_ref",
+    "lang": "fi",
+    "text": "Välittäjän viite",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_218/219: hyvitysten seuranta, käsin kirjattu hyvitys ja suoriteperusteinen raportti (1.11.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.refund_watch.retry_done",
+    "lang": "en",
+    "text": "The refund was queued again.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_218/219: hyvitysten seuranta, käsin kirjattu hyvitys ja suoriteperusteinen raportti (1.11.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.refund_watch.retry_done",
+    "lang": "fi",
+    "text": "Hyvitys palautettiin jonoon.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_218/219: hyvitysten seuranta, käsin kirjattu hyvitys ja suoriteperusteinen raportti (1.11.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.refund_watch.retry",
+    "lang": "en",
+    "text": "Retry automatic refund",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_218/219: hyvitysten seuranta, käsin kirjattu hyvitys ja suoriteperusteinen raportti (1.11.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.refund_watch.retry",
+    "lang": "fi",
+    "text": "Yritä automaattista hyvitystä uudelleen",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_218/219: hyvitysten seuranta, käsin kirjattu hyvitys ja suoriteperusteinen raportti (1.11.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.refund_watch.search",
+    "lang": "en",
+    "text": "Search by order number, name or reference",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_218/219: hyvitysten seuranta, käsin kirjattu hyvitys ja suoriteperusteinen raportti (1.11.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.refund_watch.search",
+    "lang": "fi",
+    "text": "Hae tilausnumerolla, nimellä tai viitteellä",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_218/219: hyvitysten seuranta, käsin kirjattu hyvitys ja suoriteperusteinen raportti (1.11.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.refund_watch.status.failed",
+    "lang": "en",
+    "text": "Failed",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_218/219: hyvitysten seuranta, käsin kirjattu hyvitys ja suoriteperusteinen raportti (1.11.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.refund_watch.status.failed",
+    "lang": "fi",
+    "text": "Epäonnistui",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_218/219: hyvitysten seuranta, käsin kirjattu hyvitys ja suoriteperusteinen raportti (1.11.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.refund_watch.status.processing",
+    "lang": "en",
+    "text": "Processing",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_218/219: hyvitysten seuranta, käsin kirjattu hyvitys ja suoriteperusteinen raportti (1.11.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.refund_watch.status.processing",
+    "lang": "fi",
+    "text": "Käsittelyssä",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_218/219: hyvitysten seuranta, käsin kirjattu hyvitys ja suoriteperusteinen raportti (1.11.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.refund_watch.status.requested",
+    "lang": "en",
+    "text": "Queued",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_218/219: hyvitysten seuranta, käsin kirjattu hyvitys ja suoriteperusteinen raportti (1.11.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.refund_watch.status.requested",
+    "lang": "fi",
+    "text": "Jonossa",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_218/219: hyvitysten seuranta, käsin kirjattu hyvitys ja suoriteperusteinen raportti (1.11.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.refund_watch.submit",
+    "lang": "en",
+    "text": "Record refund",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_218/219: hyvitysten seuranta, käsin kirjattu hyvitys ja suoriteperusteinen raportti (1.11.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.refund_watch.submit",
+    "lang": "fi",
+    "text": "Kirjaa hyvitys",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_218/219: hyvitysten seuranta, käsin kirjattu hyvitys ja suoriteperusteinen raportti (1.11.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.refund_watch.title",
+    "lang": "en",
+    "text": "Refund follow-up",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_218/219: hyvitysten seuranta, käsin kirjattu hyvitys ja suoriteperusteinen raportti (1.11.2026). FI+EN. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.admin.refund_watch.title",
+    "lang": "fi",
+    "text": "Hyvitysten seuranta",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_218/219: hyvitysten seuranta, käsin kirjattu hyvitys ja suoriteperusteinen raportti (1.11.2026). FI+EN. Tuo admin_texts_importilla."
+  }
+]

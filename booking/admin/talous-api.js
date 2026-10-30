@@ -13,7 +13,7 @@ import { createMock } from './talous-mock.js';
 export const RPC = {
   listOrders: 'admin_list_orders', getOrder: 'admin_get_order', listPayments: 'admin_list_payments', listAddons: 'admin_list_addons',
   addToOrder: 'admin_add_to_order', createPaymentLink: 'admin_create_payment_link', refund: 'admin_refund', refundOrder: 'admin_refund_order', reservationRefundPreview: 'admin_reservation_refund_preview', cancelReservation: 'admin_cancel_reservation', recordPayment: 'admin_record_payment', listVatRates: 'admin_list_vat_rates',
-  reportDaily: 'admin_report_daily', reportMonthly: 'admin_report_month', reportRange: 'admin_report_range', reportTransactions: 'admin_report_transactions', reportGiftCards: 'admin_report_gift_cards', reportCsv: 'admin_report_csv', salesChart: 'admin_sales_chart',
+  reportDaily: 'admin_report_daily', reportMonthly: 'admin_report_month', reportRange: 'admin_report_range', reportTransactions: 'admin_report_transactions', reportGiftCards: 'admin_report_gift_cards', reportCsv: 'admin_report_csv', reportAccrual: 'admin_report_accrual', reportAccrualCsv: 'admin_report_accrual_csv', salesChart: 'admin_sales_chart',
   getReceipt: 'admin_get_receipt', resendReceipt: 'admin_resend_receipt',
   annualCardForOrder: 'admin_annual_card_for_order',   // booking_146: tilauksen vuosikortti + koodin sähköpostin tila
 };
@@ -210,6 +210,8 @@ export function rpcBackend(rpc) {
     reportTransactions: (a) => call('reportTransactions', { p_from: a.from, p_to: a.to }),
     reportGiftCards: (a) => call('reportGiftCards', { p_filter: a.filter, p_format: a.format || 'json' }),
     reportCsv: (a) => call('reportCsv', compact({ p_from: a.from, p_to: a.to, p_kind: a.kind || 'lines' })),
+    reportAccrual: (a) => call('reportAccrual', { p_from: a.from, p_to: a.to }),
+    reportAccrualCsv: (a) => call('reportAccrualCsv', { p_from: a.from, p_to: a.to }),
     salesChart: (year) => call('salesChart', { p_year: year }),
     getReceipt: (id) => call('getReceipt', { p_receipt_id: id }),
     resendReceipt: (id) => call('resendReceipt', { p_receipt_id: id }),
@@ -218,6 +220,37 @@ export function rpcBackend(rpc) {
 }
 
 // io = selaimen apurit (talous.js antaa sb.js:n): functionUrl(nimi, kysely) = Edge-funktion osoite, select(taulu, kysely) = PostgREST-luku, fnBlob(nimi, kysely) = JWT-suojattu GET → {blob,type}
+const moneyLine = (p) => ({ product: p.product ?? '', rate: num(p.rate), quantity: num(p.quantity), net: num(p.net), vat: num(p.vat), gross: num(p.gross) });
+const vatLine = (v) => ({ rate: num(v.rate), quantity: num(v.quantity), net: num(v.net), vat: num(v.vat), gross: num(v.gross) });
+export function normAccrual(r) {
+  const per = r.period || {};
+  const t = r.totals || {};
+  const adv = r.advances || {};
+  const svc = adv.services || {};
+  const gc = adv.gift_cards_unused || {};
+  return {
+    period: { from: per.from ?? null, to: per.to ?? null, tz: per.tz || 'Europe/Helsinki', kind: per.kind || (per.from && per.from === per.to ? 'day' : 'range') },
+    basis: r.basis || 'service',
+    as_of: r.as_of || per.to || null,
+    generated_at: r.generated_at ?? null,
+    sales_by_product: L(r.sales_by_product).map(moneyLine),
+    sales_by_vat: L(r.sales_by_vat).map(vatLine),
+    refunds_by_product: L(r.refunds_by_product).map(moneyLine),
+    refunds_by_vat: L(r.refunds_by_vat).map(vatLine),
+    totals: {
+      sales_net: num(t.sales_net), sales_vat: num(t.sales_vat), sales_gross: num(t.sales_gross),
+      refunds_net: num(t.refunds_net), refunds_vat: num(t.refunds_vat), refunds_gross: num(t.refunds_gross),
+      net: num(t.net), vat: num(t.vat), gross: num(t.gross),
+    },
+    advances: {
+      as_of: adv.as_of || r.as_of || per.to || null,
+      services: { net: num(svc.net), vat: num(svc.vat), gross: num(svc.gross), lines: num(svc.lines), by_vat: L(svc.by_vat).map(vatLine) },
+      gift_cards_unused: { count: num(gc.count), gross: num(gc.gross), vat: num(gc.vat), net: num(gc.net), rate: num(gc.rate || 25.5), vat_at_sale: gc.vat_at_sale !== false },
+      total_gross: num(adv.total_gross),
+    },
+  };
+}
+
 export function createTalousApi({ rpc, io = {}, mock = wantsMock(), mockFactory = () => createMock({ delay: 120 }) } = {}) {
   const forced = !!mock, missing = new Set(), listeners = new Set();
   let mockBackend = null;
@@ -257,6 +290,11 @@ export function createTalousApi({ rpc, io = {}, mock = wantsMock(), mockFactory 
     reportDaily: (date) => run('reportDaily', date, normReport),
     reportMonthly: (ym) => run('reportMonthly', ym, normReport),
     reportRange: (from, to) => run('reportRange', { from, to }, normReport),
+    reportAccrual: (from, to) => run('reportAccrual', { from, to }, normAccrual),
+    async reportAccrualCsv(from, to) {
+      const res = await run('reportAccrualCsv', { from, to });
+      return { source: 'server', filename: res.filename || `suorite_${from}_${to}.csv`, content: String(res.content ?? ''), mime: res.mime || 'text/csv' };
+    },
     reportTransactions: (from, to) => run('reportTransactions', { from, to }, (r) => ({ period: r.period || { from, to, kind: 'transactions' }, rows: L(r.rows).map((x) => ({
       voucher: x.voucher ?? '', date: x.date ?? '', customer: x.customer ?? '', product: x.product ?? '', quantity: num(x.quantity), net: num(x.net), vat_rate: num(x.vat_rate), vat: num(x.vat), gross: num(x.gross),
       method: x.method ?? '', method_label: x.method_label ?? '', status: x.status === 'open' ? 'open' : 'paid', kind: x.kind === 'refund' ? 'refund' : x.kind === 'redemption' ? 'redemption' : 'sale' })) })),

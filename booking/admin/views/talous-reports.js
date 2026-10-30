@@ -7,6 +7,7 @@ import { toCsv, downloadCsv } from '../csv.js';
 import { methodLabel, loading, emptyBox, errorBox } from './talous-ui.js';
 import { TEXTS } from '../talous-texts.js';
 import { reportText as rt } from '../reports-texts.js';
+import { accrualText as at } from '../accrual-texts.js';
 
 const fiMethod = (c) => TEXTS.fi[`method.${c}`] || c;
 const KINDS = ['daily', 'this', 'prev', 'monthly', 'range'];
@@ -32,22 +33,27 @@ function saveBlob(filename, blob) {
 // Oikeudet: päivä = reports.daily TAI reports.view; muu jakso, CSV ja lahjakorttiraportti = reports.view.
 export function createReportsTab({ api, canFull = true }) {
   const today = todayHel();
-  const st = { kind: 'daily', date: today, year: +today.slice(0, 4), month: +today.slice(5, 7), from: `${today.slice(0, 8)}01`, to: today, gc: 'open' };
+  const st = { basis: 'payment', kind: 'daily', date: today, year: +today.slice(0, 4), month: +today.slice(5, 7), from: `${today.slice(0, 8)}01`, to: today, gc: 'open' };
   const out = h('div', { class: 'tl-report', 'data-testid': 'report-out' });
   const gcOut = h('div', { 'data-testid': 'r-gc-out' });
   let seq = 0, gseq = 0, current = null;
   const ym = () => `${st.year}-${String(st.month).padStart(2, '0')}`;
-  const spanOf = () => (st.kind === 'this' ? monthBounds(today.slice(0, 7)) : st.kind === 'prev' ? monthBounds(shiftMonth(today.slice(0, 7), -1)) : { from: st.from, to: st.to });
+  const spanOf = () => (st.kind === 'daily' ? { from: st.date, to: st.date } : st.kind === 'this' ? monthBounds(today.slice(0, 7)) : st.kind === 'prev' ? monthBounds(shiftMonth(today.slice(0, 7), -1)) : st.kind === 'monthly' ? monthBounds(ym()) : { from: st.from, to: st.to });
   async function loadSales() {
     const my = ++seq; current = null;
-    csvBtn.disabled = true; sumCsvBtn.disabled = true; txPdfBtn.disabled = true; pdfSrvBtn.disabled = true;
+    csvBtn.disabled = true; sumCsvBtn.disabled = true; txPdfBtn.disabled = true; pdfSrvBtn.disabled = true; accCsvBtn.disabled = true;
     out.replaceChildren(loading());
     try {
-      const r = st.kind === 'daily' ? await api.reportDaily(st.date) : st.kind === 'monthly' ? await api.reportMonthly(ym()) : await api.reportRange(spanOf().from, spanOf().to);
+      const span = spanOf();
+      const r = st.basis === 'service'
+        ? await api.reportAccrual(span.from, span.to)
+        : st.kind === 'daily' ? await api.reportDaily(st.date) : st.kind === 'monthly' ? await api.reportMonthly(ym()) : await api.reportRange(span.from, span.to);
       if (my !== seq) return;
       current = r;
-      csvBtn.disabled = !canFull; sumCsvBtn.disabled = !canFull; txPdfBtn.disabled = !canFull; pdfSrvBtn.disabled = false;
-      out.replaceChildren(view(r));
+      const accrual = st.basis === 'service';
+      csvBtn.disabled = accrual || !canFull; sumCsvBtn.disabled = accrual || !canFull; txPdfBtn.disabled = accrual || !canFull; pdfSrvBtn.disabled = accrual;
+      accCsvBtn.hidden = !accrual; accCsvBtn.disabled = !canFull;
+      out.replaceChildren(accrual ? viewAccrual(r) : view(r));
     } catch (e) { if (my === seq) out.replaceChildren(errorBox(e, loadSales)); }
   }
   async function loadGc() {
@@ -154,6 +160,46 @@ export function createReportsTab({ api, canFull = true }) {
       section(rt('ui.admin.reports.gc_johku'), r.johku.rows, r.johku.totals, 'r-gc-johku', rt('ui.admin.reports.gc_note')));
   }
 
+  function viewAccrual(r) {
+    const M = fmt.money;
+    const T = r.totals || {};
+    const cols = [at('ui.admin.accrual.col_product'), at('ui.admin.accrual.col_count'), at('ui.admin.accrual.col_net'), at('ui.admin.accrual.col_gross'), at('ui.admin.accrual.col_vat_eur'), at('ui.admin.accrual.col_vat_pct')];
+    const vatCols = [at('ui.admin.accrual.col_vat_pct'), at('ui.admin.accrual.col_net'), at('ui.admin.accrual.col_gross'), at('ui.admin.accrual.col_vat_eur')];
+    const sum = (rows, k) => rows.reduce((s, x) => s + Number(x[k] || 0), 0);
+    const qtyTxt = (n) => Math.abs(n - Math.round(n)) < 0.001 ? fmt.int(n) : String(Math.round(n * 100) / 100).replace('.', ',');
+    const moneyRow = (p) => [p.product, qtyTxt(p.quantity), M(p.net), M(p.gross), M(p.vat), fmt.pct(p.rate)];
+    const moneyFoot = (rows) => [at('ui.admin.accrual.total'), qtyTxt(sum(rows, 'quantity')), M(sum(rows, 'net')), M(sum(rows, 'gross')), M(sum(rows, 'vat')), ''];
+    const table = (testid, caption, heads, rows, foot) => h('section', { class: 'tl-sec' }, h('h3', { text: caption }), h('table', { class: 'tl-table', 'data-testid': testid },
+      h('thead', {}, h('tr', {}, heads.map((c, i) => h('th', { scope: 'col', class: i ? 'r' : '', text: c })))),
+      h('tbody', {}, rows.map((row) => h('tr', {}, row.map((c, i) => h(i ? 'td' : 'th', i ? { class: 'r', text: c } : { scope: 'row', text: c }))))),
+      foot ? h('tfoot', {}, h('tr', {}, foot.map((c, i) => h(i ? 'td' : 'th', i ? { class: 'r', text: c } : { scope: 'row', text: c })))) : null));
+    const sales = r.sales_by_product || [];
+    const refunds = r.refunds_by_product || [];
+    const salesVat = r.sales_by_vat || [];
+    const refundVat = r.refunds_by_vat || [];
+    const adv = r.advances || {};
+    const svc = adv.services || { by_vat: [], net: 0, vat: 0, gross: 0 };
+    const gc = adv.gift_cards_unused || { count: 0, net: 0, vat: 0, gross: 0 };
+    const head = h('header', { class: 'tl-report-head' }, h('h2', { 'data-testid': 'accrual-title', text: at('ui.admin.accrual.sales') }), h('p', { class: 'muted', text: at('ui.admin.accrual.basis_note') }));
+    const stats = h('dl', { class: 'tl-stats' },
+      h('div', { class: 'tl-stat' }, h('dt', { text: at('ui.admin.accrual.col_gross') }), h('dd', { 'data-testid': 'accrual-gross', text: M(T.gross) })),
+      h('div', { class: 'tl-stat' }, h('dt', { text: at('ui.admin.accrual.refunds') }), h('dd', { 'data-testid': 'accrual-refunds', text: M(T.refunds_gross) })),
+      h('div', { class: 'tl-stat' }, h('dt', { text: at('ui.admin.accrual.col_vat_eur') }), h('dd', { 'data-testid': 'accrual-vat', text: M(T.vat) })),
+      h('div', { class: 'tl-stat' }, h('dt', { text: at('ui.admin.accrual.col_net') }), h('dd', { 'data-testid': 'accrual-net', text: M(T.net) })));
+    const byProduct = sales.length ? table('accrual-sales', at('ui.admin.accrual.sales'), cols, sales.map(moneyRow), moneyFoot(sales)) : h('section', { class: 'tl-sec', 'data-testid': 'accrual-sales' }, h('h3', { text: at('ui.admin.accrual.sales') }), emptyBox(at('ui.admin.accrual.empty')));
+    const byRefund = refunds.length ? table('accrual-refunds', at('ui.admin.accrual.refunds'), cols, refunds.map(moneyRow), moneyFoot(refunds)) : h('section', { class: 'tl-sec', 'data-testid': 'accrual-refunds' }, h('h3', { text: at('ui.admin.accrual.refunds') }), h('p', { class: 'muted', text: at('ui.admin.accrual.no_refunds') }));
+    const vatTable = (id, title, rows) => table(id, title, vatCols, rows.map((v) => [fmt.pct(v.rate), M(v.net), M(v.gross), M(v.vat)]), [at('ui.admin.accrual.total'), M(sum(rows, 'net')), M(sum(rows, 'gross')), M(sum(rows, 'vat'))]);
+    const advances = h('section', { class: 'tl-sec', 'data-testid': 'accrual-advances' },
+      h('h3', { text: at('ui.admin.accrual.advances') }),
+      h('p', { class: 'muted', text: `${at('ui.admin.accrual.as_of', { date: fmt.date(adv.as_of || r.as_of) })}. ${at('ui.admin.accrual.advances_note')}` }),
+      vatTable('accrual-advance-vat', at('ui.admin.accrual.advances_services'), svc.by_vat || []),
+      h('p', { 'data-testid': 'accrual-advance-gross', text: `${at('ui.admin.accrual.advances_services')}: ${M(svc.gross)}` }),
+      h('h3', { text: at('ui.admin.accrual.gift_cards') }),
+      h('p', { class: 'muted', text: at('ui.admin.accrual.gift_cards_note') }),
+      h('p', { 'data-testid': 'accrual-giftcards', text: `${qtyTxt(gc.count)} · ${M(gc.gross)}` }),
+      h('p', { 'data-testid': 'accrual-advance-total', text: `${at('ui.admin.accrual.advances_total')}: ${M(adv.total_gross)}` }));
+    return h('div', { 'data-testid': 'accrual-report' }, head, stats, byProduct, byRefund, vatTable('accrual-sales-vat', at('ui.admin.accrual.sales_vat'), salesVat), vatTable('accrual-refund-vat', at('ui.admin.accrual.refunds_vat'), refundVat), advances);
+  }
   const kindLabel = { daily: rt('ui.admin.reports.day'), this: rt('ui.admin.reports.this_month'), prev: rt('ui.admin.reports.prev_month'), monthly: rt('ui.admin.reports.pick_month'), range: rt('ui.admin.reports.range') };
   const kindBtn = (k) => { const off = k !== 'daily' && !canFull; return h('button', { type: 'button', role: 'radio', class: 'tl-seg', 'aria-checked': String(st.kind === k), 'data-testid': `r-kind-${k}`, disabled: off || null, title: off ? t('r.monthlyNoPerm') : null, onclick: () => { st.kind = k; syncKind(); loadSales(); } }, kindLabel[k]); };
   const kindBtns = Object.fromEntries(KINDS.map((k) => [k, kindBtn(k)]));
@@ -176,7 +222,16 @@ export function createReportsTab({ api, canFull = true }) {
     if (res.source === 'server') downloadCsv(res.filename, res.content);
     else if (current.lines) downloadCsv(`tapahtumat_${current.period.from}_${current.period.to}.csv`, toCsv(current.lines, { methodLabel: fiMethod }));
   }
-  const csvBtn = btn('r-csv', t('r.csv'), async () => { csvBtn.disabled = true; try { await grabCsv('lines'); } catch (e) { toast(errMsg(e), 'err'); } finally { csvBtn.disabled = !current || !canFull; } }, !canFull);
+  const csvBtn = btn('r-csv', t('r.csv'), async () => { csvBtn.disabled = true; try { await grabCsv('lines'); } catch (e) { toast(errMsg(e), 'err'); } finally { csvBtn.disabled = !current || !canFull || st.basis === 'service'; } }, !canFull);
+  const accCsvBtn = btn('r-accrual-csv', at('ui.admin.accrual.csv'), async () => {
+    if (!current) return;
+    accCsvBtn.disabled = true;
+    try {
+      const res = await api.reportAccrualCsv(current.period.from, current.period.to);
+      downloadCsv(res.filename, res.content);
+    } catch (e) { toast(errMsg(e), 'err'); } finally { accCsvBtn.disabled = !current || !canFull; }
+  }, !canFull);
+  accCsvBtn.hidden = true;
   const sumCsvBtn = btn('r-summary-csv', rt('ui.admin.reports.summary_csv'), async () => { sumCsvBtn.disabled = true; try { await grabCsv('summary'); } catch (e) { toast(errMsg(e), 'err'); } finally { sumCsvBtn.disabled = !current || !canFull; } }, !canFull);
   function pdfName(mode) {
     const p = current?.period;
@@ -206,8 +261,15 @@ export function createReportsTab({ api, canFull = true }) {
   }, !canFull);
   const gcPdfBtn = btn('r-gc-pdf', rt('ui.admin.reports.gc_pdf'), () => grabPdf('giftcards', gcPdfBtn), !canFull);
   syncKind();
-  const controls = h('div', { class: 'tl-toolbar tl-r-controls tl-noprint' }, h('div', { class: 'fld' }, h('span', { text: t('r.type') }), h('div', { role: 'radiogroup', 'aria-label': t('r.type'), class: 'tl-segs' }, ...KINDS.map((k) => kindBtns[k]))), dayFld, monFld, rangeFld,
-    h('div', { class: 'tl-actions' }, csvBtn, sumCsvBtn, pdfSrvBtn, txPdfBtn, pdfBtn), h('p', { class: 'muted tl-hint', text: t('r.pdfNote') }), canFull ? null : h('p', { class: 'tl-hint', role: 'note', 'data-testid': 'r-limited', text: t('r.limited') }));
+  const basisBtn = (id, key) => h('button', { type: 'button', role: 'radio', class: 'tl-seg', 'aria-checked': String(st.basis === id), 'data-testid': `r-basis-${id}`, onclick: () => { st.basis = id; for (const b of basisBtns) b.setAttribute('aria-checked', String(b.dataset.basis === id)); loadSales(); } }, at(key));
+  const basisPay = basisBtn('payment', 'ui.admin.accrual.basis_payment');
+  const basisSvc = basisBtn('service', 'ui.admin.accrual.basis_service');
+  basisPay.dataset.basis = 'payment'; basisSvc.dataset.basis = 'service';
+  const basisBtns = [basisPay, basisSvc];
+  const controls = h('div', { class: 'tl-toolbar tl-r-controls tl-noprint' },
+    h('div', { class: 'fld' }, h('span', { text: at('ui.admin.accrual.basis_legend') }), h('div', { role: 'radiogroup', 'aria-label': at('ui.admin.accrual.basis_legend'), class: 'tl-segs', 'data-testid': 'r-basis' }, basisPay, basisSvc)),
+    h('div', { class: 'fld' }, h('span', { text: t('r.type') }), h('div', { role: 'radiogroup', 'aria-label': t('r.type'), class: 'tl-segs' }, ...KINDS.map((k) => kindBtns[k]))), dayFld, monFld, rangeFld,
+    h('div', { class: 'tl-actions' }, csvBtn, sumCsvBtn, accCsvBtn, pdfSrvBtn, txPdfBtn, pdfBtn), h('p', { class: 'muted tl-hint', text: t('r.pdfNote') }), canFull ? null : h('p', { class: 'tl-hint', role: 'note', 'data-testid': 'r-limited', text: t('r.limited') }));
   const gcPanel = h('section', { class: 'tl-sec tl-noprint', 'data-testid': 'r-gc' }, h('h3', { text: rt('ui.admin.reports.gc_title') }), h('div', { class: 'tl-toolbar' }, h('label', { class: 'fld' }, h('span', { text: rt('ui.admin.reports.gc_filter') }), gcFilter), gcCsvBtn, gcPdfBtn), gcOut);
   const node = h('div', { class: 'tl-tab', 'data-testid': 'tab-reports' }, controls, out, gcPanel);
   return { node, load: () => Promise.all([loadSales(), loadGc()]) };

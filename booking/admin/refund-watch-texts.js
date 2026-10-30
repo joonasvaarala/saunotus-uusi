@@ -1,0 +1,76 @@
+// Hyvitysten seuranta (booking_218). Oletukset FI+EN, samat kuin content/site-texts.pending-import-105.json.
+import { getLang } from './talous-i18n.js';
+
+export const RW_TEXTS = {
+  fi: {
+    'ui.admin.nav.refund_watch': 'Hyvitysten seuranta',
+    'ui.admin.refund_watch.title': 'Hyvitysten seuranta',
+    'ui.admin.refund_watch.intro': 'Hyvitykset, joita välittäjä ei ole vahvistanut. Yli 24 tuntia odottanut hyvitys on merkitty. Jos automaattinen hyvitys ei onnistu, palauta raha välittäjän portaalissa ja kirjaa se tähän.',
+    'ui.admin.refund_watch.empty': 'Ei avoimia hyvityksiä.',
+    'ui.admin.refund_watch.search': 'Hae tilausnumerolla, nimellä tai viitteellä',
+    'ui.admin.refund_watch.aging_banner': 'Yli 24 tuntia odottaneita hyvityksiä: {{var:n}}',
+    'ui.admin.refund_watch.no_perm': 'Hyvitysten seuranta vaatii oikeuden bookings.manage tai admin-roolin.',
+    'ui.admin.refund_watch.col.amount': 'Summa',
+    'ui.admin.refund_watch.col.customer': 'Asiakas',
+    'ui.admin.refund_watch.col.order': 'Tilaus',
+    'ui.admin.refund_watch.col.status': 'Tila',
+    'ui.admin.refund_watch.col.age': 'Ikä',
+    'ui.admin.refund_watch.col.provider': 'Välittäjä',
+    'ui.admin.refund_watch.col.actions': 'Toiminnot',
+    'ui.admin.refund_watch.status.requested': 'Jonossa',
+    'ui.admin.refund_watch.status.processing': 'Käsittelyssä',
+    'ui.admin.refund_watch.status.failed': 'Epäonnistui',
+    'ui.admin.refund_watch.aging': 'Yli 24 h',
+    'ui.admin.refund_watch.age_hours': '{{var:hours}} h',
+    'ui.admin.refund_watch.retry': 'Yritä automaattista hyvitystä uudelleen',
+    'ui.admin.refund_watch.manual': 'Kirjaa käsin tehty hyvitys',
+    'ui.admin.refund_watch.manual_title': 'Kirjaa käsin tehty hyvitys',
+    'ui.admin.refund_watch.manual_hint': 'Kirjaa vain hyvitys, joka on jo tehty välittäjän portaalissa. Sama hyvityskuitti syntyy kuin onnistuneesta automaattihyvityksestä.',
+    'ui.admin.refund_watch.amount': 'Summa',
+    'ui.admin.refund_watch.date': 'Hyvityspäivä',
+    'ui.admin.refund_watch.provider_ref': 'Välittäjän viite',
+    'ui.admin.refund_watch.note': 'Huomautus',
+    'ui.admin.refund_watch.submit': 'Kirjaa hyvitys',
+    'ui.admin.refund_watch.done': 'Hyvitys kirjattu.',
+    'ui.admin.refund_watch.retry_done': 'Hyvitys palautettiin jonoon.',
+  },
+  en: {
+    'ui.admin.nav.refund_watch': 'Refund follow-up',
+    'ui.admin.refund_watch.title': 'Refund follow-up',
+    'ui.admin.refund_watch.intro': 'Refunds the provider has not confirmed. A refund waiting more than 24 hours is flagged. If the automatic refund fails, refund the money in the provider portal and record it here.',
+    'ui.admin.refund_watch.empty': 'No open refunds.',
+    'ui.admin.refund_watch.search': 'Search by order number, name or reference',
+    'ui.admin.refund_watch.aging_banner': 'Refunds waiting more than 24 hours: {{var:n}}',
+    'ui.admin.refund_watch.no_perm': 'Refund follow-up requires bookings.manage or the admin role.',
+    'ui.admin.refund_watch.col.amount': 'Amount',
+    'ui.admin.refund_watch.col.customer': 'Customer',
+    'ui.admin.refund_watch.col.order': 'Order',
+    'ui.admin.refund_watch.col.status': 'Status',
+    'ui.admin.refund_watch.col.age': 'Age',
+    'ui.admin.refund_watch.col.provider': 'Provider',
+    'ui.admin.refund_watch.col.actions': 'Actions',
+    'ui.admin.refund_watch.status.requested': 'Queued',
+    'ui.admin.refund_watch.status.processing': 'Processing',
+    'ui.admin.refund_watch.status.failed': 'Failed',
+    'ui.admin.refund_watch.aging': 'Over 24 h',
+    'ui.admin.refund_watch.age_hours': '{{var:hours}} h',
+    'ui.admin.refund_watch.retry': 'Retry automatic refund',
+    'ui.admin.refund_watch.manual': 'Record a manual refund',
+    'ui.admin.refund_watch.manual_title': 'Record a manual refund',
+    'ui.admin.refund_watch.manual_hint': 'Record only a refund already made in the provider portal. The same credit receipt is created as for a successful automatic refund.',
+    'ui.admin.refund_watch.amount': 'Amount',
+    'ui.admin.refund_watch.date': 'Refund date',
+    'ui.admin.refund_watch.provider_ref': 'Provider reference',
+    'ui.admin.refund_watch.note': 'Note',
+    'ui.admin.refund_watch.submit': 'Record refund',
+    'ui.admin.refund_watch.done': 'Refund recorded.',
+    'ui.admin.refund_watch.retry_done': 'The refund was queued again.',
+  },
+};
+
+export function rw(key, vars = {}, lang = getLang()) {
+  const bag = RW_TEXTS[lang] || RW_TEXTS.fi;
+  let text = bag[key] || RW_TEXTS.fi[key] || key;
+  for (const [name, value] of Object.entries(vars)) text = text.replaceAll(`{{var:${name}}}`, String(value));
+  return text;
+}
