@@ -1,0 +1,42 @@
+[
+  {
+    "key": "ui.treatment.party",
+    "lang": "fi",
+    "text": "{{var:n}} hlö · {{var:price}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": ["{{var:n}}", "{{var:price}}"],
+    "reason": "Hoitosivun henkilömäärän hinta valitsimen vieressä ja alaosan yhteenvedossa (2 hlö · 134 €). FI+EN, yksikkö erillisessä _one-avaimessa. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.treatment.party",
+    "lang": "en",
+    "text": "{{var:n}} guests · {{var:price}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": ["{{var:n}}", "{{var:price}}"],
+    "reason": "Hoitosivun henkilömäärän hinta valitsimen vieressä ja alaosan yhteenvedossa (2 hlö · 134 €). FI+EN, yksikkö erillisessä _one-avaimessa. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.treatment.party_one",
+    "lang": "fi",
+    "text": "{{var:n}} hlö · {{var:price}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": ["{{var:n}}", "{{var:price}}"],
+    "reason": "Hoitosivun henkilömäärän hinta valitsimen vieressä ja alaosan yhteenvedossa (2 hlö · 134 €). FI+EN, yksikkö erillisessä _one-avaimessa. Tuo admin_texts_importilla."
+  },
+  {
+    "key": "ui.treatment.party_one",
+    "lang": "en",
+    "text": "{{var:n}} guest · {{var:price}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": ["{{var:n}}", "{{var:price}}"],
+    "reason": "Hoitosivun henkilömäärän hinta valitsimen vieressä ja alaosan yhteenvedossa (2 hlö · 134 €). FI+EN, yksikkö erillisessä _one-avaimessa. Tuo admin_texts_importilla."
+  }
+]

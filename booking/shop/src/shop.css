@@ -239,6 +239,12 @@ a.bk-sd:hover{filter:brightness(.97)}
 .bk-step-box h3{display:flex;align-items:center;gap:10px;margin:1.1em 0 .5em}
 .bk-stepn{flex:none;width:30px;height:30px;border-radius:50%;background:var(--green);color:#fff;font:600 15px/30px var(--body);text-align:center}
 .bk-step-box .bk-hint{margin-top:6px}
+/* Henkilömäärän hinta heti valitsimen alla (mobiili ensin): iso summa, lisähenkilön kaava pienempänä. */
+.bk-persons{display:flex;flex-direction:column;align-items:flex-start;gap:10px;max-width:100%}
+.bk-party{margin:0;display:flex;flex-direction:column;align-items:flex-start;gap:4px;max-width:100%}
+.bk-party-total{display:block;font:700 32px/1.1 var(--head);color:var(--ink);letter-spacing:-.01em}
+.bk-party-note{display:block;font:400 14px/1.35 var(--body);color:var(--muted);max-width:28em;overflow-wrap:anywhere}
+@media(min-width:700px){.bk-party-total{font-size:40px}}
 .bk-nofree{margin:12px 0 0}
 /* Pakettituote (kb 7): aikajana tekstinä + värikaista (koriste, aria-hidden; tieto on tekstissä). Vihreä = rituaali, kulta = savusauna (sisäistä taukoa ei näytetä). */
 .bk-timeline{margin:8px 0 2px;max-width:34em}
