@@ -353,6 +353,34 @@ const PREPAID_ON = '2026-10-15';
     if (a.p_from <= PREPAID_ON && PREPAID_ON <= a.p_to) rows.push(['K-INFO', dmy(PREPAID_ON), 'Aino A', csvQ('Yleinen saunavuoro'), 2, csvMoney(28.69), csvNum(25.5), csvMoney(7.31), csvMoney(36), 'Lahjakortti', 'maksettu', 'lunastus'].join(';'));
     return csvFile(`tapahtumat_${a.p_from}_${a.p_to}.csv`, 'tosite;pvm;asiakas;tuote;maara;netto;alv_%;alv_eur;brutto;maksutapa;tila;laji', rows);
   }
+  function adminReportAccrual(a = {}) {
+    return {
+      period: { from: a.p_from, to: a.p_to, tz: 'Europe/Helsinki', kind: a.p_from === a.p_to ? 'day' : 'range' },
+      basis: 'service (palvelupäivä, Europe/Helsinki)',
+      as_of: a.p_to,
+      sales_by_product: [{ product: 'Yleinen savusaunavuoro', rate: 25.5, quantity: 2, net: 45.42, vat: 11.58, gross: 57 }],
+      sales_by_vat: [{ rate: 25.5, quantity: 2, net: 45.42, vat: 11.58, gross: 57 }],
+      refunds_by_product: [],
+      refunds_by_vat: [],
+      totals: { sales_net: 45.42, sales_vat: 11.58, sales_gross: 57, refunds_net: 0, refunds_vat: 0, refunds_gross: 0, net: 45.42, vat: 11.58, gross: 57 },
+      advances: {
+        as_of: a.p_to,
+        services: { net: 22.31, vat: 5.69, gross: 28, lines: 1, by_vat: [{ rate: 25.5, net: 22.31, vat: 5.69, gross: 28 }] },
+        gift_cards_unused: { count: 1, gross: 50, net: 39.84, vat: 10.16, rate: 25.5, vat_at_sale: true },
+        total_gross: 78,
+      },
+    };
+  }
+  function adminReportAccrualCsv(a = {}) {
+    const rep = adminReportAccrual(a);
+    const rows = [];
+    for (const p of rep.sales_by_product) rows.push(['myynti', csvQ(p.product), csvNum(p.rate), csvNum(p.quantity), csvMoney(p.net), csvMoney(p.vat), csvMoney(p.gross)].join(';'));
+    for (const p of rep.refunds_by_product) rows.push(['hyvitys', csvQ(p.product), csvNum(p.rate), csvNum(p.quantity), csvMoney(p.net), csvMoney(p.vat), csvMoney(p.gross)].join(';'));
+    const g = rep.advances.gift_cards_unused;
+    rows.push(['ennakko', 'Lahjakortit kayttamatta', csvNum(g.rate), csvNum(g.count), csvMoney(g.net), csvMoney(g.vat), csvMoney(g.gross)].join(';'));
+    rows.push(['ennakko', 'Saadut ennakot yhteensa', '', '', '', '', csvMoney(rep.advances.total_gross)].join(';'));
+    return csvFile(`suorite_${a.p_from}_${a.p_to}.csv`, 'osio;tuote;alv_%;maara;netto;alv_eur;brutto', rows);
+  }
   function adminReportGiftCards(a = {}) {
     const filter = a.p_filter || 'open';
     if (!['open', 'used', 'all'].includes(filter)) throw fail('invalid_param', 'p_filter: open|used|all');
@@ -479,7 +507,7 @@ const PREPAID_ON = '2026-10-15';
   const ADDON_LIST = [{ id: 1, code: 'saunavihta', name: 'Saunavihta', name_en: 'Sauna whisk (vihta)', price: 5, vat_rate: 25.5, max_per_person: 1, active: true }, { id: 2, code: 'pyyhe', name: 'Pyyhe', name_en: 'Towel', price: 5, vat_rate: 25.5, max_per_person: 1, active: true },
     { id: 3, code: 'turvenaamio_jalkakylpy', name: 'Turvenaamio ja jalkakylpy', name_en: 'Peat mask and foot bath', price: 12, vat_rate: 25.5, max_per_person: 1, active: true }];
   const HANDLERS = { admin_analytics_summary: (a) => analyticsMock(a.p_from || today, a.p_to || today), admin_list_orders: adminListOrders, admin_get_order: adminGetOrder, admin_list_payments: adminListPayments, admin_list_addons: () => ADDON_LIST, admin_add_to_order: adminAddToOrder, admin_create_payment_link: adminCreatePaymentLink,
-    admin_refund: adminRefund, admin_refund_order: adminRefundOrder, admin_reservation_refund_preview: adminReservationRefundPreview, admin_cancel_reservation: adminCancelReservation, admin_record_payment: adminRecordPayment, admin_list_vat_rates: adminListVatRates, admin_report_daily: adminReportDaily, admin_report_month: adminReportMonth, admin_report_range: adminReportRange, admin_report_csv: adminReportCsv, admin_report_gift_cards: adminReportGiftCards, admin_sales_chart: adminSalesChart, admin_get_receipt: adminGetReceipt, admin_resend_receipt: adminResendReceipt, admin_annual_card_for_order: adminAnnualCardForOrder };
+    admin_refund: adminRefund, admin_refund_order: adminRefundOrder, admin_reservation_refund_preview: adminReservationRefundPreview, admin_cancel_reservation: adminCancelReservation, admin_record_payment: adminRecordPayment, admin_list_vat_rates: adminListVatRates, admin_report_daily: adminReportDaily, admin_report_month: adminReportMonth, admin_report_range: adminReportRange, admin_report_csv: adminReportCsv, admin_report_accrual: adminReportAccrual, admin_report_accrual_csv: adminReportAccrualCsv, admin_report_gift_cards: adminReportGiftCards, admin_sales_chart: adminSalesChart, admin_get_receipt: adminGetReceipt, admin_resend_receipt: adminResendReceipt, admin_annual_card_for_order: adminAnnualCardForOrder };
   // sama kutsutapa kuin sb.js:n rpc(): rpc(nimi, parametrit) → Promise. Tuntematon nimi = puuttuva RPC (404 / PGRST202) kuten PostgRESTissä.
   async function rpc(name, args = {}) {
     await wait();

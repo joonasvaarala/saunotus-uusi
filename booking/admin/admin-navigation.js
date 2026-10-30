@@ -8,6 +8,7 @@ export const NAV_GROUPS = [
     { id: 'pikakassa', path: 'pikakassa', labelKey: 'ui.admin.nav.pos', view: 'pos', any: ['pos.use'] },
     { id: 'talous', path: 'talous', labelKey: 'ui.admin.nav.finance', view: 'talous', any: ['payments.manage', 'giftcards.manage'] },
     { id: 'seurattavat', path: 'seurattavat-maksut', labelKey: 'ui.admin.nav.paylink_watch', view: 'paylink-watch', any: ['payments.manage'] },
+    { id: 'hyvitykset', path: 'hyvitysten-seuranta', labelKey: 'ui.admin.nav.refund_watch', view: 'refund-watch', any: ['bookings.manage'] },
     { id: 'laskut', path: 'laskut', labelKey: 'ui.admin.nav.invoices', view: 'invoices', any: ['invoices.manage'] },
   ] },
   { id: 'products', path: 'tuotteet', labelKey: 'ui.admin.nav.products', tabs: [
