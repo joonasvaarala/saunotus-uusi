@@ -9,6 +9,15 @@ comment on column booking.reservations.hidden_reason is 'Piilotuksen syy, esim. 
 do $$
 declare m record; n int; v_a booking.addons; v_before numeric; v_after numeric;
 begin
+  -- Tyhjä kanta (ei Johku-lähderivejä): datamuutos on no-op. PRODissa rivit ovat ja muutos ajetaan.
+  if not exists (
+    select 1 from booking.order_items i
+     where i.id = 13679 and i.order_id = 11596 and i.kind = 'reservation'
+       and i.product_id = 45 and i.parent_item_id = 13678
+  ) then
+    raise notice 'booking_37: Johku-yhdistyksen lähtörivit puuttuvat, datamuutos ohitetaan';
+    return;
+  end if;
   select * into v_a from booking.addons where id = 1 and code = 'turvenaamio_jalkakylpy';
   if not found then raise exception 'addon 1 puuttuu'; end if;
   for m in select * from (values

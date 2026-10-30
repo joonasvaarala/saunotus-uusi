@@ -11,6 +11,19 @@
 -- Vuoromuutokset kulkevat AINA public.shift_apply_change -funktion kautta (source 'staff_bot',
 -- actor 'bot:otto-grok-bot', actor_staff_id = Otto) -> shift_change_log + shift_outbox -> Google-kalenteri.
 
+-- Tyhjä kanta: public.audit_log on tuotannon taulu. create if not exists ei muuta tuotantoa.
+create table if not exists public.audit_log (
+  id bigint generated always as identity primary key,
+  actor_kind text,
+  actor_name text,
+  action text,
+  entity_type text,
+  entity_id text,
+  old_data jsonb,
+  new_data jsonb,
+  at timestamptz not null default now()
+);
+
 -- 1) Scopet: laajennetaan sallittua listaa (ei poisteta mitään)
 alter table botgw.bot_clients drop constraint if exists bot_clients_scopes_known;
 alter table botgw.bot_clients add constraint bot_clients_scopes_known check (scopes <@ array[

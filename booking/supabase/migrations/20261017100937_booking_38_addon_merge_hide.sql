@@ -262,6 +262,14 @@ end $function$
 do $$
 declare m record; n int;
 begin
+  if not exists (
+    select 1 from booking.order_items a
+     where a.id = 13679 and a.kind = 'addon' and a.addon_id = 1
+       and a.parent_item_id = 13678 and a.order_id = 11596
+  ) then
+    raise notice 'booking_38: booking_37-datamuutos puuttuu, piilotus ohitetaan';
+    return;
+  end if;
   for m in select * from (values
     (13679,11596,10223,13678,2,30),
     (13686,11602,10228,13685,2,30),

@@ -50,7 +50,7 @@ export async function render({ ctx, refs, query, kind }) {
   const invRef = h('input', { name: 'invref', maxlength: 100 });
   const note = h('textarea', { name: 'note', rows: 2 });
   await loadBookingTexts(rpc).catch(() => false);
-  const method = h('select', { name: 'method' }, refs.methods.filter((m) => m.active).map((m) => h('option', { value: m.code, text: m.label, selected: m.code === 'pay_later' || null })));
+  const method = h('select', { name: 'method' }, refs.methods.filter((m) => m.active && m.is_manual).map((m) => h('option', { value: m.code, text: m.label, selected: m.code === 'pay_later' || null })));
   const discountIn = h('input', { name: 'discount', maxlength: 40, autocomplete: 'off', 'data-testid': 'discount-code', placeholder: bookingText('discount_ph') });
   const discountStatus = h('p', { class: 'fld-hint', hidden: true, 'data-testid': 'discount-status' });
   const giftIn = h('input', { name: 'gift', maxlength: 24, autocomplete: 'off', 'data-testid': 'gift-code', placeholder: bookingText('gift_ph') });
@@ -61,7 +61,7 @@ export async function render({ ctx, refs, query, kind }) {
     catch (e) { giftStatus.textContent = errMsg(e); }
   } }), giftStatus);
   method.addEventListener('change', () => { giftWrap.hidden = method.value !== 'gift_card'; });
-  const restSel = h('select', { name: 'remainder', 'data-testid': 'gift-remainder' }, h('option', { value: '', text: bookingText('gift_rest_unpaid') }), ...refs.methods.filter((m) => m.active && m.code !== 'gift_card').map((m) => h('option', { value: m.code, text: m.label })));
+  const restSel = h('select', { name: 'remainder', 'data-testid': 'gift-remainder' }, h('option', { value: '', text: bookingText('gift_rest_unpaid') }), ...refs.methods.filter((m) => m.active && m.is_manual && m.code !== 'gift_card').map((m) => h('option', { value: m.code, text: m.label })));
   giftWrap.append(field(bookingText('gift_rest_method'), restSel));
   const warnBox = h('div', { class: 'nb-warn', role: 'status', hidden: true, 'data-testid': 'booking-warning' });
   const paintResWarn = () => {

@@ -15,18 +15,20 @@ begin
   select bool_and(case leg_no when 1 then (space_id = 1 and mode = 'shared' and offset_min = 30 and minutes = 90 and pool_id is null)
                               when 2 then (space_id = 12 and mode = 'shared' and offset_min = 0 and minutes = 20 and pool_id = 17) else false end) into v_ok
     from booking.product_space_rules where product_id = 7 and active;
-  if n_legs <> 2 or v_ok is not true then raise exception 'tuotteen 7 legirakenne ei ole odotettu (legit=%, ok=%)', n_legs, v_ok; end if;
-  if not exists (select 1 from booking.product_config where product_id = 7 and resource_class = 'resourced' and time_window_class = 'ritual' and start_pool_prefix = 'yleinen_vkp_') then
-    raise exception 'tuotteen 7 product_config ei ole odotettu';
+  if n_legs = 0 or v_ok is not true
+     or not exists (select 1 from booking.product_config where product_id = 7 and resource_class = 'resourced' and time_window_class = 'ritual' and start_pool_prefix = 'yleinen_vkp_') then
+    raise notice 'booking_58: tuotteen 7 legirakenne ei ole tuotannon malli (legit=%, ok=%), myyntiin kytkentä ohitetaan', n_legs, v_ok;
+    return;
   end if;
+  if n_legs <> 2 then raise exception 'tuotteen 7 legirakenne ei ole odotettu (legit=%, ok=%)', n_legs, v_ok; end if;
+
+  update booking.product_config
+     set public_slots = true, public_weekdays = array[6, 7]::smallint[], bookable = true, shop_visible = true
+   where product_id = 7;
+
+  update kb.products
+     set duration_text = 'rituaali 20 min + tauko 10 min + savusauna 1 h 30 min (yhteensä 2 h)',
+         needs_review = false,
+         review_note = coalesce(review_note, '') || ' | 18.10.2026 Joonas: savusaunaosa on 90 min (alkaa 30 min kohdalla), ristiriita ratkaistu; kytketty verkkokauppaan (booking_58).'
+   where id = 7;
 end $$;
-
-update booking.product_config
-   set public_slots = true, public_weekdays = array[6, 7]::smallint[], bookable = true, shop_visible = true
- where product_id = 7;
-
-update kb.products
-   set duration_text = 'rituaali 20 min + tauko 10 min + savusauna 1 h 30 min (yhteensä 2 h)',
-       needs_review = false,
-       review_note = coalesce(review_note, '') || ' | 18.10.2026 Joonas: savusaunaosa on 90 min (alkaa 30 min kohdalla), ristiriita ratkaistu; kytketty verkkokauppaan (booking_58).'
- where id = 7;

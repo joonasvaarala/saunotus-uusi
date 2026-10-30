@@ -5,7 +5,7 @@
     "text": "Seurattavat maksut",
     "class": "normal",
     "kind": "plain",
-    "max_len": 80,
+    "max_len": 200,
     "placeholders": [],
     "reason": "booking_215: maksamattomien maksulinkkien muistutukset ja hallinnan Seurattavat maksut -näkymä (Joonas 29.10.2026). FI+EN. Tuo admin_texts_importilla."
   },
@@ -25,7 +25,7 @@
     "text": "Avoimet maksulinkit. Ennakkomaksu muistutetaan 3 päivän jälkeen ja vuorokausi ennen eräpäivää. Paikan päällä annettu linkki muistutetaan 3 päivän välein, enintään 4 kertaa.",
     "class": "normal",
     "kind": "plain",
-    "max_len": 400,
+    "max_len": 450,
     "placeholders": [],
     "reason": "booking_215: maksamattomien maksulinkkien muistutukset ja hallinnan Seurattavat maksut -näkymä (Joonas 29.10.2026). FI+EN. Tuo admin_texts_importilla."
   },
@@ -343,7 +343,7 @@
     "text": "Kirjaa {{var:amount}} käsin. Avoin maksulinkki perutaan ja kuitti jää kirjanpitoon. Asiakkaalle ei lähde erillistä kuittiviestiä.",
     "class": "normal",
     "kind": "plain",
-    "max_len": 400,
+    "max_len": 350,
     "placeholders": [
       "{{var:amount}}"
     ],
@@ -485,7 +485,7 @@
     "text": "Payments to follow",
     "class": "normal",
     "kind": "plain",
-    "max_len": 80,
+    "max_len": 200,
     "placeholders": [],
     "reason": "booking_215: maksamattomien maksulinkkien muistutukset ja hallinnan Seurattavat maksut -näkymä (Joonas 29.10.2026). FI+EN. Tuo admin_texts_importilla."
   },
@@ -505,7 +505,7 @@
     "text": "Open payment links. A prepaid link is reminded after 3 days and one day before the due date. An on-site link is reminded every 3 days, at most 4 times.",
     "class": "normal",
     "kind": "plain",
-    "max_len": 400,
+    "max_len": 450,
     "placeholders": [],
     "reason": "booking_215: maksamattomien maksulinkkien muistutukset ja hallinnan Seurattavat maksut -näkymä (Joonas 29.10.2026). FI+EN. Tuo admin_texts_importilla."
   },
@@ -823,7 +823,7 @@
     "text": "Record {{var:amount}} manually. The open payment link is cancelled and the receipt stays in the books. No separate receipt email is sent.",
     "class": "normal",
     "kind": "plain",
-    "max_len": 400,
+    "max_len": 350,
     "placeholders": [
       "{{var:amount}}"
     ],

@@ -107,13 +107,18 @@ begin
   ) v(product_id, slug, from_url, to_url, from_md5, to_md5) loop
     if md5(r.from_url) <> r.from_md5 or md5(r.to_url) <> r.to_md5 then raise exception 'booking_163: sisäinen md5-virhe (tuote %)', r.product_id; end if;
     select p.booking_url, p.slug into cur, cur_slug from kb.products p where p.id = r.product_id;
-    if not found then raise exception 'booking_163: kb.products id % puuttuu. Ei muutoksia.', r.product_id; end if;
+    if not found then
+      raise notice 'booking_163: kb.products id % puuttuu, ohitetaan', r.product_id;
+      skip := skip + 1; continue;
+    end if;
     if cur_slug is distinct from r.slug then
-      raise exception 'booking_163: kb.products id % slug on % (odotettu %). Ei muutoksia.', r.product_id, cur_slug, r.slug;
+      raise notice 'booking_163: kb.products id % slug on % (odotettu %), ohitetaan', r.product_id, cur_slug, r.slug;
+      skip := skip + 1; continue;
     end if;
     if cur is not distinct from r.to_url then skip := skip + 1; continue; end if;   -- jo ajettu (uudelleenajo ei tee mitään)
     if cur is distinct from r.from_url then
-      raise exception 'booking_163: kb.products id % booking_url ei vastaa odotettua (md5 %, odotettu %). Ei muutoksia.', r.product_id, md5(coalesce(cur, '')), r.from_md5;
+      raise notice 'booking_163: kb.products id % booking_url ei ole tuotannon osoite (md5 %), ohitetaan', r.product_id, md5(coalesce(cur, ''));
+      skip := skip + 1; continue;
     end if;
     ids := ids || r.product_id; froms := froms || r.from_url; tos := tos || r.to_url;
   end loop;

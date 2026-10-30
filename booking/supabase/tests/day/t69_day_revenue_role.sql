@@ -30,7 +30,7 @@ begin
   perform pg_temp.t69_ck(v_code in ('forbidden', '42501') or v_code ilike '%permission denied%', 'A1: anon ei saa päivän tuottoa');
 
   perform test.login(v_admin);
-  r := booking.admin_create_booking(v_rule, v_thu, 2, null, '{"name":"T69 Maksettu","email":"t69-paid@example.test","phone":"0400006901"}'::jsonb, 'cash', true, null);
+  r := booking.admin_create_booking(v_rule, v_thu, 2, null, '{"name":"T69 Maksettu","email":"t69-paid@example.test","phone":"0400006901"}'::jsonb, 'card_terminal', true, null);
   perform test.logout();
   if (r ->> 'reservation_id') is null then
     raise exception 'TESTRESULT_ABORT booking %', r;

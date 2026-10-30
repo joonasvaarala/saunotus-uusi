@@ -7,6 +7,14 @@
 do $$
 declare v_a booking.addons; n int; t_a numeric; t_b numeric; s_a numeric; s_b numeric;
 begin
+  if not exists (
+    select 1 from booking.order_items i
+     where i.id = 13620 and i.order_id = 11552 and i.kind = 'reservation'
+       and i.product_id = 44 and i.parent_item_id is null
+  ) then
+    raise notice 'booking_39: vihta-lähderivi 13620 puuttuu, datamuutos ohitetaan';
+    return;
+  end if;
   select * into v_a from booking.addons where id = 2 and code = 'saunavihta';
   if not found then raise exception 'addon 2 puuttuu'; end if;
   if v_a.price_gross is distinct from 13 then raise exception 'addon 2 hinta ei 13 (%)', v_a.price_gross; end if;
