@@ -56,7 +56,7 @@ begin
     't219') returning id into rid;
 
   insert into booking.gift_cards(code, issuer, initial_amount, balance, status, vat_treatment, sale_vat_rate, accounting_origin, source, complimentary, activated_at, valid_from, valid_to)
-  values ('T219NATIVE01', 'own', 40, 40, 'active', 'at_sale', 25.5, 'native', 'native', false, '2032-06-01 10:00:00+00', '2032-06-01', '2033-06-01')
+  values ('HHT219NATIV1', 'own', 40, 40, 'active', 'at_sale', 25.5, 'native', 'native', false, '2032-06-01 10:00:00+00', '2032-06-01', '2033-06-01')
   returning id into g;
   insert into booking.gift_card_ledger(gift_card_id, delta, balance_after, reason, at)
   values (g, 40, 40, 'purchase', '2032-06-01 10:00:00+00');

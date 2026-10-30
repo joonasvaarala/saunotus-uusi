@@ -117,8 +117,8 @@ begin
   v_counts := v_counts || jsonb_build_object('reservations', v_n);
   if to_regclass('booking.reservation_legs') is not null then
     select count(*) into v_n from booking.reservation_legs l
-      join booking.reservations r on r.id = l.reservation_id
-     where r.order_id in (select id from _cut_orders);
+      join booking.reservations rv on rv.id = l.reservation_id
+     where rv.order_id in (select id from _cut_orders);
     v_counts := v_counts || jsonb_build_object('reservation_legs', v_n);
   end if;
   select count(*) into v_n from _cut_payments;
@@ -335,11 +335,8 @@ begin
           jsonb_build_object('counts', v_counts, 'kept', v_kept, 'at', now()));
 
   if v_seq is not null then
-    select case when s.is_called then s.last_value + 1 else s.last_value end
-      into v_next
-      from pg_sequences s
-     where s.schemaname = split_part(v_seq, '.', 1)
-       and s.sequencename = split_part(v_seq, '.', 2);
+    execute format('select case when is_called then last_value + 1 else last_value end from %s', v_seq)
+      into v_next;
   end if;
 
   return jsonb_build_object(

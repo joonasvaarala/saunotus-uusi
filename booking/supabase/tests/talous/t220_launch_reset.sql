@@ -42,6 +42,7 @@ begin
   insert into booking.email_outbox(kind, order_id, payment_id, dedupe_key, payload)
   values ('order_confirmation', o, p, 't220:' || o::text, '{}'::jsonb);
   insert into booking.invoice_customers(company_name) values ('T220 Oy') returning id into ic;
+  insert into booking.invoice_counters(series, last_seq) values ('L', 0) on conflict (series) do nothing;
   insert into booking.invoices(customer_id, order_id, status, kind, due_date, seller_snapshot, customer_snapshot)
   values (ic, o, 'draft', 'debit', (now() at time zone 'Europe/Helsinki')::date + 14, '{"name":"T220"}'::jsonb, '{"company":"T220 Oy"}'::jsonb)
   returning id into inv;
@@ -52,7 +53,7 @@ begin
   insert into booking.receipt_counters(series, year, last_seq) values ('K', 2034, 900220)
   on conflict (series, year) do update set last_seq = 900220;
   insert into booking.gift_cards(code, issuer, initial_amount, balance, status, source, accounting_origin, vat_treatment, complimentary, purchase_order_id, activated_at, valid_to)
-  values ('T220NATIVE01', 'own', 40, 40, 'active', 'native', 'native', 'at_sale', false, o, now(), '2035-01-01')
+  values ('HHT220NATIV1', 'own', 40, 40, 'active', 'native', 'native', 'at_sale', false, o, now(), '2035-01-01')
   returning id into g;
   insert into booking.gift_card_ledger(gift_card_id, order_id, delta, balance_after, reason)
   values (g, o, 40, 40, 'purchase');
@@ -103,9 +104,7 @@ begin
   perform pg_temp.ck(pg_temp.try(format('delete from booking.gift_card_ledger where gift_card_id = %s', gj)) = 'ledger_append_only', 'B18 Johku-kirjausta ei voi poistaa');
 
   v_seq := pg_get_serial_sequence('booking.orders', 'order_no');
-  select case when s.is_called then s.last_value + 1 else s.last_value end into v_next
-    from pg_sequences s
-   where s.schemaname = split_part(v_seq, '.', 1) and s.sequencename = split_part(v_seq, '.', 2);
+  execute format('select case when is_called then last_value + 1 else last_value end from %s', v_seq) into v_next;
   perform pg_temp.ck(v_next = greatest(10001, coalesce((select max(order_no) from booking.orders), 0) + 1), 'B19 seuraava tilausnumero: ' || coalesce(v_next::text, 'null'));
 
   log := current_setting('t220.log', true);

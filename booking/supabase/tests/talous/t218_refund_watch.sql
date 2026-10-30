@@ -44,13 +44,13 @@ begin
 
   insert into booking.customers(name, email) values ('T218 Asiakas', 't218@example.test') returning id into cu;
   insert into booking.orders(customer_id, status, payment_status, total_gross, source_channel, locale, confirmed_at)
-  values (cu, 'confirmed', 'paid', 58, 'admin', 'fi', '2032-06-01 10:00:00+00') returning id into o;
+  values (cu, 'confirmed', 'paid', 58, 'admin', 'fi', '2026-10-01 10:00:00+00') returning id into o;
   insert into booking.order_items(order_id, product_name, kind, quantity, unit_price_gross, line_total_gross, vat_rate)
   values (o, 'T218 vuoro', 'reservation', 2, 29, 58, 25.5);
   alter table booking.payments disable trigger payments_paid_ins;
   alter table booking.payments disable trigger payments_paid_upd;
   insert into booking.payments(order_id, method, provider, status, amount, paid_at)
-  values (o, 'montonio', 'montonio', 'paid', 58, '2032-06-02 12:00:00+00') returning id into p;
+  values (o, 'montonio', 'montonio', 'paid', 58, '2026-10-02 12:00:00+00') returning id into p;
   insert into booking.payment_lines(payment_id, description, kind, quantity, amount_gross, vat_rate)
   values (p, 'T218 vuoro', 'reservation', 2, 58, 25.5) returning id into pl;
   insert into booking.refunds(payment_id, order_id, amount, reason, status, provider, provider_status, lines, created_at, updated_at)
@@ -92,19 +92,19 @@ begin
   perform pg_temp.ck(r ->> 'status' = 'requested' and (select status from booking.refunds where id = f) = 'requested', 'C1 uudelleenyritys jonoon: ' || coalesce(r ->> 'err', r ->> 'status'));
   perform pg_temp.ck(exists (select 1 from booking.audit_log where action = 'REFUND_RETRY' and row_pk = f::text and actor = u_ad), 'C2 audit retry');
 
-  r := pg_temp.call(format($q$booking.admin_record_manual_refund(%s, 58, '2032-06-03', 'portal-t218', 'Hyvitetty portaalissa')$q$, f));
+  r := pg_temp.call(format($q$booking.admin_record_manual_refund(%s, 58, '2026-10-03', 'portal-t218', 'Hyvitetty portaalissa')$q$, f));
   perform pg_temp.ck(r ->> 'status' = 'done' and r ->> 'receipt_no' is not null, 'D1 käsinkirjaus tekee hyvityskuitin: ' || coalesce(r ->> 'err', r::text));
   perform pg_temp.ck((select status from booking.refunds where id = f) = 'done'
       and (select provider_status from booking.refunds where id = f) = 'manual_done'
       and (select provider_refund_id from booking.refunds where id = f) = 'portal-t218', 'D2 tila ja viite');
   perform pg_temp.ck((select status from booking.payments where id = p) = 'refunded', 'D3 maksu refunded');
-  perform pg_temp.ck((select (issued_at at time zone 'Europe/Helsinki')::date from booking.receipts where refund_id = f) = '2032-06-03', 'D4 kuitin päivä on hyvityspäivä');
+  perform pg_temp.ck((select (issued_at at time zone 'Europe/Helsinki')::date from booking.receipts where refund_id = f) = '2026-10-03', 'D4 kuitin päivä on hyvityspäivä');
   perform pg_temp.ck(exists (select 1 from booking.audit_log where action = 'MANUAL_REFUND' and row_pk = f::text and actor = u_ad and new_data ->> 'note' = 'Hyvitetty portaalissa'), 'D5 audit henkilökunta');
   select count(*) into n from booking.receipts where refund_id = f;
   perform pg_temp.ck(n = 1, 'D6 yksi hyvityskuitti');
-  r := pg_temp.call(format($q$booking.admin_record_manual_refund(%s, 58, '2032-06-03', 'portal-t218', 'Uudelleen')$q$, f));
+  r := pg_temp.call(format($q$booking.admin_record_manual_refund(%s, 58, '2026-10-03', 'portal-t218', 'Uudelleen')$q$, f));
   perform pg_temp.ck((r ->> 'already')::boolean, 'D7 toinen kirjaus ei tee toista kuittia');
-  perform pg_temp.ck(pg_temp.try(format($q$select booking.admin_record_manual_refund(%s, 99, '2032-06-03', 'x', 'Liikaa rahaa')$q$, f2)) = 'amount_exceeds_refundable', 'D8 liian suuri summa');
+  perform pg_temp.ck(pg_temp.try(format($q$select booking.admin_record_manual_refund(%s, 99, '2026-10-03', 'x', 'Liikaa rahaa')$q$, f2)) = 'amount_exceeds_refundable', 'D8 liian suuri summa');
   perform pg_temp.logout();
 
   log := current_setting('t218.log', true);
