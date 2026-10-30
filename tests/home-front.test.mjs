@@ -52,14 +52,29 @@ test('elämyskortit: nimi, hinta ja kesto tuotteesta; lahjakortti #avoin; kuva v
     const cards = html.split('<li class="card').slice(1);
     assert.equal(cards.length, HOME_EXPERIENCES.length);
     for (const spec of HOME_EXPERIENCES) {
-      const p = prod(spec.slug);
-      const name = (lang === 'en' && p.name_en) || p.name;
-      assert.ok(html.includes(name), `${lang} ${name}`);
+      for (const slug of spec.pair || [spec.slug]) {
+        const p = prod(slug);
+        const name = (lang === 'en' && p.name_en) || p.name;
+        assert.ok(html.includes(name), `${lang} ${name}`);
+      }
     }
     assert.match(html, lang === 'fi' ? /alk\. 29 € \/ hlö · 2 h/ : /from €29 \/ person · 2 h/);
     assert.match(html, lang === 'fi' ? /alk\. 99 € · 1 h/ : /from €99 · 1 h/);
+    assert.match(html, lang === 'fi' ? /alk\. 210 € · 2 h/ : /from €210 · 2 h/);
     assert.match(html, lang === 'fi' ? /alk\. 250 € · 1–7 h vaihtoehdot/ : /from €250 · 1–7 h options/);
+    assert.match(html, lang === 'fi' ? /alk\. 180 € · 2 h/ : /from €180 · 2 h/);
     assert.match(html, lang === 'fi' ? /alk\. 29 €/ : /from €29/);
+    assert.match(html, lang === 'fi' ? /<h3>Saunahoito ja saunotus<\/h3>/ : /<h3>Sauna Treatment and Saunotus<\/h3>/);
+    assert.equal((html.match(/data-testid="care-pair"/g) || []).length, 1);
+    const marks = ['/tuote/yleinensauna', '/tuote/saunahoito-2', '/tuote/saunotus-2', '/tuote/oma-saunavuoro', '/tuote/jalkiloylyt'];
+    let at = -1;
+    for (const m of marks) {
+      const i = html.indexOf(m);
+      assert.ok(i > at, `${lang} järjestys ${m}`);
+      at = i;
+    }
+    assert.match(html, /j-jalkiloylyt-800\.webp/);
+    assert.match(html, /data-slug="jalkiloylyt"/);
     assert.match(html, /href="\/varaa\/#\/tuote\/yleinensauna"|href="\/en\/book\/#\/tuote\/yleinensauna"/);
     assert.match(html, /products\/10-ifj3bf\.webp/);
     assert.match(html, /<picture><source type="image\/avif" srcset="[^"]*width=600[^"]*600w, [^"]*width=900[^"]*900w"/);
@@ -68,7 +83,7 @@ test('elämyskortit: nimi, hinta ja kesto tuotteesta; lahjakortti #avoin; kuva v
     assert.match(html, /resize=contain/);
     assert.match(html, /sizes="\(min-width: 1100px\) 220px, 280px"/);
     assert.match(html, /width="1600" height="1067" alt="[^"]*" loading="lazy" decoding="async"/);
-    assert.equal(cards.filter((c) => c.startsWith(' noimg')).length, 3);
+    assert.equal(cards.filter((c) => c.startsWith(' noimg')).length, 2);
     assert.match(html, /j-avoin-lahjakortti-800\.webp/);
     assert.match(html, lang === 'fi' ? /Osta lahjaksi →/ : /Buy as a gift →/);
     assert.match(html, lang === 'fi' ? /href="\/lahjakortti\/#avoin"/ : /href="\/en\/gift-card\/#avoin"/);

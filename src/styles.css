@@ -375,6 +375,16 @@ html.co-js.co-show-sauna #yritysvuorot,html.co-js.co-show-day #tarjous{display:b
 .xp .bd p.xp-desc{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;line-clamp:3;overflow:hidden;margin:0 0 .7em}
 .xp .xp-meta{margin:auto 0 0;font:600 13px/1.35 var(--label);color:var(--ink)}
 .xp .card .cta{color:var(--gold)}
+.xp-opts{list-style:none;margin:auto 0 0;padding:0;display:grid;gap:8px}
+.xp-opt{display:flex;flex-direction:column;align-items:flex-start;gap:2px;min-height:44px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;color:inherit;text-decoration:none;position:relative;z-index:2}
+.xp-opt-name{font:600 14px/1.3 var(--label);color:var(--ink);overflow-wrap:anywhere}
+.xp-opt .xp-meta{margin:0}
+.xp-opt-cta{margin-top:4px;font:600 12px/1 var(--label);letter-spacing:.04em;color:var(--gold)}
+.xp-opt:hover{border-color:var(--gold)}
+.xp-opt:hover .xp-opt-name{color:var(--gold)}
+.xp-opt:focus{outline:none}
+.xp-opt:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
+.xp .card.xp-pair:hover{transform:none;box-shadow:0 8px 22px rgba(60,45,30,.07)}
 @media (min-width:1100px){.xp{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));overflow:visible;padding-bottom:0}.xp>li{flex:none}}
 .week-soon,.week-more{display:none}
 /* Saunarituaali: vaalea kortti, kuva vieressä (desktop) tai yläpuolella (kapea). Ei tummaa peittoa eikä ikoneita. */
@@ -418,6 +428,16 @@ html.co-js.co-show-sauna #yritysvuorot,html.co-js.co-show-day #tarjous{display:b
 .bk-img picture{display:block;width:100%;height:100%}
 .bk-img img{display:block;width:100%;height:100%;object-fit:cover}
 .bk-card .card-img{aspect-ratio:3/2;margin:-20px -20px 12px;border-radius:var(--r) var(--r) 0 0}
+.bk-card-pair .bk-pair-body{display:flex;flex-direction:column;gap:6px;height:100%;padding:20px}
+.bk-pair-opts{list-style:none;margin:8px 0 0;padding:0;display:grid;gap:10px}
+.bk-pair-opt{display:flex;flex-direction:column;align-items:flex-start;gap:2px;min-height:44px;padding:12px 14px;border:1px solid var(--line);border-radius:10px;color:inherit;text-decoration:none}
+.bk-pair-name{font:600 17px/1.3 var(--label);color:var(--ink);overflow-wrap:anywhere}
+.bk-pair-opt .bk-meta{margin:0}
+.bk-pair-opt .btn{margin-top:8px;pointer-events:none}
+.bk-pair-opt:hover{border-color:var(--gold)}
+.bk-pair-opt:hover .bk-pair-name{color:var(--gold)}
+.bk-pair-opt:focus{outline:none}
+.bk-pair-opt:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
 .tr-smoke{margin:2px 0 0;font:600 11px/1.3 var(--label);letter-spacing:.06em;text-transform:uppercase;color:var(--green)}
 .tr-note{margin:22px auto 0;max-width:46em}
 .tr-note a{white-space:nowrap}

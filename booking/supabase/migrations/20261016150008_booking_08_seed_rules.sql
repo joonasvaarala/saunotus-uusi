@@ -100,7 +100,7 @@ insert into _rules values
  ('16','Oma savusaunavuoro pe 16–21 (5 h)','exclusive','{5}','16:00',300,null,'{5}','16:00','21:00','fixed_plus_extra',8,16,720,true,null,null,103,null),
  ('16','Oma savusaunavuoro pe 14–16 (2 h)','exclusive','{5}','14:00',120,null,'{5}','14:00','16:00','fixed_plus_extra',8,16,720,true,null,null,104,null),
  ('16','Oma savusaunavuoro ma–pe 16–19 (3 h)','exclusive','{1,2,3,4,5}','16:00',180,null,'{1,2,3,4,5}','16:00','19:00','fixed_plus_extra',8,16,720,true,null,null,105,'Ma–to 16–19 osuu yleisiin vuoroihin → päällekkäissääntö estää jos yleisillä vuoroilla varauksia'),
- ('16','Oma savusaunavuoro ma–to 14–16 esilöylyt (2 h)','exclusive','{1,2,3,4}','14:00',120,null,'{1,2,3,4}','14:00','16:00','fixed_plus_extra',8,16,720,true,null,null,106,'kb-variantin voimassaolo päättyy 1.11.2026 → rivi poistuu tarjonnasta itsestään'),
+ ('16','Oma savusaunavuoro ma–to 14–16 esilöylyt (2 h)','exclusive','{1,2,3,4}','14:00',120,null,'{1,2,3,4}','14:00','16:00','fixed_plus_extra',8,16,720,true,null,null,106,'Omistajan päätös: ma–to esilöylyt jatkuu toistaiseksi (kb-variantin valid_to tyhjä, hinta ennallaan)'),
  ('16','Oma savusaunavuoro uudenvuodenaatto 31.12.2026 (7 h)','exclusive','{4}','14:00',420,null,null,null,null,'fixed_plus_extra',8,16,720,false,'2026-12-31','2026-12-31',107,'EI KÄYTÖSSÄ: kb-variantissa 1 ei ole alkamisaikaa → omistajan vahvistettava (esim. 14–21 vai 16–23)'),
  -- === Savusaunan jälkilöylyt (kb 26 / Johku 15): alkaa 19:00 ===
  ('15','Jälkilöylyt ma–to 19–21 (2 h)','exclusive','{1,2,3,4}','19:00',120,null,'{1,2,3,4}','19:00','21:00','fixed_plus_extra',6,16,120,true,null,null,110,'deadline 120 min = oletus (Johkussa tyhjä)'),

@@ -101,7 +101,7 @@ insert into kb.product_price_variants(id,product_id,label,price,duration_minutes
 (6,25,'Pe klo 16–21',550.0,300,'{5}','16:00:00','21:00:00',null,10.0,null,null,null,null,'Verkkokaupan varausmoottorin hintarivit (from webshop booking-engine price rows)',true),
 (7,25,'Pe lyhyt klo 14–16',300.0,120,'{5}','14:00:00','16:00:00',null,10.0,null,null,null,null,'Verkkokaupan varausmoottorin hintarivit (from webshop booking-engine price rows)',true),
 (8,25,'Ma–pe klo 16–19',420.0,180,'{1,2,3,4,5}','16:00:00','19:00:00',null,10.0,null,null,null,null,'Verkkokaupan varausmoottorin hintarivit (from webshop booking-engine price rows)',true),
-(9,25,'Ma–to esilöylyt klo 14–16',250.0,120,'{1,2,3,4}','14:00:00','16:00:00',null,10.0,null,null,'2026-05-01','2026-11-01','Verkkokaupan varausmoottorin hintarivit (from webshop booking-engine price rows)',true),
+(9,25,'Ma–to esilöylyt klo 14–16',250.0,120,'{1,2,3,4}','14:00:00','16:00:00',null,10.0,null,null,'2026-05-01',null,'Verkkokaupan varausmoottorin hintarivit (from webshop booking-engine price rows)',true),
 (10,26,'31.12.2025 2 h',400.0,120,null,null,null,6,10.0,null,null,'2025-12-31','2025-12-31','Mennyt päivämäärä',false),
 (11,26,'Su 3 h ("Su talvi")',250.0,180,'{7}','19:00:00','22:00:00',6,10.0,null,null,null,null,'Verkkokaupan varausmoottorin hintarivit (from webshop booking-engine price rows)',true),
 (12,26,'La 3 h ("La talvi")',300.0,180,'{6}','19:00:00','22:00:00',6,10.0,null,null,null,null,'Verkkokaupan varausmoottorin hintarivit (from webshop booking-engine price rows)',true),

@@ -1,9 +1,10 @@
 // Hoidot ja rituaalit -sivu. Tuotekortti on sama rakenne kuin kaupan listalla
 // (booking/shop/src/shop.js + treatment-ui.js): kuva, nimi, lyhyt kuvaus, kesto, hinta, painike.
 // Hinta, kesto, slug ja savusauna-lippu tulevat tuotteesta (liveProduct = public_catalog tai kb).
-// Uudet tekstit: ui.site.treatments_* (content/site-texts.pending-import-95.json); puuttuu kannasta → tämä varateksti.
+// Uudet tekstit: ui.site.treatments_* (content/site-texts.pending-import-95.json) ja yhdistelmäkortti
+// ui.site.care_pair_* (content/site-texts.pending-import-107.json); puuttuu kannasta → tämä varateksti.
 import { tx } from './site-texts.mjs';
-import { alts, pageDoc } from './content-texts.mjs';
+import { alts, cards, pageDoc } from './content-texts.mjs';
 import { site, e, pageHref, money, picture, icon } from './lib.mjs';
 import { liveProduct } from './catalog-live.mjs';
 import { productCardInner } from './product-card-image.mjs';
@@ -77,6 +78,15 @@ export const TREATMENTS_TEXTS = Object.freeze({
   'ui.site.treatments_faq_where_q': { fi: 'Missä hoidot ja saunotukset tehdään?', en: 'Where do the treatments and saunotus take place?' },
 });
 
+// Yhdistelmäkortin otsikko ja ingressi. Hinnat, kestot ja nimet tulevat tuotteista, eivät tästä.
+export const CARE_TEXTS = Object.freeze({
+  'ui.site.care_pair_title': { fi: 'Saunahoito ja saunotus', en: 'Sauna Treatment and Saunotus' },
+  'ui.site.care_pair_text': {
+    fi: 'Lempeä saunahoito tai pidempi saunotus hoitosauna Raunissa. Valitse vaihtoehto ja varaa oma aikasi.',
+    en: 'A gentle sauna treatment or a longer saunotus in the Rauni treatment sauna. Choose an option and book your own time.',
+  },
+});
+
 // Kaupan kategoriachippi (catalog-kind.js): k=hoito esivalitsee Hoidot ja rituaalit, jos chippi on listalla; muuten kauppa näyttää kaiken.
 export const TREATMENT_SHOP_HASH = '/?k=hoito';
 const ASK_SLUG = 'morsiussauna';
@@ -115,7 +125,19 @@ const FALLBACK_IMG = Object.freeze({
 });
 
 const quiet = { warn() {} };
-const tt = (key, lang) => tx(key, lang, { fallback: TREATMENTS_TEXTS[key][lang], log: quiet });
+const tt = (key, lang) => tx(key, lang, { fallback: (CARE_TEXTS[key] || TREATMENTS_TEXTS[key])[lang], log: quiet });
+export const careText = (key, lang) => tt(key, lang);
+
+/** cards.json treatments.saunahoito + treatments.saunotus = yksi kortti. Tuotteet ja tuotesivut pysyvät erillään. */
+export function carePairSpec() {
+  const a = cards.treatments?.saunahoito;
+  const b = cards.treatments?.saunotus;
+  if (!a || !b || a.pairWith !== 'saunotus' || b.pairWith !== 'saunahoito') {
+    throw new Error('treatments.saunahoito ja treatments.saunotus pitää yhdistää (pairWith)');
+  }
+  if (typeof a.kb !== 'string' || typeof b.kb !== 'string') throw new Error('yhdistelmäkortin slug puuttuu');
+  return { slugs: [a.kb, b.kb], imageSlug: a.kb, fallbackImg: a.img || 'hunaja' };
+}
 const pic = (id, lang, o = {}) => picture(id, { alt: o.alt ?? alts[id]?.[lang] ?? '', ...o });
 const sec = (cls, inner, id) => `<section class="section ${cls || ''}"${id ? ` id="${id}"` : ''}><div class="wrap">${inner}</div></section>`;
 const head = (title, lead, orn) => `<header class="center"><h2 class="sec-title">${e(title)}</h2>${orn ? `<div class="divider">${icon('ikoni-ornamentti', 34)}</div>` : ''}${lead ? `<p class="lead">${e(lead)}</p>` : ''}</header>`;
@@ -132,6 +154,14 @@ export function treatmentCardPrice(p, lang) {
   }
   if (p.price_type === 'from' || p.price_type === 'variable') return `${t.from} ${v}`;
   return v;
+}
+
+/** Yhdistelmäkortin vaihtoehto: sama hintakaava kuin muilla hoitokorteilla, alk.-etuliite kun kaava ei jo ala sillä. */
+export function careOptionPrice(p, lang) {
+  const t = shopT(lang);
+  const full = treatmentCardPrice(p, lang);
+  if (p.price_type === 'from' || p.price_type === 'variable') return full;
+  return `${t.from} ${full}`;
 }
 
 /** Sama kesto kuin kaupan kortilla: paketin minuutit, muuten tuotteen duration_text(_en). */
@@ -166,6 +196,43 @@ export function treatmentCard(p, lang) {
   return `<li class="bk-card"><a class="bk-card-link" href="${e(href)}">${cardImage(p, lang, name)}<h3>${e(name)}</h3>${smoke}${text ? `<p class="bk-desc">${e(text)}</p>` : ''}<div class="bk-card-meta" data-testid="card-meta">${when ? `<p class="bk-meta bk-card-when" data-testid="card-when">${e(when)}</p>` : ''}<p class="bk-meta bk-card-price" data-testid="card-price"><strong>${e(treatmentCardPrice(p, lang))}</strong></p></div><span class="btn sm">${e(cta)}<span class="sr"> – ${e(name)}</span></span></a></li>`;
 }
 
+function pairOption(p, lang) {
+  const name = pname(p, lang);
+  const href = pageHref('book', lang, shopHash(p.slug));
+  const when = treatmentCardWhen(p, lang);
+  const cta = site.ui[lang].reserve;
+  return `<li><a class="bk-pair-opt" data-testid="care-pair-option" data-slug="${e(p.slug)}" href="${e(href)}"><span class="bk-pair-name">${e(name)}</span>${when ? `<span class="bk-meta bk-card-when" data-testid="card-when">${e(when)}</span>` : ''}<span class="bk-meta bk-card-price" data-testid="card-price"><strong>${e(careOptionPrice(p, lang))}</strong></span><span class="btn sm">${e(cta)}<span class="sr"> – ${e(name)}</span></span></a></li>`;
+}
+
+/** Kaksi tuotetta, yksi kortti: omat linkit, kestot ja alk.-hinnat. Kuva ensimmäisen tuotteen kuva. */
+export function treatmentPairCard(products, lang) {
+  if (!products?.length) throw new Error('yhdistelmäkortilta puuttuu tuote');
+  const title = tt('ui.site.care_pair_title', lang);
+  const text = tt('ui.site.care_pair_text', lang);
+  const image = cardImage(products[0], lang, title);
+  const opts = products.map((p) => pairOption(p, lang)).join('');
+  return `<li class="bk-card bk-card-pair" data-testid="care-pair"><div class="bk-pair-body">${image}<h3>${e(title)}</h3>${text ? `<p class="bk-desc">${e(text)}</p>` : ''}<ul class="bk-pair-opts">${opts}</ul></div></li>`;
+}
+
+function groupCards(g, lang) {
+  const pair = carePairSpec();
+  const inPair = new Set(pair.slugs);
+  const showPair = pair.slugs.every((slug) => g.slugs.includes(slug));
+  let pairDone = false;
+  const parts = [];
+  for (const slug of g.slugs) {
+    if (showPair && inPair.has(slug)) {
+      if (!pairDone) {
+        parts.push(treatmentPairCard(pair.slugs.map(productOf), lang));
+        pairDone = true;
+      }
+      continue;
+    }
+    parts.push(treatmentCard(productOf(slug), lang));
+  }
+  return parts.join('');
+}
+
 function productOf(slug) {
   const p = liveProduct(slug);
   if (!p) throw new Error('tuotetta ei löydy: ' + slug);
@@ -194,7 +261,7 @@ function groups(d, lang) {
   const session = `<a href="${e(pageHref('sauna', lang))}">${e(tt('ui.site.treatments_session_link', lang))}</a>`;
   return TREATMENT_GROUPS.map((g, i) => {
     const block = d[g.key];
-    const cards = g.slugs.map((slug) => treatmentCard(productOf(slug), lang)).join('');
+    const cards = groupCards(g, lang);
     const note = g.note ? `<p class="center tr-note">${e(block.note)} ${session}</p>` : '';
     const more = g.mail ? `<p class="center" style="margin-top:22px">${e(block.note)} ${mail(block.title)}</p>` : '';
     return sec(i % 2 ? 'tint' : '', `${head(block.title, block.text, true)}<ul class="bk-cards">${cards}</ul>${note}${more}`, block.id || g.id);

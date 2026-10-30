@@ -11,12 +11,14 @@ import { shopHash } from './event-cards.mjs';
 import { shortRaw, derivedExcerpt } from '../booking/shop/src/short-desc.js';
 import { visibleText } from '../booking/shop/src/rich-view.js';
 import { label, listHref, t as articleT } from './articles/config.mjs';
+import { carePairSpec, careText } from './treatments-page.mjs';
 
+const carePair = carePairSpec();
 export const HOME_EXPERIENCES = Object.freeze([
   { slug: 'yleinensauna' },
-  { slug: 'saunahoito-2' },
+  { pair: carePair.slugs, imageSlug: carePair.imageSlug, fallbackImg: carePair.fallbackImg },
   { slug: 'oma-saunavuoro' },
-  { slug: 'saunotus-2' },
+  { slug: 'jalkiloylyt', fallbackImg: 'j-jalkiloylyt' },
   { slug: 'lahjakortti', page: 'gift', hash: 'avoin', fallbackImg: 'j-avoin-lahjakortti', cta: 'gift' },
 ]);
 
@@ -69,22 +71,49 @@ function cardImage(p, name, fallbackId) {
   return productCardInner({ slug: p.slug, alt: name, fallbackHtml, sizes: SIZES.home });
 }
 
-export function experienceHtml(lang) {
+function experienceMeta(p, lang) {
   const u = U(lang);
-  const items = HOME_EXPERIENCES.map((spec) => {
-    const p = liveProduct(spec.slug);
-    if (!p) return '';
-    const name = (lang === 'en' && p.name_en) || p.name || spec.slug;
-    const im = cardImage(p, name, spec.fallbackImg);
-    const box = im.has ? `<div class="im"${im.attrs}>${im.html}</div>` : '';
-    const host = im.has ? '' : im.attrs;
-    const blurb = cardBlurb(p, lang);
-    const durTxt = cardDuration(p, lang);
-    const per = p.price_type === 'per_person' ? ` ${u.perPersonShort}` : '';
-    const meta = `${u.fromWord} ${money(priceOf(p), lang)}${per}${durTxt ? ` · ${durTxt}` : ''}`;
-    const cta = spec.cta === 'gift' ? homeText('ui.site.home_gift_cta', lang) : u.reserveArrow;
-    return `<li class="card${box ? '' : ' noimg'}"${host}>${box}<div class="bd"><h3><a href="${e(experienceHref(spec, lang))}">${e(name)}</a></h3>${blurb ? `<p class="xp-desc">${e(blurb)}</p>` : ''}<p class="xp-meta">${e(meta)}</p></div><div class="cta" aria-hidden="true">${e(cta)}</div></li>`;
+  const per = p.price_type === 'per_person' ? ` ${u.perPersonShort}` : '';
+  const durTxt = cardDuration(p, lang);
+  return `${u.fromWord} ${money(priceOf(p), lang)}${per}${durTxt ? ` · ${durTxt}` : ''}`;
+}
+
+function productName(p, lang, slug) {
+  return (lang === 'en' && p.name_en) || p.name || slug;
+}
+
+function singleExperience(spec, lang) {
+  const p = liveProduct(spec.slug);
+  if (!p) return '';
+  const u = U(lang);
+  const name = productName(p, lang, spec.slug);
+  const im = cardImage(p, name, spec.fallbackImg);
+  const box = im.has ? `<div class="im"${im.attrs}>${im.html}</div>` : '';
+  const host = im.has ? '' : im.attrs;
+  const blurb = cardBlurb(p, lang);
+  const cta = spec.cta === 'gift' ? homeText('ui.site.home_gift_cta', lang) : u.reserveArrow;
+  return `<li class="card${box ? '' : ' noimg'}"${host}>${box}<div class="bd"><h3><a href="${e(experienceHref(spec, lang))}">${e(name)}</a></h3>${blurb ? `<p class="xp-desc">${e(blurb)}</p>` : ''}<p class="xp-meta">${e(experienceMeta(p, lang))}</p></div><div class="cta" aria-hidden="true">${e(cta)}</div></li>`;
+}
+
+function pairExperience(spec, lang) {
+  const products = spec.pair.map((slug) => liveProduct(slug)).filter(Boolean);
+  if (!products.length) return '';
+  const title = careText('ui.site.care_pair_title', lang);
+  const blurb = careText('ui.site.care_pair_text', lang);
+  const imageProduct = liveProduct(spec.imageSlug) || products[0];
+  const im = cardImage(imageProduct, title, spec.fallbackImg);
+  const box = im.has ? `<div class="im"${im.attrs}>${im.html}</div>` : '';
+  const host = im.has ? '' : im.attrs;
+  const u = U(lang);
+  const opts = products.map((p) => {
+    const name = productName(p, lang, p.slug);
+    return `<li><a class="xp-opt" data-testid="care-pair-option" data-slug="${e(p.slug)}" href="${e(experienceHref({ slug: p.slug }, lang))}"><span class="xp-opt-name">${e(name)}</span><span class="xp-meta">${e(experienceMeta(p, lang))}</span><span class="xp-opt-cta">${e(u.reserveArrow)}</span></a></li>`;
   }).join('');
+  return `<li class="card xp-pair${box ? '' : ' noimg'}" data-testid="care-pair"${host}>${box}<div class="bd"><h3>${e(title)}</h3>${blurb ? `<p class="xp-desc">${e(blurb)}</p>` : ''}<ul class="xp-opts">${opts}</ul></div></li>`;
+}
+
+export function experienceHtml(lang) {
+  const items = HOME_EXPERIENCES.map((spec) => (spec.pair ? pairExperience(spec, lang) : singleExperience(spec, lang))).join('');
   return `<header class="center"><h2 class="sec-title">${e(homeText('ui.site.home_choose_title', lang))}</h2></header><ul class="xp" aria-label="${e(homeText('ui.site.home_choose_title', lang))}">${items}</ul>`;
 }
 

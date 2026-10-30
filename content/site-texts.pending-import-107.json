@@ -1,0 +1,42 @@
+[
+ {
+  "key": "ui.site.care_pair_title",
+  "lang": "fi",
+  "text": "Saunahoito ja saunotus",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Omistajan päätös: saunahoito ja saunotus yhdessä kortissa (etusivu ja Hoidot ja rituaalit). Tuotteet, hinnat ja tuotesivut pysyvät erillään. FI+EN. Ei vielä tuotannossa. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.site.care_pair_title",
+  "lang": "en",
+  "text": "Sauna Treatment and Saunotus",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Omistajan päätös: saunahoito ja saunotus yhdessä kortissa (etusivu ja Hoidot ja rituaalit). Tuotteet, hinnat ja tuotesivut pysyvät erillään. FI+EN. Ei vielä tuotannossa. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.site.care_pair_text",
+  "lang": "fi",
+  "text": "Lempeä saunahoito tai pidempi saunotus hoitosauna Raunissa. Valitse vaihtoehto ja varaa oma aikasi.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Omistajan päätös: saunahoito ja saunotus yhdessä kortissa (etusivu ja Hoidot ja rituaalit). Tuotteet, hinnat ja tuotesivut pysyvät erillään. FI+EN. Ei vielä tuotannossa. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.site.care_pair_text",
+  "lang": "en",
+  "text": "A gentle sauna treatment or a longer saunotus in the Rauni treatment sauna. Choose an option and book your own time.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "Omistajan päätös: saunahoito ja saunotus yhdessä kortissa (etusivu ja Hoidot ja rituaalit). Tuotteet, hinnat ja tuotesivut pysyvät erillään. FI+EN. Ei vielä tuotannossa. Tuo admin_texts_importilla."
+ }
+]
