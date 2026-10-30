@@ -3,6 +3,7 @@
  "treatments": {
   "saunahoito": {
    "kb": "saunahoito-2",
+   "pairWith": "saunotus",
    "img": "hunaja",
    "show": [
     "duration",
@@ -26,6 +27,7 @@
   },
   "saunotus": {
    "kb": "saunotus-2",
+   "pairWith": "saunahoito",
    "img": "saunotus-selka",
    "show": [
     "duration",
