@@ -360,6 +360,13 @@ jobs:
       # (migraatiot + fixtures/10_test_helpers.sql). Työnkulussa ei ole Postgresia.
       # Cron-jobia ei luoda migraatiossa. Tuotannossa: booking/supabase/manual/booking_215_payment_link_reminders_cron.sql.
       - run: node --test booking/tests/maksulinkki-muistutukset.test.mjs
+      # booking_216: maksuvälittäjän provisioraportti (jakso, palvelu, maksutapa, toteutunut tai arvio).
+      # Tekstit content/site-texts.pending-import-103.json.
+      # Migraatio booking/supabase/migrations/booking_216_payment_provider_fees.sql
+      # (ylläpitäjä lisää tuotantoaikaleiman nimeen ennen ajoa).
+      # SQL: booking/supabase/tests/talous/t216_payment_provider_fees.sql paikallisessa PG:ssä.
+      # Työnkulussa ei ole Postgresia.
+      - run: node --test booking/tests/provisio-raportti.test.mjs
       - uses: actions/upload-pages-artifact@v3
         if: github.event_name != 'pull_request'
         with:

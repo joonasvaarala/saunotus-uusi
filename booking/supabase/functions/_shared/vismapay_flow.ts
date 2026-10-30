@@ -3,6 +3,7 @@
 import type { Db } from "./mobilepay.ts";
 import { dbError } from "./mobilepay.ts";
 import { PAY_SETTLED, REFUND_DONE, REFUND_PENDING, REFUND_REJECTED, scrubSource, VismaApi, VismaError, type PayEnv } from "./vismapay.ts";
+import { feeSlice } from "./provider_fee.ts";
 
 export type ApplyOutcome = "paid" | "failed" | "cancelled" | "pending" | "authorized" | "needs_review";
 
@@ -65,7 +66,7 @@ export async function settleOrder(api: VismaApi, db: Db, orderNumber: string): P
   const cents = Number(payment.amount);
   const source = payment.source;
   if (PAY_SETTLED.has(status)) {
-    const applied = await applyOutcome(db, orderNumber, "paid", Number.isFinite(cents) ? euros(cents) : null, { visma_status: status, source, settled: 1 });
+    const applied = await applyOutcome(db, orderNumber, "paid", Number.isFinite(cents) ? euros(cents) : null, { visma_status: status, source, settled: 1, ...(feeSlice(payment) || {}) });
     if (!applied.ok) return { http: 503, outcome: "retry", detail: applied.code };
     if (applied.outcome === "needs_review" || applied.code === "amount_mismatch") return { http: 200, outcome: "needs_review" };
     return { http: 200, outcome: applied.already ? "paid" : "paid", detail: { already: !!applied.already } };
@@ -138,7 +139,7 @@ async function finishFromVisma(api: VismaApi, db: Db, claim: Claim, refundId: st
   if (Number(g?.result) === 2) return fail(db, claim.refund_id, { reason: "refund_not_found", refund_id: refundId }, "failed");
   const status = Number(g?.refund?.status);
   if (REFUND_DONE.has(status)) {
-    const { error } = await db.rpc("vismapay_refund_complete", { p_refund_id: claim.refund_id, p_provider_refund_id: refundId, p_raw: { visma_status: status, type: "confirmed" } });
+    const { error } = await db.rpc("vismapay_refund_complete", { p_refund_id: claim.refund_id, p_provider_refund_id: refundId, p_raw: { visma_status: status, type: "confirmed", ...(feeSlice(g?.refund) || {}) } });
     if (error) return { result: "db_error", detail: dbError(error)!.code };
     return { result: "done" };
   }

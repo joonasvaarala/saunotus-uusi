@@ -1,4 +1,4 @@
-// report-pdf: kind=daily|month|range|transactions|giftcards. verify_jwt=true.
+// report-pdf: kind=daily|month|range|transactions|giftcards|fees. verify_jwt=true.
 // Kutsuu admin_report_* kutsujan JWT:llä, joten reports.daily / reports.view pysyy voimassa.
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { buildReportPdf, REPORT_PDF_TEXTS } from "./render.ts";
@@ -6,7 +6,7 @@ import { fetchSiteTexts, makeT } from "../_shared/site_texts.ts";
 
 const cors = { "access-control-allow-origin": "*", "access-control-allow-headers": "authorization, x-client-info, apikey, content-type", "access-control-allow-methods": "GET, POST, OPTIONS" };
 const json = (o: unknown, status = 200) => new Response(JSON.stringify(o), { status, headers: { ...cors, "content-type": "application/json" } });
-const ALLOWED = new Set(["daily", "month", "range", "transactions", "giftcards"]);
+const ALLOWED = new Set(["daily", "month", "range", "transactions", "giftcards", "fees"]);
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: cors });
@@ -17,7 +17,8 @@ Deno.serve(async (req) => {
   if (!auth) return json({ ok: false, code: "unauthorized" }, 401);
   const sb = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_ANON_KEY")!, { global: { headers: { Authorization: auth } }, auth: { persistSession: false } });
   const kind = ALLOWED.has(q.kind) ? q.kind : "daily";
-  const rpc = kind === "month" ? sb.schema("booking").rpc("admin_report_month", { p_ym: q.ym })
+  const rpc = kind === "fees" ? sb.schema("booking").rpc("admin_report_provider_fees", { p_from: q.from, p_to: q.to, p_format: "json" })
+    : kind === "month" ? sb.schema("booking").rpc("admin_report_month", { p_ym: q.ym })
     : kind === "range" ? sb.schema("booking").rpc("admin_report_range", { p_from: q.from, p_to: q.to })
     : kind === "transactions" ? sb.schema("booking").rpc("admin_report_transactions", { p_from: q.from, p_to: q.to })
     : kind === "giftcards" ? sb.schema("booking").rpc("admin_report_gift_cards", { p_filter: q.filter || "all", p_format: "json" })

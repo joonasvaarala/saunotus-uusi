@@ -12,6 +12,7 @@ import { loadVcrTexts, vcrText } from '../voucher-redeem-texts.js';
 import { VCR_SELLERS, VCR_RPC, VCR_URL_MAX, sellerLabel, checkRedeemUrls } from '../voucher-redeem-logic.js';
 import { renderCalendarExport } from './calendar-export.js';
 import { TECHNICAL_LIMITS, modeBadgeKind, modeTextKey, overviewNotices, splitFrom, validateSection } from '../settings-logic.js';
+import { feeRulesCard } from './fee-rules-panel.js';
 
 const tx = (key) => st(`ui.admin.settings.${key}`);
 const MANUAL = ['pay_later', 'card_terminal', 'bank_transfer', 'invoice', 'partner_voucher', 'other'];
@@ -292,7 +293,8 @@ function paymentsPanel(bundle, reload) {
     card(tx('methods_title'), tx('methods_help'),
       ...toggles.map((t) => t.ui.row),
       cash.row,
-      saveBar('payment_methods', () => ({ methods: Object.fromEntries(toggles.map((t) => [t.code, t.ui.input.checked])) }), reload, 'save-methods')));
+      saveBar('payment_methods', () => ({ methods: Object.fromEntries(toggles.map((t) => [t.code, t.ui.input.checked])) }), reload, 'save-methods')),
+    feeRulesCard());
 }
 
 function mailPanel(bundle, reload) {

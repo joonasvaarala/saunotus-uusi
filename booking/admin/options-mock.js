@@ -106,6 +106,7 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
     calls: [], perms: [...perms],
     dayNotes: [], dayBulletins: [], dayMemoSeq: 1, dayBulletinSeq: 1, ownShifts: [], staffShifts: [],
     messagesTimed: false,
+    feeRules: [],
     messageSeq: 2,
     messages: [{
       id: 1, name: '[ESIMERKKI EI KÄYTÖSSÄ] Ohje', category: 'instruction', delivery_mode: 'scheduled', active: false,
@@ -481,6 +482,32 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
       if (a.p_section === 'technical' && role !== 'admin') throw err('forbidden', 'Tekniset rajat vain pääkäyttäjälle');
       try { applySection(st.settingsUi, a.p_section, a.p || {}); }
       catch (e) { throw err(e.code || 'invalid_value', e.message); }
+      return { ok: true };
+    },
+    admin_list_payment_fee_rules: () => {
+      need('settings.edit');
+      return { ok: true, rows: st.feeRules.map((r) => ({ ...r, provider_label: ({ montonio: 'Montonio', visma_pay: 'Visma Pay', mobilepay: 'MobilePay', manual: 'Käsin', johku: 'Johku' })[r.provider] || r.provider })) };
+    },
+    admin_upsert_payment_fee_rule: (a) => {
+      need('settings.edit');
+      const p = a.p || {};
+      const provider = String(p.provider || '');
+      const method = String(p.method || '*');
+      const fixed = Number(p.fixed_eur);
+      const percent = Number(p.percent);
+      if (!/^[a-z][a-z0-9_]{0,39}$/.test(provider) || !/^(\*|[a-z][a-z0-9_]{0,39})$/.test(method) || !Number.isFinite(fixed) || fixed < 0 || fixed > 1000 || !Number.isFinite(percent) || percent < 0 || percent > 100) throw err('invalid_value', 'Tarkista provisiosääntö');
+      let row = st.feeRules.find((r) => r.provider === provider && r.method === method);
+      if (!row) { row = { id: st.feeRules.reduce((m, r) => Math.max(m, r.id), 0) + 1, provider, method }; st.feeRules.push(row); }
+      row.fixed_eur = Math.round(fixed * 10000) / 10000;
+      row.percent = Math.round(percent * 10000) / 10000;
+      row.active = p.active !== false;
+      return { ok: true, rule: { ...row } };
+    },
+    admin_delete_payment_fee_rule: (a) => {
+      need('settings.edit');
+      const i = st.feeRules.findIndex((r) => r.id === Number(a.p_id));
+      if (i < 0) throw err('not_found', 'Sääntöä ei löydy');
+      st.feeRules.splice(i, 1);
       return { ok: true };
     },
     'select:settings': (q = {}) => {

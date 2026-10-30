@@ -1,6 +1,7 @@
 // Maksutapahtuman käsittely: Vippsin tila -> tietokanta (jaettu: webhook ja tilaussivun reconcile).
 // Periaate: tilaus/maksu merkitään maksetuksi VAIN onnistuneen capturen jälkeen (booking.payment_mark_paid -> _on_payment_paid: kuitti + kirjanpito-outbox).
 import { aggVal, dbError, type Db, MobilePayApi, VippsError, type VippsPayment } from "./mobilepay.ts";
+import { feeSlice } from "./provider_fee.ts";
 
 export type Outcome = { reference: string; outcome: string; state?: string; detail?: unknown };
 export class DbFailure extends Error { constructor(public fn: string, public info: { code: string; message: string }) { super(`db_${fn}_${info.code}`); } }
@@ -98,7 +99,7 @@ export async function processReference(ref: string, deps: { db: Db; api: MobileP
     }
   }
 
-  const paid = await rpc(db, "payment_mark_paid", { p_provider: "mobilepay", p_provider_ref: ref, p_amount: lk.amount, p_raw: null });
+  const paid = await rpc(db, "payment_mark_paid", { p_provider: "mobilepay", p_provider_ref: ref, p_amount: lk.amount, p_raw: feeSlice(vp) });
   await rpc(db, "mobilepay_payment_event", { p_reference: ref, p_state: "CAPTURED", p_redirect_url: null, p_detail: null });
   return { reference: ref, state, outcome: paid?.needs_manual_review ? "paid_needs_review" : "paid", detail: { filled } };
 }

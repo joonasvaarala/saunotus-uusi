@@ -21,7 +21,7 @@ export async function buildReportPdf(rep: any, kind: string, lang = "fi", tfn: T
   const TX = (key: string, vars?: Record<string, string | number | null | undefined>) => tfn(key, loc, vars);
   const eur = (n: unknown) => money(n, loc);
   const pdf = await PDFDocument.create();
-  const title = kind === "transactions" ? TX("ui.admin.reports.pdf_transactions") : kind === "giftcards" ? TX("ui.admin.reports.pdf_giftcards") : TX("ui.admin.reports.pdf_summary");
+  const title = kind === "transactions" ? TX("ui.admin.reports.pdf_transactions") : kind === "giftcards" ? TX("ui.admin.reports.pdf_giftcards") : kind === "fees" ? TX("ui.admin.reports.fee_title") : TX("ui.admin.reports.pdf_summary");
   pdf.setTitle(san(title)); pdf.setProducer(san(TX("ui.admin.reports.pdf_heading"))); pdf.setCreator("booking");
   const font = await pdf.embedFont(StandardFonts.Helvetica);
   const bold = await pdf.embedFont(StandardFonts.HelveticaBold);
@@ -46,8 +46,22 @@ export async function buildReportPdf(rep: any, kind: string, lang = "fi", tfn: T
   const from = period.from ? dfi(period.from) : "";
   const to = period.to ? dfi(period.to) : from;
   text(TX("ui.admin.reports.pdf_heading") + " – " + title, M, 13, bold); y -= 16;
-  if (from) { text(TX("ui.admin.reports.pdf_period", { from, to }) + " · " + TX("ui.admin.reports.basis"), M, 7, font, grey); y -= 18; }
+  if (from) { text(TX("ui.admin.reports.pdf_period", { from, to }) + (kind === "fees" ? "" : " · " + TX("ui.admin.reports.basis")), M, 7, font, grey); y -= 18; }
 
+  if (kind === "fees") {
+    const basis = (b: string) => b === "actual" ? TX("ui.admin.reports.fee_basis_actual") : b === "estimated" ? TX("ui.admin.reports.fee_basis_estimated") : TX("ui.admin.reports.fee_basis_missing");
+    const head = [TX("ui.admin.reports.fee_col_provider"), TX("ui.admin.reports.fee_col_method"), TX("ui.admin.reports.fee_col_basis"), TX("ui.admin.reports.fee_col_count"), TX("ui.admin.reports.fee_col_gross"), TX("ui.admin.reports.fee_col_fee"), TX("ui.admin.reports.fee_col_net")];
+    const cols = [0, 120, 230, 300, 350, 420, 500];
+    const line = (r: any) => [String(r.provider_label || r.provider || ""), String(r.method_label || r.method || ""), basis(String(r.basis || "")), String(r.count ?? ""), eur(r.gross), r.fee == null ? "–" : eur(r.fee), r.net == null ? "–" : eur(r.net)];
+    const rows = Array.isArray(rep.rows) ? rep.rows : [];
+    table(TX("ui.admin.reports.fee_sales"), head, cols, rows.filter((r: any) => r.direction !== "refund").map(line));
+    table(TX("ui.admin.reports.fee_refunds"), head, cols, rows.filter((r: any) => r.direction === "refund").map(line));
+    const tot = rep.totals || {};
+    if (Number(tot.missing) > 0) { need(28); text(TX("ui.admin.reports.fee_missing_note"), M, 7, font, grey); y -= 14; }
+    else if (tot.settlement != null) { need(16); text(`${TX("ui.admin.reports.fee_settlement")}: ${eur(tot.settlement)}`, M, 10, bold); y -= 14; }
+    need(28); text(TX("ui.admin.reports.fee_net_note"), M, 7, font, grey);
+    return await pdf.save();
+  }
   if (kind === "transactions") {
     const head = [TX("ui.admin.reports.col_voucher"), TX("ui.admin.reports.col_date"), TX("ui.admin.reports.col_customer"), TX("ui.admin.reports.col_product"), TX("ui.admin.reports.col_qty"), TX("ui.admin.reports.col_net"), TX("ui.admin.reports.col_vat_pct"), TX("ui.admin.reports.col_vat_eur"), TX("ui.admin.reports.col_gross"), TX("ui.admin.reports.col_method"), TX("ui.admin.reports.col_status"), TX("ui.admin.reports.col_kind")];
     const kindLabel = (k: string) => k === "refund" ? TX("ui.admin.reports.kind_refund") : k === "redemption" ? TX("ui.admin.reports.kind_redemption") : TX("ui.admin.reports.kind_sale");

@@ -245,3 +245,22 @@ Deno.test("refund-käsittelijä: ei oikeutta ja odottava luonti", async () => {
   assertEquals(j.processed[0].result, "pending");
   assertEquals(calls.some((c) => (c as [string])[0] === "montonio_refund_complete"), false);
 });
+
+Deno.test("webhook vie provision JSON:iin, ei asiakkaan vastaukseen eikä tiliä", async () => {
+  const { db, calls } = routed((name) => {
+    if (name === "montonio_payment_lookup") return { data: { found: true, amount: 40, order_uuid: "ord-1" }, error: null };
+    if (name === "montonio_payment_apply") return { data: { ok: true, outcome: "paid" }, error: null };
+    return { data: { ok: true }, error: null };
+  });
+  const token = await signJwt({
+    accessKey: ACCESS, merchantReference: REF, paymentStatus: "PAID", grandTotal: 40, uuid: "ord-1",
+    merchantFee: 0.35, senderIban: "FI00", exp: 4_000_000_000,
+  }, SECRET);
+  const res = await notify(post("https://f/montonio-notify", { orderToken: token }), { db, env: testEnv(), fetch: async () => asJson(500, {}) });
+  assertEquals(res.status, 200);
+  assertEquals(await res.text(), "OK");
+  const apply = calls.find((c) => (c as [string])[0] === "montonio_payment_apply") as [string, { p_raw: Record<string, unknown> }];
+  assertEquals(apply[1].p_raw.merchantFee, 0.35);
+  assertEquals("senderIban" in apply[1].p_raw, false);
+  assertEquals(JSON.stringify({ body: "OK", raw: apply[1].p_raw }).toLowerCase().includes("montonio"), false);
+});
