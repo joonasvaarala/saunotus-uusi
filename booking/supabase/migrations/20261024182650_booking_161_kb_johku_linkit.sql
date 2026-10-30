@@ -119,10 +119,7 @@ begin
     execute format('select %I from kb.products where id = $1', r.col) into cur using r.product_id;
     if cur is not distinct from r.to_text then skip := skip + 1; continue; end if;   -- jo ajettu (uudelleenajo ei tee mitään)
     if cur is distinct from r.from_text then
-      -- Tyhjä kanta / fixture: kuvaus ei ole tuotannon teksti. Tuotannossa teksti täsmää tai on jo päivitetty (yllä).
-      raise notice 'booking_161: kb.products id % sarake % ei ole tuotannon teksti (md5 %), ohitetaan', r.product_id, r.col, md5(coalesce(cur, ''));
-      skip := skip + 1;
-      continue;
+      raise exception 'booking_161: kb.products id % sarake % ei vastaa odotettua tekstiä (md5 %, odotettu %). Ei muutoksia.', r.product_id, r.col, md5(cur), r.from_md5;
     end if;
     ids := ids || r.product_id; cols := cols || r.col; froms := froms || r.from_text; tos := tos || r.to_text;
   end loop;
