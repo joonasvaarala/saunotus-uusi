@@ -1,0 +1,422 @@
+[
+ {
+  "key": "ui.admin.reports.vat_sales",
+  "lang": "fi",
+  "text": "ALV-erittely, myynti",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_217: raporttien pienet korjaukset (maksutavat, lahjakortin jakson saldo, ALV-erittely, Myynti-sanat, Johku-merkintä). FI+EN. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.reports.vat_sales",
+  "lang": "en",
+  "text": "VAT breakdown, sales",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_217: raporttien pienet korjaukset (maksutavat, lahjakortin jakson saldo, ALV-erittely, Myynti-sanat, Johku-merkintä). FI+EN. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.reports.vat_refunds",
+  "lang": "fi",
+  "text": "ALV-erittely, hyvitykset",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_217: raporttien pienet korjaukset (maksutavat, lahjakortin jakson saldo, ALV-erittely, Myynti-sanat, Johku-merkintä). FI+EN. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.reports.vat_refunds",
+  "lang": "en",
+  "text": "VAT breakdown, refunds",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_217: raporttien pienet korjaukset (maksutavat, lahjakortin jakson saldo, ALV-erittely, Myynti-sanat, Johku-merkintä). FI+EN. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.reports.vat_net",
+  "lang": "fi",
+  "text": "ALV-erittely, netto",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_217: raporttien pienet korjaukset (maksutavat, lahjakortin jakson saldo, ALV-erittely, Myynti-sanat, Johku-merkintä). FI+EN. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.reports.vat_net",
+  "lang": "en",
+  "text": "VAT breakdown, net",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_217: raporttien pienet korjaukset (maksutavat, lahjakortin jakson saldo, ALV-erittely, Myynti-sanat, Johku-merkintä). FI+EN. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.reports.vat_breakdown_note",
+  "lang": "fi",
+  "text": "Myynnin ja hyvitysten verot näytetään erikseen. Nettoerittely on tositteille tulostettu vero, ja se vastaa yhteenvedon ALV:tä. Hyvitys kuuluu hyvitystositteen jaksoon.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 450,
+  "placeholders": [],
+  "reason": "booking_217: raporttien pienet korjaukset (maksutavat, lahjakortin jakson saldo, ALV-erittely, Myynti-sanat, Johku-merkintä). FI+EN. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.reports.vat_breakdown_note",
+  "lang": "en",
+  "text": "Sales tax and refund tax are shown separately. The net breakdown is the tax printed on the documents, and it matches the VAT total. A refund belongs to the refund document period.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 450,
+  "placeholders": [],
+  "reason": "booking_217: raporttien pienet korjaukset (maksutavat, lahjakortin jakson saldo, ALV-erittely, Myynti-sanat, Johku-merkintä). FI+EN. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.reports.vat_rounding_note",
+  "lang": "fi",
+  "text": "Tuoterivien arvonlisävero on laskettu riveittäin. Myynnin verokantaryhmä pyöristetään ryhmänä, joten erotus voi olla senttejä. Erotus näytetään pyöristysrivinä.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_217: raporttien pienet korjaukset (maksutavat, lahjakortin jakson saldo, ALV-erittely, Myynti-sanat, Johku-merkintä). FI+EN. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.reports.vat_rounding_note",
+  "lang": "en",
+  "text": "Product-line VAT is calculated per line. A sale rounds each VAT rate as a group, so the difference can be cents. The difference is shown as a rounding row.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_217: raporttien pienet korjaukset (maksutavat, lahjakortin jakson saldo, ALV-erittely, Myynti-sanat, Johku-merkintä). FI+EN. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.reports.rounding_row",
+  "lang": "fi",
+  "text": "Pyöristys, tuoterivi vastaan myynti",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_217: raporttien pienet korjaukset (maksutavat, lahjakortin jakson saldo, ALV-erittely, Myynti-sanat, Johku-merkintä). FI+EN. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.reports.rounding_row",
+  "lang": "en",
+  "text": "Rounding, product line versus sale",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_217: raporttien pienet korjaukset (maksutavat, lahjakortin jakson saldo, ALV-erittely, Myynti-sanat, Johku-merkintä). FI+EN. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.reports.sales_tab",
+  "lang": "fi",
+  "text": "Myynti",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_217: raporttien pienet korjaukset (maksutavat, lahjakortin jakson saldo, ALV-erittely, Myynti-sanat, Johku-merkintä). FI+EN. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.reports.sales_tab",
+  "lang": "en",
+  "text": "Sales",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_217: raporttien pienet korjaukset (maksutavat, lahjakortin jakson saldo, ALV-erittely, Myynti-sanat, Johku-merkintä). FI+EN. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.reports.methods_tab",
+  "lang": "fi",
+  "text": "Maksutavat",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_217: raporttien pienet korjaukset (maksutavat, lahjakortin jakson saldo, ALV-erittely, Myynti-sanat, Johku-merkintä). FI+EN. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.reports.methods_tab",
+  "lang": "en",
+  "text": "Payment methods",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_217: raporttien pienet korjaukset (maksutavat, lahjakortin jakson saldo, ALV-erittely, Myynti-sanat, Johku-merkintä). FI+EN. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.reports.methods_csv",
+  "lang": "fi",
+  "text": "Maksutavat CSV",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_217: raporttien pienet korjaukset (maksutavat, lahjakortin jakson saldo, ALV-erittely, Myynti-sanat, Johku-merkintä). FI+EN. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.reports.methods_csv",
+  "lang": "en",
+  "text": "Payment methods CSV",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_217: raporttien pienet korjaukset (maksutavat, lahjakortin jakson saldo, ALV-erittely, Myynti-sanat, Johku-merkintä). FI+EN. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.reports.methods_reconcile",
+  "lang": "fi",
+  "text": "Maksutapojen netto vastaa myyntiä hyvitysten jälkeen.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_217: raporttien pienet korjaukset (maksutavat, lahjakortin jakson saldo, ALV-erittely, Myynti-sanat, Johku-merkintä). FI+EN. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.reports.methods_reconcile",
+  "lang": "en",
+  "text": "The net of payment methods matches sales after refunds.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_217: raporttien pienet korjaukset (maksutavat, lahjakortin jakson saldo, ALV-erittely, Myynti-sanat, Johku-merkintä). FI+EN. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.reports.gc_open_title",
+  "lang": "fi",
+  "text": "Avoimet jakson lopussa",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_217: raporttien pienet korjaukset (maksutavat, lahjakortin jakson saldo, ALV-erittely, Myynti-sanat, Johku-merkintä). FI+EN. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.reports.gc_open_title",
+  "lang": "en",
+  "text": "Open at period end",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_217: raporttien pienet korjaukset (maksutavat, lahjakortin jakson saldo, ALV-erittely, Myynti-sanat, Johku-merkintä). FI+EN. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.reports.gc_opening",
+  "lang": "fi",
+  "text": "Alkusaldo",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_217: raporttien pienet korjaukset (maksutavat, lahjakortin jakson saldo, ALV-erittely, Myynti-sanat, Johku-merkintä). FI+EN. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.reports.gc_opening",
+  "lang": "en",
+  "text": "Opening balance",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_217: raporttien pienet korjaukset (maksutavat, lahjakortin jakson saldo, ALV-erittely, Myynti-sanat, Johku-merkintä). FI+EN. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.reports.gc_sold_period",
+  "lang": "fi",
+  "text": "Myyty jaksolla",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_217: raporttien pienet korjaukset (maksutavat, lahjakortin jakson saldo, ALV-erittely, Myynti-sanat, Johku-merkintä). FI+EN. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.reports.gc_sold_period",
+  "lang": "en",
+  "text": "Sold in the period",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_217: raporttien pienet korjaukset (maksutavat, lahjakortin jakson saldo, ALV-erittely, Myynti-sanat, Johku-merkintä). FI+EN. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.reports.gc_redeemed_period",
+  "lang": "fi",
+  "text": "Käytetty jaksolla",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_217: raporttien pienet korjaukset (maksutavat, lahjakortin jakson saldo, ALV-erittely, Myynti-sanat, Johku-merkintä). FI+EN. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.reports.gc_redeemed_period",
+  "lang": "en",
+  "text": "Redeemed in the period",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_217: raporttien pienet korjaukset (maksutavat, lahjakortin jakson saldo, ALV-erittely, Myynti-sanat, Johku-merkintä). FI+EN. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.reports.gc_expired",
+  "lang": "fi",
+  "text": "Vanhentunut jaksolla",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_217: raporttien pienet korjaukset (maksutavat, lahjakortin jakson saldo, ALV-erittely, Myynti-sanat, Johku-merkintä). FI+EN. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.reports.gc_expired",
+  "lang": "en",
+  "text": "Expired in the period",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_217: raporttien pienet korjaukset (maksutavat, lahjakortin jakson saldo, ALV-erittely, Myynti-sanat, Johku-merkintä). FI+EN. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.reports.gc_closing",
+  "lang": "fi",
+  "text": "Saldo jakson lopussa",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_217: raporttien pienet korjaukset (maksutavat, lahjakortin jakson saldo, ALV-erittely, Myynti-sanat, Johku-merkintä). FI+EN. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.reports.gc_closing",
+  "lang": "en",
+  "text": "Balance at period end",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_217: raporttien pienet korjaukset (maksutavat, lahjakortin jakson saldo, ALV-erittely, Myynti-sanat, Johku-merkintä). FI+EN. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.reports.gc_bucket_own",
+  "lang": "fi",
+  "text": "Omat maksetut",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_217: raporttien pienet korjaukset (maksutavat, lahjakortin jakson saldo, ALV-erittely, Myynti-sanat, Johku-merkintä). FI+EN. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.reports.gc_bucket_own",
+  "lang": "en",
+  "text": "Own paid cards",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_217: raporttien pienet korjaukset (maksutavat, lahjakortin jakson saldo, ALV-erittely, Myynti-sanat, Johku-merkintä). FI+EN. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.reports.gc_bucket_free",
+  "lang": "fi",
+  "text": "Omat maksuttomat",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_217: raporttien pienet korjaukset (maksutavat, lahjakortin jakson saldo, ALV-erittely, Myynti-sanat, Johku-merkintä). FI+EN. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.reports.gc_bucket_free",
+  "lang": "en",
+  "text": "Own complimentary cards",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_217: raporttien pienet korjaukset (maksutavat, lahjakortin jakson saldo, ALV-erittely, Myynti-sanat, Johku-merkintä). FI+EN. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.reports.gc_bucket_johku",
+  "lang": "fi",
+  "text": "Johku",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_217: raporttien pienet korjaukset (maksutavat, lahjakortin jakson saldo, ALV-erittely, Myynti-sanat, Johku-merkintä). FI+EN. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.reports.gc_bucket_johku",
+  "lang": "en",
+  "text": "Johku",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_217: raporttien pienet korjaukset (maksutavat, lahjakortin jakson saldo, ALV-erittely, Myynti-sanat, Johku-merkintä). FI+EN. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.reports.gc_johku_liability",
+  "lang": "fi",
+  "text": "Johku-lahjakorttien saldo on vain tilasto. Se ei ole tämän järjestelmän kirjanpitovelkaa, koska myynti on kirjattu Johkussa.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_217: raporttien pienet korjaukset (maksutavat, lahjakortin jakson saldo, ALV-erittely, Myynti-sanat, Johku-merkintä). FI+EN. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.reports.gc_johku_liability",
+  "lang": "en",
+  "text": "Johku gift card balances are statistics only. They are not a liability of this system, because the sale was recorded in Johku.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_217: raporttien pienet korjaukset (maksutavat, lahjakortin jakson saldo, ALV-erittely, Myynti-sanat, Johku-merkintä). FI+EN. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.reports.gc_note",
+  "lang": "fi",
+  "text": "Johku-osio on erillään ja vain tilastoa. Sen saldo ei ole tämän järjestelmän kirjanpitovelkaa, koska arvonlisävero on kirjattu Johkussa.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_217: raporttien pienet korjaukset (maksutavat, lahjakortin jakson saldo, ALV-erittely, Myynti-sanat, Johku-merkintä). FI+EN. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.reports.gc_note",
+  "lang": "en",
+  "text": "The Johku section is separate and for statistics only. Its balance is not a liability of this system, because the VAT was recorded in Johku.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_217: raporttien pienet korjaukset (maksutavat, lahjakortin jakson saldo, ALV-erittely, Myynti-sanat, Johku-merkintä). FI+EN. Tuo admin_texts_importilla."
+ }
+]

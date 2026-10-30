@@ -51,21 +51,21 @@ begin
   perform pg_temp.t68_ck(v_code = 'forbidden', 'A2: ei-henkilöstö forbidden');
 
   perform test.login(v_admin);
-  r := booking.admin_create_booking(v_rule, v_thu, 2, null, '{"name":"T68 Maksettu","email":"t68-paid@example.test","phone":"0400006801"}'::jsonb, 'cash', true, null);
+  r := booking.admin_create_booking(v_rule, v_thu, 2, null, '{"name":"T68 Maksettu","email":"t68-paid@example.test","phone":"0400006801"}'::jsonb, 'card_terminal', true, null);
   v_paid := (r ->> 'reservation_id')::bigint; v_paid_order := (r ->> 'order_id')::bigint;
-  r := booking.admin_create_booking(v_rule, v_thu, 2, null, '{"name":"T68 Peruttu","email":"t68-cancel@example.test","phone":"0400006802"}'::jsonb, 'cash', true, null);
+  r := booking.admin_create_booking(v_rule, v_thu, 2, null, '{"name":"T68 Peruttu","email":"t68-cancel@example.test","phone":"0400006802"}'::jsonb, 'card_terminal', true, null);
   v_cancel := (r ->> 'reservation_id')::bigint;
   perform booking.admin_set_reservation_status(v_cancel, 'cancelled', 't68');
   r := booking.admin_create_booking(v_rule, v_thu, 1, null, '{"name":"T68 Maksamatta","email":"t68-unpaid@example.test","phone":"0400006803"}'::jsonb, 'pay_later', false, null);
   v_unpaid := (r ->> 'reservation_id')::bigint;
-  r := booking.admin_create_booking(v_rule, v_thu, 2, null, '{"name":"T68 Lisa","email":"t68-addon@example.test","phone":"0400006804"}'::jsonb, 'cash', true, null, null, null, null, 'admin', jsonb_build_array(jsonb_build_object('id', v_addon, 'quantity', 1)));
+  r := booking.admin_create_booking(v_rule, v_thu, 2, null, '{"name":"T68 Lisa","email":"t68-addon@example.test","phone":"0400006804"}'::jsonb, 'card_terminal', true, null, null, null, null, 'admin', jsonb_build_array(jsonb_build_object('id', v_addon, 'quantity', 1)));
   v_addon_res := (r ->> 'reservation_id')::bigint;
   r := booking.admin_create_booking(v_rule, v_thu, 2, null, '{"name":"T68 Lahjakortti","email":"t68-gift@example.test","phone":"0400006805"}'::jsonb, 'pay_later', false, null);
   v_gift := (r ->> 'reservation_id')::bigint;
-  r := booking.admin_create_booking(v_rule, v_thu, 1, null, '{"name":"T68 Poissa","email":"t68-noshow@example.test","phone":"0400006806"}'::jsonb, 'cash', true, null);
+  r := booking.admin_create_booking(v_rule, v_thu, 1, null, '{"name":"T68 Poissa","email":"t68-noshow@example.test","phone":"0400006806"}'::jsonb, 'card_terminal', true, null);
   v_noshow := (r ->> 'reservation_id')::bigint;
   perform booking.admin_set_reservation_status(v_noshow, 'no_show', 't68');
-  r := booking.admin_create_booking(v_rule, v_other, 2, null, '{"name":"T68 Muu Paiva","email":"t68-other@example.test","phone":"0400006807"}'::jsonb, 'cash', true, null);
+  r := booking.admin_create_booking(v_rule, v_other, 2, null, '{"name":"T68 Muu Paiva","email":"t68-other@example.test","phone":"0400006807"}'::jsonb, 'card_terminal', true, null);
   v_other_res := (r ->> 'reservation_id')::bigint;
   perform test.logout();
 
@@ -90,13 +90,13 @@ begin
   update booking.orders set payment_status = 'paid' where id = (select order_id from booking.reservations where id = v_gift);
 
   perform test.login(v_admin);
-  r := booking.admin_create_booking(v_rule, v_thu, 1, null, '{"name":"T68 Vanhentunut","email":"t68-exp@example.test","phone":"0400006808"}'::jsonb, 'cash', true, null);
+  r := booking.admin_create_booking(v_rule, v_thu, 1, null, '{"name":"T68 Vanhentunut","email":"t68-exp@example.test","phone":"0400006808"}'::jsonb, 'card_terminal', true, null);
   v_expired := (r ->> 'reservation_id')::bigint;
-  r := booking.admin_create_booking(v_rule, v_thu, 1, null, '{"name":"T68 Pito Ohi","email":"t68-past@example.test","phone":"0400006809"}'::jsonb, 'cash', true, null);
+  r := booking.admin_create_booking(v_rule, v_thu, 1, null, '{"name":"T68 Pito Ohi","email":"t68-past@example.test","phone":"0400006809"}'::jsonb, 'card_terminal', true, null);
   v_past := (r ->> 'reservation_id')::bigint;
-  r := booking.admin_create_booking(v_rule, v_thu, 1, null, '{"name":"T68 Pito Voimassa","email":"t68-hold@example.test","phone":"0400006810"}'::jsonb, 'cash', true, null);
+  r := booking.admin_create_booking(v_rule, v_thu, 1, null, '{"name":"T68 Pito Voimassa","email":"t68-hold@example.test","phone":"0400006810"}'::jsonb, 'card_terminal', true, null);
   v_hold := (r ->> 'reservation_id')::bigint;
-  r := booking.admin_create_booking(v_rule, v_thu, 1, null, '{"name":"T68 Piilo","email":"t68-hidden@example.test","phone":"0400006812"}'::jsonb, 'cash', true, null);
+  r := booking.admin_create_booking(v_rule, v_thu, 1, null, '{"name":"T68 Piilo","email":"t68-hidden@example.test","phone":"0400006812"}'::jsonb, 'card_terminal', true, null);
   v_hidden := (r ->> 'reservation_id')::bigint;
   perform test.logout();
 

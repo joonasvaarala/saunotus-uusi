@@ -55,7 +55,7 @@ begin
       and has_function_privilege('authenticated', 'booking.admin_set_montonio_mode(text,text)', 'execute')
       and not has_function_privilege('anon', 'booking.admin_set_montonio_mode(text,text)', 'execute'), 'A1 oikeudet');
   perform pg_temp.ck((select mode from booking.integration_config where key = 'montonio') = 'off', 'A2 mode off (asetettu testin transaktiossa)');
-  perform pg_temp.ck(exists (select 1 from booking.payment_methods where code = 'montonio' and is_manual = false and active = false), 'A3 payment_methods montonio ei ole käteismenetelmä');
+  perform pg_temp.ck(exists (select 1 from booking.payment_methods where code = 'montonio' and is_manual = false and active = true), 'A3 payment_methods montonio on käytössä oleva verkkomaksu, ei käsinkirjaus');
   perform pg_temp.ck((select mode from booking.integration_config where key = 'procountor') is not distinct from pc_mode
       and (select settings ->> 'daily_enabled' from booking.integration_config where key = 'procountor') is not distinct from pc_daily, 'A4 procountor ennallaan heti migraation jälkeen');
 

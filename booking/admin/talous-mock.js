@@ -256,10 +256,14 @@ const PREPAID_ON = '2026-10-15';
     const absRow = (rows) => by(rows, (l) => `${l.product}|${l.vat_rate}`, (a, l) => ({ product: l.product, rate: l.vat_rate, quantity: round2((a?.quantity || 0) + Math.abs(l.quantity)), net: round2((a?.net || 0) + Math.abs(l.net)), vat: round2((a?.vat || 0) + Math.abs(l.vat)), gross: round2((a?.gross || 0) + Math.abs(l.gross)) }));
     rep.by_product = absRow(sales);
     rep.refunds_by_product = absRow(refunds);
+    const vatAbs = (rows) => by(rows, (l) => l.vat_rate, (a, l) => ({ rate: l.vat_rate, net: round2((a?.net || 0) + Math.abs(l.net)), vat: round2((a?.vat || 0) + Math.abs(l.vat)), gross: round2((a?.gross || 0) + Math.abs(l.gross)) })).sort((a, b) => a.rate - b.rate);
+    rep.by_vat_sales = vatAbs(sales);
+    rep.by_vat_refunds = vatAbs(refunds);
     const salesGross = round2(sales.reduce((s, l) => s + l.gross, 0)), refundsAbs = round2(refunds.reduce((s, l) => s + Math.abs(l.gross), 0));
     const lineVat = round2(sales.reduce((s, l) => s + l.vat, 0) - refunds.reduce((s, l) => s + Math.abs(l.vat), 0));
     const vatRounding = round2(rep.totals.vat_after_refunds - lineVat), productGross = round2(salesGross - refundsAbs);
-    rep.reconciliation = { sales_gross: salesGross, refunds_gross: refundsAbs, product_gross: productGross, payments_gross: rep.totals.net_after_refunds, difference: round2(rep.totals.net_after_refunds - productGross), line_vat: lineVat, receipt_vat: rep.totals.vat_after_refunds, vat_rounding: vatRounding, cash_rounding: rep.totals.rounding, rounding_code: Math.abs(vatRounding) >= 0.005 ? 'line_vs_receipt_vat' : null };
+    const methodsNet = round2(rep.by_method.reduce((s, m) => s + m.gross + m.refunds, 0));
+    rep.reconciliation = { sales_gross: salesGross, refunds_gross: refundsAbs, product_gross: productGross, payments_gross: rep.totals.net_after_refunds, difference: round2(rep.totals.net_after_refunds - productGross), methods_net: methodsNet, methods_difference: round2(methodsNet - rep.totals.net_after_refunds), line_vat: lineVat, receipt_vat: rep.totals.vat_after_refunds, vat_rounding: vatRounding, cash_rounding: rep.totals.rounding, rounding_code: Math.abs(vatRounding) >= 0.005 ? 'line_vs_receipt_vat' : null };
     rep.vat_summary = by(lines, (l) => l.vat_rate, (a, l) => ({ rate: l.vat_rate, net: sum(a, 'net', l), vat: sum(a, 'vat', l), gross: sum(a, 'gross', l) })).sort((a, b) => a.rate - b.rate);
     const soldLines = sales.filter((l) => l.group === 'giftcard');
     const soldRows = absRow(soldLines);
@@ -267,6 +271,7 @@ const PREPAID_ON = '2026-10-15';
     rep.gift_card_period = {
       sold: { count: round2(soldLines.reduce((s, l) => s + Math.abs(l.quantity), 0)), net: round2(soldLines.reduce((s, l) => s + Math.abs(l.net), 0)), vat: round2(soldLines.reduce((s, l) => s + Math.abs(l.vat), 0)), gross: round2(soldLines.reduce((s, l) => s + Math.abs(l.gross), 0)), lines: soldRows, by_vat: soldByVat },
       complimentary: { issued_count: 0, issued_gross: 0, redeemed_count: 0, redeemed_gross: 0 },
+      open: { native_paid: { opening: 0, sold: 0, redeemed: 0, other: 0, expired: 0, closing: 0, cards: 0, accounting: true, difference: 0 }, native_complimentary: { opening: 0, sold: 0, redeemed: 0, other: 0, expired: 0, closing: 0, cards: 0, accounting: false, difference: 0 }, johku: { opening: 0, sold: 0, redeemed: 0, other: 0, expired: 0, closing: 0, cards: 0, accounting: false, difference: 0 }, johku_accounting: false },
     };
     if (daily) rep.receipts = receipts;
     else rep.by_day = by(receipts, (x) => dayOf(x.issued_at), (a, x) => ({ date: dayOf(x.issued_at), receipts: (a?.receipts || 0) + (x.kind === 'receipt' ? 1 : 0), gross: round2((a?.gross || 0) + (x.kind === 'receipt' ? x.gross : 0)), vat: round2((a?.vat || 0) + x.vat), refunds: round2((a?.refunds || 0) + (x.kind === 'refund_receipt' ? x.gross : 0)) })).sort((a, b) => a.date.localeCompare(b.date));
@@ -336,7 +341,15 @@ const PREPAID_ON = '2026-10-15';
       rows.push(['tasmaytys', rec.rounding_code || 'alv_pyoristys', '', '', '', csvMoney(rec.vat_rounding), ''].join(';'));
       return csvFile(`yhteenveto_${a.p_from}_${a.p_to}.csv`, 'osio;nimi;alv_%;maara;netto;alv_eur;brutto', rows);
     }
-    if (kind === 'vat') return csvFile(`kuitit_vat_${a.p_from}_${a.p_to}.csv`, 'pvm;kuitti;tilaus;tyyppi;maksutapa;alv_prosentti;netto;alv_eur;brutto', []);
+    if (kind === 'methods') {
+      const rep = buildReport(a.p_from, a.p_to, 'range');
+      const rows = rep.by_method.map((m) => [csvQ(m.label || m.method), csvNum(m.payments), csvMoney(m.gross), csvMoney(m.refunds), csvMoney(m.gross + m.refunds)].join(';'));
+      rows.push(['tasmaytys', '', '', '', csvMoney(rep.reconciliation.methods_net)].join(';'));
+      rows.push(['myynti_hyvitysten_jalkeen', '', '', '', csvMoney(rep.reconciliation.payments_gross)].join(';'));
+      rows.push(['erotus', '', '', '', csvMoney(rep.reconciliation.methods_difference)].join(';'));
+      return csvFile(`maksutavat_${a.p_from}_${a.p_to}.csv`, 'maksutapa;maksuja;myynti_brutto;hyvitykset;netto', rows);
+    }
+    if (kind === 'vat') return csvFile(`myynti_vat_${a.p_from}_${a.p_to}.csv`, 'pvm;tosite;tilaus;tyyppi;maksutapa;alv_prosentti;netto;alv_eur;brutto', []);
     const rows = linesBetween(a.p_from, a.p_to).map((l) => [l.receipt_no, dmy(l.date), '', csvQ(l.product), l.kind === 'refund_receipt' ? -Math.abs(l.quantity) : l.quantity, csvMoney(l.net), csvNum(l.vat_rate), csvMoney(l.vat), csvMoney(l.gross), METHOD_LABELS[l.method] || l.method, 'maksettu', l.kind === 'refund_receipt' ? 'hyvitys' : 'myynti'].join(';'));
     if (a.p_from <= PREPAID_ON && PREPAID_ON <= a.p_to) rows.push(['K-INFO', dmy(PREPAID_ON), 'Aino A', csvQ('Yleinen saunavuoro'), 2, csvMoney(28.69), csvNum(25.5), csvMoney(7.31), csvMoney(36), 'Lahjakortti', 'maksettu', 'lunastus'].join(';'));
     return csvFile(`tapahtumat_${a.p_from}_${a.p_to}.csv`, 'tosite;pvm;asiakas;tuote;maara;netto;alv_%;alv_eur;brutto;maksutapa;tila;laji', rows);

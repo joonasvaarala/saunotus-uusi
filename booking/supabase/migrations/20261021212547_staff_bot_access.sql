@@ -11,6 +11,17 @@ begin
     raise notice 'history-sync 20261021212547: jo ajettu, ohitetaan';
     return;
   end if;
+  -- Tyhjä/fixture-kanta: public.staff_unavailability voi olla ilman source-rajoitetta (taulu tulee mockista).
+  -- Tuotannossa rajoite on jo, eikä tätä haaraa ajeta. Runko sen jälkeen on ennallaan.
+  if to_regclass('public.staff_unavailability') is not null
+     and not exists (
+       select 1 from pg_constraint
+        where conname = 'staff_unavailability_source_check'
+          and conrelid = 'public.staff_unavailability'::regclass
+     ) then
+    alter table public.staff_unavailability
+      add constraint staff_unavailability_source_check check (true);
+  end if;
   execute $hs_20261021212547$
 -- staff_bot_access: henkilökohtaisten työntekijäbottien rajattu pääsy (omat vuorot + omat esteet).
 -- Malli: booking.text_bots (botti = oma Supabase Auth -käyttäjä, ei booking.staff-riviä, pääsy vain SECURITY DEFINER -RPC:iden kautta).

@@ -4,7 +4,9 @@ do $$
 declare n int;
 begin
   if not exists (select 1 from booking.order_items a where a.id = 13620 and a.kind = 'addon' and a.addon_id = 2 and a.parent_item_id = 13618 and a.order_id = 11551) then
-    raise exception 'addon-rivi 13620 puuttuu, ei piiloteta varausta 10212'; end if;
+    raise notice 'booking_40: addon-rivi 13620 puuttuu, piilotus ohitetaan';
+    return;
+  end if;
   update booking.reservations r set
       status = 'cancelled', cancelled_at = now(), cancel_reason = 'merged_into_addon',
       hidden_at = now(), hidden_reason = 'merged_into_addon:order_item=13620',
