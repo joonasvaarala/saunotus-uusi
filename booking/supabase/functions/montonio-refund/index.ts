@@ -6,8 +6,12 @@ import { handle } from "./handler.ts";
 async function authorize(req: Request): Promise<boolean> {
   return authorizeServiceRoleOrPermission(req.headers.get("authorization"), Deno.env.get("SUPABASE_SERVICE_ROLE_KEY"), async (auth) => {
     const userClient = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_ANON_KEY")!, { global: { headers: { Authorization: auth } }, auth: { persistSession: false } });
-    const { data, error } = await userClient.schema("booking").rpc("has_permission", { p_permission: "payments.refund" });
-    return !error && data === true;
+    const refund = await userClient.schema("booking").rpc("has_permission", { p_permission: "payments.refund" });
+    if (!refund.error && refund.data === true) return true;
+    const manage = await userClient.schema("booking").rpc("has_permission", { p_permission: "bookings.manage" });
+    if (!manage.error && manage.data === true) return true;
+    const adm = await userClient.schema("booking").rpc("is_admin");
+    return !adm.error && adm.data === true;
   });
 }
 
