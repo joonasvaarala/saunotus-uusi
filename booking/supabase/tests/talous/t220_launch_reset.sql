@@ -23,6 +23,7 @@ declare
   inv bigint; v_before int; v_johku int; v_settings int; v_products int;
   dry jsonb; applied jsonb; verify jsonb;
   log text; np int; nf int; v_seq text; v_next bigint;
+  v_dc bigint; v_dc_used int; v_req bigint;
 begin
   insert into booking.customers(name, email) values ('T220 Natiivi', 't220-native@example.test') returning id into cu;
   insert into booking.orders(customer_id, status, payment_status, total_gross, source_channel, locale)
@@ -61,12 +62,28 @@ begin
   values ('orders', o::text, 'INSERT', jsonb_build_object('order_id', o));
 
   insert into booking.orders(status, payment_status, total_gross, source_channel, locale, external_source, external_id, johku_order_no, order_no)
-  values ('confirmed', 'paid', 15, 'johku_import', 'fi', 'johku', 't220-johku', 770220, 770220);
+  values ('confirmed', 'paid', 15, 'johku_import', 'fi', 'johku', 't220-johku', 14220, 14220);
   insert into booking.gift_cards(code, issuer, initial_amount, balance, status, source, accounting_origin, vat_treatment)
   values ('T220JOHKU001', 'johku', 15, 15, 'active', 'johku', 'johku', 'at_sale')
   returning id into gj;
   insert into booking.gift_card_ledger(gift_card_id, delta, balance_after, reason)
   values (gj, 15, 15, 'johku_purchase');
+
+  -- Tapaukset, jotka vanha skripti jätti: lahjakorttiviite tilausrivillä, upsell, ilmoitukset,
+  -- tilaukseen kuulumaton sähköposti, alennuskoodin käyttökerta ja audit-rivit poistetuista tilauksista.
+  insert into booking.order_items(order_id, product_name, unit_price_gross, line_total_gross, vat_rate, gift_card_id)
+  values (o, 'T220 lahjakortilla', 40, 40, 25.5, g);
+  select id, used_count into v_dc, v_dc_used from booking.discount_codes order by id limit 1;
+  if v_dc is not null then
+    update booking.orders set discount_code_id = v_dc where id = o;
+    update booking.discount_codes set used_count = used_count + 1 where id = v_dc;
+  end if;
+  insert into booking.order_requests(order_id, kind) values (o, 'cancel') returning id into v_req;
+  insert into booking.notifications_outbox(topic, ref_table, ref_id, dedupe_key) values ('cancel_request', 'order_requests', v_req, 't220:' || v_req);
+  insert into booking.email_outbox(kind, dedupe_key, payload) values ('business_quote_ack', 't220-quote', '{}'::jsonb);
+  insert into booking.upsell_events(session_id, source, product_id, event, order_id)
+  values (gen_random_uuid(), 'checkout', (select min(id) from kb.products), 'added', o);
+  insert into booking.audit_log(table_name, row_pk, action, old_data) values ('orders', '999999220', 'DELETE', '{"order_id":999999220}');
 
   select count(*) into v_johku from booking.orders where external_source = 'johku' or source_channel = 'johku_import' or johku_order_no is not null;
   select count(*) into v_settings from booking.settings;
@@ -89,7 +106,7 @@ begin
   perform pg_temp.ck((select count(*) from booking.gift_cards where id = g) = 0, 'B6 natiivi lahjakortti poissa');
   perform pg_temp.ck((select count(*) from booking.gift_cards where id = gj) = 1, 'B7 Johku-lahjakortti tallella');
   perform pg_temp.ck((select count(*) from booking.gift_card_ledger where gift_card_id = gj) = 1, 'B8 Johku-kirjaus tallella');
-  perform pg_temp.ck((select count(*) from booking.orders where johku_order_no = 770220) = 1, 'B9 Johku-tilaus tallella');
+  perform pg_temp.ck((select count(*) from booking.orders where johku_order_no = 14220) = 1, 'B9 Johku-tilaus tallella');
   perform pg_temp.ck((select count(*) from booking.settings) = v_settings, 'B10 asetukset tallella');
   perform pg_temp.ck((select count(*) from kb.products) = v_products, 'B11 tuotteet tallella');
   perform pg_temp.ck(coalesce((select max(last_seq) from booking.receipt_counters), 0) = coalesce((select max(seq) from booking.receipts), 0), 'B12 kuittisarja = jäljellä oleva max');
@@ -105,7 +122,14 @@ begin
 
   v_seq := pg_get_serial_sequence('booking.orders', 'order_no');
   execute format('select case when is_called then last_value + 1 else last_value end from %s', v_seq) into v_next;
-  perform pg_temp.ck(v_next = greatest(10001, coalesce((select max(order_no) from booking.orders), 0) + 1), 'B19 seuraava tilausnumero: ' || coalesce(v_next::text, 'null'));
+  perform pg_temp.ck(v_next = 15000, 'B19 seuraava tilausnumero 15000: ' || coalesce(v_next::text, 'null'));
+  perform pg_temp.ck((verify ->> 'next_order_no')::bigint = 15000, 'B20 verify: seuraava tilausnumero 15000');
+  perform pg_temp.ck((select count(*) from booking.email_outbox where order_id is null or order_id not in (select id from booking.orders)) = 0, 'B21 tilaukseen kuulumattomat sähköpostit poissa');
+  perform pg_temp.ck((select count(*) from booking.upsell_events) = 0, 'B22 upsell-tapahtumat poissa');
+  perform pg_temp.ck((select count(*) from booking.notifications_outbox where ref_table = 'order_requests' and ref_id = v_req) = 0, 'B23 ilmoitus poistetusta pyynnöstä poissa');
+  perform pg_temp.ck((verify ->> 'discount_codes_wrong')::int = 0 and (v_dc is null or (select used_count from booking.discount_codes where id = v_dc) <= v_dc_used), 'B24 alennuskoodin käyttökerrat laskettu uudelleen');
+  perform pg_temp.ck(not exists (select 1 from booking.audit_log where row_pk = '999999220'), 'B25 audit poistetusta tilauksesta poissa');
+  perform pg_temp.ck((verify -> 'not_zero') = '{}'::jsonb, 'B26 verify: kaikki natiivit taulut nollassa: ' || coalesce(verify ->> 'not_zero', 'null'));
 
   log := current_setting('t220.log', true);
   np := (select count(*) from regexp_split_to_table(log, E'\n') l where l like 'P %');

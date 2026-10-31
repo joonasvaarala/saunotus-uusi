@@ -28,16 +28,29 @@ Ei palvelinkoodia, ei build-vaihetta selaimen koodille, ei kirjastoriippuvuuksia
 
 Uusi kirjanpito alkaa puhtaalta pöydältä. Skripti `scripts/reset_before_launch.sql` **ei ole migraatio** eikä sitä ajeta automaattisesti. Ylläpitäjä ajaa sen itse tietokannan omistajana, yhdessä transaktiossa.
 
-Tiedoston ajo on kuivaharjoitus: se luo funktiot `booking.cutover_reset(boolean)` ja `booking.cutover_reset_verify()` ja tulostaa poistettavat rivit tauluittain. Poisto:
+Sääntö: kaikki uudessa järjestelmässä luotu (varaukset, tilaukset, asiakkaat, maksut, kuitit, laskut, lahjakortit, sähköpostit, ilmoitukset, upsell-, jono- ja analytiikkarivit sekä niiden audit-rivit) on testiä. Nollauksen jälkeen jäljellä on vain Johku-peräinen data (`external_source='johku'`, `johku_order_no` tai `source_channel='johku_import'`) sekä tuotteet, asetukset, henkilökunta, poikkeuspäivät, tekstit, alennuskoodit ja Johku-lahjakortit.
+
+Tiedoston ajo on kuivaharjoitus: se luo funktiot `booking.cutover_reset(boolean)`, `booking.cutover_reset_verify()` ja `booking._cutover_storage_orphans()` ja tulostaa poistettavat rivit tauluittain sekä poistettavat PDF-tiedostot (`storage_objects`). Poisto:
 
 ```sql
 begin;
+select booking.cutover_reset(true);
 select booking.cutover_reset(false);
-select booking.cutover_reset_verify();
+select booking.cutover_reset_verify();   -- ok = true
 commit;
 ```
 
-`verify` kertoo, että natiivi myynti on nolla sekä kassaperusteisessa että suoriteperusteisessa raportissa jaksolla 2000–2099. Johku-tuonti, tuotteet, hinnat, asetukset, henkilökunta, työvuorot, tekstit ja tapahtumien määritykset säilyvät. Kuitti-, lasku- ja hyvityslaskusarjat (K, H, L ja muut) nollataan. Seuraava tilausnumero on 10001, tai suurin säilytetty Johku-tilausnumero + 1, jos se on suurempi. Muuttumattomien taulujen triggerit (`receipts_guard`, `invoices_lock`, `invoice_lines_lock`, `gift_card_ledger_append_only`) otetaan pois päältä vain poiston ajaksi ja kytketään takaisin samassa transaktiossa.
+Nollaus:
+
+* poistaa natiivit rivit kaikista tapahtumatauluista, myös tilaukseen kuulumattomat sähköpostit, `notifications_outbox`-rivit poistettuihin riveihin, kaikki `upsell_events`, jono-, tarjouspyyntö-, rajoitin- ja analytiikkarivit sekä poistettujen rivien `audit_log`-rivit (niissä on henkilötietoja)
+* irrottaa `order_items.gift_card_id`-viitteet ennen natiivien lahjakorttien poistoa ja palauttaa Johku-lahjakorttien saldot testikäytöistä
+* laskee alennuskoodien `used_count` uudelleen jäljelle jäävistä käytöistä
+* nollaa kuitti- ja laskusarjat (K, H, L ja muut): ensimmäinen uusi numero on 1
+* asettaa tilausnumerosarjan niin, että **ensimmäinen uusi tilaus saa numeron 15000** (Johku-numerot ovat alle 15000; nollaus keskeytyy, jos säilyvä tilausnumero on ≥ 15000)
+
+`verify` tarkistaa, että jokaisessa tapahtumataulussa on nolla natiivia riviä (`left`, `not_zero`), sarjat ovat oikein, alennuskoodien käyttökerrat täsmäävät, seuraava tilausnumero on 15000 ja natiivi myynti on nolla sekä kassa- että suoriteperusteisessa raportissa. Muuttumattomien taulujen triggerit (`receipts_guard`, `invoices_lock`, `invoice_lines_lock`, `gift_card_ledger_append_only`) otetaan pois päältä vain poiston ajaksi ja kytketään takaisin samassa transaktiossa.
+
+**PDF-tiedostot.** SQL ei voi poistaa Storage-tiedostoja (`storage.protect_delete`). Testikuittien ja -laskujen PDF:t poistetaan nollauksen jälkeen skriptillä `scripts/cutover_storage_cleanup.mjs` (kuivaharjoitus oletuksena, `--apply` poistaa) tai Supabase Dashboardista. Tämä on pakollista ennen ensimmäistä oikeaa laskua: `invoice-pdf` käyttää välimuistina tiedostoa `<laskunumero>.pdf`, joten vanha testi-PDF `L000001.pdf` näytettäisiin muuten uuden laskun L000001 PDF:nä. `verify ->> 'storage_ok'` on `true`, kun orpoja tiedostoja ei ole.
 
 ## Arkkitehtuuri
 
@@ -96,7 +109,7 @@ erDiagram
 Keskeiset taulut (kaikissa RLS päällä; tarkka rakenne migraatioissa 02–03):
 
 * `customers` – yhteystiedot, `marketing_consent` + `_at` + `_source` + `_text_version`, `unsubscribe_token`, `external_source/external_id`, `anonymized_at` (GDPR).
-* `orders` – `order_no` (alkaa 10001), `public_token` (vahvistussivun salainen linkki), `status`, `payment_status`, `total_gross`, `source_channel` (`web|admin|phone|email|walk_in|johku_import|other`), `external_source='johku'`, `external_id`, `johku_order_no`.
+* `orders` – `order_no` (uudet tilaukset alkaen 15000, Johku-tilaukset omilla numeroillaan), `public_token` (vahvistussivun salainen linkki), `status`, `payment_status`, `total_gross`, `source_channel` (`web|admin|phone|email|walk_in|johku_import|other`), `external_source='johku'`, `external_id`, `johku_order_no`.
 * `order_items` – rivikohtainen `vat_rate` (24 / 25.5 / 14 / 13.5 / 10 / 0), generoidut `line_net` / `line_vat`.
 * `reservations` – `space_id`, `mode` (`shared`/`exclusive`), `starts_at/ends_at`, generoitu `during`, `persons`, `pool_ids` (kapasiteettipoolit, snapshot), `status`, `hold_expires_at`, `rule_id`.
 * `payments` – `provider`, `provider_ref`, `status`, `method`, `amount`, `link_url`, `raw`.
