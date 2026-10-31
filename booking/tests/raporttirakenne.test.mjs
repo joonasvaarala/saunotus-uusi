@@ -106,11 +106,12 @@ function pdfStrings(bytes) {
     try { parts.push(inflateSync(slice).toString('latin1')); } catch { parts.push(slice.toString('latin1')); }
     i = end + 9;
   }
-  return parts.join('\n');
+  // pdf-lib kirjoittaa tekstit heksana (<...> Tj): puretaan ne luettaviksi.
+  return parts.join('\n').replace(/<([0-9A-Fa-f\s]+)>/g, (_, h) => Buffer.from(h.replace(/\s+/g, ''), 'hex').toString('latin1'));
 }
 
 test('myynti-PDF ei sisällä maksutapoja eikä Johkua', () => {
-  const deno = spawnSync('deno', ['eval', '--no-lock', `
+  const deno = spawnSync('deno', ['eval', '--no-lock', '--node-modules-dir=none', `
     import { buildReportPdf } from ${JSON.stringify(join(root, 'supabase/functions/report-pdf/render.ts'))};
     const rep = { period: { from: '2026-04-01', to: '2026-04-30' }, totals: { receipts: 1, refund_receipts: 0, gross: 100, refunds_gross: 0, gross_after_refunds: 100, vat_after_refunds: 20.32, net_ex_vat_after_refunds: 79.68 }, by_product: [{ product: 'Sauna', quantity: 1, net: 79.68, gross: 100, vat: 20.32, rate: 25.5 }], refunds_by_product: [], by_vat_sales: [{ rate: 25.5, net: 79.68, vat: 20.32, gross: 100 }], by_vat_refunds: [], by_vat: [{ rate: 25.5, net: 79.68, vat: 20.32, gross: 100 }], gift_card_period: { sold: { lines: [] } }, reconciliation: { sales_gross: 100, refunds_gross: 0, product_gross: 100, vat_rounding: 0 }, by_method: [{ method: 'card', label: 'Kortti', gross: 100, refunds: 0 }] };
     const bytes = await buildReportPdf(rep, 'daily', 'fi');

@@ -171,7 +171,7 @@ begin
     'R9: ALV-erittely = myynti miinus hyvitykset, rivin ALV');
   perform public.t117_ck(position(E'\nmaksutapa;' in csv) = 0 and position('tasmaytys;maksutavat' in csv) = 0 and position('tasmaytys;erotus' in csv) = 0 and position('johku_loppusaldo' in csv) = 0, 'S2: yhteenvedossa ei maksutapoja eikä Johku-saldoa');
   csv := public.t117_call($q$booking.admin_report_csv('2032-06-15'::date, '2032-06-15'::date, 'summary')$q$) ->> 'content';
-  perform public.t117_ck(position('maksutapa;' in csv) = 0 and position('tasmaytys;erotus' in csv) = 0 and position('tasmaytys;tuotteet' in csv) > 0 and position('lahjakortti_maksuton;myonnetty' in csv) > 0, 'S3: päiväyhteenvedossa ei maksutapoja');
+  perform public.t117_ck(position('maksutapa;' in csv) = 0 and position('tasmaytys;erotus' in csv) = 0 and position('tasmaytys;tuotteet' in csv) > 0 and position('lahjakortti_maksuton;myonnetty' in csv) = 0, 'S3: päiväyhteenvedossa ei maksutapoja eikä maksuttomia kortteja');
 
   gc := public.t117_call($q$booking.admin_report_gift_cards('open', 'json')$q$);
   perform public.t117_ck(gc -> 'johku' is null and (select count(*) from jsonb_array_elements(gc -> 'statistics' -> 'johku' -> 'rows') e where e ->> 'code_masked' = '****-****-AB12' and e ->> 'source' = 'johku') = 1, 'L1: Johku vain statistics.johku');

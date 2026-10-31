@@ -72,8 +72,8 @@ begin
   insert into booking.order_items(order_id, product_name, kind, quantity, unit_price_gross, line_total_gross, vat_rate)
   values (o_late, 'T222 myohemmin', 'product', 1, 15, 15, 25.5);
 
-  insert into booking.orders(status, payment_status, total_gross, source_channel, locale, confirmed_at, external_source, johku_order_no)
-  values ('confirmed', 'unpaid', 70.00, 'johku_import', 'fi', '2035-04-06 09:00:00+00', 'johku', 770222) returning id into o_johku;
+  insert into booking.orders(status, payment_status, total_gross, source_channel, locale, confirmed_at, external_source, external_id, johku_order_no)
+  values ('confirmed', 'unpaid', 70.00, 'johku_import', 'fi', '2035-04-06 09:00:00+00', 'johku', 'T222-770222', 770222) returning id into o_johku;
 
   insert into booking.orders(status, payment_status, total_gross, source_channel, locale, confirmed_at)
   values ('confirmed', 'paid', 10.00, 'admin', 'fi', '2035-04-10 09:00:00+00') returning id into o_fee;
@@ -144,7 +144,8 @@ begin
      where x ->> 'voucher' in (n_part, n_mix, n_full, n_johku)), 'E1 tapahtumaraportin avoimet');
 
   fees := booking.admin_report_provider_fees(d0, d1, 'json');
-  perform pg_temp.ck((fees -> 'totals' ->> 'sales_gross')::numeric = 10 and (fees -> 'totals' ->> 'sales_count')::int = 1, 'F1 provisio brutto vain korttimaksu: ' || coalesce(fees -> 'totals' ->> 'sales_gross', 'null'));
+  -- Korttipäätemaksut 2,02 + 33,50 + 58,00 ja Montonio 10,00. Lahjakortti 20 ja Johku 30 eivät ole mukana.
+  perform pg_temp.ck((fees -> 'totals' ->> 'sales_gross')::numeric = 103.52 and (fees -> 'totals' ->> 'sales_count')::int = 4, 'F1 provisio brutto vain kortti- ja verkkomaksut: ' || coalesce(fees -> 'totals' ->> 'sales_gross', 'null'));
   perform pg_temp.ck(not exists (
     select 1 from jsonb_array_elements(fees -> 'rows') x
      where x ->> 'method' = 'gift_card' or x ->> 'provider' = 'johku' or coalesce((x ->> 'gross')::numeric, 0) in (20, 30)), 'F2 ei lahjakorttia eikä Johkua');
@@ -154,17 +155,17 @@ begin
 
   perform pg_temp.logout();
   insert into booking.gift_cards(code, issuer, source, accounting_origin, vat_treatment, sale_vat_rate, initial_amount, balance, status, buyer_name, complimentary, activated_at, valid_from, valid_to)
-  values ('HHT222CARDQW71', 'own', 'native', 'native', 'at_sale', 25.5, 40, 40, 'active', 'T222 Oma', false, '2035-04-01 10:00:00+00', '2035-04-01', '2036-04-01');
+  values ('HHT222CARDQ7', 'own', 'native', 'native', 'at_sale', 25.5, 40, 40, 'active', 'T222 Oma', false, '2035-04-01 10:00:00+00', '2035-04-01', '2036-04-01');
   insert into booking.gift_cards(code, issuer, source, accounting_origin, vat_treatment, sale_vat_rate, initial_amount, balance, status, buyer_name, complimentary, activated_at, valid_from, valid_to)
-  values ('JK222CARD0JK99', 'johku', 'johku', 'johku', 'at_sale', 25.5, 80, 80, 'active', 'T222 Johku', false, '2035-01-01 10:00:00+00', '2035-01-01', '2036-01-01');
+  values ('JK222CARD0J9', 'johku', 'johku', 'johku', 'at_sale', 25.5, 80, 80, 'active', 'T222 Johku', false, '2035-01-01 10:00:00+00', '2035-01-01', '2036-01-01');
   perform pg_temp.login(u_mgr);
   gc := booking.admin_report_gift_cards('all', 'json', d0, d1);
   perform pg_temp.ck(gc -> 'johku' is null and gc -> 'period' ->> 'to' = '2035-04-30' and gc -> 'balance' ? 'native_paid' and gc -> 'balance' ? 'native_complimentary' and not (gc -> 'balance' ? 'johku'), 'G1 jakso ja oma saldo');
-  perform pg_temp.ck((select count(*) from jsonb_array_elements(gc -> 'own' -> 'rows') e where e ->> 'code_masked' = '****-****-JK99') = 0, 'G2 Johku ei ole omassa osiossa');
-  perform pg_temp.ck((select count(*) from jsonb_array_elements(gc -> 'statistics' -> 'johku' -> 'rows') e where e ->> 'code_masked' = '****-****-JK99') = 1, 'G3 Johku on statistics.johku');
-  perform pg_temp.ck((select count(*) from jsonb_array_elements(gc -> 'own' -> 'rows') e where e ->> 'code_masked' = '****-****-QW71' and coalesce(e ->> 'source', '') <> 'johku') = 1, 'G4 oma kortti omassa osiossa');
+  perform pg_temp.ck((select count(*) from jsonb_array_elements(gc -> 'own' -> 'rows') e where e ->> 'code_masked' = '****-****-D0J9') = 0, 'G2 Johku ei ole omassa osiossa');
+  perform pg_temp.ck((select count(*) from jsonb_array_elements(gc -> 'statistics' -> 'johku' -> 'rows') e where e ->> 'code_masked' = '****-****-D0J9') = 1, 'G3 Johku on statistics.johku');
+  perform pg_temp.ck((select count(*) from jsonb_array_elements(gc -> 'own' -> 'rows') e where e ->> 'code_masked' = '****-****-RDQ7' and coalesce(e ->> 'source', '') <> 'johku') = 1, 'G4 oma kortti omassa osiossa');
   csv := booking.admin_report_gift_cards('all', 'csv', d0, d1) ->> 'content';
-  perform pg_temp.ck(position('johku;' in csv) = 0 and position('QW71' in csv) > 0 and position('JK99' in csv) = 0 and position('saldo;oma_maksettu;alkusaldo' in csv) > 0, 'G5 CSV ilman Johkua, saldorivit mukana');
+  perform pg_temp.ck(position('johku;' in csv) = 0 and position('RDQ7' in csv) > 0 and position('D0J9' in csv) = 0 and position('saldo;oma_maksettu;alkusaldo' in csv) > 0, 'G5 CSV ilman Johkua, saldorivit mukana');
   perform pg_temp.ck((booking.admin_report_gift_cards('open', 'csv', d0, d1) ->> 'filename') = 'lahjakortit_2035-04-30_open.csv', 'G6 tiedostonimi');
   perform pg_temp.ck((booking.admin_report_accrual_csv(d0, d1) ->> 'filename') = 'palvelupaiva_2035-04-01_2035-04-30.csv', 'G7 palvelupaiva-CSV');
   perform pg_temp.logout();

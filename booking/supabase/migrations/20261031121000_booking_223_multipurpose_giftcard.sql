@@ -246,16 +246,33 @@ begin
   return null;
 end $function$;
 
-create or replace function booking._on_payment_paid(p_payment_id bigint) returns void language plpgsql security definer set search_path = '' as $$
-declare v_id bigint; v_order bigint;
+CREATE OR REPLACE FUNCTION booking._on_payment_paid(p_payment_id bigint)
+ RETURNS void
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO ''
+AS $function$
+declare v_id bigint; v_order bigint; v_method text;
 begin
+  -- booking_224: lasku on myyntitosite, maksuksi merkitseminen ei luo kassakuittia.
   if exists (select 1 from booking.payments where id = p_payment_id and method = 'invoice') then return; end if;
   v_id := booking._issue_receipt(p_payment_id);
   if v_id is not null then
-    select order_id into v_order from booking.payments where id = p_payment_id;
+    select order_id, method into v_order, v_method from booking.payments where id = p_payment_id;
+    -- booking_174: kumppanilahjakortti → kuitti vain kirjanpitoon, ei kuittisähköpostia
+    if booking._is_partner_method(v_method) then return; end if;
+    -- booking_176: kumppanilahjakortin erotuksen maksu → kuitti näkyy tilaussivulla, ei kuittisähköpostia. Seuranta tilauksen/pyynnön mukaan: myös korvaava linkki
+    -- (uusi payments.id) tai muu tapa maksaa erotus (tilaussivu) erotuslinkin luonnin jälkeen, kun lunastettu pyyntö on yhä voimassa.
+    if exists (select 1 from booking.vc_difference_payments d
+                where d.payment_id = p_payment_id
+                   or (d.order_id = v_order
+                       and d.created_at <= (select pp.created_at from booking.payments pp where pp.id = p_payment_id)
+                       and (d.claim_id is null or exists (select 1 from booking.voucher_claims vc where vc.id = d.claim_id and vc.status = 'redeemed')))) then
+      return;
+    end if;
     perform booking._enqueue_email('receipt', v_order, v_id, p_payment_id, 'receipt:' || v_id);
   end if;
-end $$;
+end $function$;
 
 create or replace function booking._on_refund_done(p_refund_id bigint) returns void language plpgsql security definer set search_path = '' as $$
 declare v_id bigint; v_order bigint; v_pay bigint;

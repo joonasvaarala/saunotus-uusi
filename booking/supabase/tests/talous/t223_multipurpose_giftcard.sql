@@ -59,7 +59,7 @@ begin
   perform pg_temp.ck(res ->> 'err' is null and res ->> 'accounted' = 'true' and res ->> 'receipt_no' like 'K-%', 'R1 alennettu kanta lunastus on K-kuitti: ' || coalesce(res ->> 'err', res ->> 'receipt_no', 'null'));
   res := pg_temp.call(format($q$booking.admin_redeem_gift_card(%s, %L, 36, 'sauna')$q$, o_mix, code));
   perform pg_temp.ck(res ->> 'err' is null and res ->> 'accounted' = 'true', 'R2 yleinen kanta lunastus on myynti: ' || coalesce(res ->> 'err', res ->> 'receipt_no', 'null'));
-  res := pg_temp.call($q$booking.admin_create_gift_card('open', 25, 1, null, null, null, null, null, null, null, 'fi', 't223 maksuton')$q$);
+  res := pg_temp.call($q$booking.admin_create_gift_card('open', 50, 1, null, null, null, null, null, null, null, 'fi', 't223 maksuton')$q$);
   perform pg_temp.logout();
   perform pg_temp.ck(res ->> 'err' is null and (select count(*) from booking.receipts r where r.order_id = (res ->> 'order_id')::bigint) = 0, 'C1 maksuton kortti ei tee kirjanpitokuittia');
   perform pg_temp.ck(position('partner_voucher_accounted' in pg_get_functiondef('booking._acct_excluded(bigint,bigint)'::regprocedure)) > 0, 'E1 Elämyslahjojen kirjauspolku säilyy');

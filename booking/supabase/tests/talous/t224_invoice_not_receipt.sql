@@ -43,7 +43,9 @@ begin
   inv := booking.admin_send_invoice((select id from booking.invoices where order_id = o_id and kind = 'debit'), true, false);
   perform pg_temp.logout();
   perform pg_temp.ck(inv ->> 'status' = 'sent' and inv ->> 'invoice_no' is not null, 'S1 lasku lähetetty: ' || coalesce(inv ->> 'err', inv ->> 'invoice_no', 'null'));
+  alter table booking.invoices disable trigger invoices_lock;
   update booking.invoices set invoice_date = '2036-04-10', due_date = '2036-05-10' where id = (inv ->> 'id')::bigint;
+  alter table booking.invoices enable trigger invoices_lock;
   gross := (select total_gross from booking.invoices where id = (inv ->> 'id')::bigint);
   perform pg_temp.ck(gross = 303.50, 'S2 brutto 303,50');
   perform pg_temp.ck((select procountor_invoice_id is null and procountor_export_status is null from booking.invoices where id = (inv ->> 'id')::bigint), 'S3 vientikentät tyhjiä');
@@ -56,7 +58,9 @@ begin
   perform pg_temp.ck(inv ->> 'status' = 'paid', 'P1 tila maksettu');
   perform pg_temp.ck(before_n = after_n, 'P2 ei K-kuittia');
   perform pg_temp.ck(exists (select 1 from booking.audit_log a where a.action = 'INVOICE_MARK_PAID' and a.row_pk = inv ->> 'id'), 'P3 kirjausketju');
+  alter table booking.invoices disable trigger invoices_lock;
   update booking.invoices set paid_at = '2036-05-02 12:00:00+00' where id = (inv ->> 'id')::bigint;
+  alter table booking.invoices enable trigger invoices_lock;
 
   perform pg_temp.login(u);
   rep := booking.admin_report_range('2036-04-01', '2036-04-30');
@@ -69,7 +73,9 @@ begin
   credit := booking.admin_credit_invoice((inv ->> 'id')::bigint);
   credit := booking.admin_send_invoice((credit ->> 'id')::bigint, true, false);
   perform pg_temp.logout();
+  alter table booking.invoices disable trigger invoices_lock;
   update booking.invoices set invoice_date = '2036-04-20', due_date = '2036-04-20' where id = (credit ->> 'id')::bigint;
+  alter table booking.invoices enable trigger invoices_lock;
   perform pg_temp.login(u);
   rep := booking.admin_report_invoices('2036-04-01', '2036-04-30', 'json');
   perform pg_temp.logout();
