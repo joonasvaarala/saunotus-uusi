@@ -9,6 +9,8 @@ import { refreshLiveCatalog } from '../src/catalog-live.mjs';
 import { refreshProductImages } from '../src/product-images.mjs';
 import { applyContentTexts } from '../src/content-texts.mjs';
 import { validLegacyRedirects, redirectHtml } from '../src/seo-enhance.mjs';
+import { imageTransformsOn } from '../booking/shop/src/product-image.js';
+import { assertNoRenderImageUrls } from './check-image-urls.mjs';
 
 const OUT = process.env.DIST || 'dist';
 rmSync(OUT, { recursive: true, force: true });
@@ -60,4 +62,5 @@ const xe = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace
 const articleUrls = articles.sitemap.map((u) => `<url><loc>${xe(u.loc)}</loc><lastmod>${u.lastmod}</lastmod>${u.alternates.map((a) => `<xhtml:link rel="alternate" hreflang="${xe(a.hreflang)}" href="${xe(a.href)}"/>`).join('')}</url>`);
 write('/sitemap.xml', `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n${[...urls.map((u) => `<url><loc>${abs(u.path)}</loc><lastmod>${today}</lastmod>${alt(u.key)}</url>`), ...articleUrls].join('\n')}\n</urlset>\n`);
 write('/robots.txt', isTest ? 'User-agent: *\nDisallow: /\n' : `User-agent: *\nAllow: /\n\nSitemap: ${SITE_URL}/sitemap.xml\n`);
+if (!imageTransformsOn()) assertNoRenderImageUrls(OUT);
 console.log(`build ok: ${urls.length + 1 + articles.pages.length} sivua (sisältöosio ${articles.pages.length}, vanhojen osoitteiden ohjaussivuja ${legacy.length}), ympäristö=${isTest ? 'test (noindex)' : 'prod'}, ${SITE_URL}`);

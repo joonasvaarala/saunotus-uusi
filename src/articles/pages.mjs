@@ -5,6 +5,7 @@ import { e, href, abs, site, pageHref, isTest } from '../lib.mjs';
 import * as R from '../render.mjs';
 import { cfg, t, label, listPath, articlePath, tagPath, listPagePath, articleUrl, tagSlug, dateFmt, isoDay, LANGS } from './config.mjs';
 import { renderMarkdown } from './markdown.mjs';
+import { imageTransformsOn, publicImageUrl } from '../../booking/shop/src/product-image.js';
 
 const other = (l) => (l === 'fi' ? 'en' : 'fi');
 const siteName = (lang) => site.ui[lang].siteName;
@@ -24,7 +25,7 @@ export function imgHtml(im, variants, { sizes = '100vw', eager = false } = {}) {
     webpParts.push(webpParts.length ? `${webp} ${im.width}w` : webp);
     return `<picture><source type="image/webp" srcset="${webpParts.join(', ')}" sizes="${sizes}"><img src="${jpg}" ${attrs}></picture>`;
   }
-  if (!v) return `<img src="${e(im.url)}" ${attrs}>`;
+  if (!v) return `<img src="${e(publicImageUrl(im.url))}" ${attrs}>`;
   const set = (ext) => v.widths.map((w) => `${href(`/img/articles/${v.id}-${w}.${ext}`)} ${w}w`).join(', ');
   const last = v.widths[v.widths.length - 1];
   return `<picture><source type="image/avif" srcset="${set('avif')}" sizes="${sizes}"><source type="image/webp" srcset="${set('webp')}" sizes="${sizes}"><img src="${href(`/img/articles/${v.id}-${last}.webp`)}" ${attrs}></picture>`;
@@ -187,6 +188,14 @@ function articlePage(it, ctx) {
   const ogShown = localArticleImage(ogBase);
   if (ogShown?.url && ogShown !== ogBase) ld.image = [ogShown.url];
   else if (!ld.image?.length && ogBase?.url) ld.image = [ogBase.url];
+  if (!imageTransformsOn() && ld.image) {
+    const fix = (x) => {
+      if (typeof x === 'string') return publicImageUrl(x);
+      if (x && typeof x === 'object' && typeof x.url === 'string' && publicImageUrl(x.url) !== x.url) return { ...x, url: publicImageUrl(x.url) };
+      return x;
+    };
+    ld.image = Array.isArray(ld.image) ? ld.image.map(fix) : fix(ld.image);
+  }
 
   const tags = (a.tags || []).map((x) => ({ slug: tagSlug(x), label: x }));
   const related = ctx.related(it);
@@ -207,7 +216,8 @@ function articlePage(it, ctx) {
     + (related.length ? `<section class="section tint art-related" aria-labelledby="rel-h"><div class="wrap"><h2 class="sec-title" id="rel-h">${e(t(lang, 'related'))}</h2><ul class="cards art-cards">${related.map((r) => card(r, lang, variants)).join('')}</ul></div></section>` : '');
 
   const ogExtra = `<meta property="article:published_time" content="${e(a.published_at)}"><meta property="article:modified_time" content="${e(a.updated_at || a.published_at)}">${a.category ? `<meta property="article:section" content="${e(a.category)}">` : ''}${(a.tags || []).map((x) => `<meta property="article:tag" content="${e(x)}">`).join('')}`;
-  const og = ogShown?.url ? ogShown : ogBase;
+  const ogRaw = ogShown?.url ? ogShown : ogBase;
+  const og = ogRaw?.url && !imageTransformsOn() && publicImageUrl(ogRaw.url) !== ogRaw.url ? { ...ogRaw, url: publicImageUrl(ogRaw.url) } : ogRaw;
   const jsonLd = [ld, ldBreadcrumb(lang, a, canonical)];
   if (md.faqs.length) jsonLd.push({ '@context': 'https://schema.org', '@type': 'FAQPage', '@id': `${canonical}#usein-kysyttya`, mainEntity: md.faqs.map((f) => ({ '@type': 'Question', name: f.question, acceptedAnswer: { '@type': 'Answer', text: f.answer } })) });
   const html = R.layout({

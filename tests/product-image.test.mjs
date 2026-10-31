@@ -1,7 +1,9 @@
 // Tuotekuvan srcset: Supabase-muunnos (600/900, avif+webp, jpeg-varakuva) tai alkuperäinen URL.
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { canTransform, transformUrl, productImageHtml, productImageSpec, CARD_WIDTHS, SIZES, withImageVersion, liveImageUrl, imageVersionOf, catalogImageUrl } from '../booking/shop/src/product-image.js';
+import { canTransform, transformUrl, productImageHtml, productImageSpec, CARD_WIDTHS, SIZES, withImageVersion, liveImageUrl, imageVersionOf, catalogImageUrl, imageTransformsOn, publicImageUrl } from '../booking/shop/src/product-image.js';
+
+process.env.IMAGE_TRANSFORMS = 'on';
 
 const OBJ = 'https://sxbofnuisemspgquoxyv.supabase.co/storage/v1/object/public/product-images/products/1-wq1bnlln.jpg';
 const LOCAL = 'http://localhost:4181/storage/v1/object/public/product-images/products/1-abcdef.jpg';
@@ -56,4 +58,21 @@ test('kuviosoite versioidaan updated_atilla tai polulla', () => {
   assert.equal(liveImageUrl('https://cdn.test/product-images/', { path: 'products/1-aaaaaa.webp', updated_at: 't' }), 'https://cdn.test/product-images/products/1-aaaaaa.webp?v=t');
   assert.equal(catalogImageUrl('', { path: 'products/1-aaaaaa.webp' }), '');
   assert.match(catalogImageUrl(LOCAL, { path: 'products/1-abcdef.jpg' }), /[?&]v=products%2F1-abcdef\.jpg$/);
+});
+
+test('IMAGE_TRANSFORMS=off ja selainconfig: ei srcsetiä, render-osoite palautuu object-osoitteeksi', () => {
+  assert.equal(imageTransformsOn({ env: {} }), true);
+  assert.equal(imageTransformsOn({ env: { IMAGE_TRANSFORMS: 'off' } }), false);
+  assert.equal(imageTransformsOn({ env: { IMAGE_TRANSFORMS: 'on' }, config: { imageTransforms: false } }), false);
+  assert.equal(imageTransformsOn({ env: { IMAGE_TRANSFORMS: 'off' }, config: { url: 'https://x' } }), false);
+  assert.equal(canTransform(OBJ, { transforms: false }), false);
+  const html = productImageHtml(OBJ, { transforms: false, widths: CARD_WIDTHS, sizes: SIZES.shop, alt: 'Yleinen & vuoro', width: 1600, height: 1068, lazy: true });
+  assert.equal(html, `<img src="${OBJ}" width="1600" height="1068" alt="Yleinen &amp; vuoro" loading="lazy" decoding="async">`);
+  assert.doesNotMatch(html, /srcset|picture|\/render\/image\//);
+  const render = `${OBJ.replace('/storage/v1/object/public/', '/storage/v1/render/image/public/')}?width=600&resize=contain&quality=50&format=avif&v=abc`;
+  assert.equal(publicImageUrl(render, { transforms: false }), `${OBJ}?v=abc`);
+  assert.equal(transformUrl(OBJ, { transforms: false, width: 600, format: 'avif' }), OBJ);
+  const spec = productImageSpec(OBJ, { transforms: true, widths: [600], alt: 'A', lazy: true });
+  assert.equal(spec.sources.length, 2);
+  assert.match(spec.sources[0].srcset, /\/render\/image\//);
 });

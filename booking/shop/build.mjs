@@ -12,6 +12,8 @@ import { join, dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
+import { imageTransformsOn } from './src/product-image.js';
+import { assertNoRenderImageUrls } from '../../scripts/check-image-urls.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const repo = resolve(here, '../..');
@@ -51,6 +53,7 @@ const cfg = {
   mobilepayTestUi: process.env.BOOKING_MOBILEPAY_TEST_UI ? /^(1|true)$/i.test(process.env.BOOKING_MOBILEPAY_TEST_UI) : process.env.SITE_ENV === 'test', mobilepayOfficialButton: !/^(0|false)$/i.test(process.env.BOOKING_MOBILEPAY_OFFICIAL_BUTTON || ''), siteEnv: process.env.SITE_ENV || '',
   giftCardPdf: /^(0|false)$/i.test(process.env.BOOKING_GIFT_CARD_PDF || '') ? false : (/^(1|true)?$/i.test(process.env.BOOKING_GIFT_CARD_PDF || '') ? true : process.env.BOOKING_GIFT_CARD_PDF),
   payMarks: `${BASE}/img/pay/`,
+  ...(imageTransformsOn() ? {} : { imageTransforms: false }),
 };
 writeFileSync(join(A, 'config.js'), `// Muokkaa tätä tiedostoa julkaisussa (ei vaadi uudelleenrakennusta). anon-avain saa olla julkinen.\nwindow.BOOKING_CONFIG=${JSON.stringify(cfg, null, 2)};\n`);
 // Staattinen tuotedata: tuntemattoman tuotteen "ota yhteyttä" -sivu + hoitotuotteiden kortit (hinta, kesto, henkilömäärät; ks. treatments.js loadProducts)
@@ -231,6 +234,7 @@ for (const n of readdirSync(A)) {
     if (out !== src) writeFileSync(p, out);
   }
 })(OUT);
+if (!imageTransformsOn()) assertNoRenderImageUrls(OUT);
 if (!nShopImports || !nShopRefs) { console.error('shop build: VIRHE: versiotunnus ei tullut kaupan moduuleihin / sivuille'); process.exit(1); }
 for (const n of readdirSync(A)) if (n.endsWith('.js') && /(?:from|import)\s*\(?\s*['"]\.\/[^'"?]+\.js['"]/.test(readFileSync(join(A, n), 'utf8'))) { console.error(`shop build: VIRHE: ${n}: versioimaton relatiivinen import`); process.exit(1); }
 // Varmistus: jokainen kaupan distin relatiivinen import löytyy dististä (sama tarkistus kuin hallinnalla build-pages.mjs:ssä).

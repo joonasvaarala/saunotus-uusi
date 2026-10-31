@@ -58,7 +58,7 @@ npm run check               # linkki-/resurssitarkistus dist/-kansioon (check:ex
 
 `npm run build` ja `npm run preview` rakentavat pelkän staattisen sivuston ilman Supabase-osoitetta. Julkaistava kokonaisuus (kauppa, hallinta, vuorosivu) tulee komennoista `build:test` ja `build:prod`. Ne lukevat vain oman tiedostonsa `config/env/`. Ympäristöön jääneet arvot eivät ylikirjoita tiedostoa.
 
-Muut ympäristömuuttujat: `DIST=...` (tulostekansio), `SAUNABOT=on` (chatbot päälle). Chatbotin skriptin osoite tulee buildin `BOOKING_SUPABASE_URL`:sta.
+Muut ympäristömuuttujat: `DIST=...` (tulostekansio), `SAUNABOT=on` (chatbot päälle). Chatbotin skriptin osoite tulee buildin `BOOKING_SUPABASE_URL`:sta. Tuotekuvien muunnos on oletuksena päällä. `config/env/test.env` asettaa `IMAGE_TRANSFORMS=off`, koska DEV-projektissa muunnosrajapinta palauttaa 403: build, kauppa, artikkelien varapolku ja chatbot käyttävät silloin vain tavallisia object-osoitteita ilman muunnettuun rajapintaan viittaavaa srcsetiä.
 
 ## Sisällön muuttaminen
 

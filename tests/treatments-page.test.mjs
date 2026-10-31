@@ -5,6 +5,7 @@ import { readFileSync, readdirSync } from 'node:fs';
 
 delete process.env.SITE_ENV;
 process.env.SITE_URL = 'https://saunotus.fi';
+process.env.IMAGE_TRANSFORMS = 'on';
 
 const { TREATMENTS_TEXTS, CARE_TEXTS, TREATMENT_GROUPS, treatmentCardPrice, treatmentCardWhen, careOptionPrice, treatmentOffers, treatmentFaq } = await import('../src/treatments-page.mjs');
 const { setLiveCatalog, clearLiveCatalog } = await import('../src/catalog-live.mjs');
