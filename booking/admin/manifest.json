@@ -1,0 +1,21 @@
+{
+  "id": "./",
+  "name": "Saunotus hallinta",
+  "short_name": "Hallinta",
+  "description": "Sipoonjoen Perinnesaunan varaushallinta",
+  "lang": "fi",
+  "dir": "ltr",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F4EFE7",
+  "theme_color": "#2B3A30",
+  "handle_links": "preferred",
+  "launch_handler": { "client_mode": "navigate-existing" },
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
