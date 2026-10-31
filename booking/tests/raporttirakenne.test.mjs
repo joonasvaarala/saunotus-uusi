@@ -80,13 +80,13 @@ test('myynti-CSV ja laskuraportti mockissa, PDF-lajit', async () => {
   assert.match(pdf, /admin_report_invoices/);
   assert.match(pdf, /myynti_/);
   assert.match(pdf, /laskut_/);
-  const sql = src('supabase/migrations/20261031122000_booking_224_invoice_not_receipt.sql');
+  const sql = src('supabase/migrations/20261031123733_booking_224_invoice_not_receipt.sql');
   assert.match(sql, /procountor_invoice_id/);
   assert.match(sql, /procountor_export_status/);
   assert.match(sql, /INVOICE_MARK_PAID/);
   assert.doesNotMatch(sql, /_issue_receipt/);
-  assert.match(src('supabase/migrations/20261031121000_booking_223_multipurpose_giftcard.sql'), /if new\.method = 'invoice' then/);
-  assert.match(src('supabase/migrations/20261031120000_booking_222_report_structure.sql'), /is distinct from 'invoice'/);
+  assert.match(src('supabase/migrations/20261031123728_booking_223_multipurpose_giftcard.sql'), /if new\.method = 'invoice' then/);
+  assert.match(src('supabase/migrations/20261031123723_booking_222_report_structure.sql'), /is distinct from 'invoice'/);
   assert.match(readFileSync(join(repo, '.github/workflows/pages.yml'), 'utf8'), /raporttirakenne\.test\.mjs/);
 });
 
