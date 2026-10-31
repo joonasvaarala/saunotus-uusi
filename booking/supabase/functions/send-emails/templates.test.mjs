@@ -118,7 +118,7 @@ test('puuttuvat tiedot eiv채t kaada eik채 j채t채 tyhj채채: ei tilausta, ei nime�
     assert.ok(m.html.includes(`${loc === 'en' ? 'Hello,' : 'Hei,'}`));
     assert.ok(m.html.includes(`src="${T.LOGO_FALLBACK}"`), 'oletuslogo');
   }
-  assert.equal(T.LOGO_FALLBACK, 'https://joonasvaarala.github.io/saunotus-uusi/img/logo-kuitti.png');
+  assert.equal(T.LOGO_FALLBACK, 'https://saunotus.fi/img/logo-kuitti.png');
 });
 
 test('siteBase / logoUrl: alipolku ja tuotanto', { skip }, () => {

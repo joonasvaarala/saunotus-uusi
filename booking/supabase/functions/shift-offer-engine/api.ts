@@ -8,6 +8,7 @@ import {
   offerJson,
   offerPageLocation,
   pageBase,
+  pageOrigins,
   parseAction,
   resultTitle,
   shiftRoute,
@@ -88,23 +89,30 @@ function payload(
   };
 }
 
-function json(origin: string | null, status: number, body: OfferPayload): Response {
+function json(origin: string | null, status: number, body: OfferPayload, allowed: readonly string[]): Response {
   const headers = new Headers({
     "content-type": "application/json; charset=utf-8",
     "cache-control": "no-store",
   });
-  const cors = corsHeaders(origin);
+  const cors = corsHeaders(origin, allowed);
   if (cors) for (const [key, value] of Object.entries(cors)) headers.set(key, value);
   return new Response(JSON.stringify(body), { status, headers });
 }
 
-export async function handleOfferRequest(req: Request, db: OfferDb, pageBaseEnv: string | undefined): Promise<Response> {
+export async function handleOfferRequest(
+  req: Request,
+  db: OfferDb,
+  pageBaseEnv: string | undefined,
+  pageEnv?: { origins?: string; supabaseUrl?: string },
+): Promise<Response> {
+  const allowed = pageOrigins(pageEnv?.origins, pageEnv?.supabaseUrl);
+  const base = pageBase(pageBaseEnv, pageEnv?.supabaseUrl);
   const url = new URL(req.url);
   const origin = req.headers.get("origin");
   const queryToken = url.searchParams.get("token");
   const route = shiftRoute(req.method, url.pathname, queryToken);
   if (route === "options") {
-    const cors = corsHeaders(origin);
+    const cors = corsHeaders(origin, allowed);
     if (!cors) return new Response(null, { status: 403, headers: { vary: "origin" } });
     return new Response(null, { status: 204, headers: { ...cors, "cache-control": "no-store" } });
   }
@@ -112,7 +120,7 @@ export async function handleOfferRequest(req: Request, db: OfferDb, pageBaseEnv:
     return new Response(null, {
       status: 302,
       headers: {
-        location: offerPageLocation(pageBase(pageBaseEnv), queryToken ?? ""),
+        location: offerPageLocation(base, queryToken ?? ""),
         "cache-control": "no-store",
         "referrer-policy": "no-referrer",
       },
@@ -120,22 +128,22 @@ export async function handleOfferRequest(req: Request, db: OfferDb, pageBaseEnv:
   }
   if (route === "offers") {
     const token = queryToken ?? "";
-    if (!token) return json(origin, 400, payload("bad_token", null, [], null, null));
+    if (!token) return json(origin, 400, payload("bad_token", null, [], null, null), allowed);
     const open = await loadOpenOffers(db, token);
-    if (!open.ok) return json(origin, 400, payload("bad_token", null, [], null, null));
-    return json(origin, 200, payload(null, open.focusOfferId, open.offers, null, null));
+    if (!open.ok) return json(origin, 400, payload("bad_token", null, [], null, null), allowed);
+    return json(origin, 200, payload(null, open.focusOfferId, open.offers, null, null), allowed);
   }
   if (route !== "respond") return new Response("method not allowed", { status: 405 });
 
   const body = await req.json().catch(() => null);
   const record = body && typeof body === "object" && !Array.isArray(body) ? body as Record<string, unknown> : null;
   const token = typeof record?.token === "string" ? record.token : "";
-  if (!token) return json(origin, 400, payload("bad_token", null, [], null, null));
+  if (!token) return json(origin, 400, payload("bad_token", null, [], null, null), allowed);
   const open = await loadOpenOffers(db, token);
-  if (!open.ok) return json(origin, 400, payload("bad_token", null, [], null, null));
+  if (!open.ok) return json(origin, 400, payload("bad_token", null, [], null, null), allowed);
   const action = parseAction(typeof record?.response === "string" ? record.response : null);
   const show = (result: string | null, acted: ShiftOfferCard | null, offers: ShiftOfferCard[], snoozeOpen: string | null, status = 200) =>
-    json(origin, status, payload(result, open.focusOfferId, offers, acted, snoozeOpen));
+    json(origin, status, payload(result, open.focusOfferId, offers, acted, snoozeOpen), allowed);
   if (!action) return show(null, null, open.offers, null);
   const posted = typeof record?.offer_id === "string" ? record.offer_id : "";
   const target = posted ? (UUID.test(posted) ? posted : "") : open.focusOfferId;

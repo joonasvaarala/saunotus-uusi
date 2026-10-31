@@ -2,7 +2,16 @@
 // Näyttää vain token-haltijan omat avoimet ja vastatut vuorot; vastauksen voi muuttaa (kieltäytyminen → hyväksyntä).
 // Kaikki teksti kirjoitetaan textContentillä. Tekstit FI + EN (?lang=en). Avaimet ui.vuoro_oma.* (pending-import-53).
 
-export const API = "https://sxbofnuisemspgquoxyv.supabase.co/functions/v1/shift-offer-engine";
+// Osoite tulee julkaisun config.js:stä (window.BOOKING_CONFIG.url). Ei kovakoodattua projektia.
+export function shiftOfferApi(config) {
+  const url = String((config && config.url) || "").replace(/\/$/, "");
+  if (!/^https:\/\/[a-z0-9-]+\.supabase\.co$/.test(url) && !/^http:\/\/localhost(:\d+)?$/.test(url)) return "";
+  return url + "/functions/v1/shift-offer-engine";
+}
+
+function offerApi() {
+  return shiftOfferApi(globalThis.BOOKING_CONFIG);
+}
 
 export const TEXTS = {
   fi: {
@@ -174,9 +183,11 @@ function boot() {
     other.setAttribute("href", "?" + next.toString());
     other.setAttribute("hreflang", lang === "en" ? "fi" : "en");
   }
+  const base = offerApi();
   render.onRespond = async (offerId, response) => {
+    if (!base) { render(document, lang, { ok: false, error: "load_error" }, null); return; }
     try {
-      const res = await fetch(API + "/api/my/respond", {
+      const res = await fetch(base + "/api/my/respond", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ token, offer_id: offerId, response }),
@@ -188,7 +199,8 @@ function boot() {
     }
   };
   if (!token) { render(document, lang, { ok: false, error: "bad_token" }, null); return; }
-  fetch(API + "/api/my?token=" + encodeURIComponent(token))
+  if (!base) { render(document, lang, { ok: false, error: "load_error" }, null); return; }
+  fetch(base + "/api/my?token=" + encodeURIComponent(token))
     .then((r) => r.json())
     .then((page) => render(document, lang, page, null))
     .catch(() => render(document, lang, { ok: false, error: "load_error" }, null));

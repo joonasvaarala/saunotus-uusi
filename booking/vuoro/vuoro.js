@@ -1,7 +1,16 @@
 // Vuorotarjouksen vastaussivu. Tekstit tulevat JSON-rajapinnasta ja kirjoitetaan textContentillä.
 // Poletti on sivun osoitteessa. Henkilö päätellään palvelimella poletista.
 
-export const API = "https://sxbofnuisemspgquoxyv.supabase.co/functions/v1/shift-offer-engine";
+// Osoite tulee julkaisun config.js:stä (window.BOOKING_CONFIG.url). Ei kovakoodattua projektia.
+export function shiftOfferApi(config) {
+  const url = String((config && config.url) || "").replace(/\/$/, "");
+  if (!/^https:\/\/[a-z0-9-]+\.supabase\.co$/.test(url) && !/^http:\/\/localhost(:\d+)?$/.test(url)) return "";
+  return url + "/functions/v1/shift-offer-engine";
+}
+
+function offerApi() {
+  return shiftOfferApi(globalThis.BOOKING_CONFIG);
+}
 
 const DONE = new Set(["accepted", "already_taken", "already_filled", "already_yours", "declined", "snoozed"]);
 const QUIET = new Set(["bad_token", "not_owner", "not_recipient", "load_error"]);
@@ -104,9 +113,14 @@ async function readJson(res) {
 function boot() {
   const token = new URLSearchParams(location.search).get("token") || "";
   const draw = (payload) => render(document, payload, onRespond);
+  const base = offerApi();
   async function onRespond(offerId, response, until) {
+    if (!base) {
+      draw({ ok: false, result: "load_error", title: "Sivua ei saatu ladattua", offers: [] });
+      return;
+    }
     try {
-      const res = await fetch(API + "/api/respond", {
+      const res = await fetch(base + "/api/respond", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ token, offer_id: offerId, response, until }),
@@ -120,7 +134,11 @@ function boot() {
     draw({ ok: false, result: "bad_token", title: "Linkki ei kelpaa", offers: [] });
     return;
   }
-  fetch(API + "/api/offers?token=" + encodeURIComponent(token))
+  if (!base) {
+    draw({ ok: false, result: "load_error", title: "Sivua ei saatu ladattua", offers: [] });
+    return;
+  }
+  fetch(base + "/api/offers?token=" + encodeURIComponent(token))
     .then(readJson)
     .then(draw)
     .catch(() => draw({ ok: false, result: "load_error", title: "Sivua ei saatu ladattua", offers: [] }));

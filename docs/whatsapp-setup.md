@@ -13,7 +13,7 @@ Mallipohjat ovat tiedostossa [`docs/whatsapp-templates.json`](whatsapp-templates
 | `cancelled` | `tarjous_peruttu` | hoidot-sulku perui tarjouksen |
 | `exhausted_ask`, `alert` | `joonas_tyhja_vuoro` | tyhjä vuoro, ilmoituksen numero tai sana hälytys, URL-painike |
 
-URL-painikkeen osoite on edelleen `https://sxbofnuisemspgquoxyv.supabase.co/functions/v1/shift-offer-engine?token={{1}}`. Sitä ei vaihdeta: mallipohja on Metan tarkastuksessa. Funktio vastaa tähän GET-pyyntöön ohjauksella 302. Kohde kootaan asetuksesta `SHIFT_OFFER_PAGE_BASE` (oletus `https://joonasvaarala.github.io/saunotus-uusi`, ilman lopun kauttaviivaa) ja polusta `/vuoro/?token=`. Poletti URL-koodataan. Verkkotunnuksen vaihdossa riittää tämä yksi asetus. Staattinen sivu hakee avoimet tarjoukset funktiosta `GET /api/offers` ja kirjaa vastauksen `POST /api/respond`. Selain saa lukea JSON-vastauksen vain osoitteista `joonasvaarala.github.io`, `saunotus.fi` ja `www.saunotus.fi`.
+URL-painikkeen osoite on edelleen `https://sxbofnuisemspgquoxyv.supabase.co/functions/v1/shift-offer-engine?token={{1}}`. Sitä ei vaihdeta: mallipohja on Metan tarkastuksessa. Funktio vastaa tähän GET-pyyntöön ohjauksella 302. Kohde kootaan asetuksesta `SHIFT_OFFER_PAGE_BASE` (oletus `https://saunotus.fi`, ilman lopun kauttaviivaa) ja polusta `/vuoro/?token=`. Poletti URL-koodataan. Tuotantoprojektissa github.io-osoitetta ei käytetä oletuksena eikä vaikka `SHIFT_OFFER_PAGE_BASE` sen sanoisi. Staattinen sivu hakee avoimet tarjoukset funktiosta `GET /api/offers` ja kirjaa vastauksen `POST /api/respond`. Selain saa lukea JSON-vastauksen osoitteista `saunotus.fi` ja `www.saunotus.fi`. Testisivuston origin `https://joonasvaarala.github.io` sallitaan vain, kun `SHIFT_OFFER_PAGE_ORIGINS` sen sanoo eikä funktio ole tuotantoprojektissa.
 
 ## Salaisuuksien nimet
 
@@ -111,7 +111,7 @@ Tätä ei tehdä tässä haarassa.
 
 1. Mergeä tämä PR.
 2. Älä aja uudelleen `20261022003917`, `20261022013104`, `20261022014510`, `20261022022221`, `20261022024547` tai `20261021224956` äläkä sääntösiementä.
-3. Laita neljä `WHATSAPP_*`-salaisuutta edge-ympäristöön. Varmista holvin `shift_offer_token_secret`. `SHIFT_OFFER_PAGE_BASE` tarvitaan vain, jos sivu ei ole enää GitHub Pagesissa. Oletus on `https://joonasvaarala.github.io/saunotus-uusi`.
+3. Laita neljä `WHATSAPP_*`-salaisuutta edge-ympäristöön. Varmista holvin `shift_offer_token_secret`. Tuotannossa `SHIFT_OFFER_PAGE_BASE` on `https://saunotus.fi` tai tyhjä (koodin oletus). github.io ei kelpaa tuotantoprojektissa. Testisivustolla (Supabase DEV) aseta `SHIFT_OFFER_PAGE_BASE=https://joonasvaarala.github.io/saunotus-uusi` ja `SHIFT_OFFER_PAGE_ORIGINS=https://joonasvaarala.github.io`.
 4. `supabase functions deploy shift-offer-engine --project-ref sxbofnuisemspgquoxyv`. `verify_jwt` pysyy false: tick tunnistaa `x-sync-secret`, webhook allekirjoituksen, vastauslinkki poletin. Mallipohjan painikeosoitetta ei muuteta.
 5. Tee Metassa webhookin Verify and save ja tilaa `messages`.
 6. Lähetä neljä mallipohjaa ja odota Approved.

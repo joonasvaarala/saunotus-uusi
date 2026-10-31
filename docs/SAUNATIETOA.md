@@ -62,7 +62,7 @@ Kolmen uusimman artikkelin korttirenderöinti (`homeSectionHtml`, `pickHomeItems
 |---|---|
 | `SITE_ENV=test` | noindex,nofollow + robots Disallow kaikkialla. Tuotannossa (ei `test`) käytetään `seo.robots`-asetusta. |
 | `SITE_URL` | canonicalien, hreflangien, OG-kuvien ja sitemapin juuri |
-| `BOOKING_SUPABASE_URL`, `BOOKING_ANON_KEY` | RPC-osoite ja julkinen avain (CI:ssä jo `pages.yml`:ssä) |
+| `BOOKING_SUPABASE_URL`, `BOOKING_ANON_KEY` | RPC-osoite ja julkinen avain. Testi: `config/env/test.env` (pages.yml). Tuotanto: `config/env/prod.env` (`npm run build:prod`). |
 | `ARTICLES_FIXTURE=1` tai polku JSON:iin | käyttää fixture-dataa (ei verkkoa), esim. `tests/articles/fixtures/rpc.json` tai `rpc-empty.json` |
 | `ARTICLES_STRICT=1` | RPC-virhe pysäyttää rakennuksen |
 | `ARTICLES_IMAGES=0` | ohita kuvien muunnos (nopea paikallinen build) |

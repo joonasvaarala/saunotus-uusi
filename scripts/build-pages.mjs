@@ -1,13 +1,16 @@
-// GitHub Pages -julkaisun koonti yhteen artifactiin (dist/):
+// Julkaistavan sivuston koonti yhteen artifactiin (dist/):
 //   /               perussivusto (FI/EN), Johku-linkit korvattu sisäisellä varauskaupalla (booking/shop/build.mjs)
 //   /varaa/  /en/…  varauskauppa (kauppa-build tuottaa sivut ja /booking/-tiedostot)
 //   /hallinta/      hallinta-SPA (booking/admin + booking/shared/sb.js), config.js generoidaan tässä
-// Käyttö:  SITE_ENV=test SITE_URL=https://joonasvaarala.github.io/saunotus-uusi \
-//          BOOKING_SUPABASE_URL=https://<ref>.supabase.co BOOKING_ANON_KEY=<publishable/anon> node scripts/build-pages.mjs
+//   /vuoro/         vuorotarjouksen vastaussivu; config.js saa Supabase-osoitteen tästä buildista
+// Käyttö:  npm run build:test    (config/env/test.env, GitHub Pages, Supabase DEV)
+//          npm run build:prod    (config/env/prod.env, https://saunotus.fi, Supabase PROD)
 // Julkaistaan vain julkinen anon/publishable-avain. Skripti kieltäytyy service_role/sb_secret-avaimista.
+// SITE_ENV=prod vaatii tuotantoprojektin ja saunotus.fi:n. SITE_ENV=test kieltäytyy molemmista.
 import { execFileSync } from 'node:child_process';
 import { cpSync, mkdirSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
+import { assertBuildTarget } from '../src/site-target.mjs';
 
 const need = (k) => { const v = (process.env[k] || '').trim(); if (!v) { console.error(`build-pages: ympäristömuuttuja ${k} puuttuu`); process.exit(2); } return v; };
 const SITE_URL = need('SITE_URL').replace(/\/$/, '');
@@ -15,6 +18,8 @@ const SUPA = need('BOOKING_SUPABASE_URL').replace(/\/$/, '');
 const KEY = need('BOOKING_ANON_KEY');
 const OUT = resolve(process.env.DIST || 'dist');
 process.env.SITE_ENV ||= 'test';
+try { assertBuildTarget({ siteEnv: process.env.SITE_ENV, siteUrl: SITE_URL, supabaseUrl: SUPA }); }
+catch (err) { console.error('build-pages: ' + err.message); process.exit(2); }
 const BASE = new URL(SITE_URL).pathname.replace(/\/$/, '');
 
 // --- avaimen turvatarkistus (ei tulosteta avainta) ---
@@ -107,6 +112,9 @@ for (const f of ['index.html', 'vuoro.css', 'vuoro.js']) cpSync(join('booking/vu
 // booking_153: henkilökunnan oma sivu → /vuoro/oma/ (pysyvä henkilökohtainen linkki ?token=, noindex)
 mkdirSync(join(V, 'oma'), { recursive: true });
 for (const f of ['index.html', 'oma.css', 'oma.js']) cpSync(join('booking/vuoro/oma', f), join(V, 'oma', f));
+const vuoroCfg = `// Generoitu julkaisussa (scripts/build-pages.mjs). Vuorosivu käyttää tämän buildin Supabase-osoitetta.\nwindow.BOOKING_CONFIG=${JSON.stringify({ url: SUPA })};\n`;
+writeFileSync(join(V, 'config.js'), vuoroCfg);
+writeFileSync(join(V, 'oma', 'config.js'), vuoroCfg);
 
 // 3e) Paketti 11 / booking_144: evästeetön kävijämittaus. OLETUKSENA POIS.
 //     Skripti lisätään sivuille VAIN, kun SITE_ANALYTICS=on JA SITE_ENV != test. Testisivulla (GitHub Pages, SITE_ENV=test) ei koskaan.
@@ -164,4 +172,13 @@ if (!ANALYTICS_ON) (function noTracking(d) { for (const n of readdirSync(d)) { c
 if (!statSync(join(OUT, 'img', 'ovi-kaiverrus-1024.webp'), { throwIfNoEntry: false })) fail('oven kuva puuttuu: img/ovi-kaiverrus-1024.webp');
 const vuoroHtml = readFileSync(join(OUT, 'vuoro', 'index.html'), 'utf8');
 if (!/src="\.\.\/img\/ovi-kaiverrus-1024\.webp"/.test(vuoroHtml)) fail('vuoro-sivun oven kuvan polku ei ole suhteellinen');
+if (!vuoroHtml.includes('src="./config.js"') || !readFileSync(join(OUT, 'vuoro', 'oma', 'index.html'), 'utf8').includes('src="./config.js"')) fail('vuoro-sivulta puuttuu config.js');
+{
+  const otherRef = process.env.SITE_ENV === 'prod' ? 'aoejjmfzulhkhxbehphs' : 'sxbofnuisemspgquoxyv';
+  for (const rel of ['vuoro/config.js', 'vuoro/oma/config.js', 'vuoro/vuoro.js', 'vuoro/oma/oma.js', 'hallinta/config.js', 'index.html']) {
+    const t = readFileSync(join(OUT, rel), 'utf8');
+    if (t.includes(otherRef)) fail(`${rel} viittaa väärän ympäristön Supabase-projektiin`);
+    if (rel.endsWith('config.js') && !t.includes(SUPA)) fail(`${rel} ei käytä julkaisun Supabase-osoitetta`);
+  }
+}
 console.log(`build-pages ok → ${OUT}  (kävijämittaus ${ANALYTICS_ON ? `PÄÄLLÄ ${nAnalytics} sivulla` : 'pois'}; perussivusto, ${BASE || ''}/varaa/, ${BASE || ''}/hallinta/, ${BASE || ''}/juomat/, ${BASE || ''}/vuoro/; Supabase ${new URL(SUPA).hostname})`);

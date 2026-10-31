@@ -1,5 +1,6 @@
 name: Julkaise testiympäristö (GitHub Pages)
-# TESTI: SITE_ENV=test → noindex + robots Disallow koko sivustolla (myös /varaa/ ja /hallinta/). Tuotantoon tämä ei ole tarkoitettu.
+# TESTI: config/env/test.env (SITE_ENV=test, Supabase DEV aoejjmfzulhkhxbehphs, github.io). noindex + robots Disallow koko sivustolla.
+# Tuotantoa ei rakenneta tässä. Tuotanto: npm run build:prod (config/env/prod.env, https://saunotus.fi, Supabase PROD) ja dist/ SFTP:llä.
 # Yksi Pages-artifact: perussivusto + varauskauppa (/varaa/, /en/book/) + hallinta (/hallinta/). Rakentaa scripts/build-pages.mjs.
 # Saunatietoa-artikkelit (docs/SAUNATIETOA.md): build hakee julkaistut artikkelit RPC:llä (public_list_articles / public_get_article / public_articles_sitemap, vain anon-avain, vain luku).
 # Uusi/muuttunut artikkeli päätyy sivulle: repository_dispatch (articles-changed) / workflow_dispatch / tunnin ajastus (ajastettu julkaisu) → build → deploy (vain main).
@@ -20,17 +21,14 @@ permissions:
 concurrency:
   group: pages-${{ github.ref }}
   cancel-in-progress: true
-env:
-  SITE_ENV: test
-  SITE_URL: https://joonasvaarala.github.io/saunotus-uusi
-  BOOKING_SUPABASE_URL: https://sxbofnuisemspgquoxyv.supabase.co
-  # JULKINEN publishable-avain (frontend-avain, saa olla julkinen; oikeudet määrää RLS + funktioiden GRANTit). service_role-avainta EI koskaan tähän.
-  BOOKING_ANON_KEY: sb_publishable_LZFhBH9bMAe8Q8uDI70bvQ_1cSVHCih
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      # Testiympäristön osoite ja julkinen avain: config/env/test.env. Ei tuotannon arvoja tähän työnkulkuun.
+      - name: Lataa testiympäristö (Supabase DEV)
+        run: bash scripts/build-site.sh --print-env test >> "$GITHUB_ENV"
       # Varmuuskopioinnin tarkistukset: ei verkkoa, ei kantaa, ei oikeaa dumppia (db-backup.yml ei käynnisty PR:ssä).
       - run: python3 -m unittest discover -s scripts/backup -p 'test_*.py'
       - run: python3 -m unittest discover -s booking/tools/johku-sync -p 'test_*.py'
@@ -38,8 +36,8 @@ jobs:
       - uses: actions/cache@v4
         with:
           path: .cache/site-texts
-          key: site-texts-${{ github.run_id }}
-          restore-keys: site-texts-
+          key: site-texts-test-${{ github.run_id }}
+          restore-keys: site-texts-test-
       - uses: actions/setup-node@v4
         with:
           node-version: 20
@@ -47,7 +45,7 @@ jobs:
       - run: npm ci
       # Saunatietoa: markdown-, lähde-/RPC-, sivupohja- ja build-tarkistustestit (fixture, ei verkkoa)
       - run: node --test tests/articles/*.test.mjs
-      - run: node --test tests/home-front.test.mjs tests/product-image.test.mjs tests/product-cards-image.test.mjs tests/week-programme.test.mjs tests/treatments-page.test.mjs
+      - run: node --test tests/site-target.test.mjs tests/home-front.test.mjs tests/product-image.test.mjs tests/product-cards-image.test.mjs tests/week-programme.test.mjs tests/treatments-page.test.mjs
       # Tiivis viikko: Tänään-merkki ei saa peittää aikaa (Playwright + järjestelmän Chrome).
       - name: Chrome tiiviin viikon testiin
         run: |
@@ -144,8 +142,8 @@ jobs:
       - uses: actions/cache@v4
         with:
           path: .cache/articles
-          key: articles-${{ github.run_id }}
-          restore-keys: articles-
+          key: articles-test-${{ github.run_id }}
+          restore-keys: articles-test-
       - run: node scripts/build-pages.mjs
       - run: node scripts/check-articles.mjs
       # etusivun hero: <picture>/preloadit/mitat/alt/OG + kultanapin kontrasti (staattinen tarkistus dististä)

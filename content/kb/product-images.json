@@ -1,5 +1,5 @@
 {
-  "_doc": "booking.public_product_images -tilannekuva (27.10.2026). Build päivittää listan RPC:llä kun BOOKING_SUPABASE_URL ja BOOKING_ANON_KEY ovat asetettu; muuten tämä tiedosto. Vain hallinnan tuotekuvat, ei sivuston markkinointikuvia. storage_base on julkinen bucket-osoite.",
+  "_doc": "booking.public_product_images -tilannekuva (27.10.2026). Build hakee listan RPC:llä kun BOOKING_SUPABASE_URL ja BOOKING_ANON_KEY ovat asetettu. Jos haku epäonnistuu, kuvapolut tulevat tästä tiedostosta ja storage_base vaihdetaan buildin Supabase-osoitteeseen. Ilman osoitetta jää tämän tiedoston storage_base (offline-tilannekuva). Vain hallinnan tuotekuvat, ei sivuston markkinointikuvia.",
   "storage_base": "https://sxbofnuisemspgquoxyv.supabase.co/storage/v1/object/public/product-images",
   "images": [
     {

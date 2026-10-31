@@ -17,6 +17,8 @@ vartijatesti `booking/tests/osoite-saunotus-fi-170.test.mjs`):
 
 Merkinnät: 🗄️ = tuotantotietokannan muutos, 🖥️ = palvelin-, DNS- tai hosting-muutos. Kumpikin tarvitsee Joonasin OK:n ennen ajoa.
 
+**Nykytila 1.11.2026 jälkeen.** Tuotanto on https://saunotus.fi. Se rakennetaan komennolla `npm run build:prod` (`config/env/prod.env`: Supabase PROD, `SITE_URL=https://saunotus.fi`) ja `dist/` viedään palvelimelle SFTP:llä. GitHub Pages (https://joonasvaarala.github.io/saunotus-uusi) on testi ja käyttää Supabase DEViä (`npm run build:test`, `config/env/test.env`, workflow `pages.yml`). Build kieltäytyy, jos testi osoittaa tuotantoon tai tuotanto käyttää DEV-arvoja tai github.io-osoitetta.
+
 ## A. Nyt (ennen siirtoa): koodi ja tietokanta samaan aikaan
 
 1. 🗄️ **`booking/supabase/migrations/20261024201634_booking_170_osoite_saunotus_fi.sql` ajettu tuotantoon 24.10.2026 (versio 20261024201634) tämän PR:n yhdistämisen yhteydessä.**
@@ -45,13 +47,14 @@ Merkinnät: 🗄️ = tuotantotietokannan muutos, 🖥️ = palvelin-, DNS- tai 
 
 ## B. Siirtopäivä 1.11.2026
 
-1. 🖥️ `saunotus.fi` osoittamaan uuteen sivustoon (hosting/DNS). Sivusto rakennetaan tuotantotilassa: `SITE_ENV` pois tai `prod`,
-   `SITE_URL=https://saunotus.fi` (`content/site.json` → `canonicalBase` on jo `https://saunotus.fi`). Tuotantobuild ei käytä noindexiä.
+1. 🖥️ `saunotus.fi` osoittamaan uuteen sivustoon (hosting/DNS). Sivusto rakennetaan tuotantotilassa: `npm run build:prod`
+   (`config/env/prod.env`, `SITE_ENV=prod`, `SITE_URL=https://saunotus.fi`). Tuotantobuild ei käytä noindexiä.
 2. 🖥️ `www.saunotus.fi` ja `saunotus.com` (+ `www.saunotus.com`) → 301 `https://saunotus.fi/` (polku säilyy).
-3. 🗄️ `booking.settings.site_base_url` → `"https://saunotus.fi"`. Nyt arvo on `https://joonasvaarala.github.io/saunotus-uusi`.
+3. 🗄️ `booking.settings.site_base_url` on tuotannossa `"https://saunotus.fi"` (1.11.2026). DEV-projektissa arvo on testisivuston osoite.
    Sähköpostien, tilaussivun, QR-koodien ja kalenterin linkit rakentuvat tästä asetuksesta.
-4. 🖥️ Edge-funktion ympäristömuuttuja `SHIFT_OFFER_PAGE_BASE=https://saunotus.fi` (shift-offer-engine; oletus on testisivu).
-   `https://saunotus.fi` ja `https://www.saunotus.fi` ovat jo sallittujen originien listassa.
+4. 🖥️ Edge-funktion ympäristömuuttuja `SHIFT_OFFER_PAGE_BASE=https://saunotus.fi` (shift-offer-engine). Koodin oletus on sama osoite.
+   Tuotantoprojektissa github.io-osoitetta ei käytetä, vaikka muuttuja sen sanoisi. Sallitut originit oletuksena ovat `https://saunotus.fi` ja `https://www.saunotus.fi`.
+   Testisivuston origin `https://joonasvaarala.github.io` tulee mukaan vain `SHIFT_OFFER_PAGE_ORIGINS`-muuttujalla, eikä tuotantoprojektissa.
 5. 🖥️ Supabase Auth: lisää Site URL / Redirect URLs -asetuksiin `https://saunotus.fi/hallinta/` ja muut tarvittavat osoitteet, jos hallinnan
    kirjautuminen käyttää uudelleenohjausta.
 6. 🖥️ WhatsApp/Meta: Business infon verkkosivuksi `https://saunotus.fi` (docs/whatsapp-setup.md).

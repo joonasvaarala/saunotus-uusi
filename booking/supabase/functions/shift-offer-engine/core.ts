@@ -79,25 +79,66 @@ export async function secretMatches(provided: string, expected: string): Promise
 export type ShiftRoute = "offers" | "respond" | "redirect" | "options" | "tick" | "invalid";
 
 // Sivut, joilta selain saa kutsua JSON-rajapintaa. Origin on skeema + isäntä, ei polkua.
+// Oletus on tuotanto. Testisivuston github.io lisätään SHIFT_OFFER_PAGE_ORIGINS-ympäristömuuttujalla,
+// eikä sitä käytetä kun SUPABASE_URL on tuotantoprojekti.
+export const PROD_SUPABASE_REF = "sxbofnuisemspgquoxyv";
+
 export const SHIFT_OFFER_PAGE_ORIGINS = [
-  "https://joonasvaarala.github.io",
   "https://saunotus.fi",
   "https://www.saunotus.fi",
 ];
 
-export const DEFAULT_SHIFT_OFFER_PAGE_BASE = "https://joonasvaarala.github.io/saunotus-uusi";
+export const DEFAULT_SHIFT_OFFER_PAGE_BASE = "https://saunotus.fi";
 
-export function pageBase(envValue: string | undefined): string {
+export function isProdSupabase(supabaseUrl: string | undefined): boolean {
+  return (supabaseUrl ?? "").includes(`${PROD_SUPABASE_REF}.supabase.co`);
+}
+
+function isGithubPages(value: string): boolean {
+  try {
+    const host = new URL(value).hostname;
+    return host === "github.io" || host.endsWith(".github.io");
+  } catch {
+    return false;
+  }
+}
+
+function extraOrigins(raw: string | undefined): string[] {
+  const out: string[] = [];
+  for (const part of (raw ?? "").split(",")) {
+    const origin = part.trim();
+    if (!origin) continue;
+    try {
+      const u = new URL(origin);
+      if (u.protocol !== "https:" || u.username || u.password || u.pathname !== "/" || u.search || u.hash) continue;
+      if (!out.includes(u.origin)) out.push(u.origin);
+    } catch { /* ohita */ }
+  }
+  return out;
+}
+
+export function pageOrigins(originsEnv: string | undefined, supabaseUrl?: string): string[] {
+  const merged = [...SHIFT_OFFER_PAGE_ORIGINS];
+  for (const origin of extraOrigins(originsEnv)) {
+    if (!merged.includes(origin)) merged.push(origin);
+  }
+  if (isProdSupabase(supabaseUrl)) return merged.filter((origin) => !isGithubPages(origin));
+  return merged;
+}
+
+export function pageBase(envValue: string | undefined, supabaseUrl?: string): string {
   const raw = (envValue ?? "").trim() || DEFAULT_SHIFT_OFFER_PAGE_BASE;
-  return raw.replace(/\/+$/, "");
+  const base = raw.replace(/\/+$/, "");
+  if (isProdSupabase(supabaseUrl) && isGithubPages(base)) return DEFAULT_SHIFT_OFFER_PAGE_BASE;
+  return base;
 }
 
 export function offerPageLocation(base: string, token: string): string {
   return `${base.replace(/\/+$/, "")}/vuoro/?token=${encodeURIComponent(token)}`;
 }
 
-export function corsHeaders(origin: string | null): Record<string, string> | null {
-  if (!origin || !SHIFT_OFFER_PAGE_ORIGINS.includes(origin)) return null;
+export function corsHeaders(origin: string | null, allowed: readonly string[] = SHIFT_OFFER_PAGE_ORIGINS): Record<string, string> | null {
+  if (!origin || !allowed.includes(origin)) return null;
   return {
     "access-control-allow-origin": origin,
     "access-control-allow-methods": "GET, POST, OPTIONS",

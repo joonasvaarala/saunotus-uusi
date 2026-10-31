@@ -136,6 +136,7 @@ test('FI-oletukset eivät sisällä kovakoodattua yritysnimeä muualla kuin paik
 });
 
 // ---------- sähköpostit ----------
+// Oletuslogo on https://saunotus.fi/img/logo-kuitti.png. Viestit ilman sivuston osoitetta käyttävät sitä, joten niiden html-tiiviste päivitettiin logon mukana.
 const run = (t) => Object.fromEntries(emailCases().map((c) => { const m = TPL.render(c.kind, structuredClone(c.data), c.locale, t); return [c.name, { subject: sha(m.subject), text: sha(m.text), html: sha(m.html) }]; }));
 test('sähköpostit: sama sisältö tavu tavulta kuin ennen siirtoa (repon oletukset)', { skip }, () => {
   const got = run(undefined);
