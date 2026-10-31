@@ -5,6 +5,7 @@ import { readFileSync } from 'node:fs';
 
 delete process.env.SITE_ENV;
 process.env.SITE_URL = 'https://saunotus.fi';
+process.env.IMAGE_TRANSFORMS = 'on';
 
 const { setProductImages } = await import('../src/product-images.mjs');
 const R = await import('../src/render.mjs');

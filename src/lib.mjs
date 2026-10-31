@@ -7,6 +7,13 @@ import { PHONE_DISPLAY_FI, PHONE_DISPLAY_EN, PHONE_TEL, phoneDisplay } from '../
 export { phoneDisplay };
 import { resolvePrivacyPages } from './policy-lang.mjs';
 import { chatbotWidgetSrc } from './site-target.mjs';
+import { imageTransformsOn } from '../booking/shop/src/product-image.js';
+
+function chatbotWidgetUrl() {
+  const src = chatbotWidgetSrc(process.env.BOOKING_SUPABASE_URL);
+  if (!src || imageTransformsOn()) return src;
+  return `${src}${src.includes('?') ? '&' : '?'}image_transforms=off`;
+}
 
 // Puhelinnumero tulee yhdestä vakiosta (booking/shop/src/phone.js), ei site.json:sta: näkyvä muoto kielen mukaan (phoneDisplay(lang): fi "010 299 2866", en "+358 10 299 2866"), linkki tel:+358102992866.
 // contact.phone = suomenkielinen muoto (oletus), contact.phoneEn = englanninkielinen; sivupohjat käyttävät phoneDisplay(lang).
@@ -14,7 +21,7 @@ const siteJson = read('content/site.json');
 export const site = {
   ...siteJson,
   contact: { ...siteJson.contact, phone: PHONE_DISPLAY_FI, phoneEn: PHONE_DISPLAY_EN, phoneTel: PHONE_TEL },
-  chatbot: { ...siteJson.chatbot, widgetSrc: chatbotWidgetSrc(process.env.BOOKING_SUPABASE_URL) },
+  chatbot: { ...siteJson.chatbot, get widgetSrc() { return chatbotWidgetUrl(); } },
 };
 export const kb = read('content/kb/kb.json');
 // /en/privacy/ vain kun kb.policies-kohdilla on title_en + body_en (src/policy-lang.mjs); muuten privacy.en = null.

@@ -5,6 +5,7 @@ import { readFileSync } from 'node:fs';
 
 delete process.env.SITE_ENV;
 process.env.SITE_URL = 'https://saunotus.fi';
+process.env.IMAGE_TRANSFORMS = 'on';
 
 const { experienceHtml, HOME_TEXTS, HOME_EXPERIENCES, cardDuration } = await import('../src/home-front.mjs');
 const { setLiveCatalog, clearLiveCatalog } = await import('../src/catalog-live.mjs');
@@ -89,6 +90,7 @@ test('pending-import-85 vastaa HOME_TEXTS-varatekstejä, FI+EN, ei HTML:ää', (
 });
 
 test('elämyskortit: nimi, hinta ja kesto tuotteesta; lahjakortti #avoin; kuva vain hallinnan kuvasta', () => {
+  process.env.IMAGE_TRANSFORMS = 'on';
   clearLiveCatalog();
   for (const lang of ['fi', 'en']) {
     const html = experienceHtml(lang);

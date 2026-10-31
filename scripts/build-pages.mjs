@@ -11,6 +11,8 @@ import { execFileSync } from 'node:child_process';
 import { cpSync, mkdirSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { assertBuildTarget } from '../src/site-target.mjs';
+import { imageTransformsOn } from '../booking/shop/src/product-image.js';
+import { assertNoRenderImageUrls } from './check-image-urls.mjs';
 
 const need = (k) => { const v = (process.env[k] || '').trim(); if (!v) { console.error(`build-pages: ympäristömuuttuja ${k} puuttuu`); process.exit(2); } return v; };
 const SITE_URL = need('SITE_URL').replace(/\/$/, '');
@@ -181,4 +183,5 @@ if (!vuoroHtml.includes('src="./config.js"') || !readFileSync(join(OUT, 'vuoro',
     if (rel.endsWith('config.js') && !t.includes(SUPA)) fail(`${rel} ei käytä julkaisun Supabase-osoitetta`);
   }
 }
+if (!imageTransformsOn()) assertNoRenderImageUrls(OUT);
 console.log(`build-pages ok → ${OUT}  (kävijämittaus ${ANALYTICS_ON ? `PÄÄLLÄ ${nAnalytics} sivulla` : 'pois'}; perussivusto, ${BASE || ''}/varaa/, ${BASE || ''}/hallinta/, ${BASE || ''}/juomat/, ${BASE || ''}/vuoro/; Supabase ${new URL(SUPA).hostname})`);

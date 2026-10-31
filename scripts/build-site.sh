@@ -25,11 +25,12 @@ if [[ ! -f "$file" ]]; then
   exit 2
 fi
 
-unset SITE_ENV SITE_URL BOOKING_SUPABASE_URL BOOKING_ANON_KEY
+unset SITE_ENV SITE_URL BOOKING_SUPABASE_URL BOOKING_ANON_KEY IMAGE_TRANSFORMS
 got_site_env=0
 got_site_url=0
 got_supabase_url=0
 got_anon_key=0
+got_image_transforms=0
 while IFS= read -r line || [[ -n "$line" ]]; do
   [[ "$line" =~ ^[[:space:]]*# ]] && continue
   [[ "$line" =~ ^[[:space:]]*$ ]] && continue
@@ -40,9 +41,13 @@ while IFS= read -r line || [[ -n "$line" ]]; do
   key="${BASH_REMATCH[1]}"
   val="${BASH_REMATCH[2]}"
   case "$key" in
-    SITE_ENV|SITE_URL|BOOKING_SUPABASE_URL|BOOKING_ANON_KEY) ;;
+    SITE_ENV|SITE_URL|BOOKING_SUPABASE_URL|BOOKING_ANON_KEY|IMAGE_TRANSFORMS) ;;
     *) echo "build-site: avainta $key ei sallita ympäristötiedostossa" >&2; exit 2 ;;
   esac
+  if [[ "$key" == "IMAGE_TRANSFORMS" && "$val" != "on" && "$val" != "off" ]]; then
+    echo "build-site: IMAGE_TRANSFORMS on on tai off" >&2
+    exit 2
+  fi
   if [[ "$val" == *"'"* || "$val" == *'"'* || "$val" == *$'\n'* || "$val" == *" "* ]]; then
     echo "build-site: avaimen $key arvo ei ole pelkkä tunnus tai osoite" >&2
     exit 2
@@ -60,6 +65,9 @@ while IFS= read -r line || [[ -n "$line" ]]; do
     BOOKING_ANON_KEY)
       if [[ "$got_anon_key" == 1 ]]; then echo "build-site: BOOKING_ANON_KEY kahdesti" >&2; exit 2; fi
       got_anon_key=1 ;;
+    IMAGE_TRANSFORMS)
+      if [[ "$got_image_transforms" == 1 ]]; then echo "build-site: IMAGE_TRANSFORMS kahdesti" >&2; exit 2; fi
+      got_image_transforms=1 ;;
   esac
   printf -v "$key" '%s' "$val"
   export "$key"
@@ -84,6 +92,7 @@ if [[ "$print_only" == 1 ]]; then
   printf 'SITE_URL=%s\n' "$SITE_URL"
   printf 'BOOKING_SUPABASE_URL=%s\n' "$BOOKING_SUPABASE_URL"
   printf 'BOOKING_ANON_KEY=%s\n' "$BOOKING_ANON_KEY"
+  if [[ -n "${IMAGE_TRANSFORMS:-}" ]]; then printf 'IMAGE_TRANSFORMS=%s\n' "$IMAGE_TRANSFORMS"; fi
   exit 0
 fi
 

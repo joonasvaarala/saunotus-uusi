@@ -5,7 +5,7 @@
 // Varattu, mennyt tai virheellinen vuoro ei näy. Jos kumpikaan haku ei onnistu, ohjelma jää ennalleen.
 // Ei innerHTML:ää: kaikki solmut createElement + textContent.
 import { rpc } from './sb.js';
-import { liveImageUrl } from './product-image.js';
+import { liveImageUrl, publicImageUrl } from './product-image.js';
 import { quietByWeekday, addDaysIso, fillText, pctText, validOffer, bookablePrivateSlots, offerForSlot, weekdayIso, JALKIL_ID } from './quiet-offers-logic.js';
 import { dateForWeekday, shiftIsFull, weekEvents, eventDisplayName, freeShopEvents, cardDates, cardTime, eventIsFull, eventWaitlistPath } from './week-live.js';
 
@@ -175,7 +175,7 @@ export function applyEventCards(list, events, { lang = 'fi', shopHref = '', now 
     const prev = ev.slug ? fallbackPic.get(ev.slug) : null;
     const path = String(ev.image_path || '');
     const direct = /^https?:\/\//.test(path) || path.startsWith('/img/');
-    const url = !path ? '' : direct ? path : (imageBase ? liveImageUrl(String(imageBase).replace(/\/$/, ''), { path, updated_at: ev.image_updated_at, alt: ev.image_alt }) : '');
+    const url = !path ? '' : direct ? publicImageUrl(path) : (imageBase ? liveImageUrl(String(imageBase).replace(/\/$/, ''), { path, updated_at: ev.image_updated_at, alt: ev.image_alt }) : '');
     if (url) {
       const img = doc.createElement('img');
       img.src = url;
