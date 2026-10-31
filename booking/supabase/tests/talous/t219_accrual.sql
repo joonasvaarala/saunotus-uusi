@@ -83,7 +83,7 @@ begin
   perform pg_temp.ck((booking.admin_report_accrual('2033-07-01', '2033-07-01') #>> '{advances,gift_cards_unused,gross}')::numeric = 0, 'C9 vanhentunut kortti ei ole ennakko');
   csv := booking.admin_report_accrual_csv('2032-06-01', '2032-06-30') ->> 'content';
   perform pg_temp.ck(left(csv, 1) = chr(65279) and csv like '%' || E'\r\n' || '%' and position('osio;tuote;alv_%' in csv) > 0 and position('ennakko;Lahjakortit kayttamatta' in csv) > 0, 'D1 CSV BOM, rivinvaihto, ennakkorivi');
-  perform pg_temp.ck((booking.admin_report_accrual_csv('2032-06-01', '2032-06-30') ->> 'filename') = 'suorite_2032-06-01_2032-06-30.csv', 'D2 tiedostonimi');
+  perform pg_temp.ck((booking.admin_report_accrual_csv('2032-06-01', '2032-06-30') ->> 'filename') = 'palvelupaiva_2032-06-01_2032-06-30.csv', 'D2 tiedostonimi');
   perform pg_temp.logout();
 
   log := current_setting('t219.log', true);

@@ -1,0 +1,1182 @@
+[
+  {
+    "key": "ui.admin.reports.basis_document",
+    "lang": "en",
+    "text": "Basis: document date (Helsinki). A refund belongs to the refund document period.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_222: raporttirakenne"
+  },
+  {
+    "key": "ui.admin.reports.basis_document",
+    "lang": "fi",
+    "text": "Peruste: tositepäivä (Helsinki). Hyvitys kuuluu hyvitystositteen jaksoon.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 73,
+    "placeholders": [],
+    "reason": "booking_222: raporttirakenne"
+  },
+  {
+    "key": "ui.admin.reports.basis_giftcards",
+    "lang": "en",
+    "text": "Basis: position at the period end.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 34,
+    "placeholders": [],
+    "reason": "booking_222: raporttirakenne"
+  },
+  {
+    "key": "ui.admin.reports.basis_giftcards",
+    "lang": "fi",
+    "text": "Peruste: tilanne jakson lopussa.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 32,
+    "placeholders": [],
+    "reason": "booking_222: raporttirakenne"
+  },
+  {
+    "key": "ui.admin.reports.basis_invoices",
+    "lang": "en",
+    "text": "Basis: invoice date (Helsinki).",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 31,
+    "placeholders": [],
+    "reason": "booking_222: raporttirakenne"
+  },
+  {
+    "key": "ui.admin.reports.basis_invoices",
+    "lang": "fi",
+    "text": "Peruste: laskun päivä (Helsinki).",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 33,
+    "placeholders": [],
+    "reason": "booking_222: raporttirakenne"
+  },
+  {
+    "key": "ui.admin.reports.basis_service",
+    "lang": "en",
+    "text": "Basis: service date (Helsinki).",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 31,
+    "placeholders": [],
+    "reason": "booking_222: raporttirakenne"
+  },
+  {
+    "key": "ui.admin.reports.basis_service",
+    "lang": "fi",
+    "text": "Peruste: palvelupäivä (Helsinki).",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 33,
+    "placeholders": [],
+    "reason": "booking_222: raporttirakenne"
+  },
+  {
+    "key": "ui.admin.reports.export_csv",
+    "lang": "en",
+    "text": "Download CSV",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 12,
+    "placeholders": [],
+    "reason": "booking_222: raporttirakenne"
+  },
+  {
+    "key": "ui.admin.reports.export_csv",
+    "lang": "fi",
+    "text": "Lataa CSV",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 9,
+    "placeholders": [],
+    "reason": "booking_222: raporttirakenne"
+  },
+  {
+    "key": "ui.admin.reports.export_pdf",
+    "lang": "en",
+    "text": "Download PDF",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 12,
+    "placeholders": [],
+    "reason": "booking_222: raporttirakenne"
+  },
+  {
+    "key": "ui.admin.reports.export_pdf",
+    "lang": "fi",
+    "text": "Lataa PDF",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 9,
+    "placeholders": [],
+    "reason": "booking_222: raporttirakenne"
+  },
+  {
+    "key": "ui.admin.reports.gc_comp_stats",
+    "lang": "en",
+    "text": "Complimentary gift cards, information only",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 42,
+    "placeholders": [],
+    "reason": "booking_222: raporttirakenne"
+  },
+  {
+    "key": "ui.admin.reports.gc_comp_stats",
+    "lang": "fi",
+    "text": "Maksuttomat lahjakortit, vain tieto",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 35,
+    "placeholders": [],
+    "reason": "booking_222: raporttirakenne"
+  },
+  {
+    "key": "ui.admin.reports.gc_multi_note",
+    "lang": "en",
+    "text": "A sold gift card is a multi-purpose voucher. No VAT is recorded when it is sold.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_222: raporttirakenne"
+  },
+  {
+    "key": "ui.admin.reports.gc_multi_note",
+    "lang": "fi",
+    "text": "Myyty lahjakortti on monikäyttöinen arvoseteli. Siitä ei kirjata arvonlisäveroa myyntihetkellä.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 95,
+    "placeholders": [],
+    "reason": "booking_222: raporttirakenne"
+  },
+  {
+    "key": "ui.admin.reports.gc_redemptions_row",
+    "lang": "en",
+    "text": "Paid with a gift card",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 21,
+    "placeholders": [],
+    "reason": "booking_222: raporttirakenne"
+  },
+  {
+    "key": "ui.admin.reports.gc_redemptions_row",
+    "lang": "fi",
+    "text": "Lahjakortilla maksettu",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 22,
+    "placeholders": [],
+    "reason": "booking_222: raporttirakenne"
+  },
+  {
+    "key": "ui.admin.reports.gc_sales_row",
+    "lang": "en",
+    "text": "Gift cards sold",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 15,
+    "placeholders": [],
+    "reason": "booking_222: raporttirakenne"
+  },
+  {
+    "key": "ui.admin.reports.gc_sales_row",
+    "lang": "fi",
+    "text": "Myydyt lahjakortit",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 18,
+    "placeholders": [],
+    "reason": "booking_222: raporttirakenne"
+  },
+  {
+    "key": "ui.admin.reports.group_accounting",
+    "lang": "en",
+    "text": "For the books",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 13,
+    "placeholders": [],
+    "reason": "booking_222: raporttirakenne"
+  },
+  {
+    "key": "ui.admin.reports.group_accounting",
+    "lang": "fi",
+    "text": "Kirjanpitoon",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 12,
+    "placeholders": [],
+    "reason": "booking_222: raporttirakenne"
+  },
+  {
+    "key": "ui.admin.reports.group_reconcile",
+    "lang": "en",
+    "text": "Reconciliation",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 14,
+    "placeholders": [],
+    "reason": "booking_222: raporttirakenne"
+  },
+  {
+    "key": "ui.admin.reports.group_reconcile",
+    "lang": "fi",
+    "text": "Täsmäytys",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 9,
+    "placeholders": [],
+    "reason": "booking_222: raporttirakenne"
+  },
+  {
+    "key": "ui.admin.reports.group_stats",
+    "lang": "en",
+    "text": "Statistics, not for the books",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 29,
+    "placeholders": [],
+    "reason": "booking_222: raporttirakenne"
+  },
+  {
+    "key": "ui.admin.reports.group_stats",
+    "lang": "fi",
+    "text": "Tilastot, ei kirjanpitoon",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 25,
+    "placeholders": [],
+    "reason": "booking_222: raporttirakenne"
+  },
+  {
+    "key": "ui.admin.reports.inv_credits",
+    "lang": "en",
+    "text": "Credit notes",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 12,
+    "placeholders": [],
+    "reason": "booking_222: raporttirakenne"
+  },
+  {
+    "key": "ui.admin.reports.inv_credits",
+    "lang": "fi",
+    "text": "Hyvityslaskut",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 13,
+    "placeholders": [],
+    "reason": "booking_222: raporttirakenne"
+  },
+  {
+    "key": "ui.admin.reports.inv_due",
+    "lang": "en",
+    "text": "Due date",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 8,
+    "placeholders": [],
+    "reason": "booking_222: raporttirakenne"
+  },
+  {
+    "key": "ui.admin.reports.inv_due",
+    "lang": "fi",
+    "text": "Eräpäivä",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 8,
+    "placeholders": [],
+    "reason": "booking_222: raporttirakenne"
+  },
+  {
+    "key": "ui.admin.reports.inv_no",
+    "lang": "en",
+    "text": "Number",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 6,
+    "placeholders": [],
+    "reason": "booking_222: raporttirakenne"
+  },
+  {
+    "key": "ui.admin.reports.inv_no",
+    "lang": "fi",
+    "text": "Numero",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 6,
+    "placeholders": [],
+    "reason": "booking_222: raporttirakenne"
+  },
+  {
+    "key": "ui.admin.reports.inv_paid",
+    "lang": "en",
+    "text": "Paid on",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 7,
+    "placeholders": [],
+    "reason": "booking_222: raporttirakenne"
+  },
+  {
+    "key": "ui.admin.reports.inv_paid",
+    "lang": "fi",
+    "text": "Maksettu",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 8,
+    "placeholders": [],
+    "reason": "booking_222: raporttirakenne"
+  },
+  {
+    "key": "ui.admin.reports.inv_status_credited",
+    "lang": "en",
+    "text": "credited",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 8,
+    "placeholders": [],
+    "reason": "booking_222: raporttirakenne"
+  },
+  {
+    "key": "ui.admin.reports.inv_status_credited",
+    "lang": "fi",
+    "text": "hyvitetty",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 9,
+    "placeholders": [],
+    "reason": "booking_222: raporttirakenne"
+  },
+  {
+    "key": "ui.admin.reports.inv_status_open",
+    "lang": "en",
+    "text": "open",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 4,
+    "placeholders": [],
+    "reason": "booking_222: raporttirakenne"
+  },
+  {
+    "key": "ui.admin.reports.inv_status_open",
+    "lang": "fi",
+    "text": "avoin",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 5,
+    "placeholders": [],
+    "reason": "booking_222: raporttirakenne"
+  },
+  {
+    "key": "ui.admin.reports.inv_status_overdue",
+    "lang": "en",
+    "text": "overdue",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 7,
+    "placeholders": [],
+    "reason": "booking_222: raporttirakenne"
+  },
+  {
+    "key": "ui.admin.reports.inv_status_overdue",
+    "lang": "fi",
+    "text": "erääntynyt",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 10,
+    "placeholders": [],
+    "reason": "booking_222: raporttirakenne"
+  },
+  {
+    "key": "ui.admin.reports.inv_status_paid",
+    "lang": "en",
+    "text": "paid",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 4,
+    "placeholders": [],
+    "reason": "booking_222: raporttirakenne"
+  },
+  {
+    "key": "ui.admin.reports.inv_status_paid",
+    "lang": "fi",
+    "text": "maksettu",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 8,
+    "placeholders": [],
+    "reason": "booking_222: raporttirakenne"
+  },
+  {
+    "key": "ui.admin.reports.invoiced_line",
+    "lang": "en",
+    "text": "Invoiced, recorded in Procountor",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 32,
+    "placeholders": [],
+    "reason": "booking_222: raporttirakenne"
+  },
+  {
+    "key": "ui.admin.reports.invoiced_line",
+    "lang": "fi",
+    "text": "Laskutettu, kirjataan Procountorissa",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 36,
+    "placeholders": [],
+    "reason": "booking_222: raporttirakenne"
+  },
+  {
+    "key": "ui.admin.reports.methods_diff_help",
+    "lang": "en",
+    "text": "The difference is not zero. Check a missing receipt or the wrong period before booking.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 87,
+    "placeholders": [],
+    "reason": "booking_222: raporttirakenne"
+  },
+  {
+    "key": "ui.admin.reports.methods_diff_help",
+    "lang": "fi",
+    "text": "Erotus ei ole nolla. Tarkista puuttuva kuitti tai väärä jakso ennen kirjausta.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 78,
+    "placeholders": [],
+    "reason": "booking_222: raporttirakenne"
+  },
+  {
+    "key": "ui.admin.reports.methods_formula",
+    "lang": "en",
+    "text": "Money received and the invoiced amount match sales once gift card sales and redemptions are included. The difference must be zero.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 130,
+    "placeholders": [],
+    "reason": "booking_222: raporttirakenne"
+  },
+  {
+    "key": "ui.admin.reports.methods_formula",
+    "lang": "fi",
+    "text": "Saatu raha ja laskutettu vastaavat myyntiä, kun lahjakortin myynti ja lunastus on otettu huomioon. Erotuksen pitää olla nolla.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 126,
+    "placeholders": [],
+    "reason": "booking_222: raporttirakenne"
+  },
+  {
+    "key": "ui.admin.reports.money_received",
+    "lang": "en",
+    "text": "Money received",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 14,
+    "placeholders": [],
+    "reason": "booking_222: raporttirakenne"
+  },
+  {
+    "key": "ui.admin.reports.money_received",
+    "lang": "fi",
+    "text": "Saatu raha",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 10,
+    "placeholders": [],
+    "reason": "booking_222: raporttirakenne"
+  },
+  {
+    "key": "ui.admin.reports.next_period",
+    "lang": "en",
+    "text": "Next period",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 11,
+    "placeholders": [],
+    "reason": "booking_222: raporttirakenne"
+  },
+  {
+    "key": "ui.admin.reports.next_period",
+    "lang": "fi",
+    "text": "Seuraava jakso",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 14,
+    "placeholders": [],
+    "reason": "booking_222: raporttirakenne"
+  },
+  {
+    "key": "ui.admin.reports.open_help",
+    "lang": "en",
+    "text": "Open is a confirmed order that is still unpaid at the period end. A refund does not reopen a receivable.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 104,
+    "placeholders": [],
+    "reason": "booking_222: raporttirakenne"
+  },
+  {
+    "key": "ui.admin.reports.open_help",
+    "lang": "fi",
+    "text": "Avoin on vahvistettu tilaus, jota ei ole maksettu jakson loppuun mennessä. Hyvitys ei avaa saatavaa uudelleen.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 110,
+    "placeholders": [],
+    "reason": "booking_222: raporttirakenne"
+  },
+  {
+    "key": "ui.admin.reports.open_title",
+    "lang": "en",
+    "text": "Open payments",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 13,
+    "placeholders": [],
+    "reason": "booking_222: raporttirakenne"
+  },
+  {
+    "key": "ui.admin.reports.open_title",
+    "lang": "fi",
+    "text": "Avoimet maksut",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 14,
+    "placeholders": [],
+    "reason": "booking_222: raporttirakenne"
+  },
+  {
+    "key": "ui.admin.reports.pdf_invoices",
+    "lang": "en",
+    "text": "Invoice report",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 14,
+    "placeholders": [],
+    "reason": "booking_222: raporttirakenne"
+  },
+  {
+    "key": "ui.admin.reports.pdf_invoices",
+    "lang": "fi",
+    "text": "Laskuraportti",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 13,
+    "placeholders": [],
+    "reason": "booking_222: raporttirakenne"
+  },
+  {
+    "key": "ui.admin.reports.pdf_methods",
+    "lang": "en",
+    "text": "Payment method report",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 21,
+    "placeholders": [],
+    "reason": "booking_222: raporttirakenne"
+  },
+  {
+    "key": "ui.admin.reports.pdf_methods",
+    "lang": "fi",
+    "text": "Maksutaparaportti",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 17,
+    "placeholders": [],
+    "reason": "booking_222: raporttirakenne"
+  },
+  {
+    "key": "ui.admin.reports.pdf_service",
+    "lang": "en",
+    "text": "Service date report",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 19,
+    "placeholders": [],
+    "reason": "booking_222: raporttirakenne"
+  },
+  {
+    "key": "ui.admin.reports.pdf_service",
+    "lang": "fi",
+    "text": "Palvelupäiväraportti",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 20,
+    "placeholders": [],
+    "reason": "booking_222: raporttirakenne"
+  },
+  {
+    "key": "ui.admin.reports.period",
+    "lang": "en",
+    "text": "Period",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 6,
+    "placeholders": [],
+    "reason": "booking_222: raporttirakenne"
+  },
+  {
+    "key": "ui.admin.reports.period",
+    "lang": "fi",
+    "text": "Jakso",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 5,
+    "placeholders": [],
+    "reason": "booking_222: raporttirakenne"
+  },
+  {
+    "key": "ui.admin.reports.picker",
+    "lang": "en",
+    "text": "Report",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 6,
+    "placeholders": [],
+    "reason": "booking_222: raporttirakenne"
+  },
+  {
+    "key": "ui.admin.reports.picker",
+    "lang": "fi",
+    "text": "Raportti",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 8,
+    "placeholders": [],
+    "reason": "booking_222: raporttirakenne"
+  },
+  {
+    "key": "ui.admin.reports.prev_period",
+    "lang": "en",
+    "text": "Previous period",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 15,
+    "placeholders": [],
+    "reason": "booking_222: raporttirakenne"
+  },
+  {
+    "key": "ui.admin.reports.prev_period",
+    "lang": "fi",
+    "text": "Edellinen jakso",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 15,
+    "placeholders": [],
+    "reason": "booking_222: raporttirakenne"
+  },
+  {
+    "key": "ui.admin.reports.r_fees",
+    "lang": "en",
+    "text": "Fee report",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 10,
+    "placeholders": [],
+    "reason": "booking_222: raporttirakenne"
+  },
+  {
+    "key": "ui.admin.reports.r_fees",
+    "lang": "fi",
+    "text": "Provisioraportti",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 16,
+    "placeholders": [],
+    "reason": "booking_222: raporttirakenne"
+  },
+  {
+    "key": "ui.admin.reports.r_fees_help",
+    "lang": "en",
+    "text": "Payment provider fees for the period. Gift cards and Johku are excluded.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 72,
+    "placeholders": [],
+    "reason": "booking_222: raporttirakenne"
+  },
+  {
+    "key": "ui.admin.reports.r_fees_help",
+    "lang": "fi",
+    "text": "Maksuvälittäjän provisio jaksolta. Lahjakortti ja Johku eivät ole mukana.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 73,
+    "placeholders": [],
+    "reason": "booking_222: raporttirakenne"
+  },
+  {
+    "key": "ui.admin.reports.r_giftcards",
+    "lang": "en",
+    "text": "Gift card report",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 16,
+    "placeholders": [],
+    "reason": "booking_222: raporttirakenne"
+  },
+  {
+    "key": "ui.admin.reports.r_giftcards",
+    "lang": "fi",
+    "text": "Lahjakorttiraportti",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 19,
+    "placeholders": [],
+    "reason": "booking_222: raporttirakenne"
+  },
+  {
+    "key": "ui.admin.reports.r_giftcards_help",
+    "lang": "en",
+    "text": "Balance of own paid gift cards at the period end. Complimentary cards are not in the books.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 91,
+    "placeholders": [],
+    "reason": "booking_222: raporttirakenne"
+  },
+  {
+    "key": "ui.admin.reports.r_giftcards_help",
+    "lang": "fi",
+    "text": "Omien maksettujen lahjakorttien saldo jakson lopussa. Maksuttomat kortit eivät ole kirjanpidossa.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 97,
+    "placeholders": [],
+    "reason": "booking_222: raporttirakenne"
+  },
+  {
+    "key": "ui.admin.reports.r_invoices",
+    "lang": "en",
+    "text": "Invoice report",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 14,
+    "placeholders": [],
+    "reason": "booking_222: raporttirakenne"
+  },
+  {
+    "key": "ui.admin.reports.r_invoices",
+    "lang": "fi",
+    "text": "Laskuraportti",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 13,
+    "placeholders": [],
+    "reason": "booking_222: raporttirakenne"
+  },
+  {
+    "key": "ui.admin.reports.r_invoices_help",
+    "lang": "en",
+    "text": "Invoices by invoice date. The accountant books these until the invoice is sent to Procountor.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 93,
+    "placeholders": [],
+    "reason": "booking_222: raporttirakenne"
+  },
+  {
+    "key": "ui.admin.reports.r_invoices_help",
+    "lang": "fi",
+    "text": "Laskut laskun päivältä. Kirjanpitäjä kirjaa nämä, kunnes lasku lähtee Procountoriin.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 84,
+    "placeholders": [],
+    "reason": "booking_222: raporttirakenne"
+  },
+  {
+    "key": "ui.admin.reports.r_methods",
+    "lang": "en",
+    "text": "Payment method report",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 21,
+    "placeholders": [],
+    "reason": "booking_222: raporttirakenne"
+  },
+  {
+    "key": "ui.admin.reports.r_methods",
+    "lang": "fi",
+    "text": "Maksutaparaportti",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 17,
+    "placeholders": [],
+    "reason": "booking_222: raporttirakenne"
+  },
+  {
+    "key": "ui.admin.reports.r_methods_help",
+    "lang": "en",
+    "text": "Money received by method, with invoiced amounts on a separate line. The difference must be zero.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 96,
+    "placeholders": [],
+    "reason": "booking_222: raporttirakenne"
+  },
+  {
+    "key": "ui.admin.reports.r_methods_help",
+    "lang": "fi",
+    "text": "Saatu raha maksutavoittain ja laskutettu erikseen. Erotuksen pitää olla nolla.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 78,
+    "placeholders": [],
+    "reason": "booking_222: raporttirakenne"
+  },
+  {
+    "key": "ui.admin.reports.r_refunds",
+    "lang": "en",
+    "text": "Refund follow-up",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 16,
+    "placeholders": [],
+    "reason": "booking_222: raporttirakenne"
+  },
+  {
+    "key": "ui.admin.reports.r_refunds",
+    "lang": "fi",
+    "text": "Hyvitysten seuranta",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 19,
+    "placeholders": [],
+    "reason": "booking_222: raporttirakenne"
+  },
+  {
+    "key": "ui.admin.reports.r_refunds_help",
+    "lang": "en",
+    "text": "Open refunds in follow-up. The link opens the follow-up view.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 61,
+    "placeholders": [],
+    "reason": "booking_222: raporttirakenne"
+  },
+  {
+    "key": "ui.admin.reports.r_refunds_help",
+    "lang": "fi",
+    "text": "Avoimet hyvitykset seurannassa. Linkki avaa seurannan.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 54,
+    "placeholders": [],
+    "reason": "booking_222: raporttirakenne"
+  },
+  {
+    "key": "ui.admin.reports.r_sales",
+    "lang": "en",
+    "text": "Sales report",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 12,
+    "placeholders": [],
+    "reason": "booking_222: raporttirakenne"
+  },
+  {
+    "key": "ui.admin.reports.r_sales",
+    "lang": "fi",
+    "text": "Myyntiraportti",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 14,
+    "placeholders": [],
+    "reason": "booking_222: raporttirakenne"
+  },
+  {
+    "key": "ui.admin.reports.r_sales_help",
+    "lang": "en",
+    "text": "Sales and VAT on the receipt date. Invoices and gift card sales are not included.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 81,
+    "placeholders": [],
+    "reason": "booking_222: raporttirakenne"
+  },
+  {
+    "key": "ui.admin.reports.r_sales_help",
+    "lang": "fi",
+    "text": "Myynti ja arvonlisävero kuitin päivältä. Laskut ja lahjakortin myynti eivät ole tässä.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 86,
+    "placeholders": [],
+    "reason": "booking_222: raporttirakenne"
+  },
+  {
+    "key": "ui.admin.reports.r_service",
+    "lang": "en",
+    "text": "Service date report",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 19,
+    "placeholders": [],
+    "reason": "booking_222: raporttirakenne"
+  },
+  {
+    "key": "ui.admin.reports.r_service",
+    "lang": "fi",
+    "text": "Palvelupäiväraportti",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 20,
+    "placeholders": [],
+    "reason": "booking_222: raporttirakenne"
+  },
+  {
+    "key": "ui.admin.reports.r_service_help",
+    "lang": "en",
+    "text": "Sales by service date. Advances are shown separately.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 53,
+    "placeholders": [],
+    "reason": "booking_222: raporttirakenne"
+  },
+  {
+    "key": "ui.admin.reports.r_service_help",
+    "lang": "fi",
+    "text": "Myynti palvelupäivän mukaan. Ennakot näytetään erikseen.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 56,
+    "placeholders": [],
+    "reason": "booking_222: raporttirakenne"
+  },
+  {
+    "key": "ui.admin.reports.r_stats",
+    "lang": "en",
+    "text": "Overall statistics",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 18,
+    "placeholders": [],
+    "reason": "booking_222: raporttirakenne"
+  },
+  {
+    "key": "ui.admin.reports.r_stats",
+    "lang": "fi",
+    "text": "Kokonaistilastot",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 16,
+    "placeholders": [],
+    "reason": "booking_222: raporttirakenne"
+  },
+  {
+    "key": "ui.admin.reports.r_stats_help",
+    "lang": "en",
+    "text": "Johku and other statistics. This is not booked in the accounts.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 63,
+    "placeholders": [],
+    "reason": "booking_222: raporttirakenne"
+  },
+  {
+    "key": "ui.admin.reports.r_stats_help",
+    "lang": "fi",
+    "text": "Johku ja muut tilastot. Tätä ei kirjata kirjanpitoon.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 53,
+    "placeholders": [],
+    "reason": "booking_222: raporttirakenne"
+  },
+  {
+    "key": "ui.admin.reports.r_transactions",
+    "lang": "en",
+    "text": "Transaction report",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 18,
+    "placeholders": [],
+    "reason": "booking_222: raporttirakenne"
+  },
+  {
+    "key": "ui.admin.reports.r_transactions",
+    "lang": "fi",
+    "text": "Tapahtumaraportti",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 17,
+    "placeholders": [],
+    "reason": "booking_222: raporttirakenne"
+  },
+  {
+    "key": "ui.admin.reports.r_transactions_help",
+    "lang": "en",
+    "text": "Receipt lines and open payments. An open row and a redemption are not in the sales total.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 89,
+    "placeholders": [],
+    "reason": "booking_222: raporttirakenne"
+  },
+  {
+    "key": "ui.admin.reports.r_transactions_help",
+    "lang": "fi",
+    "text": "Kuitin rivit ja avoimet maksut. Avoin rivi ja lunastus eivät ole myynnin summassa.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 82,
+    "placeholders": [],
+    "reason": "booking_222: raporttirakenne"
+  },
+  {
+    "key": "ui.admin.reports.stats_note",
+    "lang": "en",
+    "text": "Not for the books. Johku is statistics only.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 44,
+    "placeholders": [],
+    "reason": "booking_222: raporttirakenne"
+  },
+  {
+    "key": "ui.admin.reports.stats_note",
+    "lang": "fi",
+    "text": "Ei kirjanpitoon. Johku on vain tilasto.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 39,
+    "placeholders": [],
+    "reason": "booking_222: raporttirakenne"
+  },
+  {
+    "key": "ui.admin.reports.today",
+    "lang": "en",
+    "text": "Today",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 5,
+    "placeholders": [],
+    "reason": "booking_222: raporttirakenne"
+  },
+  {
+    "key": "ui.admin.reports.today",
+    "lang": "fi",
+    "text": "Tänään",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 6,
+    "placeholders": [],
+    "reason": "booking_222: raporttirakenne"
+  },
+  {
+    "key": "ui.admin.reports.tx_excluded_note",
+    "lang": "en",
+    "text": "Open rows and redemptions are shown, but they are not in the sales or refund totals.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 84,
+    "placeholders": [],
+    "reason": "booking_222: raporttirakenne"
+  },
+  {
+    "key": "ui.admin.reports.tx_excluded_note",
+    "lang": "fi",
+    "text": "Avoin rivi ja lunastus näytetään, mutta ne eivät ole myynnin tai hyvitysten summassa.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 85,
+    "placeholders": [],
+    "reason": "booking_222: raporttirakenne"
+  },
+  {
+    "key": "ui.admin.reports.tx_sum_net",
+    "lang": "en",
+    "text": "Net",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 3,
+    "placeholders": [],
+    "reason": "booking_222: raporttirakenne"
+  },
+  {
+    "key": "ui.admin.reports.tx_sum_net",
+    "lang": "fi",
+    "text": "Netto",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 5,
+    "placeholders": [],
+    "reason": "booking_222: raporttirakenne"
+  },
+  {
+    "key": "ui.admin.reports.tx_sum_refunds",
+    "lang": "en",
+    "text": "Refunds total",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 13,
+    "placeholders": [],
+    "reason": "booking_222: raporttirakenne"
+  },
+  {
+    "key": "ui.admin.reports.tx_sum_refunds",
+    "lang": "fi",
+    "text": "Hyvitykset yhteensä",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 19,
+    "placeholders": [],
+    "reason": "booking_222: raporttirakenne"
+  },
+  {
+    "key": "ui.admin.reports.tx_sum_sales",
+    "lang": "en",
+    "text": "Sales total",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 11,
+    "placeholders": [],
+    "reason": "booking_222: raporttirakenne"
+  },
+  {
+    "key": "ui.admin.reports.tx_sum_sales",
+    "lang": "fi",
+    "text": "Myynti yhteensä",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 15,
+    "placeholders": [],
+    "reason": "booking_222: raporttirakenne"
+  },
+  {
+    "key": "ui.admin.reports.yesterday",
+    "lang": "en",
+    "text": "Yesterday",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 9,
+    "placeholders": [],
+    "reason": "booking_222: raporttirakenne"
+  },
+  {
+    "key": "ui.admin.reports.yesterday",
+    "lang": "fi",
+    "text": "Eilen",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 5,
+    "placeholders": [],
+    "reason": "booking_222: raporttirakenne"
+  }
+]

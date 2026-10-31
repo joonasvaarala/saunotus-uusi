@@ -55,7 +55,7 @@ export async function render({ ctx, reload, query }) {
   const factories = {
     orders: () => createOrdersTab({ api, ctx, gift, rpc }),   // booking_173: rpc kumppanilahjakortin laatikolle
     payments: () => createPaymentsTab({ api, ctx, onOpenOrder: (no) => { select('orders'); tabs.orders.setSearch(String(no)); } }),
-    reports: () => createReportsTab({ api, canFull }),
+    reports: () => createReportsTab({ api, canFull, ctx }),
     analytics: () => createAnalyticsTab(),   // Paketti 11: Kävijät (reports.daily/reports.view), admin_analytics_summary
     vouchers: () => createVouchersTab({ api, vouchers, ctx, onOpenOrder: (no) => { select('orders'); tabs.orders.setSearch(String(no), { open: true }); } }),
     giftcards: () => createGiftcardsTab({ api, gift, ctx, onOpenOrder: (no) => { select('orders'); tabs.orders.setSearch(String(no), { open: true }); } }),

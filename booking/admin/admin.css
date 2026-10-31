@@ -548,6 +548,11 @@ input[aria-invalid=true],select[aria-invalid=true],textarea[aria-invalid=true]{b
 .tl-segs{display:flex;border:1px solid var(--green);border-radius:8px;overflow:hidden;background:#fff}
 .tl-seg{flex:1;min-height:44px;padding:0 14px;border:0;background:#fff;color:var(--green);font:600 14px/1.2 inherit;font-family:inherit;cursor:pointer}.tl-seg[aria-checked=true]{background:var(--green);color:#fff}
 .tl-r-controls .tl-actions{grid-column:1/-1;margin:0}.tl-r-controls>.fld:first-child{grid-column:1/-1}.tl-seg{white-space:normal}
+.tl-report-picker{display:flex;flex-direction:column;gap:10px}
+.tl-report-group{display:flex;flex-direction:column;gap:4px}
+.tl-report-group>span{font-size:12px;font-weight:700}
+.tl-report-picker .tl-seg,.tl-report-picker a.tl-seg{display:block;text-align:left;border:1px solid var(--green);border-radius:8px;text-decoration:none}
+.tl-report-picker .tl-seg[disabled]{opacity:.45;cursor:not-allowed}
 .badge.pay-refunded,.badge.pay-partially_refunded{background:#EDE3D0;color:#4a3418}
 @media(max-width:699px){
   .tl-table thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}

@@ -106,7 +106,7 @@ test('Mock-palvelin: raportit täsmäävät (päivä ↔ kuukausi, ALV, maksutav
   assert.ok(GROUPS.includes(ag.lines[0].group));
   await assert.rejects(() => R('admin_report_daily', { p_date: 'x' }), (e) => e.code === 'invalid_date');
   const csv = await R('admin_report_csv', { p_from: '2026-10-10', p_to: '2026-10-10' });
-  assert.equal(csv.content.charCodeAt(0), 0xFEFF); assert.equal(csv.content.split('\r\n')[0].slice(1), 'tosite;pvm;asiakas;tuote;maara;netto;alv_%;alv_eur;brutto;maksutapa;tila;laji'); assert.equal(csv.content.trim().split('\r\n').length - 1, d.lines.length);
+  assert.equal(csv.content.charCodeAt(0), 0xFEFF); assert.equal(csv.content.split('\r\n')[0].slice(1), 'tosite;pvm;asiakas;tuote;maara;netto;alv_%;alv_eur;brutto;maksutapa;tila;laji'); assert.equal(csv.content.trim().split('\r\n').length - 1, d.lines.length + d.open.rows.length);
   assert.equal(Math.round(d.reconciliation.difference * 100), 0);
   assert.ok(Array.isArray(d.by_product) && Array.isArray(d.refunds_by_product));
   assert.equal(S(d.vat_summary, 'gross'), c(d.reconciliation.product_gross));
@@ -115,8 +115,10 @@ test('Mock-palvelin: raportit täsmäävät (päivä ↔ kuukausi, ALV, maksutav
   assert.equal(sumDay.content.includes('maksutapa;'), false);
   assert.equal(sumDay.content.includes('tasmaytys;tuotteet'), true);
   const sumMonth = await R('admin_report_csv', { p_from: '2026-10-01', p_to: '2026-10-31', p_kind: 'summary' });
-  assert.equal(sumMonth.content.includes('\r\nmaksutapa;'), true);
-  assert.equal(sumMonth.content.includes('lahjakortti_maksuton;myonnetty'), true);
+  assert.equal(sumMonth.content.includes('\r\nmaksutapa;'), false);
+  assert.equal(sumMonth.content.includes('johku_loppusaldo'), false);
+  assert.equal(sumMonth.content.includes('tasmaytys;maksutavat'), false);
+  assert.equal(sumMonth.content.includes('lahjakortti_maksuton;myonnetty'), false);
 });
 test('Mock-palvelin: kirjoittavat RPC:t palauttavat sopimuksen muodot ja tarkistavat summat', async () => {
   const un = mock.orders.find((o) => o.is_native && o.payment_status === 'unpaid' && o.unpaid_amount > 0), pd = mock.orders.find((o) => o.is_native && o.payment_status === 'paid' && o.payments.length);
@@ -198,7 +200,7 @@ test('Datakerros: puuttuva RPC → vain se toiminto mockiin + ilmoitus; muu virh
 test('Datakerros: CSV = palvelimen admin_report_csv (12 saraketta, booking_34)', async () => {
   const api = A.createTalousApi({ mock: true, mockFactory: () => mock });
   const rep = await api.reportMonthly('2026-09'); const c = await api.reportCsv(rep);
-  assert.equal(c.source, 'server'); assert.ok(c.content.slice(1).startsWith(CSV_COLUMNS.join(';'))); assert.equal(c.content.trim().split('\r\n').length - 1, rep.lines.length);
+  assert.equal(c.source, 'server'); assert.ok(c.content.slice(1).startsWith(CSV_COLUMNS.join(';'))); assert.equal(c.content.trim().split('\r\n').length - 1, rep.lines.length + (rep.open?.rows?.length || 0));
   const noLines = { ...rep, lines: null }; const s = await api.reportCsv(noLines);
   assert.equal(s.source, 'server'); assert.equal(s.filename, 'tapahtumat_2026-09-01_2026-09-30.csv'); assert.ok(s.content.startsWith('\uFEFFtosite;pvm;asiakas;tuote;maara'));
 });

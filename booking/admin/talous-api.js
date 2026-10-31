@@ -13,7 +13,7 @@ import { createMock } from './talous-mock.js';
 export const RPC = {
   listOrders: 'admin_list_orders', getOrder: 'admin_get_order', listPayments: 'admin_list_payments', listAddons: 'admin_list_addons',
   addToOrder: 'admin_add_to_order', createPaymentLink: 'admin_create_payment_link', refund: 'admin_refund', refundOrder: 'admin_refund_order', reservationRefundPreview: 'admin_reservation_refund_preview', cancelReservation: 'admin_cancel_reservation', recordPayment: 'admin_record_payment', listVatRates: 'admin_list_vat_rates',
-  reportDaily: 'admin_report_daily', reportMonthly: 'admin_report_month', reportRange: 'admin_report_range', reportTransactions: 'admin_report_transactions', reportGiftCards: 'admin_report_gift_cards', reportCsv: 'admin_report_csv', reportAccrual: 'admin_report_accrual', reportAccrualCsv: 'admin_report_accrual_csv', reportProviderFees: 'admin_report_provider_fees', salesChart: 'admin_sales_chart',
+  reportDaily: 'admin_report_daily', reportMonthly: 'admin_report_month', reportRange: 'admin_report_range', reportTransactions: 'admin_report_transactions', reportGiftCards: 'admin_report_gift_cards', reportCsv: 'admin_report_csv', reportAccrual: 'admin_report_accrual', reportAccrualCsv: 'admin_report_accrual_csv', reportInvoices: 'admin_report_invoices', reportProviderFees: 'admin_report_provider_fees', salesChart: 'admin_sales_chart',
   getReceipt: 'admin_get_receipt', resendReceipt: 'admin_resend_receipt',
   annualCardForOrder: 'admin_annual_card_for_order',   // booking_146: tilauksen vuosikortti + koodin sähköpostin tila
 };
@@ -153,7 +153,7 @@ export function normReport(r) {
     } : null,
     receipts: Array.isArray(r.receipts) ? r.receipts.map((x) => ({ receipt_no: x.receipt_no, kind: x.kind, issued_at: x.issued_at, order_no: x.order_no ?? null, method: x.method, gross: num(x.gross), net: num(x.net), vat: num(x.vat) })) : null,
     by_day: Array.isArray(r.by_day) ? r.by_day.map((d) => ({ date: d.date, receipts: num(d.receipts), gross: num(d.gross), vat: num(d.vat), refunds: num(d.refunds) })) : null,
-    open: { orders: num(r.open?.orders), unpaid: num(r.open?.unpaid) },
+    open: { orders: num(r.open?.orders), unpaid: num(r.open?.unpaid), rows: L(r.open?.rows).map((x) => ({ voucher: x.voucher ?? '', date: x.date ?? '', customer: x.customer ?? '', product: x.product ?? '', quantity: num(x.quantity), net: num(x.net), vat_rate: num(x.vat_rate), vat: num(x.vat), gross: num(x.gross), method: x.method ?? '', method_label: x.method_label ?? '', status: x.status === 'open' ? 'open' : 'paid', kind: x.kind === 'refund' ? 'refund' : x.kind === 'redemption' ? 'redemption' : 'sale' })) },
     statistics: { johku: normJohkuStats(r.statistics?.johku) },
     lines: Array.isArray(r.lines) ? r.lines : null };   // rivitaso: vain mock (asiakaspuolen CSV); oikea palvelin ei sitä vielä palauta
 }
@@ -218,11 +218,12 @@ export function rpcBackend(rpc) {
     reportMonthly: (ym) => call('reportMonthly', { p_ym: ym }),
     reportRange: (a) => call('reportRange', { p_from: a.from, p_to: a.to }),
     reportTransactions: (a) => call('reportTransactions', { p_from: a.from, p_to: a.to }),
-    reportGiftCards: (a) => call('reportGiftCards', { p_filter: a.filter, p_format: a.format || 'json' }),
+    reportGiftCards: (a) => call('reportGiftCards', compact({ p_filter: a.filter, p_format: a.format || 'json', p_from: a.from, p_to: a.to })),
     reportCsv: (a) => call('reportCsv', compact({ p_from: a.from, p_to: a.to, p_kind: a.kind || 'lines' })),
     reportProviderFees: (a) => call('reportProviderFees', { p_from: a.from, p_to: a.to, p_format: a.format || 'json' }),
     reportAccrual: (a) => call('reportAccrual', { p_from: a.from, p_to: a.to }),
     reportAccrualCsv: (a) => call('reportAccrualCsv', { p_from: a.from, p_to: a.to }),
+    reportInvoices: (a) => call('reportInvoices', compact({ p_from: a.from, p_to: a.to, p_format: a.format || 'json' })),
     salesChart: (year) => call('salesChart', { p_year: year }),
     getReceipt: (id) => call('getReceipt', { p_receipt_id: id }),
     resendReceipt: (id) => call('resendReceipt', { p_receipt_id: id }),
@@ -302,9 +303,15 @@ export function createTalousApi({ rpc, io = {}, mock = wantsMock(), mockFactory 
     reportMonthly: (ym) => run('reportMonthly', ym, normReport),
     reportRange: (from, to) => run('reportRange', { from, to }, normReport),
     reportAccrual: (from, to) => run('reportAccrual', { from, to }, normAccrual),
+    async reportInvoices(from, to, format = 'json') {
+      const res = await run('reportInvoices', { from, to, format });
+      if (format === 'csv') return { source: 'server', filename: res.filename || `laskut_${from}_${to}.csv`, content: String(res.content ?? ''), mime: res.mime || 'text/csv' };
+      const row = (x) => ({ id: x.id, invoice_no: x.invoice_no ?? '', customer: x.customer ?? '', invoice_date: x.invoice_date, due_date: x.due_date, net: num(x.net), vat: num(x.vat), gross: num(x.gross), vat_breakdown: L(x.vat_breakdown), status: x.status || 'open', paid_at: x.paid_at ?? null, kind: x.kind || 'debit' });
+      return { period: res.period || { from, to, kind: 'invoices' }, invoices: L(res.invoices).map(row), credits: L(res.credits).map(row), totals: { net: num(res.totals?.net), vat: num(res.totals?.vat), gross: num(res.totals?.gross), credit_gross: num(res.totals?.credit_gross) } };
+    },
     async reportAccrualCsv(from, to) {
       const res = await run('reportAccrualCsv', { from, to });
-      return { source: 'server', filename: res.filename || `suorite_${from}_${to}.csv`, content: String(res.content ?? ''), mime: res.mime || 'text/csv' };
+      return { source: 'server', filename: res.filename || `palvelupaiva_${from}_${to}.csv`, content: String(res.content ?? ''), mime: res.mime || 'text/csv' };
     },
     reportTransactions: (from, to) => run('reportTransactions', { from, to }, (r) => ({ period: r.period || { from, to, kind: 'transactions' }, rows: L(r.rows).map((x) => ({
       voucher: x.voucher ?? '', date: x.date ?? '', customer: x.customer ?? '', product: x.product ?? '', quantity: num(x.quantity), net: num(x.net), vat_rate: num(x.vat_rate), vat: num(x.vat), gross: num(x.gross),
@@ -321,13 +328,15 @@ export function createTalousApi({ rpc, io = {}, mock = wantsMock(), mockFactory 
     // Palauttaa { source:'server', filename, content }. (csv.js = asiakaspuolen varakirjoittaja samoille sarakkeille, ei käytössä kun palvelin vastaa.)
     async reportCsv(report, kind = 'lines') {
       const res = await run('reportCsv', { from: report.period.from, to: report.period.to, kind });
-      const prefix = kind === 'summary' ? 'yhteenveto' : kind === 'vat' ? 'myynti_vat' : kind === 'methods' ? 'maksutavat' : 'tapahtumat';
-      return { source: 'server', filename: res.filename || `${prefix}_${report.period.from}_${report.period.to}.csv`, content: String(res.content ?? ''), mime: res.mime || 'text/csv' };
+      const span = `${report.period.from}_${report.period.to}`;
+      const day = report.period.from && report.period.from === report.period.to;
+      const prefix = kind === 'summary' ? (day ? `myynti_${report.period.from}` : `myynti_${span}`) : kind === 'vat' ? `myynti_vat_${span}` : kind === 'methods' ? (day ? `maksutavat_${report.period.from}` : `maksutavat_${span}`) : `tapahtumat_${span}`;
+      return { source: 'server', filename: res.filename || `${prefix}.csv`, content: String(res.content ?? ''), mime: res.mime || 'text/csv' };
     },
     // booking_216: provisio. Puuttuva RPC ei siirrä muita raportteja mockiin (vanha kanta).
     async reportProviderFees(from, to, format = 'json') {
       const norm = (r) => {
-        if (format === 'csv') return { filename: r?.filename || `provisio_${from}_${to}.csv`, content: String(r?.content ?? ''), mime: r?.mime || 'text/csv' };
+        if (format === 'csv') return { filename: r?.filename || `palkkiot_${from}_${to}.csv`, content: String(r?.content ?? ''), mime: r?.mime || 'text/csv' };
         const row = (x) => ({
           provider: x.provider || '', provider_label: x.provider_label || x.provider || '', method: x.method || '', method_label: x.method_label || x.method || '',
           direction: x.direction === 'refund' ? 'refund' : 'sale', basis: ['actual', 'estimated', 'missing'].includes(x.basis) ? x.basis : 'missing',
@@ -345,12 +354,14 @@ export function createTalousApi({ rpc, io = {}, mock = wantsMock(), mockFactory 
       try { return norm(await real.reportProviderFees({ from, to, format })); }
       catch (e) { if (isMissingRpc(e)) return null; throw e; }
     },
-    async reportGiftCards(filter = 'open', format = 'json') {
-      const res = await run('reportGiftCards', { filter, format });
-      if (format === 'csv') return { source: 'server', filename: res.filename || `lahjakortit_${filter}.csv`, content: String(res.content ?? ''), mime: res.mime || 'text/csv' };
+    async reportGiftCards(filter = 'open', format = 'json', from = null, to = null) {
+      const res = await run('reportGiftCards', { filter, format, from, to });
+      if (format === 'csv') return { source: 'server', filename: res.filename || `lahjakortit_${to || 'tilanne'}_${filter}.csv`, content: String(res.content ?? ''), mime: res.mime || 'text/csv' };
       const bucket = (b) => ({ count: num(b?.count), initial: num(b?.initial), balance: num(b?.balance), net: num(b?.net), vat: num(b?.vat), gross: num(b?.gross) });
+      const roll = (b) => ({ opening: num(b?.opening), sold: num(b?.sold), redeemed: num(b?.redeemed), other: num(b?.other), expired: num(b?.expired), closing: num(b?.closing), cards: num(b?.cards), accounting: b?.accounting === true, difference: num(b?.difference) });
       const row = (x) => ({ code_masked: x.code_masked ?? '', buyer: x.buyer ?? '', package: x.package ?? '', initial: num(x.initial), balance: num(x.balance), net: num(x.net), vat_rate: num(x.vat_rate), vat: num(x.vat), gross: num(x.gross), sold_on: x.sold_on ?? null, valid_to: x.valid_to ?? null, status: x.status ?? '', source: x.source ?? '', vat_treatment: x.vat_treatment ?? '', complimentary: x.complimentary === true || x.vat_treatment === 'maksuton' });
-      return { filter: res.filter || filter, own: { rows: L(res.own?.rows).map(row), at_redemption: bucket(res.own?.at_redemption), at_sale: bucket(res.own?.at_sale), complimentary: bucket(res.own?.complimentary) }, johku: { rows: L(res.johku?.rows).map(row), totals: bucket(res.johku?.totals) } };
+      const johku = res.statistics?.johku || res.johku;
+      return { filter: res.filter || filter, period: res.period || { from, to, kind: 'giftcards' }, own: { rows: L(res.own?.rows).map(row), at_redemption: bucket(res.own?.at_redemption), at_sale: bucket(res.own?.at_sale), complimentary: bucket(res.own?.complimentary) }, balance: { native_paid: roll(res.balance?.native_paid), native_complimentary: roll(res.balance?.native_complimentary) }, statistics: { johku: johku ? { rows: L(johku.rows).map(row), totals: bucket(johku.totals), balance: roll(johku.balance) } : null } };
     },
     // ALV-huomautus on vain tiedote: virhe/puuttuva RPC/oikeus puuttuu → null (ei mock-varaa, ei bannerin muutosta)
     listVatRates: async () => { if (!real) return normVatRates(await getMock().listVatRates()); try { return normVatRates(await real.listVatRates()); } catch { return null; } },
@@ -419,10 +430,15 @@ export function createTalousApi({ rpc, io = {}, mock = wantsMock(), mockFactory 
     async reportPdf(report) {
       if (!real || !io.fnBlob) return null;
       const p = report.period || {}, mode = report.pdf || 'summary';
-      const q = mode === 'fees' ? { kind: 'fees', from: p.from, to: p.to }
+      if (mode === 'stats') return null;
+      const day = p.kind === 'day' || (p.from && p.from === p.to);
+      const q = mode === 'invoices' ? { kind: 'invoices', from: p.from, to: p.to }
+        : mode === 'fees' ? { kind: 'fees', from: p.from, to: p.to }
         : mode === 'transactions' ? { kind: 'transactions', from: p.from, to: p.to }
-        : mode === 'giftcards' ? { kind: 'giftcards', filter: report.filter || 'all' }
-        : p.kind === 'day' ? { kind: 'daily', date: p.from }
+        : mode === 'giftcards' ? { kind: 'giftcards', filter: report.filter || 'all', from: p.from, to: p.to }
+        : mode === 'accrual' ? { kind: 'accrual', from: p.from, to: p.to }
+        : mode === 'methods' ? (day ? { kind: 'methods', date: p.from, from: p.from, to: p.from } : { kind: 'methods', from: p.from, to: p.to })
+        : day ? { kind: 'daily', date: p.from }
         : p.kind === 'month' ? { kind: 'month', ym: String(p.from || '').slice(0, 7) }
         : { kind: 'range', from: p.from, to: p.to };
       return io.fnBlob('report-pdf', q);
