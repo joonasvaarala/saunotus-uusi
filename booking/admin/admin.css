@@ -1086,3 +1086,14 @@ body.shot #shell .nav .lbl{display:inline}
 .paylink-watch .paylink-actions .btn{width:auto;min-height:44px}
 .paylink-watch tr.needs-action{box-shadow:inset 4px 0 0 var(--gold)}
 .paylink-watch tr.needs-action td{background:var(--bg)}
+/* PWA: asennusvihje ja päivitys. Kiinteä palkki alavalikon yläpuolella, ei modaali. Vain teeman värit. */
+.pwa-notices{position:fixed;z-index:30;left:12px;right:12px;bottom:calc(72px + env(safe-area-inset-bottom));display:grid;gap:8px;max-width:28rem;margin:0 auto;pointer-events:none}
+.pwa-hint,.pwa-update{pointer-events:auto;display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:10px 12px;background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:var(--r);box-shadow:0 8px 24px rgba(43,58,48,.16)}
+.pwa-hint p,.pwa-update p{margin:0;flex:1;min-width:10rem;font-size:14px}
+.pwa-hint .btn,.pwa-update .btn{min-height:44px}
+@media(min-width:56.25em){
+  .pwa-notices{bottom:16px;left:auto;right:16px}
+}
+@media print{
+  .pwa-notices{display:none!important}
+}

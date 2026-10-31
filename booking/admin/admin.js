@@ -9,6 +9,7 @@ import { needsManualRoute, parseAdminHash } from './reservation-query.js';
 import { resolveAdminPath, compactIdentity, toggleMobileNav, navGroupById, groupAllowed, selectGroupTab, shouldCollapseMobileNav, shouldCollapseOnNavLink } from './admin-navigation.js';
 import { setupQuickSearch } from './quick-search.js';
 import { loadNavTexts, navText } from './nav-texts.js';
+import { startHallintaPwa } from './pwa.js';
 
 const $ = (id) => document.getElementById(id);
 // Kokeilutila: osoite /hallinta/?mock=1 → keinoistunto + selaimen oma mock-data (options-mock.js). EI verkkokutsuja eikä kirjautumista; mikään ei tallennu. Ilman parametria ennallaan.
@@ -207,6 +208,7 @@ document.addEventListener('click', (ev) => {
   if (needsManualRoute(location.hash, href)) { ev.preventDefault(); route(); }
 });
 onAuthChange((s) => { if (!s) { dayModule?.clearDayBundleCache?.(); clearSiteTextsCache(); showLogin(''); } });
+startHallintaPwa();
 // Kutsulinkki (#access_token=…&type=invite): istunto otetaan käyttöön ja käyttäjä asettaa salasanan ennen hallintaan siirtymistä
 if (adoptSessionFromHash()) {
   $('login-screen').hidden = true; $('shell').hidden = true; $('setpw-screen').hidden = false;
