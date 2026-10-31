@@ -21,7 +21,7 @@ export async function buildReportPdf(rep: any, kind: string, lang = "fi", tfn: T
   const TX = (key: string, vars?: Record<string, string | number | null | undefined>) => tfn(key, loc, vars);
   const eur = (n: unknown) => money(n, loc);
   const pdf = await PDFDocument.create();
-  const title = kind === "transactions" ? TX("ui.admin.reports.pdf_transactions") : kind === "giftcards" ? TX("ui.admin.reports.pdf_giftcards") : kind === "fees" ? TX("ui.admin.reports.fee_title") : TX("ui.admin.reports.pdf_summary");
+  const title = kind === "transactions" ? TX("ui.admin.reports.pdf_transactions") : kind === "giftcards" ? TX("ui.admin.reports.pdf_giftcards") : kind === "fees" ? TX("ui.admin.reports.fee_title") : kind === "methods" ? TX("ui.admin.reports.pdf_methods") : kind === "accrual" ? TX("ui.admin.reports.pdf_service") : kind === "invoices" ? TX("ui.admin.reports.pdf_invoices") : TX("ui.admin.reports.r_sales");
   pdf.setTitle(san(title)); pdf.setProducer(san(TX("ui.admin.reports.pdf_heading"))); pdf.setCreator("booking");
   const font = await pdf.embedFont(StandardFonts.Helvetica);
   const bold = await pdf.embedFont(StandardFonts.HelveticaBold);
@@ -46,7 +46,8 @@ export async function buildReportPdf(rep: any, kind: string, lang = "fi", tfn: T
   const from = period.from ? dfi(period.from) : "";
   const to = period.to ? dfi(period.to) : from;
   text(TX("ui.admin.reports.pdf_heading") + " – " + title, M, 13, bold); y -= 16;
-  if (from) { text(TX("ui.admin.reports.pdf_period", { from, to }) + (kind === "fees" ? "" : " · " + TX("ui.admin.reports.basis")), M, 7, font, grey); y -= 18; }
+  const basisKey = kind === "accrual" ? "ui.admin.reports.basis_service" : kind === "giftcards" ? "ui.admin.reports.basis_giftcards" : kind === "invoices" ? "ui.admin.reports.basis_invoices" : "ui.admin.reports.basis_document";
+  if (from) { text(TX("ui.admin.reports.pdf_period", { from, to }) + (kind === "fees" ? "" : " · " + TX(basisKey)), M, 7, font, grey); y -= 18; }
 
   if (kind === "fees") {
     const basis = (b: string) => b === "actual" ? TX("ui.admin.reports.fee_basis_actual") : b === "estimated" ? TX("ui.admin.reports.fee_basis_estimated") : TX("ui.admin.reports.fee_basis_missing");
@@ -73,13 +74,61 @@ export async function buildReportPdf(rep: any, kind: string, lang = "fi", tfn: T
   if (kind === "giftcards") {
     const head = [TX("ui.admin.reports.gc_col_code"), TX("ui.admin.reports.gc_col_buyer"), TX("ui.admin.reports.gc_col_package"), TX("ui.admin.reports.gc_col_initial"), TX("ui.admin.reports.gc_col_balance"), TX("ui.admin.reports.col_net"), TX("ui.admin.reports.col_vat_pct"), TX("ui.admin.reports.col_vat_eur"), TX("ui.admin.reports.col_gross"), TX("ui.admin.reports.gc_col_sold"), TX("ui.admin.reports.gc_col_valid"), TX("ui.admin.reports.gc_col_status")];
     const line = (x: any) => [String(x.code_masked ?? ""), String(x.buyer ?? ""), String(x.package ?? ""), eur(x.initial), eur(x.balance), eur(x.net), rate(x.vat_rate, loc), eur(x.vat), eur(x.gross), dfi(String(x.sold_on ?? "")), x.valid_to ? dfi(String(x.valid_to)) : "", String(x.status ?? "")];
-    const own = rep.own || {}, johku = rep.johku || {};
+    const own = rep.own || {};
     const cols = [0, 78, 160, 280, 350, 410, 470, 520, 570, 640, 700, 760];
+    const roll = (rep.balance && rep.balance.native_paid) || (rep.gift_card_period && rep.gift_card_period.open && rep.gift_card_period.open.native_paid) || {};
+    table(TX("ui.admin.reports.gc_open_title"), [TX("ui.admin.reports.col_product"), TX("ui.admin.reports.gc_opening"), TX("ui.admin.reports.gc_sold_period"), TX("ui.admin.reports.gc_redeemed_period"), TX("ui.admin.reports.gc_expired"), TX("ui.admin.reports.gc_closing")], [0, 160, 240, 320, 400, 515], [
+      [TX("ui.admin.reports.gc_bucket_own"), eur(roll.opening), eur(roll.sold), eur(roll.redeemed), eur(roll.expired), eur(roll.closing)],
+    ]);
     table(TX("ui.admin.reports.gc_own"), head, cols, (own.rows || []).map(line));
-    need(20); text(TX("ui.admin.reports.gc_paid_note"), M, 7, font, grey); y -= 12;
-    if (Number(own.complimentary?.count) > 0) { need(20); text(TX("ui.admin.reports.gc_complimentary"), M, 7, font, grey); y -= 14; }
-    table(TX("ui.admin.reports.gc_johku"), head, cols, (johku.rows || []).map(line));
-    need(24); text(TX("ui.admin.reports.gc_note"), M, 7, font, grey);
+    need(20); text(TX("ui.admin.reports.gc_multi_note"), M, 7, font, grey);
+    return await pdf.save();
+  }
+  if (kind === "invoices") {
+    const head = [TX("ui.admin.reports.inv_no"), TX("ui.admin.reports.col_customer"), TX("ui.admin.reports.col_date"), TX("ui.admin.reports.inv_due"), TX("ui.admin.reports.col_net"), TX("ui.admin.reports.col_vat_eur"), TX("ui.admin.reports.col_gross"), TX("ui.admin.reports.col_status")];
+    const st = (s: string) => TX(`ui.admin.reports.inv_status_${s}`);
+    const line = (x: any) => [String(x.invoice_no ?? ""), String(x.customer ?? ""), dfi(String(x.invoice_date ?? "")), dfi(String(x.due_date ?? "")), eur(x.net), eur(x.vat), eur(x.gross), st(String(x.status ?? "open"))];
+    table(TX("ui.admin.reports.r_invoices"), head, [0, 70, 180, 240, 300, 360, 430, 500], (rep.invoices || []).map(line));
+    table(TX("ui.admin.reports.inv_credits"), head, [0, 70, 180, 240, 300, 360, 430, 500], (rep.credits || []).map(line));
+    return await pdf.save();
+  }
+  if (kind === "accrual") {
+    const t = rep.totals ?? {};
+    const prodHead = [TX("ui.admin.reports.col_product"), TX("ui.admin.reports.col_count"), TX("ui.admin.reports.col_net"), TX("ui.admin.reports.col_gross"), TX("ui.admin.reports.col_vat_eur"), TX("ui.admin.reports.col_vat_pct")];
+    const prodCols = [0, 210, 270, 350, 430, 515];
+    const lineOf = (p: any) => [String(p.product ?? ""), String(p.quantity ?? ""), eur(p.net), eur(p.gross), eur(p.vat), rate(p.rate, loc)];
+    table(TX("ui.admin.reports.sales_list"), prodHead, prodCols, (rep.sales_by_product || []).map(lineOf));
+    table(TX("ui.admin.reports.refunds_by_product"), prodHead, prodCols, (rep.refunds_by_product || []).map(lineOf));
+    const adv = rep.advances || {};
+    table(TX("ui.admin.reports.pdf_service"), ["", TX("ui.admin.reports.col_gross")], [0, 515], [
+      [TX("ui.admin.reports.pdf_sales"), eur(t.gross)],
+      [TX("ui.admin.reports.pdf_refunds"), eur(t.refunds_gross)],
+      [TX("ui.admin.reports.pdf_after"), eur(adv.total_gross)],
+    ]);
+    return await pdf.save();
+  }
+  if (kind === "methods") {
+    const methods = rep.by_method || [];
+    const rates = [...(rep.by_vat || [])].sort((a: any, b: any) => Number(a.rate) - Number(b.rate));
+    const cell = (m: string, rateN: number) => (rep.by_method_vat || []).find((x: any) => x.method === m && Number(x.rate) === Number(rateN));
+    table(TX("ui.admin.reports.payments"), [TX("ui.admin.reports.col_method"), TX("ui.admin.reports.col_gross")], [0, 515], methods.map((m: any) => [String(m.label ?? m.method ?? ""), eur(Number(m.gross ?? 0) + Number(m.refunds ?? 0))]));
+    if (rates.length) {
+      const cols = [0, ...rates.map((_: any, i: number) => 180 + i * 80), 180 + rates.length * 80];
+      table(TX("ui.admin.reports.by_vat"), [TX("ui.admin.reports.col_method"), ...rates.map((v: any) => rate(v.rate, loc)), TX("ui.admin.reports.total")], cols, methods.map((m: any) => [String(m.label ?? m.method ?? ""), ...rates.map((v: any) => { const c = cell(m.method, v.rate); return c ? eur(c.gross) : "–"; }), eur((rep.by_method_vat || []).filter((x: any) => x.method === m.method).reduce((s: number, x: any) => s + Number(x.gross || 0), 0))]));
+    }
+    const rec = rep.reconciliation || {};
+    const money = rec.money_received ?? 0;
+    const diff = rec.methods_difference ?? 0;
+    table(TX("ui.admin.reports.reconcile"), ["", TX("ui.admin.reports.col_gross")], [0, 515], [
+      [TX("ui.admin.reports.money_received"), eur(money)],
+      [TX("ui.admin.reports.pdf_after"), eur(rep.totals?.gross_after_refunds)],
+      [TX("ui.admin.reports.gc_redemptions_row"), eur(rec.gift_card_redemptions)],
+      [TX("ui.admin.reports.gc_sales_row"), eur(rec.gift_card_sales)],
+      [TX("ui.admin.reports.invoiced_line"), eur(rec.invoiced)],
+      [TX("ui.admin.reports.reconcile_diff"), eur(diff)],
+    ]);
+    const opens = (rep.open && rep.open.rows) || [];
+    table(TX("ui.admin.reports.open_title"), [TX("ui.admin.reports.col_voucher"), TX("ui.admin.reports.col_customer"), TX("ui.admin.reports.col_gross")], [0, 180, 400], opens.map((x: any) => [String(x.voucher ?? ""), String(x.customer ?? ""), eur(x.gross)]));
     return await pdf.save();
   }
 
@@ -111,27 +160,9 @@ export async function buildReportPdf(rep: any, kind: string, lang = "fi", tfn: T
   need(28); text(TX("ui.admin.reports.vat_breakdown_note"), M, 7, font, grey); y -= 16;
   const gcp = rep.gift_card_period || {};
   const sold = gcp.sold || {};
-  const comp = gcp.complimentary || {};
-  const pre = rep.prepaid_redemptions || {};
   need(20); text(TX("ui.admin.reports.gc_summary_title"), M, 12, bold); y -= 16;
-  table(TX("ui.admin.reports.gc_sold"), prodHead, prodCols, (sold.lines || []).map(lineOf));
-  need(28); text(TX("ui.admin.reports.gc_sold_note"), M, 7, font, grey); y -= 16;
-  table(TX("ui.admin.reports.gc_redeemed"), prodHead, prodCols, (pre.lines || []).map(lineOf));
-  need(28); text(TX("ui.admin.reports.prepaid_note"), M, 7, font, grey); y -= 16;
-  table(TX("ui.admin.reports.gc_complimentary_title"), [TX("ui.admin.reports.col_product"), TX("ui.admin.reports.col_count"), TX("ui.admin.reports.col_gross")], [0, 250, 515], [
-    [TX("ui.admin.reports.gc_comp_issued"), String(comp.issued_count ?? 0), eur(comp.issued_gross)],
-    [TX("ui.admin.reports.gc_comp_redeemed"), String(comp.redeemed_count ?? 0), eur(comp.redeemed_gross)],
-  ]);
-  need(28); text(TX("ui.admin.reports.gc_comp_note"), M, 7, font, grey); y -= 16;
-  const open = (rep.gift_card_period || {}).open || {};
-  const openRow = (key: string, label: string) => { const b = open[key] || {}; return [label, eur(b.opening), eur(b.sold), eur(b.redeemed), eur(b.expired), eur(b.closing)]; };
-  table(TX("ui.admin.reports.gc_open_title"), [TX("ui.admin.reports.col_product"), TX("ui.admin.reports.gc_opening"), TX("ui.admin.reports.gc_sold_period"), TX("ui.admin.reports.gc_redeemed_period"), TX("ui.admin.reports.gc_expired"), TX("ui.admin.reports.gc_closing")], [0, 160, 240, 320, 400, 515], [
-    openRow("native_paid", TX("ui.admin.reports.gc_bucket_own")),
-    openRow("native_complimentary", TX("ui.admin.reports.gc_bucket_free")),
-    openRow("johku", TX("ui.admin.reports.gc_bucket_johku")),
-  ]);
-  need(28); text(TX("ui.admin.reports.gc_johku_liability"), M, 7, font, grey); y -= 16;
-  table(TX("ui.admin.reports.payments"), [TX("ui.admin.reports.col_method"), TX("ui.admin.reports.col_gross")], [0, 515], (rep.by_method || []).map((m: any) => [String(m.label ?? m.method ?? ""), eur(Number(m.gross ?? 0) + Number(m.refunds ?? 0))]));
+  table(TX("ui.admin.reports.gc_sold"), [TX("ui.admin.reports.col_product"), TX("ui.admin.reports.col_count"), TX("ui.admin.reports.col_gross")], [0, 250, 515], (sold.lines || []).map((p: any) => [String(p.product ?? ""), String(p.quantity ?? ""), eur(p.gross)]));
+  need(28); text(TX("ui.admin.reports.gc_multi_note"), M, 7, font, grey); y -= 16;
   const rec = rep.reconciliation;
   if (rec) {
     const rows = [
@@ -139,16 +170,11 @@ export async function buildReportPdf(rep: any, kind: string, lang = "fi", tfn: T
       [TX("ui.admin.reports.reconcile_refunds"), eur(rec.refunds_gross)],
       [TX("ui.admin.reports.reconcile_products"), eur(rec.product_gross)],
     ];
-    rows.push([TX("ui.admin.reports.reconcile_payments"), eur(rec.payments_gross)]);
-    rows.push([TX("ui.admin.reports.reconcile_diff"), eur(rec.difference)]);
-    if (rec.methods_net != null) rows.push([TX("ui.admin.reports.pay_net"), eur(rec.methods_net)]);
     if (Math.abs(Number(rec.vat_rounding ?? 0)) >= 0.005 || rec.rounding_code) rows.push([TX("ui.admin.reports.rounding_row"), eur(rec.vat_rounding)]);
     if (Math.abs(Number(rec.cash_rounding ?? 0)) >= 0.005) rows.push([TX("ui.admin.reports.cash_rounding"), eur(rec.cash_rounding)]);
     table(TX("ui.admin.reports.reconcile"), ["", TX("ui.admin.reports.col_gross")], [0, 515], rows);
     if (rec.rounding_code) { need(28); text(TX("ui.admin.reports.vat_rounding_note"), M, 7, font, grey); y -= 16; }
   }
   if (rep.by_day) table(TX("ui.admin.reports.day"), [TX("ui.admin.reports.col_date"), TX("ui.admin.reports.col_gross")], [0, 515], rep.by_day.map((d: any) => [dfi(d.date), eur(d.gross)]));
-  const op = rep.open ?? {};
-  if (Number(op.orders) > 0) { need(24); text(`${TX("ui.admin.reports.status_open")}: ${op.orders} · ${eur(op.unpaid)}`, M, 8, font, grey); y -= 12; text(TX("ui.admin.reports.open_note"), M, 7, font, grey); }
   return await pdf.save();
 }

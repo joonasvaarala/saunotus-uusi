@@ -90,7 +90,8 @@ begin
   inv := booking.admin_mark_invoice_paid((inv ->> 'id')::bigint);
   perform public.t90_ck(inv ->> 'status' = 'paid', 'M1: lasku merkitty maksetuksi');
   perform public.t90_ck((select payment_status from booking.orders where id = o_id) = 'paid', 'M2: tilauksen maksutila on paid');
-  perform public.t90_ck(exists (select 1 from booking.receipts rc join booking.payments p on p.id = rc.payment_id where p.order_id = o_id and p.method = 'invoice' and rc.kind = 'receipt'), 'M3: kuitti syntyi');
+  perform public.t90_ck(not exists (select 1 from booking.receipts rc join booking.payments p on p.id = rc.payment_id where p.order_id = o_id and p.method = 'invoice' and rc.kind = 'receipt'), 'M3: laskun maksu ei luo K-kuittia');
+  perform public.t90_ck(exists (select 1 from booking.audit_log a where a.action = 'INVOICE_MARK_PAID' and a.row_pk = inv ->> 'id'), 'M3b: maksun kirjausketju');
   perform public.t90_ck((booking.admin_list_orders(p_search => '990901', p_payment_filter => 'paid') ->> 'total')::int = 1, 'M4: maksetut-suodatin löytää tilauksen');
   perform public.t90_logout();
   perform public.t90_ck(public.t90_try(format('update booking.invoice_lines set description = %L where invoice_id = %s', 'muutos', inv ->> 'id')) = 'invoice_locked', 'S6: rivit lukossa lähetyksen jälkeen');

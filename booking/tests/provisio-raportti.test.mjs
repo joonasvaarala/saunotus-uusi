@@ -113,6 +113,8 @@ test('migraatio booking_216, rollback, SQL-testi ja hallinnan kytkentä', () => 
   assert.match(rb, /drop function if exists booking\.admin_report_provider_fees/);
   assert.match(rb, /drop column if exists provider_fee/);
   assert.match(src('supabase/tests/talous/t216_payment_provider_fees.sql'), /TESTRESULT/);
+  assert.match(src('supabase/migrations/20261031120000_booking_222_report_structure.sql'), /p\.method is distinct from 'gift_card'/);
+  assert.match(src('admin/talous-mock.js'), /method !== 'gift_card'|gift_card/);
   assert.match(src('admin/views/talous-reports.js'), /reportProviderFees/);
   assert.match(src('admin/views/talous-reports.js'), /data-testid': 'r-fees'/);
   assert.match(src('admin/views/settings.js'), /feeRulesCard/);

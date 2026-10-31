@@ -217,6 +217,8 @@ async function johkuChecks(page, name, vp, lang, T) {
   if ((await page.locator('[data-testid=payments-dir]').getAttribute('data-dir')) === 'asc') { await page.click('[data-testid=payments-dir]'); await page.waitForTimeout(300); }   // suunta takaisin oletukseen (uusin ensin)
   // --- Raportit: kuluva kuukausi/päivä (ei Johku-myyntiä → "ei myyntiä" -tila, kirjanpitoluvut ennallaan) ---
   await page.click('[data-testid=tab-reports-btn]'); await page.waitForSelector('[data-testid=r-gross]');
+  expect(await page.locator('[data-testid=r-johku]').count() === 0, `${name}: myyntiraportissa ei Johkua`);
+  await page.click('[data-testid=r-report-stats]'); await page.waitForSelector('[data-testid=r-johku]');
   expect(await page.locator('[data-testid=r-johku]').count() === 1 && (await page.locator('[data-testid=r-johku] h3').innerText()) === T['r.johku.title'], `${name}: Raportit: Johku-lohko (otsikko)`);
   expect(await page.locator('[data-testid=r-johku]').evaluate((el) => !el.closest('.tl-stats') && !el.querySelector('[data-testid=r-gross]') && el.classList.contains('tl-noprint')), `${name}: Johku-lohko erillään ja pois tulosteesta`);
   expect(/./.test(await page.locator('[data-testid=r-johku] .tl-johku-note').innerText()) && (await page.locator('[data-testid=r-johku] .tl-johku-note').innerText()) === T['r.johku.note'], `${name}: Johku-lohkon selite`);
@@ -229,7 +231,7 @@ async function johkuChecks(page, name, vp, lang, T) {
   expect((await rj('rj-gross')) === fmtFi(J.gross) && (await rj('rj-gross-n')) === T['r.johku.perOrders'].replace('{n}', J.orders.toLocaleString(lang === 'fi' ? 'fi-FI' : 'en-US').replace(nbsp, ' ')) && (await rj('rj-refunded')) === fmtFi(J.refunded_gross) && (await rj('rj-refunded-n')) === T['r.johku.perOrders'].replace('{n}', J.refunded_orders.toLocaleString(lang === 'fi' ? 'fi-FI' : 'en-US').replace(nbsp, ' ')), `${name}: Johku-luvut vastaavat statistics.johku (${await rj('rj-gross')} / ${J.gross})`);
   const mrows = await page.locator('[data-testid=rj-by-method] tbody tr').count();
   expect(mrows === J.by_method.length, `${name}: Johku-maksutavat ${mrows}/${J.by_method.length}`);
-  expect(await page.locator('[data-testid=r-gross]').count() === 0 && await page.locator('[data-testid=r-csv]').isDisabled(), `${name}: Johku ei tee kirjanpitoraportista epätyhjää (ei totals-lukuja, CSV pois)`);
+  expect(await page.locator('[data-testid=r-gross]').count() === 0, `${name}: Johku on vain tilastoissa`);
   await layoutChecks(page, `${name} raportti johku`);
   if (shots) await shot(page, `talous-raportit-johku-${vp}-${lang}`);
   if (vp === 1280 && lang === 'fi') {   // tulostus: Johku-lohko piilossa
@@ -238,10 +240,12 @@ async function johkuChecks(page, name, vp, lang, T) {
     await page.emulateMedia({ media: 'screen' });
   }
   // sama kuukausi: Johku-lohko päivittyy takaisin kuluvaan jaksoon (ei myyntiä)
-  await page.selectOption('[data-testid=r-year]', String(new Date().getFullYear())); await page.selectOption('[data-testid=r-month]', String(new Date().getMonth() + 1)); await page.waitForSelector('[data-testid=r-daily]');
+  await page.selectOption('[data-testid=r-year]', String(new Date().getFullYear())); await page.selectOption('[data-testid=r-month]', String(new Date().getMonth() + 1)); await page.waitForSelector('[data-testid=r-johku]');
   const Jn = (await mk.rpc('admin_report_month', { p_ym: `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}` })).statistics.johku;
-  expect(await page.locator('[data-testid=r-johku]').count() === 1 && (Jn.orders > 0 || (await page.locator('[data-testid=r-johku] .tl-empty').count()) === 1) && await page.locator('[data-testid=r-gross]').count() === 1, `${name}: kuluvan kuukauden raportti: kirjanpitoluvut + Johku-lohko erikseen`);
-  await page.click('[data-testid=r-kind-daily]'); await page.waitForSelector('[data-testid=r-gross], [data-testid=r-johku]');
+  expect(await page.locator('[data-testid=r-johku]').count() === 1 && (Jn.orders > 0 || (await page.locator('[data-testid=rj-gross]').count()) === 1), `${name}: kuluvan kuukauden tilasto: Johku-lohko`);
+  await page.click('[data-testid=r-report-sales]'); await page.waitForSelector('[data-testid=r-gross]');
+  expect(await page.locator('[data-testid=r-johku]').count() === 0, `${name}: myyntiraportti ilman Johkua`);
+  await page.click('[data-testid=r-kind-daily]'); await page.waitForSelector('[data-testid=r-gross]');
   // --- Tilaukset: Johku-tilauksen maksuosio ---
   await page.click('[data-testid=tab-orders-btn]'); await page.click('[data-testid=orders-reset]');
   const jo = mk.orders.find((o) => o.johku && !o.payments.length && o.payment_status === 'paid');
@@ -356,7 +360,7 @@ async function adminSuite() {
     // --- Raportit ---
     await page.click('[data-testid=tab-reports-btn]');
     await page.waitForSelector('[data-testid=r-gross]');
-    for (const id of ['r-by-vat', 'r-by-product', 'r-refunds-product', 'r-gc-summary', 'r-by-group', 'r-gross-after', 'r-net-ex-vat']) expect(await page.locator(`[data-testid=${id}]`).count() === 1, `${name}: raporttitaulukko ${id}`);
+    for (const id of ['r-by-vat', 'r-by-product', 'r-refunds-product', 'r-gc-summary', 'r-gross-after', 'r-net-ex-vat']) expect(await page.locator(`[data-testid=${id}]`).count() === 1, `${name}: raporttitaulukko ${id}`);
     for (const id of ['r-by-method', 'r-matrix']) expect(await page.locator(`[data-testid=${id}]`).count() === 0, `${name}: päiväraportissa ei ${id}`);
     await layoutChecks(page, `${name} raportti päivä`);
     if (vp === 390 || vp === 1280) await shot(page, `talous-raportit-paiva-${vp}-${lang}`);
@@ -365,11 +369,15 @@ async function adminSuite() {
     const d1 = await csvOf();
     expect(d1.buf[0] === 0xEF && d1.buf[1] === 0xBB && d1.buf[2] === 0xBF, `${name}: CSV alkaa UTF-8 BOM:lla`);
     const txt = d1.buf.toString('utf8').slice(1), lines = txt.split('\r\n');
-    expect(lines[0] === 'tosite;pvm;asiakas;tuote;maara;netto;alv_%;alv_eur;brutto;maksutapa;tila;laji', `${name}: CSV-otsikko (${lines[0]})`);
-    expect(lines.at(-1) === '' && lines.length > 3 && lines.slice(1, -1).every((l) => l.split(';').length >= 12), `${name}: CSV rivit CRLF + 12 saraketta`);
-    const cols = lines[1].replace(/\r$/, '').split(';');
-    expect(/^-?\d+,\d{2}$/.test(cols[5]) && /^-?\d+,\d{2}$/.test(cols[7]) && /^-?\d+,\d{2}$/.test(cols[8]) && /^(myynti|hyvitys)$/.test(cols[11]), `${name}: desimaalipilkku (${lines[1]})`);
-    expect(/^tapahtumat_\d{4}-\d{2}-\d{2}_\d{4}-\d{2}-\d{2}\.csv$/.test(d1.fn), `${name}: CSV-tiedostonimi ${d1.fn}`);
+    expect(lines[0] === 'osio;nimi;alv_%;maara;netto;alv_eur;brutto', `${name}: myynti-CSV-otsikko (${lines[0]})`);
+    expect(!txt.includes('\r\nmaksutapa;') && !txt.includes('johku'), `${name}: myynti-CSV ilman maksutapoja ja Johkua`);
+    expect(/^myynti_\d{4}-\d{2}-\d{2}\.csv$/.test(d1.fn), `${name}: CSV-tiedostonimi ${d1.fn}`);
+    await page.click('[data-testid=r-report-transactions]'); await page.waitForSelector('[data-testid=r-tx-table]');
+    const tx = await csvOf();
+    const txTxt = tx.buf.toString('utf8').slice(1), txLines = txTxt.split('\r\n');
+    expect(txLines[0] === 'tosite;pvm;asiakas;tuote;maara;netto;alv_%;alv_eur;brutto;maksutapa;tila;laji', `${name}: tapahtuma-CSV (${txLines[0]})`);
+    expect(/^tapahtumat_\d{4}-\d{2}-\d{2}_\d{4}-\d{2}-\d{2}\.csv$/.test(tx.fn), `${name}: tapahtuma-CSV-nimi ${tx.fn}`);
+    await page.click('[data-testid=r-report-sales]'); await page.waitForSelector('[data-testid=r-gross]');
     // PDF = window.print
     await page.evaluate(() => { window.__printed = 0; window.print = () => { window.__printed++; }; });
     await page.click('[data-testid=r-pdf]'); expect(await page.evaluate(() => window.__printed) === 1, `${name}: PDF-nappi kutsuu tulostusta`);
@@ -382,11 +390,11 @@ async function adminSuite() {
     }
     // kuukausiraportti
     await page.click('[data-testid=r-kind-monthly]'); await page.waitForSelector('[data-testid=r-daily]');
-    for (const id of ['r-by-method', 'r-matrix']) expect(await page.locator(`[data-testid=${id}]`).count() === 1, `${name}: kuukausiraportin ${id}`);
+    for (const id of ['r-by-method', 'r-matrix']) expect(await page.locator(`[data-testid=${id}]`).count() === 0, `${name}: myyntiraportissa ei ${id}`);
     expect(await page.locator('[data-testid=r-daily] tbody tr').count() >= 10, `${name}: kuukausiraportin päiväerittely`);
     await layoutChecks(page, `${name} raportti kuukausi`);
     if (vp === 390 || vp === 1280) await shot(page, `talous-raportit-kuukausi-${vp}-${lang}`);
-    const d2 = await csvOf(); expect(/^tapahtumat_\d{4}-\d{2}-01_\d{4}-\d{2}-\d{2}\.csv$/.test(d2.fn) && d2.buf.length > d1.buf.length, `${name}: kuukausi-CSV`);
+    const d2 = await csvOf(); expect(/^myynti_\d{4}-\d{2}-01_\d{4}-\d{2}-\d{2}\.csv$/.test(d2.fn) && d2.buf.length > d1.buf.length, `${name}: kuukausi-CSV`);
     // hyvitysrivi (negatiivinen) löytyy jossain kuukaudessa: edellinen kuukausi
     // kielenvaihto
     if (vp === 390) {
@@ -509,22 +517,22 @@ async function adminSuite() {
     const calls = (n) => page.st.calls.filter((c) => c.name === n);
     expect(await page.locator('[data-testid=mock-banner]').isHidden(), `${name}: ei bannerita`);
     expect(/^\d{4}-\d{2}-\d{2}$/.test(calls('admin_report_daily')[0].args.p_date), `${name}: admin_report_daily`);
-    for (const id of ['r-by-vat', 'r-by-group', 'r-receipts-list', 'r-gc-summary']) expect(await page.locator(`[data-testid=${id}]`).count() === 1, `${name}: ${id}`);
-    for (const id of ['r-by-method', 'r-matrix']) expect(await page.locator(`[data-testid=${id}]`).count() === 0, `${name}: päiväraportissa ei ${id}`);
+    for (const id of ['r-by-vat', 'r-gc-summary']) expect(await page.locator(`[data-testid=${id}]`).count() === 1, `${name}: ${id}`);
+    for (const id of ['r-by-method', 'r-matrix', 'r-johku']) expect(await page.locator(`[data-testid=${id}]`).count() === 0, `${name}: päiväraportissa ei ${id}`);
     await page.click('[data-testid=r-kind-monthly]'); await page.waitForSelector('[data-testid=r-daily]');
-    for (const id of ['r-by-method', 'r-matrix']) expect(await page.locator(`[data-testid=${id}]`).count() === 1, `${name}: kuukausiraportin ${id}`);
+    for (const id of ['r-by-method', 'r-matrix']) expect(await page.locator(`[data-testid=${id}]`).count() === 0, `${name}: myyntiraportissa ei ${id}`);
     const mon = calls('admin_report_month').at(-1).args.p_ym;
     const [dl] = await Promise.all([page.waitForEvent('download'), page.click('[data-testid=r-csv]')]);
     const buf = await readFile(await dl.path()), txt = buf.toString('utf8');
-    expect(calls('admin_report_csv').length === 1 && calls('admin_report_csv')[0].args.p_from === `${mon}-01` && calls('admin_report_csv')[0].args.p_kind === 'lines', `${name}: admin_report_csv kutsuttu (${JSON.stringify(calls('admin_report_csv')[0]?.args)})`);
-    expect(buf[0] === 0xEF && buf[1] === 0xBB && txt.slice(1).startsWith('tosite;pvm;asiakas;tuote;maara;netto;alv_%;alv_eur;brutto;maksutapa;tila;laji') && /^tapahtumat_\d{4}-\d{2}-01_\d{4}-\d{2}-\d{2}\.csv$/.test(dl.suggestedFilename()), `${name}: palvelimen CSV sellaisenaan (${dl.suggestedFilename()})`);
+    expect(calls('admin_report_csv').length === 1 && calls('admin_report_csv')[0].args.p_from === `${mon}-01` && calls('admin_report_csv')[0].args.p_kind === 'summary', `${name}: admin_report_csv kutsuttu (${JSON.stringify(calls('admin_report_csv')[0]?.args)})`);
+    expect(buf[0] === 0xEF && buf[1] === 0xBB && txt.slice(1).startsWith('osio;nimi;alv_%;maara;netto;alv_eur;brutto') && /^myynti_\d{4}-\d{2}-01_\d{4}-\d{2}-\d{2}\.csv$/.test(dl.suggestedFilename()), `${name}: palvelimen CSV sellaisenaan (${dl.suggestedFilename()})`);
     // report-pdf (verify_jwt=true): Lataa PDF → fetch JWT:llä → tiedosto
     await page.click('[data-testid=r-kind-daily]'); await page.waitForSelector('[data-testid=r-gross]'); await page.waitForFunction(() => !document.querySelector('[data-testid=r-pdf-server]').disabled);
     const [pdl] = await Promise.all([page.waitForEvent('download'), page.click('[data-testid=r-pdf-server]')]);
-    expect(/^raportti_paiva_\d{4}-\d{2}-\d{2}\.pdf$/.test(pdl.suggestedFilename()) && page.st.reportPdfCalls?.length === 1 && /kind=daily&date=\d{4}-\d{2}-\d{2}/.test(page.st.reportPdfCalls[0].search) && /^Bearer /.test(page.st.reportPdfCalls[0].auth), `${name}: report-pdf JWT:llä (${JSON.stringify(page.st.reportPdfCalls)})`);
+    expect(/^myynti_\d{4}-\d{2}-\d{2}\.pdf$/.test(pdl.suggestedFilename()) && page.st.reportPdfCalls?.length === 1 && /kind=daily&date=\d{4}-\d{2}-\d{2}/.test(page.st.reportPdfCalls[0].search) && /^Bearer /.test(page.st.reportPdfCalls[0].auth), `${name}: report-pdf JWT:llä (${JSON.stringify(page.st.reportPdfCalls)})`);
     await page.click('[data-testid=r-kind-monthly]'); await page.waitForSelector('[data-testid=r-daily]'); await page.waitForFunction(() => !document.querySelector('[data-testid=r-pdf-server]').disabled);
     const [pdl2] = await Promise.all([page.waitForEvent('download'), page.click('[data-testid=r-pdf-server]')]);
-    expect(/^raportti_kuukausi_\d{4}-\d{2}\.pdf$/.test(pdl2.suggestedFilename()) && /kind=month&ym=\d{4}-\d{2}/.test(page.st.reportPdfCalls[1].search), `${name}: report-pdf kuukausi`);
+    expect(/^myynti_\d{4}-\d{2}-01_\d{4}-\d{2}-\d{2}\.pdf$/.test(pdl2.suggestedFilename()) && /kind=month&ym=\d{4}-\d{2}/.test(page.st.reportPdfCalls[1].search), `${name}: report-pdf kuukausi`);
     await page.context().close();
   }
   // ---- RPC:t puuttuvat: kaunis "ominaisuus ei vielä käytössä" + esimerkkidata; jokaista puuttuvaa RPC:tä kutsutaan vain kerran ----

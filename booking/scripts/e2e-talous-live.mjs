@@ -189,22 +189,22 @@ async function readSuite() {
     const g = async (id) => num(await page.locator(`[data-testid=${id}]`).innerText());
     expect(await g('r-gross') === +daily.totals.gross && await g('r-refunds') === +daily.totals.refunds_gross && await g('r-gross-after') === +daily.totals.gross_after_refunds && await g('r-vat') === +daily.totals.vat_after_refunds && await g('r-net-ex-vat') === +daily.totals.net_ex_vat_after_refunds,
       `${name}: päiväraportin summat = palvelin (${daily.totals.gross}/${daily.totals.refunds_gross}/${daily.totals.gross_after_refunds}/${daily.totals.vat_after_refunds}/${daily.totals.net_ex_vat_after_refunds})`);
-    expect((await page.locator('[data-testid=report-title]').innerText()).startsWith(T['r.daily']), `${name}: päiväraportin otsikko (period ilman kind-kenttää)`);
+    expect(/Myyntiraportti|Sales report/.test(await page.locator('[data-testid=report-title]').innerText()), `${name}: päiväraportin otsikko`);
     expect(await g('r-receipts') === daily.totals.receipts && await g('r-refund-receipts') === daily.totals.refund_receipts, `${name}: kuittimäärät`);
-    for (const id of ['r-by-vat', 'r-by-group', 'r-gc-summary']) expect(await page.locator(`[data-testid=${id}]`).count() === 1, `${name}: ${id}`);
+    for (const id of ['r-by-vat', 'r-gc-summary']) expect(await page.locator(`[data-testid=${id}]`).count() === 1, `${name}: ${id}`);
     for (const id of ['r-by-method', 'r-matrix']) expect(await page.locator(`[data-testid=${id}]`).count() === 0, `${name}: päiväraportissa ei ${id}`);
     const vatRows = await page.locator('[data-testid=r-by-vat] tbody tr').count();
     expect(vatRows === daily.by_vat.length, `${name}: ALV-taulukon rivit (${vatRows}/${daily.by_vat.length})`);
     if (vp === 1280) await shot(page, 'live-raportit-paiva-1280-fi'); else await shot(page, 'live-raportit-paiva-390-fi');
     const [dl] = await Promise.all([page.waitForEvent('download'), page.click('[data-testid=r-csv]')]);
     const buf = await readFile(await dl.path()), txt = buf.toString('utf8');
-    expect(buf[0] === 0xEF && buf[1] === 0xBB && buf[2] === 0xBF && txt.slice(1).startsWith('tosite;pvm;asiakas;tuote;maara;netto;alv_%;alv_eur;brutto;maksutapa;tila;laji'), `${name}: CSV = palvelimen admin_report_csv (12 saraketta, BOM)`);
+    expect(buf[0] === 0xEF && buf[1] === 0xBB && buf[2] === 0xBF && txt.slice(1).startsWith('osio;nimi;alv_%;maara;netto;alv_eur;brutto') && !txt.includes('\r\nmaksutapa;'), `${name}: CSV = myyntiraportti ilman maksutapoja`);
     const csvLines = txt.trim().split('\r\n'); expect(csvLines.length - 1 === daily.receipts.length || csvLines.length > 1, `${name}: CSV-rivit (${csvLines.length - 1})`);
     await page.click('[data-testid=r-kind-monthly]'); await page.waitForSelector('[data-testid=r-daily]');
     const month = await must('admin_report_month', { p_ym: today.slice(0, 7) });
-    for (const id of ['r-by-method', 'r-matrix']) expect(await page.locator(`[data-testid=${id}]`).count() === 1, `${name}: kuukausiraportin ${id}`);
+    for (const id of ['r-by-method', 'r-matrix', 'r-johku']) expect(await page.locator(`[data-testid=${id}]`).count() === 0, `${name}: myyntiraportissa ei ${id}`);
     expect(await g('r-gross') === +month.totals.gross && await page.locator('[data-testid=r-daily] tbody tr').count() === month.by_day.length, `${name}: kuukausiraportti = palvelin (${month.totals.gross}, ${month.by_day.length} päivää)`);
-    expect((await page.locator('[data-testid=report-title]').innerText()).startsWith(T['r.monthly']), `${name}: kuukausiraportin otsikko`);
+    expect(/Myyntiraportti|Sales report/.test(await page.locator('[data-testid=report-title]').innerText()), `${name}: kuukausiraportin otsikko`);
     if (vp === 1280) await shot(page, 'live-raportit-kuukausi-1280-fi');
     // --- ALV-huomautus ---
     await page.click('[data-testid=tab-orders-btn]');
@@ -454,7 +454,8 @@ async function johkuSuite() {
     await page.fill('[data-testid=payments-search]', ''); await page.keyboard.press('Enter'); await page.waitForTimeout(600);
     const cnt = (await page.locator('[data-testid=payments-count]').innerText()).replace(nbsp, ' ');
     expect(await page.locator('[data-testid=payments-count]').getAttribute('data-johku-rows') === String(pays.johku_rows) && /Johku-rivejä/.test(cnt) && cnt.includes('ilman Johkua'), `Johku UI ${vp}: summarivi (${cnt})`);
-    await page.click('[data-testid=tab-reports-btn]'); await page.waitForSelector('[data-testid=r-johku]');
+    await page.click('[data-testid=tab-reports-btn]'); await page.waitForSelector('[data-testid=r-report-stats]');
+    await page.click('[data-testid=r-report-stats]'); await page.waitForSelector('[data-testid=r-johku]');
     await page.click('[data-testid=r-kind-monthly]'); await page.selectOption('[data-testid=r-year]', '2026'); await page.selectOption('[data-testid=r-month]', '3'); await page.waitForSelector('[data-testid=rj-gross]');
     expect(num(await page.locator('[data-testid=rj-gross]').innerText()) === 80 && num(await page.locator('[data-testid=rj-refunded]').innerText()) === 40 && (await page.locator('[data-testid=rj-by-method] tbody tr').count()) === 1, `Johku UI ${vp}: Raportit-lohko (80 € / 40 €)`);
     expect((await page.locator('[data-testid=r-johku] h3').innerText()) === T['r.johku.title'], `Johku UI ${vp}: lohkon otsikko`);

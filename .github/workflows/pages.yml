@@ -373,6 +373,11 @@ jobs:
       # SQL: booking/supabase/tests/talous/t216_payment_provider_fees.sql paikallisessa PG:ssä.
       # Työnkulussa ei ole Postgresia.
       - run: node --test booking/tests/provisio-raportti.test.mjs
+      # booking_222–224: raporttivalitsin, monikäyttöinen lahjakortti ja lasku ilman K-kuittia.
+      # SQL: t222_report_structure.sql, t223_multipurpose_giftcard.sql ja t224_invoice_not_receipt.sql
+      # ajetaan paikallisessa PG:ssä. Työnkulussa ei ole Postgresia.
+      # Myynti-PDF ajetaan Denolla (setup-deno on ylempänä).
+      - run: node --test booking/tests/raporttirakenne.test.mjs
       - uses: actions/upload-pages-artifact@v3
         if: github.event_name != 'pull_request'
         with:
