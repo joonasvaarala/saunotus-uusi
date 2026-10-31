@@ -17,9 +17,8 @@
   "home": "/{loc}"
  },
  "chatbot": {
-  "_doc": "Saunabot-valmius. enabled=false: ei lataa mitään (vain HTML-kommentti). Ei tuotantoon ennen OpenAI-avainta/päätöstä. Testaus: SAUNABOT=on npm run build",
-  "enabled": false,
-  "widgetSrc": "https://sxbofnuisemspgquoxyv.supabase.co/functions/v1/saunabot/widget.js"
+  "_doc": "Saunabot-valmius. enabled=false: ei lataa mitään (vain HTML-kommentti). widgetSrc rakennetaan buildissa BOOKING_SUPABASE_URL:sta (/functions/v1/saunabot/widget.js), sitä ei kovakoodata tähän. Ei tuotantoon ennen OpenAI-avainta/päätöstä. Testaus: SAUNABOT=on ja buildin Supabase-osoite.",
+  "enabled": false
  },
  "contact": {
   "email": "savusauna@saunotus.fi",

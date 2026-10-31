@@ -1,5 +1,5 @@
 // Paikallinen savutesti Pages-koosteelle alipolulla (ei kosketa oikeaan Supabaseen: kaikki *.supabase.co-pyynnöt vastataan mockilla).
-//   1) SITE_ENV=test SITE_URL=https://joonasvaarala.github.io/saunotus-uusi BOOKING_SUPABASE_URL=https://<ref>.supabase.co BOOKING_ANON_KEY=… DIST=/tmp/dist node scripts/build-pages.mjs
+//   1) npm run build:test    (tai DIST=/tmp/dist npm run build:test; asetukset config/env/test.env, Supabase DEV)
 //   2) mkdir /tmp/site && ln -s /tmp/dist /tmp/site/saunotus-uusi && (cd /tmp/site && python3 -m http.server 4190 --bind 127.0.0.1 &)
 //   3) PW_DIR=/polku/node_modules node scripts/smoke-pages.mjs        (BASE_URL oletus http://127.0.0.1:4190/saunotus-uusi, CHROME oletus /usr/bin/google-chrome)
 // Tarkistaa: sivut/skriptit/tyylit/importit latautuvat alipolulta (ei 404, ei konsolivirheitä), noindex, hallinnan kirjautumisnäkymä,

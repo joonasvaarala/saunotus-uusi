@@ -1,6 +1,6 @@
 # Sipoonjoen Perinnesauna – uusi sivusto (staattinen, FI/EN)
 
-Kevyt staattinen kopio sivustosta https://saunotus.fi (alkuperäinen on WordPress + Kadence + Elementor, ei Nuxt). Sisältöä ylläpitää Koodari. **Tämä on testiversio – ei tuotantokäytössä, ei hakukoneille (noindex).**
+Tuotantosivusto on https://saunotus.fi (1.11.2026 alkaen). GitHub Pages -osoite https://joonasvaarala.github.io/saunotus-uusi on testiympäristö: se käyttää Supabase DEViä, sivut ovat noindex, eikä se saa osua tuotantoon. Sisältöä ylläpitää Koodari.
 
 ## Teknologiavalinta ja perustelut
 
@@ -50,13 +50,15 @@ KORJAUSRAPORTTI.md     korjauslistan käsittely
 
 ```bash
 npm install                 # vain jos kuvat ajetaan uudelleen (sharp)
-npm run preview             # rakentaa testiversion → dist/, palvelee http://localhost:4173/
-npm run build:test          # GitHub Pages -testi (SITE_ENV=test, osoite https://joonasvaarala.github.io/saunotus-uusi)
-npm run build:prod          # tuotanto (canonical https://saunotus.fi, indeksoitavissa, ei noindexia)
+npm run preview             # paikallinen esikatselu ilman Supabasea → dist/, http://localhost:4173/
+npm run build:test          # GitHub Pages -testi: config/env/test.env (Supabase DEV)
+npm run build:prod          # tuotanto: config/env/prod.env (https://saunotus.fi, Supabase PROD)
 npm run check               # linkki-/resurssitarkistus dist/-kansioon (check:external tarkistaa myös ulkoiset)
 ```
 
-Ympäristömuuttujat: `SITE_ENV=test` (noindex-meta + `robots.txt` Disallow), `SITE_URL=...` (ohittaa osoitteen), `DIST=...` (tulostekansio), `SAUNABOT=on` (chatbot päälle testissä).
+`npm run build` ja `npm run preview` rakentavat pelkän staattisen sivuston ilman Supabase-osoitetta. Julkaistava kokonaisuus (kauppa, hallinta, vuorosivu) tulee komennoista `build:test` ja `build:prod`. Ne lukevat vain oman tiedostonsa `config/env/`. Ympäristöön jääneet arvot eivät ylikirjoita tiedostoa.
+
+Muut ympäristömuuttujat: `DIST=...` (tulostekansio), `SAUNABOT=on` (chatbot päälle). Chatbotin skriptin osoite tulee buildin `BOOKING_SUPABASE_URL`:sta.
 
 ## Sisällön muuttaminen
 
@@ -81,9 +83,30 @@ Asiakaskokemukset-osio rakennetaan Google-arvosteluista **rakennusvaiheessa puht
 
 ## Chatbot-widget (valmius, POIS PÄÄLTÄ)
 
-Upotus on HTML-kommenttina jokaisen sivun lopussa. Se ei lataa mitään. Käyttöönotto: `content/site.json` → `chatbot.enabled: true` (tai testissä `SAUNABOT=on npm run build`). Lisää silloin `<script src=".../saunabot/widget.js" defer>` ja `<div data-saunabot-quiz>`. **Ei tuotantoon** ennen OpenAI-avainta ja päätöstä.
+Upotus on HTML-kommenttina jokaisen sivun lopussa. Se ei lataa mitään. Käyttöönotto: `content/site.json` → `chatbot.enabled: true` (tai `SAUNABOT=on` buildin yhteydessä). Skriptin osoite on buildin `BOOKING_SUPABASE_URL` + `/functions/v1/saunabot/widget.js`. **Ei tuotantoon** ennen OpenAI-avainta ja päätöstä.
 
-## Testiversion julkaisu (GitHub Pages)
+## Testi ja tuotanto
+
+Kaksi julkaisua, kaksi Supabase-projektia. Build kieltäytyy, jos ne sekoittuvat (`src/site-target.mjs`).
+
+| | Testi | Tuotanto |
+|---|---|---|
+| Osoite | https://joonasvaarala.github.io/saunotus-uusi | https://saunotus.fi |
+| `SITE_ENV` | `test` (noindex, robots Disallow) | `prod` |
+| Supabase | DEV `aoejjmfzulhkhxbehphs` | PROD `sxbofnuisemspgquoxyv` |
+| Asetukset | `config/env/test.env` | `config/env/prod.env` |
+| Komento | `npm run build:test` | `npm run build:prod` |
+| Julkaisu | GitHub Actions `.github/workflows/pages.yml` (vain main) | `dist/` SFTP:llä tuotantopalvelimelle. Actions ei deployaa tuotantoa. |
+
+Molemmissa tiedostoissa on vain julkinen publishable-avain. Salaisuutta ei kirjoiteta repoon. Avaimen vaihto: muokkaa oikeaa `config/env/*.env`-tiedostoa. Arvoja ei kopioida `pages.yml`:stä.
+
+Tuotantobuild vaatii osoitteen `https://sxbofnuisemspgquoxyv.supabase.co` ja `SITE_URL=https://saunotus.fi`. Testibuild kieltäytyy tuotantoprojektista ja osoitteesta saunotus.fi. Väärä yhdistelmä pysähtyy ennen sivujen rakentamista.
+
+`pages.yml` lataa `config/env/test.env`:n. Sivutekstien ja artikkelien välimuistitunnus alkaa `site-texts-test-` ja `articles-test-`, jotta tuotannosta haettu data ei palaudu testiajoon. Varmuuskopio (`.github/workflows/db-backup.yml`, `scripts/backup/`) pysyy tuotantoprojektissa.
+
+Testisivuston build voi varoittaa `406`, jos DEV-projektin API-asetuksissa skeema `booking` ei ole julkisten skeemojen listalla (`public, graphql_public, booking`). Silloin sivut käyttävät repon varatekstejä. Tämä on Supabasen hallintapaneelin asetus, ei tämän repon migraatio.
+
+### Testiversion osoitteet (GitHub Pages)
 
 Osoitteet (testi, noindex kaikkialla – myös `/varaa/` ja `/hallinta/`):
 
@@ -101,27 +124,30 @@ Osoitteet (testi, noindex kaikkialla – myös `/varaa/` ja `/hallinta/`):
 | `pull_request` (esim. PR #1, haara `booking`) | vain build + tarkistukset + yksikkötestit (CI-tarkistus), **ei deployta** |
 | `workflow_dispatch` muusta haarasta | vain build, ei deployta |
 
-Julkaisu siis tapahtuu vasta kun `booking`-haara on yhdistetty `main`iin (Pages-asetus: Settings → Pages → Source = GitHub Actions). PR:n esikatselua ei julkaista.
+Julkaisu GitHub Pagesiin tapahtuu, kun muutos on `main`-haarassa (Pages-asetus: Settings → Pages → Source = GitHub Actions). PR:n esikatselua ei julkaista. Tuotantoon tämä työnkulku ei deployaa.
 
-**Rakennusajan muuttujat** (workflow'n `env`): `SITE_ENV=test`, `SITE_URL=https://joonasvaarala.github.io/saunotus-uusi`, `BOOKING_SUPABASE_URL=https://sxbofnuisemspgquoxyv.supabase.co`, `BOOKING_ANON_KEY=<julkinen publishable-avain>`. Avain on frontend-avain ja saa olla repossa; **`service_role`-avainta ei koskaan** viedä workflow'hun, repoon tai frontendiin. Avaimen vaihto: muokkaa `BOOKING_ANON_KEY` workflow'ssa.
+Testiajon asetukset tulevat tiedostosta `config/env/test.env`. **Salaisuutta ei koskaan** viedä workflow'hun, repoon tai frontendiin.
 
 Paikallinen ajo ja savutesti:
 
 ```bash
-SITE_ENV=test SITE_URL=https://joonasvaarala.github.io/saunotus-uusi BOOKING_SUPABASE_URL=https://<ref>.supabase.co \
-  BOOKING_ANON_KEY=<publishable> node scripts/build-pages.mjs        # → dist/
+npm run build:test                                                 # → dist/ (Supabase DEV)
 # alipolun simulointi: palvele dist/ polun /saunotus-uusi/ alla (esim. python3 -m http.server kansiosta, jossa saunotus-uusi -> dist)
 PW_DIR=<polku playwright node_modules> BASE_URL=http://127.0.0.1:4190/saunotus-uusi node scripts/smoke-pages.mjs
 ```
 
-**Kuka asettaa mitä (kertaluonteisesti, ennen kuin kutsut toimivat):**
+Tuotanto rakennetaan samalla skriptillä, eri tiedostosta, ja `dist/` siirretään SFTP:llä:
 
-| Kuka | Mitä |
+```bash
+npm run build:prod
+```
+
+**Supabase-hallintapaneeli (ei tätä repoa, ei tehdä automaattisesti):**
+
+| Projekti | Mitä |
 |---|---|
-| Bottiavustus | ajaa migraation 10 (`20261016150010_booking_10_rls_initplan.sql`); halutessa deployaa `admin-users`-funktion uudelleen (ei pakollinen, ks. `booking/docs/bottiavustus-pyynto.md`) |
-| Joonas (Supabase Dashboard) | Edge Function -salaisuudet: `INVITE_REDIRECT_URL=https://joonasvaarala.github.io/saunotus-uusi/hallinta/` ja `ALLOWED_ORIGINS` sisältämään `https://joonasvaarala.github.io` (vain origin, ei polkua; ei jokerimerkkiä) |
-| Joonas (Supabase Dashboard) | Authentication → URL Configuration → *Redirect URLs*: lisää `https://joonasvaarala.github.io/saunotus-uusi/hallinta/` (muuten kutsulinkki ohjautuu Site URL:iin) |
-| Joonas (GitHub) | Pages-lähteeksi *GitHub Actions* (jo asetettu); PR #1:n yhdistäminen `main`iin käynnistää julkaisun |
+| DEV (testisivusto) | Authentication → Site URL `https://joonasvaarala.github.io/saunotus-uusi`, Redirect URL `https://joonasvaarala.github.io/saunotus-uusi/hallinta/`. API → Exposed schemas: `booking` mukana (`public, graphql_public, booking`), muuten kauppa ja hallinta saavat 406. Kun `admin-users` deployataan: `ALLOWED_ORIGINS=https://joonasvaarala.github.io`. Kun `shift-offer-engine` deployataan: `SHIFT_OFFER_PAGE_BASE=https://joonasvaarala.github.io/saunotus-uusi` ja `SHIFT_OFFER_PAGE_ORIGINS=https://joonasvaarala.github.io`. |
+| PROD | Site URL ja Redirect URL vain `https://saunotus.fi` / `https://saunotus.fi/hallinta/`. `ALLOWED_ORIGINS` ja `SHIFT_OFFER_PAGE_BASE` osoittavat saunotus.fi:hin. github.io ei kuulu tuotantoon. |
 
 **Moduulien lataus (välimuisti).** GitHub Pages välimuistittaa tiedostoja noin 10 minuuttia, joten selain voi hetkellisesti yhdistää uuden `index.html`:n ja vanhan moduulin. Siksi `build-pages.mjs` lisää hallinnan kaikkiin importteihin ja resursseihin saman versiotunnuksen (`?v=<commit sha>`; yksi moduuli-instanssi per tiedosto). Lisäksi `admin.js` yrittää epäonnistuneen näkymämoduulin latausta kerran uudelleen cache-bust-parametrilla (`?r=…`); jos sekin epäonnistuu, näytetään virhe ja "Lataa uudelleen" -painike. Paikallisessa kehityksessä tunnus on tyhjä (tiedostot sellaisenaan).
 

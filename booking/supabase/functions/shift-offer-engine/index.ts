@@ -3,7 +3,8 @@
 //
 // Autentikointi:
 //   * tick (POST ilman tokenia): header x-sync-secret = env SYNC_CRON_SECRET (vakioaikavertailu)
-//   * vastauslinkki (GET ?token=): 302 sivulle SHIFT_OFFER_PAGE_BASE/vuoro/?token= (oletus GitHub Pages).
+//   * vastauslinkki (GET ?token=): 302 sivulle SHIFT_OFFER_PAGE_BASE/vuoro/?token= (oletus https://saunotus.fi).
+//     Testisivusto: SHIFT_OFFER_PAGE_BASE ja SHIFT_OFFER_PAGE_ORIGINS. Tuotantoprojektissa github.io ei kelpaa.
 //     Sivu hakee JSON:n GET /api/offers ja kirjaa vastauksen POST /api/respond.
 //     HMAC-token tarkistetaan tietokannassa (shift_offer_verify_token). Avain on vain vault-salaisuus
 //     shift_offer_token_secret. Edge-funktiolla ei ole omaa avainta. GET ei muuta rivejä.
@@ -98,12 +99,13 @@ Deno.serve(async (req) => {
       await deliverInbound(supa, env, message, log);
     });
   }
-  if (myRoute(req.method, url.pathname)) return handleMyPageRequest(req, myPageDb(db()));
+  const shiftPage = { origins: Deno.env.get("SHIFT_OFFER_PAGE_ORIGINS"), supabaseUrl: Deno.env.get("SUPABASE_URL") };
+  if (myRoute(req.method, url.pathname)) return handleMyPageRequest(req, myPageDb(db()), shiftPage);
   const token = url.searchParams.get("token");
   const route = shiftRoute(req.method, url.pathname, token);
   if (route === "invalid") return new Response("method not allowed", { status: 405 });
   if (route !== "tick") {
-    const res = await handleOfferRequest(req, offerDb(db()), Deno.env.get("SHIFT_OFFER_PAGE_BASE"));
+    const res = await handleOfferRequest(req, offerDb(db()), Deno.env.get("SHIFT_OFFER_PAGE_BASE"), shiftPage);
     if (route === "respond") {
       const copy = res.clone();
       const body = await copy.json().catch(() => null);

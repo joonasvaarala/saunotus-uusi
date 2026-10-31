@@ -75,7 +75,9 @@ test('build-pages: mittaus vain SITE_ANALYTICS=on eikä koskaan testisivulla; ei
   assert.match(bp, /'views\/talous-analytics\.js', 'analytics-mock\.js'/);
   const wf = read('.github/workflows/pages.yml');
   assert.doesNotMatch(wf, /SITE_ANALYTICS/, 'CI ei kytke mittausta päälle');
-  assert.match(wf, /SITE_ENV: test/);
+  assert.match(wf, /config\/env\/test\.env/);
+  assert.match(read('config/env/test.env'), /^SITE_ENV=test$/m);
+  assert.doesNotMatch(wf, /sxbofnuisemspgquoxyv/);
 });
 
 test('SEO: Schema.org-lisäykset sivupohjassa, ei arvostelumerkintöjä', () => {

@@ -136,6 +136,9 @@ test('hallinta: Käyttäjät-näkymässä omien sivujen osio, whatsapp_enabled e
 
 test('oma sivu: noindex, ei referreriä, vain textContent, värit ilman sinistä, build kopioi', () => {
   const html = rd('booking/vuoro/oma/index.html'), js = rd('booking/vuoro/oma/oma.js'), css = rd('booking/vuoro/oma/oma.css');
+  assert.match(html, /src="\.\/config\.js"/);
+  assert.match(js, /shiftOfferApi/);
+  assert.doesNotMatch(js, /sxbofnuisemspgquoxyv/);
   assert.match(html, /<meta name="robots" content="noindex, nofollow">/);
   assert.match(html, /<meta name="referrer" content="no-referrer">/);
   assert.match(html, /href="\.\.\/vuoro\.css"/);

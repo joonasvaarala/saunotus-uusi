@@ -261,7 +261,7 @@ mkdir -p out/hallinta && cp -r booking/admin/* out/hallinta/ && cp booking/share
 cp out/hallinta/config.example.js out/hallinta/config.js   # täytä url + anonKey
 ```
 
-Kaupan ja hallinnan saa yhdellä komennolla samaan julkaisuun: `node scripts/build-pages.mjs` (ks. [Testiversion julkaisu](../README.md#testiversion-julkaisu-github-pages) juuri-READMEssä). Skripti generoi `hallinta/config.js`:n rakennusajan ympäristömuuttujista.
+Kaupan ja hallinnan saa yhdellä komennolla samaan julkaisuun: `npm run build:prod` (tuotanto) tai `npm run build:test` (GitHub Pages -testi). Ks. [Testi ja tuotanto](../README.md#testi-ja-tuotanto) juuri-READMEssä. Skripti generoi `hallinta/config.js`:n ympäristötiedoston arvoista.
 
 ### Resurssivaraukset hallinnassa (migraatio 17)
 

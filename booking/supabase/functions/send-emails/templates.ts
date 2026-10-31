@@ -22,7 +22,7 @@ export const PHONE_FI = "010 299 2866";
 export const PHONE_EN = "+358 10 299 2866";
 export const phoneFor = (en: boolean) => (en ? PHONE_EN : PHONE_FI);
 export const PHONE_TEL = "+358102992866";
-export const LOGO_FALLBACK = "https://joonasvaarala.github.io/saunotus-uusi/img/logo-kuitti.png";
+export const LOGO_FALLBACK = "https://saunotus.fi/img/logo-kuitti.png";
 const GREEN = "#1f3d2b", GREEN_SOFT = "#3d5c47", SAND = "#efe7d6", SAND_LIGHT = "#f7f2e7", SAND_LINE = "#d9ccb2", INK = "#2b2a26", MUTED = "#6f6a5d";
 const FONT = "Georgia,'Times New Roman',serif", SANS = "Arial,Helvetica,sans-serif";
 

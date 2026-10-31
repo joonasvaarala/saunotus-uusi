@@ -74,7 +74,7 @@ Deno.test("WhatsApp GET redirects to the static page and does not touch the data
   assertEquals(res.status, 302);
   assertEquals(
     res.headers.get("location"),
-    "https://joonasvaarala.github.io/saunotus-uusi/vuoro/?token=a%2Bb%2Fc%3Dd",
+    "https://saunotus.fi/vuoro/?token=a%2Bb%2Fc%3Dd",
   );
   assertEquals(res.headers.get("cache-control"), "no-store");
   assertEquals(res.headers.get("referrer-policy"), "no-referrer");
@@ -91,7 +91,7 @@ Deno.test("WhatsApp GET redirects to the static page and does not touch the data
 Deno.test("GET /api/offers returns the person's open offers as JSON", async () => {
   const db = dbOf({ data: OPEN, error: null });
   const res = await handleOfferRequest(
-    req("GET", "/functions/v1/shift-offer-engine/api/offers?token=abc.def", "https://joonasvaarala.github.io"),
+    req("GET", "/functions/v1/shift-offer-engine/api/offers?token=abc.def", "https://saunotus.fi"),
     db,
     undefined,
   );
@@ -260,7 +260,6 @@ Deno.test("a bad token does not call the respond rpc", async () => {
 
 Deno.test("CORS echoes only the configured site origins", async () => {
   const allowed = [
-    "https://joonasvaarala.github.io",
     "https://saunotus.fi",
     "https://www.saunotus.fi",
   ];
@@ -285,7 +284,7 @@ Deno.test("CORS echoes only the configured site origins", async () => {
     assertEquals(got.headers.get("access-control-allow-origin"), origin);
     assert(!got.headers.has("access-control-allow-credentials"));
   }
-  for (const origin of ["https://evil.example", "https://joonasvaarala.github.io.evil.com", "https://saunotus.fi.evil.com"]) {
+  for (const origin of ["https://evil.example", "https://joonasvaarala.github.io", "https://joonasvaarala.github.io.evil.com", "https://saunotus.fi.evil.com"]) {
     const pre = await handleOfferRequest(
       req("OPTIONS", "/functions/v1/shift-offer-engine/api/respond", origin),
       db,
@@ -310,6 +309,43 @@ Deno.test("CORS echoes only the configured site origins", async () => {
   );
   assertEquals(bare.status, 403);
   assertEquals(bare.headers.get("access-control-allow-origin"), null);
+});
+
+Deno.test("github.io works only when the env asks and the project is not production", async () => {
+  const db = dbOf({ data: null, error: null });
+  const prod = "https://sxbofnuisemspgquoxyv.supabase.co";
+  const dev = "https://aoejjmfzulhkhxbehphs.supabase.co";
+  const gh = "https://joonasvaarala.github.io";
+  const blocked = await handleOfferRequest(
+    req("GET", "/functions/v1/shift-offer-engine?token=abc", null),
+    db,
+    "https://joonasvaarala.github.io/saunotus-uusi",
+    { origins: gh, supabaseUrl: prod },
+  );
+  assertEquals(blocked.status, 302);
+  assertEquals(blocked.headers.get("location"), "https://saunotus.fi/vuoro/?token=abc");
+  const preProd = await handleOfferRequest(
+    req("OPTIONS", "/functions/v1/shift-offer-engine/api/offers", gh),
+    db,
+    undefined,
+    { origins: gh, supabaseUrl: prod },
+  );
+  assertEquals(preProd.status, 403);
+  const preDev = await handleOfferRequest(
+    req("OPTIONS", "/functions/v1/shift-offer-engine/api/offers", gh),
+    db,
+    "https://joonasvaarala.github.io/saunotus-uusi",
+    { origins: gh, supabaseUrl: dev },
+  );
+  assertEquals(preDev.status, 204);
+  assertEquals(preDev.headers.get("access-control-allow-origin"), gh);
+  const moved = await handleOfferRequest(
+    req("GET", "/functions/v1/shift-offer-engine?token=abc", null),
+    db,
+    "https://joonasvaarala.github.io/saunotus-uusi/",
+    { origins: gh, supabaseUrl: dev },
+  );
+  assertEquals(moved.headers.get("location"), "https://joonasvaarala.github.io/saunotus-uusi/vuoro/?token=abc");
 });
 
 Deno.test("the WhatsApp template button URL stays on the function", async () => {

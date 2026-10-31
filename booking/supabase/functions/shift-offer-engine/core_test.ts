@@ -9,6 +9,7 @@ import {
   formatShiftWhen,
   offerPageLocation,
   pageBase,
+  pageOrigins,
   parseAction,
   roleTitle,
   shiftRoute,
@@ -54,8 +55,17 @@ Deno.test("WhatsApp GET redirects and only the JSON routes answer", () => {
   assertEquals(shiftRoute("OPTIONS", "/functions/v1/shift-offer-engine/api/offers", null), "options");
   assertEquals(parseAction("accept"), "accept");
   assertEquals(parseAction("nope"), null);
-  assertEquals(pageBase(undefined), "https://joonasvaarala.github.io/saunotus-uusi");
+  assertEquals(pageBase(undefined), "https://saunotus.fi");
   assertEquals(pageBase("https://saunotus.fi/"), "https://saunotus.fi");
+  assertEquals(pageBase("https://joonasvaarala.github.io/saunotus-uusi"), "https://joonasvaarala.github.io/saunotus-uusi");
+  const prod = "https://sxbofnuisemspgquoxyv.supabase.co";
+  const dev = "https://aoejjmfzulhkhxbehphs.supabase.co";
+  assertEquals(pageBase("https://joonasvaarala.github.io/saunotus-uusi", prod), "https://saunotus.fi");
+  assertEquals(pageBase("https://joonasvaarala.github.io/saunotus-uusi/", dev), "https://joonasvaarala.github.io/saunotus-uusi");
+  assertEquals(pageOrigins(undefined), ["https://saunotus.fi", "https://www.saunotus.fi"]);
+  assertEquals(pageOrigins("https://joonasvaarala.github.io", prod).includes("https://joonasvaarala.github.io"), false);
+  assertEquals(pageOrigins("https://joonasvaarala.github.io", dev).includes("https://joonasvaarala.github.io"), true);
+  assertEquals(pageOrigins("https://evil.example/vuoro", dev).includes("https://evil.example"), false);
   assertEquals(
     offerPageLocation("https://saunotus.fi/", "a+b/c=d"),
     "https://saunotus.fi/vuoro/?token=a%2Bb%2Fc%3Dd",
