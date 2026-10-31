@@ -12,10 +12,53 @@ const { setArticlesState } = await import('../src/articles/runtime.mjs');
 const R = await import('../src/render.mjs');
 
 const kb = JSON.parse(readFileSync(new URL('../content/kb/kb.json', import.meta.url), 'utf8'));
+const cardsDoc = JSON.parse(readFileSync(new URL('../content/cards.json', import.meta.url), 'utf8'));
 const home = JSON.parse(readFileSync(new URL('../content/pages/home.json', import.meta.url), 'utf8'));
 const partial = JSON.parse(readFileSync(new URL('../content/partials/saunotus-perinne.json', import.meta.url), 'utf8'));
 const pending = JSON.parse(readFileSync(new URL('../content/site-texts.pending-import-85.json', import.meta.url), 'utf8'));
 const prod = (slug) => kb.products.find((p) => p.slug === slug);
+
+// Sama sääntö kuin freeShopEvents (booking/shop/src/week-live.js): category event, kerta available tai full, ends_at > now.
+// Mennyt kerta (Kekri päättyy 2026-10-31T17:00:00Z) ei ole etusivulla. Otsikko on cards.jsonista, kuten renderöinti.
+function homeShopEvents(now = Date.now()) {
+  if (!Number.isFinite(+now)) return [];
+  const upcomingOf = (ev) => (Array.isArray(ev.occurrences) ? ev.occurrences : [])
+    .filter((o) => o && (o.status === 'available' || o.status === 'full') && o.starts_at && Date.parse(o.ends_at || o.starts_at) > +now)
+    .sort((a, b) => String(a.starts_at).localeCompare(String(b.starts_at)));
+  return (Array.isArray(kb.events_shop) ? kb.events_shop : [])
+    .filter((ev) => ev && ev.category === 'event' && typeof ev.slug === 'string' && ev.slug && ev.name)
+    .map((ev) => ({ ev, upcoming: upcomingOf(ev) }))
+    .filter((x) => x.upcoming.length)
+    .map(({ ev, upcoming }) => ({
+      slug: ev.slug,
+      title: cardsDoc.events?.[ev.slug]?.fi?.title || ev.name,
+      full: upcoming.every((o) => o.status === 'full'),
+      starts: upcoming[0].starts_at,
+    }))
+    .sort((a, b) => String(a.starts).localeCompare(String(b.starts)) || a.slug.localeCompare(b.slug));
+}
+
+// events_shop tyhjä tulevista → render.mjs upcomingEvents (kb.events + cards.json, ei Täynnä-merkkiä).
+function legacyHomeEvents(today = new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Helsinki' })) {
+  const out = [];
+  for (const [id, c] of Object.entries(cardsDoc.events || {})) {
+    if (String(id).startsWith('_')) continue;
+    const slug = c.kb || id;
+    const p = kb.products.find((x) => x.slug === slug);
+    if (!p) continue;
+    const dates = (kb.events || []).filter((row) => row.product_id === p.id && (row.ends_on || row.starts_on) >= today)
+      .sort((a, b) => String(a.starts_on).localeCompare(String(b.starts_on)));
+    if (!dates.length) continue;
+    out.push({ slug, title: c.fi?.title || p.name, full: false, starts: dates[0].starts_on });
+  }
+  return out.sort((a, b) => String(a.starts).localeCompare(String(b.starts)) || a.slug.localeCompare(b.slug));
+}
+
+function expectedHomeEvents() {
+  const shop = homeShopEvents(Date.now());
+  if (shop.length) return { kind: 'shop', events: shop };
+  return { kind: 'legacy', events: legacyHomeEvents() };
+}
 
 test('perinne-osio säilyttää home.json about -kentän FI+EN sanasta sanaan', () => {
   assert.deepEqual(partial.fi, home.fi.about);
@@ -133,18 +176,54 @@ test('etusivu: järjestys, ei varaa-verkosta-listaa, torstai 16:00, kaksi tapaht
   assert.equal(thu.opens, '16:00');
   assert.equal(thu.closes, '19:00');
   assert.ok(!ld.openingHoursSpecification.some((x) => x.dayOfWeek === 'Friday'));
-  const ev = fi.slice(fi.indexOf('id="tapahtumat"'), fi.indexOf('id="saunatietoa"'));
-  const n = (ev.match(/<li class="card ev"/g) || []).length;
-  assert.equal(n, 2, `vapaita tapahtumia ${n}`);
-  assert.match(ev, /Naisten jouluinen saunailta/);
-  assert.match(ev, /Saunottajien yhteisöpäivä/);
+  const eventsSlice = (html) => html.slice(html.indexOf('id="tapahtumat"'), html.indexOf('id="saunatietoa"'));
+  // Seinäkello ei saa muuttaa tarkistusta: jäädytetty hetki (sama kuin tests/week-programme.test.mjs) on ennen Kekriä.
+  const wall = Date.now;
+  Date.now = () => Date.parse('2026-10-28T08:00:00Z');
+  let frozenFi;
+  try { frozenFi = R.home('fi'); }
+  finally { Date.now = wall; }
+  const evFix = eventsSlice(frozenFi);
+  const nFix = (evFix.match(/<li class="card ev"/g) || []).length;
+  assert.equal(nFix, 2, `vapaita tapahtumia ${nFix}`);
+  assert.match(evFix, /Naisten jouluinen saunailta/);
+  assert.match(evFix, /Saunottajien yhteisöpäivä/);
   // booking_210: täydet tapahtumat näkyvät himmennettyinä Täynnä-merkillä ja jonolinkillä.
+  const fullFix = evFix.match(/<li class="card ev is-full"[\s\S]*?<\/li>/g) || [];
+  assert.equal(fullFix.length, 2, `täysiä tapahtumia ${fullFix.length}`);
+  assert.ok(fullFix.every((c) => /class="pill full">Täynnä</.test(c) && /Liity jonoon/.test(c)));
+  assert.match(fullFix.join(''), /Sipoonjoen Kekri/);
+  assert.match(fullFix.join(''), /Perinnesaunotusilta/);
+  assert.deepEqual(homeShopEvents(Date.parse('2026-10-28T08:00:00Z')).map((x) => [x.slug, x.full]), [
+    ['sipoonjoen-kekri', true],
+    ['perinnesaunotusilta', true],
+    ['naisten-joulusauna', false],
+    ['saunottajien-yhteisopaiva-2', false],
+  ]);
+  assert.deepEqual(homeShopEvents(Date.parse('2026-10-31T17:00:00Z')).map((x) => x.slug), [
+    'perinnesaunotusilta', 'naisten-joulusauna', 'saunottajien-yhteisopaiva-2',
+  ]);
+  // Nykyhetki: etusivu näyttää täsmälleen sen, mitä data ja kello sallivat. Päättynyt kerta ei jää kortiksi.
+  const ev = eventsSlice(fi);
+  const exp = expectedHomeEvents();
+  const open = exp.events.filter((x) => !x.full);
+  const fullExpected = exp.events.filter((x) => x.full);
+  const n = (ev.match(/<li class="card ev"/g) || []).length;
   const full = ev.match(/<li class="card ev is-full"[\s\S]*?<\/li>/g) || [];
-  assert.equal(full.length, 2, `täysiä tapahtumia ${full.length}`);
+  assert.equal(n, open.length, `vapaita tapahtumia ${n}, odotettiin ${open.map((x) => x.slug).join(', ') || 'ei yhtään'}`);
+  assert.equal(full.length, fullExpected.length, `täysiä tapahtumia ${full.length}, odotettiin ${fullExpected.map((x) => x.slug).join(', ') || 'ei yhtään'}`);
+  for (const x of open) assert.ok(ev.includes(x.title), x.slug);
   assert.ok(full.every((c) => /class="pill full">Täynnä</.test(c) && /Liity jonoon/.test(c)));
-  assert.match(full.join(''), /Sipoonjoen Kekri/);
-  assert.match(full.join(''), /Perinnesaunotusilta/);
-  assert.match(ev, /data-live-events/);
+  for (const x of fullExpected) assert.ok(full.join('').includes(x.title), x.slug);
+  if (exp.kind === 'shop') {
+    for (const raw of kb.events_shop) {
+      if (exp.events.some((x) => x.slug === raw.slug)) continue;
+      const title = cardsDoc.events?.[raw.slug]?.fi?.title || raw.name;
+      assert.ok(!ev.includes(title), `${raw.slug} on mennyt`);
+    }
+  }
+  if (exp.events.length) assert.match(ev, /data-live-events/);
+  else assert.match(ev, /Uusia tapahtumia julkaistaan pian/);
   assert.match(ev, /Kaikki tapahtumat/);
   assert.match(ev, /href="\/varaa\/#\/\?k=tapahtuma"/);
   assert.match(fi, /<summary>Voiko vuoroon saapua myöhässä\?<\/summary>/);
