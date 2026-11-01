@@ -24,7 +24,7 @@ function pngInfo(buf) {
 function loadSw(scope) {
   const listeners = {};
   const sandbox = {
-    URL, Response, console,
+    URL, Response, console, setTimeout, clearTimeout,
     fetch: async () => { throw new Error('fetch puuttuu'); },
     caches: { open: async () => { throw new Error('caches.open puuttuu'); }, keys: async () => [], delete: async () => false },
   };
@@ -32,8 +32,14 @@ function loadSw(scope) {
     location: new URL(new URL('sw.js', scope).href),
     registration: { scope },
     addEventListener(type, fn) { (listeners[type] ||= []).push(fn); },
+    removeEventListener(type, fn) {
+      const list = listeners[type];
+      if (!list) return;
+      const i = list.indexOf(fn);
+      if (i >= 0) list.splice(i, 1);
+    },
     skipWaiting() { sandbox.self.skipped = (sandbox.self.skipped || 0) + 1; },
-    clients: { claim: async () => { sandbox.self.claimed = true; } },
+    clients: { claim: async () => { sandbox.self.claimed = true; }, matchAll: async () => [] },
   };
   vm.createContext(sandbox);
   vm.runInContext(swSrc, sandbox, { filename: 'sw.js' });
@@ -136,7 +142,10 @@ test('asennusvihje: Androidin kehote, iPhonen Jaa-ohje, ei erillisessä ikkunass
   assert.equal(shouldRegisterSw('/'), false);
   assert.equal(shouldRegisterSw('/saunotus-uusi/'), false);
   assert.equal(shouldRegisterSw('/hallinta/offline.html'), false);
-  assert.match(read('booking/admin/pwa.js'), /if \(reloadOnControl\) location\.reload\(\)/);
+  assert.match(read('booking/admin/pwa.js'), /addEventListener\('controllerchange'/);
+  assert.match(read('booking/admin/pwa.js'), /applyServiceWorkerUpdate/);
+  assert.match(read('booking/admin/sw.js'), /await self\.skipWaiting\(\)/);
+  assert.match(read('booking/admin/sw.js'), /self\.clients\.claim\(\)/);
   assert.equal(startHallintaPwa(), undefined);
 });
 
@@ -236,6 +245,7 @@ test('service worker: ei Supabasea, ei kauppaa, HTML verkosta, vanha välimuisti
   listeners.install[0]({ waitUntil(p) { installing = p; } });
   await installing;
   assert.deepEqual(added, precache);
+  assert.equal(sandbox.self.skipped, 1);
 
   const deleted = [];
   sandbox.caches.keys = async () => ['hallinta-old', api.CACHE, 'varaa-v1', 'pages'];
@@ -258,6 +268,111 @@ test('service worker: ei Supabasea, ei kauppaa, HTML verkosta, vanha välimuisti
   assert.match(read('booking/admin/offline.html'), /noindex/);
 });
 
+test('service worker: version.json ohitetaan eikä vanhaa moduulia anneta uudella tunnuksella', async () => {
+  const prod = 'https://saunotus.fi/hallinta/';
+  const { sandbox, listeners, api } = loadSw(prod);
+  const kind = (url, opt) => api.classify(req(url, opt));
+  assert.equal(kind(prod + 'version.json'), 'bypass');
+  assert.equal(kind(prod + 'version.json?ts=1'), 'bypass');
+  assert.equal(kind(prod + 'version.json?v=abc'), 'bypass');
+  assert.equal(kind(prod + 'admin.js?v=abc'), 'static');
+  assert.equal(api.sameCachedAsset(prod + 'views/talous.js?v=new', prod + 'views/talous.js?v=old'), false);
+  assert.equal(api.sameCachedAsset(prod + 'views/talous.js?v=new', prod + 'views/talous.js?v=new'), true);
+  assert.equal(api.sameCachedAsset(prod + 'views/talous.js?v=new', prod + 'views/day.js?v=new'), false);
+  assert.equal(api.sameCachedAsset(prod + 'admin.js?v=new', ''), true);
+  assert.equal(api.authClientUrl(prod + '#access_token=secret&type=invite'), true);
+  assert.equal(api.authClientUrl(prod + '?code=pkce'), true);
+  assert.equal(api.authClientUrl(prod + '#/talous'), false);
+  assert.equal(api.PRECACHE.includes('./version.json'), false);
+
+  let matchOpts = null;
+  const cached = { url: prod + 'views/talous.js?v=old', from: 'cache' };
+  const network = { status: 200, type: 'basic', from: 'net', headers: { get: (k) => (k === 'content-type' ? 'text/javascript' : null) }, clone() { return this; } };
+  const deleted = [];
+  let fetches = 0;
+  sandbox.fetch = async () => { fetches++; return network; };
+  sandbox.caches.open = async () => ({
+    match: async (_r, opts) => { matchOpts = opts; return cached; },
+    delete: async () => { deleted.push('gone'); },
+    put: async () => { throw new Error('eri tunnusta ei saa tallentaa osumana'); },
+  });
+  const mixed = await api.cacheFirst(req(prod + 'views/talous.js?v=new'));
+  assert.equal(mixed, network);
+  assert.equal(fetches, 1);
+  assert.deepEqual(deleted, ['gone']);
+  assert.equal(matchOpts.ignoreSearch, false);
+
+  fetches = 0;
+  sandbox.caches.open = async () => ({
+    match: async () => ({ url: prod + 'views/talous.js?v=new', from: 'cache' }),
+    put: async () => { throw new Error('osuma ei lähde verkkoon'); },
+  });
+  const hit = await api.cacheFirst(req(prod + 'views/talous.js?v=new'));
+  assert.equal(hit.from, 'cache');
+  assert.equal(fetches, 0);
+
+  const puts = [];
+  sandbox.fetch = async (url, init) => { fetches++; return { url, init, status: 200, type: 'basic', headers: { get: () => 'application/json' }, clone() { return this; } }; };
+  sandbox.caches.open = async () => ({ match: async () => undefined, put: async () => { puts.push('put'); } });
+  fetches = 0;
+  const ver = await api.cacheFirst(req(prod + 'version.json?ts=9'));
+  assert.equal(ver.init.cache, 'no-store');
+  assert.equal(fetches, 1);
+  assert.deepEqual(puts, []);
+
+  const navigated = [];
+  sandbox.self.UPDATE_ACK_MS = 0;
+  sandbox.self.clients.matchAll = async () => [{
+    id: 'old',
+    url: prod + '#/kassa',
+    postMessage() {},
+    navigate: async (url) => { navigated.push(url); },
+  }];
+  sandbox.caches.keys = async () => ['hallinta-old', api.CACHE];
+  const removed = [];
+  sandbox.caches.delete = async (key) => { removed.push(key); return true; };
+  let act;
+  listeners.activate[0]({ waitUntil(p) { act = p; } });
+  await act;
+  assert.deepEqual(navigated, [prod + '#/kassa']);
+  assert.deepEqual(removed, ['hallinta-old']);
+  assert.equal(sandbox.self.claimed, true);
+
+  const { sandbox: ackBox, listeners: ackListeners } = loadSw(prod);
+  const ackNav = [];
+  ackBox.self.UPDATE_ACK_MS = 30_000;
+  ackBox.self.clients.matchAll = async () => [{
+    id: 'held',
+    url: prod + '#/',
+    postMessage(data) {
+      if (data?.type === 'HALLINTA_UPDATED') {
+        for (const fn of [...ackListeners.message]) fn({ source: { id: 'held' }, data: { type: 'HALLINTA_ACK', hold: true } });
+      }
+    },
+    navigate: async () => { ackNav.push('nav'); },
+  }];
+  ackBox.caches.keys = async () => [];
+  let ackAct;
+  ackListeners.activate[0]({ waitUntil(p) { ackAct = p; } });
+  await ackAct;
+  assert.deepEqual(ackNav, []);
+
+  const { sandbox: authBox, listeners: authListeners } = loadSw(prod);
+  const authNav = [];
+  authBox.self.UPDATE_ACK_MS = 0;
+  authBox.self.clients.matchAll = async () => [{
+    id: 'invite',
+    url: prod + '#access_token=secret&type=invite',
+    postMessage() {},
+    navigate: async () => { authNav.push('nav'); },
+  }];
+  authBox.caches.keys = async () => [];
+  let authAct;
+  authListeners.activate[0]({ waitUntil(p) { authAct = p; } });
+  await authAct;
+  assert.deepEqual(authNav, []);
+});
+
 test('build kopioi PWA-tiedostot ja versioi välimuistin; kauppa ja julkinen sivusto eivät rekisteröi workeria', () => {
   const build = read('scripts/build-pages.mjs');
   for (const f of ['manifest.json', 'sw.js', 'offline.html', 'pwa.js', 'icon-192.png', 'icon-512.png', 'icon-maskable-512.png', 'apple-touch-icon.png']) {
@@ -265,6 +380,8 @@ test('build kopioi PWA-tiedostot ja versioi välimuistin; kauppa ja julkinen siv
   }
   assert.match(build, /const SW_VER = '\$\{VER\}';/);
   assert.match(build, /hallinta-' \+ VER\.slice\(3\)/);
+  assert.match(build, /version\.json/);
+  assert.match(build, /assetVer: VER/);
   assert.match(build, /manifest\.scope !== '\.\/'/);
   assert.match(read('.github/workflows/pages.yml'), /node --test booking\/tests\/hallinta-pwa\.test\.mjs/);
   assert.doesNotMatch(read('src/render.mjs'), /serviceWorker|manifest\.json/);
