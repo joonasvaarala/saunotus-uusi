@@ -19,6 +19,7 @@ from sync import advance_baseline, chunks, db_state_from_remote, fetch_export, m
 ROOT = os.path.abspath(os.path.join(HERE, "..", ".."))
 MIGRATION = os.path.join(ROOT, "supabase", "migrations", "20261022091609_booking_126_johku_sync.sql")
 MIGRATION_227 = os.path.join(ROOT, "supabase", "migrations", "20261101130000_booking_227_johku_unmapped_review.sql")
+MIGRATION_227B = os.path.join(ROOT, "supabase", "migrations", "20261101133000_booking_227b_therapist_slack_null_leg.sql")
 
 
 def plan():
@@ -329,6 +330,16 @@ class MigrationTextTest(unittest.TestCase):
         self.assertIn("ei_resurssia", block)
         self.assertIn("v_kb is not null", block)
         self.assertIn("johku_product_id' = '134'", sql)
+
+    def test_227b_null_leg_and_existing_update(self):
+        with open(MIGRATION_227B, encoding="utf-8") as f:
+            sql = f.read().lower()
+        self.assertEqual(sql.count("p_exclude_leg is null or c.leg_id is distinct from p_exclude_leg"), 2)
+        self.assertIn("interval '15 minutes'", sql)
+        self.assertIn("recent_ei as materialized", sql)
+        self.assertIn("v_space is null and v_res_id is null", sql)
+        self.assertIn("v_res.space_id", sql)
+        self.assertIn("lr.code = 'rauni'", sql)
 
 
 if __name__ == "__main__":

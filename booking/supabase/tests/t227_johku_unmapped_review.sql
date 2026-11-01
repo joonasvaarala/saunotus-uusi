@@ -24,6 +24,15 @@ declare
   v_code text;
   v_slack_hit integer;
   v_slack_free integer;
+  v_slack_leg integer;
+  v_past bigint;
+  v_stale bigint;
+  v_fresh bigint;
+  v_legged bigint;
+  v_n integer;
+  v_exist bigint;
+  v_oid2 bigint;
+  v_item bigint;
   v_start timestamptz := '2031-06-03 12:00:00+03';
   v_end timestamptz := '2031-06-03 14:30:00+03';
   v_free_start timestamptz := '2031-08-04 12:00:00+03';
@@ -190,8 +199,117 @@ begin
     'E6: peruttu rivi ei ole aktiivinen claim');
 
   v_slack_hit := booking._therapist_slack('saunotus', v_start, v_end, 1, null, null, null);
+  v_slack_leg := booking._therapist_slack('saunotus', v_start, v_end, 1, null, -1, null);
   v_slack_free := booking._therapist_slack('saunotus', v_free_start, v_free_end, 1, null, null, null);
-  perform pg_temp.ck(v_slack_hit < v_slack_free, 'E7: saunottajan slack pienenee päällekkäin (' || v_slack_hit || ' < ' || v_slack_free || ')');
+  perform pg_temp.ck(v_slack_hit = v_slack_leg and v_slack_hit < v_slack_free,
+    'E7: null leg_id lasketaan mukaan kun p_exclude_leg on null (' || v_slack_hit || ' = ' || v_slack_leg || ' < ' || v_slack_free || ')');
+
+  -- F: vain elävät rivit heijastetaan (päättynyt historia ja completed eivät)
+  insert into booking.reservations(
+    order_id, space_id, mode, starts_at, ends_at, persons, status,
+    external_source, external_id, external_meta, claim_offset_min)
+  values (
+    v_oid, v_ei, 'shared', now() - interval '3 hours', now() - interval '2 hours', 1, 'confirmed',
+    'johku', '8802295', '{"johku_product_id":"134"}'::jsonb, 0)
+  returning id into v_past;
+  insert into booking.reservations(
+    order_id, space_id, mode, starts_at, ends_at, persons, status,
+    external_source, external_id, external_meta, claim_offset_min)
+  values (
+    v_oid, v_ei, 'shared', now() - interval '30 minutes', now() - interval '1 minute', 1, 'confirmed',
+    'johku', '8802296', '{"johku_product_id":"134"}'::jsonb, 0)
+  returning id into v_fresh;
+  insert into booking.reservations(
+    order_id, space_id, mode, starts_at, ends_at, persons, status,
+    external_source, external_id, external_meta, claim_offset_min)
+  values (
+    v_oid, v_ei, 'shared', '2031-10-06 12:00:00+03', '2031-10-06 14:00:00+03', 1, 'completed',
+    'johku', '8802297', '{"johku_product_id":"134"}'::jsonb, 0)
+  returning id into v_stale;
+  perform pg_temp.ck(not exists (
+      select 1 from booking.v_claims c where c.reservation_id = v_past and c.resource_id = v_rauni),
+    'F1: yli 15 min sitten päättynyt ei heijastu Rauniin');
+  perform pg_temp.ck(exists (
+      select 1 from booking.v_claims c where c.reservation_id = v_fresh and c.resource_id = v_rauni and c.role = 'space'),
+    'F2: minuutin sisään päättynyt (puskuri) heijastuu');
+  perform pg_temp.ck(not exists (
+      select 1 from booking.v_claims c where c.reservation_id = v_stale and c.resource_id = v_rauni),
+    'F3: completed ei heijastu');
+
+  -- G: valmis Rauni-leg ei kahdennu
+  insert into booking.reservations(
+    order_id, space_id, mode, starts_at, ends_at, persons, status,
+    external_source, external_id, external_meta, claim_offset_min)
+  values (
+    v_oid, v_ei, 'shared', '2031-09-02 12:00:00+03', '2031-09-02 14:30:00+03', 2, 'confirmed',
+    'johku', '8802298', '{"johku_product_id":"134"}'::jsonb, 0)
+  returning id into v_legged;
+  insert into booking.reservation_legs(reservation_id, resource_id, role, mode, starts_at, ends_at, persons)
+  values (v_legged, v_rauni, 'space', 'exclusive', '2031-09-02 12:00:00+03', '2031-09-02 14:30:00+03', 2);
+  select count(*) into v_n
+    from booking.v_claims c
+   where c.reservation_id = v_legged and c.role = 'space' and c.resource_id = v_rauni;
+  perform pg_temp.ck(v_n = 1, 'G1: Rauni-legillä yksi claim, ei projektion kopiota (' || v_n || ')');
+
+  -- H: olemassa olevan tuntemattoman tuotteen peruutus menee läpi; uusi insert jää review-jonoon
+  v := booking.svc_johku_sync_apply(jsonb_build_object(
+    'orders', jsonb_build_array(jsonb_build_object(
+      'external_id', '8802301', 'johku_order_no', 8802301, 'customer_ext', '880227',
+      'status', 'confirmed', 'payment_status', 'paid', 'total_gross', 10,
+      'locale', 'fi', 'customer_kind', 'private')),
+    'items', jsonb_build_array(jsonb_build_object(
+      'external_id', '8802302', 'order_ext', '8802301', 'johku_product_id', '999003',
+      'product_name', 'Tuntematon hoito', 'kind', 'reservation', 'quantity', 1,
+      'unit_price_gross', 10, 'line_total_gross', 10, 'vat_rate', 25.5,
+      'price_breakdown', jsonb_build_object('johku_role', 'line')))));
+  perform pg_temp.ck((v ->> 'ok')::boolean, 'H0: tilaus ja rivi: ' || coalesce(v ->> 'code', 'ok'));
+  select id into v_oid2 from booking.orders where external_source = 'johku' and external_id = '8802301';
+  select id into v_item from booking.order_items where external_source = 'johku' and external_id = '8802302';
+  insert into booking.reservations(
+    order_id, order_item_id, space_id, mode, starts_at, ends_at, persons, status,
+    external_source, external_id, external_meta, claim_offset_min)
+  values (
+    v_oid2, v_item, v_ei, 'shared', '2031-11-02 12:00:00+02', '2031-11-02 14:00:00+02', 1, 'confirmed',
+    'johku', '8802303', '{"source":"johku","johku_product_id":"999003"}'::jsonb, 0)
+  returning id into v_exist;
+  v := booking.svc_johku_sync_apply(jsonb_build_object(
+    'orders', jsonb_build_array(jsonb_build_object(
+      'external_id', '8802301', 'johku_order_no', 8802301, 'customer_ext', '880227',
+      'status', 'confirmed', 'payment_status', 'paid', 'total_gross', 10,
+      'locale', 'fi', 'customer_kind', 'private')),
+    'items', jsonb_build_array(jsonb_build_object(
+      'external_id', '8802302', 'order_ext', '8802301', 'johku_product_id', '999003',
+      'product_name', 'Tuntematon hoito', 'kind', 'reservation', 'quantity', 1,
+      'unit_price_gross', 10, 'line_total_gross', 10, 'vat_rate', 25.5,
+      'price_breakdown', jsonb_build_object('johku_role', 'line'))),
+    'reservations', jsonb_build_array(jsonb_build_object(
+      'external_id', '8802303', 'order_ext', '8802301', 'item_ext', '8802302',
+      'johku_product_id', '999003', 'persons', 1, 'status', 'cancelled',
+      'cancel_reason', 'johku_import',
+      'starts_at', '2031-11-02T12:00:00+02:00', 'ends_at', '2031-11-02T14:00:00+02:00',
+      'pool_codes', '[]'::jsonb))));
+  perform pg_temp.ck((v ->> 'ok')::boolean, 'H1: peruutus-apply ok');
+  perform pg_temp.ck(not exists (
+      select 1 from jsonb_array_elements(v -> 'review') e
+       where e ->> 'external_id' = '8802303' and e ->> 'code' = 'unmapped_product'),
+    'H2: olemassa oleva rivi ei jää unmapped-reviewhin');
+  perform pg_temp.ck(exists (
+      select 1 from jsonb_array_elements_text(v -> 'applied' -> 'reservations') x where x = '8802303'),
+    'H3: peruutus on applied');
+  perform pg_temp.ck((select status from booking.reservations where id = v_exist) = 'cancelled'
+      and (select space_id from booking.reservations where id = v_exist) = v_ei,
+    'H4: tila cancelled, tila ei_resurssia ennallaan');
+  v := booking.svc_johku_sync_apply(jsonb_build_object(
+    'reservations', jsonb_build_array(jsonb_build_object(
+      'external_id', '8802304', 'order_ext', '8802301', 'item_ext', '8802302',
+      'johku_product_id', '999003', 'persons', 1, 'status', 'cancelled',
+      'starts_at', '2031-11-03T12:00:00+02:00', 'ends_at', '2031-11-03T14:00:00+02:00',
+      'pool_codes', '[]'::jsonb))));
+  perform pg_temp.ck(exists (
+      select 1 from jsonb_array_elements(v -> 'review') e
+       where e ->> 'external_id' = '8802304' and e ->> 'code' = 'unmapped_product')
+    and not exists (select 1 from booking.reservations where external_source = 'johku' and external_id = '8802304'),
+    'H5: uusi tuntematon rivi jää review-jonoon eikä synny');
 
   raise exception 'TESTRESULT pass=% fail=% :: %',
     (select count(*) from t227_r where ok),
