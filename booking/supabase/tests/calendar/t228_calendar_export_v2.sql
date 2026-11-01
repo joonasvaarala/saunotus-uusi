@@ -46,6 +46,7 @@ declare
   savu bigint; rauni bigint; ei bigint; rit_pool bigint;
   p_tue bigint[]; p_turve bigint[]; p_thu bigint[]; p_1500 bigint[]; p_1700 bigint[];
   tue_name text; turve_name text; yle_name text; savu_name text; rauni_name text; treat_name text; ev_name text;
+  ev_product bigint;
   d jsonb; ev jsonb; plan jsonb; fin jsonb; bad jsonb; resources jsonb;
   seq_cust bigint; seq_ord bigint; seq_res bigint;
   seq_cust2 bigint; seq_ord2 bigint; seq_res2 bigint;
@@ -61,7 +62,12 @@ begin
   select r.name into savu_name from booking.resources r where r.code = 'savusauna';
   select r.name into rauni_name from booking.resources r where r.code = 'rauni';
   select p.name into treat_name from kb.products p where p.id = 10;
-  select p.name into ev_name from kb.products p where p.id = 113;
+  select p.id, p.name into ev_product, ev_name
+    from kb.products p
+   where p.slug = 'sipoonjoen-joulusauna' or p.name = 'Sipoonjoen joulusauna'
+   order by case when p.slug = 'sipoonjoen-joulusauna' then 0 else 1 end, p.id
+   limit 1;
+  perform public.t228_ck(ev_product is not null, 'C8 joulusauna löytyy slugista tai nimestä');
   select c.google_calendar_id into v_closure from booking.closure_calendars c where c.google_calendar_id is not null order by c.code limit 1;
   select s.google_calendar_id into v_shift from public.calendar_sources s where s.google_calendar_id is not null order by s.role_type limit 1;
   perform public.t228_ck(v_closure is not null, 'C2 sulkukalenteri löytyy');
@@ -152,7 +158,7 @@ begin
 
   insert into booking.schedule_rules(id, product_id, label, mode, space_id, weekdays, start_time, duration_minutes, valid_from, valid_to, kind, active)
   overriding system value values
-    (rule_ev, 113, 'Testi joulusauna', 'shared', ei, array[extract(isodow from date '2027-01-09')::smallint], time '12:00', 120, date '2027-01-09', date '2027-01-09', 'event', true);
+    (rule_ev, ev_product, 'Testi joulusauna', 'shared', ei, array[extract(isodow from date '2027-01-09')::smallint], time '12:00', 120, date '2027-01-09', date '2027-01-09', 'event', true);
 
   insert into booking.reservations(id, order_id, product_id, space_id, mode, starts_at, ends_at, persons, status, pool_ids, claim_offset_min, rule_id)
   overriding system value values
@@ -162,8 +168,8 @@ begin
     (r_we, o_we, 1, savu, 'shared', timestamptz '2027-01-09 15:00:00+02', timestamptz '2027-01-09 15:30:00+02', 2, 'confirmed', p_1500, 0, null),
     (r_we2, o_we2, 1, savu, 'shared', timestamptz '2027-01-09 17:00:00+02', timestamptz '2027-01-09 17:30:00+02', 3, 'confirmed', p_1700, 0, null),
     (r_priv, o_priv, 25, savu, 'exclusive', timestamptz '2027-01-09 13:00:00+02', timestamptz '2027-01-09 15:00:00+02', 4, 'confirmed', '{}'::bigint[], 0, null),
-    (r_tr, o_tr, 10, rauni, 'exclusive', timestamptz '2027-01-09 11:00:00+02', timestamptz '2027-01-09 12:30:00+02', 1, 'confirmed', '{}'::bigint[], 0, null),
-    (r_ev, o_ev, 113, ei, 'shared', timestamptz '2027-01-09 12:00:00+02', timestamptz '2027-01-09 12:30:00+02', 4, 'confirmed', '{}'::bigint[], 0, rule_ev),
+    (r_tr, o_tr, 10, rauni, 'exclusive', timestamptz '2027-01-09 13:00:00+02', timestamptz '2027-01-09 14:30:00+02', 1, 'confirmed', '{}'::bigint[], 0, null),
+    (r_ev, o_ev, ev_product, ei, 'shared', timestamptz '2027-01-09 12:00:00+02', timestamptz '2027-01-09 12:30:00+02', 4, 'confirmed', '{}'::bigint[], 0, rule_ev),
     (r_rit, o_rit, 7, savu, 'shared', timestamptz '2027-01-17 16:00:00+02', timestamptz '2027-01-17 16:30:00+02', 2, 'confirmed', '{}'::bigint[], 30, null);
   insert into booking.reservation_legs(id, reservation_id, resource_id, role, mode, starts_at, ends_at, persons, offset_min, minutes, pool_ids)
   overriding system value values
@@ -179,7 +185,7 @@ begin
   perform public.t228_ck((ev ->> 'starts_at')::timestamptz = timestamptz '2027-01-09 15:00:00+02', 'W3 alku on 15');
   perform public.t228_ck((ev ->> 'ends_at')::timestamptz = timestamptz '2027-01-09 19:00:00+02', 'W4 loppu on 19 eikä Johkun 15:30');
   perform public.t228_ck(ev ->> 'google_calendar_id' = cal_savu, 'W5 palkki Savusaunan kalenterissa');
-  perform public.t228_ck(ev ->> 'google_event_id' = 'bkw20270109', 'W6 tunniste');
+  perform public.t228_ck(ev ->> 'google_event_id' = 'bkv20270109', 'W6 tunniste');
   perform public.t228_ck(position('Maija' in coalesce(ev ->> 'description', '')) = 0 and position('040' in coalesce(ev ->> 'description', '')) = 0 and position('@' in coalesce(ev ->> 'description', '')) = 0, 'W7 palkissa ei yhteystietoja');
   perform public.t228_ck(position('12–14' in coalesce(ev ->> 'description', '')) = 0 and position('13–15' in coalesce(ev ->> 'summary', '')) = 0, 'W8 tapahtuma ja yksityinen eivät levitä palkkia');
 
@@ -222,6 +228,11 @@ begin
   perform public.t228_ck(position('Maija' in (ev ->> 'description')) > 0 and position('040' in (ev ->> 'description')) = 0 and position('@' in (ev ->> 'description')) = 0, 'P3 nimi jää, puhelin ja sähköposti eivät');
   select x into ev from jsonb_array_elements(d -> 'events') x where x ->> 'event_key' = 'r:' || r_tr::text;
   perform public.t228_ck(ev ->> 'summary' = rauni_name || ' – ' || treat_name || ', 1 hlö' and ev ->> 'google_calendar_id' = cal_rauni, 'P4 hoito Raunin kalenterissa');
+  perform public.t228_ck(
+    (select bool_and((x ->> 'google_event_id') ~ '^[a-v0-9]{5,128}$')
+       and count(distinct x ->> 'kind') filter (where x ->> 'kind' in ('reservation', 'shift', 'ritual', 'event', 'weekend')) = 5
+       from jsonb_array_elements(d -> 'events') x),
+    'I1 jokaisen lajin tunnus on a-v ja 0-9');
 
   plan := booking.booking_calendar_export_plan();
   perform public.t228_ck(plan ->> 'mode' = 'dry_run', 'S1 harjoitusajo');
@@ -239,7 +250,7 @@ begin
   perform public.t228_ck((fin ->> 'upserted')::int = 1, 'S6 viikonlopun palkki kirjautuu');
   bad := public.t228_call(format('select booking.booking_calendar_export_finish(%L::jsonb)', jsonb_build_object('upserts', jsonb_build_array(jsonb_build_object(
     'event_key', 'w:2027-01-09', 'kind', 'weekend', 'resource_code', 'savusauna',
-    'google_calendar_id', v_shift, 'google_event_id', 'bkw20270109', 'content_hash', 'x',
+    'google_calendar_id', v_shift, 'google_event_id', 'bkv20270109', 'content_hash', 'x',
     'starts_at', '2027-01-09 15:00:00+02', 'ends_at', '2027-01-09 19:00:00+02')))::text));
   perform public.t228_ck(bad ->> 'err' = 'shift_calendar', 'S7 viimeistely ei kirjoita vuorokalenteriin');
 

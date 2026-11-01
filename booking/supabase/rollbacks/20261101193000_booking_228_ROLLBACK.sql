@@ -2,6 +2,7 @@
 -- Palauttaa halutut tapahtumat booking_116:n päiväpalkkiin, suunnitelman booking_115:een
 -- ja asetusten tarkistuksen booking_114:ään (vain sulkukalenteri).
 -- Uuden lajin rivit poistetaan, jotta tarkistus voidaan kaventaa.
+-- Viikonlopun Google-tunnus on bkv + YYYYMMDD. Etuliite ei ole bkw, koska w ei kuulu a–v.
 -- modea ei muuteta. Googleen ei kirjoiteta.
 set local lock_timeout = '5s';
 

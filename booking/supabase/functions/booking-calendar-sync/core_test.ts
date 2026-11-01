@@ -33,7 +33,7 @@ Deno.test("planOps ohittaa vuorokalenterin eikä kirjoita sinne", () => {
     events: [onShift, ev()],
     mapped: [
       { event_key: "d:2027-01-09", google_calendar_id: SHIFT, google_event_id: "bkd20270109" },
-      { event_key: "w:2027-01-09", google_calendar_id: CAL, google_event_id: "bkw20270109", content_hash: "old" },
+      { event_key: "w:2027-01-09", google_calendar_id: CAL, google_event_id: "bkv20270109", content_hash: "old" },
     ],
   };
   const { ops, blocked } = planOps(plan);

@@ -9,7 +9,7 @@
 --   s:  arjen yleinen vuoro, vain jos vähintään yksi varaus, koko vuoro säännön mukaan (bks).
 --       Turvetorstai 16–17 on oma tapahtuma, erillään torstain yleisestä vuorosta.
 --   w:  la–su yksi palkki Savusaunan kalenterissa ensimmäisestä varatusta yleisestä vuorosta
---       viimeisen loppuun (bkw). Mukana kb 7:n savusaunaosa. Ei tapahtumia, rituaaleja,
+--       viimeisen loppuun (bkv + YYYYMMDD; w ei kelpaa Google-tunnukseen). Mukana kb 7:n savusaunaosa. Ei tapahtumia, rituaaleja,
 --       yksityisvarauksia eikä hoitoja.
 -- Vanhaa d:/bkd-päiväpalkkia ei enää haluta. Seuraava ajo poistaa sen.
 -- Sulkukalenterin ja vuorokalenterin (public.calendar_sources) tunnusta ei hyväksytä kohteeksi.
@@ -330,7 +330,7 @@ begin
            'google_calendar_id', a.calendar_id,
            'google_event_id', case
              when a.kind = 'reservation' then 'bkr' || lpad(a.reservation_id::text, 8, '0')
-             when a.kind = 'weekend' then 'bkw' || replace(substr(a.event_key, 3), '-', '')
+             when a.kind = 'weekend' then 'bkv' || replace(substr(a.event_key, 3), '-', '')
              when a.kind = 'ritual' then 'bkl' || substr(md5(a.event_key), 1, 24)
              when a.kind = 'event' then 'bke' || substr(md5(a.event_key), 1, 24)
              else 'bks' || substr(md5(a.event_key), 1, 24) end,
