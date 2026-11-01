@@ -84,6 +84,8 @@ jobs:
       - run: node --test booking/tests/pay-later.test.mjs
       # pakettituote Saunarituaali ja savusaunavuoro (kb 7, booking_58, §17.11): aikajana, loppuaika +2 h, la/su, mock, tuotantofixture
       - run: node --test booking/tests/saunarituaali.test.mjs
+      # booking_230: Hoidot kiinni sulkee saunottajaa tarvitsevat tuotteet (rituaali + paketin rituaalijalka). SQL: t230 ajetaan psql:llä.
+      - run: node --test booking/tests/hoidot-saunottaja-sulku.test.mjs
       # booking_221: hoitotuotteen hinta valitulle henkilömäärälle (katalogin included_persons + extra_person_price = kassan _treatment_price); aika säilyy, jos se käy uudelle määrälle
       - run: node --test booking/tests/hoito-hinta-henkilomaara.test.mjs
       # booking_159: Saunotusrituaali (kb 8) pois hoito-/rituaalilistoilta (tuotesivu ja lisätuote ennallaan) + paketin otsikon tekstimigraatio ja rollback
