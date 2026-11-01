@@ -4,6 +4,8 @@
 
 // scripts/build-pages.mjs korvaa tämän (?v=…). Tyhjä kehityksessä. Kysely saa sw.js-pyynnön näyttämään versioidulta,
 // ja tavumuutos julkaisee uuden workerin.
+import { applyServiceWorkerUpdate, pageHasUnsavedWork, showVersionBanner, getVersionController } from './version-check.js';
+
 const SW_VER = '';
 const DISMISS_KEY = 'hallinta.pwa.installDismissed';
 
@@ -53,7 +55,6 @@ export function hallintaSwScript(moduleUrl, ver = SW_VER) {
 }
 
 let deferredPrompt = null;
-let reloadOnControl = false;
 
 function hintDismissed() {
   try { return localStorage.getItem(DISMISS_KEY) === '1'; } catch { return false; }
@@ -127,9 +128,10 @@ function showUpdate(reg) {
   btn.className = 'btn primary';
   btn.textContent = PWA_TEXT.reload;
   btn.addEventListener('click', () => {
-    reloadOnControl = true;
     const waiting = reg.waiting;
     if (waiting) waiting.postMessage({ type: 'SKIP_WAITING' });
+    const ctrl = getVersionController();
+    if (ctrl) ctrl.reload();
     else location.reload();
   });
   bar.append(p, btn);
@@ -149,9 +151,23 @@ export function startHallintaPwa() {
   if (installHintKind({ standalone, dismissed: hintDismissed(), ios: isIosDevice(), canPrompt: false }) === 'ios') renderHint('ios');
   if (!('serviceWorker' in navigator) || !shouldRegisterSw(location.pathname)) return;
   const base = import.meta.url;
-  navigator.serviceWorker.addEventListener('controllerchange', () => {
-    if (reloadOnControl) location.reload();
+  // controllerchange kerran per päivitys: applyServiceWorkerUpdate ohittaa saman päivityksen toisen tapahtuman
+  // ja juuri tehdyn uudelleenlatauksen. Ensimmäinen asennus (ei aiempaa controlleria) ei lataa sivua uudelleen.
+  const hadController = !!navigator.serviceWorker.controller;
+  const ack = (data) => {
+    try { navigator.serviceWorker.controller?.postMessage({ type: 'HALLINTA_ACK', ...data }); } catch { /* worker ei ole vielä ohjaksissa */ }
+  };
+  const onSwUpdate = () => applyServiceWorkerUpdate({
+    hadController,
+    unsaved: () => pageHasUnsavedWork(document, location.hash),
+    ack,
+    showBanner: () => showVersionBanner(document, { onUpdate: () => getVersionController()?.reload() }),
   });
+  navigator.serviceWorker.addEventListener('controllerchange', onSwUpdate);
+  navigator.serviceWorker.addEventListener('message', (event) => {
+    if (event.data && event.data.type === 'HALLINTA_UPDATED') onSwUpdate();
+  });
+  try { navigator.serviceWorker.controller?.postMessage({ type: 'HALLINTA_ACK', hold: false, fresh: true }); } catch { /* ei controlleria */ }
   navigator.serviceWorker.register(hallintaSwScript(base), { scope: hallintaSwScope(base) }).then((reg) => {
     const watch = () => { if (reg.waiting) showUpdate(reg); };
     watch();

@@ -10,6 +10,7 @@ import { resolveAdminPath, compactIdentity, toggleMobileNav, navGroupById, group
 import { setupQuickSearch } from './quick-search.js';
 import { loadNavTexts, navText } from './nav-texts.js';
 import { startHallintaPwa } from './pwa.js';
+import { getVersionController, startHallintaVersionWatch } from './version-check.js';
 
 const $ = (id) => document.getElementById(id);
 // Kokeilutila: osoite /hallinta/?mock=1 → keinoistunto + selaimen oma mock-data (options-mock.js). EI verkkokutsuja eikä kirjautumista; mikään ei tallennu. Ilman parametria ennallaan.
@@ -32,11 +33,21 @@ export const ctx = { role: null, roleLabel: '', name: '', perms: [], can: (p) =>
 const ASSET_VER = '';
 const viewUrl = (name, bust) => `./views/${name}.js${ASSET_VER}${bust ? `${ASSET_VER ? '&' : '?'}r=${Date.now()}` : ''}`;
 // Näkymämoduulin lataus: epäonnistunut dynaaminen import jää selaimessa muistiin samalle osoitteelle, joten yksi uusinta tehdään
-// cache-bust-parametrilla. Jos sekin epäonnistuu, näytetään selkeä virhe ja "Lataa uudelleen" -painike (ks. route()).
+// cache-bust-parametrilla. Jos sekin epäonnistuu, tarkistetaan version.json. Uusi julkaisu ladataan heti uudelleen (virhepalkin sijaan).
+// Muuten näytetään selkeä virhe ja "Lataa uudelleen" -painike (ks. route()).
 async function loadView(name) {
   try { return await import(viewUrl(name)); } catch (e1) {
     console.warn(`Näkymän ${name} lataus epäonnistui, yritetään uudelleen`, e1);
-    try { return await import(viewUrl(name, true)); } catch (e2) { throw Object.assign(new Error(`Näkymän ${name} lataus epäonnistui`), { loadFailed: true, cause: e2 }); }
+    try { return await import(viewUrl(name, true)); } catch (e2) {
+      const ctrl = getVersionController();
+      if (ctrl) {
+        try {
+          const action = await ctrl.check('load-fail');
+          if (action === 'reload') return new Promise(() => {});
+        } catch { /* versiotarkistus ei saa peittää varsinaista virhettä */ }
+      }
+      throw Object.assign(new Error(`Näkymän ${name} lataus epäonnistui`), { loadFailed: true, cause: e2 });
+    }
   }
 }
 const loadErrorView = () => h('div', { class: 'pad', role: 'alert' },
@@ -78,7 +89,16 @@ let lastPath = null;   // toisesta näkymästä Päivään palattaessa päiväni
 let routeSeq = 0;   // nopea navigointi: vain viimeisin reitti saa piirtää näkymän (vanhentuneet vastaukset hylätään)
 async function route() {
   if (!getSession()) return;
+  const version = getVersionController();
+  // Palkki jäi tallentamattoman lomakkeen takia: seuraava siirtymä lataa uuden julkaisun ennen näkymää.
+  if (version?.onNavigate()) return;
   const seq = ++routeSeq;
+  if (version) {
+    try {
+      const action = await version.check('route');
+      if (seq !== routeSeq || action === 'reload' || version.reloading) return;
+    } catch { /* versiotarkistus ei saa estää näkymää */ }
+  }
   const { path, rest, query } = parseAdminHash(location.hash);
   const resolved = resolveAdminPath(path);
   const r = ROUTES.find((x) => x.path === resolved.path && allowed(x)) || ROUTES[0];
@@ -208,6 +228,7 @@ document.addEventListener('click', (ev) => {
   if (needsManualRoute(location.hash, href)) { ev.preventDefault(); route(); }
 });
 onAuthChange((s) => { if (!s) { dayModule?.clearDayBundleCache?.(); clearSiteTextsCache(); showLogin(''); } });
+startHallintaVersionWatch({ running: ASSET_VER });
 startHallintaPwa();
 // Kutsulinkki (#access_token=…&type=invite): istunto otetaan käyttöön ja käyttäjä asettaa salasanan ennen hallintaan siirtymistä
 if (adoptSessionFromHash()) {
