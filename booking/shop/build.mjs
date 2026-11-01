@@ -193,6 +193,10 @@ let changed = 0;
       const Q = { lang, shopHref: BASE + PATHS[lang].shop };
       out = out.replace('</body>', `${out.includes('/booking/config.js') ? '' : `<script src="${BASE}/booking/config.js"></script>`}<script>window.BOOKING_QUIET=${JSON.stringify(Q)}</script><script type="module" src="${BASE}/booking/quiet-week.js"></script></body>`);
     }
+    // Tuotenimi public_catalogista sivuilla, joilla ei ole viikko-ohjelmaa (siellä quiet-week.js tekee saman haun).
+    if (out.includes('data-catalog-name') && !out.includes('/booking/quiet-week.js') && !out.includes('/booking/catalog-names-boot.js')) {
+      out = out.replace('</body>', `${out.includes('/booking/config.js') ? '' : `<script src="${BASE}/booking/config.js"></script>`}<script type="module" src="${BASE}/booking/catalog-names-boot.js"></script></body>`);
+    }
     // Tuotekortin kuva elävästä katalogista (public_product_images). Esirenderöity kuva jää, jos haku epäonnistuu.
     if (out.includes('data-product-image') && !out.includes('/booking/product-cards-live.js')) {
       out = out.replace('</body>', `${out.includes('/booking/config.js') ? '' : `<script src="${BASE}/booking/config.js"></script>`}<script type="module" src="${BASE}/booking/product-cards-live.js"></script></body>`);

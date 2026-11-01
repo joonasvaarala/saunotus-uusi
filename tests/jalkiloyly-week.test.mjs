@@ -50,6 +50,8 @@ before(async () => {
   const booking = join(dist, 'booking');
   mkdirSync(booking, { recursive: true });
   cpSync(join(root, 'booking/shop/src/quiet-week.js'), join(booking, 'quiet-week.js'));
+  cpSync(join(root, 'booking/shop/src/catalog-names.js'), join(booking, 'catalog-names.js'));
+  cpSync(join(root, 'booking/shop/src/text-spaces.js'), join(booking, 'text-spaces.js'));
   cpSync(join(root, 'booking/shop/src/product-image.js'), join(booking, 'product-image.js'));
   cpSync(join(root, 'booking/shop/src/quiet-offers-logic.js'), join(booking, 'quiet-offers-logic.js'));
   cpSync(join(root, 'booking/shop/src/week-live.js'), join(booking, 'week-live.js'));

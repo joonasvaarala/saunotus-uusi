@@ -96,7 +96,7 @@ test('kortit: hinta, kesto ja slug tuotteesta; savusaunamerkki vain lipulla; Mor
         assert.ok(card.includes(treatmentCardWhen(p, lang)), `${lang} ${slug} kesto`);
       } else {
         assert.doesNotMatch(card, /data-testid="care-pair"/);
-        assert.ok(card.includes(`<h3>${safe}</h3>`), name);
+        assert.ok(card.includes(`<h3><span data-catalog-name data-catalog-slug="${slug}">${safe}</span></h3>`), name);
         assert.ok(card.includes(`<strong>${expectPrice[slug][i]}</strong>`), `${lang} ${slug} hinta`);
       }
       assert.equal(treatmentCardPrice(p, lang), expectPrice[slug][i]);
