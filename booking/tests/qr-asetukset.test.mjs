@@ -214,7 +214,7 @@ test('pending-import-16: vain uudet avaimet, FI+EN, ei numeroita', () => {
       const row = pending109.find((r) => r.key === key && r.lang === lang) || row16 || pending24.find((r) => r.key === key && r.lang === lang) || pending31.find((r) => r.key === key && r.lang === lang);
       assert.ok(row, key);
       assert.equal(row.text, text);
-      if (!row16) assert.equal(pending24.some((r) => r.key === key && r.lang === lang) || pending31.some((r) => r.key === key && r.lang === lang), true, key);
+      if (!row16) assert.equal(pending109.some((r) => r.key === key && r.lang === lang) || pending24.some((r) => r.key === key && r.lang === lang) || pending31.some((r) => r.key === key && r.lang === lang), true, key);
     }
     for (const [key, text] of Object.entries(DRINKS_EXTRA[lang])) {
       assert.equal(DRINKS_TEXTS[lang][key], undefined);

@@ -266,8 +266,8 @@ function bookingPanel(bundle, reload, calendarExport, calendarExportFailed, isAd
 function paymentsPanel(bundle, reload) {
   const s = bundle.settings || {};
   const hold = num(tx('hold_min'), s.checkout_hold_minutes, tx('unit_minutes'), 5, 60);
-  const grace = num(tx('hold_grace'), s.checkout_mobilepay_grace_minutes, tx('unit_minutes'), 0, 60);
-  const wait = num(tx('hold_wait'), s.checkout_mobilepay_max_wait_minutes, tx('unit_minutes'), 0, 120);
+  const grace = num(tx('hold_extra'), s.checkout_mobilepay_grace_minutes, tx('unit_minutes'), 0, 60);
+  const wait = num(tx('hold_cap'), s.checkout_mobilepay_max_wait_minutes, tx('unit_minutes'), 0, 120);
   const company = toggle(tx('inv_co_label'), tx('inv_co_help'), s.checkout_company_invoice_enabled === true, { testid: 'company-invoice' });
   const methods = new Map((bundle.payment_methods || []).map((m) => [m.code, m]));
   const toggles = MANUAL.filter((code) => methods.has(code)).map((code) => {
@@ -287,7 +287,7 @@ function paymentsPanel(bundle, reload) {
       checkout_mobilepay_max_wait_minutes: Number(wait.input.value),
     }), reload, 'save-hold')),
     card(tx('inv_co_title'), null, company.row, saveBar('company_invoice', () => ({ checkout_company_invoice_enabled: company.input.checked }), reload, 'save-company')),
-    card(tx('methods_title'), tx('methods_help'),
+    card(tx('methods_title'), tx('methods_lead'),
       ...toggles.map((t) => t.ui.row),
       cash.row,
       saveBar('payment_methods', () => ({ methods: Object.fromEntries(toggles.map((t) => [t.code, t.ui.input.checked])) }), reload, 'save-methods')),
