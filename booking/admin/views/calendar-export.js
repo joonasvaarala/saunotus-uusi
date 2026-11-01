@@ -58,6 +58,7 @@ export function renderCalendarExport({ state, failed, isAdmin, reload }) {
       await rpc('admin_set_booking_calendar', { p: payload });
     } catch (err) {
       if (err?.code === 'closure_calendar') { toast(cx('ui.admin.calendar_export.error_closure'), 'err'); return; }
+      if (err?.code === 'shift_calendar') { toast(cx('ui.admin.calendar_export.error_shift'), 'err'); return; }
       if (err?.code === 'invalid_calendar') { toast(cx('ui.admin.calendar_export.error_invalid'), 'err'); return; }
       throw err;
     }
@@ -68,7 +69,10 @@ export function renderCalendarExport({ state, failed, isAdmin, reload }) {
     const res = await rpc('admin_booking_calendar_preview');
     previewOut.textContent = [
       `${cx('ui.admin.calendar_export.preview_private')} ${res.private_events ?? 0}`,
-      `${cx('ui.admin.calendar_export.preview_days')} ${res.day_bars ?? 0}`,
+      `${cx('ui.admin.calendar_export.preview_rituals')} ${res.ritual_sessions ?? 0}`,
+      `${cx('ui.admin.calendar_export.preview_events')} ${res.events ?? 0}`,
+      `${cx('ui.admin.calendar_export.preview_weekdays')} ${res.weekday_shifts ?? 0}`,
+      `${cx('ui.admin.calendar_export.preview_weekends')} ${res.weekend_bars ?? 0}`,
       `${cx('ui.admin.calendar_export.preview_unconfigured')} ${res.unconfigured ?? 0}`,
       cx('ui.admin.calendar_export.preview_not_sent'),
     ].join(' · ');

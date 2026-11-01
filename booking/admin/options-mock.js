@@ -138,6 +138,7 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
       accounts: { rounding: '', sales_by_vat: {}, clearing_by_method: {} },
     },
     closureCalendarIds: ['sulku-test@group.calendar.google.com'],
+    shiftCalendarIds: ['vuoro-test@group.calendar.google.com'],
     bookingCalendar: {
       mode: 'off', timezone: 'Europe/Helsinki', window_back_days: 7, window_forward_days: 180,
       admin_base_url: '', shared_calendar_id: '', fast_nudge: false, last: null,
@@ -459,6 +460,7 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
       const shared = p.shared_calendar_id == null ? st.bookingCalendar.shared_calendar_id : String(p.shared_calendar_id).trim();
       if (calendarIdError(shared)) throw err('invalid_calendar', 'Kalenterin tunnus ei kelpaa');
       if (shared && st.closureCalendarIds.includes(shared)) throw err('closure_calendar', 'Sulkukalenteria ei käytetä varauksille');
+      if (shared && st.shiftCalendarIds.includes(shared)) throw err('shift_calendar', 'Vuorokalenteria ei käytetä varauksille');
       const src = p.resource_calendars == null ? Object.fromEntries(st.bookingCalendar.resources.map((r) => [r.code, r.calendar_id])) : p.resource_calendars;
       if (src == null || typeof src !== 'object' || Array.isArray(src)) throw err('invalid_setting', 'Resurssikalenterit ovat objekti');
       const known = new Map(st.bookingCalendar.resources.map((r) => [r.code, r]));
@@ -468,6 +470,7 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
         if (!known.has(code)) throw err('unknown_resource', 'Tuntematon resurssi');
         if (id && calendarIdError(id)) throw err('invalid_calendar', 'Kalenterin tunnus ei kelpaa');
         if (id && st.closureCalendarIds.includes(id)) throw err('closure_calendar', 'Sulkukalenteria ei käytetä varauksille');
+        if (id && st.shiftCalendarIds.includes(id)) throw err('shift_calendar', 'Vuorokalenteria ei käytetä varauksille');
         next.set(code, id);
       }
       for (const [code, id] of next) known.get(code).calendar_id = id;
@@ -482,7 +485,7 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
     },
     admin_booking_calendar_preview: () => {
       need('settings.edit');
-      return { ok: true, sent: false, private_events: 1, day_bars: st.bookingCalendar.shared_calendar_id ? 1 : 0, unconfigured: st.bookingCalendar.shared_calendar_id ? 0 : 1 };
+      return { ok: true, sent: false, private_events: 1, ritual_sessions: 0, events: 0, weekday_shifts: 0, weekend_bars: 0, day_bars: 0, unconfigured: st.bookingCalendar.shared_calendar_id ? 0 : 1 };
     },
     admin_set_setting: (a) => {
       need('settings.edit');

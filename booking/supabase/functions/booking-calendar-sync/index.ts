@@ -5,7 +5,7 @@
 //   * kutsuja: header x-sync-secret = env SYNC_CRON_SECRET (vakioaikavertailu)
 //   * Google: palvelutili, env GOOGLE_SERVICE_ACCOUNT_JSON, JWT bearer, scope calendar.events
 // Kohdekalenterit jaetaan palvelutilin client_email-osoitteelle oikeudella "Make changes to events".
-// Sulkukalenterien id:tä ei kirjoiteta (kanta ja planOps hylkäävät).
+// Sulkukalenterien ja vuorokalenterien (public.calendar_sources) id:tä ei kirjoiteta (kanta ja planOps hylkäävät).
 //
 // Pyyntö (POST, JSON, valinnainen): { "dryRun": true }
 // Vastaus: vain laskurit ja virhekoodit. Ei otsikoita, kuvauksia, kalenteri-id:itä tai avaimia.
