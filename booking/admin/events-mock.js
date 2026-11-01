@@ -121,6 +121,16 @@ export function createEventsMock({ today, resources = EVENT_MOCK_RESOURCES, prod
       r.blocks = next;
       return ruleObj(p, r).blocks;
     },
+    admin_training_segments_get: (a) => {
+      const { r } = locate(a.p_option_rule_id);
+      return r.segments || [];
+    },
+    admin_training_segments_set: (a) => {
+      const { r } = locate(a.p_option_rule_id);
+      const ids = a.p_segment_rule_ids || [];
+      r.segments = ids.map((id, i) => ({ position: i + 1, rule_id: +id }));
+      return r.segments;
+    },
     admin_event_set_channels: (a) => {
       const p = find(a.p_product_id);
       const bad = (a.p_channels || []).find((c) => !CHANNELS.includes(c));

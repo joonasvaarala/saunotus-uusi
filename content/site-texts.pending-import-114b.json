@@ -1,0 +1,102 @@
+[
+  {
+    "key": "ui.shop.training.segments",
+    "lang": "fi",
+    "text": "Jaksot",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_226b: monijaksoisen koulutuksen osakerrat kassalla."
+  },
+  {
+    "key": "ui.shop.training.segments",
+    "lang": "en",
+    "text": "Segments",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_226b: segments of a multi-part course at checkout."
+  },
+  {
+    "key": "admin.events.segments",
+    "lang": "fi",
+    "text": "Osakerrat",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_226b: hallinnan kenttä, joka liittää ilmoittautumisen kertoihin."
+  },
+  {
+    "key": "admin.events.segments",
+    "lang": "en",
+    "text": "Segments",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_226b: admin field linking an enrollment to occurrences."
+  },
+  {
+    "key": "admin.events.segments_hint",
+    "lang": "fi",
+    "text": "Järjestys, pilkulla. Saman tuotteen muut kerrat piilotetaan kaupasta. Toisen tuotteen kerta pysyy myynnissä ja jakaa paikat.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_226b: osakerrat ja jaettu kapasiteetti."
+  },
+  {
+    "key": "admin.events.segments_hint",
+    "lang": "en",
+    "text": "Order, comma-separated. Other occurrences of this product are hidden from the shop. Another product’s occurrence stays on sale and shares seats.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 220,
+    "placeholders": [],
+    "reason": "booking_226b: segments and shared capacity."
+  },
+  {
+    "key": "admin.events.segment_seat",
+    "lang": "fi",
+    "text": "Jaettu paikka",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_226b: osallistujalistassa toisen kurssin varaama paikka."
+  },
+  {
+    "key": "admin.events.segment_seat",
+    "lang": "en",
+    "text": "Shared place",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_226b: a seat taken by another course enrollment."
+  },
+  {
+    "key": "admin.events.single_room_hint",
+    "lang": "fi",
+    "text": "Oletus 2. Jaettu paikka kuluttaa tämän kerran huoneita, kun osakerta on merkitty.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 160,
+    "placeholders": [],
+    "reason": "booking_226b: huonekapasiteetti on osakertakohtainen, ei päivien päällekkäisyys."
+  },
+  {
+    "key": "admin.events.single_room_hint",
+    "lang": "en",
+    "text": "Default 2. A shared place uses this occurrence’s rooms when it is listed as a segment.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 160,
+    "placeholders": [],
+    "reason": "booking_226b: single rooms follow explicit segments."
+  }
+]

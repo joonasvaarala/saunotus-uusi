@@ -160,6 +160,10 @@ function orderBlock(d: any, en: boolean, X: X): Block {
   const tr = o.training;
   if (tr) {
     tl.push("", `${X("email.training.course")}: ${tr.course_price != null ? eur(tr.course_price, en) : "–"}`);
+    if ((tr.segments || []).length > 1) {
+      tl.push(X("email.training.segments"));
+      for (const s of tr.segments) tl.push(`  ${s.label || s.rule_id}${s.starts_at ? `: ${dt(s.starts_at, en)}` : ""}`);
+    }
     for (const a of tr.addons || []) tl.push(`  ${a.code === "single_room" ? X("email.training.single") : a.code === "internship" ? X("email.training.internship") : a.code}: +${eur(a.price, en)}`);
     if (tr.total != null) tl.push(`${X("email.training.total")}: ${eur(tr.total, en)}`);
     if (tr.remaining != null) tl.push(`${X("email.training.remaining")}: ${eur(tr.remaining, en)}`);

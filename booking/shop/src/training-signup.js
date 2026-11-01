@@ -25,6 +25,7 @@ export const TRAINING_TEXTS = {
     privacy: 'Hyväksyn tietosuojaselosteen',
     places: 'Paikkoja jäljellä',
     pay_online: 'Maksa verkossa',
+    segments: 'Jaksot',
   },
   en: {
     deposit_now: 'Reservation fee due now',
@@ -41,6 +42,7 @@ export const TRAINING_TEXTS = {
     privacy: 'I accept the privacy notice',
     places: 'Places left',
     pay_online: 'Pay online',
+    segments: 'Segments',
   },
 };
 
@@ -152,6 +154,10 @@ export function createTrainingSignup(ctx) {
     paint();
     const when = isMultiDay(s) ? occurrenceText(s, lang) : `${dayLong(s.starts_at)}, ${hm(s.starts_at)}–${hm(s.ends_at)}`;
     const places = s.remaining != null ? h('p', { class: 'bk-note', 'data-testid': 'training-places', text: `${L('places')}: ${s.remaining}` }) : null;
+    const segs = Array.isArray(offer?.segments) ? offer.segments : [];
+    const segList = segs.length > 1 ? h('section', { 'data-testid': 'training-segments' },
+      h('h3', { text: L('segments') }),
+      h('ul', { class: 'bk-slotlist' }, segs.map((g) => h('li', { text: `${(lang === 'en' && g.label_en) || g.label || ''}${g.starts_at ? ` · ${dayLong(g.starts_at)}` : ''}`.trim() })))) : null;
     const submit = h('button', { type: 'submit', class: 'btn gold', 'data-testid': 'training-submit', text: L('pay_online') });
     const form = h('form', { class: 'bk-form', novalidate: true, 'data-testid': 'training-form', onsubmit: async (ev) => {
       ev.preventDefault();
@@ -197,7 +203,7 @@ export function createTrainingSignup(ctx) {
       h('div', { class: 'bk-pick-main' }, h('strong', { class: 'bk-pick-name', text: (lang === 'en' && p.name_en) || p.name }),
         h('span', { class: 'bk-pick-when', text: when })),
       h('a', { class: 'bk-pick-change', href: bk(`/tuote/${p.slug}/${ds}`), text: t.changeSlot }));
-    mount(h('h2', { text: t.bookTitle }), pick, places,
+    mount(h('h2', { text: t.bookTitle }), pick, places, segList,
       h('div', { class: 'bk-checkout' }, form,
         h('aside', { class: 'bk-aside', 'aria-label': t.summary }, h('h3', { text: t.summary }), sumList,
           h('p', { class: 'bk-totalrow' }, `${L('deposit_now')}: `, totalEl))));

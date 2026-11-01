@@ -38,6 +38,7 @@ export const EMAIL_TEXTS: TextTable = {
   "email.training.deposit": { fi: "Varausmaksu", en: "Reservation fee" },
   "email.training.remaining": { fi: "Laskutetaan myöhemmin", en: "To be invoiced later" },
   "email.training.balance": { fi: "Loppusumma laskutetaan myöhemmin. Verkossa maksettiin vain varausmaksu.", en: "The balance is invoiced later. Only the reservation fee was paid online." },
+  "email.training.segments": { fi: "Jaksot", en: "Segments" },
   "email.order_confirmation.more": { fi: "Voit katsoa tilaustasi, lisätä siihen palveluita, pyytää muutoksia ja ladata kuitit täältä:", en: "You can view your order, add services, request changes and download receipts here:" },
   "email.order_confirmation.instructions_title": { fi: "Ohje", en: "Instructions" },
   "email.product_message.subject_fallback": { fi: "Viesti tilaukseen {{var:no}}", en: "A message about order {{var:no}}" },

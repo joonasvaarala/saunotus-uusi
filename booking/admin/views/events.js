@@ -222,7 +222,7 @@ export async function render({ ctx, refs, reload, query }) {
     const queue = eventQueueParts(h, { lang: getLang(), ruleId: r.id, rpc });
     const li = h('li', { class: `card ev-occ-item${flags.active && !flags.cancelled ? '' : ' off'}`, 'data-testid': 'event-occurrence' },
       h('div', { class: 'row between wrap' },
-        h('div', {}, h('strong', { class: 'ev-occ-label', text: label }), h('div', { class: 'muted', text: span(r.starts_at, r.ends_at) })),
+        h('div', {}, h('strong', { class: 'ev-occ-label', text: label }), h('div', { class: 'muted', text: span(r.starts_at, r.ends_at) }), p.category === 'training' ? h('div', { class: 'muted', 'data-testid': 'event-occ-id', text: `Id ${r.id}` }) : null),
         h('div', { class: 'meta' }, capNode(flags), ...statusNodes(flags), flags.waitlist ? h('span', { class: 'muted', text: T('waitlist', { n: flags.waitlist }) }) : null)),
       h('div', { class: 'row wrap ev-occ-actions' },
         btn('event-occ-blocks', T('blocks'), () => showBlocks(), 'btn sm ghost'),
@@ -246,6 +246,7 @@ export async function render({ ctx, refs, reload, query }) {
       h('div', { class: 'row wrap' }, field(T('add_dates'), h('input', { name: 'date', type: 'date', value: r.date, required: true, min: r.date >= localParts(new Date().toISOString()).date ? localParts(new Date().toISOString()).date : null })), field(T('add_times'), h('input', { name: 'start_time', type: 'time', value: String(r.start_time || '').slice(0, 5), required: true })), field(T('duration'), num('duration_minutes', r.duration_minutes, { min: 15, max: p.category === 'training' ? 43200 : 20160 }))),
       h('div', { class: 'row wrap' }, field(T('max_persons'), num('max_persons', r.max_persons, { min: 1, max: p.category === 'training' ? 6 : 500, 'data-testid': 'event-occ-max' })), field(T('min_persons'), num('min_persons', r.min_persons, { min: 1, max: 500 })), field(T('deadline'), num('deadline_minutes', r.deadline_minutes, { min: 0, max: 20160 })), p.category === 'training' ? field(tx('single_room_max'), num('single_room_max', r.single_room_max ?? 2, { min: 0, max: 20, 'data-testid': 'event-occ-rooms' }), tx('single_room_hint')) : null),
       h('div', { class: 'row wrap' }, field(T('label_fi'), h('input', { name: 'label', value: r.label || '', maxlength: 200 })), field(T('label_en'), h('input', { name: 'label_en', value: r.label_en || '', maxlength: 200 }))),
+      p.category === 'training' ? field(tx('segments'), h('input', { name: 'segments', value: '', 'data-testid': 'event-occ-segments', autocomplete: 'off' }), tx('segments_hint')) : null,
       h('label', { class: 'check' }, h('input', { type: 'checkbox', name: 'active', checked: r.active !== false && !r.cancelled_at || null, disabled: booked ? true : null }), ' ', T('active')),
       h('div', { class: 'row wrap' }, h('button', { type: 'submit', class: 'btn primary', 'data-testid': 'event-occ-save', text: T('occ_inline_save') }), h('button', { type: 'button', class: 'btn ghost', text: T('time_changed_skip'), onclick: () => close() })));
     f.addEventListener('submit', (ev) => { ev.preventDefault(); act(f.querySelector('[data-testid="event-occ-save"]'), async () => {
@@ -253,14 +254,22 @@ export async function render({ ctx, refs, reload, query }) {
       const patch = { date: fd.get('date'), start_time: String(fd.get('start_time') || '').slice(0, 5), duration_minutes: n('duration_minutes'),
         max_persons: n('max_persons'), min_persons: n('min_persons'), deadline_minutes: n('deadline_minutes'), label: String(fd.get('label') || '').trim() || null, label_en: String(fd.get('label_en') || '').trim() || null, active: f.active.checked && !r.cancelled_at };
       if (p.category === 'training') patch.single_room_max = n('single_room_max');
+      const segmentIds = p.category === 'training' ? String(fd.get('segments') || '').split(/[^0-9]+/).filter(Boolean).map((x) => Number(x)) : null;
       if (isPastMove({ date: r.date, start_time: r.start_time }, { date: patch.date, start_time: patch.start_time })) { toast(T('err_past_move'), 'err'); return; }
       const before = `${r.date}|${String(r.start_time).slice(0, 5)}|${r.duration_minutes}`;
       const out = await rpc('admin_event_rule_upsert', { p_id: r.id, p_product_id: null, p_patch: patch });
+      if (segmentIds) await rpc('admin_training_segments_set', { p_option_rule_id: r.id, p_segment_rule_ids: segmentIds });
       const after = `${out?.date}|${String(out?.start_time || '').slice(0, 5)}|${out?.duration_minutes}`;
       toast(T('saved'));
       if ((Number(out?.moved_bookings) > 0 || (before !== after && booked > 0))) offerTimeMessage(p, r, out);
       else refresh();
     }); });
+    if (p.category === 'training') {
+      rpc('admin_training_segments_get', { p_option_rule_id: r.id }).then((rows) => {
+        const input = f.querySelector('[data-testid="event-occ-segments"]');
+        if (input && Array.isArray(rows)) input.value = rows.map((x) => x.rule_id).join(', ');
+      }).catch(() => {});
+    }
     return f;
   }
   function offerTimeMessage(p, r, out) {
@@ -482,6 +491,7 @@ export async function render({ ctx, refs, reload, query }) {
     if (row.customer_note) bits.push(h('div', {}, h('span', { class: 'muted', text: `${T('extra_customer')}: ` }), h('span', { text: row.customer_note })));
     if (row.adults) bits.push(h('div', { text: `${row.adults} ${T('extra_adults')}` }));
     if (row.children) bits.push(h('div', { text: `${row.children} ${T('extra_children')}` }));
+    if (row.capacity_only) bits.push(h('div', { 'data-testid': 'event-participant-segment', text: tx('segment_seat') }));
     if (row.country) bits.push(h('div', { 'data-testid': 'event-participant-country', text: `${tx('col_country')}: ${row.country}${row.is_foreign ? ` · ${tx('foreign_yes')}` : ''}` }));
     if (row.language) bits.push(h('div', { text: `${tx('col_language')}: ${row.language}` }));
     if (row.participant_total != null) bits.push(h('div', { 'data-testid': 'event-participant-total', text: `${tx('participant_total')}: ${row.participant_total} · ${tx('participant_deposit')}: ${row.deposit_paid ?? '–'} · ${tx('participant_remaining')}: ${row.remaining ?? '–'}` }));
