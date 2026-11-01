@@ -27,6 +27,15 @@ export function addMonths(ymd, n) {
   return `${yy}-${p2(mm + 1)}-${p2(Math.min(d, last))}`;
 }
 export const deliverMaxDate = (today, months) => addMonths(today, Math.min(DELIVER_MAX_MONTHS, Math.max(1, Number(months) || 6)));
+// Pikajatko hallinnassa: +1 / +3 / +6 kk. Voimassa oleva päättymispäivä jatkuu siitä; mennyt tai puuttuva päivä lähtee tästä päivästä (Helsinki).
+export function giftExtendDate(validTo, months, today) {
+  const n = Math.trunc(Number(months));
+  if (![1, 3, 6].includes(n)) return null;
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(String(today || ''))) return null;
+  const end = String(validTo || '');
+  const base = /^\d{4}-\d{2}-\d{2}$/.test(end) && end >= today ? end : today;
+  return addMonths(base, n);
+}
 export const cleanCover = (s) => String(s ?? '').replace(/\r\n/g, '\n').replace(/[\x00-\x09\x0b-\x1f\x7f]/g, '').trim();
 export const coverState = (s) => { const n = [...cleanCover(s)].length; return { n, left: COVER_MAX - n, over: n > COVER_MAX }; };
 // Palauttaa { ok: true, value: { delivery_to, cover_message, deliver_on, deliver_time } } tai { ok: false, code } (palvelimen virhekoodi)

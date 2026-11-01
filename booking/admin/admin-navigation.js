@@ -31,6 +31,15 @@ const GROUP_BY_CHILD = new Map(NAV_GROUPS.flatMap((g) => g.tabs.map((t) => [t.pa
 const GROUP_BY_PATH = new Map(NAV_GROUPS.map((g) => [g.path, g]));
 
 const resolved = (path, legacyReservations, groupId, tabId) => ({ path, legacyReservations, groupId, tabId });
+// Vanha Talous › Lahjakortit / Lahjakoodit ohjautuu Lahjakortit-valikkoon (yksi paikka).
+export function legacyFinanceGiftTarget(path, query) {
+  if (path !== 'talous') return null;
+  const tab = query?.get?.('tab') || '';
+  if (tab !== 'giftcards' && tab !== 'vouchers') return null;
+  const q = new URLSearchParams(query);
+  q.set('tab', tab === 'vouchers' ? 'lunastukset' : 'omat');
+  return `#/lahjakortit?${q.toString()}`;
+}
 export function resolveAdminPath(path) {
   if (path === 'varaukset') return resolved('tilaukset', true, null, null);
   const child = GROUP_BY_CHILD.get(path);

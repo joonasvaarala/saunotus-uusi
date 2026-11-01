@@ -31,7 +31,8 @@ export function createVoucherMock({ now = new Date(), delay = 0, remindHours = 2
     code_masked: mask(c.code), code: full ? c.code : null, status: c.status, problem_code: c.problem_code, customer_name: c.customer_name, customer_email: c.customer_email, customer_phone: c.customer_phone, locale: c.locale,
     hold_until: null, hours_left: null, voucher_value: c.voucher_value, amount: c.amount, payment_id: c.payment_id, partner_ref: c.partner_ref, attempts: c.attempts, last_checked_at: c.last_checked_at,
     problem_notified_at: c.problem_notified_at, needs_review: c.needs_review, notes: c.notes, resolved_at: c.resolved_at, resolved_by: c.resolved_by, created_at: c.created_at, updated_at: c.updated_at,
-    age_hours: round2((now.getTime() - new Date(c.created_at).getTime()) / 3600000), stale: ACTIVE.includes(c.status) && (now.getTime() - new Date(c.created_at).getTime()) / 3600000 >= remindHours, active: ACTIVE.includes(c.status), status_since: c.resolved_at || c.created_at });
+    age_hours: round2((now.getTime() - new Date(c.created_at).getTime()) / 3600000), stale: ACTIVE.includes(c.status) && (now.getTime() - new Date(c.created_at).getTime()) / 3600000 >= remindHours, active: ACTIVE.includes(c.status), status_since: c.resolved_at || c.created_at,
+    booking_product: 'Yleinen saunavuoro', booking_starts_at: new Date(now.getTime() + 3 * 86400000).toISOString(), booking_reservation_id: c.reservation_id, value_card: false });
   const find = (id) => { const c = claims.find((x) => x.id === +id); if (!c) throw err('not_found', 'Lunastuspyyntöä ei löydy'); return c; };
   const handlers = {
     admin_list_voucher_claims: (a = {}) => {

@@ -33,7 +33,8 @@ export function normClaim(c) {
     voucher_value: c.voucher_value == null ? null : num(c.voucher_value), amount: c.amount == null ? null : num(c.amount), payment_id: c.payment_id ?? null, partner_ref: c.partner_ref ?? null,
     attempts: num(c.attempts), last_checked_at: c.last_checked_at ?? null, problem_notified_at: c.problem_notified_at ?? null, needs_review: !!c.needs_review, notes: c.notes || '',
     resolved_at: c.resolved_at ?? null, resolved_by: c.resolved_by ?? null, created_at: c.created_at, updated_at: c.updated_at ?? c.created_at,
-    age_hours: c.age_hours == null ? null : num(c.age_hours), stale: !!c.stale, active: c.active != null ? !!c.active : VC_ACTIVE.includes(c.status), status_since: c.status_since ?? c.updated_at ?? c.created_at };
+    age_hours: c.age_hours == null ? null : num(c.age_hours), stale: !!c.stale, active: c.active != null ? !!c.active : VC_ACTIVE.includes(c.status), status_since: c.status_since ?? c.updated_at ?? c.created_at,
+    booking_product: c.booking_product || '', booking_starts_at: c.booking_starts_at || null, booking_reservation_id: c.booking_reservation_id ?? null, value_card: c.value_card === true };
 }
 export const normList = (r) => ({ total: num(r.total), sort: r.sort || 'oldest_open', claims: L(r.claims).map(normClaim) });
 export const normDetail = (r) => ({ claim: normClaim(r.claim),

@@ -21,8 +21,9 @@ export function createVouchersTab({ api, vouchers, ctx, onOpenOrder = () => {} }
   const canResolve = !!ctx.can('giftcards.manage');
   const list = h('ul', { class: 'tl-list vc', 'data-testid': 'vcl-list' }), count = h('p', { class: 'muted tl-count', role: 'status', 'data-testid': 'vcl-count' }), pagers = [h('div'), h('div')];
   const summary = h('ul', { class: 'vcl-sum', 'data-testid': 'vcl-summary', 'aria-label': t('vcl.title') });
+  const chips = h('div', { class: 'vcl-filters', role: 'group', 'aria-label': t('vcl.f.status'), 'data-testid': 'vcl-status-chips' });
   let seq = 0, reopen = null, remindH = 24;
-  const afterChange = (id) => { reopen = id; api.changed?.(); load(); };
+  const afterChange = (id) => { reopen = id; api?.changed?.(); load(); };
 
   async function loadSummary() {
     try {
@@ -49,14 +50,23 @@ export function createVouchersTab({ api, vouchers, ctx, onOpenOrder = () => {} }
     } catch (e) { if (my === seq) { list.replaceChildren(errorBox(e, load)); count.textContent = ''; pagers.forEach((p) => p.replaceChildren()); } }
   }
   const who = (c) => c.customer_name || c.customer_email || '–';
+  const bookingLabel = (c) => {
+    const when = c.booking_starts_at ? fmt.dt(c.booking_starts_at) : '';
+    const name = String(c.booking_product || '').trim();
+    const book = [name, when].filter(Boolean).join(' · ');
+    const order = c.order_no ? t('vcl.orderNo', { no: c.order_no }) : '';
+    if (book && order) return `${book} · ${order}`;
+    return book || order || '–';
+  };
+  const amountLabel = (c) => (c.amount != null && c.status === 'redeemed' ? fmt.money(c.amount) : c.voucher_value != null ? fmt.money(c.voucher_value) : '–');
   function claimRow(c) {
     const stale = c.stale && c.active;
     const head = [
       h('span', { class: 'tl-c tl-main' }, h('strong', { class: 'gc-code', 'data-testid': 'vcl-code', text: c.code_masked }), ' ', h('span', { class: 'tl-name', text: `${c.source_label || srcLabel(c.source)} · ${who(c)}` })),
-      h('span', { class: 'tl-c tl-date' }, h('small', { class: 'tl-lab', text: t('vcl.col.age') }), h('span', { 'data-testid': 'vcl-age', text: c.age_hours != null ? vcAge(c.age_hours) : '–' })),
-      h('span', { class: 'tl-c tl-first' }, h('small', { class: 'tl-lab', text: t('vcl.col.order') }), h('span', { text: c.order_no ? t('vcl.orderNo', { no: c.order_no }) : '–' })),
-      h('span', { class: 'tl-c tl-sum' }, h('small', { class: 'tl-lab', text: t('vcl.col.amount') }), h('strong', { text: c.status === 'redeemed' && c.amount ? fmt.money(c.amount) : '–' })),
-      h('span', { class: 'tl-c tl-badges' }, vcStatusBadge(c.status), c.status === 'problem' && c.problem_code ? badge('err', t(`vcl.pc.${c.problem_code}`)) : null,
+      h('span', { class: 'tl-c tl-date' }, h('small', { class: 'tl-lab', text: t('vcl.col.created') }), h('span', { 'data-testid': 'vcl-created', text: c.created_at ? fmt.dt(c.created_at) : '–' }), c.age_hours != null ? h('small', { 'data-testid': 'vcl-age', text: ` · ${vcAge(c.age_hours)}` }) : null),
+      h('span', { class: 'tl-c tl-first' }, h('small', { class: 'tl-lab', text: t('vcl.col.booking') }), h('span', { 'data-testid': 'vcl-booking', text: bookingLabel(c) })),
+      h('span', { class: 'tl-c tl-sum' }, h('small', { class: 'tl-lab', text: t('vcl.col.amount') }), h('strong', { text: amountLabel(c) })),
+      h('span', { class: 'tl-c tl-badges' }, vcStatusBadge(c.status), c.value_card ? badge('muted', t('vcl.valueCard')) : null, c.status === 'problem' && c.problem_code ? badge('err', t(`vcl.pc.${c.problem_code}`)) : null,
         stale ? Object.assign(badge('warn', t('vcl.stale')), { title: t('vcl.staleTitle', { h: remindH }) }) : null, c.needs_review ? badge('warn', t('vcl.review')) : null),
     ];
     const row = expandRow({ id: `vc${c.id}`, head, testid: 'vcl', build: () => detail(c.id) });
@@ -80,9 +90,13 @@ export function createVouchersTab({ api, vouchers, ctx, onOpenOrder = () => {} }
       h('p', { class: 'tl-hint', 'data-testid': 'vcl-guess', text: gs ? t('vcl.d.guess', { source: srcLabel(gs) }) : t('vcl.d.noGuess') }),
       mismatch ? h('p', { class: 'tl-johku-note', role: 'note', 'data-testid': 'vcl-mismatch', text: t('vcl.d.mismatch') }) : null,
       c.needs_review ? h('p', { class: 'tl-johku-note', role: 'note', text: t('vcl.d.reviewNote') }) : null,
+      c.value_card ? h('p', { class: 'tl-hint', 'data-testid': 'vcl-value-card', text: t('vcl.d.valueCard') }) : null,
       c.order_no ? h('p', {}, h('button', { type: 'button', class: 'btn', 'data-testid': 'vcl-open-order', onclick: () => onOpenOrder(c.order_no) }, t('vcl.d.openOrder', { no: c.order_no }))) : null);
     const sub = (title, items, none, tid) => h('section', { class: 'tl-sec' }, h('h3', { text: title }), items.length ? h('ul', { class: 'tl-sub', 'data-testid': tid }, items) : emptyBox(none));
-    const res = sub(t('vcl.d.reservations'), d.reservations.map((x) => h('li', {}, h('span', { class: 'tl-sub-main', text: x.product_name || `#${x.id}` }), h('span', { class: 'tl-sub-meta', text: [fmt.dt(x.starts_at), t('vcl.d.persons', { n: x.persons })].join(' · ') }), h('span', { class: 'tl-sub-sum' }))), t('vcl.d.noReservations'), 'vcl-reservations');
+    const res = sub(t('vcl.d.reservations'), d.reservations.map((x) => {
+      const chosen = c.reservation_id != null && String(x.id) === String(c.reservation_id);
+      return h('li', { 'data-testid': chosen ? 'vcl-chosen-booking' : null }, h('span', { class: 'tl-sub-main', text: `${chosen ? `${t('vcl.d.chosen')}: ` : ''}${x.product_name || `#${x.id}`}` }), h('span', { class: 'tl-sub-meta', text: [fmt.dt(x.starts_at), t('vcl.d.persons', { n: x.persons })].join(' · ') }), h('span', { class: 'tl-sub-sum' }));
+    }), t('vcl.d.noReservations'), 'vcl-reservations');
     const pay = sub(t('vcl.d.payment'), d.payment ? [h('li', {}, h('span', { class: 'tl-sub-main', text: methodLabel(d.payment.method || 'partner_voucher', d.payment.method_label) }), h('span', { class: 'tl-sub-meta', text: [d.payment.paid_at ? fmt.dt(d.payment.paid_at) : null, d.payment.note].filter(Boolean).join(' · ') }), h('span', { class: 'tl-sub-sum', text: fmt.money(d.payment.amount) }))] : [], t('vcl.d.noPayment'), 'vcl-payment');
     const notes = c.notes ? h('section', { class: 'tl-sec' }, h('h3', { text: t('vcl.d.notes') }), h('p', { class: 'vcl-notes', 'data-testid': 'vcl-notes', text: c.notes })) : null;
     const fin = !c.active, noRight = t('vcl.a.noRight'), off = !canResolve ? noRight : fin ? t('vcl.a.final') : null;
@@ -124,8 +138,13 @@ export function createVouchersTab({ api, vouchers, ctx, onOpenOrder = () => {} }
   }
 
   // ---- työkalupalkki ----
+  // Ratkaisu käyttää admin_resolve_voucher_claim → _vc_redeem(5) (henkilökunta). value_card on botin kuudes argumentti, sitä ei lähetetä tästä.
   let toolbar;
-  const change = (patch) => { Object.assign(st, patch, { offset: 0 }); load(); };
+  const CHIP_STATUS = [['active', 'open'], ['redeemed', 'redeemed'], ['cancelled', 'rejected']];
+  function paintChips() {
+    chips.replaceChildren(...CHIP_STATUS.map(([v, k]) => h('button', { type: 'button', class: `btn${st.status === v ? ' primary' : ''}`, 'aria-pressed': String(st.status === v), 'data-testid': `vcl-chip-${k}`, onclick: () => change({ status: v }) }, t(`vcl.chip.${k}`))));
+  }
+  const change = (patch) => { Object.assign(st, patch, { offset: 0 }); paintChips(); load(); };
   function buildToolbar() {
     const ss = searchFld(t('vcl.search'), 'vcl-search', (v) => change({ search: v })); ss.input.value = st.search;
     const sort = h('label', { class: 'fld' }, h('span', { text: t('vcl.f.sort') }), h('select', { 'data-testid': 'vcl-f-sort', onchange: (e) => change({ sort: e.target.value }) }, VC_SORTS.map((s) => h('option', { value: s, text: t(`vcl.sort.${s}`) }))));
@@ -136,7 +155,7 @@ export function createVouchersTab({ api, vouchers, ctx, onOpenOrder = () => {} }
       activeCount: () => countActive(st, { status: 'active', sort: 'oldest_open', limit: 25 }),
       filters: [
         selectFld(t('vcl.f.status'), 'vcl-f-status', VC_STATUSES, vcStatusLabel, st.status, (v) => change({ status: v }), t('vcl.st.all')), sort, pageSizeSelect(st.limit, (n) => change({ limit: n })),
-        h('button', { type: 'button', class: 'btn ghost', 'data-testid': 'vcl-reset', onclick: () => { Object.assign(st, { search: '', status: 'active', sort: 'oldest_open', offset: 0 }); buildToolbar(); load(); } }, t('filters.reset')),
+        h('button', { type: 'button', class: 'btn ghost', 'data-testid': 'vcl-reset', onclick: () => { Object.assign(st, { search: '', status: 'active', sort: 'oldest_open', offset: 0 }); buildToolbar(); paintChips(); load(); } }, t('filters.reset')),
       ],
     });
     const next = h('form', { class: 'tl-toolbar', role: 'search', onsubmit: (e) => e.preventDefault() }, drawer.node);
@@ -144,8 +163,9 @@ export function createVouchersTab({ api, vouchers, ctx, onOpenOrder = () => {} }
     toolbar = next; return next;
   }
   buildToolbar();
+  paintChips();
   const refresh = h('button', { type: 'button', class: 'btn', 'data-testid': 'vcl-refresh', onclick: () => { loadSummary(); load(); } }, h('span', { text: t('vcl.refresh') }));
-  const cols = h('div', { class: 'tl-cols gc', 'aria-hidden': 'true' }, h('span', { text: t('vcl.col.source') }), h('span', { text: t('vcl.col.age') }), h('span', { text: t('vcl.col.order') }), h('span', { class: 'r', text: t('vcl.col.amount') }), h('span', { text: t('vcl.col.status') }), h('span'));
-  const node = h('div', { class: 'tl-tab', 'data-testid': 'tab-vouchers' }, h('div', { class: 'row between wrap vcl-top' }, h('div', {}, h('h2', { class: 'vcl-h', text: t('vcl.title') }), h('p', { class: 'muted tl-hint', text: t('vcl.lead') })), refresh), summary, toolbar, count, pagers[0], cols, list, pagers[1]);
-  return { node, load() { loadSummary(); return load(); }, setSearch(q) { st.search = q; st.status = ''; st.offset = 0; buildToolbar(); load(); } };
+  const cols = h('div', { class: 'tl-cols gc', 'aria-hidden': 'true' }, h('span', { text: t('vcl.col.source') }), h('span', { text: t('vcl.col.created') }), h('span', { text: t('vcl.col.booking') }), h('span', { class: 'r', text: t('vcl.col.amount') }), h('span', { text: t('vcl.col.status') }), h('span'));
+  const node = h('div', { class: 'tl-tab', 'data-testid': 'tab-vouchers' }, h('div', { class: 'row between wrap vcl-top' }, h('div', {}, h('h2', { class: 'vcl-h', text: t('vcl.title') }), h('p', { class: 'muted tl-hint', text: t('vcl.lead') })), refresh), summary, chips, toolbar, count, pagers[0], cols, list, pagers[1]);
+  return { node, load() { loadSummary(); return load(); }, setSearch(q) { st.search = q; st.status = ''; st.offset = 0; buildToolbar(); paintChips(); load(); } };
 }

@@ -4,7 +4,7 @@
 import { h, dialog, toast, badge } from '../ui.js';
 import { icon } from '../icons.js';
 import { t, fmt, getLang } from '../talous-i18n.js';
-import { deliveryErrors, SERVER_FIELD, deliverMaxDate, helsinkiNow, coverState, COVER_MAX } from '../giftcards-delivery.js';
+import { deliveryErrors, SERVER_FIELD, deliverMaxDate, helsinkiNow, coverState, COVER_MAX, giftExtendDate } from '../giftcards-delivery.js';
 import { GC_STATUSES, GC_SORTS, GC_PAY_METHODS, GC_GREETING_MAX, normalizeGiftCode, formatGiftCode, giftCodeValid } from '../giftcards-api.js';
 import { reportText } from '../reports-texts.js';
 import { loading, emptyBox, errorBox, pager, selectFld, searchFld, expandRow, actionBtn, formDialog, friendly, methodLabel } from './talous-ui.js';
@@ -72,13 +72,14 @@ export async function redeemSubmit({ gift, order, code, amount, note }) {
 // ---- välilehti ----
 export const GC_PAGE = 20;   // Joonas: tiheät rivit, 20 kerrallaan (palvelimen sivutus)
 const prodOf = (c) => c.product_name || c.package_name || '';   // booking_145: product_name = paketti / Johkun tuote / malli
-export function createGiftcardsTab({ api, gift, ctx, onOpenOrder = () => {} }) {
-  const st = { search: '', status: '', source: '', package: '', sort: 'created_desc', balance: '', expiring: '', unverified: '', limit: GC_PAGE, offset: 0 };   // booking_145: 20 korttia kerrallaan
+export function createGiftcardsTab({ api, gift, ctx, onOpenOrder = () => {}, searchFirst = false, initialSearch = '', browse = false }) {
+  const st = { search: initialSearch || '', status: '', source: '', package: '', sort: 'created_desc', balance: '', expiring: '', unverified: '', limit: GC_PAGE, offset: 0, browse: !!(searchFirst && browse) };   // booking_145: 20 korttia kerrallaan
+  const listed = () => !searchFirst || st.browse || String(st.search || '').trim() !== '' || st.status || st.source || st.package || st.balance || st.expiring || st.unverified;
   const canAdmin = !!ctx.can('giftcards.admin'), canPay = !!ctx.can('payments.manage');
   const list = h('ul', { class: 'tl-list gc', 'data-testid': 'gc-list' }), count = h('p', { class: 'muted tl-count', role: 'status', 'data-testid': 'gc-count' }), pagers = [h('div'), h('div')];
   const sums = h('p', { class: 'muted tl-count', 'data-testid': 'gc-sums' }), switches = h('div', { class: 'gc-switches', 'data-testid': 'gc-switches' });
   let seq = 0, packages = [], reopen = null;
-  const afterChange = (id) => { reopen = id; api.changed?.(); load(); };
+  const afterChange = (id) => { reopen = id; api?.changed?.(); load(); };
 
   async function loadSettings() {
     try {
@@ -89,6 +90,15 @@ export function createGiftcardsTab({ api, gift, ctx, onOpenOrder = () => {} }) {
     } catch (e) { switches.replaceChildren(errorBox(e)); }
   }
   async function load() {
+    if (browseBtn) browseBtn.hidden = !searchFirst || !!st.browse;
+    if (!listed()) {
+      seq += 1;
+      list.setAttribute('aria-busy', 'false');
+      count.textContent = ''; sums.textContent = '';
+      pagers.forEach((p) => p.replaceChildren());
+      list.replaceChildren(emptyBox(t('gc.prompt')));
+      return;
+    }
     const my = ++seq;
     list.replaceChildren(loading()); list.setAttribute('aria-busy', 'true');
     try {
@@ -160,8 +170,23 @@ export function createGiftcardsTab({ api, gift, ctx, onOpenOrder = () => {} }) {
         : h('button', { type: 'button', class: 'btn tl-btn tl-rc-btn', disabled: true, 'data-testid': 'gc-pdf', title: t('gc.d.pdfNotReady') }, icon('download', 18), h('span', { text: t('gc.d.pdf') })),
       h('span', { class: 'tl-hint', 'data-testid': 'gc-pdf-note', text: !pdfReady ? t('gc.d.pdfNotReady') : !c.balance_verified ? t('gc.d.pdfUnverified') : t('gc.d.pdfNote') })) : null;
     const noRight = t('gc.a.noRight');
+    const extendBlocked = c.status === 'cancelled' || c.status === 'pending_payment';
+    const today = helsinkiNow().date;
+    const quick = h('div', { class: 'gc-quick', role: 'group', 'aria-label': t('gc.a.extGroup'), 'data-testid': 'gc-quick-extend' },
+      [1, 3, 6].map((n) => {
+        const date = giftExtendDate(c.valid_to, n, today);
+        const b = actionBtn({ key: `ext${n}`, label: t('gc.a.ext', { n }), testid: `gc-btn-ext-${n}`, extraDisabled: extendBlocked || !date ? t('gc.a.extBlocked') : null, onClick: async () => {
+          await gift.setExpiry({ id: c.id, validTo: date, note: t('gc.a.extNote', { n }) });
+          doneToast(gift, 'admin_set_gift_card_expiry');
+          toast(t('gc.a.extDone', { date: fmt.date(date) }), 'ok');
+          afterChange(c.id);
+        } });
+        if (date && !extendBlocked) b.title = t('gc.a.extTitle', { n, date: fmt.date(date) });
+        return b;
+      }));
     const actions = h('div', { class: 'tl-actions', 'data-testid': 'gc-actions' },
-      actionBtn({ key: 'expiry', label: t('gc.a.expiry'), ico: 'calendar', testid: 'gc-btn-expiry', onClick: () => expiryDialog(c) }),
+      quick,
+      actionBtn({ key: 'expiry', label: t('gc.a.expiry'), ico: 'calendar', testid: 'gc-btn-expiry', extraDisabled: extendBlocked ? t('gc.a.extBlocked') : null, onClick: () => expiryDialog(c) }),
       actionBtn({ key: 'adjust', label: t('gc.a.adjust'), ico: 'euro', testid: 'gc-btn-adjust', extraDisabled: canAdmin ? null : noRight, onClick: () => adjustDialog(c) }),
       c.status === 'cancelled' ? null : actionBtn({ key: 'deactivate', label: t('gc.a.deactivate'), ico: 'lock', testid: 'gc-btn-deactivate', extraDisabled: canAdmin ? null : noRight, onClick: () => reasonDialog(c, 'deactivate') }),
       actionBtn({ key: 'reactivate', label: t('gc.a.reactivate'), ico: 'undo', testid: 'gc-btn-reactivate', extraDisabled: !canAdmin ? noRight : c.status === 'pending_payment' ? t('gc.a.unpaidNoReact') : c.status === 'cancelled' || c.status === 'used' || c.status === 'expired' ? null : t('gc.a.noneNeeded'), onClick: () => reasonDialog(c, 'reactivate') }));
@@ -307,7 +332,7 @@ export function createGiftcardsTab({ api, gift, ctx, onOpenOrder = () => {} }) {
         simple(t('gc.f.balance'), 'gc-f-balance', [['', t('gc.f.balance.any')], ['yes', t('gc.f.balance.yes')], ['no', t('gc.f.balance.no')]], 'balance'),
         simple(t('gc.f.expiring'), 'gc-f-expiring', [['', t('gc.f.expiring.any')], ['30', t('gc.f.expiring.30')], ['90', t('gc.f.expiring.90')]], 'expiring'),
         simple(t('gc.f.unverified'), 'gc-f-unverified', [['', t('gc.f.unverified.any')], ['yes', t('gc.f.unverified.yes')]], 'unverified'),
-        h('button', { type: 'button', class: 'btn ghost', 'data-testid': 'gc-reset', onclick: () => { Object.assign(st, { search: '', status: '', source: '', package: '', sort: 'created_desc', balance: '', expiring: '', unverified: '' }); buildToolbar(); load(); } }, t('filters.reset')),
+        h('button', { type: 'button', class: 'btn ghost', 'data-testid': 'gc-reset', onclick: () => { const keep = st.browse; Object.assign(st, { search: '', status: '', source: '', package: '', sort: 'created_desc', balance: '', expiring: '', unverified: '', browse: keep }); buildToolbar(); load(); } }, t('filters.reset')),
       ],
     });
     const next = h('form', { class: 'tl-toolbar', role: 'search', onsubmit: (e) => e.preventDefault() }, drawer.node);
@@ -316,7 +341,9 @@ export function createGiftcardsTab({ api, gift, ctx, onOpenOrder = () => {} }) {
   }
   buildToolbar();
   const newBtn = h('button', { type: 'button', class: 'btn primary gc-new', 'data-testid': 'gc-new', onclick: () => createDialog().catch((e) => toast(friendly(e), 'err')) }, icon('gift', 20), h('span', { text: t('gc.new') }));
+  const browseBtn = searchFirst ? h('button', { type: 'button', class: 'btn', 'data-testid': 'gc-browse', hidden: st.browse || null, onclick: () => { st.browse = true; load(); } }, t('gc.browse')) : null;
   const cols = h('div', { class: 'tl-cols gc', 'aria-hidden': 'true' }, ...[['code'], ['who'], ['product'], ['balance', 'r'], ['valid'], ['status'], ['source']].map(([k, cl]) => h('span', { class: cl || null, text: t(`gc.col.${k}`) })), h('span'));
-  const node = h('div', { class: 'tl-tab', 'data-testid': 'tab-giftcards' }, h('div', { class: 'row between wrap gc-top' }, switches, newBtn), toolbar, count, sums, pagers[0], cols, list, pagers[1]);
-  return { node, load() { loadSettings(); return load(); }, setSearch(q) { st.search = q; st.offset = 0; buildToolbar(); load(); } };
+  const lead = searchFirst ? h('p', { class: 'muted tl-hint', 'data-testid': 'gc-lead', text: t('gc.lead') }) : null;
+  const node = h('div', { class: 'tl-tab', 'data-testid': 'tab-giftcards' }, lead, toolbar, browseBtn, h('div', { class: 'row between wrap gc-top' }, switches, newBtn), count, sums, pagers[0], cols, list, pagers[1]);
+  return { node, load() { loadSettings(); return load(); }, setSearch(q) { st.search = q; st.offset = 0; buildToolbar(); load(); }, focusSearch() { toolbar?.querySelector('[data-testid=gc-search]')?.focus(); } };
 }

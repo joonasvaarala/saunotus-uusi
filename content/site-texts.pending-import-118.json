@@ -1,0 +1,62 @@
+[
+  {
+    "key": "ui.admin.nav.giftcards",
+    "lang": "fi",
+    "text": "Lahjakortit",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Hallinnan päänavigaatio: lahjakortit omana kohtana (aiemmin Talous-välilehti). booking/admin/nav-texts.js"
+  },
+  {
+    "key": "ui.admin.nav.giftcards",
+    "lang": "en",
+    "text": "Gift cards",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Hallinnan päänavigaatio: lahjakortit omana kohtana (aiemmin Talous-välilehti). booking/admin/nav-texts.js"
+  },
+  {
+    "key": "ui.admin.nav.giftcards_own",
+    "lang": "fi",
+    "text": "Omat lahjakortit",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Lahjakortit-valikon välilehti: omien korttien haku ja voimassaolon jatko. booking/admin/nav-texts.js"
+  },
+  {
+    "key": "ui.admin.nav.giftcards_own",
+    "lang": "en",
+    "text": "Our gift cards",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Lahjakortit-valikon välilehti: omien korttien haku ja voimassaolon jatko. booking/admin/nav-texts.js"
+  },
+  {
+    "key": "ui.admin.nav.giftcards_claims",
+    "lang": "fi",
+    "text": "Lunastuspyynnöt",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Lahjakortit-valikon välilehti: kumppanien lahjakorttien lunastuspyynnöt. booking/admin/nav-texts.js"
+  },
+  {
+    "key": "ui.admin.nav.giftcards_claims",
+    "lang": "en",
+    "text": "Redemption requests",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Lahjakortit-valikon välilehti: kumppanien lahjakorttien lunastuspyynnöt. booking/admin/nav-texts.js"
+  }
+]
