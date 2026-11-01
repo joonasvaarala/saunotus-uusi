@@ -11,6 +11,7 @@ const texts = await import(pathToFileURL(join(root, 'admin/calendar-export-texts
 const logic = await import(pathToFileURL(join(root, 'admin/calendar-export-logic.js')));
 const pending = JSON.parse(readFileSync(join(repo, 'content/site-texts.pending-import-25.json'), 'utf8'));
 const pending26 = JSON.parse(readFileSync(join(repo, 'content/site-texts.pending-import-26.json'), 'utf8'));
+const pending116 = JSON.parse(readFileSync(join(repo, 'content/site-texts.pending-import-116.json'), 'utf8'));
 const fallback = JSON.parse(readFileSync(join(repo, 'content/site-texts.fallback.json'), 'utf8'));
 const settings = readFileSync(join(root, 'admin/views/settings.js'), 'utf8');
 const view = readFileSync(join(root, 'admin/views/calendar-export.js'), 'utf8');
@@ -22,6 +23,7 @@ test('sanakirja, tuontitiedostot ja varateksti täsmäävät', () => {
   const overlay = new Map();
   for (const row of pending) overlay.set(row.key + '|' + row.lang, row);
   for (const row of pending26) overlay.set(row.key + '|' + row.lang, row);
+  for (const row of pending116) overlay.set(row.key + '|' + row.lang, row);
   for (const lang of ['fi', 'en']) {
     for (const [key, text] of Object.entries(texts.CALENDAR_EXPORT_TEXTS[lang])) {
       const row = overlay.get(key + '|' + lang);
@@ -40,10 +42,19 @@ test('sanakirja, tuontitiedostot ja varateksti täsmäävät', () => {
   }
   assert.equal(new Set(pending26.map((r) => r.key + '|' + r.lang)).size, pending26.length);
   assert.equal(pending26.length % 2, 0);
+  const overridden = new Set(pending116.map((r) => r.key + '|' + r.lang));
   for (const row of pending26) {
+    if (overridden.has(row.key + '|' + row.lang)) continue;
     assert.equal(texts.CALENDAR_EXPORT_TEXTS[row.lang][row.key], row.text);
   }
+  for (const row of pending116) {
+    assert.equal(texts.CALENDAR_EXPORT_TEXTS[row.lang][row.key], row.text);
+    assert.equal(row.text.includes('@'), false);
+    assert.equal(row.text.includes('http'), false);
+  }
+  assert.equal(pending116.length % 2, 0);
   assert.ok(pending26.some((r) => r.key === 'ui.admin.calendar_export.preview_days'));
+  assert.ok(pending116.some((r) => r.key === 'ui.admin.calendar_export.error_shift'));
 });
 
 test('tunniste: sähköpostimuoto ja lyhyt tunnus, tyhjä sallitaan, väli ei', () => {
@@ -72,6 +83,8 @@ test('mock: oletus pois, sulku ja salaisuus hylätään, esikatselu ei lähetä'
   assert.equal(cur.shared_calendar_id, '');
   await assert.rejects(() => mock.rpc('admin_set_booking_calendar', { p: { mode: 'dry_run', api_key: 'ei' } }), (e) => e.code === 'secrets_not_allowed');
   await assert.rejects(() => mock.rpc('admin_set_booking_calendar', { p: { shared_calendar_id: 'sulku-test@group.calendar.google.com' } }), (e) => e.code === 'closure_calendar');
+  await assert.rejects(() => mock.rpc('admin_set_booking_calendar', { p: { shared_calendar_id: 'vuoro-test@group.calendar.google.com' } }), (e) => e.code === 'shift_calendar');
+  await assert.rejects(() => mock.rpc('admin_set_booking_calendar', { p: { resource_calendars: { rauni: 'vuoro-test@group.calendar.google.com' } } }), (e) => e.code === 'shift_calendar');
   await assert.rejects(() => mock.rpc('admin_set_booking_calendar', { p: { shared_calendar_id: 'on väli' } }), (e) => e.code === 'invalid_calendar');
   const kept = await mock.rpc('admin_get_booking_calendar');
   assert.equal(kept.mode, 'off');

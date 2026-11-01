@@ -1,0 +1,162 @@
+[
+  {
+    "key": "ui.admin.calendar_export.lead",
+    "lang": "fi",
+    "text": "Hoidot, yksityisvaraukset, saunotusrituaalit ja tapahtumat viedään omiksi tapahtumikseen. Arjen yleinen vuoro näkyy koko vuoron mittaisena, kun sillä on varaus. Turvetorstai näkyy erikseen. Viikonloppuna yleiset vuorot ovat yksi palkki päivässä. Kalenterit ovat Savusauna, Rauni ja Lovi. Yhteinen kalenteri on vain varalla. Sulku- ja vuorokalentereita ei käytetä. Kalenterissa tehty muutos ei muuta varausta. Oletus on pois päältä.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 700,
+    "placeholders": [],
+    "reason": "booking_228: varauskalenterin vienti v2, kolme resurssikalenteria."
+  },
+  {
+    "key": "ui.admin.calendar_export.shared_hint",
+    "lang": "fi",
+    "text": "Vain varalla, jos resurssilla ei ole omaa tunnusta. Tyhjä tunnus ei vie tapahtumaa.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 700,
+    "placeholders": [],
+    "reason": "booking_228: varauskalenterin vienti v2, kolme resurssikalenteria."
+  },
+  {
+    "key": "ui.admin.calendar_export.resource_hint",
+    "lang": "fi",
+    "text": "Tämän resurssin tapahtumat. Savusauna, Rauni ja Lovi riittävät. Viikonlopun yleisten vuorojen palkki menee Savusaunaan.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 700,
+    "placeholders": [],
+    "reason": "booking_228: varauskalenterin vienti v2, kolme resurssikalenteria."
+  },
+  {
+    "key": "ui.admin.calendar_export.preview_rituals",
+    "lang": "fi",
+    "text": "Rituaaleja",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 700,
+    "placeholders": [],
+    "reason": "booking_228: varauskalenterin vienti v2, kolme resurssikalenteria."
+  },
+  {
+    "key": "ui.admin.calendar_export.preview_events",
+    "lang": "fi",
+    "text": "Tapahtumia",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 700,
+    "placeholders": [],
+    "reason": "booking_228: varauskalenterin vienti v2, kolme resurssikalenteria."
+  },
+  {
+    "key": "ui.admin.calendar_export.preview_weekdays",
+    "lang": "fi",
+    "text": "Arjen vuoroja",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 700,
+    "placeholders": [],
+    "reason": "booking_228: varauskalenterin vienti v2, kolme resurssikalenteria."
+  },
+  {
+    "key": "ui.admin.calendar_export.preview_weekends",
+    "lang": "fi",
+    "text": "Viikonloppupalkkeja",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 700,
+    "placeholders": [],
+    "reason": "booking_228: varauskalenterin vienti v2, kolme resurssikalenteria."
+  },
+  {
+    "key": "ui.admin.calendar_export.error_shift",
+    "lang": "fi",
+    "text": "Vuorokalenteria ei käytetä varauksille.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 700,
+    "placeholders": [],
+    "reason": "booking_228: varauskalenterin vienti v2, kolme resurssikalenteria."
+  },
+  {
+    "key": "ui.admin.calendar_export.lead",
+    "lang": "en",
+    "text": "Treatments, private bookings, sauna rituals and events are exported as their own events. A weekday public shift is shown for its full scheduled length when it has a booking. Turvetorstai is separate. On weekends, public shifts are one bar per day. The calendars are Savusauna, Rauni and Lovi. The shared calendar is only a fallback. Closure and shift calendars are not used. An edit in the calendar does not change the booking. The default is off.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 700,
+    "placeholders": [],
+    "reason": "booking_228: varauskalenterin vienti v2, kolme resurssikalenteria."
+  },
+  {
+    "key": "ui.admin.calendar_export.shared_hint",
+    "lang": "en",
+    "text": "Fallback only, when the resource has no id of its own. An empty id exports nothing.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 700,
+    "placeholders": [],
+    "reason": "booking_228: varauskalenterin vienti v2, kolme resurssikalenteria."
+  },
+  {
+    "key": "ui.admin.calendar_export.resource_hint",
+    "lang": "en",
+    "text": "Events for this resource. Savusauna, Rauni and Lovi are enough. The weekend public-shift bar goes to Savusauna.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 700,
+    "placeholders": [],
+    "reason": "booking_228: varauskalenterin vienti v2, kolme resurssikalenteria."
+  },
+  {
+    "key": "ui.admin.calendar_export.preview_rituals",
+    "lang": "en",
+    "text": "Rituals",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 700,
+    "placeholders": [],
+    "reason": "booking_228: varauskalenterin vienti v2, kolme resurssikalenteria."
+  },
+  {
+    "key": "ui.admin.calendar_export.preview_events",
+    "lang": "en",
+    "text": "Events",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 700,
+    "placeholders": [],
+    "reason": "booking_228: varauskalenterin vienti v2, kolme resurssikalenteria."
+  },
+  {
+    "key": "ui.admin.calendar_export.preview_weekdays",
+    "lang": "en",
+    "text": "Weekday shifts",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 700,
+    "placeholders": [],
+    "reason": "booking_228: varauskalenterin vienti v2, kolme resurssikalenteria."
+  },
+  {
+    "key": "ui.admin.calendar_export.preview_weekends",
+    "lang": "en",
+    "text": "Weekend bars",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 700,
+    "placeholders": [],
+    "reason": "booking_228: varauskalenterin vienti v2, kolme resurssikalenteria."
+  },
+  {
+    "key": "ui.admin.calendar_export.error_shift",
+    "lang": "en",
+    "text": "A shift calendar is not used for bookings.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 700,
+    "placeholders": [],
+    "reason": "booking_228: varauskalenterin vienti v2, kolme resurssikalenteria."
+  }
+]

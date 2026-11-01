@@ -8,7 +8,7 @@
 
 export interface DesiredEvent {
   event_key: string;
-  kind: "reservation" | "shift" | "day";
+  kind: "reservation" | "shift" | "day" | "ritual" | "event" | "weekend";
   reservation_id?: number | null;
   resource_code: string;
   google_calendar_id?: string | null;
@@ -40,6 +40,8 @@ export interface ExportPlan {
   events?: DesiredEvent[];
   mapped?: MappedEvent[];
   closure_calendar_ids?: string[];
+  /** public.calendar_sources. Vuorokalenteriin ei kirjoiteta. */
+  shift_calendar_ids?: string[];
 }
 
 export interface GWriteEvent {
@@ -104,7 +106,10 @@ export function toGoogleEvent(ev: DesiredEvent): GWriteEvent {
 }
 
 export function planOps(plan: ExportPlan): { ops: SyncOp[]; unconfigured: number; blocked: number; unchanged: number } {
-  const closure = new Set((plan.closure_calendar_ids ?? []).filter(Boolean));
+  const closure = new Set([
+    ...(plan.closure_calendar_ids ?? []),
+    ...(plan.shift_calendar_ids ?? []),
+  ].filter(Boolean));
   const mapped = new Map((plan.mapped ?? []).map((m) => [m.event_key, m]));
   const ops: SyncOp[] = [];
   const wanted = new Set<string>();
