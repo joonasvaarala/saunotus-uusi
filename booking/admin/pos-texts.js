@@ -2,6 +2,7 @@
 // Uudet muokkaus- ja QR-myyntitekstit: pending-import-16 (POS_EDIT_TEXTS).
 // Maksupopupin uudet avaimet: pending-import-17 (POS_PAY_TEXTS). Sanakirja on varalla, kunnes tuonti on ajettu.
 // Maksulinkin sähköposti: pending-import-18 (POS_LINK_TEXTS). Allekirjoitus Tapio on email.payment_link.sign_name.
+// Asiakaskentän uusi otsikko ja vihje: pending-import-113 (POS_CUSTOMER_TEXTS). Vanhat ui.pos.email / email_help jäävät tuoduiksi.
 // public_get_site_texts peittää ui.pos.*-avaimet. Haku epäonnistuu tai rivi puuttuu → sanakirja.
 import { getLang } from './talous-i18n.js';
 
@@ -170,6 +171,19 @@ export const POS_LINK_TEXTS = {
   },
 };
 
+export const POS_CUSTOMER_TEXTS = {
+  fi: {
+    customer: 'Asiakas (nimi tai sähköposti)',
+    customer_help: 'Hae asiakasrekisteristä tai kirjoita sähköposti. Maksulinkki lähetetään tähän osoitteeseen.',
+    customer_list: 'Asiakkaat',
+  },
+  en: {
+    customer: 'Customer (name or email)',
+    customer_help: 'Search the customer register or type an email. The payment link is sent to this address.',
+    customer_list: 'Customers',
+  },
+};
+
 export const POS_PAY_TEXTS = {
   fi: {
     pay_title: 'Maksu',
@@ -220,6 +234,6 @@ export function clearPosTextCache() {
 export function posText(key, lang = getLang()) {
   const live = db.get(`${PREFIX}${key}|${lang}`);
   if (live) return live;
-  return POS_TEXTS[lang]?.[key] || POS_EDIT_TEXTS[lang]?.[key] || POS_PAY_TEXTS[lang]?.[key] || POS_LINK_TEXTS[lang]?.[key]
-    || POS_TEXTS.fi[key] || POS_EDIT_TEXTS.fi[key] || POS_PAY_TEXTS.fi[key] || POS_LINK_TEXTS.fi[key] || key;
+  return POS_TEXTS[lang]?.[key] || POS_EDIT_TEXTS[lang]?.[key] || POS_PAY_TEXTS[lang]?.[key] || POS_LINK_TEXTS[lang]?.[key] || POS_CUSTOMER_TEXTS[lang]?.[key]
+    || POS_TEXTS.fi[key] || POS_EDIT_TEXTS.fi[key] || POS_PAY_TEXTS.fi[key] || POS_LINK_TEXTS.fi[key] || POS_CUSTOMER_TEXTS.fi[key] || key;
 }
