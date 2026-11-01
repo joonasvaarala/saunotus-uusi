@@ -4,11 +4,12 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import test from 'node:test';
 import { createAdminMock } from '../admin/options-mock.js';
-import { applySection, exampleBundle, ibanOk, overviewNotices, validateSection } from '../admin/settings-logic.js';
+import { applySection, exampleBundle, ibanOk, modeBadgeKind, modeTextKey, overviewNotices, validateSection } from '../admin/settings-logic.js';
 import { SETTINGS_TEXTS } from '../admin/settings-texts.js';
 
 const read = (rel) => readFileSync(new URL(rel, import.meta.url), 'utf8');
 const pending31 = JSON.parse(read('../../content/site-texts.pending-import-31.json'));
+const pending109 = JSON.parse(read('../../content/site-texts.pending-import-109.json'));
 const older = ['12', '16', '24', '29'].flatMap((n) => JSON.parse(read(`../../content/site-texts.pending-import-${n}.json`)));
 
 const seller = () => {
@@ -42,7 +43,9 @@ test('mock säilyttää logon, synkkaa pidon eikä koske live-tilaan', async () 
   const mock = createAdminMock({ role: 'manager' });
   const before = await mock.rpc('admin_settings_bundle');
   assert.equal(before.qr_only, false);
-  assert.equal(before.vismapay.mode, 'test');
+  assert.equal(before.montonio.mode, 'off');
+  assert.equal(before.vismapay, undefined);
+  assert.equal(before.mobilepay, undefined);
   assert.equal(before.resend.allowlist_on, true);
   assert.equal(before.resend.allowlist_count, 2);
   before.settings.seller.logo_url = 'https://example.test/logo.png';
@@ -64,9 +67,16 @@ test('mock säilyttää logon, synkkaa pidon eikä koske live-tilaan', async () 
   assert.equal(qr.qr_only, true);
   assert.equal(qr.settings, undefined);
   const state = exampleBundle();
+  state.montonio.mode = 'test';
+  state.vismapay = { mode: 'test' };
+  state.mobilepay = { mode: 'test' };
   state.resend.mode = 'live';
   state.resend.allowlist_on = false;
-  assert.deepEqual(overviewNotices(state), ['warn_pay_test', 'warn_allowlist_open']);
+  assert.deepEqual(overviewNotices(state), ['warn_pay_test']);
+  state.montonio.mode = 'live';
+  assert.deepEqual(overviewNotices(state), ['warn_pay_live']);
+  assert.equal(modeBadgeKind('live'), 'ok');
+  assert.equal(modeTextKey('live'), 'mode_live');
   applySection(state, 'email_sender', { from_name: 'Perinnesauna', reply_to: 'savusauna@saunotus.fi' });
   assert.equal(state.resend.from, 'Perinnesauna <savusauna@saunotus.fi>');
   assert.equal(state.resend.mode, 'live');
@@ -91,16 +101,38 @@ test('pending-import-31: uudet asetustekstit, FI+EN, ei päällekkäin', () => {
     assert.equal(taken.has(`${row.key}|${row.lang}`), false);
     assert.equal(seen.has(`${row.key}|${row.lang}`), false);
     seen.add(`${row.key}|${row.lang}`);
-    assert.equal(SETTINGS_TEXTS[row.lang][row.key], row.text);
+    const newer = pending109.find((r) => r.key === row.key && r.lang === row.lang);
+    const live = SETTINGS_TEXTS[row.lang][row.key];
+    if (newer) assert.equal(live, newer.text);
+    else if (live !== undefined) assert.equal(live, row.text);
   }
   for (const lang of ['fi', 'en']) {
     for (const [key, text] of Object.entries(SETTINGS_TEXTS[lang])) {
       if (!key.startsWith('ui.admin.settings.') && !key.startsWith('ui.admin.qr.')) continue;
-      const row = pending31.find((r) => r.key === key && r.lang === lang) || older.find((r) => r.key === key && r.lang === lang);
+      const row = pending109.find((r) => r.key === key && r.lang === lang) || pending31.find((r) => r.key === key && r.lang === lang) || older.find((r) => r.key === key && r.lang === lang);
       assert.ok(row, key + ' ' + lang);
       assert.equal(row.text, text);
     }
   }
+});
+
+test('pending-import-109: päivitetyt asetustekstit, FI+EN', () => {
+  const seen = new Set();
+  assert.equal(pending109.length, 6);
+  assert.equal(pending109.length % 2, 0);
+  for (const row of pending109) {
+    assert.match(row.key, /^ui\.admin\.settings\.[a-z0-9_]+$/);
+    assert.ok(row.lang === 'fi' || row.lang === 'en');
+    assert.equal(row.class, 'normal');
+    assert.equal(row.kind, 'plain');
+    assert.deepEqual(row.placeholders, []);
+    assert.equal(row.text.trim(), row.text);
+    assert.ok(row.max_len >= row.text.length);
+    assert.equal(SETTINGS_TEXTS[row.lang][row.key], row.text);
+    assert.equal(seen.has(`${row.key}|${row.lang}`), false);
+    seen.add(`${row.key}|${row.lang}`);
+  }
+  assert.equal(SETTINGS_TEXTS.fi['ui.admin.settings.warn_allowlist_open'], undefined);
 });
 
 test('migraatio ei poista avaimia eikä kirjoita live-tilaa', () => {
@@ -115,6 +147,19 @@ test('migraatio ei poista avaimia eikä kirjoita live-tilaa', () => {
   assert.equal(/admin_set_vismapay_mode/.test(sql), false);
   assert.equal(/admin_set_procountor_settings/.test(sql), false);
   assert.match(rb, /drop function if exists booking\.admin_save_settings/);
+  const sql225 = read('../supabase/migrations/20261101081500_booking_225_settings_montonio.sql');
+  assert.match(sql225, /'montonio', jsonb_build_object\('mode'/);
+  assert.equal(/'vismapay'/.test(sql225), false);
+  assert.equal(/'mobilepay'/.test(sql225), false);
+  assert.equal(/update\s+booking\.integration_config/i.test(sql225), false);
+  assert.equal(/insert\s+into\s+booking\.integration_config/i.test(sql225), false);
+  assert.equal(/delete\s+from\s+booking\.integration_config/i.test(sql225), false);
+  assert.match(sql225, /grant execute on function booking\.admin_settings_bundle\(\) to authenticated, service_role/);
+  const view = read('../admin/views/settings.js');
+  assert.equal(view.includes('bundle.vismapay'), false);
+  assert.equal(view.includes('bundle.mobilepay'), false);
+  assert.equal(view.includes('warn_allowlist_open'), false);
+  assert.match(view, /bundle\.montonio\?\.mode/);
   assert.match(read('../../.github/workflows/pages.yml'), /node --test booking\/tests\/asetukset\.test\.mjs/);
   assert.match(read('../../.github/workflows/pages.yml'), /t123 \(booking\/supabase\/tests\/talous\/t123_settings_ui\.sql\)/);
 });
