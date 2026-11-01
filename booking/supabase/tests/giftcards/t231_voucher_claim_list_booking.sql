@@ -27,7 +27,7 @@ declare
   log text; np int; nf int; ns int;
 begin
   select pg_get_functiondef('booking.admin_list_voucher_claims(text,text,integer,integer,text)'::regprocedure) into src;
-  perform pg_temp.ck(src ilike '%security definer%' and src ilike '%search_path = ''''%' and src like '%booking._vc_json(c, false)%' and src like '%booking_product%' and src like '%value_card%' and src not like '%_vc_json(c, true)%', 'A1 lista: definer, maskattu json, varaus ja value_card');
+  perform pg_temp.ck(src ilike '%security definer%' and src ilike '%search_path TO ''''%' and src like '%booking._vc_json(c, false)%' and src like '%booking_product%' and src like '%value_card%' and src not like '%_vc_json(c, true)%', 'A1 lista: definer, maskattu json, varaus ja value_card');
   perform pg_temp.ck(has_function_privilege('authenticated', 'booking.admin_list_voucher_claims(text,text,integer,integer,text)', 'execute')
       and not has_function_privilege('anon', 'booking.admin_list_voucher_claims(text,text,integer,integer,text)', 'execute'), 'A2 execute authenticated, ei anon');
   select pg_get_functiondef('booking.admin_resolve_voucher_claim(bigint,text,text,text,numeric,text)'::regprocedure) into def;
