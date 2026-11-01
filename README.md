@@ -102,6 +102,8 @@ Molemmissa tiedostoissa on vain julkinen publishable-avain. Salaisuutta ei kirjo
 
 Tuotantobuild vaatii osoitteen `https://sxbofnuisemspgquoxyv.supabase.co` ja `SITE_URL=https://saunotus.fi`. Testibuild kieltäytyy tuotantoprojektista ja osoitteesta saunotus.fi. Väärä yhdistelmä pysähtyy ennen sivujen rakentamista.
 
+`TEST_ENV_BANNER` tulee samasta ympäristötiedostosta (`on` testissä, `off` tuotannossa). Testibuild kirjoittaa oranssinpunaisen **Testiympäristö**-bannerin hallinnan jokaiseen näkymään (myös kirjautuminen ja salasanan asetus) sekä julkisen sivuston sivuille, juomasivulle ja vuorolinkeille. Tuotantobuild ei kirjoita banneria eikä sen tekstiä `dist/`-hakemistoon. Build keskeytyy, jos lippu ja `SITE_ENV` eivät täsmää. Banneri ei perustu selaimen osoitteeseen.
+
 `pages.yml` lataa `config/env/test.env`:n. Sivutekstien ja artikkelien välimuistitunnus alkaa `site-texts-test-` ja `articles-test-`, jotta tuotannosta haettu data ei palaudu testiajoon. Varmuuskopio (`.github/workflows/db-backup.yml`, `scripts/backup/`) pysyy tuotantoprojektissa.
 
 Testisivuston build voi varoittaa `406`, jos DEV-projektin API-asetuksissa skeema `booking` ei ole julkisten skeemojen listalla (`public, graphql_public, booking`). Silloin sivut käyttävät repon varatekstejä. Tämä on Supabasen hallintapaneelin asetus, ei tämän repon migraatio.

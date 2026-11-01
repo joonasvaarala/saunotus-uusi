@@ -56,6 +56,8 @@ test('ympäristötiedostot ja Pages-työnkulku eivät sekoita projekteja', () =>
   const yml = read('.github/workflows/pages.yml');
   assert.match(testEnv, /^IMAGE_TRANSFORMS=off$/m);
   assert.doesNotMatch(prodEnv, /^IMAGE_TRANSFORMS=/m);
+  assert.match(testEnv, /^TEST_ENV_BANNER=on$/m);
+  assert.match(prodEnv, /^TEST_ENV_BANNER=off$/m);
   assert.match(testEnv, /^SITE_ENV=test$/m);
   assert.match(testEnv, new RegExp(`^SITE_URL=https://joonasvaarala\\.github\\.io/saunotus-uusi$`, 'm'));
   assert.match(testEnv, new RegExp(`^BOOKING_SUPABASE_URL=${DEV_SUPABASE_URL.replace(/[.]/g, '\\.')}$`, 'm'));
@@ -76,10 +78,12 @@ test('ympäristötiedostot ja Pages-työnkulku eivät sekoita projekteja', () =>
   assert.equal(printed.status, 0);
   assert.match(printed.stdout, new RegExp(`BOOKING_SUPABASE_URL=${DEV_SUPABASE_URL}`));
   assert.match(printed.stdout, /^IMAGE_TRANSFORMS=off$/m);
+  assert.match(printed.stdout, /^TEST_ENV_BANNER=on$/m);
   assert.doesNotMatch(printed.stdout, /sxbofnuisemspgquoxyv/);
   const printedProd = spawnSync('bash', ['scripts/build-site.sh', '--print-env', 'prod'], { cwd: root, encoding: 'utf8' });
   assert.equal(printedProd.status, 0);
   assert.doesNotMatch(printedProd.stdout, /IMAGE_TRANSFORMS/);
+  assert.match(printedProd.stdout, /^TEST_ENV_BANNER=off$/m);
   assert.match(printedProd.stdout, new RegExp(`BOOKING_SUPABASE_URL=${PROD_SUPABASE_URL}`));
 });
 

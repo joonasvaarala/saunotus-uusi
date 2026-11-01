@@ -18,6 +18,7 @@ import { faqFor, policyFor, eventTimeFor } from './kb-en.mjs';
 import { selectShopEvents, shopEventsHtml, shopHash, eventWaitlistPath } from './event-cards.mjs';
 import { EVENT_CARD_TEXTS } from './event-full-texts.mjs';
 import { productCardInner } from './product-card-image.mjs';
+import { testBannerEnabled, testBannerHtml, testBannerStyleTag } from './test-env-banner.mjs';
 import {
   read, site, kb, images, e, href, pageHref, pagePath, abs, SITE_URL, BASE, isTest, chatbotOn,
   johku, bookingUrl, phoneDisplay, heroPicture, heroPreload, reviewsData, product, money, dur, priceOf, fromMode, picture, icon, hm,
@@ -315,8 +316,12 @@ export function layout({ lang, key, meta, body, preload = '', robotsOnly = false
     ? `<div data-saunabot-quiz></div>\n<script src="${e(site.chatbot.widgetSrc)}" defer></script>`
     : `<!-- Saunabot (POIS KÄYTÖSTÄ – ei tuotantoon ennen OpenAI-avainta). Ota käyttöön: content/site.json chatbot.enabled = true.\n<script src="${site.chatbot.widgetSrc}" defer></script>\n<div data-saunabot-quiz></div>\n-->`;
   const fl = (k, l) => pageHref(k, l);
+  const showBanner = testBannerEnabled();
+  const bannerStyle = showBanner ? testBannerStyleTag('public') : '';
+  const bannerOpen = showBanner ? `<div class="site-sticky">${testBannerHtml(lang)}` : '';
+  const bannerClose = showBanner ? '</div>' : '';
   return `<!doctype html>
-<html lang="${lang}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<html lang="${lang}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1${showBanner ? ',viewport-fit=cover' : ''}">
 <title>${e(meta.title)}</title><meta name="description" content="${e(meta.description)}">
 ${isTest ? '<meta name="robots" content="noindex,nofollow">' : (seo?.robots ? `<meta name="robots" content="${e(seo.robots)}">` : '')}
 <link rel="canonical" href="${e(url)}">${hl}${xdef}${seo?.extraHead || ''}
@@ -324,18 +329,17 @@ ${isTest ? '<meta name="robots" content="noindex,nofollow">' : (seo?.robots ? `<
 ${alt_[o] && !seo ? `<meta property="og:locale:alternate" content="${ui(o).locale}">` : ''}<meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#2B3A30">
 <link rel="icon" href="${href('/img/favicon.svg')}" type="image/svg+xml">
 <link rel="preload" href="${href('/fonts/Lato-normal-400.woff2')}" as="font" type="font/woff2" crossorigin>${preload}
-<style>${css}${seo?.extraCss || ''}${extraCss}</style>
+<style>${css}${seo?.extraCss || ''}${extraCss}</style>${bannerStyle}
 <script type="application/ld+json">${jsonLd(lang)}</script>${(seo?.jsonLd || []).map((j) => `<script type="application/ld+json">${JSON.stringify(j).replace(/</g, '\\u003c')}</script>`).join('')}${seo ? '' : seoSchemaForPage({ lang, key, url, body }).map(jsonLdScript).join('')}
 </head><body>
-${isTest ? `<div class="testbar" role="note">${e(u.siteTestNote)}</div>` : ''}
 <a class="skip" href="#main">${e(u.skip)}</a>
-<header class="site-header"><div class="wrap hdr">
+${bannerOpen}<header class="site-header"><div class="wrap hdr">
 <a class="brand" href="${pageHref('home', lang)}"><img src="${href('/img/favicon.svg')}" width="27" height="37" alt=""><span class="brand-txt"><b>SAUNOTUS</b> <small>${e(headerTagline(lang, u))}</small></span></a>
 <nav class="nav-desk" aria-label="${e(u.menuLabel)}">${nav}</nav>
 ${langSw}
 <a class="btn sm" href="${bookHref}">${e(u.book)}</a>
 <details class="nav-mob"><summary>${e(u.menu)}</summary><nav aria-label="${e(u.menuLabel)}">${nav}<a class="btn gold nav-cta" href="${bookHref}">${e(u.bookFull)}</a></nav></details>
-</div></header>
+</div></header>${bannerClose}
 <main id="main" tabindex="-1">
 ${body}
 </main>

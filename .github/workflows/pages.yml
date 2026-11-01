@@ -45,7 +45,7 @@ jobs:
       - run: npm ci
       # Saunatietoa: markdown-, lähde-/RPC-, sivupohja- ja build-tarkistustestit (fixture, ei verkkoa)
       - run: node --test tests/articles/*.test.mjs
-      - run: node --test tests/site-target.test.mjs tests/home-front.test.mjs tests/product-image.test.mjs tests/image-transforms.test.mjs tests/product-cards-image.test.mjs tests/week-programme.test.mjs tests/treatments-page.test.mjs
+      - run: node --test tests/site-target.test.mjs tests/test-env-banner.test.mjs tests/home-front.test.mjs tests/product-image.test.mjs tests/image-transforms.test.mjs tests/product-cards-image.test.mjs tests/week-programme.test.mjs tests/treatments-page.test.mjs
       # Tiivis viikko: Tänään-merkki ei saa peittää aikaa (Playwright + järjestelmän Chrome).
       - name: Chrome tiiviin viikon testiin
         run: |
