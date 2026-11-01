@@ -110,6 +110,8 @@ begin
   res := booking.public_create_training_signup(v_full_rule, d1, 'Fulla', 'fulla@t226b.example', '0403000099', 'FI', 'en', 'en', null, false, true, array['single_room']);
   perform test.logout();
   perform pg_temp.ck((res ->> 'code') = 'single_room_full', 'D3: Full-3 ei saa huonetta kun retriitti 2 on täynnä');
+  res := booking.public_training_checkout(v_full_rule, d1);
+  perform pg_temp.ck(coalesce((select a ->> 'available' from jsonb_array_elements(res -> 'addons') a where a ->> 'code' = 'single_room'), 'true') = 'false', 'D3b: huone ei ole valittavissa kun osakerta on täynnä');
   select count(*) into v_n from booking.reservations x
    where x.rule_id = v_a1 and x.notes = 'training_segment' and booking._res_active(x.status, x.hold_expires_at);
   perform pg_temp.ck(v_n = 1, 'D4: epäonnistunut huonevaraus ei lisännyt toista paikkaa retriitille 1');
@@ -121,6 +123,8 @@ begin
     perform pg_temp.ck((res ->> 'ok') = 'true', 'E' || i || ': retriitin 3 paikka');
   end loop;
   select count(*) into v_n from booking.reservations x where x.rule_id = v_a1 and booking._res_active(x.status, x.hold_expires_at);
+  select s.remaining into v_left from booking.public_availability(v_full, d1, d1) s where s.rule_id = v_full_rule;
+  perform pg_temp.ck(v_left = 0, 'E5b: Full-3 näyttää pienimmän vapaan paikkamäärän');
   perform test.anon('10.226.82.9');
   res := booking.public_create_training_signup(v_full_rule, d1, 'Esto', 'esto@t226b.example', '0403000088', 'SE', 'en', 'en', null, false, true, '{}');
   perform test.logout();

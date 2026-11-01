@@ -63,6 +63,25 @@ language sql stable security definer set search_path = '' as $$
    where not exists (select 1 from booking.training_segments s where s.option_rule_id = p_rule_id)
 $$;
 
+create or replace function booking._training_rule_seats_left(p_rule_id bigint)
+returns integer language sql stable security definer set search_path = '' as $$
+  select booking._pools_remaining(
+    coalesce((select array_agg(rp.pool_id order by rp.pool_id) from booking.schedule_rule_pools rp where rp.rule_id = p_rule_id), '{}'::bigint[]),
+    lower(booking._training_rule_range(p_rule_id)),
+    upper(booking._training_rule_range(p_rule_id)))
+$$;
+
+-- Pienin vapaa paikkamäärä: valinnan oma pooli ja jokainen osakerta.
+create or replace function booking._training_option_seats_left(p_rule_id bigint)
+returns integer language sql stable security definer set search_path = '' as $$
+  select min(n)::integer from (
+    select booking._training_rule_seats_left(p_rule_id) as n
+    union all
+    select booking._training_rule_seats_left(s.rule_id)
+      from booking._training_segments_of(p_rule_id) s
+  ) q
+$$;
+
 create or replace function booking._training_segment_ids(p_rule_id bigint)
 returns setof bigint language sql stable security definer set search_path = '' as $$
   select s.rule_id from booking._training_segments_of(p_rule_id) s
@@ -160,13 +179,19 @@ begin
            case when s.status = 'closed' then 'closed'
                 when s.mode = 'exclusive' and s.status = 'unavailable'
                      and booking._waitlist_private_taken(s.rule_id, s.starts_at, s.ends_at) then 'full'
+                when cap.left_n is not null and (cap.left_n <= 0 or (s.status = 'available' and cap.left_n < coalesce(s.min_persons, 1))) then 'full'
                 else s.status end,
-           s.remaining, s.min_persons, s.max_persons, s.price_mode, s.unit_price, s.base_price, s.included_persons, s.extra_person_price,
+           case when cap.left_n is null then s.remaining else least(s.remaining, cap.left_n) end,
+           s.min_persons, s.max_persons, s.price_mode, s.unit_price, s.base_price, s.included_persons, s.extra_person_price,
            s.label_en
       from booking._sessions(greatest(p_from, (now() at time zone booking._tz())::date),
                              least(p_to, (now() at time zone booking._tz())::date + v_horizon),
                              p_product_id, true) s
       join booking.schedule_rules rr on rr.id = s.rule_id
+      left join lateral (
+        select booking._training_option_seats_left(s.rule_id) as left_n
+         where exists (select 1 from booking.training_segments ts where ts.option_rule_id = s.rule_id)
+      ) cap on true
      where s.status <> 'closed'
        and not rr.training_segment_only;
 end $$;
@@ -200,7 +225,7 @@ begin
   return jsonb_build_object(
     'ok', true, 'rule_id', r.id, 'product_id', p.id,
     'course_price', pc.course_price, 'deposit_amount', v_deposit,
-    'single_rooms_remaining', v_left, 'addons', v_offers,
+    'single_rooms_remaining', v_left, 'seats_remaining', booking._training_option_seats_left(r.id), 'addons', v_offers,
     'segments', booking._training_segment_json(r.id));
 end $$;
 
@@ -513,6 +538,8 @@ declare f text;
 begin
   foreach f in array array[
     'booking._training_segments_of(bigint)',
+    'booking._training_rule_seats_left(bigint)',
+    'booking._training_option_seats_left(bigint)',
     'booking._training_segment_ids(bigint)',
     'booking._training_segment_json(bigint)',
     'booking._training_hold_segment(bigint, bigint, timestamp with time zone)'

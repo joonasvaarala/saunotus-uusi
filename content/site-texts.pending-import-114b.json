@@ -80,23 +80,203 @@
     "reason": "booking_226b: a seat taken by another course enrollment."
   },
   {
-    "key": "admin.events.single_room_hint",
+    "key": "admin.events.segments_load_error",
     "lang": "fi",
-    "text": "Oletus 2. Jaettu paikka kuluttaa tämän kerran huoneita, kun osakerta on merkitty.",
+    "text": "Osakertojen lataus epäonnistui. Sulje lomake ja avaa se uudelleen.",
     "class": "normal",
     "kind": "plain",
     "max_len": 160,
     "placeholders": [],
-    "reason": "booking_226b: huonekapasiteetti on osakertakohtainen, ei päivien päällekkäisyys."
+    "reason": "booking_226b: osakertakenttää ei tallenneta, jos lataus epäonnistui."
   },
   {
-    "key": "admin.events.single_room_hint",
+    "key": "admin.events.segments_load_error",
     "lang": "en",
-    "text": "Default 2. A shared place uses this occurrence’s rooms when it is listed as a segment.",
+    "text": "Could not load segments. Close the form and open it again.",
     "class": "normal",
     "kind": "plain",
     "max_len": 160,
     "placeholders": [],
-    "reason": "booking_226b: single rooms follow explicit segments."
+    "reason": "booking_226b: segments are not saved when loading failed."
+  },
+  {
+    "key": "email.training.intro",
+    "lang": "fi",
+    "text": "Kiitos ilmoittautumisesta. Varausmaksu on vastaanotettu. Kurssia ei ole maksettu kokonaan.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 300,
+    "placeholders": [],
+    "reason": "booking_226: vahvistusviesti ei väitä kurssia maksetuksi."
+  },
+  {
+    "key": "email.training.intro",
+    "lang": "en",
+    "text": "Thank you for registering. The reservation fee has been received. The course has not been paid in full.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 300,
+    "placeholders": [],
+    "reason": "booking_226: confirmation does not claim the course is fully paid."
+  },
+  {
+    "key": "email.training.course",
+    "lang": "fi",
+    "text": "Kurssin hinta",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_226: vahvistusviestin kurssihinta."
+  },
+  {
+    "key": "email.training.course",
+    "lang": "en",
+    "text": "Course price",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_226: course price in the confirmation email."
+  },
+  {
+    "key": "email.training.single",
+    "lang": "fi",
+    "text": "Yhden hengen huone",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_226: yhden hengen huone vahvistusviestissä."
+  },
+  {
+    "key": "email.training.single",
+    "lang": "en",
+    "text": "Single room",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_226: single room in the confirmation email."
+  },
+  {
+    "key": "email.training.internship",
+    "lang": "fi",
+    "text": "Harjoittelujakso",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_226: harjoittelujakso vahvistusviestissä."
+  },
+  {
+    "key": "email.training.internship",
+    "lang": "en",
+    "text": "Internship period",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_226: internship in the confirmation email."
+  },
+  {
+    "key": "email.training.total",
+    "lang": "fi",
+    "text": "Loppusumma",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_226: kurssin loppusumma vahvistusviestissä."
+  },
+  {
+    "key": "email.training.total",
+    "lang": "en",
+    "text": "Course total",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_226: course total in the confirmation email."
+  },
+  {
+    "key": "email.training.deposit",
+    "lang": "fi",
+    "text": "Varausmaksu",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_226: verkossa maksettu varausmaksu."
+  },
+  {
+    "key": "email.training.deposit",
+    "lang": "en",
+    "text": "Reservation fee",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_226: reservation fee paid online."
+  },
+  {
+    "key": "email.training.remaining",
+    "lang": "fi",
+    "text": "Laskutetaan myöhemmin",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_226: myöhemmin laskutettava osuus."
+  },
+  {
+    "key": "email.training.remaining",
+    "lang": "en",
+    "text": "To be invoiced later",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_226: balance invoiced later."
+  },
+  {
+    "key": "email.training.balance",
+    "lang": "fi",
+    "text": "Loppusumma laskutetaan myöhemmin. Verkossa maksettiin vain varausmaksu.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_226: vahvistus ei väitä koko kurssia maksetuksi."
+  },
+  {
+    "key": "email.training.balance",
+    "lang": "en",
+    "text": "The balance is invoiced later. Only the reservation fee was paid online.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_226: the email does not claim the course is fully paid."
+  },
+  {
+    "key": "email.training.segments",
+    "lang": "fi",
+    "text": "Jaksot",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_226b: monijaksoisen kurssin jaksot vahvistusviestissä."
+  },
+  {
+    "key": "email.training.segments",
+    "lang": "en",
+    "text": "Segments",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_226b: segments of a multi-part course in the confirmation email."
   }
 ]

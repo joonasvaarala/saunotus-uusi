@@ -241,24 +241,32 @@ export async function render({ ctx, refs, reload, query }) {
   function inlineForm(p, r, close) {
     const num = (name, v, o = {}) => h('input', { name, type: 'number', value: v ?? '', inputmode: 'numeric', ...o });
     const booked = bookingCount(r);
+    let segmentsReady = null;
+    const segInput = h('input', { name: 'segments', value: '', disabled: true, 'data-testid': 'event-occ-segments', autocomplete: 'off' });
+    const segErr = h('p', { class: 'err', role: 'alert', hidden: true, 'data-testid': 'event-occ-segments-error' });
+    const saveBtn = h('button', { type: 'submit', class: 'btn primary', 'data-testid': 'event-occ-save', disabled: p.category === 'training' || null, text: T('occ_inline_save') });
     const f = h('form', { class: 'stack ev-inline', 'data-testid': 'event-occ-form', novalidate: true },
       booked ? h('p', { class: 'ev-warn', text: T('warn_bookings', { n: booked }) }) : null,
       h('div', { class: 'row wrap' }, field(T('add_dates'), h('input', { name: 'date', type: 'date', value: r.date, required: true, min: r.date >= localParts(new Date().toISOString()).date ? localParts(new Date().toISOString()).date : null })), field(T('add_times'), h('input', { name: 'start_time', type: 'time', value: String(r.start_time || '').slice(0, 5), required: true })), field(T('duration'), num('duration_minutes', r.duration_minutes, { min: 15, max: p.category === 'training' ? 43200 : 20160 }))),
       h('div', { class: 'row wrap' }, field(T('max_persons'), num('max_persons', r.max_persons, { min: 1, max: p.category === 'training' ? 6 : 500, 'data-testid': 'event-occ-max' })), field(T('min_persons'), num('min_persons', r.min_persons, { min: 1, max: 500 })), field(T('deadline'), num('deadline_minutes', r.deadline_minutes, { min: 0, max: 20160 })), p.category === 'training' ? field(tx('single_room_max'), num('single_room_max', r.single_room_max ?? 2, { min: 0, max: 20, 'data-testid': 'event-occ-rooms' }), tx('single_room_hint')) : null),
       h('div', { class: 'row wrap' }, field(T('label_fi'), h('input', { name: 'label', value: r.label || '', maxlength: 200 })), field(T('label_en'), h('input', { name: 'label_en', value: r.label_en || '', maxlength: 200 }))),
-      p.category === 'training' ? field(tx('segments'), h('input', { name: 'segments', value: '', 'data-testid': 'event-occ-segments', autocomplete: 'off' }), tx('segments_hint')) : null,
+      p.category === 'training' ? field(tx('segments'), segInput, tx('segments_hint')) : null,
+      p.category === 'training' ? segErr : null,
       h('label', { class: 'check' }, h('input', { type: 'checkbox', name: 'active', checked: r.active !== false && !r.cancelled_at || null, disabled: booked ? true : null }), ' ', T('active')),
-      h('div', { class: 'row wrap' }, h('button', { type: 'submit', class: 'btn primary', 'data-testid': 'event-occ-save', text: T('occ_inline_save') }), h('button', { type: 'button', class: 'btn ghost', text: T('time_changed_skip'), onclick: () => close() })));
-    f.addEventListener('submit', (ev) => { ev.preventDefault(); act(f.querySelector('[data-testid="event-occ-save"]'), async () => {
+      h('div', { class: 'row wrap' }, saveBtn, h('button', { type: 'button', class: 'btn ghost', text: T('time_changed_skip'), onclick: () => close() })));
+    const segmentKey = (s) => String(s || '').split(/[^0-9]+/).filter(Boolean).join(',');
+    f.addEventListener('submit', (ev) => { ev.preventDefault(); act(saveBtn, async () => {
+      if (p.category === 'training' && segmentsReady == null) { toast(tx('segments_load_error'), 'err'); return; }
       const fd = new FormData(f), n = (k) => (String(fd.get(k) ?? '').trim() === '' ? null : Number(fd.get(k)));
       const patch = { date: fd.get('date'), start_time: String(fd.get('start_time') || '').slice(0, 5), duration_minutes: n('duration_minutes'),
         max_persons: n('max_persons'), min_persons: n('min_persons'), deadline_minutes: n('deadline_minutes'), label: String(fd.get('label') || '').trim() || null, label_en: String(fd.get('label_en') || '').trim() || null, active: f.active.checked && !r.cancelled_at };
       if (p.category === 'training') patch.single_room_max = n('single_room_max');
-      const segmentIds = p.category === 'training' ? String(fd.get('segments') || '').split(/[^0-9]+/).filter(Boolean).map((x) => Number(x)) : null;
       if (isPastMove({ date: r.date, start_time: r.start_time }, { date: patch.date, start_time: patch.start_time })) { toast(T('err_past_move'), 'err'); return; }
       const before = `${r.date}|${String(r.start_time).slice(0, 5)}|${r.duration_minutes}`;
       const out = await rpc('admin_event_rule_upsert', { p_id: r.id, p_product_id: null, p_patch: patch });
-      if (segmentIds) await rpc('admin_training_segments_set', { p_option_rule_id: r.id, p_segment_rule_ids: segmentIds });
+      if (p.category === 'training' && segmentKey(fd.get('segments')) !== segmentKey(segmentsReady)) {
+        await rpc('admin_training_segments_set', { p_option_rule_id: r.id, p_segment_rule_ids: segmentKey(fd.get('segments')).split(',').filter(Boolean).map(Number) });
+      }
       const after = `${out?.date}|${String(out?.start_time || '').slice(0, 5)}|${out?.duration_minutes}`;
       toast(T('saved'));
       if ((Number(out?.moved_bookings) > 0 || (before !== after && booked > 0))) offerTimeMessage(p, r, out);
@@ -266,9 +274,15 @@ export async function render({ ctx, refs, reload, query }) {
     }); });
     if (p.category === 'training') {
       rpc('admin_training_segments_get', { p_option_rule_id: r.id }).then((rows) => {
-        const input = f.querySelector('[data-testid="event-occ-segments"]');
-        if (input && Array.isArray(rows)) input.value = rows.map((x) => x.rule_id).join(', ');
-      }).catch(() => {});
+        if (!Array.isArray(rows)) throw new Error('segments');
+        segmentsReady = rows.map((x) => x.rule_id).join(', ');
+        segInput.value = segmentsReady;
+        segInput.disabled = false;
+        saveBtn.disabled = false;
+      }).catch(() => {
+        segErr.hidden = false;
+        segErr.textContent = tx('segments_load_error');
+      });
     }
     return f;
   }

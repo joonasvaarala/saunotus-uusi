@@ -482,7 +482,7 @@
   {
     "key": "admin.events.single_room_hint",
     "lang": "fi",
-    "text": "Oletus 2. Täynnä oleva huone estää valinnan myös päällekkäisillä kursseilla.",
+    "text": "Oletus 2. Jaettu paikka kuluttaa tämän kerran huoneita, kun osakerta on merkitty.",
     "class": "normal",
     "kind": "plain",
     "max_len": 160,
@@ -492,7 +492,7 @@
   {
     "key": "admin.events.single_room_hint",
     "lang": "en",
-    "text": "Default 2. A full single-room pool also blocks overlapping courses.",
+    "text": "Default 2. A shared place uses this occurrence’s rooms when it is listed as a segment.",
     "class": "normal",
     "kind": "plain",
     "max_len": 160,
