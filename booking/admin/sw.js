@@ -147,12 +147,14 @@ async function notifyOpenClients() {
 }
 
 self.addEventListener('activate', (event) => {
-  event.waitUntil((async () => {
+  const ready = (async () => {
     const keys = await caches.keys();
     await Promise.all(keys.filter((key) => key.startsWith(CACHE_PREFIX) && key !== CACHE).map((key) => caches.delete(key)));
     await self.clients.claim();
-    await notifyOpenClients();
-  })());
+  })();
+  event.waitUntil(ready);
+  // Not inside waitUntil: client.navigate() during activation waits for activation itself → deadlock.
+  ready.then(() => notifyOpenClients()).catch(() => {});
 });
 
 self.addEventListener('message', (event) => {

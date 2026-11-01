@@ -76,6 +76,17 @@ let nImports = 0;
     writeFileSync(p, t);
   }
 })(A);
+// Hallinta tuo osan kaupan moduuleista dist/shop/src:stä (ei /booking/-kansiosta). Sama ?v= kuin hallinnan
+// importteihin, muuten esim. discount-code-logic.js → discount-texts.js jää ilman välimuistitunnusta.
+(function tagShop(d) {
+  for (const n of readdirSync(d)) {
+    const p = join(d, n);
+    if (!n.endsWith('.js')) continue;
+    const t = readFileSync(p, 'utf8');
+    const next = t.replace(/(\b(?:from|import)\s*)(['"])(\.{1,2}\/[^'"?]+\.js)\2/g, (_, a, q, u) => `${a}${q}${u}${VER}${q}`);
+    if (next !== t) writeFileSync(p, next);
+  }
+})(join(OUT, 'shop', 'src'));
 {
   const hp = join(A, 'index.html');
   let t = readFileSync(hp, 'utf8');
@@ -182,7 +193,15 @@ if (!/rel="apple-touch-icon" href="apple-touch-icon\.png"/.test(adminHtml)) fail
   if (!manifest || manifest.scope !== './' || manifest.start_url !== './' || manifest.display !== 'standalone' || manifest.lang !== 'fi') fail('manifestin scope, start_url, display tai kieli');
   if (manifest.name !== 'Saunotus hallinta' || manifest.short_name !== 'Hallinta') fail('manifestin nimi');
 }
-(function chk(d) { for (const n of readdirSync(d)) { const p = join(d, n); if (statSync(p).isDirectory()) { chk(p); continue; } if (n.endsWith('.js') && /(?:from|import)\s*['"]\.{1,2}\/[^'"?]+\.js['"]/.test(readFileSync(p, 'utf8'))) fail(`${p}: versioimaton relatiivinen import`); } })(A);
+function chkUnversioned(d) {
+  for (const n of readdirSync(d)) {
+    const p = join(d, n);
+    if (statSync(p).isDirectory()) { chkUnversioned(p); continue; }
+    if (n.endsWith('.js') && /(?:from|import)\s*['"]\.{1,2}\/[^'"?]+\.js['"]/.test(readFileSync(p, 'utf8'))) fail(`${p}: versioimaton relatiivinen import`);
+  }
+}
+chkUnversioned(A);
+chkUnversioned(join(OUT, 'shop', 'src'));
 for (const f of ['admin.js', 'ui.js', 'icons.js', 'sb.js', 'config.js', 'admin.css', 'calendar.css', 'views/users.js', 'views/calendar.js', 'views/customerform.js', 'views/addons.js', 'views/productimage.js', 'views/talous.js', 'views/talous-orders.js', 'voucher-redeem-logic.js', 'voucher-redeem-texts.js', 'voucher-redeem-mock.js', 'views/voucher-redeem.js', 'views/talous-payments.js', 'views/talous-reports.js', 'views/talous-analytics.js', 'analytics-mock.js', 'views/talous-ui.js', 'views/talous-receipts.js', 'views/talous-giftcards.js', 'views/pos.js', 'pos-screen.js', 'pos-logic.js', 'pos-texts.js', 'phone-fi.js', 'qrsvg.js', 'qrcode-generator.js', 'settings-tabs.js', 'settings-texts.js', 'qr-print.js', 'qr-panel.js', 'options.js', 'options-logic.js', 'options-mock.js', 'talous-api.js', 'talous-mock.js', 'giftcards-api.js', 'giftcards-mock.js', 'giftcards-texts.js', 'talous-i18n.js', 'talous-texts.js', 'csv.js', 'day-texts.js', 'refund-cancel-texts.js', 'views/refund-cancel.js', 'annual-card-texts.js', 'annual-card-logic.js', 'views/annual-card-panel.js', 'annual-manage-texts.js', 'filter-texts.js', 'nav-texts.js', 'admin-navigation.js', 'quick-search.js', 'views/orders.js', 'views/nav-group.js', 'day-bundle-cache.js', 'site-texts-cache.js', 'views/day.js', 'day-memos-texts.js', 'day-memos-logic.js', 'views/day-memos.js', 'views/events.js', 'events-logic.js', 'events-texts.js', 'events-mock.js', 'logo-haalea.svg', 'manifest.json', 'sw.js', 'offline.html', 'pwa.js', 'version-check.js', 'version.json', 'icon-192.png', 'icon-512.png', 'icon-maskable-512.png', 'apple-touch-icon.png', 'rich-editor.js', 'vendor/quill/quill.js', 'vendor/quill/quill.snow.css', 'vendor/quill/LICENSE']) if (!statSync(join(A, f), { throwIfNoEntry: false })) fail(`hallinnasta puuttuu ${f}`);
 (function chkImports(d) { for (const n of readdirSync(d)) { const p = join(d, n); if (statSync(p).isDirectory()) { chkImports(p); continue; } if (!n.endsWith('.js')) continue; for (const m of readFileSync(p, 'utf8').matchAll(/(?:from|import)\s*\(?\s*(['"])(\.{1,2}\/[^'"?]+\.js)(?:\?[^'"]*)?\1/g)) { if (!statSync(resolve(d, m[2]), { throwIfNoEntry: false })) fail(`${p}: tuotu moduuli puuttuu dististä: ${m[2]}`); } } })(A);
 if (process.env.SITE_ENV === 'test') {

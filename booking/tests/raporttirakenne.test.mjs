@@ -131,3 +131,89 @@ test('myynti-PDF ei sisällä maksutapoja eikä Johkua', () => {
   assert.equal(/Johku/i.test(text), false);
   assert.match(text, /Myyntiraportti/);
 });
+
+function installReportDom() {
+  function textOf(node) {
+    if (!node) return '';
+    if (node.nodeType === 3) return node.data;
+    return (node.children || []).map(textOf).join('');
+  }
+  function Node(type) { this.nodeType = type; this.parent = null; this.children = []; }
+  function Text(data) { Node.call(this, 3); this.data = String(data); }
+  Text.prototype = Object.create(Node.prototype);
+  function El(tag) {
+    Node.call(this, 1);
+    this.tagName = String(tag).toUpperCase();
+    this.attrs = {};
+    this.className = '';
+    this.listeners = {};
+    this.value = '';
+  }
+  El.prototype = Object.create(Node.prototype);
+  Object.defineProperty(El.prototype, 'textContent', {
+    get() { return textOf(this); },
+    set(v) { const t = new Text(v); t.parent = this; this.children = [t]; },
+  });
+  El.prototype.setAttribute = function (k, v) { this.attrs[k] = String(v); if (k === 'class') this.className = String(v); };
+  El.prototype.getAttribute = function (k) { return Object.prototype.hasOwnProperty.call(this.attrs, k) ? this.attrs[k] : null; };
+  El.prototype.addEventListener = function (type, fn) { (this.listeners[type] ||= []).push(fn); };
+  El.prototype.append = function (...items) {
+    for (const item of items) {
+      const n = item && item.nodeType ? item : new Text(item);
+      if (n.parent) n.parent.children = n.parent.children.filter((c) => c !== n);
+      n.parent = this;
+      this.children.push(n);
+    }
+  };
+  El.prototype.replaceChildren = function (...items) {
+    this.children = [];
+    for (const item of items) this.append(item);
+  };
+  const create = (tag) => new El(tag);
+  globalThis.document = { createElement: create, createElementNS: (_ns, tag) => create(tag), createTextNode: (t) => new Text(t), body: create('body') };
+  function walk(node, visit, acc = []) {
+    if (node?.nodeType === 1) visit(node, acc);
+    for (const c of node?.children || []) if (c.nodeType === 1) walk(c, visit, acc);
+    return acc;
+  }
+  return { walk };
+}
+
+test('tapahtumaraportti: huomautus on taulukon sisar divissä ja nettosumma sulkeutuu', async () => {
+  const { walk } = installReportDom();
+  globalThis.location = { hash: '#/talous?r=transactions&from=2026-10-01&to=2026-10-01', search: '' };
+  globalThis.history = { replaceState(_a, _b, url) { if (typeof url === 'string') location.hash = url; } };
+  const { createReportsTab } = await import(pathToFileURL(join(root, 'admin/views/talous-reports.js')).href);
+  const tab = createReportsTab({
+    api: {
+      reportTransactions: async () => ({
+        rows: [
+          { voucher: 'K1', date: '2026-10-01', customer: 'Aino', product: 'Löyly', quantity: 1, net: 80, vat_rate: 25.5, vat: 20.4, gross: 100.4, method: 'cash', method_label: 'Käteinen', status: 'paid', kind: 'sale' },
+          { voucher: 'H1', date: '2026-10-01', customer: 'Aino', product: 'Löyly', quantity: 1, net: -40, vat_rate: 25.5, vat: -10.2, gross: -50.2, method: 'cash', method_label: 'Käteinen', status: 'paid', kind: 'refund' },
+          { voucher: 'A1', date: '2026-10-01', customer: 'B', product: 'Avoin', quantity: 1, net: 10, vat_rate: 25.5, vat: 2.55, gross: 12.55, method: 'card_terminal', status: 'open', kind: 'sale' },
+          { voucher: 'L1', date: '2026-10-01', customer: 'C', product: 'Kortti', quantity: 1, net: 20, vat_rate: 0, vat: 0, gross: 20, method: 'gift_card', status: 'paid', kind: 'redemption' },
+        ],
+      }),
+    },
+    canFull: true,
+    ctx: { role: 'admin', can: () => true },
+  });
+  await tab.load();
+  const byId = (id) => walk(tab.node, (el, acc) => { if (el.getAttribute('data-testid') === id) acc.push(el); });
+  const table = byId('r-tx-table')[0];
+  const note = walk(tab.node, (el, acc) => {
+    if (el.tagName === 'P' && el.textContent.includes('eivät ole myynnin tai hyvitysten')) acc.push(el);
+  })[0];
+  assert.ok(table);
+  assert.ok(note);
+  assert.equal(note.parent, table.parent);
+  assert.equal(note.parent.tagName, 'DIV');
+  assert.equal(table.parent.children.includes(note), true);
+  let up = note;
+  while (up) { assert.notEqual(up, table); up = up.parent; }
+  const net = byId('r-tx-net')[0];
+  assert.match(net.textContent, /50,20/);
+  const rows = walk(table, (el, acc) => { if (el.tagName === 'TR' && el.parent?.tagName === 'TBODY') acc.push(el); });
+  assert.equal(rows.filter((tr) => tr.getAttribute('data-excluded') === 'true').length, 2);
+  assert.equal(rows.filter((tr) => tr.getAttribute('data-excluded') == null).length, 2);
+});

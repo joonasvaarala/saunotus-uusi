@@ -334,6 +334,9 @@ test('service worker: version.json ohitetaan eikä vanhaa moduulia anneta uudell
   let act;
   listeners.activate[0]({ waitUntil(p) { act = p; } });
   await act;
+  assert.deepEqual(navigated, []);
+  await new Promise((r) => setTimeout(r, 0));
+  await new Promise((r) => setTimeout(r, 0));
   assert.deepEqual(navigated, [prod + '#/kassa']);
   assert.deepEqual(removed, ['hallinta-old']);
   assert.equal(sandbox.self.claimed, true);
@@ -355,6 +358,8 @@ test('service worker: version.json ohitetaan eikä vanhaa moduulia anneta uudell
   let ackAct;
   ackListeners.activate[0]({ waitUntil(p) { ackAct = p; } });
   await ackAct;
+  await new Promise((r) => setTimeout(r, 0));
+  await new Promise((r) => setTimeout(r, 0));
   assert.deepEqual(ackNav, []);
 
   const { sandbox: authBox, listeners: authListeners } = loadSw(prod);
@@ -370,7 +375,58 @@ test('service worker: version.json ohitetaan eikä vanhaa moduulia anneta uudell
   let authAct;
   authListeners.activate[0]({ waitUntil(p) { authAct = p; } });
   await authAct;
+  await new Promise((r) => setTimeout(r, 0));
+  await new Promise((r) => setTimeout(r, 0));
   assert.deepEqual(authNav, []);
+});
+
+function callArg(src, fnName) {
+  const marker = fnName + '(';
+  const i = src.indexOf(marker);
+  assert.notEqual(i, -1, fnName);
+  let depth = 0;
+  for (let j = i + fnName.length; j < src.length; j++) {
+    if (src[j] === '(') depth++;
+    else if (src[j] === ')') {
+      depth--;
+      if (depth === 0) return src.slice(i + marker.length, j);
+    }
+  }
+  assert.fail('sulkematon ' + fnName);
+}
+
+test('aktivointi ei odota notifyOpenClientsia waitUntilissa', async () => {
+  const prod = 'https://saunotus.fi/hallinta/';
+  const activateAt = swSrc.indexOf("self.addEventListener('activate'");
+  const activate = swSrc.slice(activateAt, swSrc.indexOf("self.addEventListener('fetch'", activateAt));
+  const waited = callArg(activate, 'event.waitUntil');
+  assert.equal(waited.includes('notifyOpenClients'), false);
+  assert.doesNotMatch(waited, /navigate\s*\(/);
+  assert.doesNotMatch(activate, /await\s+notifyOpenClients\s*\(/);
+  assert.match(activate, /event\.waitUntil\(ready\)/);
+  assert.match(activate, /ready\.then\(\(\) => notifyOpenClients\(\)\)/);
+
+  const { sandbox, listeners } = loadSw(prod);
+  const navigated = [];
+  sandbox.self.UPDATE_ACK_MS = 0;
+  sandbox.self.clients.matchAll = async () => [{
+    id: 'old',
+    url: prod + '#/talous',
+    postMessage() {},
+    navigate: async (url) => { navigated.push(url); },
+  }];
+  sandbox.caches.keys = async () => ['hallinta-stale', sandbox.self.hallintaSw.CACHE];
+  const deleted = [];
+  sandbox.caches.delete = async (key) => { deleted.push(key); return true; };
+  let act;
+  listeners.activate[0]({ waitUntil(p) { act = p; } });
+  await act;
+  assert.deepEqual(navigated, []);
+  assert.equal(sandbox.self.claimed, true);
+  assert.deepEqual(deleted, ['hallinta-stale']);
+  await new Promise((r) => setTimeout(r, 0));
+  await new Promise((r) => setTimeout(r, 0));
+  assert.deepEqual(navigated, [prod + '#/talous']);
 });
 
 test('build kopioi PWA-tiedostot ja versioi välimuistin; kauppa ja julkinen sivusto eivät rekisteröi workeria', () => {
