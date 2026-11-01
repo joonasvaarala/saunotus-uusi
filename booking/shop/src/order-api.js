@@ -34,7 +34,13 @@ export function normOrder(r) {
       short_text: String(g.short_text ?? ''), short_rich: g.short_rich === true, delivery_mode: g.delivery_mode === 'order_only' ? 'order_only' : 'scheduled' })),
     upsell_addons: (r.upsell?.addons || []).map((a) => ({ id: a.id, code: a.code, name: a.name, name_en: a.name_en ?? null, price: num(a.price), max: num(a.max, 20) })),
     upsell_treatments: (r.upsell?.treatments || []).map((x) => ({ product_id: x.product_id ?? null, name: x.name || '', name_en: x.name_en ?? null })),
-    pending_additions: (r.pending_additions || []).map((a) => ({ item_id: a.item_id, kind: a.kind || '', name: a.name || '', name_en: a.name_en ?? null, quantity: num(a.quantity, 1), line_total: num(a.line_total), reservation_id: a.reservation_id ?? null, hold_expires_at: a.hold_expires_at ?? null, seconds_left: num(a.seconds_left), expired: a.expired === true })) };
+    pending_additions: (r.pending_additions || []).map((a) => ({ item_id: a.item_id, kind: a.kind || '', name: a.name || '', name_en: a.name_en ?? null, quantity: num(a.quantity, 1), line_total: num(a.line_total), reservation_id: a.reservation_id ?? null, hold_expires_at: a.hold_expires_at ?? null, seconds_left: num(a.seconds_left), expired: a.expired === true })),
+    training: r.training && typeof r.training === 'object' ? {
+      course_price: r.training.course_price == null ? null : num(r.training.course_price),
+      addons_total: num(r.training.addons_total), total: r.training.total == null ? null : num(r.training.total),
+      deposit_paid: num(r.training.deposit_paid), remaining: r.training.remaining == null ? null : num(r.training.remaining),
+      addons: (r.training.addons || []).map((a) => ({ code: a.code, price: num(a.price) })),
+    } : null };
 }
 export function rpcBackend(rpc, token) {
   return {

@@ -135,9 +135,9 @@ test('shop.js: yritysyleisö ei hae public_events, piilottaa chipin ja suodattaa
   assert.match(list, /chipsFor\(cat\)\.filter\(\(x\) => S\.audience !== 'business' \|\| x !== 'tapahtuma'\)/);
   const day = shop.slice(shop.indexOf('async function viewDay'), shop.indexOf('async function viewProduct'));
   assert.match(day, /productsForAudience\(state\.catalog, 'business'\)/);
-  assert.match(day, /productsForAudience\(state\.catalog, S\.audience\)\.map/);
-  assert.match(shop, /const products = productsForAudience\(state\.catalog, S\.audience\)/);
-  assert.match(shop, /catalog: productsForAudience\(state\.catalog, S\.audience\)/);
+  assert.match(day, /listedProducts\(productsForAudience\(state\.catalog, S\.audience\)\)\.map/);
+  assert.match(shop, /const products = listedProducts\(productsForAudience\(state\.catalog, S\.audience\)\)/);
+  assert.match(shop, /catalog: listedProducts\(productsForAudience\(state\.catalog, S\.audience\)\)/);
   const product = shop.slice(shop.indexOf('async function viewProduct'), shop.indexOf('function spotBadge'));
   assert.match(product, /productsForAudience\(state\.catalog, S\.audience\)\.find/);
   assert.match(product, /S\.audience === 'business' \? null : findEvent\(await publicEvents\(\), slug\)/);

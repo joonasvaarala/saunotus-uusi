@@ -3,7 +3,7 @@
 // Aikavyöhyke aina Europe/Helsinki (sama kuin booking._tz()). Asiakasviestiin ei päädy maksuvälittäjän nimeä.
 import { csvText } from './csv.js';
 export const TZ = 'Europe/Helsinki';
-export const CHANNELS = ['shop', 'widget'];               // booking._channels_effective: shop = verkkokauppa, widget = koulutussivun widget
+export const CHANNELS = ['shop', 'widget', 'link'];       // shop = verkkokauppa, widget = upotus, link = vain suora linkki
 export const MAX_SERIES = 60;                             // yhdellä tallennuksella enintään näin monta kertaa
 export const MAX_BLOCKS = 50;                             // sama raja kuin admin_event_blocks_set
 export const MODES = ['exclusive', 'shared'];
@@ -88,12 +88,14 @@ export function buildSeries(input = {}) {
   if (ts.invalid.length) return { ok: false, error: 'bad_time', invalid: ts.invalid };
   if (!ds.values.length) return { ok: false, error: 'no_dates' };
   if (!ts.values.length) return { ok: false, error: 'no_times' };
-  const dur = intOr(input.duration_minutes), max = intOr(input.max_persons), min = intOr(input.min_persons), dl = intOr(input.deadline_minutes);
-  if (!(dur >= 15 && dur <= 20160)) return { ok: false, error: 'bad_duration' };
-  if (max !== null && !(max >= 1 && max <= 500)) return { ok: false, error: 'bad_max' };
+  const training = input.category === 'training';
+  const dur = intOr(input.duration_minutes), max = intOr(input.max_persons), min = intOr(input.min_persons), dl = intOr(input.deadline_minutes), rooms = intOr(input.single_room_max);
+  if (!(dur >= 15 && dur <= (training ? 43200 : 20160))) return { ok: false, error: 'bad_duration' };
+  if (max !== null && !(max >= 1 && max <= (training ? 6 : 500))) return { ok: false, error: 'bad_max' };
   if (min !== null && !(min >= 1 && min <= 500)) return { ok: false, error: 'bad_min' };
   if (min !== null && max !== null && min > max) return { ok: false, error: 'min_over_max' };
   if (dl !== null && !(dl >= 0 && dl <= 20160)) return { ok: false, error: 'bad_deadline' };
+  if (rooms !== null && !(rooms >= 0 && rooms <= 20)) return { ok: false, error: 'bad_rooms' };
   const n = ds.values.length * ts.values.length;
   if (n > MAX_SERIES) return { ok: false, error: 'too_many', count: n };
   const label = String(input.label ?? '').trim(), labelEn = String(input.label_en ?? '').trim();
@@ -103,6 +105,7 @@ export function buildSeries(input = {}) {
     if (max !== null) p.max_persons = max;
     if (min !== null) p.min_persons = min;
     if (dl !== null) p.deadline_minutes = dl;
+    if (rooms !== null) p.single_room_max = rooms;
     if (label) p.label = label;          // tyhjä → palvelin antaa oletusnimen (päivä + kellonaika)
     if (labelEn) p.label_en = labelEn;
     patches.push(p);

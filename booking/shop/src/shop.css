@@ -104,6 +104,8 @@ button.bk-cell:hover{filter:brightness(.97)}
 .bk-aside{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:18px 20px}
 .bk-aside h3{margin-top:0}
 .bk-sum{display:grid;grid-template-columns:minmax(80px,38%) minmax(0,1fr);gap:6px 14px;margin:0 0 12px}
+.bk-sum.bk-training{grid-template-columns:minmax(0,1fr) auto}
+.bk-sum.bk-training dt{overflow-wrap:break-word}
 .bk-sum dt{overflow-wrap:anywhere;font:600 12px var(--label);text-transform:uppercase;letter-spacing:.06em;color:var(--muted);padding-top:4px}
 .bk-sum dd{margin:0;font-weight:700;color:var(--ink)}
 .bk-totalrow{font-size:20px;border-top:1px solid var(--line);padding-top:12px;margin:0 0 8px}

@@ -1,0 +1,282 @@
+[
+  {
+    "key": "ui.shop.training.segments",
+    "lang": "fi",
+    "text": "Jaksot",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_226b: monijaksoisen koulutuksen osakerrat kassalla."
+  },
+  {
+    "key": "ui.shop.training.segments",
+    "lang": "en",
+    "text": "Segments",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_226b: segments of a multi-part course at checkout."
+  },
+  {
+    "key": "admin.events.segments",
+    "lang": "fi",
+    "text": "Osakerrat",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_226b: hallinnan kenttä, joka liittää ilmoittautumisen kertoihin."
+  },
+  {
+    "key": "admin.events.segments",
+    "lang": "en",
+    "text": "Segments",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_226b: admin field linking an enrollment to occurrences."
+  },
+  {
+    "key": "admin.events.segments_hint",
+    "lang": "fi",
+    "text": "Järjestys, pilkulla. Saman tuotteen muut kerrat piilotetaan kaupasta. Toisen tuotteen kerta pysyy myynnissä ja jakaa paikat.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_226b: osakerrat ja jaettu kapasiteetti."
+  },
+  {
+    "key": "admin.events.segments_hint",
+    "lang": "en",
+    "text": "Order, comma-separated. Other occurrences of this product are hidden from the shop. Another product’s occurrence stays on sale and shares seats.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 220,
+    "placeholders": [],
+    "reason": "booking_226b: segments and shared capacity."
+  },
+  {
+    "key": "admin.events.segment_seat",
+    "lang": "fi",
+    "text": "Jaettu paikka",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_226b: osallistujalistassa toisen kurssin varaama paikka."
+  },
+  {
+    "key": "admin.events.segment_seat",
+    "lang": "en",
+    "text": "Shared place",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "booking_226b: a seat taken by another course enrollment."
+  },
+  {
+    "key": "admin.events.segments_load_error",
+    "lang": "fi",
+    "text": "Osakertojen lataus epäonnistui. Sulje lomake ja avaa se uudelleen.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 160,
+    "placeholders": [],
+    "reason": "booking_226b: osakertakenttää ei tallenneta, jos lataus epäonnistui."
+  },
+  {
+    "key": "admin.events.segments_load_error",
+    "lang": "en",
+    "text": "Could not load segments. Close the form and open it again.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 160,
+    "placeholders": [],
+    "reason": "booking_226b: segments are not saved when loading failed."
+  },
+  {
+    "key": "email.training.intro",
+    "lang": "fi",
+    "text": "Kiitos ilmoittautumisesta. Varausmaksu on vastaanotettu. Kurssia ei ole maksettu kokonaan.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 300,
+    "placeholders": [],
+    "reason": "booking_226: vahvistusviesti ei väitä kurssia maksetuksi."
+  },
+  {
+    "key": "email.training.intro",
+    "lang": "en",
+    "text": "Thank you for registering. The reservation fee has been received. The course has not been paid in full.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 300,
+    "placeholders": [],
+    "reason": "booking_226: confirmation does not claim the course is fully paid."
+  },
+  {
+    "key": "email.training.course",
+    "lang": "fi",
+    "text": "Kurssin hinta",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_226: vahvistusviestin kurssihinta."
+  },
+  {
+    "key": "email.training.course",
+    "lang": "en",
+    "text": "Course price",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_226: course price in the confirmation email."
+  },
+  {
+    "key": "email.training.single",
+    "lang": "fi",
+    "text": "Yhden hengen huone",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_226: yhden hengen huone vahvistusviestissä."
+  },
+  {
+    "key": "email.training.single",
+    "lang": "en",
+    "text": "Single room",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_226: single room in the confirmation email."
+  },
+  {
+    "key": "email.training.internship",
+    "lang": "fi",
+    "text": "Harjoittelujakso",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_226: harjoittelujakso vahvistusviestissä."
+  },
+  {
+    "key": "email.training.internship",
+    "lang": "en",
+    "text": "Internship period",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_226: internship in the confirmation email."
+  },
+  {
+    "key": "email.training.total",
+    "lang": "fi",
+    "text": "Loppusumma",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_226: kurssin loppusumma vahvistusviestissä."
+  },
+  {
+    "key": "email.training.total",
+    "lang": "en",
+    "text": "Course total",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_226: course total in the confirmation email."
+  },
+  {
+    "key": "email.training.deposit",
+    "lang": "fi",
+    "text": "Varausmaksu",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_226: verkossa maksettu varausmaksu."
+  },
+  {
+    "key": "email.training.deposit",
+    "lang": "en",
+    "text": "Reservation fee",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_226: reservation fee paid online."
+  },
+  {
+    "key": "email.training.remaining",
+    "lang": "fi",
+    "text": "Laskutetaan myöhemmin",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_226: myöhemmin laskutettava osuus."
+  },
+  {
+    "key": "email.training.remaining",
+    "lang": "en",
+    "text": "To be invoiced later",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_226: balance invoiced later."
+  },
+  {
+    "key": "email.training.balance",
+    "lang": "fi",
+    "text": "Loppusumma laskutetaan myöhemmin. Verkossa maksettiin vain varausmaksu.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_226: vahvistus ei väitä koko kurssia maksetuksi."
+  },
+  {
+    "key": "email.training.balance",
+    "lang": "en",
+    "text": "The balance is invoiced later. Only the reservation fee was paid online.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_226: the email does not claim the course is fully paid."
+  },
+  {
+    "key": "email.training.segments",
+    "lang": "fi",
+    "text": "Jaksot",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_226b: monijaksoisen kurssin jaksot vahvistusviestissä."
+  },
+  {
+    "key": "email.training.segments",
+    "lang": "en",
+    "text": "Segments",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_226b: segments of a multi-part course in the confirmation email."
+  }
+]

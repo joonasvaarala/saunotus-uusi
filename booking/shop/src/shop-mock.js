@@ -61,6 +61,27 @@ function eventDemoSlots(now) {
   // +15 yksi aika, +22 kaksi aikaa (toinen täynnä), +29 kokonaan täynnä
   return [row(9311, 15, 18, 0, 'available', 8), row(9312, 22, 16, 0, 'available', 6), row(9313, 22, 18, 30, 'full', 0), row(9314, 29, 18, 0, 'full', 0)];
 }
+function trainingProduct() {
+  return {
+    id: 22601, slug: 'sauna-healing', name: 'Sauna healing', name_en: 'Sauna healing', category: 'training', sale_kind: 'other',
+    price: 200, price_type: 'deposit', deposit: true, listed: false, deposit_amount: 200, course_price: 1500,
+    duration_text: '5 päivää', duration_text_en: '5 days', duration_minutes: 7200,
+    short_description: 'Viiden päivän saunaparannuskurssi. Varausmaksu maksetaan verkossa.',
+    short_description_en: 'A five-day sauna healing course. The reservation fee is paid online.',
+    description: 'Kurssin loppusumma laskutetaan myöhemmin. Valitse aloitusjakso.',
+    description_en: 'The course balance is invoiced later. Choose a start block.',
+    booking_kind: 'rules', min_persons: 1, max_persons: 6,
+    training_addons: [{ code: 'single_room', price: 200 }, { code: 'internship', price: 500 }],
+  };
+}
+function trainingSlots(now) {
+  const at = (d, hh) => { const x = new Date(now()); x.setUTCDate(x.getUTCDate() + d); x.setUTCHours(hh - 2, 0, 0, 0); return x; };
+  const row = (rule, d, days, status, remaining) => {
+    const start = at(d, 10), end = new Date(start.getTime() + days * 864e5);
+    return { rule_id: rule, product_id: 22601, label: null, label_en: null, mode: 'shared', session_date: start.toLocaleDateString('sv-SE', { timeZone: 'Europe/Helsinki' }), starts_at: start.toISOString(), ends_at: end.toISOString(), status, remaining, min_persons: 1, max_persons: 6, price_mode: 'per_person', unit_price: 200, base_price: null };
+  };
+  return [row(22611, 21, 5, 'available', 3), row(22612, 70, 14, 'available', 6)];
+}
 const MUTATING = new Set(['public_create_treatment_booking', 'public_change_treatment_booking']);
 // scenario=pay|pay-prod|pay-off: vahvistussivun maksuvalinta (MobilePay + lahjakortti) – maksutila, lahjakortit ja mobilepay-funktiot tulevat order-mock.js:stä (sama mock kuin tilaussivulla); mpResult = paluutulos (paid|failed|pending|…).
 // Demo ilman omaa varausta: tuntematon token → valmis maksamaton varaus (vahvistussivu: /varaa/vahvistus/?mock=1&scenario=pay#<mikä tahansa uuid>).
@@ -79,6 +100,7 @@ export function createShopMock({ storage = globalThis.sessionStorage, now = () =
   const ritual = /[?&]ritual=1(&|$)/.test(globalThis.location?.search || '') ? createRitualMock({ storage, now, fail }) : null;
   const noTimes = fail === 'notimes';   // ?mock=1&fail=notimes: public_treatment_availability palauttaa aina tyhjän ("Ei vapaita aikoja" -tila)
   let failOnce = ['option_required', 'invalid_option', 'online_payment_unavailable', 'too_many_pending'].includes(fail) ? fail : null;
+  let trainingBooking = null;
   try { restoreBookings(JSON.parse(storage?.getItem(KEY) || 'null')); } catch { /* tyhjä alku */ }
   const save = () => { try { storage?.setItem(KEY, JSON.stringify(snapshotBookings())); } catch { /* ei säilytystä */ } };
   const missing = (name) => new ApiError(`Could not find the function booking.${name} in the schema cache`, { status: 404, code: 'PGRST202' });
@@ -155,6 +177,29 @@ export function createShopMock({ storage = globalThis.sessionStorage, now = () =
       case 'public_settings': return { public_booking_enabled: true, public_treatment_horizon_days: 14 };
       case 'public_product_images': return mockProductImages(globalThis.location?.search || '');
       // booking_158: tapahtumat myynti suljettuna (events.sale_enabled = false) → kaikki kerrat 'closed'; ?mock=1 → #/tuote/perinnesaunotusilta
+      case 'public_product_by_slug': {
+        if (args.p_slug !== 'sauna-healing') return null;
+        return trainingProduct();
+      }
+      case 'public_training_checkout': {
+        const full = String(args.p_date || '').endsWith('01');
+        return { ok: true, rule_id: +args.p_rule_id, course_price: 1500, deposit_amount: 200, single_rooms_remaining: full ? 0 : 2,
+          addons: [{ code: 'single_room', price: 200, remaining: full ? 0 : 2, available: !full }, { code: 'internship', price: 500, available: true }] };
+      }
+      case 'public_create_training_signup': {
+        if (args.p_privacy_consent !== true) return { ok: false, code: 'privacy_required', message: 'Tietosuojasuostumus puuttuu' };
+        const addons = args.p_addons || [];
+        const addonSum = (addons.includes('single_room') ? 200 : 0) + (addons.includes('internship') ? 500 : 0);
+        const total = 1500 + addonSum;
+        const token = '00000000-0000-4000-8000-000000000226';
+        const start = new Date(now() + 21 * 864e5); start.setUTCHours(8, 0, 0, 0);
+        const end = new Date(start.getTime() + 5 * 864e5);
+        const training = { course_price: 1500, addons_total: addonSum, total, deposit_paid: 200, remaining: total - 200, addons: addons.map((code) => ({ code, price: code === 'single_room' ? 200 : 500 })) };
+        trainingBooking = { ok: true, order_no: 22601, token, status: 'pending', payment_status: 'unpaid', total: 200, currency: 'EUR', can_change: false, change_deadline: null, change_hours_before: 48,
+          items: [{ product_name: 'Sauna healing', product_id: 22601, quantity: 1, line_total: 200, vat_rate: 25.5, persons: 1, starts_at: start.toISOString(), ends_at: end.toISOString(), rule_id: +args.p_rule_id, status: 'pending', mode: 'shared' }],
+          addons: [], training };
+        return { ok: true, order_no: 22601, token, status: 'pending', total: 200, payment_mode: 'hold_until_paid', checkout_state: 'awaiting_payment', awaiting_payment: true, hold_kind: 'checkout', training };
+      }
       case 'public_events': {
         const at = (d, hh, mm = 0) => { const x = new Date(now()); x.setUTCDate(x.getUTCDate() + d); x.setUTCHours(hh - 2, mm, 0, 0); return x.toISOString(); };
         return [
@@ -170,6 +215,7 @@ export function createShopMock({ storage = globalThis.sessionStorage, now = () =
       case 'public_payment_options': return { ok: true, online_enabled: false, methods: [] };
       case 'public_checkout_payment_options': return { ok: true, mobilepay_enabled: false, gift_card_redeem_enabled: false, methods: [] };
       case 'public_get_booking': {
+        if (trainingBooking && args.p_token === trainingBooking.token) return trainingBooking;
         if (scenario === 'invoice_locked') {
           const start = new Date(now() + 5 * 864e5).toISOString();
           return { ok: true, order_no: 185, status: 'pending', payment_status: 'invoiced', invoice_locked: true, total: 40, currency: 'EUR',
@@ -186,6 +232,9 @@ export function createShopMock({ storage = globalThis.sessionStorage, now = () =
         }
         if (name === 'public_availability' && privOn && ( +args.p_product_id === 25 || +args.p_product_id === 26)) {
           return privDemoSlots(now, +args.p_product_id).filter((r) => r.session_date >= args.p_from && r.session_date <= args.p_to);
+        }
+        if (name === 'public_availability' && +args.p_product_id === 22601) {
+          return trainingSlots(now).filter((r) => r.session_date >= args.p_from && r.session_date <= args.p_to);
         }
         if (name === 'public_availability' && eventsOn && +args.p_product_id === 31) {
           return eventDemoSlots(now).filter((r) => r.session_date >= args.p_from && r.session_date <= args.p_to);

@@ -252,8 +252,14 @@ async function main() {
       h('ul', { class: 'ord-lines', 'data-testid': 'order-lines' }, o.items.map((i) => h('li', {},
         h('span', { class: 'ord-l-main' }, h('strong', { text: i.quantity > 1 ? `${nm(i)} × ${i.quantity}` : nm(i) })),
         h('span', { class: 'ord-l-sum', text: money(i.line_total) })))),
-      h('dl', { class: 'ord-sums' }, h('div', {}, h('dt', { text: `${t.total} (${t.vatIncl})` }), h('dd', { 'data-testid': 'order-total', text: money(o.total) })), h('div', {}, h('dt', { text: t.paid }), h('dd', { text: money(o.paid) })),
-        h('div', { class: unpaid > 0 ? 'due' : '' }, h('dt', { text: t.unpaid }), h('dd', { 'data-testid': 'order-unpaid', text: money(unpaid) }))));
+      h('dl', { class: 'ord-sums' },
+        o.training ? h('div', {}, h('dt', { text: t.trainingCourse }), h('dd', { 'data-testid': 'order-course', text: o.training.course_price != null ? money(o.training.course_price) : '–' })) : null,
+        ...(o.training?.addons || []).map((a) => h('div', {}, h('dt', { text: a.code === 'single_room' ? t.trainingSingle : a.code === 'internship' ? t.trainingInternship : a.code }), h('dd', { text: `+${money(a.price)}` }))),
+        o.training ? h('div', {}, h('dt', { text: t.trainingTotal }), h('dd', { 'data-testid': 'order-course-total', text: o.training.total != null ? money(o.training.total) : '–' })) : null,
+        o.training ? h('div', {}, h('dt', { text: t.trainingRemaining }), h('dd', { 'data-testid': 'order-remaining', text: o.training.remaining != null ? money(o.training.remaining) : '–' })) : null,
+        h('div', {}, h('dt', { text: `${o.training ? t.trainingDeposit : t.total} (${t.vatIncl})` }), h('dd', { 'data-testid': 'order-total', text: money(o.total) })), h('div', {}, h('dt', { text: t.paid }), h('dd', { text: money(o.paid) })),
+        h('div', { class: unpaid > 0 ? 'due' : '' }, h('dt', { text: t.unpaid }), h('dd', { 'data-testid': 'order-unpaid', text: money(unpaid) }))),
+      o.training ? h('p', { class: 'bk-note', 'data-testid': 'order-training-balance', text: t.trainingBalance }) : null);
     // maksulinkki: avoin (pending) maksu + verkkomaksu käytössä → linkki; muuten maksu paikan päällä
     const link = o.online_payment_enabled && !onState.show ? o.payments.find((p) => p.status === 'pending' && p.link_path) : null;
     const payHidden = !!co && (co.preliminary || co.expired || co.cancelled || co.processing);   // alustavaa/vanhentunutta ei makseta; käsittelyn aikana ei toista maksua

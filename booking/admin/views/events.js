@@ -6,7 +6,7 @@
 import { rpc } from '../sb.js';
 import { h, dialog, field, toast, badge, errMsg, fmtDate, fmtTime, fmtDT, todayHel, STATUS, PAY } from '../ui.js';
 import { downloadCsv } from '../csv.js';
-import { loadEventsTexts, evText as T } from '../events-texts.js';
+import { loadEventsTexts, evText as T, courseText as tx } from '../events-texts.js';
 import { getLang } from '../talous-i18n.js';
 import { buildSeries, defaultLabel, validateBlock, blockToRow, blocksPayload, timeline, selectableResources, channelsOf, normChannels, CHANNELS,
   copyArgs, copyName, conflictsOf, localParts, MAX_BLOCKS, occurrenceFlags, bookingCount, isPastMove, messageDraft, customerMessageText, participantsToCsv, weekdayIso } from '../events-logic.js';
@@ -185,7 +185,7 @@ export async function render({ ctx, refs, reload, query }) {
 
   function settingsPanel(p) {
     const cur = channelsOf(p);
-    const boxes = CHANNELS.map((c) => h('label', { class: 'check' }, h('input', { type: 'checkbox', value: c, checked: cur.includes(c) || null, disabled: !canEdit, 'data-testid': `event-channel-${c}` }), ' ', T(`channel_${c}`)));
+    const boxes = CHANNELS.map((c) => h('label', { class: 'check' }, h('input', { type: 'checkbox', value: c, checked: cur.includes(c) || null, disabled: !canEdit, 'data-testid': `event-channel-${c}` }), ' ', c === 'link' ? tx('channel_link') : T(`channel_${c}`)));
     const chanSave = canEdit ? h('button', { type: 'button', class: 'btn sm', 'data-testid': 'event-channels-save', text: T('save'), onclick: (e) => act(e.target, async () => {
       const next = normChannels(boxes.map((b) => b.querySelector('input')).filter((i) => i.checked).map((i) => i.value));
       await rpc('admin_event_set_channels', { p_product_id: p.product_id, p_channels: next }); toast(T('channels_saved'));
@@ -195,7 +195,20 @@ export async function render({ ctx, refs, reload, query }) {
       h('div', { class: 'row wrap' },
         h('a', { class: 'btn', href: `#/tuotteet?muokkaa=${p.product_id}`, 'data-testid': 'event-edit-product', text: T('edit_product') }),
         canEdit ? h('button', { type: 'button', class: 'btn', 'data-testid': 'event-copy', text: T('copy_event'), onclick: () => copyEvent(p) }) : null),
-      h('fieldset', { class: 'card ev-chan', 'data-testid': 'event-channels' }, h('legend', { text: T('channels') }), h('div', { class: 'row wrap' }, boxes, chanSave)));
+      h('fieldset', { class: 'card ev-chan', 'data-testid': 'event-channels' }, h('legend', { text: T('channels') }), h('div', { class: 'row wrap' }, boxes, chanSave)),
+      p.category === 'training' ? directLinks(p) : null);
+  }
+
+  function directLinks(p) {
+    const slug = p.slug || '';
+    const rows = [['fi', `/varaa/#/tuote/${slug}`], ['en', `/en/book/#/tuote/${slug}`]];
+    return h('fieldset', { class: 'card', 'data-testid': 'event-direct-links' }, h('legend', { text: tx('direct_link') }),
+      ...rows.map(([lang, path]) => h('div', { class: 'row wrap' },
+        h('label', { text: tx(lang === 'fi' ? 'direct_link_fi' : 'direct_link_en') }),
+        h('input', { readonly: true, value: path, 'data-testid': `event-link-${lang}`, 'aria-label': tx('direct_link') }),
+        h('button', { type: 'button', class: 'btn sm', text: tx('copy_link'), onclick: async (e) => {
+          try { await navigator.clipboard.writeText(path); toast(tx('link_copied')); } catch { e.target.focus(); }
+        } }))));
   }
 
   function occItem(p, r) {
@@ -209,7 +222,7 @@ export async function render({ ctx, refs, reload, query }) {
     const queue = eventQueueParts(h, { lang: getLang(), ruleId: r.id, rpc });
     const li = h('li', { class: `card ev-occ-item${flags.active && !flags.cancelled ? '' : ' off'}`, 'data-testid': 'event-occurrence' },
       h('div', { class: 'row between wrap' },
-        h('div', {}, h('strong', { class: 'ev-occ-label', text: label }), h('div', { class: 'muted', text: span(r.starts_at, r.ends_at) })),
+        h('div', {}, h('strong', { class: 'ev-occ-label', text: label }), h('div', { class: 'muted', text: span(r.starts_at, r.ends_at) }), p.category === 'training' ? h('div', { class: 'muted', 'data-testid': 'event-occ-id', text: `Id ${r.id}` }) : null),
         h('div', { class: 'meta' }, capNode(flags), ...statusNodes(flags), flags.waitlist ? h('span', { class: 'muted', text: T('waitlist', { n: flags.waitlist }) }) : null)),
       h('div', { class: 'row wrap ev-occ-actions' },
         btn('event-occ-blocks', T('blocks'), () => showBlocks(), 'btn sm ghost'),
@@ -228,25 +241,49 @@ export async function render({ ctx, refs, reload, query }) {
   function inlineForm(p, r, close) {
     const num = (name, v, o = {}) => h('input', { name, type: 'number', value: v ?? '', inputmode: 'numeric', ...o });
     const booked = bookingCount(r);
+    let segmentsReady = null;
+    const segInput = h('input', { name: 'segments', value: '', disabled: true, 'data-testid': 'event-occ-segments', autocomplete: 'off' });
+    const segErr = h('p', { class: 'err', role: 'alert', hidden: true, 'data-testid': 'event-occ-segments-error' });
+    const saveBtn = h('button', { type: 'submit', class: 'btn primary', 'data-testid': 'event-occ-save', disabled: p.category === 'training' || null, text: T('occ_inline_save') });
     const f = h('form', { class: 'stack ev-inline', 'data-testid': 'event-occ-form', novalidate: true },
       booked ? h('p', { class: 'ev-warn', text: T('warn_bookings', { n: booked }) }) : null,
-      h('div', { class: 'row wrap' }, field(T('add_dates'), h('input', { name: 'date', type: 'date', value: r.date, required: true, min: r.date >= localParts(new Date().toISOString()).date ? localParts(new Date().toISOString()).date : null })), field(T('add_times'), h('input', { name: 'start_time', type: 'time', value: String(r.start_time || '').slice(0, 5), required: true })), field(T('duration'), num('duration_minutes', r.duration_minutes, { min: 15, max: 20160 }))),
-      h('div', { class: 'row wrap' }, field(T('max_persons'), num('max_persons', r.max_persons, { min: 1, max: 500, 'data-testid': 'event-occ-max' })), field(T('min_persons'), num('min_persons', r.min_persons, { min: 1, max: 500 })), field(T('deadline'), num('deadline_minutes', r.deadline_minutes, { min: 0, max: 20160 }))),
+      h('div', { class: 'row wrap' }, field(T('add_dates'), h('input', { name: 'date', type: 'date', value: r.date, required: true, min: r.date >= localParts(new Date().toISOString()).date ? localParts(new Date().toISOString()).date : null })), field(T('add_times'), h('input', { name: 'start_time', type: 'time', value: String(r.start_time || '').slice(0, 5), required: true })), field(T('duration'), num('duration_minutes', r.duration_minutes, { min: 15, max: p.category === 'training' ? 43200 : 20160 }))),
+      h('div', { class: 'row wrap' }, field(T('max_persons'), num('max_persons', r.max_persons, { min: 1, max: p.category === 'training' ? 6 : 500, 'data-testid': 'event-occ-max' })), field(T('min_persons'), num('min_persons', r.min_persons, { min: 1, max: 500 })), field(T('deadline'), num('deadline_minutes', r.deadline_minutes, { min: 0, max: 20160 })), p.category === 'training' ? field(tx('single_room_max'), num('single_room_max', r.single_room_max ?? 2, { min: 0, max: 20, 'data-testid': 'event-occ-rooms' }), tx('single_room_hint')) : null),
       h('div', { class: 'row wrap' }, field(T('label_fi'), h('input', { name: 'label', value: r.label || '', maxlength: 200 })), field(T('label_en'), h('input', { name: 'label_en', value: r.label_en || '', maxlength: 200 }))),
+      p.category === 'training' ? field(tx('segments'), segInput, tx('segments_hint')) : null,
+      p.category === 'training' ? segErr : null,
       h('label', { class: 'check' }, h('input', { type: 'checkbox', name: 'active', checked: r.active !== false && !r.cancelled_at || null, disabled: booked ? true : null }), ' ', T('active')),
-      h('div', { class: 'row wrap' }, h('button', { type: 'submit', class: 'btn primary', 'data-testid': 'event-occ-save', text: T('occ_inline_save') }), h('button', { type: 'button', class: 'btn ghost', text: T('time_changed_skip'), onclick: () => close() })));
-    f.addEventListener('submit', (ev) => { ev.preventDefault(); act(f.querySelector('[data-testid="event-occ-save"]'), async () => {
+      h('div', { class: 'row wrap' }, saveBtn, h('button', { type: 'button', class: 'btn ghost', text: T('time_changed_skip'), onclick: () => close() })));
+    const segmentKey = (s) => String(s || '').split(/[^0-9]+/).filter(Boolean).join(',');
+    f.addEventListener('submit', (ev) => { ev.preventDefault(); act(saveBtn, async () => {
+      if (p.category === 'training' && segmentsReady == null) { toast(tx('segments_load_error'), 'err'); return; }
       const fd = new FormData(f), n = (k) => (String(fd.get(k) ?? '').trim() === '' ? null : Number(fd.get(k)));
       const patch = { date: fd.get('date'), start_time: String(fd.get('start_time') || '').slice(0, 5), duration_minutes: n('duration_minutes'),
         max_persons: n('max_persons'), min_persons: n('min_persons'), deadline_minutes: n('deadline_minutes'), label: String(fd.get('label') || '').trim() || null, label_en: String(fd.get('label_en') || '').trim() || null, active: f.active.checked && !r.cancelled_at };
+      if (p.category === 'training') patch.single_room_max = n('single_room_max');
       if (isPastMove({ date: r.date, start_time: r.start_time }, { date: patch.date, start_time: patch.start_time })) { toast(T('err_past_move'), 'err'); return; }
       const before = `${r.date}|${String(r.start_time).slice(0, 5)}|${r.duration_minutes}`;
       const out = await rpc('admin_event_rule_upsert', { p_id: r.id, p_product_id: null, p_patch: patch });
+      if (p.category === 'training' && segmentKey(fd.get('segments')) !== segmentKey(segmentsReady)) {
+        await rpc('admin_training_segments_set', { p_option_rule_id: r.id, p_segment_rule_ids: segmentKey(fd.get('segments')).split(',').filter(Boolean).map(Number) });
+      }
       const after = `${out?.date}|${String(out?.start_time || '').slice(0, 5)}|${out?.duration_minutes}`;
       toast(T('saved'));
       if ((Number(out?.moved_bookings) > 0 || (before !== after && booked > 0))) offerTimeMessage(p, r, out);
       else refresh();
     }); });
+    if (p.category === 'training') {
+      rpc('admin_training_segments_get', { p_option_rule_id: r.id }).then((rows) => {
+        if (!Array.isArray(rows)) throw new Error('segments');
+        segmentsReady = rows.map((x) => x.rule_id).join(', ');
+        segInput.value = segmentsReady;
+        segInput.disabled = false;
+        saveBtn.disabled = false;
+      }).catch(() => {
+        segErr.hidden = false;
+        segErr.textContent = tx('segments_load_error');
+      });
+    }
     return f;
   }
   function offerTimeMessage(p, r, out) {
@@ -306,8 +343,11 @@ export async function render({ ctx, refs, reload, query }) {
     const previewHost = h('div', { 'data-testid': 'event-add-preview-list' });
     const datesMirror = h('input', { type: 'hidden', 'data-testid': 'event-add-dates' });
     const num = (name, v, o = {}) => h('input', { name, type: 'number', value: v ?? '', inputmode: 'numeric', ...o });
-    const dur = num('duration_minutes', p.duration_minutes || 120, { min: 15, max: 20160, 'data-testid': 'event-add-duration' });
-    const max = num('max_persons', p.max_persons ?? '', { min: 1, max: 500, 'data-testid': 'event-add-max' });
+    const durMax = p.category === 'training' ? 43200 : 20160;
+    const dur = num('duration_minutes', p.duration_minutes || 120, { min: 15, max: durMax, 'data-testid': 'event-add-duration' });
+    const maxCap = p.category === 'training' ? 6 : 500;
+    const max = num('max_persons', p.max_persons ?? (p.category === 'training' ? 6 : ''), { min: 1, max: maxCap, 'data-testid': 'event-add-max' });
+    const rooms = p.category === 'training' ? num('single_room_max', 2, { min: 0, max: 20, 'data-testid': 'event-add-rooms' }) : null;
     const min = num('min_persons', '', { min: 1, max: 500 });
     const dl = num('deadline_minutes', '', { min: 0, max: 20160 });
     const lab = h('input', { name: 'label', maxlength: 200 }), labEn = h('input', { name: 'label_en', maxlength: 200 });
@@ -319,10 +359,10 @@ export async function render({ ctx, refs, reload, query }) {
     function seriesNow() {
       let dates = [...stateA.selected];
       if (stateA.repeat) {
-        const rep = buildSeries({ dates, times: stateA.times, repeat: { from: stateA.from, until: stateA.until, weekdays: [...stateA.weekdays] }, duration_minutes: dur.value, max_persons: max.value, min_persons: min.value, deadline_minutes: dl.value, label: lab.value, label_en: labEn.value });
+        const rep = buildSeries({ category: p.category, dates, times: stateA.times, repeat: { from: stateA.from, until: stateA.until, weekdays: [...stateA.weekdays] }, duration_minutes: dur.value, max_persons: max.value, min_persons: min.value, deadline_minutes: dl.value, single_room_max: rooms?.value, label: lab.value, label_en: labEn.value });
         return rep;
       }
-      return buildSeries({ dates, times: stateA.times, duration_minutes: dur.value, max_persons: max.value, min_persons: min.value, deadline_minutes: dl.value, label: lab.value, label_en: labEn.value });
+      return buildSeries({ category: p.category, dates, times: stateA.times, duration_minutes: dur.value, max_persons: max.value, min_persons: min.value, deadline_minutes: dl.value, single_room_max: rooms?.value, label: lab.value, label_en: labEn.value });
     }
     function paintTimes() {
       timesHost.replaceChildren(...stateA.times.map((tm, i) => h('div', { class: 'row wrap' },
@@ -339,7 +379,7 @@ export async function render({ ctx, refs, reload, query }) {
       const r = seriesNow();
       datesMirror.value = r.ok ? r.patches.map((x) => x.date).filter((d, i, a) => a.indexOf(d) === i).join(', ') : [...stateA.selected].sort().join(', ');
       if (!r.ok) {
-        const msg = (datesMirror.value || stateA.repeat || stateA.times.some(Boolean)) ? T(`err_${r.error}`, { list: (r.invalid || []).join(', '), n: r.count }) : T('preview_empty');
+        const msg = (datesMirror.value || stateA.repeat || stateA.times.some(Boolean)) ? (r.error === 'bad_rooms' ? tx('err_bad_rooms') : T(`err_${r.error}`, { list: (r.invalid || []).join(', '), n: r.count })) : T('preview_empty');
         previewHost.replaceChildren(h('p', { class: 'muted', role: 'status', 'data-testid': 'event-add-preview', text: msg }));
         return;
       }
@@ -355,12 +395,12 @@ export async function render({ ctx, refs, reload, query }) {
       h('label', { class: 'check' }, repeatBox, ' ', T('repeat')), repeatRow,
       h('div', { class: 'row wrap' }, h('strong', { text: T('add_times') }), h('button', { type: 'button', class: 'btn sm', text: T('add_time'), onclick: () => { stateA.times.push('17:00'); paintTimes(); } })),
       timesHost,
-      h('div', { class: 'row wrap' }, field(T('duration'), dur), field(T('max_persons'), max, T('max_hint')), field(T('min_persons'), min), field(T('deadline'), dl)),
+      h('div', { class: 'row wrap' }, field(T('duration'), dur), field(T('max_persons'), max, T('max_hint')), field(T('min_persons'), min), field(T('deadline'), dl), rooms ? field(tx('single_room_max'), rooms, tx('single_room_hint')) : null),
       h('div', { class: 'row wrap' }, field(T('label_fi'), lab, T('label_hint', { example: defaultLabel(today, '17:00', 'fi') })), field(T('label_en'), labEn, T('label_hint', { example: defaultLabel(today, '17:00', 'en') }))),
       previewHost, submit);
     for (const el of [dur, max, min, dl, lab, labEn]) el.addEventListener('input', paintPreview);
     f.addEventListener('submit', (ev) => { ev.preventDefault(); const r = seriesNow();
-      if (!r.ok) { toast(T(`err_${r.error}`, { list: (r.invalid || []).join(', '), n: r.count }), 'err'); paintPreview(); return; }
+      if (!r.ok) { toast(r.error === 'bad_rooms' ? tx('err_bad_rooms') : T(`err_${r.error}`, { list: (r.invalid || []).join(', '), n: r.count }), 'err'); paintPreview(); return; }
       const okBtn = h('button', { type: 'submit', class: 'btn primary', 'data-testid': 'event-add-confirm', text: T('confirm_create') });
       const list = h('ul', { class: 'ev-preview' }, r.patches.map((x) => h('li', { text: `${defaultLabel(x.date, x.start_time, getLang())}` })));
       const box = h('form', { class: 'stack' }, h('p', { text: T('add_preview', { n: r.patches.length }) }), list, okBtn);
@@ -393,6 +433,12 @@ export async function render({ ctx, refs, reload, query }) {
       if (row.customer_note) bits.push(`${T('extra_customer')}: ${row.customer_note}`);
       if (row.adults) bits.push(`${row.adults} ${T('extra_adults')}`);
       if (row.children) bits.push(`${row.children} ${T('extra_children')}`);
+      if (row.country) bits.push(`${tx('col_country')}: ${row.country}`);
+      if (row.language) bits.push(`${tx('col_language')}: ${row.language}`);
+      if (row.is_foreign) bits.push(tx('foreign_yes'));
+      if (row.participant_total != null) bits.push(`${tx('participant_total')}: ${row.participant_total}`);
+      if (row.deposit_paid != null) bits.push(`${tx('participant_deposit')}: ${row.deposit_paid}`);
+      if (row.remaining != null) bits.push(`${tx('participant_remaining')}: ${row.remaining}`);
       return bits.join('\n');
     }
     function csvRows(list) {
@@ -459,6 +505,10 @@ export async function render({ ctx, refs, reload, query }) {
     if (row.customer_note) bits.push(h('div', {}, h('span', { class: 'muted', text: `${T('extra_customer')}: ` }), h('span', { text: row.customer_note })));
     if (row.adults) bits.push(h('div', { text: `${row.adults} ${T('extra_adults')}` }));
     if (row.children) bits.push(h('div', { text: `${row.children} ${T('extra_children')}` }));
+    if (row.capacity_only) bits.push(h('div', { 'data-testid': 'event-participant-segment', text: tx('segment_seat') }));
+    if (row.country) bits.push(h('div', { 'data-testid': 'event-participant-country', text: `${tx('col_country')}: ${row.country}${row.is_foreign ? ` · ${tx('foreign_yes')}` : ''}` }));
+    if (row.language) bits.push(h('div', { text: `${tx('col_language')}: ${row.language}` }));
+    if (row.participant_total != null) bits.push(h('div', { 'data-testid': 'event-participant-total', text: `${tx('participant_total')}: ${row.participant_total} · ${tx('participant_deposit')}: ${row.deposit_paid ?? '–'} · ${tx('participant_remaining')}: ${row.remaining ?? '–'}` }));
     return bits.length ? h('div', {}, bits) : h('span', { class: 'muted', text: '–' });
   }
   function printTable(list, rules) {
@@ -467,7 +517,7 @@ export async function render({ ctx, refs, reload, query }) {
         h('tbody', {}, list.map((row) => {
           const rule = rules.find((r) => r.id === row.rule_id);
           const opt = (getLang() === 'en' && row.option_label_en) || row.option_label || '';
-          const extra = [opt && `${T('extra_option')}: ${opt}`, row.customer_note && `${T('extra_customer')}: ${row.customer_note}`].filter(Boolean).join(' · ');
+          const extra = [opt && `${T('extra_option')}: ${opt}`, row.customer_note && `${T('extra_customer')}: ${row.customer_note}`, row.country && `${tx('col_country')}: ${row.country}`, row.participant_total != null && `${tx('participant_total')}: ${row.participant_total}`, row.remaining != null && `${tx('participant_remaining')}: ${row.remaining}`].filter(Boolean).join(' · ');
           return h('tr', {},
             h('td', { text: rule ? occLabel(rule) : '' }), h('td', { text: row.name || '' }), h('td', { text: [row.email, row.phone].filter(Boolean).join(' · ') }),
             h('td', { text: String(row.persons ?? '') }), h('td', { text: `${STATUS[row.order_status] || ''} ${PAY[row.payment_status] || ''}`.trim() }),
