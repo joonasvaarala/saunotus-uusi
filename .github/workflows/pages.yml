@@ -43,6 +43,8 @@ jobs:
           node-version: 20
       # sharp (artikkelikuvien avif/webp-versiot) on devDependency; ilman sitä build jatkuu alkuperäisillä kuvilla
       - run: npm ci
+      # Selainmoduulit eivät aina ole node-testin importteja. Syntaksivirhe (esim. talous-reports.js) kaataa näkymän tuotannossa, joten jokainen selain-.js tarkistetaan ennen muita testejä.
+      - run: node --test booking/tests/browser-js-syntax.test.mjs
       # Saunatietoa: markdown-, lähde-/RPC-, sivupohja- ja build-tarkistustestit (fixture, ei verkkoa)
       - run: node --test tests/articles/*.test.mjs
       - run: node --test tests/site-target.test.mjs tests/test-env-banner.test.mjs tests/home-front.test.mjs tests/product-image.test.mjs tests/image-transforms.test.mjs tests/product-cards-image.test.mjs tests/week-programme.test.mjs tests/treatments-page.test.mjs

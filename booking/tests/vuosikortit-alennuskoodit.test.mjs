@@ -186,4 +186,9 @@ test('hallinta: Alennuskoodit-reitti (oikeus catalog.edit tai annual_cards.manag
 test('build-pages kopioi hallinnan tuomat koodimoduulit dist/shop/src:iin', () => {
   const b = readFileSync(resolve(dirname(fileURLToPath(import.meta.url)), '../../scripts/build-pages.mjs'), 'utf8');
   for (const f of ['discount-code-logic.js', 'discount-texts.js']) assert.ok(b.includes(`cpSync('booking/shop/src/${f}', join(OUT, 'shop', 'src', '${f}'))`), f);
+  assert.match(b, /\(function tagShop\(d\)/);
+  assert.match(b, /chkUnversioned\(join\(OUT, 'shop', 'src'\)\)/);
+  const tagAt = b.indexOf('(function tagShop');
+  const tag = b.slice(tagAt, b.indexOf("})(join(OUT, 'shop', 'src'));", tagAt));
+  assert.match(tag, /\$\{u\}\$\{VER\}/);
 });
