@@ -6,7 +6,7 @@ import { createAdminMock } from './options-mock.js';
 import { loadFilterTexts } from './filter-texts.js';
 import { primeSiteTexts, clearSiteTextsCache } from './site-texts-cache.js';
 import { needsManualRoute, parseAdminHash } from './reservation-query.js';
-import { resolveAdminPath, compactIdentity, toggleMobileNav, navGroupById, groupAllowed, selectGroupTab, shouldCollapseMobileNav, shouldCollapseOnNavLink } from './admin-navigation.js';
+import { resolveAdminPath, legacyFinanceGiftTarget, compactIdentity, toggleMobileNav, navGroupById, groupAllowed, selectGroupTab, shouldCollapseMobileNav, shouldCollapseOnNavLink } from './admin-navigation.js';
 import { setupQuickSearch } from './quick-search.js';
 import { loadNavTexts, navText } from './nav-texts.js';
 import { startHallintaPwa } from './pwa.js';
@@ -59,6 +59,7 @@ const ROUTES = [
   { path: 'kalenteri', label: 'Kalenteri', icon: 'calendar', mod: () => loadView('calendar') },
   { path: 'tilaukset', label: 'Tilaukset', labelFn: () => navText('ui.admin.nav.orders'), icon: 'list', mod: () => loadView('orders') },
   { path: 'asiakkaat', label: 'Asiakkaat', icon: 'users', mod: () => loadView('customers') },
+  { path: 'lahjakortit', label: 'Lahjakortit', labelFn: () => navText('ui.admin.nav.giftcards'), icon: 'gift', any: ['giftcards.manage'], mod: () => loadView('lahjakortit') },
   { path: 'kassa', label: 'Kassa ja talous', labelFn: () => navText('ui.admin.nav.cash_finance'), icon: 'euro', groupId: 'cash', mod: () => loadView('nav-group') },
   { path: 'tuotteet', label: 'Tuotteet', labelFn: () => navText('ui.admin.nav.products'), icon: 'tag', groupId: 'products', mod: () => loadView('nav-group') },
   { path: 'viestit', label: 'Viestit', icon: 'mail', any: ['messages.edit'], mod: () => loadView('messages') },
@@ -100,6 +101,8 @@ async function route() {
     } catch { /* versiotarkistus ei saa estää näkymää */ }
   }
   const { path, rest, query } = parseAdminHash(location.hash);
+  const jump = legacyFinanceGiftTarget(path, query);
+  if (jump && jump !== location.hash) { location.replace(jump); return; }
   const resolved = resolveAdminPath(path);
   const r = ROUTES.find((x) => x.path === resolved.path && allowed(x)) || ROUTES[0];
   drawNav(r.path);

@@ -133,10 +133,10 @@ async function adminSuite() {
   for (const lang of ['fi', 'en']) for (const vp of VPS) {
     const T = TEXTS[lang], name = `lahjakortit ${lang} ${vp}`;
     const page = await newPage(name, { vp, lang });
-    await page.goto(`${ORIGIN}/admin/#/talous?tab=giftcards&lang=${lang}`);
+    await page.goto(`${ORIGIN}/admin/#/lahjakortit?tab=omat&browse=1&lang=${lang}`);
     await page.waitForSelector('[data-testid=gc-list] [data-testid=gc]');
-    expect(await page.locator('[data-testid=tab-giftcards-btn]').innerText() === T['tab.giftcards'], `${name}: välilehden nimi`);
-    expect(await page.locator('[data-testid=tab-giftcards-btn]').getAttribute('aria-selected') === 'true', `${name}: välilehti valittu`);
+    expect(await page.locator('[data-testid=lahjakortit-tab-omat]').innerText() === (lang === 'fi' ? 'Omat lahjakortit' : 'Our gift cards'), `${name}: välilehden nimi`);
+    expect(await page.locator('[data-testid=lahjakortit-tab-omat]').getAttribute('aria-selected') === 'true', `${name}: välilehti valittu`);
     expect(await page.locator('[data-testid=mock-banner]').isHidden(), `${name}: ei mock-bannerin pitäisi näkyä (oikea rajapinta)`);
     await page.waitForSelector('[data-testid=gc-switches] [data-testid=gc-sw-sale]');
     expect(await page.locator('[data-testid=gc-sw-sale]').getAttribute('data-on') === 'false' && await page.locator('[data-testid=gc-sw-redeem]').getAttribute('data-on') === 'true', `${name}: kytkimet luetaan palvelimelta`);
@@ -215,7 +215,7 @@ async function adminSuite() {
   // ---- toiminnot (390 px, FI) ----
   {
     const name = 'lahjakortit toiminnot', T = TEXTS.fi, page = await newPage(name, { vp: 390, allow: /status of 400/ });   // 400 = simuloitu palvelimen toimitusvirhe
-    await page.goto(`${ORIGIN}/admin/#/talous?tab=giftcards`);
+    await page.goto(`${ORIGIN}/admin/#/lahjakortit?tab=omat&browse=1`);
     await page.waitForSelector('[data-testid=gc-list] [data-testid=gc]');
     const rows = () => page.locator('[data-testid=gc-list] > [data-testid=gc]');
     // luonti: maksuton myöntö, syy pakollinen, tervehdyksen laskuri
@@ -333,9 +333,9 @@ async function adminSuite() {
   // ---- oikeudet: pelkkä giftcards.manage (ei .admin, ei payments.manage) ----
   {
     const name = 'lahjakortit oikeudet', page = await newPage(name, { vp: 390, perms: ['giftcards.manage'] });
-    await page.goto(`${ORIGIN}/admin/#/talous`);
+    await page.goto(`${ORIGIN}/admin/#/lahjakortit?tab=omat&browse=1`);
     await page.waitForSelector('[data-testid=gc-list] [data-testid=gc]');
-    expect(await page.locator('[data-testid=tab-orders-btn]').count() === 0 && await page.locator('[data-testid=tab-payments-btn]').count() === 0 && await page.locator('[data-testid=tab-giftcards-btn]').count() === 1, `${name}: vain Lahjakortit-välilehti`);
+    expect(await page.locator('[data-testid=lahjakortit-tab-omat]').count() === 1 && await page.locator('#nav a[href="#/lahjakortit"]').count() === 1, `${name}: Lahjakortit-valikko`);
     await page.locator('[data-testid=gc-list] > [data-testid=gc]').first().locator('.tl-head').click(); await page.waitForSelector('[data-testid=gc-detail]');
     expect(await page.locator('[data-testid=gc-btn-adjust]').isDisabled() && await page.locator('[data-testid=gc-btn-deactivate]').isDisabled() && !(await page.locator('[data-testid=gc-btn-expiry]').isDisabled()), `${name}: korjaus/mitätöinti estetty, voimassaolo sallittu`);
     await page.click('[data-testid=gc-new]'); await page.waitForSelector('dialog[open] [data-testid=gc-new-mode]');
@@ -343,14 +343,14 @@ async function adminSuite() {
     await page.keyboard.press('Escape');
     const none = await newPage('lahjakortit ei oikeutta', { vp: 390, perms: ['payments.manage'] });
     await none.goto(`${ORIGIN}/admin/#/talous`); await none.waitForSelector('[data-testid=orders-list] [data-testid=order]');
-    expect(await none.locator('[data-testid=tab-giftcards-btn]').count() === 0, 'ilman giftcards.manage ei Lahjakortit-välilehteä');
+    expect(await none.locator('[data-testid=lahjakortit-tab-omat]').count() === 0 && await none.locator('#nav a[href="#/lahjakortit"]').count() === 0, 'ilman giftcards.manage ei Lahjakortit-valikkoa');
     expect(calls(none, 'admin_list_gift_cards').length === 0 && calls(none, 'admin_list_gift_card_packages').length === 0, 'ilman oikeutta ei lahjakorttikutsuja');
   }
 
   // ---- toimitusvalinnan lomake kaikilla leveyksillä FI/EN (saajalle + ajankohta + virheet) ----
   for (const lang of ['fi', 'en']) for (const vp of VPS) {
     const T = TEXTS[lang], name = `toimituslomake ${lang} ${vp}`, page = await newPage(name, { vp, lang });
-    await page.goto(`${ORIGIN}/admin/#/talous?tab=giftcards&lang=${lang}`); await page.waitForSelector('[data-testid=gc-list] [data-testid=gc]');
+    await page.goto(`${ORIGIN}/admin/#/lahjakortit?tab=omat&browse=1&lang=${lang}`); await page.waitForSelector('[data-testid=gc-list] [data-testid=gc]');
     await page.click('[data-testid=gc-new]'); await page.waitForSelector('dialog[open] [data-testid=gc-new-mode]');
     const $ = (id) => page.locator(`dialog[open] [data-testid=${id}]`);
     await page.selectOption('dialog[open] [data-testid=gc-new-mode]', 'cash'); await page.selectOption('dialog[open] [data-testid=gc-new-package]', 'entry_2');
@@ -365,7 +365,7 @@ async function adminSuite() {
   // ---- ?mock=1: koko välilehti toimii esimerkkidatalla ----
   {
     const name = 'lahjakortit mock=1', page = await newPage(name, { vp: 390 });
-    await page.goto(`${ORIGIN}/admin/#/talous?tab=giftcards&mock=1`);
+    await page.goto(`${ORIGIN}/admin/#/lahjakortit?tab=omat&browse=1&mock=1`);
     await page.waitForSelector('[data-testid=gc-list] [data-testid=gc]');
     expect(await page.locator('[data-testid=mock-banner]').isVisible() && calls(page, 'admin_list_gift_cards').length === 0, `${name}: mock-banneri, ei palvelinkutsuja`);
   }

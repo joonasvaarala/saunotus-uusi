@@ -164,10 +164,11 @@ async function adminSuite() {
   for (const lang of ['fi', 'en']) for (const vp of [360, 390, 430, 1280]) {
     const T = TEXTS[lang], name = `lahjakoodit ${lang} ${vp}`;
     const page = await newPage(name, { vp, lang });
-    await page.goto(`${ORIGIN}/admin/#/talous?tab=vouchers&lang=${lang}`);
+    await page.goto(`${ORIGIN}/admin/#/lahjakortit?tab=lunastukset&lang=${lang}`);
     await page.waitForSelector('[data-testid=vcl-list] [data-testid=vcl]');
-    const btn = page.locator('[data-testid=tab-vouchers-btn]');
-    expect(await btn.innerText() === T['tab.vouchers'] && await btn.getAttribute('aria-selected') === 'true', `${name}: välilehti "${T['tab.vouchers']}" valittu`);
+    const btn = page.locator('[data-testid=lahjakortit-tab-lunastukset]');
+    const tabName = lang === 'fi' ? 'Lunastuspyynnöt' : 'Redemption requests';
+    expect(await btn.innerText() === tabName && await btn.getAttribute('aria-selected') === 'true', `${name}: välilehti "${tabName}" valittu`);
     expect(await page.locator('[data-testid=mock-banner]').isHidden(), `${name}: ei mock-banneria (oikea rajapinta)`);
     const rows = page.locator('[data-testid=vcl-list] > [data-testid=vcl]');
     expect(await rows.count() === 5, `${name}: 5 aktiivista oletuksena (${await rows.count()})`);
@@ -197,7 +198,7 @@ async function adminSuite() {
   // toiminnot
   {
     const name = 'lahjakoodit toiminnot', page = await newPage(name, { vp: 390 });
-    await page.goto(`${ORIGIN}/admin/#/talous?tab=vouchers`); await page.waitForSelector('[data-testid=vcl-list] [data-testid=vcl]');
+    await page.goto(`${ORIGIN}/admin/#/lahjakortit?tab=lunastukset`); await page.waitForSelector('[data-testid=vcl-list] [data-testid=vcl]');
     const row = (id) => page.locator(`[data-testid=vcl-list] [data-claim-id="${id}"]`);
     // ongelma
     await row(42).locator('.tl-head').click(); await page.click('[data-testid=vcl-btn-problem]'); await page.waitForSelector('dialog[open] [data-testid=vcl-p-code]');
@@ -239,7 +240,7 @@ async function adminSuite() {
   }
   // RPC puuttuu → rauhallinen ilmoitus
   { const name = 'lahjakoodit RPC puuttuu', page = await newPage(name, { vp: 390, vc: false, allow: /rest\/v1|404/ });
-    await page.goto(`${ORIGIN}/admin/#/talous?tab=vouchers`); await page.waitForSelector('[data-testid=tab-vouchers] .tl-empty');
+    await page.goto(`${ORIGIN}/admin/#/lahjakortit?tab=lunastukset`); await page.waitForSelector('[data-testid=tab-vouchers] .tl-empty');
     expect(/admin_list_voucher_claims/.test(await page.locator('[data-testid=tab-vouchers] .tl-empty').first().innerText()), `${name}: "ei vielä käytössä" -ilmoitus`);
     await page.context().close(); }
   // oikeudet: ilman giftcards.manage ei välilehteä

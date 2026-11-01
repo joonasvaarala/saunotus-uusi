@@ -126,7 +126,7 @@ async function adminGiftSuite() {
   const list0 = await must('admin_list_gift_cards', { p_limit: 1 });
 
   // ---- 1. välilehti, kytkimet, lista = palvelin ----
-  let page = await openPage('live lahjakortit 1280', admin, { vp: 1280, hash: '#/talous?tab=giftcards' });
+  let page = await openPage('live lahjakortit 1280', admin, { vp: 1280, hash: '#/lahjakortit?tab=omat&browse=1' });
   await page.waitForSelector('[data-testid=gc-list]', { timeout: 15000 });
   await page.waitForFunction(() => document.querySelector('[data-testid=gc-count]')?.textContent || document.querySelector('[data-testid=gc-list] .tl-empty'), null, { timeout: 15000 });
   expect(await page.locator('[data-testid=mock-banner]').isHidden(), 'ei mock-bannera');
@@ -246,7 +246,7 @@ async function adminGiftSuite() {
 
   // ---- 8. mobiili + EN + staff-oikeudet ----
   for (const [vp, lang] of [[390, 'fi'], [390, 'en'], [768, 'fi'], [360, 'fi']]) {
-    const name = `live lahjakortit ${vp} ${lang}`, mp = await openPage(name, admin, { vp, lang, hash: '#/talous?tab=giftcards' });
+    const name = `live lahjakortit ${vp} ${lang}`, mp = await openPage(name, admin, { vp, lang, hash: '#/lahjakortit?tab=omat&browse=1' });
     await mp.waitForSelector('[data-testid=gc-list] [data-testid=gc]', { timeout: 15000 });
     expect(await mp.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1), `${name}: ei vaakavieritystä`);
     await gcOpen(mp, freeCode);
@@ -256,7 +256,7 @@ async function adminGiftSuite() {
   if (E.STAFF_EMAIL) {
     const staff = await login(E.STAFF_EMAIL, E.STAFF_PASSWORD);
     const perms = (await rpc('admin_my_permissions', {}, staff)).body.permissions;
-    const sp = await openPage('live staff', staff, { vp: 390, hash: '#/talous?tab=giftcards' });
+    const sp = await openPage('live staff', staff, { vp: 390, hash: '#/lahjakortit?tab=omat&browse=1' });
     if (perms.includes('giftcards.manage')) {
       await sp.waitForSelector('[data-testid=gc-list] [data-testid=gc]', { timeout: 15000 });
       await gcOpen(sp, freeCode);
@@ -471,7 +471,7 @@ async function deliveryLiveSuite() {
     expect(api?.ok && api.cards.every((c) => !('cover_message' in c)) && api.cards.some((c) => c.delivery_to === 'recipient' && c.deliver_on === day && c.deliver_time === '18:30' && c.delivered_at == null), 'public_get_order_gift_cards: delivery_to/deliver_on/deliver_time, ei cover_message-kenttää');
   }
   // D) hallinta (oikea selain): myynti saajalle ajastettuna lomakkeella; kortin tiedot + palvelimen virhe kentän alla
-  { const name = 'live toimitusvalinta hallinta', page = await openPage(name, admin, { vp: 390, hash: '#/talous?tab=giftcards' });
+  { const name = 'live toimitusvalinta hallinta', page = await openPage(name, admin, { vp: 390, hash: '#/lahjakortit?tab=omat&browse=1' });
     await page.waitForSelector('[data-testid=gc-list]', { timeout: 20000 });
     await page.click('[data-testid=gc-new]'); await page.waitForSelector('dialog[open] [data-testid=gc-new-mode]');
     const $ = (id) => page.locator(`dialog[open] [data-testid=${id}]`);

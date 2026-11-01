@@ -11,7 +11,7 @@ export function resultHref(kind, row) {
   if (kind === 'order') return `#/tilaukset?order=${encodeURIComponent(row.order_no)}`;
   if (kind === 'reservation') return `#/varaukset?id=${encodeURIComponent(row.reservation_id)}&q=${encodeURIComponent(row.order_no)}&period=all`;
   if (kind === 'customer') return `#/asiakkaat?id=${encodeURIComponent(row.id)}`;
-  if (kind === 'giftcard') return `#/talous?tab=giftcards&code=${encodeURIComponent(row.code)}`;
+  if (kind === 'giftcard') return `#/lahjakortit?tab=omat&code=${encodeURIComponent(row.code)}`;
   return '#/';
 }
 

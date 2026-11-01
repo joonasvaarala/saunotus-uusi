@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
-import { resolveAdminPath, initialOrdersTab, compactIdentity, toggleMobileNav, navGroupById, visibleGroupTabs, groupAllowed, selectGroupTab, shouldCollapseMobileNav, shouldCollapseOnNavLink } from '../admin/admin-navigation.js';
+import { resolveAdminPath, legacyFinanceGiftTarget, initialOrdersTab, compactIdentity, toggleMobileNav, navGroupById, visibleGroupTabs, groupAllowed, selectGroupTab, shouldCollapseMobileNav, shouldCollapseOnNavLink } from '../admin/admin-navigation.js';
 import { isQuickSearchInside } from '../admin/quick-search.js';
 import { parseAdminHash, reservationSortParam, reservationsHref, stateFromQuery, UNASSIGNED_HREF } from '../admin/reservation-query.js';
 import { cleanSearch, findQuickResults, resultHref, giftSearchTerm } from '../admin/quick-search.js';
@@ -17,7 +17,8 @@ const src = (p) => readFileSync(join(root, p), 'utf8');
 test('päänavigaatio: yhdeksän kohtaa, Varaukset vain Tilaukset-välilehtenä', () => {
   const js = src('admin/admin.js');
   const order = [...js.matchAll(/\{ path: '([^']*)', label:/g)].map((m) => m[1]);
-  assert.deepEqual(order, ['', 'kalenteri', 'tilaukset', 'asiakkaat', 'kassa', 'tuotteet', 'viestit', 'tilat', 'asetukset', 'uusi', 'tarkista']);
+  assert.deepEqual(order, ['', 'kalenteri', 'tilaukset', 'asiakkaat', 'lahjakortit', 'kassa', 'tuotteet', 'viestit', 'tilat', 'asetukset', 'uusi', 'tarkista']);
+  assert.match(js, /path: 'lahjakortit'[\s\S]{0,180}any: \['giftcards\.manage'\]/);
   assert.match(js, /path: 'uusi'[\s\S]{0,120}rail: false/);
   assert.match(js, /path: 'tarkista'[\s\S]{0,120}rail: false/);
   assert.doesNotMatch(js, /path: 'varaukset', label:/);
@@ -124,7 +125,7 @@ test('pikahaku löytää asiakkaita, varauksia, tilauksia, lahjakortteja ja luo 
   assert.equal(cleanSearch(' #13025 '),'13025');
   assert.deepEqual(new Set(found.map(x=>x.href)),new Set([
     '#/asiakkaat?id=42','#/varaukset?id=12&q=13025&period=all',
-    '#/tilaukset?order=13025','#/talous?tab=giftcards&code=ABCD-1234-EFGH',
+    '#/tilaukset?order=13025','#/lahjakortit?tab=omat&code=ABCD-1234-EFGH',
   ]));
   assert.ok(calls.some(c=>c.fn==='admin_list_orders'&&c.args.p_payment_filter==='all'));
   assert.equal(resultHref('unknown',{}),'#/');
@@ -164,7 +165,8 @@ test('tekstit: ui.admin.nav.* FI+EN sanakirjassa ja pending-import-38/88:ssa, ei
   const rows88 = JSON.parse(readFileSync(join(root, '../content/site-texts.pending-import-88.json'), 'utf8'));
   const rows102 = JSON.parse(readFileSync(join(root, '../content/site-texts.pending-import-102.json'), 'utf8')).filter((r) => r.key.startsWith('ui.admin.nav.'));
   const rows105 = JSON.parse(readFileSync(join(root, '../content/site-texts.pending-import-105.json'), 'utf8')).filter((r) => r.key.startsWith('ui.admin.nav.'));
-  const rows = [...rows38, ...rows88, ...rows102, ...rows105];
+  const rows118 = JSON.parse(readFileSync(join(root, '../content/site-texts.pending-import-118.json'), 'utf8')).filter((r) => r.key.startsWith('ui.admin.nav.'));
+  const rows = [...rows38, ...rows88, ...rows102, ...rows105, ...rows118];
   assert.deepEqual(Object.keys(NAV_TEXTS.fi).sort(), Object.keys(NAV_TEXTS.en).sort());
   assert.equal(rows.length, Object.keys(NAV_TEXTS.fi).length * 2);
   const seen = new Set();
@@ -182,7 +184,7 @@ test('tekstit: ui.admin.nav.* FI+EN sanakirjassa ja pending-import-38/88:ssa, ei
   for (const r of rows38) assert.equal(newKeys.has(r.key), false, r.key);
   const taken = new Set();
   for (const f of readdirSync(join(root, '../content'))) {
-    if (!/^site-texts\.(pending-import-(?!38\.|88\.|102\.|105\.)|imported|fallback)/.test(f) || !f.endsWith('.json')) continue;
+    if (!/^site-texts\.(pending-import-(?!38\.|88\.|102\.|105\.|118\.)|imported|fallback)/.test(f) || !f.endsWith('.json')) continue;
     const j = JSON.parse(readFileSync(join(root, '../content', f), 'utf8'));
     for (const r of Array.isArray(j) ? j : j.texts || []) taken.add(`${r.key}|${r.lang}`);
   }
@@ -217,6 +219,13 @@ test('ryhmät: vanhat osoitteet avaavat oikean välilehden, oikeus rajaa välile
   assert.deepEqual(resolveAdminPath('asetukset'), { path: 'asetukset', legacyReservations: false, groupId: 'settings', tabId: 'asetukset' });
   assert.deepEqual(resolveAdminPath('uusi'), { path: 'uusi', legacyReservations: false, groupId: null, tabId: null });
   assert.deepEqual(resolveAdminPath('tarkista'), { path: 'tarkista', legacyReservations: false, groupId: null, tabId: null });
+  assert.deepEqual(resolveAdminPath('lahjakortit'), { path: 'lahjakortit', legacyReservations: false, groupId: null, tabId: null });
+  assert.equal(legacyFinanceGiftTarget('talous', new URLSearchParams('tab=giftcards&code=ABCD')), '#/lahjakortit?tab=omat&code=ABCD');
+  assert.equal(legacyFinanceGiftTarget('talous', new URLSearchParams('tab=vouchers')), '#/lahjakortit?tab=lunastukset');
+  assert.equal(legacyFinanceGiftTarget('talous', new URLSearchParams('tab=orders')), null);
+  assert.equal(NAV_TEXTS.fi['ui.admin.nav.giftcards'], 'Lahjakortit');
+  assert.equal(NAV_TEXTS.fi['ui.admin.nav.giftcards_own'], 'Omat lahjakortit');
+  assert.equal(NAV_TEXTS.fi['ui.admin.nav.giftcards_claims'], 'Lunastuspyynnöt');
   assert.deepEqual(resolveAdminPath(''), { path: '', legacyReservations: false, groupId: null, tabId: null });
   const cash = navGroupById('cash');
   assert.deepEqual(visibleGroupTabs(cash, can(['pos.use'])).map((t) => t.id), ['pikakassa']);
