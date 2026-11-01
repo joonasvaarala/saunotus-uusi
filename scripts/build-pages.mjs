@@ -11,6 +11,7 @@ import { execFileSync } from 'node:child_process';
 import { cpSync, mkdirSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { assertBuildTarget } from '../src/site-target.mjs';
+import { assertTestBannerFlag, injectTestBanner, testBannerProblems } from '../src/test-env-banner.mjs';
 import { imageTransformsOn } from '../booking/shop/src/product-image.js';
 import { assertNoRenderImageUrls } from './check-image-urls.mjs';
 
@@ -21,6 +22,9 @@ const KEY = need('BOOKING_ANON_KEY');
 const OUT = resolve(process.env.DIST || 'dist');
 process.env.SITE_ENV ||= 'test';
 try { assertBuildTarget({ siteEnv: process.env.SITE_ENV, siteUrl: SITE_URL, supabaseUrl: SUPA }); }
+catch (err) { console.error('build-pages: ' + err.message); process.exit(2); }
+let bannerOn;
+try { bannerOn = assertTestBannerFlag(); }
 catch (err) { console.error('build-pages: ' + err.message); process.exit(2); }
 const BASE = new URL(SITE_URL).pathname.replace(/\/$/, '');
 
@@ -52,7 +56,7 @@ cpSync('booking/shop/src/invoice-validate.js', join(OUT, 'shop', 'src', 'invoice
 cpSync('booking/shop/src/phone.js', join(OUT, 'shop', 'src', 'phone.js'));
 cpSync('booking/shop/src/discount-code-logic.js', join(OUT, 'shop', 'src', 'discount-code-logic.js')); // booking_142: hallinnan alennuskoodit, asiakaskortti ja options-mock tuovat tämän
 cpSync('booking/shop/src/discount-texts.js', join(OUT, 'shop', 'src', 'discount-texts.js')); // discount-code-logic.js tuo tämän
-const cfg = { url: SUPA, anonKey: KEY, rest: '/rest/v1', auth: '/auth/v1', functions: '/functions/v1', schema: 'booking', payMarks: `${BASE}/img/pay/` };
+const cfg = { url: SUPA, anonKey: KEY, rest: '/rest/v1', auth: '/auth/v1', functions: '/functions/v1', schema: 'booking', payMarks: `${BASE}/img/pay/`, testBanner: bannerOn };
 writeFileSync(join(A, 'config.js'), `// Generoitu julkaisussa (scripts/build-pages.mjs). Vain julkinen anon/publishable-avain; service_role ei koskaan tähän.\nwindow.BOOKING_CONFIG=${JSON.stringify(cfg, null, 2)};\n`);
 
 // 3b) versiotunnus kaikkiin hallinnan moduuleihin ja resursseihin (välimuistin sekoittumisen esto; GitHub Pages välimuistittaa tiedostoja ~10 min)
@@ -76,7 +80,12 @@ let nImports = 0;
   const hp = join(A, 'index.html');
   let t = readFileSync(hp, 'utf8');
   t = t.replace(/((?:href|src)=")(admin\.css|calendar\.css|config\.js|admin\.js)(")/g, `$1$2${VER}$3`);
+  if (bannerOn) t = injectTestBanner(t, { lang: 'fi', kind: 'hallinta' });
   writeFileSync(hp, t);
+  if (bannerOn) {
+    const off = join(A, 'offline.html');
+    writeFileSync(off, injectTestBanner(readFileSync(off, 'utf8'), { lang: 'fi', kind: 'offline' }));
+  }
 }
 
 // 3c) kylmälaite-sivu → /juomat/ ja /en/drinks/ (polut ovat koodissa, eivät site.jsonissa)
@@ -100,6 +109,7 @@ function publishDrinks(srcName, destRel) {
   if (BASE) html = html.replace(/href="(\/(?:juomat|en\/drinks)\/)"/g, `href="${BASE}$1"`);
   html = html.replace(/(href|src)="(\.\/[^"?]+\.(?:css|js))"/g, `$1="$2${VER}"`);
   if (process.env.SITE_ENV === 'test' && !/noindex/.test(html)) html = html.replace('<head>', '<head>\n<meta name="robots" content="noindex, nofollow">');
+  if (bannerOn) html = injectTestBanner(html, { lang: srcName.includes('.en.') ? 'en' : 'fi', kind: 'plain' });
   writeFileSync(join(dir, 'index.html'), html);
   writeFileSync(join(dir, 'config.js'), `// Generoitu julkaisussa (scripts/build-pages.mjs). Vain julkinen anon/publishable-avain; service_role ei koskaan tähän.\nwindow.BOOKING_CONFIG=${JSON.stringify(cfg, null, 2)};\n`);
 }
@@ -117,6 +127,12 @@ for (const f of ['index.html', 'oma.css', 'oma.js']) cpSync(join('booking/vuoro/
 const vuoroCfg = `// Generoitu julkaisussa (scripts/build-pages.mjs). Vuorosivu käyttää tämän buildin Supabase-osoitetta.\nwindow.BOOKING_CONFIG=${JSON.stringify({ url: SUPA })};\n`;
 writeFileSync(join(V, 'config.js'), vuoroCfg);
 writeFileSync(join(V, 'oma', 'config.js'), vuoroCfg);
+if (bannerOn) {
+  for (const rel of ['index.html', 'oma/index.html']) {
+    const p = join(V, rel);
+    writeFileSync(p, injectTestBanner(readFileSync(p, 'utf8'), { lang: 'fi', kind: 'plain' }));
+  }
+}
 
 // 3e) Paketti 11 / booking_144: evästeetön kävijämittaus. OLETUKSENA POIS.
 //     Skripti lisätään sivuille VAIN, kun SITE_ANALYTICS=on JA SITE_ENV != test. Testisivulla (GitHub Pages, SITE_ENV=test) ei koskaan.
@@ -184,4 +200,8 @@ if (!vuoroHtml.includes('src="./config.js"') || !readFileSync(join(OUT, 'vuoro',
   }
 }
 if (!imageTransformsOn()) assertNoRenderImageUrls(OUT);
+{
+  const bannerProblems = testBannerProblems(OUT, { enabled: bannerOn });
+  if (bannerProblems.length) fail(`testiympäristön banneri: ${bannerProblems.join('; ')}`);
+}
 console.log(`build-pages ok → ${OUT}  (kävijämittaus ${ANALYTICS_ON ? `PÄÄLLÄ ${nAnalytics} sivulla` : 'pois'}; perussivusto, ${BASE || ''}/varaa/, ${BASE || ''}/hallinta/, ${BASE || ''}/juomat/, ${BASE || ''}/vuoro/; Supabase ${new URL(SUPA).hostname})`);

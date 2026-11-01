@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Lataa config/env/test.env tai config/env/prod.env ja rakentaa julkaistavan sivuston.
-# Ympäristön omat arvot eivät periydy: tiedosto on ainoa lähde SITE_ENV:lle, SITE_URL:lle ja Supabase-avaimille.
+# Ympäristön omat arvot eivät periydy: tiedosto on ainoa lähde SITE_ENV:lle, SITE_URL:lle, Supabase-avaimille ja TEST_ENV_BANNER-lipulle.
 #
 #   npm run build:test     # GitHub Pages -testi, Supabase DEV
 #   npm run build:prod     # saunotus.fi, Supabase PROD (dist/ SFTP:llä, ei Actions-deployta)
@@ -25,12 +25,13 @@ if [[ ! -f "$file" ]]; then
   exit 2
 fi
 
-unset SITE_ENV SITE_URL BOOKING_SUPABASE_URL BOOKING_ANON_KEY IMAGE_TRANSFORMS
+unset SITE_ENV SITE_URL BOOKING_SUPABASE_URL BOOKING_ANON_KEY IMAGE_TRANSFORMS TEST_ENV_BANNER
 got_site_env=0
 got_site_url=0
 got_supabase_url=0
 got_anon_key=0
 got_image_transforms=0
+got_test_banner=0
 while IFS= read -r line || [[ -n "$line" ]]; do
   [[ "$line" =~ ^[[:space:]]*# ]] && continue
   [[ "$line" =~ ^[[:space:]]*$ ]] && continue
@@ -41,11 +42,15 @@ while IFS= read -r line || [[ -n "$line" ]]; do
   key="${BASH_REMATCH[1]}"
   val="${BASH_REMATCH[2]}"
   case "$key" in
-    SITE_ENV|SITE_URL|BOOKING_SUPABASE_URL|BOOKING_ANON_KEY|IMAGE_TRANSFORMS) ;;
+    SITE_ENV|SITE_URL|BOOKING_SUPABASE_URL|BOOKING_ANON_KEY|IMAGE_TRANSFORMS|TEST_ENV_BANNER) ;;
     *) echo "build-site: avainta $key ei sallita ympäristötiedostossa" >&2; exit 2 ;;
   esac
   if [[ "$key" == "IMAGE_TRANSFORMS" && "$val" != "on" && "$val" != "off" ]]; then
     echo "build-site: IMAGE_TRANSFORMS on on tai off" >&2
+    exit 2
+  fi
+  if [[ "$key" == "TEST_ENV_BANNER" && "$val" != "on" && "$val" != "off" ]]; then
+    echo "build-site: TEST_ENV_BANNER on on tai off" >&2
     exit 2
   fi
   if [[ "$val" == *"'"* || "$val" == *'"'* || "$val" == *$'\n'* || "$val" == *" "* ]]; then
@@ -68,6 +73,9 @@ while IFS= read -r line || [[ -n "$line" ]]; do
     IMAGE_TRANSFORMS)
       if [[ "$got_image_transforms" == 1 ]]; then echo "build-site: IMAGE_TRANSFORMS kahdesti" >&2; exit 2; fi
       got_image_transforms=1 ;;
+    TEST_ENV_BANNER)
+      if [[ "$got_test_banner" == 1 ]]; then echo "build-site: TEST_ENV_BANNER kahdesti" >&2; exit 2; fi
+      got_test_banner=1 ;;
   esac
   printf -v "$key" '%s' "$val"
   export "$key"
@@ -78,6 +86,7 @@ missing=""
 [[ "$got_site_url" == 1 ]] || missing+=" SITE_URL"
 [[ "$got_supabase_url" == 1 ]] || missing+=" BOOKING_SUPABASE_URL"
 [[ "$got_anon_key" == 1 ]] || missing+=" BOOKING_ANON_KEY"
+[[ "$got_test_banner" == 1 ]] || missing+=" TEST_ENV_BANNER"
 if [[ -n "$missing" ]]; then
   echo "build-site: ${name}.env:sta puuttuu:${missing}" >&2
   exit 2
@@ -86,12 +95,21 @@ if [[ "$SITE_ENV" != "$name" ]]; then
   echo "build-site: ${name}.env asettaa SITE_ENV=${SITE_ENV}, odotettiin ${name}" >&2
   exit 2
 fi
+if [[ "$SITE_ENV" == "prod" && "$TEST_ENV_BANNER" != "off" ]]; then
+  echo "build-site: tuotanto vaatii TEST_ENV_BANNER=off" >&2
+  exit 2
+fi
+if [[ "$SITE_ENV" == "test" && "$TEST_ENV_BANNER" != "on" ]]; then
+  echo "build-site: testi vaatii TEST_ENV_BANNER=on" >&2
+  exit 2
+fi
 
 if [[ "$print_only" == 1 ]]; then
   printf 'SITE_ENV=%s\n' "$SITE_ENV"
   printf 'SITE_URL=%s\n' "$SITE_URL"
   printf 'BOOKING_SUPABASE_URL=%s\n' "$BOOKING_SUPABASE_URL"
   printf 'BOOKING_ANON_KEY=%s\n' "$BOOKING_ANON_KEY"
+  printf 'TEST_ENV_BANNER=%s\n' "$TEST_ENV_BANNER"
   if [[ -n "${IMAGE_TRANSFORMS:-}" ]]; then printf 'IMAGE_TRANSFORMS=%s\n' "$IMAGE_TRANSFORMS"; fi
   exit 0
 fi
