@@ -380,6 +380,8 @@ jobs:
       # ajetaan paikallisessa PG:ssä. Työnkulussa ei ole Postgresia.
       # Myynti-PDF ajetaan Denolla (setup-deno on ylempänä).
       - run: node --test booking/tests/raporttirakenne.test.mjs
+      # Hallinnan kalenteri: koko päiväruutu avaa päivän (kuukausi ja viikko), näppäimistö ja varauslinkki erikseen.
+      - run: node --test booking/tests/kalenteri-paivasolu.test.mjs
       - uses: actions/upload-pages-artifact@v3
         if: github.event_name != 'pull_request'
         with:

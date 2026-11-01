@@ -68,15 +68,37 @@ export async function render({ ctx, refs, reload }) {
     try { data = await load(rg); } catch (e) { body.replaceChildren(h('p', { class: 'err pad', role: 'alert', text: errMsg(e) })); return; }
     const sh = group(data.shifts, 'starts_at'), bk = group(data.bookings, 'starts_at');
     const today = todayHel();
+    // Koko päiväruutu avaa saman päivän kuin päivänumeron painike. Painike peittää ruudun (näppäimistö, Enter/Space, aria-label).
+    // Viikon varauslinkki on ruudun päällä ja tekee vain oman toimintonsa: se ei vaihda valittua päivää.
+    const openDay = (ds) => { state.sel = ds; draw(); };
+    const hitControl = (ev) => {
+      const raw = ev.target?.nodeType === 1 ? ev.target : (ev.target?.parentElement || ev.target?.parent);
+      return raw?.closest?.('a, button, input, select, textarea, summary') || null;
+    };
     const dayCell = (ds, inMonth) => {
       const ns = (sh.get(ds) || []).length, nb = (bk.get(ds) || []);
       const persons = nb.reduce((a, r) => a + (r.persons || 0), 0);
       const items = state.mode === 'week'
         ? h('ul', { class: 'cal-list' }, ...(sh.get(ds) || []).map(shiftItem), ...nb.slice().sort((a, c) => a.starts_at.localeCompare(c.starts_at)).map(bookingItem))
         : h('span', { class: 'cal-chips' }, ns ? h('span', { class: 'chip shift', title: `${ns} työvuoroa` }, h('b', { text: String(ns) }), h('span', { class: 'lbl', text: ' vuoroa' })) : null, nb.length ? h('span', { class: 'chip booking', title: `${nb.length} varausta, ${persons} henkilöä` }, h('b', { text: String(nb.length) }), h('span', { class: 'lbl', text: ` var. · ${persons} hlö` })) : null);
-      return h('div', { class: `cal-day${inMonth ? '' : ' out'}${ds === today ? ' today' : ''}${ds === state.sel ? ' sel' : ''}`, 'data-date': ds },
-        h('button', { type: 'button', class: 'cal-dnum', 'aria-label': `${fmtLong(ds)}: ${ns} työvuoroa, ${nb.length} varausta`, 'aria-pressed': ds === state.sel ? 'true' : 'false', onclick: () => { state.sel = ds; draw(); } },
-          h('span', { class: 'wd', text: WD[dowMon(ds)] }), h('span', { class: 'n', text: String(+ds.slice(8)) })), items);
+      const label = `${fmtLong(ds)}: ${ns} työvuoroa, ${nb.length} varausta`;
+      const opener = h('button', {
+        type: 'button', class: 'cal-dnum', 'aria-label': label, 'aria-pressed': ds === state.sel ? 'true' : 'false',
+        onclick: (ev) => { ev.stopPropagation(); openDay(ds); },
+        onkeydown: (ev) => {
+          if (ev.key !== 'Enter' && ev.key !== ' ' && ev.key !== 'Spacebar') return;
+          ev.preventDefault();
+          ev.stopPropagation();
+          openDay(ds);
+        },
+      });
+      return h('div', {
+        class: `cal-day${inMonth ? '' : ' out'}${ds === today ? ' today' : ''}${ds === state.sel ? ' sel' : ''}`,
+        'data-date': ds,
+        onclick: (ev) => { if (hitControl(ev)) return; openDay(ds); },
+      }, opener, h('div', { class: 'cal-day-face' },
+        h('span', { class: 'cal-num', 'aria-hidden': 'true' }, h('span', { class: 'wd', text: WD[dowMon(ds)] }), h('span', { class: 'n', text: String(+ds.slice(8)) })),
+        items));
     };
     const cells = Array.from({ length: rg.days }, (_, i) => addDays(rg.start, i));
     const grid = h('div', { class: `cal-grid ${state.mode}` },

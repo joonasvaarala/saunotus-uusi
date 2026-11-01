@@ -14,19 +14,26 @@
 .cal-grid{display:grid;gap:2px}
 .cal-grid.month{grid-template-columns:repeat(7,minmax(0,1fr))}
 .cal-head{font-size:12px;font-weight:700;color:var(--muted);text-align:center;padding:4px 0}
-.cal-day{background:#fff;border:1px solid var(--line);border-radius:8px;min-height:64px;padding:2px;display:flex;flex-direction:column;gap:2px;overflow:hidden}
+.cal-day{position:relative;background:#fff;border:1px solid var(--line);border-radius:8px;min-height:64px;padding:2px;display:flex;flex-direction:column;gap:2px;overflow:hidden;cursor:pointer;touch-action:manipulation}
+.cal-day:hover{background:#f7f3ec}
 .cal-day.out{background:#f1ede6;opacity:.65}
+.cal-day.out:hover{background:#e6dfd2}
 .cal-day.today{border-color:var(--green);box-shadow:inset 0 0 0 1px var(--green)}
 .cal-day.sel{outline:3px solid var(--gold);outline-offset:-2px}
-.cal-dnum{all:unset;box-sizing:border-box;cursor:pointer;display:flex;gap:6px;align-items:baseline;padding:3px 4px;min-height:28px;border-radius:6px;color:var(--ink)}
-.cal-dnum:focus-visible{outline:3px solid var(--gold)}
-.cal-dnum .n{font-weight:700;font-size:14px}.cal-dnum .wd{display:none;font-size:12px;color:var(--muted)}
+/* Painike peittää koko ruudun: fokus, Enter/Space ja kosketus osuvat siihen. Numero ja sirut ovat päällä, mutta eivät syö osoitinta. */
+.cal-dnum{all:unset;box-sizing:border-box;position:absolute;inset:0;z-index:1;cursor:pointer;border-radius:8px}
+.cal-dnum:focus-visible{outline:none}
+.cal-day:has(.cal-dnum:focus-visible){outline:3px solid var(--gold);outline-offset:-2px}
+.cal-day-face{position:relative;z-index:2;display:flex;flex-direction:column;gap:2px;flex:1;min-height:0;pointer-events:none}
+.cal-day-face :is(a,button,input,select,textarea,summary){pointer-events:auto}
+.cal-num{display:flex;gap:6px;align-items:baseline;padding:3px 4px;min-height:28px;color:var(--ink)}
+.cal-num .n{font-weight:700;font-size:14px}.cal-num .wd{display:none;font-size:12px;color:var(--muted)}
 .cal-chips{display:flex;flex-direction:column;gap:2px;align-items:flex-start;padding:0 2px}
 .cal-chips .chip{font-size:11px;padding:1px 7px;max-width:100%}
 .cal-chips .lbl{display:none}
 .cal-grid.week{grid-template-columns:1fr}
 .cal-grid.week .cal-day{min-height:0;padding:6px}
-.cal-grid.week .cal-dnum .wd{display:inline}
+.cal-grid.week .cal-num .wd{display:inline}
 .cal-list{list-style:none;margin:0;padding:0;display:grid;gap:6px}
 .cal-item{display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center;padding:6px 8px;border-radius:8px;border-left:5px solid;font-size:14px}
 .cal-item.shift{background:var(--shiftbg);border-color:var(--shiftbar)}
@@ -49,7 +56,7 @@
   .cal-chips .chip{font-size:12px}
   .cal-chips .lbl{display:inline}
   .cal-grid.week{grid-template-columns:repeat(7,minmax(0,1fr))}
-  .cal-grid.week .cal-dnum .wd{display:inline}
+  .cal-grid.week .cal-num .wd{display:inline}
   .cal-grid.week .cal-item{grid-template-columns:1fr;gap:2px}
   .cal-grid.week .cal-day{min-height:260px}
 }
