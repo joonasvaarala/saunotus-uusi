@@ -3,13 +3,14 @@
 import { h, toast, money, errMsg } from './ui.js';
 import { icon } from './icons.js';
 import { loadPosTexts, posText as tx } from './pos-texts.js';
-import { cartAdd, cartSetQty, cartTotal, checkoutItems, tendersFor, tenderAvailable, joinUrl, posCandidates, filterProducts, tillEditorOpen, moveSort, validEmail } from './pos-logic.js';
-import { finnishMobileMsisdn } from './phone-fi.js';
+import { cartAdd, cartSetQty, cartTotal, checkoutItems, posSheetTenders, tenderAvailable, joinUrl, posCandidates, filterProducts, tillEditorOpen, moveSort, validEmail, posCustomerHits } from './pos-logic.js';
+import { searchCustomers } from './customer-hits.js';
 import { qrSvgElement } from './qrsvg.js';
 
 const MOCK = () => new URLSearchParams(location.search).get('mock') === '1';
 
 export async function renderPos({ ctx, rpc, fn }) {
+  void fn;
   const lang = 'fi';
   const t = (k) => tx(k, lang);
   const canEdit = ctx.can('pos.use') || ctx.can('catalog.edit') || ctx.can('settings.edit');
@@ -22,9 +23,8 @@ export async function renderPos({ ctx, rpc, fn }) {
   let cart = [];
   let showLines = false;
   let tender = null;
-  let mpFlow = 'QR';
-  let phone = '';
   let email = '';
+  const suggest = { items: [], hi: -1, gen: 0, req: 0, timer: null };
   let mail = null;
   let mailError = '';
   let order = null;
@@ -70,9 +70,42 @@ export async function renderPos({ ctx, rpc, fn }) {
     if (html) html.classList.remove('pos-modal-open');
   }
 
+  function stopSuggest() {
+    suggest.gen += 1;
+    suggest.req += 1;
+    suggest.items = [];
+    suggest.hi = -1;
+    clearTimeout(suggest.timer);
+    suggest.timer = null;
+  }
+
+  function customerListOpen() {
+    const list = document.getElementById('pos-customer-list');
+    return !!(list && !list.hidden && list.getAttribute('hidden') == null && list.querySelector('[role="option"]'));
+  }
+
+  function closeCustomerList() {
+    const open = customerListOpen();
+    suggest.items = [];
+    suggest.hi = -1;
+    const list = document.getElementById('pos-customer-list');
+    if (list) {
+      list.hidden = true;
+      list.setAttribute('hidden', '');
+      list.replaceChildren();
+    }
+    const inp = document.getElementById('pos-customer-input');
+    if (inp) {
+      inp.setAttribute('aria-expanded', 'false');
+      inp.removeAttribute('aria-activedescendant');
+    }
+    return open;
+  }
+
   function teardown() {
     payOpen = false;
     modalWasOpen = false;
+    stopSuggest();
     unbindKey();
     releaseScroll();
     document.getElementById('pos-pay-overlay')?.remove();
@@ -91,7 +124,10 @@ export async function renderPos({ ctx, rpc, fn }) {
 
   function onModalKey(e) {
     if (!root.isConnected) { teardown(); return; }
-    if (e.key === 'Escape') { e.preventDefault?.(); closePay(); return; }
+    if (e.key === 'Escape') {
+      if (closeCustomerList()) { e.preventDefault?.(); return; }
+      e.preventDefault?.(); closePay(); return;
+    }
     if (e.key !== 'Tab') return;
     const dlg = document.getElementById('pos-pay-dialog');
     if (!dlg) return;
@@ -168,7 +204,7 @@ export async function renderPos({ ctx, rpc, fn }) {
       const st = await rpc('admin_get_montonio_status');
       if (st && st.mode) modes = { ...modes, montonio_mode: st.mode };
     } catch { /* pos.use ilman settings.edit: maksulinkki käyttää vismapay_mode-varaa */ }
-    tenders = tendersFor(ten?.tenders || [], 'pos');
+    tenders = posSheetTenders(ten?.tenders || []);
     allProducts = Array.isArray(products) ? products : [];
     editing = tillEditorOpen(catalog.length, editing);
   }
@@ -180,11 +216,10 @@ export async function renderPos({ ctx, rpc, fn }) {
     try { await rpc('admin_pos_void', { p_order_id: id }); } catch (e) { toast(errMsg(e)); }
   }
 
-  function watch(orderId, token) {
+  function watch(orderId) {
     stopPoll();
     const tick = async () => {
       try {
-        if (!MOCK() && token) await fn('mobilepay-notify', { action: 'reconcile', order_token: token }).catch(() => {});
         const st = await rpc('admin_pos_status', { p_order_id: orderId });
         if (st?.payment_status === 'paid') {
           stopPoll();
@@ -220,7 +255,7 @@ export async function renderPos({ ctx, rpc, fn }) {
       if (!cart.length) { toast(t('empty')); return; }
       if (!tender || !tenderAvailable(tenders.find((x) => x.code === tender), modes)) { payOpen = true; toast(t('choose_method')); return; }
       const chosen = tenders.find((x) => x.code === tender);
-      if (chosen.handler === 'mobilepay' && mpFlow === 'PUSH_MESSAGE' && !finnishMobileMsisdn(phone)) { toast(t('phone_invalid')); payOpen = true; return; }
+      if (!chosen || chosen.handler !== 'payment_link') { payOpen = true; toast(t('choose_method')); return; }
       let mailTo = null;
       if (chosen.handler === 'payment_link') {
         mailTo = String(email || '').trim();
@@ -241,16 +276,7 @@ export async function renderPos({ ctx, rpc, fn }) {
           mail = { status: link.outbox_status || 'pending', masked_to: link.masked_to || null, attempts: null, max_attempts: null, sent_at: null, last_error: null };
           mailError = '';
           if (MOCK()) await rpc('admin_pos_mock_tender', { p_order_id: res.order_id });
-          watch(res.order_id, res.public_token);
-        } else if (chosen.handler === 'mobilepay') {
-          if (MOCK()) {
-            await rpc('admin_pos_mock_tender', { p_order_id: res.order_id });
-            payInfo = { kind: 'mp', flow: mpFlow, qr: mpFlow === 'QR' ? 'https://pay.example.test/mock-qr' : null, pushed: mpFlow === 'PUSH_MESSAGE' };
-          } else {
-            const started = await fn('mobilepay-start', { order_token: res.public_token, user_flow: mpFlow, phone: mpFlow === 'PUSH_MESSAGE' ? finnishMobileMsisdn(phone) : undefined });
-            payInfo = { kind: 'mp', flow: mpFlow, qr: started.qr_url || started.redirect_url || null, pushed: !!started.pushed };
-          }
-          watch(res.order_id, res.public_token);
+          watch(res.order_id);
         }
         payOpen = true;
       } catch (e) {
@@ -272,6 +298,7 @@ export async function renderPos({ ctx, rpc, fn }) {
   function nextCustomer() {
     order = null; phase = 'cart'; payInfo = null; cart = [];
     email = ''; mail = null; mailError = '';
+    stopSuggest();
     payOpen = false; returnFocus = null; modalWasOpen = false;
     stopPoll();
     draw();
@@ -307,36 +334,127 @@ export async function renderPos({ ctx, rpc, fn }) {
     for (const m of tenders) {
       const available = tenderAvailable(m, modes);
       const on = available && phase === 'cart';
-      const label = m.handler === 'payment_link' ? t('method_link') : m.handler === 'mobilepay' ? t('method_mobilepay') : m.handler === 'terminal' ? t('method_terminal') : m.code;
+      const label = m.handler === 'payment_link' ? t('method_link') : m.handler === 'terminal' ? t('method_terminal') : m.code;
       box.append(h('label', { class: 'pos-method' + (available ? '' : ' is-off') },
         h('input', { type: 'radio', name: 'tender', value: m.code, disabled: !on || null, checked: tender === m.code || null, onchange: () => { tender = m.code; draw(); } }),
         h('span', { text: label }),
         !available && m.handler === 'terminal' ? h('small', { text: t('terminal_later') }) : null,
-        !available && m.handler === 'mobilepay' ? h('small', { text: t('mp_off') }) : null,
-        !available && m.handler === 'visma_pay' ? h('small', { text: t('visma_off') }) : null,
         !available && m.handler === 'payment_link' ? h('small', { text: t('vismapay_off'), 'data-testid': 'pos-vismapay-off' }) : null));
-    }
-    return box;
-  }
-
-  function flowBox() {
-    if (tender !== 'mobilepay' || phase === 'paid') return null;
-    const box = h('div', { class: 'pos-flows', 'data-testid': 'pos-flows' });
-    box.append(h('label', {}, h('input', { type: 'radio', name: 'mpflow', checked: mpFlow === 'QR' || null, disabled: phase !== 'cart' || null, onchange: () => { mpFlow = 'QR'; draw(); } }), h('span', { text: t('method_qr') })));
-    box.append(h('label', {}, h('input', { type: 'radio', name: 'mpflow', checked: mpFlow === 'PUSH_MESSAGE' || null, disabled: phase !== 'cart' || null, onchange: () => { mpFlow = 'PUSH_MESSAGE'; draw(); } }), h('span', { text: t('method_push') })));
-    if (mpFlow === 'PUSH_MESSAGE' && phase === 'cart') {
-      const inp = h('input', { type: 'tel', inputmode: 'tel', autocomplete: 'tel', value: phone, 'aria-label': t('phone'), 'data-testid': 'pos-phone' });
-      inp.addEventListener('input', () => { phone = inp.value; });
-      box.append(h('label', { class: 'fld' }, h('span', { text: t('phone') }), inp));
     }
     return box;
   }
 
   function emailBox() {
     if (tender !== 'payment_link' || phase !== 'cart') return null;
-    const inp = h('input', { type: 'email', inputmode: 'email', autocomplete: 'email', value: email, 'aria-label': t('email'), 'data-testid': 'pos-email' });
-    inp.addEventListener('input', () => { email = inp.value; });
-    return h('label', { class: 'fld' }, h('span', { text: t('email') }), inp, h('small', { class: 'muted', text: t('email_help') }));
+    const gen = ++suggest.gen;
+    clearTimeout(suggest.timer);
+    suggest.timer = null;
+    suggest.items = [];
+    suggest.hi = -1;
+    const list = h('ul', {
+      id: 'pos-customer-list', class: 'pos-suggest', role: 'listbox', hidden: true,
+      'aria-label': t('customer_list'),
+    });
+    const inp = h('input', {
+      id: 'pos-customer-input', type: 'text', autocomplete: 'off', autocapitalize: 'off', spellcheck: 'false',
+      role: 'combobox', 'aria-autocomplete': 'list', 'aria-expanded': 'false', 'aria-controls': 'pos-customer-list',
+      'aria-labelledby': 'pos-customer-label', 'aria-describedby': 'pos-customer-hint',
+      value: email, 'data-testid': 'pos-email',
+    });
+
+    function paint(hits) {
+      suggest.items = hits;
+      suggest.hi = -1;
+      if (!hits.length) { closeCustomerList(); return; }
+      list.hidden = false;
+      list.removeAttribute('hidden');
+      inp.setAttribute('aria-expanded', 'true');
+      inp.removeAttribute('aria-activedescendant');
+      list.replaceChildren(...hits.map((hit, i) => {
+        const id = `pos-cust-opt-${i}`;
+        const label = hit.name ? `${hit.name}, ${hit.email}` : hit.email;
+        return h('li', { role: 'presentation' }, h('button', {
+          type: 'button', id, role: 'option', class: 'pos-hit', 'aria-selected': 'false', 'aria-label': label,
+          'data-testid': 'pos-customer-hit',
+          onmousedown: (e) => { e.preventDefault(); choose(hit); },
+          onclick: () => choose(hit),
+        }, h('span', { text: hit.name || hit.email }), hit.name ? h('small', { text: hit.email }) : null));
+      }));
+    }
+
+    function mark() {
+      const buttons = [...list.querySelectorAll('[role="option"]')];
+      buttons.forEach((b, i) => {
+        const on = i === suggest.hi;
+        b.setAttribute('aria-selected', on ? 'true' : 'false');
+        if (on) inp.setAttribute('aria-activedescendant', b.id || b.getAttribute('id'));
+      });
+      if (suggest.hi < 0) inp.removeAttribute('aria-activedescendant');
+      if (suggest.hi >= 0 && buttons[suggest.hi]?.scrollIntoView) buttons[suggest.hi].scrollIntoView({ block: 'nearest' });
+    }
+
+    function choose(hit) {
+      email = hit.email;
+      inp.value = hit.email;
+      closeCustomerList();
+    }
+
+    async function load(q, my) {
+      let rows = [];
+      try { rows = await searchCustomers(q, rpc); } catch { rows = []; }
+      if (!Array.isArray(rows)) rows = [];
+      if (my !== suggest.req || gen !== suggest.gen || !list.isConnected) return;
+      if (String(inp.value || '').trim() !== q) return;
+      paint(posCustomerHits(rows, 8));
+    }
+
+    function schedule() {
+      const q = String(inp.value || '').trim();
+      clearTimeout(suggest.timer);
+      const my = ++suggest.req;
+      if (q.length < 2) { closeCustomerList(); return; }
+      suggest.timer = setTimeout(() => { void load(q, my); }, 250);
+    }
+
+    inp.addEventListener('input', () => { email = String(inp.value || ''); schedule(); });
+    inp.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+        if (!customerListOpen()) {
+          if (e.key === 'ArrowDown') schedule();
+          return;
+        }
+        e.preventDefault?.();
+        const n = suggest.items.length;
+        if (!n) return;
+        suggest.hi = e.key === 'ArrowDown' ? (suggest.hi + 1) % n : (suggest.hi <= 0 ? n - 1 : suggest.hi - 1);
+        mark();
+        return;
+      }
+      if (e.key === 'Enter' && customerListOpen() && suggest.hi >= 0 && suggest.items[suggest.hi]) {
+        e.preventDefault?.();
+        choose(suggest.items[suggest.hi]);
+        return;
+      }
+      if (e.key === 'Escape' && customerListOpen()) {
+        e.preventDefault?.();
+        e.stopPropagation?.();
+        closeCustomerList();
+      }
+    });
+    inp.addEventListener('blur', () => {
+      setTimeout(() => {
+        if (!list.isConnected) return;
+        const active = document.activeElement;
+        if (active && list.contains(active)) return;
+        if (customerListOpen()) closeCustomerList();
+      }, 200);
+    });
+
+    return h('div', { class: 'fld pos-customer', 'data-testid': 'pos-customer' },
+      h('label', { id: 'pos-customer-label', for: 'pos-customer-input', text: t('customer') }),
+      inp,
+      list,
+      h('small', { id: 'pos-customer-hint', class: 'muted', text: t('customer_help') }));
   }
 
   function statusBlock() {
@@ -353,10 +471,6 @@ export async function renderPos({ ctx, rpc, fn }) {
       }
       if (payInfo.url) box.append(h('p', { class: 'muted', text: t('link_help') }), h('p', { class: 'pos-url', text: payInfo.url }), qrSvgElement(payInfo.url, { size: 220, label: t('method_link') }));
     }
-    if (phase === 'paying' && payInfo?.kind === 'mp' && payInfo.flow === 'QR' && payInfo.qr) {
-      box.append(h('p', { class: 'muted', text: t('qr_help') }), qrSvgElement(payInfo.qr, { size: 220, label: t('method_qr') }));
-    }
-    if (phase === 'paying' && payInfo?.pushed) box.append(h('p', { class: 'muted', text: t('push_help') }));
     if (phase === 'paying') box.append(h('p', { text: t('waiting') }));
     if (phase === 'paid') {
       box.append(h('div', { class: 'pos-paid', 'data-testid': 'pos-paid-dialog' },
@@ -387,8 +501,6 @@ export async function renderPos({ ctx, rpc, fn }) {
     if (phase !== 'paid') {
       dialog.append(h('h2', { text: t('method') }));
       dialog.append(methodBox());
-      const flows = flowBox();
-      if (flows) dialog.append(flows);
       const mailField = emailBox();
       if (mailField) dialog.append(mailField);
     }

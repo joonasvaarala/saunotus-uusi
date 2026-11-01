@@ -41,6 +41,33 @@ export function tendersFor(list, channel) {
     .sort((a, b) => (a.sort_order ?? 100) - (b.sort_order ?? 100));
 }
 
+const DIRECT_ONLINE = new Set(['mobilepay', 'visma_pay']);
+
+/** Pikakassan maksuikkuna: ei suoraa MobilePayta eikä Visma Payta. Maksulinkki ja korttipääte jäävät. */
+export function posSheetTenders(list) {
+  return tendersFor(list, 'pos').filter((t) => !DIRECT_ONLINE.has(t.code) && !DIRECT_ONLINE.has(t.handler));
+}
+
+/** Asiakasrekisterin osumat maksukenttään. Tilauksilta poimitut yritykset (source orders) ja osoitteettomat jätetään pois. */
+export function posCustomerHits(rows, limit = 8) {
+  const cap = Math.min(Math.max(Number(limit) || 8, 1), 8);
+  const out = [];
+  const seen = new Set();
+  for (const row of rows || []) {
+    if (!row || row.source === 'orders') continue;
+    const email = String(row.email || '').trim();
+    if (!validEmail(email)) continue;
+    const key = email.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    const name = String(row.name || '').trim() || String(row.company || '').trim();
+    const id = row.customer_id ?? row.id ?? null;
+    out.push({ id: id == null || id === '' ? null : id, name, email });
+    if (out.length >= cap) break;
+  }
+  return out;
+}
+
 export function tenderAvailable(tender, modes) {
   if (!tender) return false;
   if (tender.handler === 'terminal' || tender.code === 'card_terminal') return false;

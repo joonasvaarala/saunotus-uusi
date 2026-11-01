@@ -1,0 +1,62 @@
+[
+  {
+    "key": "ui.pos.customer",
+    "lang": "fi",
+    "text": "Asiakas (nimi tai sähköposti)",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "Pikakassan maksu: yksi kenttä asiakasrekisterin haulle tai sähköpostille. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.pos.customer",
+    "lang": "en",
+    "text": "Customer (name or email)",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "Pikakassan maksu: yksi kenttä asiakasrekisterin haulle tai sähköpostille. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.pos.customer_help",
+    "lang": "fi",
+    "text": "Hae asiakasrekisteristä tai kirjoita sähköposti. Maksulinkki lähetetään tähän osoitteeseen.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "Pikakassan maksu: yksi kenttä asiakasrekisterin haulle tai sähköpostille. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.pos.customer_help",
+    "lang": "en",
+    "text": "Search the customer register or type an email. The payment link is sent to this address.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "Pikakassan maksu: yksi kenttä asiakasrekisterin haulle tai sähköpostille. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.pos.customer_list",
+    "lang": "fi",
+    "text": "Asiakkaat",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "Pikakassan maksu: yksi kenttä asiakasrekisterin haulle tai sähköpostille. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.pos.customer_list",
+    "lang": "en",
+    "text": "Customers",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "Pikakassan maksu: yksi kenttä asiakasrekisterin haulle tai sähköpostille. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  }
+]

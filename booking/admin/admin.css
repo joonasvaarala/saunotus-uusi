@@ -683,6 +683,13 @@ input[aria-invalid=true],select[aria-invalid=true],textarea[aria-invalid=true]{b
 .pos-paid{display:grid;gap:8px;text-align:center}
 .pos-url{overflow-wrap:anywhere;font-size:14px}
 .pos-legal{font-size:13px}
+.pos-customer{min-width:0}
+.pos-customer>label{font-weight:600}
+.pos-suggest{list-style:none;margin:0;padding:0;display:grid;gap:4px;max-height:min(40dvh,240px);overflow:auto}
+.pos-hit{width:100%;min-height:48px;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:2px;text-align:left;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:#fff;font:inherit;color:var(--ink);cursor:pointer}
+.pos-hit span,.pos-hit small{min-width:0;overflow-wrap:anywhere}
+.pos-hit small{font-weight:400}
+.pos-hit[aria-selected=true],.pos-hit:hover{border-color:var(--green);background:#E4EBE5}
 .pos-devices{margin-top:18px}
 .pos-edit{width:100%;margin:8px 0}
 .pos-tools{margin-top:22px;padding-top:12px;border-top:1px solid var(--line)}

@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import test from 'node:test';
 import { finnishMobileMsisdn } from '../admin/phone-fi.js';
-import { cartAdd, cartSetQty, cartTotal, checkoutItems, looksLikeAlcohol, tenderAvailable, tendersFor, validEmail } from '../admin/pos-logic.js';
+import { cartAdd, cartSetQty, cartTotal, checkoutItems, looksLikeAlcohol, posCustomerHits, posSheetTenders, tenderAvailable, tendersFor, validEmail } from '../admin/pos-logic.js';
 import { POS_TEXTS } from '../admin/pos-texts.js';
 import { qrMatrix } from '../admin/qrsvg.js';
 import { deviceFromSearch, drinksCartAdd, looksLikeAlcohol as drinksAlcohol } from '../drinks/drinks-logic.js';
@@ -50,6 +50,7 @@ test('maksutavat: ei käteistä, korttipääte näkyy mutta ei ole valittavissa'
   ];
   const pos = tendersFor(list, 'pos').map((t) => t.code);
   assert.deepEqual(pos, ['payment_link', 'mobilepay', 'card_terminal']);
+  assert.deepEqual(posSheetTenders(list).map((t) => t.code), ['payment_link', 'card_terminal']);
   assert.equal(tenderAvailable(list.find((t) => t.code === 'card_terminal'), { mobilepay_mode: 'test' }), false);
   assert.equal(tenderAvailable(list.find((t) => t.code === 'mobilepay'), { mobilepay_mode: 'off' }), false);
   assert.equal(tenderAvailable(list.find((t) => t.code === 'mobilepay'), { mobilepay_mode: 'test' }), false);
@@ -60,6 +61,25 @@ test('maksutavat: ei käteistä, korttipääte näkyy mutta ei ole valittavissa'
   assert.equal(tenderAvailable(link, { vismapay_mode: 'dry_run' }), true);
   assert.equal(tenderAvailable(link, { montonio_mode: 'off', vismapay_mode: 'test' }), false);
   assert.equal(tenderAvailable(link, { montonio_mode: 'test', vismapay_mode: 'off' }), true);
+});
+
+test('asiakashaku: rekisterin osoitteelliset, enintään kahdeksan, ei tilausten yrityksiä', () => {
+  const rows = [
+    { source: 'customer', id: 1, customer_id: 1, name: 'Aino Testaaja', email: 'Aino@Example.com' },
+    { source: 'orders', id: null, customer_id: 2, name: 'Eero', company: 'Saunaseura Testi Oy', email: 'laskut@saunaseura.example.test' },
+    { source: 'customer', id: 9, name: 'Ilman osoitetta', email: '' },
+    { id: 4, name: 'Vanha lista', email: 'vanha@example.test' },
+    { source: 'customer', id: 5, name: '', company: 'Koivutesti Oy', email: 'liisa@t112.test' },
+  ];
+  for (let i = 0; i < 10; i++) rows.push({ source: 'customer', id: 20 + i, name: `Nimi ${i}`, email: `n${i}@example.test` });
+  const hits = posCustomerHits(rows);
+  assert.equal(hits.length, 8);
+  assert.equal(hits[0].email, 'Aino@Example.com');
+  assert.equal(hits[0].id, 1);
+  assert.equal(hits.some((h) => h.email === 'laskut@saunaseura.example.test'), false);
+  assert.equal(hits.some((h) => h.name === 'Ilman osoitetta'), false);
+  assert.equal(hits.find((h) => h.email === 'liisa@t112.test').name, 'Koivutesti Oy');
+  assert.deepEqual(posCustomerHits([{ source: 'customer', email: 'ei' }]), []);
 });
 
 test('sähköposti: sama sääntö kuin palvelimella', () => {
@@ -145,6 +165,10 @@ test('mock-kassa: lahjakortti pois, asiakkaan hinta hylätään, summa katalogis
   assert.equal(order.source_channel, 'pikakassa');
   assert.equal(order.total, 6);
   assert.equal(order.lines[0].unit_price, 3);
+  const linked = await mock.rpc('admin_pos_checkout', { p_items: [{ product_id: 101, quantity: 1 }], p_email: 'Aino@Example.com' });
+  assert.equal(linked.customer_email, 'aino@example.com');
+  assert.equal(linked.customer_id, 1);
+  assert.equal(mock.state.posCustomers.some((c) => c.email === 'aino@example.com'), false);
 });
 
 test('mock: pos.use saa lähettää linkin, payments.manage ei ole tarpeen, tuplakutsu on yksi rivi', async () => {

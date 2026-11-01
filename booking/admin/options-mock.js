@@ -216,6 +216,25 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
   const required = (pid) => !!st.settings[pid]?.option_required && activeOpts(pid).length > 0;
   const missing = (r) => r.option_id == null && activeOpts(r.product_id).length > 0;
   const product = (id) => st.products.find((p) => p.id === id);
+  // Sama sääntö kuin _counter_checkout / admin_pos_send_link: osoite liitetään rekisterin asiakkaaseen (uusin id), muuten luodaan kassan asiakas. Osoite ei päivitä olemassa olevan asiakkaan kenttiä.
+  const posCustomerEmail = (id) => {
+    const reg = st.customers.find((c) => c.id === id && !c.anonymized_at);
+    if (reg?.email) return String(reg.email).trim().toLowerCase();
+    return st.posCustomers.find((c) => c.id === id)?.email || '';
+  };
+  const ensurePosCustomer = (email) => {
+    const reg = [...st.customers].reverse().find((c) => !c.anonymized_at && String(c.email || '').trim().toLowerCase() === email);
+    if (reg) return reg.id;
+    let cust = [...st.posCustomers].reverse().find((c) => c.email === email);
+    if (!cust) {
+      const used = new Set([...st.customers.map((c) => c.id), ...st.posCustomers.map((c) => c.id)]);
+      let id = 1;
+      while (used.has(id)) id += 1;
+      cust = { id, email };
+      st.posCustomers.push(cust);
+    }
+    return cust.id;
+  };
   const addRes = ({ pid, date, at, persons, status = 'confirmed', cust, optId = null, pay = 'paid', min = 90 }) => {
     const id = ++st.seq.res, orderNo = ++st.seq.order, c = st.customers.find((x) => x.id === cust) || st.customers[0];
     const [hh, mm] = at.split(':').map(Number), endMin = hh * 60 + mm + min, end = `${String(Math.floor(endMin / 60) % 24).padStart(2, '0')}:${String(endMin % 60).padStart(2, '0')}`;
@@ -670,15 +689,7 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
       }
       const raw = a.p_email == null ? '' : String(a.p_email).trim().toLowerCase();
       if (raw && (raw.length > 254 || !EMAIL_RE.test(raw))) throw err('invalid_email', 'Sähköposti ei ole kelvollinen');
-      let customerId = null;
-      if (raw) {
-        let cust = [...st.posCustomers].reverse().find((c) => c.email === raw);
-        if (!cust) {
-          cust = { id: st.posCustomers.length + 1, email: raw };
-          st.posCustomers.push(cust);
-        }
-        customerId = cust.id;
-      }
+      const customerId = raw ? ensurePosCustomer(raw) : null;
       const id = ++st.seq.order;
       const row = { order_id: id, order_no: id, public_token: `00000000-0000-4000-8000-${String(id).padStart(12, '0')}`, total, status: 'pending', payment_status: 'unpaid', source_channel: 'pikakassa', customer_id: customerId, customer_email: raw || null, lines, receipts: [], polls: 0, arm: false };
       st.posOrders.push(row);
@@ -717,14 +728,8 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
       if (o.status !== 'pending' || !['unpaid', 'pending'].includes(o.payment_status)) throw err('order_not_editable', 'Tilaukselle ei voi lähettää maksulinkkiä');
       const email = String(a.p_email || '').trim().toLowerCase();
       if (!email || email.length > 254 || !EMAIL_RE.test(email)) throw err('invalid_email', 'Sähköposti ei ole kelvollinen');
-      const current = st.posCustomers.find((c) => c.id === o.customer_id);
-      if (!o.customer_id || current?.email !== email) {
-        let cust = [...st.posCustomers].reverse().find((c) => c.email === email);
-        if (!cust) {
-          cust = { id: st.posCustomers.length + 1, email };
-          st.posCustomers.push(cust);
-        }
-        o.customer_id = cust.id;
+      if (!o.customer_id || posCustomerEmail(o.customer_id) !== email) {
+        o.customer_id = ensurePosCustomer(email);
         o.customer_email = email;
       }
       if (!o.payment_id) o.payment_id = ++st.seq.pay;

@@ -97,11 +97,38 @@ function installDom() {
     for (let n = this; n; n = n.parent) chain.push(n);
     for (const n of chain) for (const fn of n.listeners?.click || []) fn(ev);
   };
-  El.prototype.dispatch = function (type) {
-    const ev = { type, target: this, preventDefault() {} };
+  El.prototype.removeAttribute = function (k) {
+    delete this.attrs[k];
+    if (k === 'hidden') this.hidden = false;
+    if (k === 'disabled') this.disabled = false;
+    if (k === 'id') this.id = '';
+    if (k === 'class') this.className = '';
+  };
+  El.prototype.closest = function (sel) {
+    let n = this;
+    while (n) {
+      if (n.nodeType === 1 && matchSel(n, sel)) return n;
+      n = n.parent;
+    }
+    return null;
+  };
+  El.prototype.scrollIntoView = function () {};
+  El.prototype.dispatch = function (type, extra = {}) {
+    const ev = {
+      type, target: this, defaultPrevented: false, stopped: false, ...extra,
+      preventDefault() { this.defaultPrevented = true; },
+      stopPropagation() { this.stopped = true; },
+    };
     const chain = [];
     for (let n = this; n; n = n.parent) chain.push(n);
-    for (const n of chain) for (const fn of n.listeners?.[type] || []) fn(ev);
+    for (const n of chain) {
+      if (ev.stopped) break;
+      for (const fn of n.listeners?.[type] || []) {
+        fn(ev);
+        if (ev.stopped) break;
+      }
+    }
+    return ev;
   };
   function matchSel(el, sel) {
     if (sel === 'button' || sel === 'input' || sel === 'select' || sel === 'textarea') return el.tagName === sel.toUpperCase();
@@ -167,6 +194,7 @@ const texts = await import(href('../admin/pos-texts.js'));
 const read = (rel) => readFileSync(new URL(rel, import.meta.url), 'utf8');
 const pending17 = JSON.parse(read('../../content/site-texts.pending-import-17.json'));
 const pending18 = JSON.parse(read('../../content/site-texts.pending-import-18.json'));
+const pending113 = JSON.parse(read('../../content/site-texts.pending-import-113.json'));
 const pending16 = JSON.parse(read('../../content/site-texts.pending-import-16.json'));
 const pending12 = JSON.parse(read('../../content/site-texts.pending-import-12.json'));
 
@@ -198,6 +226,7 @@ function keydown(key, extra = {}) {
 async function flush() {
   for (let i = 0; i < 12; i++) await new Promise((r) => setTimeout(r, 0));
 }
+const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 const ctx = { can: (p) => p === 'pos.use' || p === 'catalog.edit' || p === 'settings.edit' };
 
 async function mount(rpc = createAdminMock({ delay: 0 }).rpc, fn) {
@@ -321,10 +350,10 @@ test('Maksa avaa popupin; Escape, tausta ja sulku palauttavat fokuksen ja scroll
   assert.equal(document.body.classList.contains('pos-modal-open'), true);
   assert.equal(document.activeElement, dlg);
   const radios = all(dlg).filter((n) => n.getAttribute('name') === 'tender');
-  assert.deepEqual(radios.map((n) => n.value), ['payment_link', 'mobilepay', 'card_terminal']);
+  assert.deepEqual(radios.map((n) => n.value), ['payment_link', 'card_terminal']);
   assert.equal(radios.find((n) => n.value === 'card_terminal').hasAttribute('disabled'), true);
-  assert.equal(radios.find((n) => n.value === 'mobilepay').hasAttribute('disabled'), true);
   assert.equal(radios.find((n) => n.value === 'payment_link').hasAttribute('disabled'), false);
+  assert.equal(dlg.textContent.includes('MobilePay'), false);
   assert.equal(all(root).some((n) => n.getAttribute('name') === 'tender'), false);
   assert.equal(dlg.textContent.includes('Käteinen'), false);
   assert.match(dlg.textContent, /Tulossa/);
@@ -347,7 +376,7 @@ test('Maksa avaa popupin; Escape, tausta ja sulku palauttavat fokuksen ja scroll
   assert.equal(q(document.body, 'pos-pay-close'), null);
 });
 
-test('maksutapa vahvistetaan popupissa; MobilePayn puhelin ja maksulinkki pysyvät', async () => {
+test('maksutapa vahvistetaan popupissa; maksulinkki pysyy, MobilePayta ei ole', async () => {
   const mock = createAdminMock({ delay: 0 });
   const root = await mount(mock.rpc);
   q(root, 'pos-product-101').click();
@@ -358,16 +387,10 @@ test('maksutapa vahvistetaan popupissa; MobilePayn puhelin ja maksulinkki pysyv�
   assert.match(document.getElementById('toast').textContent, /Valitse maksutapa/);
   assert.equal(mock.state.calls.some((c) => c.name === 'admin_pos_checkout'), false);
   dlg = document.getElementById('pos-pay-dialog');
-  const mp = all(dlg).find((n) => n.getAttribute('name') === 'tender' && n.value === 'mobilepay');
-  mp.dispatch('change');
-  dlg = document.getElementById('pos-pay-dialog');
-  const flows = all(dlg).filter((n) => n.getAttribute('name') === 'mpflow');
-  assert.equal(flows.length, 2);
-  assert.match(dlg.textContent, /QR-koodi/);
-  assert.match(dlg.textContent, /Pyyntö puhelimeen/);
-  flows[1].dispatch('change');
-  dlg = document.getElementById('pos-pay-dialog');
-  assert.ok(q(dlg, 'pos-phone'));
+  assert.equal(all(dlg).some((n) => n.getAttribute('name') === 'tender' && n.value === 'mobilepay'), false);
+  assert.equal(all(dlg).some((n) => n.getAttribute('name') === 'mpflow'), false);
+  assert.equal(q(dlg, 'pos-phone'), null);
+  assert.equal(dlg.textContent.includes('MobilePay'), false);
   const link = all(dlg).find((n) => n.getAttribute('name') === 'tender' && n.value === 'payment_link');
   link.dispatch('change');
   const origSet = globalThis.setInterval;
@@ -377,9 +400,10 @@ test('maksutapa vahvistetaan popupissa; MobilePayn puhelin ja maksulinkki pysyv�
   try {
     dlg = document.getElementById('pos-pay-dialog');
     const email = q(dlg, 'pos-email');
-    assert.equal(email.getAttribute('type'), 'email');
-    assert.equal(email.getAttribute('inputmode'), 'email');
-    assert.equal(email.getAttribute('autocomplete'), 'email');
+    assert.equal(email.getAttribute('type'), 'text');
+    assert.equal(email.getAttribute('role'), 'combobox');
+    assert.equal(email.getAttribute('aria-autocomplete'), 'list');
+    assert.equal(email.getAttribute('autocomplete'), 'off');
     email.value = 'asiakas@example.test';
     email.dispatch('input');
     q(dlg, 'pos-confirm').click();
@@ -434,7 +458,7 @@ test('kaksi peräkkäistä vahvistusta luo yhden kassatilauksen', async () => {
   assert.equal(mock.state.calls.filter((c) => c.name === 'admin_pos_send_link').length, 1);
 });
 
-test('MobilePay-maksutapa ei ole enää valittavissa pikakassassa', async () => {
+test('MobilePay-maksutapaa ei näytetä pikakassan maksuikkunassa', async () => {
   const prev = globalThis.location.search;
   globalThis.location.search = '';
   const mock = createAdminMock({ delay: 0 });
@@ -443,9 +467,15 @@ test('MobilePay-maksutapa ei ole enää valittavissa pikakassassa', async () => 
     q(root, 'pos-product-101').click();
     q(root, 'pos-pay').click();
     const dlg = document.getElementById('pos-pay-dialog');
-    const mp = all(dlg).find((n) => n.getAttribute('name') === 'tender' && n.value === 'mobilepay');
-    assert.ok(mp);
-    assert.equal(mp.disabled, true);
+    assert.equal(all(dlg).find((n) => n.getAttribute('name') === 'tender' && n.value === 'mobilepay'), undefined);
+    assert.match(dlg.textContent, /Maksulinkki/);
+    assert.match(dlg.textContent, /Korttipääte/);
+    assert.match(dlg.textContent, /Tulossa/);
+    assert.equal(dlg.textContent.includes('MobilePay'), false);
+    const src = read('../admin/pos-screen.js');
+    assert.equal(src.includes('mobilepay-start'), false);
+    assert.equal(src.includes('mobilepay-notify'), false);
+    assert.equal(src.includes('pos-phone'), false);
     q(dlg, 'pos-confirm').click();
     await flush();
     assert.equal(mock.state.calls.some((c) => c.name === 'admin_pos_checkout'), false);
@@ -681,7 +711,11 @@ test('pending-import-18: maksulinkin tekstit FI+EN, normal, ei numeroita, kaytos
     }
   }
   const src = read('../admin/pos-screen.js');
-  for (const key of Object.keys(texts.POS_LINK_TEXTS.fi)) assert.match(src, new RegExp(`t\\('${key}'\\)`));
+  const replaced = new Set(['email', 'email_help']);
+  for (const key of Object.keys(texts.POS_LINK_TEXTS.fi)) {
+    if (replaced.has(key)) assert.equal(src.includes(`t('${key}')`), false, key);
+    else assert.match(src, new RegExp(`t\\('${key}'\\)`));
+  }
   assert.equal(src.includes('admin_create_payment_link'), false);
   assert.match(src, /admin_pos_send_link/);
   assert.match(src, /admin_pos_email_status/);
@@ -690,4 +724,150 @@ test('pending-import-18: maksulinkin tekstit FI+EN, normal, ei numeroita, kaytos
   const sign = pending18.filter((r) => r.key === 'email.payment_link.sign_name');
   assert.deepEqual(sign.map((r) => r.text), ['Tapio', 'Tapio']);
   assert.ok(sign.every((r) => r.class === 'normal' && r.lang && r.max_len === 200));
+});
+
+test('asiakaskentta: nimi hakee rekisterista, nuoli ja Enter tayttavat sahkopostin, osoite ilman valintaa kay', async () => {
+  const mock = createAdminMock({ delay: 0 });
+  const root = await mount(mock.rpc);
+  q(root, 'pos-product-101').click();
+  q(root, 'pos-pay').click();
+  let dlg = document.getElementById('pos-pay-dialog');
+  all(dlg).find((n) => n.getAttribute('name') === 'tender' && n.value === 'payment_link').dispatch('change');
+  dlg = document.getElementById('pos-pay-dialog');
+  assert.match(dlg.textContent, /Asiakas \(nimi tai sähköposti\)/);
+  assert.match(dlg.textContent, /Hae asiakasrekisteristä tai kirjoita sähköposti/);
+  const inp = q(dlg, 'pos-email');
+  assert.equal(inp.getAttribute('aria-expanded'), 'false');
+  assert.equal(inp.getAttribute('aria-controls'), 'pos-customer-list');
+  inp.value = 'A';
+  inp.dispatch('input');
+  await wait(300);
+  assert.equal(mock.state.calls.some((c) => c.name === 'admin_search_customers'), false);
+  assert.equal(document.getElementById('pos-customer-list').getAttribute('hidden') != null, true);
+  inp.value = 'Ai';
+  inp.dispatch('input');
+  await wait(300);
+  await flush();
+  const search = mock.state.calls.filter((c) => c.name === 'admin_search_customers');
+  assert.equal(search.length, 1);
+  assert.deepEqual(search[0].args, { p_search: 'Ai', p_limit: 8 });
+  const list = document.getElementById('pos-customer-list');
+  assert.equal(list.getAttribute('role'), 'listbox');
+  assert.equal(list.hidden, false);
+  assert.match(list.textContent, /Aino Testaaja/);
+  assert.match(list.textContent, /aino@example.com/);
+  const opts = all(list).filter((n) => n.getAttribute('role') === 'option');
+  assert.ok(opts.length >= 1 && opts.length <= 8);
+  inp.dispatch('keydown', { key: 'ArrowDown' });
+  assert.equal(inp.getAttribute('aria-activedescendant'), opts[0].id);
+  assert.equal(opts[0].getAttribute('aria-selected'), 'true');
+  const esc = inp.dispatch('keydown', { key: 'Escape' });
+  assert.equal(esc.defaultPrevented, true);
+  assert.equal(document.getElementById('pos-pay-dialog') != null, true);
+  assert.equal(document.getElementById('pos-customer-list').hidden, true);
+  inp.value = '0401';
+  inp.dispatch('input');
+  await wait(300);
+  await flush();
+  const phoneList = document.getElementById('pos-customer-list');
+  assert.match(phoneList.textContent, /Liisa Lasku/);
+  assert.match(phoneList.textContent, /liisa@t112.test/);
+  const phoneOpt = all(phoneList).find((n) => n.getAttribute('role') === 'option');
+  phoneOpt.click();
+  assert.equal(inp.value, 'liisa@t112.test');
+  assert.equal(phoneList.hidden, true);
+  inp.value = 'Saunaseura';
+  inp.dispatch('input');
+  await wait(300);
+  await flush();
+  assert.equal(document.getElementById('pos-customer-list').textContent.includes('Saunaseura'), false);
+  inp.value = 'Ai';
+  inp.dispatch('input');
+  await wait(300);
+  await flush();
+  const again = document.getElementById('pos-customer-input');
+  again.dispatch('keydown', { key: 'ArrowDown' });
+  again.dispatch('keydown', { key: 'Enter' });
+  assert.equal(again.value, 'aino@example.com');
+  const origSet = globalThis.setInterval;
+  const origClear = globalThis.clearInterval;
+  globalThis.setInterval = () => 1;
+  globalThis.clearInterval = () => {};
+  try {
+    q(document.getElementById('pos-pay-dialog'), 'pos-confirm').click();
+    await flush();
+    const checkout = mock.state.calls.find((c) => c.name === 'admin_pos_checkout');
+    assert.equal(checkout.args.p_email, 'aino@example.com');
+    assert.equal(mock.state.posOrders[0].customer_id, 1);
+    assert.equal('p_customer_id' in checkout.args, false);
+  } finally {
+    globalThis.setInterval = origSet;
+    globalThis.clearInterval = origClear;
+  }
+});
+
+test('asiakashaku epaonnistuu hiljaa ja kirjoitettu osoite kelpaa', async () => {
+  const mock = createAdminMock({ delay: 0 });
+  const rpc = async (name, args) => {
+    if (name === 'admin_search_customers' || name === 'admin_list_customers') throw Object.assign(new Error('forbidden'), { code: 'forbidden' });
+    return mock.rpc(name, args);
+  };
+  const root = await mount(rpc);
+  q(root, 'pos-product-101').click();
+  q(root, 'pos-pay').click();
+  let dlg = document.getElementById('pos-pay-dialog');
+  all(dlg).find((n) => n.getAttribute('name') === 'tender' && n.value === 'payment_link').dispatch('change');
+  dlg = document.getElementById('pos-pay-dialog');
+  const inp = q(dlg, 'pos-email');
+  inp.value = 'Aino';
+  inp.dispatch('input');
+  await wait(300);
+  await flush();
+  assert.equal(document.getElementById('pos-customer-list').hidden, true);
+  const toast = document.getElementById('toast');
+  assert.equal(toast ? toast.textContent.includes('forbidden') : false, false);
+  const origSet = globalThis.setInterval;
+  const origClear = globalThis.clearInterval;
+  globalThis.setInterval = () => 1;
+  globalThis.clearInterval = () => {};
+  try {
+    inp.value = 'asiakas@example.test';
+    inp.dispatch('input');
+    q(dlg, 'pos-confirm').click();
+    await flush();
+    assert.equal(mock.state.calls.find((c) => c.name === 'admin_pos_checkout').args.p_email, 'asiakas@example.test');
+  } finally {
+    globalThis.setInterval = origSet;
+    globalThis.clearInterval = origClear;
+  }
+});
+
+test('pending-import-113: asiakaskentan uudet tekstit FI+EN, normal, ei numeroita, ei paallekkain', () => {
+  const old = new Set([...pending12, ...pending16, ...pending17, ...pending18].map((r) => `${r.key}|${r.lang}`));
+  const seen = new Set();
+  assert.equal(pending113.length, Object.keys(texts.POS_CUSTOMER_TEXTS.fi).length * 2);
+  for (const row of pending113) {
+    assert.match(row.key, /^ui\.pos\.[a-z0-9_]+$/);
+    assert.ok(['fi', 'en'].includes(row.lang));
+    assert.equal(row.class, 'normal');
+    assert.equal(row.kind, 'plain');
+    assert.ok(row.max_len >= row.text.length);
+    assert.deepEqual(row.placeholders, []);
+    assert.equal(/\d|€|@|https?:|www\./i.test(row.text), false);
+    assert.equal(old.has(`${row.key}|${row.lang}`), false, row.key);
+    assert.equal(seen.has(`${row.key}|${row.lang}`), false);
+    seen.add(`${row.key}|${row.lang}`);
+  }
+  for (const key of Object.keys(texts.POS_CUSTOMER_TEXTS.fi)) {
+    assert.equal(texts.POS_LINK_TEXTS.fi[key], undefined);
+    for (const lang of ['fi', 'en']) {
+      const row = pending113.find((r) => r.key === `ui.pos.${key}` && r.lang === lang);
+      assert.equal(row.text, texts.POS_CUSTOMER_TEXTS[lang][key]);
+      assert.equal(texts.posText(key, lang), texts.POS_CUSTOMER_TEXTS[lang][key]);
+    }
+  }
+  const src = read('../admin/pos-screen.js');
+  for (const key of Object.keys(texts.POS_CUSTOMER_TEXTS.fi)) assert.match(src, new RegExp(`t\\('${key}'\\)`));
+  assert.match(read('../admin/admin.css'), /\.pos-suggest\{/);
+  assert.match(read('../admin/admin.css'), /\.pos-hit\{[^}]*min-height:48px/);
 });
