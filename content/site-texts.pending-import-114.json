@@ -1,0 +1,742 @@
+[
+  {
+    "key": "ui.shop.training.deposit_now",
+    "lang": "fi",
+    "text": "Varausmaksu nyt",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Koulutuksen kassa: verkossa maksettava varausmaksu."
+  },
+  {
+    "key": "ui.shop.training.deposit_now",
+    "lang": "en",
+    "text": "Reservation fee due now",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Training checkout: reservation fee paid online."
+  },
+  {
+    "key": "ui.shop.training.course_price",
+    "lang": "fi",
+    "text": "Kurssin hinta",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Koulutuksen kassa: kurssin perushinta."
+  },
+  {
+    "key": "ui.shop.training.course_price",
+    "lang": "en",
+    "text": "Course price",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Training checkout: base course price."
+  },
+  {
+    "key": "ui.shop.training.addons",
+    "lang": "fi",
+    "text": "Lisävalinnat",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Koulutuksen kassa: yhden hengen huone ja harjoittelujakso."
+  },
+  {
+    "key": "ui.shop.training.addons",
+    "lang": "en",
+    "text": "Options",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Training checkout: single room and internship."
+  },
+  {
+    "key": "ui.shop.training.total",
+    "lang": "fi",
+    "text": "Loppusumma",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Kurssin hinta plus lisävalinnat."
+  },
+  {
+    "key": "ui.shop.training.total",
+    "lang": "en",
+    "text": "Course total",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Course price plus selected options."
+  },
+  {
+    "key": "ui.shop.training.remaining",
+    "lang": "fi",
+    "text": "Laskutetaan myöhemmin",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Loppusumma miinus varausmaksu."
+  },
+  {
+    "key": "ui.shop.training.remaining",
+    "lang": "en",
+    "text": "To be invoiced later",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Course total minus the reservation fee."
+  },
+  {
+    "key": "ui.shop.training.balance_later",
+    "lang": "fi",
+    "text": "Loppusumma laskutetaan myöhemmin. Verkossa maksetaan vain varausmaksu.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "Koulutuksen kassa ei lupaa koko maksua."
+  },
+  {
+    "key": "ui.shop.training.balance_later",
+    "lang": "en",
+    "text": "The balance is invoiced later. Only the reservation fee is paid online.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "Training checkout does not claim the course is paid in full."
+  },
+  {
+    "key": "ui.shop.training.single_room_full",
+    "lang": "fi",
+    "text": "Yhden hengen huoneet ovat täynnä tälle ajalle.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 300,
+    "placeholders": [],
+    "reason": "Yhden hengen huoneen valinta pois käytöstä, kun kapasiteetti on täynnä."
+  },
+  {
+    "key": "ui.shop.training.single_room_full",
+    "lang": "en",
+    "text": "Single rooms are full for this date.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 300,
+    "placeholders": [],
+    "reason": "Single room checkbox disabled when capacity is full."
+  },
+  {
+    "key": "ui.shop.training.country",
+    "lang": "fi",
+    "text": "Maa",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Ilmoittautumisen maa."
+  },
+  {
+    "key": "ui.shop.training.country",
+    "lang": "en",
+    "text": "Country",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Sign-up country."
+  },
+  {
+    "key": "ui.shop.training.language",
+    "lang": "fi",
+    "text": "Kieli",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Ilmoittautumisen kieli."
+  },
+  {
+    "key": "ui.shop.training.language",
+    "lang": "en",
+    "text": "Language",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Sign-up language."
+  },
+  {
+    "key": "ui.shop.training.lang_fi",
+    "lang": "fi",
+    "text": "suomi",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 40,
+    "placeholders": [],
+    "reason": "Kielivalinta."
+  },
+  {
+    "key": "ui.shop.training.lang_fi",
+    "lang": "en",
+    "text": "Finnish",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 40,
+    "placeholders": [],
+    "reason": "Language choice."
+  },
+  {
+    "key": "ui.shop.training.lang_en",
+    "lang": "fi",
+    "text": "englanti",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 40,
+    "placeholders": [],
+    "reason": "Kielivalinta."
+  },
+  {
+    "key": "ui.shop.training.lang_en",
+    "lang": "en",
+    "text": "English",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 40,
+    "placeholders": [],
+    "reason": "Language choice."
+  },
+  {
+    "key": "ui.shop.training.privacy",
+    "lang": "fi",
+    "text": "Hyväksyn tietosuojaselosteen",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Pakollinen tietosuojasuostumus."
+  },
+  {
+    "key": "ui.shop.training.privacy",
+    "lang": "en",
+    "text": "I accept the privacy notice",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Required privacy consent."
+  },
+  {
+    "key": "ui.shop.training.places",
+    "lang": "fi",
+    "text": "Paikkoja jäljellä",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Kurssikerran vapaat paikat."
+  },
+  {
+    "key": "ui.shop.training.places",
+    "lang": "en",
+    "text": "Places left",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Places left on the course date."
+  },
+  {
+    "key": "ui.shop.training.pay_online",
+    "lang": "fi",
+    "text": "Maksa verkossa",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Asiakkaalle näkyvä maksun nimi. Ei maksuvälittäjän nimeä."
+  },
+  {
+    "key": "ui.shop.training.pay_online",
+    "lang": "en",
+    "text": "Pay online",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Customer-facing payment name."
+  },
+  {
+    "key": "admin.events.channel_link",
+    "lang": "fi",
+    "text": "Vain suora linkki",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Koulutuksen myyntikanava, ei näy listoissa."
+  },
+  {
+    "key": "admin.events.channel_link",
+    "lang": "en",
+    "text": "Direct link only",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Training sales channel, hidden from listings."
+  },
+  {
+    "key": "admin.events.direct_link",
+    "lang": "fi",
+    "text": "Suora linkki",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Hallinnan kopioitava kurssilinkki."
+  },
+  {
+    "key": "admin.events.direct_link",
+    "lang": "en",
+    "text": "Direct link",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Copyable course link in admin."
+  },
+  {
+    "key": "admin.events.single_room_max",
+    "lang": "fi",
+    "text": "Yhden hengen huoneita",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Kerran yhden hengen huoneiden määrä, oletus 2."
+  },
+  {
+    "key": "admin.events.single_room_max",
+    "lang": "en",
+    "text": "Single rooms",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Single rooms on one occurrence, default 2."
+  },
+  {
+    "key": "admin.events.participant_total",
+    "lang": "fi",
+    "text": "Loppusumma",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Osallistujan kurssihinta lisävalintoineen."
+  },
+  {
+    "key": "admin.events.participant_total",
+    "lang": "en",
+    "text": "Course total",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Participant course price including options."
+  },
+  {
+    "key": "admin.events.participant_remaining",
+    "lang": "fi",
+    "text": "Laskutetaan myöhemmin",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Osallistujan jäljellä oleva osuus."
+  },
+  {
+    "key": "admin.events.participant_remaining",
+    "lang": "en",
+    "text": "To be invoiced later",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Participant balance to invoice later."
+  },
+  {
+    "key": "admin.events.participant_deposit",
+    "lang": "fi",
+    "text": "Varausmaksu",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Osallistujan verkossa maksettu varausmaksu."
+  },
+  {
+    "key": "admin.events.participant_deposit",
+    "lang": "en",
+    "text": "Reservation fee",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Reservation fee stored on the participant."
+  },
+  {
+    "key": "admin.events.direct_link_fi",
+    "lang": "fi",
+    "text": "Suomi",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 40,
+    "placeholders": [],
+    "reason": "Suomenkielisen kurssilinkin nimiö."
+  },
+  {
+    "key": "admin.events.direct_link_fi",
+    "lang": "en",
+    "text": "Finnish",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 40,
+    "placeholders": [],
+    "reason": "Label for the Finnish course link."
+  },
+  {
+    "key": "admin.events.direct_link_en",
+    "lang": "fi",
+    "text": "Englanti",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 40,
+    "placeholders": [],
+    "reason": "Englanninkielisen kurssilinkin nimiö."
+  },
+  {
+    "key": "admin.events.direct_link_en",
+    "lang": "en",
+    "text": "English",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 40,
+    "placeholders": [],
+    "reason": "Label for the English course link."
+  },
+  {
+    "key": "admin.events.copy_link",
+    "lang": "fi",
+    "text": "Kopioi",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 40,
+    "placeholders": [],
+    "reason": "Kopioi kurssin suora linkki."
+  },
+  {
+    "key": "admin.events.copy_link",
+    "lang": "en",
+    "text": "Copy",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 40,
+    "placeholders": [],
+    "reason": "Copy the direct course link."
+  },
+  {
+    "key": "admin.events.link_copied",
+    "lang": "fi",
+    "text": "Linkki kopioitu",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Vahvistus, kun kurssilinkki on kopioitu."
+  },
+  {
+    "key": "admin.events.link_copied",
+    "lang": "en",
+    "text": "Link copied",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Confirmation after copying the course link."
+  },
+  {
+    "key": "admin.events.single_room_hint",
+    "lang": "fi",
+    "text": "Oletus 2. Täynnä oleva huone estää valinnan myös päällekkäisillä kursseilla.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 160,
+    "placeholders": [],
+    "reason": "Yhden hengen huoneiden kapasiteetti kerralla."
+  },
+  {
+    "key": "admin.events.single_room_hint",
+    "lang": "en",
+    "text": "Default 2. A full single-room pool also blocks overlapping courses.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 160,
+    "placeholders": [],
+    "reason": "Single-room capacity on one occurrence."
+  },
+  {
+    "key": "admin.events.col_country",
+    "lang": "fi",
+    "text": "Maa",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 40,
+    "placeholders": [],
+    "reason": "Osallistujan maa."
+  },
+  {
+    "key": "admin.events.col_country",
+    "lang": "en",
+    "text": "Country",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 40,
+    "placeholders": [],
+    "reason": "Participant country."
+  },
+  {
+    "key": "admin.events.col_language",
+    "lang": "fi",
+    "text": "Kieli",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 40,
+    "placeholders": [],
+    "reason": "Osallistujan kieli."
+  },
+  {
+    "key": "admin.events.col_language",
+    "lang": "en",
+    "text": "Language",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 40,
+    "placeholders": [],
+    "reason": "Participant language."
+  },
+  {
+    "key": "admin.events.col_foreign",
+    "lang": "fi",
+    "text": "Ulkomainen",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 40,
+    "placeholders": [],
+    "reason": "Osallistuja ei ole Suomesta."
+  },
+  {
+    "key": "admin.events.col_foreign",
+    "lang": "en",
+    "text": "Foreign",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 40,
+    "placeholders": [],
+    "reason": "Participant is not from Finland."
+  },
+  {
+    "key": "admin.events.foreign_yes",
+    "lang": "fi",
+    "text": "Kyllä",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 20,
+    "placeholders": [],
+    "reason": "Ulkomainen osallistuja."
+  },
+  {
+    "key": "admin.events.foreign_yes",
+    "lang": "en",
+    "text": "Yes",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 20,
+    "placeholders": [],
+    "reason": "Foreign participant."
+  },
+  {
+    "key": "admin.events.err_bad_rooms",
+    "lang": "fi",
+    "text": "Yhden hengen huoneita voi olla 0–20.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Virhe, jos yhden hengen huoneiden määrä on rajojen ulkopuolella."
+  },
+  {
+    "key": "admin.events.err_bad_rooms",
+    "lang": "en",
+    "text": "Single rooms must be between 0 and 20.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Error when the single-room count is out of range."
+  },
+  {
+    "key": "ui.order.training_course",
+    "lang": "fi",
+    "text": "Kurssin hinta",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Tilaussivun kurssihinta."
+  },
+  {
+    "key": "ui.order.training_course",
+    "lang": "en",
+    "text": "Course price",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Tilaussivun kurssihinta."
+  },
+  {
+    "key": "ui.order.training_total",
+    "lang": "fi",
+    "text": "Loppusumma",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Kurssin hinta plus lisävalinnat."
+  },
+  {
+    "key": "ui.order.training_total",
+    "lang": "en",
+    "text": "Course total",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Kurssin hinta plus lisävalinnat."
+  },
+  {
+    "key": "ui.order.training_deposit",
+    "lang": "fi",
+    "text": "Varausmaksu",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Verkossa veloitettu varausmaksu."
+  },
+  {
+    "key": "ui.order.training_deposit",
+    "lang": "en",
+    "text": "Reservation fee",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Verkossa veloitettu varausmaksu."
+  },
+  {
+    "key": "ui.order.training_remaining",
+    "lang": "fi",
+    "text": "Laskutetaan myöhemmin",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Kurssin jäljellä oleva osuus."
+  },
+  {
+    "key": "ui.order.training_remaining",
+    "lang": "en",
+    "text": "To be invoiced later",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Kurssin jäljellä oleva osuus."
+  },
+  {
+    "key": "ui.order.training_balance",
+    "lang": "fi",
+    "text": "Loppusumma laskutetaan myöhemmin. Verkossa maksetaan vain varausmaksu.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Tilaussivu ei väitä kurssia maksetuksi."
+  },
+  {
+    "key": "ui.order.training_balance",
+    "lang": "en",
+    "text": "The balance is invoiced later. Only the reservation fee is paid online.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Tilaussivu ei väitä kurssia maksetuksi."
+  },
+  {
+    "key": "ui.order.training_single",
+    "lang": "fi",
+    "text": "Yhden hengen huone",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Lisävalinta tilaussivulla."
+  },
+  {
+    "key": "ui.order.training_single",
+    "lang": "en",
+    "text": "Single room",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Lisävalinta tilaussivulla."
+  },
+  {
+    "key": "ui.order.training_internship",
+    "lang": "fi",
+    "text": "Harjoittelujakso",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Lisävalinta tilaussivulla."
+  },
+  {
+    "key": "ui.order.training_internship",
+    "lang": "en",
+    "text": "Internship period",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Lisävalinta tilaussivulla."
+  }
+]

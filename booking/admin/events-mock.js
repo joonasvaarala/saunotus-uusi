@@ -72,7 +72,7 @@ export function createEventsMock({ today, resources = EVENT_MOCK_RESOURCES, prod
     admin_event_list: (a) => st.events.filter((p) => !a.p_category || p.category === a.p_category).map((p) => listRow(p, !!a.p_include_past)),
     admin_event_rule_upsert: (a) => {
       const patch = a.p_patch || {};
-      for (const k of Object.keys(patch)) if (!['date', 'start_time', 'duration_minutes', 'max_persons', 'min_persons', 'deadline_minutes', 'label', 'label_en', 'active', 'price_variant_id'].includes(k)) throw err('unknown_field', `Kenttää ei saa muokata: ${k}`);
+      for (const k of Object.keys(patch)) if (!['date', 'start_time', 'duration_minutes', 'max_persons', 'min_persons', 'deadline_minutes', 'label', 'label_en', 'active', 'price_variant_id', 'single_room_max'].includes(k)) throw err('unknown_field', `Kenttää ei saa muokata: ${k}`);
       if (a.p_id) {
         const { p, r } = locate(a.p_id);
         if (patch.max_persons != null && patch.max_persons < r.sold_persons) throw err('max_below_sold', 'Osallistujamäärä on pienempi kuin myyty määrä');

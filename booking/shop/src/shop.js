@@ -39,6 +39,7 @@ import { RITUAL_TEXTS, RITUAL_ERRORS } from './ritual-addon-texts.js';
 import { oneKey } from './plural.js';
 import { eventText, occurrenceText, occurrenceLabel, findEvent, saleState, upcoming, isMultiDay } from './event-sale.js';
 import { groupEventDays, eventDayLabel } from './event-pick.js';
+import { createTrainingSignup, isTrainingProduct, listedProducts } from './training-signup.js';
 import { customerInvoiceLock } from './invoice-lock.js';
 import { formPaysOnline, paysByInvoice } from './company-pay.js';
 import { clockFromIso } from './clock.js';
@@ -142,7 +143,7 @@ const MOCK = new URLSearchParams(location.search).get('mock') === '1';
 let MOCK_FETCH;   // ?mock=1&scenario=pay: mobilepay-start / mobilepay-notify -funktioiden mock (fetch-yhteensopiva)
 if (MOCK) { const sm = (await import('./shop-mock.js')).createShopMock({ fail: new URLSearchParams(location.search).get('fail'), scenario: new URLSearchParams(location.search).get('scenario') || '', mpResult: new URLSearchParams(location.search).get('mpresult') || '' }); setRpcOverride(sm.rpc); MOCK_FETCH = sm.mpFetch; }
 // Mock-tilan parametrit säilyvät linkeissä ja ohjauksissa (scenario=hold… toimii koko kulun läpi kassalta vahvistussivulle)
-const mockQs = () => { if (!MOCK) return ''; const cur = new URLSearchParams(location.search), q = new URLSearchParams({ mock: '1' }); for (const k of ['scenario', 'mpresult', 'mpinterval', 'mpmax', 'holdsec', 'fail', 'ritual', 'img', 'events', 'priv']) if (cur.has(k)) q.set(k, cur.get(k)); return `?${q}`; };
+const mockQs = () => { if (!MOCK) return ''; const cur = new URLSearchParams(location.search), q = new URLSearchParams({ mock: '1' }); for (const k of ['scenario', 'mpresult', 'mpinterval', 'mpmax', 'holdsec', 'fail', 'ritual', 'img', 'events', 'priv', 'training']) if (cur.has(k)) q.set(k, cur.get(k)); return `?${q}`; };
 const bk = (hash) => `${S.shopHref}${mockQs()}#${hash}`;
 // Kassan pitotila ja maksutavat yhdestä paikasta (vuoro- ja hoitokassa): palvelin (public_checkout_payment_options) päättää, ei kovakoodata. Virhe → vanha käytös.
 const holdInfo = () => loadPayChoices({ rpc, fetchImpl: MOCK_FETCH }).then((m) => {
@@ -227,7 +228,7 @@ async function loadSpan(productId, fromDs, toDs) {
   let [y, m] = fromDs.split('-').map(Number);
   m -= 1;
   const end = toDs.slice(0, 7);
-  for (let i = 0; i < 8; i++) {
+  for (let i = 0; i < 16; i++) {
     months.push([y, m]);
     if (`${y}-${pad2(m + 1)}` >= end) break;
     m += 1;
@@ -303,7 +304,7 @@ async function viewList(query) {
   const eventIndex = indexShopEvents(events);
   for (const p of missingEventProducts(state.catalog, events)) state.catalog.push(p);
   if (S.audience === 'business') state.catalog = productsForAudience(state.catalog, 'business');
-  const cat = productsForAudience([...state.catalog, ...state.treatments.filter(treatmentListed)], S.audience);   // lisätuotteet (LISTING_HIDDEN_SLUGS) eivät näy listalla; tuotesivu toimii
+  const cat = listedProducts(productsForAudience([...state.catalog, ...state.treatments.filter(treatmentListed)], S.audience));   // linkkikoulutus ja lisätuotteet eivät näy listalla; tuotesivu toimii
   const kinds = chipsFor(cat).filter((x) => S.audience !== 'business' || x !== 'tapahtuma');   // tyhjä kategoria ei saa chippiä; yrityksille ei Tapahtumat-chippiä
   const k = kinds.includes(query.get('k')) ? query.get('k') : 'all';
   let list = cat.filter((p) => k === 'all' || kindOf(p) === k);
@@ -391,12 +392,12 @@ function modeSwitch(active, ds) {
     h('a', { href: bk(`/paiva/${ds || state.lastDay || todayHel()}`), 'aria-current': active === 'day' ? 'page' : null, text: t.modeDay }));
 }
 async function ensureMonths(pairs) { // yksi public_availability_all-kutsu / kuukausi, kaikille tuotteille
-  return ensureAllMonths({ pairs, catalog: productsForAudience(state.catalog, S.audience), months: state.months, rpc,
+  return ensureAllMonths({ pairs, catalog: listedProducts(productsForAudience(state.catalog, S.audience)), months: state.months, rpc,
     fallback: loadMonth, audience: S.audience === 'business' ? 'business' : 'consumer' });
 }
 const dayRows = (ds) => {
   const [y, m] = monthOf(ds);
-  const products = productsForAudience(state.catalog, S.audience);   // viikkoliuska ja päivän vuorot: ei julkisia tapahtumia yrityksille
+  const products = listedProducts(productsForAudience(state.catalog, S.audience));   // viikkoliuska ja päivän vuorot: ei linkkikoulutuksia eikä yrityksille julkisia tapahtumia
   return products.flatMap((p) => (state.months.get(`${p.id}:${y}-${m}`)?.[ds] || []).map((r) => ({ r, p })))
     .sort((a, b) => a.r.starts_at.localeCompare(b.r.starts_at) || products.indexOf(a.p) - products.indexOf(b.p));
 };
@@ -528,7 +529,7 @@ async function viewDay(dateStr, keep, openSlug) {
       nextDs ? h('p', {}, t.nextFree + ' ', h('a', { class: 'btn sm', href: bk(`/paiva/${nextDs}`), text: dayLong(`${nextDs}T12:00:00Z`) })) : h('p', { text: t.noNextFree }));
   }
   // Näytetään myös kokonaan loppuunmyydyt tuotteet; "unavailable" on aina piilossa.
-  const prods = productsForAudience(state.catalog, S.audience).map((p) => [p, rows.filter((x) => x.p.id === p.id)])
+  const prods = listedProducts(productsForAudience(state.catalog, S.audience)).map((p) => [p, rows.filter((x) => x.p.id === p.id)])
     .filter(([, rs]) => hasWaitlistSlots(rs))
     .sort((a, b) => Number(fullyBooked(a[1])) - Number(fullyBooked(b[1])));
   const bySlug = new Map(prods.map(([p]) => [p.slug, p]));
@@ -558,6 +559,13 @@ async function viewProduct(slug, dateStr, query) {
   if (tp) return tv.viewTreatment(tp, query || new URLSearchParams());   // hoito-/rituaalituote: oma kulku (treatment-ui.js)
   const p = productsForAudience(state.catalog, S.audience).find((x) => x.slug === slug);
   setHero(p || null, { short: false });   // lyhyt kuvaus on tuotesivulla ingressinä (leadShort), ei toistu yläbannerissa
+  if (!p && !query?.get?.('linked')) {
+    const linked = await rpc('public_product_by_slug', { p_slug: slug }).catch(() => null);
+    if (linked?.id && linked.category === 'training') {
+      state.catalog.push({ ...linked, listed: false, deposit: true });
+      return viewProduct(slug, dateStr, new URLSearchParams({ ...(query ? Object.fromEntries(query) : {}), linked: '1' }));
+    }
+  }
   if (!p) {
     // booking_158: tapahtuma/koulutus, jonka myynti on suljettu (public_catalog ei näytä sitä): tiedot ja ajankohdat public_eventsistä, ei ostoa.
     // Yrityskalenteri ei avaa julkista tapahtumaa suoralla osoitteellakaan.
@@ -570,8 +578,9 @@ async function viewProduct(slug, dateStr, query) {
     focusTop(); return;
   }
   const today = todayHel();
-  const horizon = state.settings.booking_horizon_days || 120;
-  const eventProduct = p.category === 'event';
+  const training = isTrainingProduct(p);
+  const horizon = training ? 400 : (state.settings.booking_horizon_days || 120);
+  const eventProduct = p.category === 'event' || training;
   let [y, m] = (dateStr || today).split('-').map(Number); m -= 1;
   let sel = dateStr || null;
   const wrap = h('div', { class: 'bk-prod' });
@@ -581,17 +590,20 @@ async function viewProduct(slug, dateStr, query) {
     const ok = r.status === 'available';
     const title = isMultiDay(r) ? occurrenceText(r, S.lang) : `${hm(r.starts_at)}–${hm(r.ends_at)}`;
     const sub = cleanLabel(rlabel(r));
-    const action = ok ? t.choose : t.eventWaitlistCta;
-    return h('a', {
+    const action = ok ? t.choose : (training ? '' : t.eventWaitlistCta);
+    const left = training && r.remaining != null ? t.freeSpots(r.remaining) : '';
+    const href = training ? (ok ? bk(`/varaa/${r.rule_id}/${ds}/${p.id}`) : null) : bk(ok ? `/varaa/${r.rule_id}/${ds}/${p.id}` : `/jono/${r.rule_id}/${ds}/${p.id}`);
+    return h(href ? 'a' : 'div', {
       class: `bk-ev-time${ok ? '' : ' is-full'}`,
-      href: bk(ok ? `/varaa/${r.rule_id}/${ds}/${p.id}` : `/jono/${r.rule_id}/${ds}/${p.id}`),
+      href,
       'data-testid': 'event-time',
-      'aria-label': [title, sub, ok ? null : t.full, action].filter(Boolean).join(', '),
+      'aria-label': [title, sub, left, ok ? null : t.full, href ? action : null].filter(Boolean).join(', '),
     },
       h('span', { class: 'bk-ev-when', text: title }),
       sub ? h('span', { class: 'bk-ev-sub', text: sub }) : null,
+      left ? h('span', { class: 'bk-ev-sub', 'data-testid': 'training-remaining', text: left }) : null,
       ok ? null : h('span', { class: 'bk-ev-full', text: t.full }),
-      h('span', { class: 'bk-ev-go', text: action }));
+      action ? h('span', { class: 'bk-ev-go', text: action }) : null);
   }
   async function fillEventDates(calBox, slotBox) {
     let byDay = {};
@@ -627,7 +639,8 @@ async function viewProduct(slug, dateStr, query) {
       h('p', {}, h('a', { href: bk('/'), text: t.backList })),
       h('div', { class: 'bk-prod-layout' },
         h('div', { class: 'bk-facts' },
-          h('p', { class: 'bk-meta' }, h('strong', { text: priceText(p) }), pdur(p) ? ` · ${pdur(p)}` : ''),
+          h('p', { class: 'bk-meta' }, h('strong', { text: training ? `${priceText({ ...p, price: p.deposit_amount ?? p.price })}` : priceText(p) }), pdur(p) ? ` · ${pdur(p)}` : ''),
+          training ? h('p', { class: 'bk-note', 'data-testid': 'training-course-price', text: p.course_price != null ? `${S.lang === 'en' ? 'Course price' : 'Kurssin hinta'} ${money(p.course_price)}. ${S.lang === 'en' ? 'The balance is invoiced later.' : 'Loppusumma laskutetaan myöhemmin.'}` : (S.lang === 'en' ? 'The balance is invoiced later.' : 'Loppusumma laskutetaan myöhemmin.') }) : null,
           leadShort(h, p, S.lang, desc),
           moreInfo(desc),
           eventProduct ? null : bookingJump(h, t.pickTime)),
@@ -786,7 +799,12 @@ function legalFields({ showCancel = false } = {}) {
   return { nodes, terms, consent };
 }
 
-// ---- näkymä 3: henkilömäärä + yhteystiedot ----
+// ---- näkymä 3: henkilömäärä + yhteystiedot. Koulutus käyttää omaa lomaketta (training-signup.js). ----
+const trainingSignup = createTrainingSignup({
+  h, t, S, money, dayLong, hm, mount, focusTop, errorBox, bk, rpc, texts,
+  reveal: revealIfHidden,
+  confirmUrl: (token) => `${S.confirmHref}${mockQs()}#${token}`,
+});
 async function viewCheckout(ruleId, ds, productId, via) {
   // Haetaan vuoro tuotteen kuukausidatasta (tuote-id tulee linkissä; ilman sitä käydään tuotteet läpi)
   let s = null, p = null;
@@ -800,6 +818,7 @@ async function viewCheckout(ruleId, ds, productId, via) {
   }
   setHero(p);
   if (!s) { mount(h('p', {}, h('a', { href: bk('/'), text: t.backList })), errorBox(t.noSlots)); focusTop(); return; }
+  if (isTrainingProduct(p)) return trainingSignup.viewCheckout(s, p, ds);
   let max = Math.max(s.min_persons, Math.min(s.max_persons || 50, s.remaining));
   const qs = new URLSearchParams(location.hash.split('?')[1] || '');
   let n = Math.min(Math.max(+qs.get('n') || s.min_persons, s.min_persons), max);
@@ -1160,15 +1179,22 @@ async function viewConfirmation({ refresh = false, notice = null, host = null, n
   }
   const swimKey = (b.status === 'confirmed' || co?.confirmed) ? swimwearKey(sp?.slug) : null;
   const unpaidEnd = ['cancelled', 'expired'].includes(b.status) && !['paid', 'refunded', 'partially_refunded'].includes(b.payment_status) && !paysByInvoice(b);
-  const dl = h('dl', { class: 'bk-sum' },
+  const dl = h('dl', { class: b.training ? 'bk-sum bk-training' : 'bk-sum' },
     h('dt', { text: t.order }), h('dd', { text: String(b.order_no) }), h('dt', { text: t.what }), h('dd', { text: prodName }),
     optRow ? [h('dt', { text: ox.what }), h('dd', { 'data-testid': 'conf-option', class: it.option ? '' : 'bk-opt-missing', text: optRow })] : null,
     h('dt', { text: t.when }), h('dd', { text: `${dayLong(it.starts_at)}, ${hm(it.starts_at)}–${hm(it.ends_at)}` }), h('dt', { text: t.persons }), h('dd', { text: String(it.persons) }),
     (b.addons || []).flatMap((a) => [h('dt', { text: (S.lang === 'en' && a.name_en) || a.name }), h('dd', { text: `${a.quantity} × ${money(a.unit_price)}` })]),
     ritItems.flatMap((x) => [h('dt', { text: (S.lang === 'en' && (x.name_en || ritEn.get(+x.product_id))) || x.product_name }), h('dd', { 'data-testid': 'conf-ritual', text: `${dayLong(x.starts_at)}, ${rtx('ritualSummary', { time: fmt(x.starts_at, { hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).replace('.', ':'), n: x.persons })} · ${money(x.line_total)}` })]),
-    h('dt', { text: t.total }), h('dd', { text: `${money(b.total)} (${t.vatIncl})` }), h('dt', { text: t.payStatus }), h('dd', { text: pay }),
+    ...(b.training ? [
+      h('dt', { text: S.lang === 'en' ? 'Course price' : 'Kurssin hinta' }), h('dd', { 'data-testid': 'conf-course', text: b.training.course_price != null ? money(b.training.course_price) : '–' }),
+      ...(b.training.addons || []).flatMap((a) => [h('dt', { text: a.code === 'single_room' ? (S.lang === 'en' ? 'Single room' : 'Yhden hengen huone') : a.code === 'internship' ? (S.lang === 'en' ? 'Internship period' : 'Harjoittelujakso') : a.code }), h('dd', { text: `+${money(a.price)}` })]),
+      h('dt', { text: S.lang === 'en' ? 'Course total' : 'Loppusumma' }), h('dd', { 'data-testid': 'conf-course-total', text: b.training.total != null ? money(b.training.total) : '–' }),
+      h('dt', { text: S.lang === 'en' ? 'To be invoiced later' : 'Laskutetaan myöhemmin' }), h('dd', { 'data-testid': 'conf-balance', text: b.training.remaining != null ? money(b.training.remaining) : '–' }),
+    ] : []),
+    h('dt', { text: b.training ? (S.lang === 'en' ? 'Reservation fee' : 'Varausmaksu') : t.total }), h('dd', { text: `${money(b.total)} (${t.vatIncl})` }), h('dt', { text: t.payStatus }), h('dd', { text: b.training && b.payment_status === 'paid' ? (S.lang === 'en' ? 'Reservation fee paid' : 'Varausmaksu maksettu') : pay }),
     holdV && co.awaiting && co.remaining > 0 ? [h('dt', { text: ht(S.lang, 'summary.remaining') }), h('dd', { 'data-testid': 'conf-remaining', text: money(co.remaining) })] : null);   // pitotilassa: maksettavaa jäljellä (lahjakorttiosuuden jälkeen)
   dl.dataset.testid = 'conf-summary';
+  const trainingNote = b.training ? h('p', { class: 'bk-note', 'data-testid': 'conf-training-balance', text: S.lang === 'en' ? 'The balance is invoiced later. Only the reservation fee is paid online.' : 'Loppusumma laskutetaan myöhemmin. Verkossa maksetaan vain varausmaksu.' }) : null;
   const actions = h('div', { class: 'bk-actions' });
   if (b.status !== 'cancelled' && b.status !== 'expired' && !holdV) {   // kalenterilisäys vasta vahvistetusta varauksesta
     const url = URL.createObjectURL(new Blob([ics(b)], { type: 'text/calendar' }));
@@ -1183,7 +1209,7 @@ async function viewConfirmation({ refresh = false, notice = null, host = null, n
     if (r.ok) setTimeout(() => location.reload(), 800);
   } }, t.cancelBooking));
   if (b.status === 'pending' && inv.locked) actions.append(h('p', { class: 'bk-note', role: 'status', 'data-testid': 'invoiced-cancel-note', text: t.invoicedCancelNote }, ' ', h('a', { href: `mailto:${S.email}`, text: S.email })));
-  mount(h('div', { class: `bk-conf ${b.status}` }, h('h2', { 'data-testid': 'conf-title', text: b.status === 'cancelled' ? t.confCancelled : b.status === 'expired' ? t.confExpired : b.status === 'pending' || (co && co.awaiting) ? ht(S.lang, 'h2.awaiting') : t.confTitle }), h('p', { class: 'bk-status', role: 'status', 'data-testid': 'conf-status', text: head }), holdHost, mpHost, dl,   // pitotilassa: otsikko + tilabadge → pitopaneeli → tiivis tilausyhteenveto → maksuosio (secEl lisätään yhteenvedon jälkeen)
+  mount(h('div', { class: `bk-conf ${b.status}` }, h('h2', { 'data-testid': 'conf-title', text: b.status === 'cancelled' ? t.confCancelled : b.status === 'expired' ? t.confExpired : b.status === 'pending' || (co && co.awaiting) ? ht(S.lang, 'h2.awaiting') : t.confTitle }), h('p', { class: 'bk-status', role: 'status', 'data-testid': 'conf-status', text: head }), holdHost, mpHost, dl, trainingNote,   // pitotilassa: otsikko + tilabadge → pitopaneeli → tiivis tilausyhteenveto → maksuosio (secEl lisätään yhteenvedon jälkeen)
     swimKey ? h('p', { class: 'bk-note bk-swim', 'data-testid': 'conf-swim', text: t[swimKey] }) : null,
     b.status === 'confirmed' && paysByInvoice(b) && b.payment_status !== 'paid' ? h('p', { class: 'bk-pay', text: t.companyInvoiceMethodNote }) : null,
     b.status === 'confirmed' && b.payment_status !== 'paid' && b.payment_status !== 'invoiced' && !paysByInvoice(b) && !isTreatmentBooking(b) && !online ? h('p', { class: 'bk-pay', text: t.payLater }) : null, optNote && b.status === 'confirmed' ? h('p', { class: 'bk-note', 'data-testid': 'conf-option-note', text: optNote }) : null, actions, out,
@@ -1192,7 +1218,7 @@ async function viewConfirmation({ refresh = false, notice = null, host = null, n
     unpaidEnd ? h('p', { class: 'bk-note', 'data-testid': 'conf-unpaid', text: t.unpaidCancel }) : null,
     unpaidEnd ? h('p', { class: 'bk-actions' }, h('a', { class: 'btn', 'data-testid': 'conf-retry', href: retryBookingHref(b, it, stMap), text: t.tryAgain })) : null,
     h('p', {}, h('a', { href: S.infoHref, text: t.directions }))));
-  if (b.status === 'confirmed' && !inv.locked) {
+  if (b.status === 'confirmed' && !inv.locked && !b.training) {
     const holdMinutes = holdModeOf(model?.checkout, state.settings).minutes || 15;
     const pendingAdds = additionHoldSection({
       L, items: b.pending_additions || [], minutes: holdMinutes,

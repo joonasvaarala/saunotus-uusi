@@ -98,6 +98,9 @@ export async function render({ ctx, refs, reload, query }) {
   }
   draw();
   async function edit(p) {
+    const training = p.category === 'training';
+    const offers = training ? await rpc('admin_training_addons_get', { p_product_id: p.id }).catch(() => []) : [];
+    const offerOf = (code) => (offers || []).find((o) => o.code === code) || null;
     const inp = (name, v, { area, ...o } = {}) => h(area ? 'textarea' : 'input', { name, value: v ?? '', rows: area ? 5 : null, disabled: !isAdmin, ...o });
     const vat = h('select', { name: 'vat_rate', disabled: !isAdmin }, vatChoices(p.vat_rate).map((v) => h('option', { value: v, text: vatLabel(v), selected: +p.vat_rate === v || null })));
     const f = h('form', { class: 'stack' },
@@ -105,7 +108,13 @@ export async function render({ ctx, refs, reload, query }) {
       field('Kuvaus (FI)', inp('description', p.description, { area: true, 'data-rich': '1' }), richText('hint')), field('Kuvaus (EN)', inp('description_en', p.description_en, { area: true, 'data-rich': '1' }), richText('hint')),
       // booking_156: lyhyt kuvaus (rikas teksti, sama allowlist kuin kuvauksella) → tuotekortti ja tuotesivun yläosa; tyhjä → ote kuvauksesta
       field(productText('short_fi'), inp('short_description', p.short_description, { area: true, 'data-rich': '1', 'data-testid': 'product-short-fi' }), productText('short_hint')), field(productText('short_en'), inp('short_description_en', p.short_description_en, { area: true, 'data-rich': '1', 'data-testid': 'product-short-en' }), productText('short_hint')),
-      h('div', { class: 'row wrap' }, field('Hinta € (sis. ALV)', inp('price', p.price, { type: 'number', step: '0.01', min: '0' })), field('ALV', vat)),
+      h('div', { class: 'row wrap' }, field(training ? 'Varausmaksu € (maksetaan verkossa)' : 'Hinta € (sis. ALV)', inp('price', training ? (p.config?.deposit_amount ?? p.price) : p.price, { type: 'number', step: '0.01', min: '0', 'data-testid': 'product-deposit' })), field('ALV', vat)),
+      training ? h('div', { class: 'row wrap', 'data-testid': 'product-training-prices' }, field('Kurssin hinta € (loppusumma, laskutetaan myöhemmin)', inp('course_price', p.config?.course_price ?? '', { type: 'number', step: '0.01', min: '0', 'data-testid': 'product-course-price' }))) : null,
+      training ? h('fieldset', { class: 'stack', 'data-testid': 'product-training-addons' }, h('legend', { text: 'Lisävalinnat (eivät veloitu verkossa)' }),
+        h('label', { class: 'check' }, h('input', { type: 'checkbox', name: 'addon_single', checked: offerOf('single_room')?.active ? true : null, disabled: !isAdmin }), ' Yhden hengen huone'),
+        field('Hinta €', inp('addon_single_price', offerOf('single_room')?.price ?? 200, { type: 'number', step: '0.01', min: '0' })),
+        h('label', { class: 'check' }, h('input', { type: 'checkbox', name: 'addon_intern', checked: offerOf('internship')?.active ? true : null, disabled: !isAdmin }), ' Harjoittelujakso'),
+        field('Hinta €', inp('addon_intern_price', offerOf('internship')?.price ?? 500, { type: 'number', step: '0.01', min: '0' }))) : null,
       field('Hintateksti', inp('price_text', p.price_text), 'Näytetään kb:ssä; verkkokauppa laskee näytettävän hinnan hinta-kentästä. Päivitä teksti kun muutat hintaa.'),
       h('label', { class: 'check' }, h('input', { type: 'checkbox', name: 'active', disabled: !isAdmin }), ' Aktiivinen (näkyy kb:ssä)'),
       isAdmin ? h('button', { class: 'btn primary', type: 'submit', text: 'Tallenna tuote' }) : h('p', { class: 'muted', text: 'Tuotteiden, hintojen ja kuvausten muokkaus vaatii ylläpitäjän (manager/admin) oikeudet.' }));
@@ -114,6 +123,14 @@ export async function render({ ctx, refs, reload, query }) {
       syncRichFields(f);
       const fd = new FormData(f);
       await rpc('admin_update_product', { p_product_id: p.id, p_patch: { name: fd.get('name'), name_en: fd.get('name_en'), description: fd.get('description'), description_en: fd.get('description_en'), short_description: fd.get('short_description'), short_description_en: fd.get('short_description_en'), price: +fd.get('price'), price_text: fd.get('price_text'), vat_rate: +fd.get('vat_rate'), active: f.active.checked } });
+      if (training) {
+        const course = String(fd.get('course_price') ?? '').trim();
+        await rpc('admin_update_product_config', { p_product_id: p.id, p_patch: { deposit_amount: +fd.get('price'), course_price: course === '' ? null : +course } });
+        const addonRows = [];
+        if (f.addon_single?.checked) addonRows.push({ code: 'single_room', price: +fd.get('addon_single_price'), active: true });
+        if (f.addon_intern?.checked) addonRows.push({ code: 'internship', price: +fd.get('addon_intern_price'), active: true });
+        await rpc('admin_training_addons_set', { p_product_id: p.id, p_offers: addonRows });
+      }
       toast('Tuote tallennettu'); d.close(); fresh();
     }); });
     // verkkokaupan asetukset

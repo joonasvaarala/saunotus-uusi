@@ -3,7 +3,7 @@
 // kunnes tuonti on ajettu. Haku epäonnistuu tai rivi puuttuu → sanakirja. Paikkamerkit {{var:nimi}} täytetään koodissa.
 import { getLang } from './talous-i18n.js';
 
-export const PREFIXES = ['ui.admin.events.', 'ui.admin.product.copy'];
+export const PREFIXES = ['ui.admin.events.', 'ui.admin.product.copy', 'admin.events.'];
 const E = 'ui.admin.events.';
 
 export const EVENTS_TEXTS = {
@@ -467,6 +467,46 @@ export const EVENTS_TEXTS = {
   },
 };
 
+const A = 'admin.events.';
+export const COURSE_TEXTS = {
+  fi: {
+    [`${A}channel_link`]: 'Vain suora linkki',
+    [`${A}direct_link`]: 'Suora linkki',
+    [`${A}direct_link_fi`]: 'Suomi',
+    [`${A}direct_link_en`]: 'Englanti',
+    [`${A}copy_link`]: 'Kopioi',
+    [`${A}link_copied`]: 'Linkki kopioitu',
+    [`${A}single_room_max`]: 'Yhden hengen huoneita',
+    [`${A}single_room_hint`]: 'Oletus 2. Täynnä oleva huone estää valinnan myös päällekkäisillä kursseilla.',
+    [`${A}col_country`]: 'Maa',
+    [`${A}col_language`]: 'Kieli',
+    [`${A}col_foreign`]: 'Ulkomainen',
+    [`${A}foreign_yes`]: 'Kyllä',
+    [`${A}participant_total`]: 'Loppusumma',
+    [`${A}participant_remaining`]: 'Laskutetaan myöhemmin',
+    [`${A}participant_deposit`]: 'Varausmaksu',
+    [`${A}err_bad_rooms`]: 'Yhden hengen huoneita voi olla 0–20.',
+  },
+  en: {
+    [`${A}channel_link`]: 'Direct link only',
+    [`${A}direct_link`]: 'Direct link',
+    [`${A}direct_link_fi`]: 'Finnish',
+    [`${A}direct_link_en`]: 'English',
+    [`${A}copy_link`]: 'Copy',
+    [`${A}link_copied`]: 'Link copied',
+    [`${A}single_room_max`]: 'Single rooms',
+    [`${A}single_room_hint`]: 'Default 2. A full single-room pool also blocks overlapping courses.',
+    [`${A}col_country`]: 'Country',
+    [`${A}col_language`]: 'Language',
+    [`${A}col_foreign`]: 'Foreign',
+    [`${A}foreign_yes`]: 'Yes',
+    [`${A}participant_total`]: 'Course total',
+    [`${A}participant_remaining`]: 'To be invoiced later',
+    [`${A}participant_deposit`]: 'Reservation fee',
+    [`${A}err_bad_rooms`]: 'Single rooms must be between 0 and 20.',
+  },
+};
+
 let db = new Map(), loaded = false;
 export function _resetEventsTexts() { db = new Map(); loaded = false; }
 /** Tietokannan tekstit (public_get_site_texts); virhe → sanakirja. */
@@ -493,4 +533,10 @@ export function evText(key, vars = null, lang = getLang()) {
   let s = db.get(`${k}|${L}`) ?? EVENTS_TEXTS[L][k] ?? EVENTS_TEXTS.fi[k] ?? k;
   if (vars) s = s.replace(/\{\{var:([a-z_]+)\}\}/g, (_, n) => (vars[n] == null ? '' : String(vars[n])));
   return s;
+}
+/** Koulutuksen omat hallintatekstit (pending-import-114, avain admin.events.*). */
+export function courseText(key, lang = getLang()) {
+  const k = key.startsWith('admin.') ? key : A + key;
+  const L = lang === 'en' ? 'en' : 'fi';
+  return db.get(`${k}|${L}`) ?? COURSE_TEXTS[L][k] ?? COURSE_TEXTS.fi[k] ?? k;
 }

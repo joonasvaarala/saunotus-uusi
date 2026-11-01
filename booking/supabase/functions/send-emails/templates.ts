@@ -157,7 +157,15 @@ function orderBlock(d: any, en: boolean, X: X): Block {
   const tl: string[] = [`${L.order} ${o.order_no}`];
   if (res.length) { tl.push("", `${L.sauna}:`); for (const r of res) tl.push(`  ${resName(r, en)}: ${dt(r.starts_at, en)}–${tm(r.ends_at, en)}, ${r.persons} ${L.pers}`); }
   if (items.length) { tl.push("", `${L.lines}:`); for (const i of items) tl.push(`  ${i.quantity} × ${i.name} ${eur(i.line_total, en)}`); }
-  tl.push("", `${L.total}: ${eur(o.total, en)}`);
+  const tr = o.training;
+  if (tr) {
+    tl.push("", `${X("email.training.course")}: ${tr.course_price != null ? eur(tr.course_price, en) : "–"}`);
+    for (const a of tr.addons || []) tl.push(`  ${a.code === "single_room" ? X("email.training.single") : a.code === "internship" ? X("email.training.internship") : a.code}: +${eur(a.price, en)}`);
+    if (tr.total != null) tl.push(`${X("email.training.total")}: ${eur(tr.total, en)}`);
+    if (tr.remaining != null) tl.push(`${X("email.training.remaining")}: ${eur(tr.remaining, en)}`);
+    tl.push(X("email.training.balance"));
+  }
+  tl.push("", `${tr ? X("email.training.deposit") : L.total}: ${eur(o.total, en)}`);
   let html = `<tr><td style="padding:4px 32px 4px 32px;font-family:${FONT};font-size:17px;color:${GREEN}">${L.order} ${esc(o.order_no)}</td></tr>`;
   if (res.length) {
     html += `<tr><td style="padding:6px 32px 12px 32px"><table ${FLUID_TABLE}><tr>${th(L.product, "left", "32%")}${th(L.when, "left", "40%")}${th(L.persons, "right", "28%")}</tr>`
@@ -166,9 +174,11 @@ function orderBlock(d: any, en: boolean, X: X): Block {
   if (items.length) {
     html += `<tr><td style="padding:6px 32px 8px 32px"><table ${FLUID_TABLE}><tr>${th(L.product, "left", "62%")}${th(L.qty, "right", "14%")}${th(L.sum, "right", "24%")}</tr>`
       + items.map((i: any) => `<tr>${td(String(i.name ?? ""), "left", false, "62%")}${td(String(i.quantity ?? ""), "right", false, "14%")}${td(eur(i.line_total, en), "right", false, "24%")}</tr>`).join("")
-      + `<tr><td colspan="2" align="right" style="padding:10px 8px;font-family:${SANS};font-size:15px;font-weight:bold;color:${GREEN};${TD_WRAP}">${L.total}</td><td align="right" width="24%" style="padding:10px 8px;font-family:${SANS};font-size:15px;font-weight:bold;color:${GREEN};width:24%;${TD_WRAP}">${esc(eur(o.total, en))}</td></tr></table></td></tr>`;
+      + `<tr><td colspan="2" align="right" style="padding:10px 8px;font-family:${SANS};font-size:15px;font-weight:bold;color:${GREEN};${TD_WRAP}">${tr ? esc(X("email.training.deposit")) : L.total}</td><td align="right" width="24%" style="padding:10px 8px;font-family:${SANS};font-size:15px;font-weight:bold;color:${GREEN};width:24%;${TD_WRAP}">${esc(eur(o.total, en))}</td></tr></table></td></tr>`;
+    if (tr) html += p(esc(X("email.training.balance")));
   } else {
-    html += p(`<b>${L.total}: ${esc(eur(o.total, en))}</b>`);
+    html += p(`<b>${tr ? esc(X("email.training.deposit")) : L.total}: ${esc(eur(o.total, en))}</b>`);
+    if (tr) html += p(esc(X("email.training.balance")));
   }
   return { text: tl.join("\n") + "\n", html };
 }
@@ -425,7 +435,7 @@ export function render(kind: Kind, d: any, locale?: string, t: TFn = DEFAULT_T):
       return voucherMail(kind, d, en, hello, X);
     case "order_confirmation": {
       const subject = X("email.order_confirmation.subject", { no });
-      const intro = X("email.order_confirmation.intro");
+      const intro = d?.order?.training ? X("email.training.intro") : X("email.order_confirmation.intro");
       const more = X("email.order_confirmation.more");
       const title = X("email.order_confirmation.title");
       const notes = instructionNotes(d?.order?.instructions, X("email.order_confirmation.instructions_title"));
