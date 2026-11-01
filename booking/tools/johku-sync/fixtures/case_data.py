@@ -98,6 +98,10 @@ def build():
     o14050 = order("14050", "501", "15", [
         item("20400", "113", "Jalkakylpy", "15", parent="20001"),
     ])
+    # Johku 134 Perinnesaunotus kahdelle: same service as kb 23, 2.5 h window must stay intact.
+    o14060 = order("14060", "500", "270", [
+        item("20600", "134", "Perinnesaunotus kahdelle", "270", start="2026-11-04T14:00:00+02:00", end="2026-11-04T16:30:00+02:00"),
+    ])
     o13941 = order("13941", "500", "29", [
         item("20500", "132", "Yleinen vuoro", "29", start=future, end=future_end),
     ])
@@ -116,6 +120,7 @@ def build():
     r_pkg_hidden = reservation("10275", "90002", "132", sun_side, sun_side_end)
     r_gone = reservation("18001", "90003", "132", future, future_end)
     r_removed_order = reservation("30100", "20500", "132", future, future_end)
+    r_two = reservation("30009", "20600", "134", "2026-11-04T14:00:00+02:00", "2026-11-04T16:30:00+02:00", count="2")
 
     prev = {
         "customers": [c500, c501_old, c502_old],
@@ -126,8 +131,8 @@ def build():
     }
     nxt = {
         "customers": [c500, c501, c502],
-        "orders": [o11551, o11552, o13980, o14021, o10007, o13990, o13991, o14000, o14050],
-        "reservations": [r_hidden_changed, r_pkg, r_side, r_ritual, r_shift, r_weekend, r_new, r_adv, r_men, r_removed_order],
+        "orders": [o11551, o11552, o13980, o14021, o10007, o13990, o13991, o14000, o14050, o14060],
+        "reservations": [r_hidden_changed, r_pkg, r_side, r_ritual, r_shift, r_weekend, r_new, r_adv, r_men, r_removed_order, r_two],
         "bills": [],
         "valuecards": [],
     }

@@ -9,6 +9,7 @@ from zoneinfo import ZoneInfo
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 
+from catalog import Catalog  # noqa: E402
 from fixtures.case_data import build  # noqa: E402
 from giftcards import detail_row, select_cards  # noqa: E402
 from johku_api import Client, JohkuError  # noqa: E402
@@ -17,6 +18,7 @@ from sync import advance_baseline, chunks, db_state_from_remote, fetch_export, m
 
 ROOT = os.path.abspath(os.path.join(HERE, "..", ".."))
 MIGRATION = os.path.join(ROOT, "supabase", "migrations", "20261022091609_booking_126_johku_sync.sql")
+MIGRATION_227 = os.path.join(ROOT, "supabase", "migrations", "20261101130000_booking_227_johku_unmapped_review.sql")
 
 
 def plan():
@@ -79,6 +81,33 @@ class RulesTest(unittest.TestCase):
         self.assertEqual(p["counts"]["customers_unchanged"], 1)
         self.assertTrue(any(c["external_id"] == "501" for c in p["customers"]))
         self.assertFalse(any(c["external_id"] == "502" for c in p["customers"]))
+        self.assertEqual(res["30009"]["kb_product_id"], 23)
+        self.assertEqual(res["30009"]["johku_product_id"], "134")
+        self.assertEqual(res["30009"]["pool_codes"], [])
+        self.assertTrue(res["30009"]["ends_at"].startswith("2026-11-04T16:30:00"))
+
+    def test_future_fixture_products_are_mapped(self):
+        """Every Johku product that has a future fixture booking must resolve to a kb product."""
+        cat = Catalog()
+        b = build()
+        now = b["now"]
+        missing = set()
+        seen = set()
+        for blob in (b["prev"], b["next"]):
+            for row in blob["reservations"]:
+                end = datetime.fromtimestamp(int(row["end_ts"]), tz=ZoneInfo("Europe/Helsinki"))
+                if end <= now:
+                    continue
+                pid = str(row["product_id"])
+                seen.add(pid)
+                if cat.addon_code(pid):
+                    continue
+                if cat.kb_of(pid) is None:
+                    missing.add(pid)
+        self.assertIn("134", seen)
+        self.assertEqual(cat.kb_of("134"), 23)
+        self.assertEqual(cat.kb_of("62"), 23)
+        self.assertEqual(missing, set())
 
     def test_shrink_and_order_numbers(self):
         self.assertFalse(shrunk(10, 1))
@@ -286,6 +315,20 @@ class MigrationTextTest(unittest.TestCase):
         self.assertNotIn("insert into booking.email_outbox", sql)
         self.assertNotIn("insert into booking.accounting_outbox", sql)
         self.assertNotIn("hidden_at =", sql)
+
+    def test_unmapped_product_is_reviewed(self):
+        with open(MIGRATION_227, encoding="utf-8") as f:
+            sql = f.read().lower()
+        self.assertIn("'unmapped_product'", sql)
+        self.assertIn("resource_class in ('none', 'text_only')", sql)
+        self.assertIn("_johku_unmapped_needs_room", sql)
+        marker = "booking_227: ei_resurssia only when"
+        self.assertIn(marker, sql)
+        block = sql.split(marker, 1)[1].split("if v_space is null then", 1)[0]
+        self.assertIn("text_only", block)
+        self.assertIn("ei_resurssia", block)
+        self.assertIn("v_kb is not null", block)
+        self.assertIn("johku_product_id' = '134'", sql)
 
 
 if __name__ == "__main__":
