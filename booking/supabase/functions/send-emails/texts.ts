@@ -62,9 +62,10 @@ export const EMAIL_TEXTS: TextTable = {
   "email.payment_link_reminder.intro": { fi: "Tilauksesi maksu ({{var:amount}}) on yhä avoinna. Voit maksaa sen alla olevasta linkistä.", en: "The payment for your order ({{var:amount}}) is still open. You can pay it using the link below." },
   "email.payment_link_reminder.cancel": { fi: "Ellei maksua ole maksettu {{var:date}} mennessä, varaus perutaan.", en: "If the payment is not received by {{var:date}}, the booking will be cancelled." },
   "email.payment_link_reminder.pay_button": { fi: "Maksa verkossa", en: "Pay online" },
-  // booking_174: kumppanilahjakortin arvo pienempi kuin varauksen summa → erotus maksulinkillä (payload voucher_difference)
+  // booking_174 / booking_229: erotus voi tulla lisäpalvelusta tai hinnasta, joten voucher_intro on yleinen. value_card=true → voucher_intro_value_card (yli vuoden vanha kortti, arvolahjakortti).
   "email.payment_link.voucher_subject": { fi: `Lahjakorttivarauksesi erotuksen maksu {{var:no}} – ${SN}`, en: `Pay the difference for your gift card booking {{var:no}} – ${SN}` },
-  "email.payment_link.voucher_intro": { fi: "Lahjakorttivarauksesi summa oli {{var:total}}, lahjakortin arvo oli {{var:voucher}}. Voit maksaa erotuksen {{var:difference}} alla olevasta linkistä.", en: "The total of your gift card booking was {{var:total}} and the value of the gift card was {{var:voucher}}. You can pay the difference of {{var:difference}} using the link below." },
+  "email.payment_link.voucher_intro": { fi: "Lahjakorttisi arvo on {{var:voucher}}, joten maksettavaa jää vielä {{var:difference}}. Voit maksaa sen alla olevasta linkistä.", en: "Your gift card is worth {{var:voucher}}, so {{var:difference}} remains to be paid. You can pay it using the link below." },
+  "email.payment_link.voucher_intro_value_card": { fi: "Lahjakortti on voimassa suoraan palveluun yhden vuoden ajan, jonka jälkeen se muuttuu arvolahjakortiksi. Lahjakorttisi arvo on {{var:voucher}}, joten maksettavaa jää vielä {{var:difference}}. Voit maksaa sen alla olevasta linkistä.", en: "The gift card is valid directly for the service for one year, after which it turns into a value gift card. Your gift card is worth {{var:voucher}}, so {{var:difference}} remains to be paid. You can pay it using the link below." },
   "email.payment_link.voucher_amount_label": { fi: "Maksettava erotus", en: "Difference to pay" },
   // ---- kuitti / hyvityskuitti ----
   "email.receipt.subject": { fi: `Kuitti {{var:no}} – ${SN}`, en: `Receipt {{var:no}} – ${SN}` },

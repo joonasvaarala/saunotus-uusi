@@ -106,7 +106,12 @@ test('tekstit: uudet ui.admin.vcr.* ja email.payment_link.voucher_* FI+EN pendin
     assert.ok(!r.text.includes('<')); assert.doesNotMatch(r.text, /\p{Extended_Pictographic}|https?:\/\//u); assert.ok(r.max_len >= r.text.length); assert.equal(r.class, 'normal');
   }
   for (const k of ['email.payment_link.voucher_subject', 'email.payment_link.voucher_intro', 'email.payment_link.voucher_amount_label']) assert.ok(keys.includes(k));
-  assert.match(rows.find((r) => r.key === 'email.payment_link.voucher_intro' && r.lang === 'fi').text, /\{\{var:total\}\}.*\{\{var:voucher\}\}.*\{\{var:difference\}\}/);
+  const introFi = rows.find((r) => r.key === 'email.payment_link.voucher_intro' && r.lang === 'fi');
+  const introEn = rows.find((r) => r.key === 'email.payment_link.voucher_intro' && r.lang === 'en');
+  assert.equal(introFi.text, 'Lahjakorttisi arvo on {{var:voucher}}, joten maksettavaa jää vielä {{var:difference}}. Voit maksaa sen alla olevasta linkistä.');
+  assert.equal(introEn.text, 'Your gift card is worth {{var:voucher}}, so {{var:difference}} remains to be paid. You can pay it using the link below.');
+  assert.deepEqual([...introFi.placeholders].sort(), ['{{var:difference}}', '{{var:voucher}}']);
+  assert.ok(!introFi.text.includes('{{var:total}}') && !introEn.text.includes('{{var:total}}'));
   for (const k of keys.filter((x) => x.startsWith('ui.'))) assert.ok(VCR_TEXTS.fi[k] && VCR_TEXTS.en[k], k);
   const others = readdirSync(join(here, '../../content')).filter((f) => /^site-texts\.(pending-import|imported).*\.json$/.test(f) && f !== 'site-texts.pending-import-69.json');
   for (const f of others) { const rs = JSON.parse(rd(`../content/${f}`)); if (!Array.isArray(rs)) continue; for (const r of rs) assert.ok(!keys.includes(r?.key), `${r?.key} on jo tiedostossa ${f}`); }
