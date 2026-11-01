@@ -23,6 +23,7 @@ import {
   read, site, kb, images, e, href, pageHref, pagePath, abs, SITE_URL, BASE, isTest, chatbotOn,
   johku, bookingUrl, phoneDisplay, heroPicture, heroPreload, reviewsData, product, money, dur, priceOf, fromMode, picture, icon, hm,
 } from './lib.mjs';
+import { liveCatalogName } from './catalog-live.mjs';
 
 const minifyCss = (src) => src
   .replace(/__BASE__/g, BASE)
@@ -103,14 +104,18 @@ function metaItems(c, p, lang) {
 export function card(c, lang, opt = {}) {
   const p = c.kb ? product(c.kb) : null;
   const t = { ...c[lang] };
+  // Nimi: public_catalog (hallinnan kb.products.name / name_en). Hinta, URL ja kortin teksti jäävät ennalleen.
+  // Katalogia ei ole → kortin oma otsikko (cards.json / sivuteksti). Selain päivittää nimen uudelleen (data-catalog-name).
+  const title = (c.kb && liveCatalogName(c.kb, lang)) || opt.title || t.title || '';
   const url = opt.url || (c.johku ? jk(c.johku, lang) : lang === 'en' && c.johkuEn ? jk(c.johkuEn, lang) : p ? bookingUrl(p.booking_url, lang) : jk('home', lang));
   const items = p ? metaItems(c, p, lang) : [];
   const list = t.list ? `<ul class="list">${[].concat(t.list).map((x) => `<li>${e(x)}</li>`).join('')}</ul>` : '';
   const sizes = opt.sizes || '(min-width:1100px) 280px, (min-width:640px) 45vw, 100vw';
   const fallback = c.img ? pic(c.img, lang, { sizes, alt: '' }) : '';
-  const im = c.kb ? productCardInner({ slug: c.kb, alt: opt.title || t.title || '', fallbackHtml: fallback, sizes }) : { attrs: '', html: fallback };
+  const im = c.kb ? productCardInner({ slug: c.kb, alt: title, fallbackHtml: fallback, sizes }) : { attrs: '', html: fallback };
+  const name = c.kb ? `<span data-catalog-name data-catalog-slug="${e(c.kb)}">${e(title)}</span>` : e(title);
   return `<li class="card"><div class="im"${im.attrs}>${im.html}${t.kicker ? `<span class="pill">${e(t.kicker)}</span>` : ''}</div>
-<div class="bd"><h3><a href="${e(url)}" target="_blank" rel="noopener">${e(opt.title || t.title)}${NEW(lang)}</a></h3>
+<div class="bd"><h3><a href="${e(url)}" target="_blank" rel="noopener">${name}${NEW(lang)}</a></h3>
 <p>${e(t.text)}</p>${list}${t.more ? `<details class="more"><summary>${e(ui(lang).moreInfo)}</summary><p>${e(t.more)}</p></details>` : ''}
 ${c.note || t.note ? `<p class="note">${e(c.note || t.note)}</p>` : ''}
 ${items.length ? `<ul class="meta">${items.join('')}</ul>` : ''}</div>
@@ -124,21 +129,31 @@ export function week(lang, opt = {}) {
   const u = ui(lang);
   const lab = (type, day) => site.sessionLabels[day >= 6 && type === 'public' ? 'weekend' : type]?.[lang] || '';
   // Yksi vuororivi: aika · nimi · Varaa-painike. Koko rivi on klikattava (a::after), .sr-selite säilyy. Rituaalilla aika, jos aukiolo on tiedossa.
+  // Nimi: public_catalog, jos build haki sen; muuten sessionLabels (sivuteksti). Viikonpäivä on sarakkeen otsikossa, ei nimessä.
   // data-pid/data-open/data-close: viikko-ohjelma piilottaa täyden vuoron selaimessa (week-live.js). Kellonaika aina minuutteineen.
-  const row = (time, name, url, day, meta = {}) => `<li class="sess${time ? '' : ' nt'}"${meta.pid ? ` data-pid="${meta.pid}"` : ''}${meta.open ? ` data-open="${e(meta.open)}" data-close="${e(meta.close)}"` : ''}>${time ? `<span class="t">${time}</span>` : ''}<span class="n">${e(name)}</span><a class="bk" href="${e(url)}" target="_blank" rel="noopener"><span class="bk-l">${e(u.reserve)}</span><span class="sr"> – ${e(name)}, ${e(u.daysLong[day - 1])}</span>${NEW(lang)}</a></li>`;
+  // data-catalog-name: selain vaihtaa nimen tuoreeseen public_catalog-nimeen (quiet-week.js). Hakuvirhe → tämä teksti jää.
+  const row = (time, name, url, day, meta = {}) => {
+    const nameAttr = meta.pid ? ` data-catalog-name data-pid="${meta.pid}"${meta.slug ? ` data-catalog-slug="${e(meta.slug)}"` : ''}` : '';
+    return `<li class="sess${time ? '' : ' nt'}"${meta.pid ? ` data-pid="${meta.pid}"` : ''}${meta.open ? ` data-open="${e(meta.open)}" data-close="${e(meta.close)}"` : ''}>${time ? `<span class="t">${time}</span>` : ''}<span class="n"${nameAttr}>${e(name)}</span><a class="bk" href="${e(url)}" target="_blank" rel="noopener"><span class="bk-l">${e(u.reserve)}</span><span class="sr"> – <span${nameAttr}>${e(name)}</span>, ${e(u.daysLong[day - 1])}</span>${NEW(lang)}</a></li>`;
+  };
   const li = [];
   for (let d = 1; d <= 7; d++) {
     const rows = kb.hours.filter((h) => h.weekday === d);
     const clock = (t) => { const [hh, mm] = String(t).slice(0, 5).split(':'); return `${Number(hh)}${lang === 'en' ? ':' : '.'}${mm}`; };
-    const when = (h) => (h.opens && h.closes ? { pid: h.product_id, open: String(h.opens).slice(0, 5), close: String(h.closes).slice(0, 5) } : { pid: h.product_id });
-    const sess = rows.filter((h) => h.opens && h.session_type !== 'ritual').map((h) => {
+    const metaFor = (h) => {
       const pr = kb.products.find((x) => x.id === h.product_id);
-      return row(`${clock(h.opens)}–${clock(h.closes)}`, lab(h.session_type, d), pr ? bookingUrl(pr.booking_url, lang) : jk('publicAll', lang), d, when(h));
+      const meta = h.opens && h.closes ? { pid: h.product_id, open: String(h.opens).slice(0, 5), close: String(h.closes).slice(0, 5) } : { pid: h.product_id };
+      if (pr?.slug) meta.slug = pr.slug;
+      return { pr, meta, name: (pr && liveCatalogName(pr.slug, lang)) || '' };
+    };
+    const sess = rows.filter((h) => h.opens && h.session_type !== 'ritual').map((h) => {
+      const { pr, meta, name } = metaFor(h);
+      return row(`${clock(h.opens)}–${clock(h.closes)}`, name || lab(h.session_type, d), pr ? bookingUrl(pr.booking_url, lang) : jk('publicAll', lang), d, meta);
     });
     const ritual = rows.filter((h) => h.session_type === 'ritual').map((h) => {
-      const pr = kb.products.find((x) => x.id === h.product_id);
+      const { pr, meta, name } = metaFor(h);
       const time = h.opens && h.closes ? `${clock(h.opens)}–${clock(h.closes)}` : '';
-      return row(time, site.sessionLabels.ritual[lang], pr ? bookingUrl(pr.booking_url, lang) : jk('ceremonies', lang), d, when(h));
+      return row(time, name || site.sessionLabels.ritual[lang], pr ? bookingUrl(pr.booking_url, lang) : jk('ceremonies', lang), d, meta);
     });
     const none = rows.some((h) => h.session_type === 'private_only')
       ? `<p class="none">${e(u.noPublic)}</p><ul class="alt"><li><a href="${e(jk('private', lang))}" target="_blank" rel="noopener">${e(u.privateLink)}${NEW(lang)}</a></li><li><a href="${e(jk('events', lang))}" target="_blank" rel="noopener">${e(u.eventsLink)}${NEW(lang)}</a></li></ul>` : '';

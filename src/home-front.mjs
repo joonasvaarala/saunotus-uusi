@@ -92,7 +92,7 @@ function singleExperience(spec, lang) {
   const host = im.has ? '' : im.attrs;
   const blurb = cardBlurb(p, lang);
   const cta = spec.cta === 'gift' ? homeText('ui.site.home_gift_cta', lang) : u.reserveArrow;
-  return `<li class="card${box ? '' : ' noimg'}"${host}>${box}<div class="bd"><h3><a href="${e(experienceHref(spec, lang))}">${e(name)}</a></h3>${blurb ? `<p class="xp-desc">${e(blurb)}</p>` : ''}<p class="xp-meta">${e(experienceMeta(p, lang))}</p></div><div class="cta" aria-hidden="true">${e(cta)}</div></li>`;
+  return `<li class="card${box ? '' : ' noimg'}"${host}>${box}<div class="bd"><h3><a href="${e(experienceHref(spec, lang))}"><span data-catalog-name data-catalog-slug="${e(p.slug)}">${e(name)}</span></a></h3>${blurb ? `<p class="xp-desc">${e(blurb)}</p>` : ''}<p class="xp-meta">${e(experienceMeta(p, lang))}</p></div><div class="cta" aria-hidden="true">${e(cta)}</div></li>`;
 }
 
 function pairExperience(spec, lang) {
@@ -107,7 +107,7 @@ function pairExperience(spec, lang) {
   const u = U(lang);
   const opts = products.map((p) => {
     const name = productName(p, lang, p.slug);
-    return `<li><a class="xp-opt" data-testid="care-pair-option" data-slug="${e(p.slug)}" href="${e(experienceHref({ slug: p.slug }, lang))}"><span class="xp-opt-name">${e(name)}</span><span class="xp-meta">${e(experienceMeta(p, lang))}</span><span class="xp-opt-cta">${e(u.reserveArrow)}</span></a></li>`;
+    return `<li><a class="xp-opt" data-testid="care-pair-option" data-slug="${e(p.slug)}" href="${e(experienceHref({ slug: p.slug }, lang))}"><span class="xp-opt-name" data-catalog-name data-catalog-slug="${e(p.slug)}">${e(name)}</span><span class="xp-meta">${e(experienceMeta(p, lang))}</span><span class="xp-opt-cta">${e(u.reserveArrow)}</span></a></li>`;
   }).join('');
   return `<li class="card xp-pair${box ? '' : ' noimg'}" data-testid="care-pair"${host}>${box}<div class="bd"><h3>${e(title)}</h3>${blurb ? `<p class="xp-desc">${e(blurb)}</p>` : ''}<ul class="xp-opts">${opts}</ul></div></li>`;
 }

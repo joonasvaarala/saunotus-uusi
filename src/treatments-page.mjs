@@ -193,7 +193,8 @@ export function treatmentCard(p, lang) {
   const text = blurb(p, lang);
   const smoke = p.includes_smoke_sauna === true ? `<p class="tr-smoke">${e(tt('ui.site.treatments_smoke', lang))}</p>` : '';
   const href = pageHref('book', lang, shopHash(p.slug));
-  return `<li class="bk-card"><a class="bk-card-link" href="${e(href)}">${cardImage(p, lang, name)}<h3>${e(name)}</h3>${smoke}${text ? `<p class="bk-desc">${e(text)}</p>` : ''}<div class="bk-card-meta" data-testid="card-meta">${when ? `<p class="bk-meta bk-card-when" data-testid="card-when">${e(when)}</p>` : ''}<p class="bk-meta bk-card-price" data-testid="card-price"><strong>${e(treatmentCardPrice(p, lang))}</strong></p></div><span class="btn sm">${e(cta)}<span class="sr"> – ${e(name)}</span></span></a></li>`;
+  const nm = `<span data-catalog-name data-catalog-slug="${e(p.slug)}">${e(name)}</span>`;
+  return `<li class="bk-card"><a class="bk-card-link" href="${e(href)}">${cardImage(p, lang, name)}<h3>${nm}</h3>${smoke}${text ? `<p class="bk-desc">${e(text)}</p>` : ''}<div class="bk-card-meta" data-testid="card-meta">${when ? `<p class="bk-meta bk-card-when" data-testid="card-when">${e(when)}</p>` : ''}<p class="bk-meta bk-card-price" data-testid="card-price"><strong>${e(treatmentCardPrice(p, lang))}</strong></p></div><span class="btn sm">${e(cta)}<span class="sr"> – ${nm}</span></span></a></li>`;
 }
 
 function pairOption(p, lang) {
@@ -201,7 +202,8 @@ function pairOption(p, lang) {
   const href = pageHref('book', lang, shopHash(p.slug));
   const when = treatmentCardWhen(p, lang);
   const cta = site.ui[lang].reserve;
-  return `<li><a class="bk-pair-opt" data-testid="care-pair-option" data-slug="${e(p.slug)}" href="${e(href)}"><span class="bk-pair-name">${e(name)}</span>${when ? `<span class="bk-meta bk-card-when" data-testid="card-when">${e(when)}</span>` : ''}<span class="bk-meta bk-card-price" data-testid="card-price"><strong>${e(careOptionPrice(p, lang))}</strong></span><span class="btn sm">${e(cta)}<span class="sr"> – ${e(name)}</span></span></a></li>`;
+  const nm = `<span data-catalog-name data-catalog-slug="${e(p.slug)}">${e(name)}</span>`;
+  return `<li><a class="bk-pair-opt" data-testid="care-pair-option" data-slug="${e(p.slug)}" href="${e(href)}"><span class="bk-pair-name">${nm}</span>${when ? `<span class="bk-meta bk-card-when" data-testid="card-when">${e(when)}</span>` : ''}<span class="bk-meta bk-card-price" data-testid="card-price"><strong>${e(careOptionPrice(p, lang))}</strong></span><span class="btn sm">${e(cta)}<span class="sr"> – ${nm}</span></span></a></li>`;
 }
 
 /** Kaksi tuotetta, yksi kortti: omat linkit, kestot ja alk.-hinnat. Kuva ensimmäisen tuotteen kuva. */
@@ -249,7 +251,7 @@ function paths(lang) {
   const items = START_PATHS.map((path) => {
     const links = path.slugs.map((slug) => {
       const p = productOf(slug);
-      return `<li><a href="${e(pageHref('book', lang, shopHash(p.slug)))}">${e(pname(p, lang))}</a></li>`;
+      return `<li><a data-catalog-name data-catalog-slug="${e(p.slug)}" href="${e(pageHref('book', lang, shopHash(p.slug)))}">${e(pname(p, lang))}</a></li>`;
     }).join('');
     return `<li class="tr-path"><h3>${e(tt(path.title, lang))}</h3><p>${e(tt(path.text, lang))}</p><ul class="tr-path-links">${links}</ul></li>`;
   }).join('');

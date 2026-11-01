@@ -8,6 +8,7 @@ import { rpc } from './sb.js';
 import { liveImageUrl, publicImageUrl } from './product-image.js';
 import { quietByWeekday, addDaysIso, fillText, pctText, validOffer, bookablePrivateSlots, offerForSlot, weekdayIso, JALKIL_ID } from './quiet-offers-logic.js';
 import { dateForWeekday, shiftIsFull, weekEvents, eventDisplayName, freeShopEvents, cardDates, cardTime, eventIsFull, eventWaitlistPath } from './week-live.js';
+import { applyCatalogNames } from './catalog-names.js';
 
 const TZ = 'Europe/Helsinki';
 export function decorateWeek(list, offers, { lang = 'fi', shopHref = '', today, slots, now } = {}) {
@@ -17,6 +18,17 @@ export function decorateWeek(list, offers, { lang = 'fi', shopHref = '', today, 
   const money = (n) => new Intl.NumberFormat(lang === 'fi' ? 'fi-FI' : 'en-FI', { style: 'currency', currency: 'EUR', minimumFractionDigits: Number.isInteger(+n) ? 0 : 2 }).format(+n);
   const time = (iso) => new Intl.DateTimeFormat(lang === 'fi' ? 'fi-FI' : 'en-GB', { timeZone: TZ, hour: 'numeric', minute: '2-digit', hourCycle: 'h23' }).format(new Date(iso)).replace('.', ':').replace(/:00$/, '');
   const el = (tag, cls, text) => { const n = list.ownerDocument.createElement(tag); if (cls) n.className = cls; if (text != null) n.textContent = text; return n; };
+  const named = (cls, text, productId) => {
+    const n = el('span', cls, text);
+    n.dataset.catalogName = '';
+    if (productId != null) n.dataset.pid = String(productId);
+    return n;
+  };
+  const srFor = (productId, label, detail) => {
+    const sr = el('span', 'sr');
+    sr.append(' – ', named('', label, productId), detail ? `, ${detail}` : '');
+    return sr;
+  };
   const startMin = (txt) => { const m = /^(\d{1,2})(?:[:.](\d\d))?/.exec(String(txt || '').trim()); return m ? +m[1] * 60 + +(m[2] || 0) : null; };
   const place = (ul, li, label) => {
     const mine = startMin(label);
@@ -48,8 +60,8 @@ export function decorateWeek(list, offers, { lang = 'fi', shopHref = '', today, 
       price.append(el('span', 'qb', fillText(d.quietBadge, vars)), ' ', el('del', '', vars.was), ' ', el('strong', '', vars.now));
       const a = el('a', 'bk');
       a.href = `${shopHref}#/tuote/${encodeURIComponent(p.s)}/${o.session_date}`;
-      a.append(el('span', 'bk-l', d.quietReserve || ''), el('span', 'sr', ` – ${p.n}, ${fillText(d.quietSr, vars)}`));
-      li.append(el('span', 't', `${time(o.starts_at)}–${time(o.ends_at)}`), el('span', 'n', p.n), price, a);
+      a.append(el('span', 'bk-l', d.quietReserve || ''), srFor(o.product_id, p.n, fillText(d.quietSr, vars)));
+      li.append(el('span', 't', `${time(o.starts_at)}–${time(o.ends_at)}`), named('n', p.n, o.product_id), price, a);
       place(host.ul, li, time(o.starts_at));
       added++;
     }
@@ -78,8 +90,8 @@ export function decorateWeek(list, offers, { lang = 'fi', shopHref = '', today, 
       const a = el('a', 'bk');
       a.href = `${shopHref}#/varaa/${encodeURIComponent(slot.rule_id)}/${slot.session_date}/${JALKIL_ID}`;
       const sr = offer ? fillText(d.quietSr, vars) : nowPrice;
-      a.append(el('span', 'bk-l', d.quietReserve || ''), el('span', 'sr', ` – ${p.n}, ${sr}`));
-      li.append(el('span', 't', `${time(slot.starts_at)}–${time(slot.ends_at)}`), el('span', 'n', p.n), price, a);
+      a.append(el('span', 'bk-l', d.quietReserve || ''), srFor(slot.product_id, p.n, sr));
+      li.append(el('span', 't', `${time(slot.starts_at)}–${time(slot.ends_at)}`), named('n', p.n, slot.product_id), price, a);
       place(host.ul, li, time(slot.starts_at));
       added++;
       host.day.classList.remove('off');
@@ -222,18 +234,22 @@ if (cfg && globalThis.document && window.BOOKING_CONFIG?.url) {
       rpc('public_events', { p_from: from, p_channel: 'shop' }).then((rows) => rows).catch(() => null),
       rpc('public_catalog', {}).then((rows) => (Array.isArray(rows) ? rows : [])).catch(() => null),
     ]).then(([offers, slots, availability, events, catalog]) => {
-      if (offers == null && slots == null && availability == null && events == null) return;
-      const opt = { lang: cfg.lang, shopHref: cfg.shopHref, today, now: Date.now() };
-      if (slots != null) opt.slots = slots;
-      for (const l of lists) {
-        if (offers != null || slots != null) decorateWeek(l, offers || [], opt);
-        if (availability != null || events != null) applyLiveWeek(l, { availability, events, catalog, lang: cfg.lang, shopHref: cfg.shopHref, today, now: Date.now() });
+      const namesLang = cfg.lang === 'en' ? 'en' : 'fi';
+      if (!(offers == null && slots == null && availability == null && events == null)) {
+        const opt = { lang: cfg.lang, shopHref: cfg.shopHref, today, now: Date.now() };
+        if (slots != null) opt.slots = slots;
+        for (const l of lists) {
+          if (offers != null || slots != null) decorateWeek(l, offers || [], opt);
+          if (availability != null || events != null) applyLiveWeek(l, { availability, events, catalog, lang: cfg.lang, shopHref: cfg.shopHref, today, now: Date.now() });
+        }
+        if (events != null && (Array.isArray(events) || typeof events === 'string')) {
+          const reserve = lists[0]?.dataset.quietReserve || '';
+          const imageBase = `${String(window.BOOKING_CONFIG.url).replace(/\/$/, '')}/storage/v1/object/public/product-images/`;
+          for (const ul of eventLists) applyEventCards(ul, events, { lang: cfg.lang, shopHref: cfg.shopHref, now: Date.now(), reserve, imageBase });
+        }
       }
-      if (events != null && (Array.isArray(events) || typeof events === 'string')) {
-        const reserve = lists[0]?.dataset.quietReserve || '';
-        const imageBase = `${String(window.BOOKING_CONFIG.url).replace(/\/$/, '')}/storage/v1/object/public/product-images/`;
-        for (const ul of eventLists) applyEventCards(ul, events, { lang: cfg.lang, shopHref: cfg.shopHref, now: Date.now(), reserve, imageBase });
-      }
-    }).catch(() => { /* viikko-ohjelma ja tapahtumakortit ennallaan */ });
+      // Nimet vasta kun vuororivit on lisätty. Katalogihaku yksin riittää: muut haut saavat epäonnistua.
+      if (Array.isArray(catalog)) applyCatalogNames(document, catalog, namesLang);
+    }).catch(() => { /* viikko-ohjelma, tapahtumakortit ja nimet ennallaan */ });
   }
 }

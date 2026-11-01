@@ -4,6 +4,7 @@
 // Lahjakorttisivu: Product/Offer tulee julkaistusta valikoimasta (gift-offers.js), ei cards.jsonin vanhoista Johku-korteista.
 // Ei aggregateRating-merkintää: arviot ovat Googlen (kolmannen osapuolen) arvioita, eikä niitä saa merkitä omaksi rakenteiseksi dataksi.
 import { kb, abs, e, priceOf, fromMode, site } from './lib.mjs';
+import { liveCatalogName } from './catalog-live.mjs';
 import { cards, pageDoc } from './content-texts.mjs';
 import { faqFor } from './kb-en.mjs';
 import { tx } from './site-texts.mjs';
@@ -51,7 +52,7 @@ export function seoSchemaForPage({ lang, key, url, body = '' }) {
     const seen = new Set();
     for (const g of CARD_GROUPS) for (const c of Object.values(cards[g] || {})) {
       if (!c?.kb || !(c.show || []).includes('price') || seen.has(c.kb)) continue;
-      const p = bySlug(c.kb), title = c[lang]?.title;
+      const p = bySlug(c.kb), title = liveCatalogName(c.kb, lang) || c[lang]?.title;
       if (!p || !title || !exactPrice(c, p) || !body.includes(`>${e(title)}`)) continue;
       seen.add(c.kb);
       out.push({

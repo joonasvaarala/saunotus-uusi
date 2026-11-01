@@ -1,7 +1,9 @@
 // Etusivun tuotekortit: sama lähde kuin kauppa (booking.public_catalog), buildissa.
 // Haku epäonnistuu tai ympäristössä ei ole avainta → kb-snapshot (content/kb/kb.json). Build ei kaadu.
+// Viikko-ohjelman ja tuotekortin nimi käyttää vain haettua riviä (liveCatalogName): ilman hakua jää staattinen teksti.
 import { kb } from './lib.mjs';
 import { makeRpc } from './articles/source.mjs';
+import { catalogDisplayName } from '../booking/shop/src/catalog-names.js';
 
 const FIELDS = ['name', 'name_en', 'description', 'description_en', 'short_description', 'short_description_en', 'price', 'price_type', 'price_text', 'duration_minutes', 'duration_text', 'duration_text_en'];
 let bySlug = new Map();
@@ -12,6 +14,11 @@ export function setLiveCatalog(rows) {
   for (const r of rows) if (r && typeof r.slug === 'string' && r.slug) bySlug.set(r.slug, r);
 }
 export const clearLiveCatalog = () => { bySlug = new Map(); };
+
+/** public_catalog-nimi tälle slugille. Tyhjä, jos riviä ei haettu tai nimikenttä on tyhjä. */
+export function liveCatalogName(slug, lang) {
+  return catalogDisplayName(bySlug.get(slug), lang);
+}
 
 /** Tuote korteille: katalogin kentät peittävät kb-snapshotin, kun build haki public_catalogin. */
 export function liveProduct(slug) {
