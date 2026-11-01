@@ -31,6 +31,7 @@ declare
   u_mgr uuid := gen_random_uuid();
   u_admin uuid := gen_random_uuid();
   got jsonb; bad jsonb; seller jsonb; payload jsonb; resend_mode text; pay_mode text; npass int; nfail int; log text;
+  visma_mode text; mp_mode text; mo_mode text;
 begin
   insert into auth.users(id, email) values
     (u_staff, 't123-staff-' || u_staff::text || '@example.test'),
@@ -42,6 +43,9 @@ begin
     (u_admin, 't123-admin-' || u_admin::text || '@example.test', 't123 admin', 'admin');
   update booking.settings set value = jsonb_set(coalesce(value, '{}'::jsonb), '{logo_url}', to_jsonb('https://example.test/logo.png'::text), true) where key = 'seller';
   select mode into resend_mode from booking.integration_config where key = 'resend';
+  select mode into visma_mode from booking.integration_config where key = 'vismapay';
+  select mode into mp_mode from booking.integration_config where key = 'mobilepay';
+  select mode into mo_mode from booking.integration_config where key = 'montonio';
   select value #>> '{}' into pay_mode from booking.settings where key = 'public_payment_mode';
 
   perform public.t123_login(u_staff);
@@ -54,6 +58,8 @@ begin
   got := public.t123_call('booking.admin_settings_bundle()');
   perform public.t123_ck(got ->> 'err' is null and got ->> 'qr_only' = 'false' and got ->> 'role' = 'manager', 'manager lukee');
   perform public.t123_ck((got -> 'resend') ? 'allowlist_on' and not ((got -> 'resend') ? 'test_recipients'), 'allowlist ilman listaa');
+  perform public.t123_ck((got -> 'montonio') ? 'mode' and not ((got -> 'montonio') ? 'settings') and (got -> 'montonio' ->> 'mode') is not distinct from coalesce(mo_mode, 'off'), 'montonio vain tila');
+  perform public.t123_ck(not (got ? 'vismapay') and not (got ? 'mobilepay'), 'vanhat verkkomaksut pois paketista');
   seller := jsonb_build_object(
     'name', 'Havuhattu Oy / Sipoonjoen Perinnesauna', 'legal_name', 'Havuhattu Oy', 'trade_name', 'Sipoonjoen Perinnesauna',
     'business_id', '3018112-1', 'vat_id', 'FI30181121', 'street', 'Hindsbyntie 124', 'postal_code', '04130', 'city', 'Sipoo',
@@ -79,6 +85,9 @@ begin
   perform public.t123_ck((select value ->> 'footer' from booking.settings where key = 'seller') = 'Kiitos testistä', 'alatunniste vaihtui');
   perform public.t123_ck((select active from booking.payment_methods where code = 'cash') = false, 'käteinen yhä pois');
   perform public.t123_ck((select mode from booking.integration_config where key = 'resend') = resend_mode, 'sähköpostin tila ennallaan');
+  perform public.t123_ck((select mode from booking.integration_config where key = 'vismapay') is not distinct from visma_mode, 'vismapay-tila ennallaan');
+  perform public.t123_ck((select mode from booking.integration_config where key = 'mobilepay') is not distinct from mp_mode, 'mobilepay-tila ennallaan');
+  perform public.t123_ck((select mode from booking.integration_config where key = 'montonio') is not distinct from mo_mode, 'montonio-tila ennallaan');
   perform public.t123_ck((select value #>> '{}' from booking.settings where key = 'public_payment_mode') is not distinct from pay_mode, 'maksutila ennallaan');
 
   perform public.t123_login(u_admin);

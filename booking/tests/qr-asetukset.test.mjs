@@ -22,6 +22,7 @@ const pending16 = JSON.parse(read('../../content/site-texts.pending-import-16.js
 const pending12 = JSON.parse(read('../../content/site-texts.pending-import-12.json'));
 const pending24 = JSON.parse(read('../../content/site-texts.pending-import-24.json'));
 const pending31 = JSON.parse(read('../../content/site-texts.pending-import-31.json'));
+const pending109 = JSON.parse(read('../../content/site-texts.pending-import-109.json'));
 const URL_QR = 'https://saunotus.fi/juomat/?laite=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
 
 test('QR-osoite on lukittu polku ja tuloste ei ole tyhjä', () => {
@@ -210,10 +211,10 @@ test('pending-import-16: vain uudet avaimet, FI+EN, ei numeroita', () => {
   for (const lang of ['fi', 'en']) {
     for (const [key, text] of Object.entries(SETTINGS_TEXTS[lang])) {
       const row16 = pending16.find((r) => r.key === key && r.lang === lang);
-      const row = row16 || pending24.find((r) => r.key === key && r.lang === lang) || pending31.find((r) => r.key === key && r.lang === lang);
+      const row = pending109.find((r) => r.key === key && r.lang === lang) || row16 || pending24.find((r) => r.key === key && r.lang === lang) || pending31.find((r) => r.key === key && r.lang === lang);
       assert.ok(row, key);
       assert.equal(row.text, text);
-      if (!row16) assert.equal(pending24.some((r) => r.key === key && r.lang === lang) || pending31.some((r) => r.key === key && r.lang === lang), true, key);
+      if (!row16) assert.equal(pending109.some((r) => r.key === key && r.lang === lang) || pending24.some((r) => r.key === key && r.lang === lang) || pending31.some((r) => r.key === key && r.lang === lang), true, key);
     }
     for (const [key, text] of Object.entries(DRINKS_EXTRA[lang])) {
       assert.equal(DRINKS_TEXTS[lang][key], undefined);

@@ -187,8 +187,6 @@ function homePanel(bundle, ctx) {
       h('p', { class: 'summary', text: summary.join('\n') }),
       h('p', {}, h('a', { href: settingsHref('yritys'), text: tx('company_edit') }))),
     card(tx('links_title'), tx('links_help'),
-      stat('Visma Pay', modeBadge(bundle.vismapay?.mode)),
-      stat('MobilePay', modeBadge(bundle.mobilepay?.mode)),
       stat('Montonio', modeBadge(bundle.montonio?.mode)),
       stat(tx('mail_mode'), modeBadge(bundle.resend?.mode)),
       stat('Procountor', modeBadge(bundle.procountor?.mode)),
@@ -268,8 +266,8 @@ function bookingPanel(bundle, reload, calendarExport, calendarExportFailed, isAd
 function paymentsPanel(bundle, reload) {
   const s = bundle.settings || {};
   const hold = num(tx('hold_min'), s.checkout_hold_minutes, tx('unit_minutes'), 5, 60);
-  const grace = num(tx('hold_grace'), s.checkout_mobilepay_grace_minutes, tx('unit_minutes'), 0, 60);
-  const wait = num(tx('hold_wait'), s.checkout_mobilepay_max_wait_minutes, tx('unit_minutes'), 0, 120);
+  const grace = num(tx('hold_extra'), s.checkout_mobilepay_grace_minutes, tx('unit_minutes'), 0, 60);
+  const wait = num(tx('hold_cap'), s.checkout_mobilepay_max_wait_minutes, tx('unit_minutes'), 0, 120);
   const company = toggle(tx('inv_co_label'), tx('inv_co_help'), s.checkout_company_invoice_enabled === true, { testid: 'company-invoice' });
   const methods = new Map((bundle.payment_methods || []).map((m) => [m.code, m]));
   const toggles = MANUAL.filter((code) => methods.has(code)).map((code) => {
@@ -281,8 +279,7 @@ function paymentsPanel(bundle, reload) {
   return h('div', { class: 'stack', 'data-testid': 'panel-maksut' },
     card(tx('pay_status_title'), tx('pay_status_help'),
       stat(tx('pay_mode'), h('b', { text: s.public_payment_mode === 'hold_until_paid' ? tx('mode_hold') : tx('mode_pay_later') })),
-      stat('Visma Pay', modeBadge(bundle.vismapay?.mode)),
-      stat('MobilePay', modeBadge(bundle.mobilepay?.mode)),
+      stat('Montonio', modeBadge(bundle.montonio?.mode)),
       stat(tx('pay_later_test'), onOff(s.pay_later_test_enabled === true))),
     card(tx('hold_title'), tx('hold_help'), hold.node, grace.node, wait.node, saveBar('payment_hold', () => ({
       checkout_hold_minutes: Number(hold.input.value),
@@ -290,7 +287,7 @@ function paymentsPanel(bundle, reload) {
       checkout_mobilepay_max_wait_minutes: Number(wait.input.value),
     }), reload, 'save-hold')),
     card(tx('inv_co_title'), null, company.row, saveBar('company_invoice', () => ({ checkout_company_invoice_enabled: company.input.checked }), reload, 'save-company')),
-    card(tx('methods_title'), tx('methods_help'),
+    card(tx('methods_title'), tx('methods_lead'),
       ...toggles.map((t) => t.ui.row),
       cash.row,
       saveBar('payment_methods', () => ({ methods: Object.fromEntries(toggles.map((t) => [t.code, t.ui.input.checked])) }), reload, 'save-methods')),
@@ -390,8 +387,6 @@ function connectionsPanel(bundle, procountor, procountorFailed, editor, isAdmin,
   const s = bundle.settings || {};
   return h('div', { class: 'stack', 'data-testid': 'panel-yhteydet' },
     h('p', { class: 'muted', text: tx('conn_lead') }),
-    card('Visma Pay', tx('readonly_note'), stat('Visma Pay', modeBadge(bundle.vismapay?.mode))),
-    card('MobilePay', tx('readonly_note'), stat('MobilePay', modeBadge(bundle.mobilepay?.mode))),
     card('Montonio', tx('readonly_note'), stat('Montonio', modeBadge(bundle.montonio?.mode))),
     card(tx('mail_status_title'), tx('mail_status_help'),
       stat(tx('mail_mode'), modeBadge(bundle.resend?.mode)),

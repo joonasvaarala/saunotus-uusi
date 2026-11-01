@@ -106,14 +106,11 @@ export function modeBadgeKind(mode) {
 
 export function overviewNotices(bundle) {
   const notes = [];
-  const vp = bundle?.vismapay?.mode;
-  const mp = bundle?.mobilepay?.mode;
   const mo = bundle?.montonio?.mode;
   const em = bundle?.resend?.mode;
-  if (vp === 'test' || mp === 'test' || mo === 'test') notes.push('warn_pay_test');
-  if (vp === 'live' || mp === 'live' || mo === 'live') notes.push('warn_pay_live');
-  if (em === 'live' && !bundle?.resend?.allowlist_on) notes.push('warn_allowlist_open');
-  else if (em !== 'live') notes.push('warn_email_not_live');
+  if (mo === 'test') notes.push('warn_pay_test');
+  if (mo === 'live') notes.push('warn_pay_live');
+  if (em !== 'live') notes.push('warn_email_not_live');
   return notes;
 }
 
@@ -196,7 +193,7 @@ export function validateSection(section, raw) {
       const hold = integer(body.checkout_hold_minutes, 5, 60);
       const grace = integer(body.checkout_mobilepay_grace_minutes, 0, 60);
       const wait = integer(body.checkout_mobilepay_max_wait_minutes, 0, 120);
-      if (hold == null || grace == null || wait == null) return fail('invalid_value', 'Pito on 5–60 min, MobilePayn lisäaika 0–60 min ja katto 0–120 min.');
+      if (hold == null || grace == null || wait == null) return fail('invalid_value', 'Pito on 5–60 min, lisäaika 0–60 min ja katto 0–120 min.');
       return { ok: true, value: { checkout_hold_minutes: hold, checkout_mobilepay_grace_minutes: grace, checkout_mobilepay_max_wait_minutes: wait } };
     }
     case 'company_invoice': {
@@ -468,8 +465,7 @@ export function exampleBundle() {
       { code: 'other', label: 'Muu', is_manual: true, active: true },
     ],
     resend: { mode: 'dry_run', from: 'Sipoonjoen Perinnesauna <savusauna@saunotus.fi>', reply_to: 'savusauna@saunotus.fi', allowlist_on: true, allowlist_count: 2 },
-    vismapay: { mode: 'test' },
-    mobilepay: { mode: 'test' },
+    montonio: { mode: 'off' },
     procountor: { mode: 'off', environment: 'pts', daily_enabled: false, accounts_configured: false, bank_account_configured: false },
     booking_calendar: { mode: 'off', configured: false },
     gift_packages: [{ code: 'open', name: 'Avoin lahjakortti', valid_months: 6 }],

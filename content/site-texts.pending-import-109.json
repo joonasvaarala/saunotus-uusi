@@ -1,0 +1,62 @@
+[
+  {
+    "key": "ui.admin.settings.hold_extra",
+    "lang": "fi",
+    "text": "Verkkomaksun lisäaika",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 21,
+    "placeholders": [],
+    "reason": "booking_225: pidon lisäaika on verkkomaksun, ei MobilePayn"
+  },
+  {
+    "key": "ui.admin.settings.hold_extra",
+    "lang": "en",
+    "text": "Extra time for online payment",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 29,
+    "placeholders": [],
+    "reason": "booking_225: pidon lisäaika on verkkomaksun, ei MobilePayn"
+  },
+  {
+    "key": "ui.admin.settings.hold_cap",
+    "lang": "fi",
+    "text": "Verkkomaksun odotuksen katto",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 28,
+    "placeholders": [],
+    "reason": "booking_225: pidon katto on verkkomaksun, ei MobilePayn"
+  },
+  {
+    "key": "ui.admin.settings.hold_cap",
+    "lang": "en",
+    "text": "Online payment wait limit",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 25,
+    "placeholders": [],
+    "reason": "booking_225: pidon katto on verkkomaksun, ei MobilePayn"
+  },
+  {
+    "key": "ui.admin.settings.methods_lead",
+    "lang": "fi",
+    "text": "Näillä kirjataan maksu hallintaan.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 34,
+    "placeholders": [],
+    "reason": "booking_225: verkkomaksun Visma Pay ja MobilePay pois asetuksista"
+  },
+  {
+    "key": "ui.admin.settings.methods_lead",
+    "lang": "en",
+    "text": "These are used when you record a payment in the admin.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 54,
+    "placeholders": [],
+    "reason": "booking_225: verkkomaksun Visma Pay ja MobilePay pois asetuksista"
+  }
+]
