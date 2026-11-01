@@ -359,7 +359,8 @@ test('annualCardBlock: puuttuva, peruttu, pois käytöstä tai tyhjä koodi → 
 const vdData = (locale) => ({ ...base(locale), payment: { ...base(locale).payment, amount: 30 }, voucher_difference: { total: 80, voucher_value: 50, difference: 30 } });
 test('payment_link + voucher_difference FI: summa, lahjakortin arvo ja erotus, maksulinkki, allekirjoitus Tapio', { skip }, () => {
   const m = R('payment_link', vdData('fi'), 'fi');
-  assert.ok(m.text.includes('Lahjakorttivarauksesi summa oli 80,00 €, lahjakortin arvo oli 50,00 €. Voit maksaa erotuksen 30,00 € alla olevasta linkistä.'), m.text);
+  assert.ok(m.text.includes('Lahjakorttisi arvo on 50,00 €, joten maksettavaa jää vielä 30,00 €. Voit maksaa sen alla olevasta linkistä.'), m.text);
+  assert.ok(!m.text.includes('arvolahjakortiksi'));
   assert.ok(m.subject.startsWith('Lahjakorttivarauksesi erotuksen maksu 15321') && !/[<>]/.test(m.subject));
   assert.ok(m.text.includes(PAY_URL) && m.html.includes(`href="${PAY_URL}"`));
   assert.ok(m.html.includes('Maksettava erotus') && m.html.includes('30,00 €'));
@@ -368,9 +369,26 @@ test('payment_link + voucher_difference FI: summa, lahjakortin arvo ja erotus, m
 });
 test('payment_link + voucher_difference EN', { skip }, () => {
   const m = R('payment_link', vdData('en'), 'en');
-  assert.ok(m.text.includes('The total of your gift card booking was 80.00 € and the value of the gift card was 50.00 €. You can pay the difference of 30.00 € using the link below.'), m.text);
+  assert.ok(m.text.includes('Your gift card is worth 50.00 €, so 30.00 € remains to be paid. You can pay it using the link below.'), m.text);
+  assert.ok(!/value gift card/i.test(m.text));
   assert.ok(m.subject.startsWith('Pay the difference for your gift card booking 15321'));
   assert.ok(m.html.includes('Difference to pay') && m.text.includes(PAY_URL) && /\nTapio\n/.test(m.text));
+});
+test('payment_link + voucher_difference value_card: arvolahjakortin intro, muuten yleinen', { skip }, () => {
+  const card = (locale, value_card) => R('payment_link', { ...vdData(locale), voucher_difference: { ...vdData(locale).voucher_difference, value_card } }, locale);
+  const fiCard = card('fi', true);
+  const enCard = card('en', true);
+  assert.ok(fiCard.text.includes('Lahjakortti on voimassa suoraan palveluun yhden vuoden ajan, jonka jälkeen se muuttuu arvolahjakortiksi. Lahjakorttisi arvo on 50,00 €, joten maksettavaa jää vielä 30,00 €. Voit maksaa sen alla olevasta linkistä.'), fiCard.text);
+  assert.ok(enCard.text.includes('The gift card is valid directly for the service for one year, after which it turns into a value gift card. Your gift card is worth 50.00 €, so 30.00 € remains to be paid. You can pay it using the link below.'), enCard.text);
+  assert.ok(fiCard.html.includes('arvolahjakortiksi') && enCard.html.includes('value gift card'));
+  for (const flag of [false, undefined, null, 'true']) {
+    const fi = card('fi', flag);
+    const en = card('en', flag);
+    assert.ok(!fi.text.includes('arvolahjakortiksi'), String(flag));
+    assert.ok(!/value gift card/i.test(en.text), String(flag));
+    assert.ok(fi.text.includes('Lahjakorttisi arvo on 50,00 €'));
+    assert.ok(en.text.includes('Your gift card is worth 50.00 €'));
+  }
 });
 test('payment_link: puutteellinen voucher_difference → tavallinen maksulinkkiviesti (sama kuin ilman lohkoa)', { skip }, () => {
   for (const l of ['fi', 'en']) {

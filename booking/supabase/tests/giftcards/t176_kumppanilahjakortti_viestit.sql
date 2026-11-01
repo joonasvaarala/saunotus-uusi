@@ -88,7 +88,11 @@ begin
   perform pg_temp.ck(md5(pg_get_functiondef('booking.messages_dispatch(integer)'::regprocedure)) = '4b1f94601e23d9dc3eec34bcd5b4dc08', 'A5 messages_dispatch = booking_176');
   perform pg_temp.ck(md5(pg_get_functiondef('booking._vc_notify_problem(bigint)'::regprocedure)) = '3414022269f6db113f1085208eb6f040', 'A6 _vc_notify_problem = booking_176');
   perform pg_temp.ck(md5(pg_get_functiondef('booking.admin_mark_voucher_claim_redeemed(bigint,numeric,text,text)'::regprocedure)) = 'a4e69cb26eb44b72eacce7c167342884', 'A7 admin_mark_voucher_claim_redeemed = booking_176');
-  perform pg_temp.ck(md5(pg_get_functiondef('booking.svc_mark_voucher_claim_redeemed(bigint,numeric,text,text)'::regprocedure)) = '673f26a88054b2b31dcbab872557e383', 'A8 svc_mark_voucher_claim_redeemed = booking_176');
+  perform pg_temp.ck(case
+      when to_regprocedure('booking.svc_mark_voucher_claim_redeemed(bigint,numeric,text,text)') is not null then
+        md5(pg_get_functiondef('booking.svc_mark_voucher_claim_redeemed(bigint,numeric,text,text)'::regprocedure)) = '673f26a88054b2b31dcbab872557e383'
+      else to_regprocedure('booking.svc_mark_voucher_claim_redeemed(bigint,numeric,text,text,boolean)') is not null
+    end, 'A8 svc_mark_voucher_claim_redeemed = booking_176 (tai booking_229: p_value_card)');
   if to_regprocedure('booking._vc_redeem(bigint,numeric,text,text,text)') is null or to_regprocedure('booking._vc_partner_order(bigint)') is null or to_regclass('booking.vc_difference_payments') is null then
     raise exception 'TESTRESULT pass=0 fail=1 skip=0 F A9 booking_176 puuttuu (_vc_redeem / _vc_partner_order / vc_difference_payments)';
   end if;
@@ -100,8 +104,14 @@ begin
       and not has_function_privilege('authenticated', 'booking._vc_partner_order(bigint)', 'execute'), 'A10 uudet funktiot sisäisiä (ei anon/authenticated)');
   perform pg_temp.ck(has_function_privilege('authenticated', 'booking.admin_mark_voucher_claim_redeemed(bigint,numeric,text,text)', 'execute')
       and not has_function_privilege('anon', 'booking.admin_mark_voucher_claim_redeemed(bigint,numeric,text,text)', 'execute')
-      and has_function_privilege('service_role', 'booking.svc_mark_voucher_claim_redeemed(bigint,numeric,text,text)', 'execute')
-      and not has_function_privilege('authenticated', 'booking.svc_mark_voucher_claim_redeemed(bigint,numeric,text,text)', 'execute'), 'A11 lunastusfunktioiden oikeudet ennallaan');
+      and case
+        when to_regprocedure('booking.svc_mark_voucher_claim_redeemed(bigint,numeric,text,text,boolean)') is not null then
+          has_function_privilege('service_role', 'booking.svc_mark_voucher_claim_redeemed(bigint,numeric,text,text,boolean)', 'execute')
+          and not has_function_privilege('authenticated', 'booking.svc_mark_voucher_claim_redeemed(bigint,numeric,text,text,boolean)', 'execute')
+        else
+          has_function_privilege('service_role', 'booking.svc_mark_voucher_claim_redeemed(bigint,numeric,text,text)', 'execute')
+          and not has_function_privilege('authenticated', 'booking.svc_mark_voucher_claim_redeemed(bigint,numeric,text,text)', 'execute')
+      end, 'A11 lunastusfunktioiden oikeudet ennallaan');
   perform pg_temp.ck((select relrowsecurity from pg_class where oid = 'booking.vc_difference_payments'::regclass)
       and not has_table_privilege('anon', 'booking.vc_difference_payments', 'select') and not has_table_privilege('authenticated', 'booking.vc_difference_payments', 'select'), 'A12 vc_difference_payments: RLS, ei anon/authenticated');
   perform pg_temp.ck(md5(pg_get_functiondef('booking.admin_resolve_voucher_claim(bigint,text,text,text,numeric,text)'::regprocedure)) = '41a4f3cc89e802f18e5131f849394188'

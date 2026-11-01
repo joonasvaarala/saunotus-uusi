@@ -246,30 +246,28 @@
  {
   "key": "email.payment_link.voucher_intro",
   "lang": "fi",
-  "text": "Lahjakorttivarauksesi summa oli {{var:total}}, lahjakortin arvo oli {{var:voucher}}. Voit maksaa erotuksen {{var:difference}} alla olevasta linkistä.",
+  "text": "Lahjakorttisi arvo on {{var:voucher}}, joten maksettavaa jää vielä {{var:difference}}. Voit maksaa sen alla olevasta linkistä.",
   "class": "normal",
   "kind": "plain",
-  "max_len": 450,
+  "max_len": 350,
   "placeholders": [
-   "{{var:total}}",
    "{{var:voucher}}",
    "{{var:difference}}"
   ],
-  "reason": "booking_174 (Joonas 25.10.2026): maksulinkkiviesti kumppanilahjakortin erotukselle (summa, lahjakortin arvo, erotus), allekirjoitus Tapio (email.payment_link.sign_name). Uusi avain FI+EN; send-emails/texts.ts sisältää saman varatekstin."
+  "reason": "booking_174 / booking_229: yleinen erotusviesti (lisäpalvelu tai hinta). Paikkamerkit {{var:voucher}} ja {{var:difference}}. Tuotannon site_texts on jo tämä v2-teksti; send-emails/texts.ts sisältää saman varatekstin."
  },
  {
   "key": "email.payment_link.voucher_intro",
   "lang": "en",
-  "text": "The total of your gift card booking was {{var:total}} and the value of the gift card was {{var:voucher}}. You can pay the difference of {{var:difference}} using the link below.",
+  "text": "Your gift card is worth {{var:voucher}}, so {{var:difference}} remains to be paid. You can pay it using the link below.",
   "class": "normal",
   "kind": "plain",
-  "max_len": 450,
+  "max_len": 350,
   "placeholders": [
-   "{{var:total}}",
    "{{var:voucher}}",
    "{{var:difference}}"
   ],
-  "reason": "booking_174 (Joonas 25.10.2026): maksulinkkiviesti kumppanilahjakortin erotukselle (summa, lahjakortin arvo, erotus), allekirjoitus Tapio (email.payment_link.sign_name). Uusi avain FI+EN; send-emails/texts.ts sisältää saman varatekstin."
+  "reason": "booking_174 / booking_229: yleinen erotusviesti (lisäpalvelu tai hinta). Paikkamerkit {{var:voucher}} ja {{var:difference}}. Tuotannon site_texts on jo tämä v2-teksti; send-emails/texts.ts sisältää saman varatekstin."
  },
  {
   "key": "email.payment_link.voucher_amount_label",

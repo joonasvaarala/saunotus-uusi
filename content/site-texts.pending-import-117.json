@@ -1,0 +1,28 @@
+[
+  {
+    "key": "email.payment_link.voucher_intro_value_card",
+    "lang": "fi",
+    "text": "Lahjakortti on voimassa suoraan palveluun yhden vuoden ajan, jonka jälkeen se muuttuu arvolahjakortiksi. Lahjakorttisi arvo on {{var:voucher}}, joten maksettavaa jää vielä {{var:difference}}. Voit maksaa sen alla olevasta linkistä.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 600,
+    "placeholders": [
+      "{{var:voucher}}",
+      "{{var:difference}}"
+    ],
+    "reason": "booking_229: erotuksen maksulinkki, kun kumppanikortti on yli vuoden vanha ja muuttunut arvolahjakortiksi. Yleinen voucher_intro jää lisäpalvelun ja hinnan erotukselle. send-emails/texts.ts sisältää saman varatekstin."
+  },
+  {
+    "key": "email.payment_link.voucher_intro_value_card",
+    "lang": "en",
+    "text": "The gift card is valid directly for the service for one year, after which it turns into a value gift card. Your gift card is worth {{var:voucher}}, so {{var:difference}} remains to be paid. You can pay it using the link below.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 600,
+    "placeholders": [
+      "{{var:voucher}}",
+      "{{var:difference}}"
+    ],
+    "reason": "booking_229: difference payment link when a partner card is over a year old and has turned into a value gift card. The generic voucher_intro stays for add-on and price differences. send-emails/texts.ts has the same fallback."
+  }
+]

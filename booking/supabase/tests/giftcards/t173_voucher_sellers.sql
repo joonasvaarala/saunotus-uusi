@@ -62,8 +62,16 @@ begin
       and not has_function_privilege('anon', 'booking.admin_mark_voucher_claim_redeemed(bigint,numeric,text,text)', 'execute') and not has_function_privilege('anon', 'booking.admin_set_voucher_claim_source(bigint,text)', 'execute')
       and not has_function_privilege('anon', 'booking.admin_set_voucher_redeem_urls(jsonb)', 'execute')
       and has_function_privilege('authenticated', 'booking.admin_mark_voucher_claim_redeemed(bigint,numeric,text,text)', 'execute'), 'A12 hallinnan RPC:t: ei anon, authenticated kyllä');
-  perform pg_temp.ck(not has_function_privilege('authenticated', 'booking.svc_mark_voucher_claim_redeemed(bigint,numeric,text,text)', 'execute') and not has_function_privilege('anon', 'booking.svc_mark_voucher_claim_redeemed(bigint,numeric,text,text)', 'execute')
-      and has_function_privilege('service_role', 'booking.svc_mark_voucher_claim_redeemed(bigint,numeric,text,text)', 'execute'), 'A13 svc_mark_voucher_claim_redeemed vain service_role');
+  perform pg_temp.ck(case
+      when to_regprocedure('booking.svc_mark_voucher_claim_redeemed(bigint,numeric,text,text,boolean)') is not null then
+        not has_function_privilege('authenticated', 'booking.svc_mark_voucher_claim_redeemed(bigint,numeric,text,text,boolean)', 'execute')
+        and not has_function_privilege('anon', 'booking.svc_mark_voucher_claim_redeemed(bigint,numeric,text,text,boolean)', 'execute')
+        and has_function_privilege('service_role', 'booking.svc_mark_voucher_claim_redeemed(bigint,numeric,text,text,boolean)', 'execute')
+      else
+        not has_function_privilege('authenticated', 'booking.svc_mark_voucher_claim_redeemed(bigint,numeric,text,text)', 'execute')
+        and not has_function_privilege('anon', 'booking.svc_mark_voucher_claim_redeemed(bigint,numeric,text,text)', 'execute')
+        and has_function_privilege('service_role', 'booking.svc_mark_voucher_claim_redeemed(bigint,numeric,text,text)', 'execute')
+    end, 'A13 svc_mark_voucher_claim_redeemed vain service_role');
   perform pg_temp.ck(not has_function_privilege('anon', 'booking._vc_mark_redeemed(bigint,numeric,text,text,text)', 'execute') and not has_function_privilege('authenticated', 'booking._vc_mark_redeemed(bigint,numeric,text,text,text)', 'execute')
       and not has_function_privilege('authenticated', 'booking._vc_method(text)', 'execute'), 'A14 sisäiset apufunktiot eivät ole suoraan kutsuttavissa');
 

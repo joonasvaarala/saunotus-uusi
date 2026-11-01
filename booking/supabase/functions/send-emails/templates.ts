@@ -398,7 +398,8 @@ function voucherDifferenceMail(d: any, en: boolean, hello: string, X: X, v: { no
   const subject = X("email.payment_link.voucher_subject", v);
   const title = X("email.voucher.difference_title");
   const confirmed = X("email.voucher.difference_confirmed");
-  const intro = X("email.payment_link.voucher_intro", v);
+  // booking_229: payload value_card true → arvolahjakortin intro. Muuten yleinen erotus (lisäpalvelu tai hinta).
+  const intro = X(d?.voucher_difference?.value_card === true ? "email.payment_link.voucher_intro_value_card" : "email.payment_link.voucher_intro", v);
   const receipt = X("email.voucher.difference_receipt");
   const exp = c.expires ? X("email.payment_link.expires", { date: c.expires }) : "";
   const pay = X("email.payment_link.pay_button");
