@@ -8,6 +8,7 @@ export const PERIODS = [['all', 'Kaikki ajat'], ['upcoming', 'Tulevat'], ['past'
 export const SOURCE_FILTERS = [['', 'Kaikki'], ['native', 'Uudet'], ['johku', 'Johku']];
 import { rpc } from '../sb.js';
 import { h, fmtDate, fmtTime, todayHel, addDays, dayStartIso, statusBadge, payBadge, sourceBadge, money, field, empty, errMsg, STATUS } from '../ui.js';
+import { formatWhenRange, spansDays } from '../when-range.js';
 import { filterDrawer } from '../filter-drawer.js';
 import { reservationDialog } from './shared.js';
 import { resourceBadges, spaceBadge } from './legs.js';
@@ -86,7 +87,9 @@ export async function render({ ctx, refs, reload, query, routePath = 'varaukset'
     if (reset && !rows.length) list.append(empty('Ei varauksia hakuehdoilla.'));
     // kortti: ylärivillä aika (vasen) + tilausnumero (oikea yläkulma), keskellä nimi + tuote, alarivillä merkit (vasen alakulma) + hinta (oikea alakulma)
     for (const r of rows) list.append(h('button', { type: 'button', class: 'listrow rescard', 'data-testid': 'reservation-row', 'data-reservation-id': r.reservation_id, 'data-option-missing': r.option_missing ? '1' : '0', onclick: () => reservationDialog(r, { methods: refs.methods, onChange: () => load(true), refs, can: ctx.can, role: ctx.role }) },
-      h('span', { class: 'rc-when' }, h('strong', { text: fmtDate(r.starts_at) }), ` ${fmtTime(r.starts_at)}`),
+      h('span', { class: 'rc-when' }, spansDays(r.starts_at, r.ends_at)
+        ? h('strong', { text: formatWhenRange(r.starts_at, r.ends_at, 'fi') })
+        : [h('strong', { text: fmtDate(r.starts_at) }), ` ${fmtTime(r.starts_at)}`]),
       h('span', { class: 'rc-no', text: `#${r.order_no}`, title: 'Tilausnumero' }),
       h('span', { class: 'rc-what' }, h('strong', { text: r.customer_name || '–' }), h('small', { text: ` ${r.product_name} · ${r.persons} hlö` })),
       h('span', { class: 'meta rc-badges' }, optionBadge(r), spaceBadge(r, refs), resourceBadges(r), sourceBadge(r), statusBadge(r.status), payBadge(r.payment_status)),

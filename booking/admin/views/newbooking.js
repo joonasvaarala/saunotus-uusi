@@ -7,6 +7,7 @@ import { warningBox, hasWarning } from './therapist.js';
 import { addonPicker } from './addons.js';
 import { reservationDialog } from './shared.js';
 import { h, toast, errMsg, fmtTime, fmtDay, money, todayHel, addDays, empty, revealSection, revealIfHidden, helsinkiIso } from '../ui.js';
+import { formatWhenRange, spansDays } from '../when-range.js';
 import { icon } from '../icons.js';
 import { stepper } from '../stepper.js';
 import { nbt as T, nbLang } from '../nb-texts.js';
@@ -16,6 +17,7 @@ import { loadBookingTexts, bookingText, noticeText } from '../booking-texts.js';
 import { confirmDialog } from '../confirm.js';
 import { typeSwitch, render as renderResource } from './resbooking.js';
 import { invoiceHref, openInvoiceAfterBooking } from '../invoice-link.js';
+const clockSpan = (start, end) => (spansDays(start, end) ? formatWhenRange(start, end, getLang() === 'en' ? 'en' : 'fi') : `${fmtTime(start)}–${fmtTime(end)}`);
 
 export async function render({ ctx, refs, query, reload }) {
   const isAdmin = ctx.role === 'admin';
@@ -57,7 +59,7 @@ export async function render({ ctx, refs, query, reload }) {
         : s.status === 'full' ? bookingText(isAdmin ? 'slot_full' : 'slot_full_staff')
         : s.status === 'unavailable' ? bookingText('slot_closed') : T('nb.na');
       const b = h('button', { type: 'button', role: 'radio', 'aria-checked': st.session?.rule_id === s.rule_id && st.session?.starts_at === s.starts_at ? 'true' : 'false', class: `slotbtn ${s.status}${isPrivateConflict(s) ? ' private' : ''}`, 'data-state': isPrivateConflict(s) ? 'private' : (s.status || ''), disabled: !bookable || null, onclick: () => { st.session = s; st.discount = null; sessionsBox.querySelectorAll('.slotbtn').forEach((x) => x.setAttribute('aria-checked', 'false')); b.setAttribute('aria-checked', 'true'); drawForm(true); } },
-        h('strong', { text: `${fmtTime(s.starts_at)}–${fmtTime(s.ends_at)}` }), h('span', { text: slotName(s) }), h('small', { text: caption }));
+        h('strong', { text: clockSpan(s.starts_at, s.ends_at) }), h('span', { text: slotName(s) }), h('small', { text: caption }));
       return b;
     })) : empty(T('nb.noSlots')));
   }
@@ -296,7 +298,7 @@ export async function render({ ctx, refs, query, reload }) {
         saveBtn.disabled = false; saveBtn.textContent = T('nb.save');
       }
     } },
-      h('h3', { class: 'nb-picked' }, h('span', { text: T('nb.picked', { name: slotName(s), time: `${fmtTime(s.starts_at)}–${fmtTime(s.ends_at)}` }) }), h('small', { text: fmtDay(s.starts_at) })),
+      h('h3', { class: 'nb-picked' }, h('span', { text: T('nb.picked', { name: slotName(s), time: clockSpan(s.starts_at, s.ends_at) }) }), h('small', { text: spansDays(s.starts_at, s.ends_at) ? '' : fmtDay(s.starts_at) })),
       persSec, custSec, picker.node, paySec, noteSec, bar);
     formBox.replaceChildren(f);
     syncGift(); syncCard(); syncInv();
@@ -316,7 +318,7 @@ export async function render({ ctx, refs, query, reload }) {
     } });
     result.replaceChildren(...[warningBox(r, { ctx, onDone: () => { result.replaceChildren(); } }), h('div', { class: 'card ok-box nb-done', 'data-testid': 'booking-created' },
       h('div', { class: 'nb-done-head' }, h('span', { class: 'nb-done-ico' }, icon('check', 28)), title),
-      h('p', { text: T('nb.createdLine', { product: r.product_name, day: fmtDay(r.starts_at), time: `${fmtTime(r.starts_at)}–${fmtTime(r.ends_at)}`, total: money(r.total) }) }),
+      h('p', { text: T('nb.createdLine', { product: r.product_name, day: spansDays(r.starts_at, r.ends_at) ? formatWhenRange(r.starts_at, r.ends_at, getLang() === 'en' ? 'en' : 'fi') : fmtDay(r.starts_at), time: spansDays(r.starts_at, r.ends_at) ? '' : `${fmtTime(r.starts_at)}–${fmtTime(r.ends_at)}`, total: money(r.total) }) }),
       h('div', { class: 'nb-done-actions' },
         canPay ? h('a', { class: 'btn primary', 'data-testid': 'open-order', href: `#/talous?tab=orders&order=${encodeURIComponent(r.order_no)}`, text: T('nb.openOrder') }) : null,
         openBooking,

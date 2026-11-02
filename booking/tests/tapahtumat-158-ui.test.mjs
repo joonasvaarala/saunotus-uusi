@@ -120,8 +120,8 @@ test('kauppa: suljettu tapahtuma näytetään ilman ostoa, monipäiväinen kerta
   assert.equal(S.saleState({ sale_open: true, occurrences: [{ status: 'full' }] }), 'full');
   assert.equal(S.upcoming(ev, Date.parse('2026-10-24T00:00:00Z')).length, 1);
   assert.equal(S.isMultiDay(ev.occurrences[0]), true);
-  assert.match(S.occurrenceText(ev.occurrences[0], 'fi'), /28\.11\.2026 09:00 – .*29\.11\.2026 16:00/);
-  assert.match(S.occurrenceText({ starts_at: '2026-11-14T14:00:00Z', ends_at: '2026-11-14T17:00:00Z' }, 'fi'), /14\.11\.2026 16:00–19:00$/);
+  assert.equal(S.occurrenceText(ev.occurrences[0], 'fi', Date.parse('2026-10-24T00:00:00Z')), 'la 28.11. klo 09.00 – su 29.11.2026 klo 16.00');
+  assert.match(S.occurrenceText({ starts_at: '2026-11-14T14:00:00Z', ends_at: '2026-11-14T17:00:00Z' }, 'fi', Date.parse('2026-10-24T00:00:00Z')), /14\.11\.2026 16:00–19:00$/);
   assert.equal(S.findEvent(null, 'x'), null);
   assert.equal(S.occurrenceLabel({ label: 'FI', label_en: 'EN' }, 'en'), 'EN');
   const shop = read('booking/shop/src/shop.js');

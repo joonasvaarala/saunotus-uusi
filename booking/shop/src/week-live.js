@@ -5,6 +5,7 @@
 // Hakuvirheessä kutsua ei tehdä, ja ohjelma jää ennalleen.
 import { addDaysIso, weekdayIso } from './quiet-offers-logic.js';
 import { dayLabel } from './event-date.js';
+import { formatWhenRange, spansDays } from './when-range.js';
 
 const TZ = 'Europe/Helsinki';
 
@@ -28,8 +29,9 @@ const shown = (iso, lang = 'fi') => {
   return `${Number(hh)}${lang === 'en' ? ':' : '.'}${mm}`;
 };
 
-/** Kellonaika ilman päivämäärää, minuutit aina mukana (16.00–19.00 / 16:30–18:30). Monipäiväisestä vain alku. */
-export function rangeLabel(startIso, endIso, lang = 'fi') {
+/** Kellonaika ilman päivämäärää, minuutit aina mukana (16.00–19.00 / 16:30–18:30). Monipäiväinen: koko väli. */
+export function rangeLabel(startIso, endIso, lang = 'fi', now = Date.now()) {
+  if (spansDays(startIso, endIso)) return formatWhenRange(startIso, endIso, lang, now);
   const a = shown(startIso, lang);
   if (!a) return '';
   if (!endIso || ymdHel(startIso) !== ymdHel(endIso)) return a;
@@ -98,7 +100,7 @@ export function weekEvents(events, { today, now } = {}) {
       if (!weekday) continue;
       out.push({
         weekday, date, slug: ev.slug, productId: ev.product_id, ruleId: o.rule_id,
-        name: ev.name, nameEn: ev.name_en || '', time: rangeLabel(o.starts_at, o.ends_at),
+        name: ev.name, nameEn: ev.name_en || '', time: rangeLabel(o.starts_at, o.ends_at), span: spansDays(o.starts_at, o.ends_at),
         key: `${ev.product_id}|${o.rule_id}|${date}`,
       });
     }

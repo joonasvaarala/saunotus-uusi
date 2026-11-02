@@ -24,20 +24,21 @@ export const EVENT_SHOP_TEXTS = {
 };
 export const eventText = (key, lang, tx = null) => (tx && tx(key)) || EVENT_SHOP_TEXTS[lang === 'en' ? 'en' : 'fi'][key] || EVENT_SHOP_TEXTS.fi[key] || '';
 
+import { formatWhenRange, spansDays } from './when-range.js';
+
 const TZ = 'Europe/Helsinki';
 const fmt = (iso, lang, o) => new Intl.DateTimeFormat(lang === 'en' ? 'en-GB' : 'fi-FI', { timeZone: TZ, ...o }).format(new Date(iso));
 const day = (iso, lang) => fmt(iso, lang, { weekday: 'short', day: 'numeric', month: 'numeric', year: 'numeric' });
 const clock = (iso, lang) => fmt(iso, lang, { hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).replace('.', ':');
-const ymd = (iso) => new Date(iso).toLocaleDateString('sv-SE', { timeZone: TZ });
 
-/** Kerran aika tekstinä: sama päivä → 'la 14.11.2026 16:00–19:00'; monipäiväinen → 'pe 13.11.2026 09:00 – su 15.11.2026 16:00'. */
-export function occurrenceText(o, lang = 'fi') {
+/** Kerran aika. Sama päivä ennallaan ('la 14.11.2026 16:00–19:00'). Monipäiväinen: formatWhenRange. */
+export function occurrenceText(o, lang = 'fi', now = Date.now()) {
   if (!o?.starts_at) return '';
+  if (spansDays(o.starts_at, o.ends_at)) return formatWhenRange(o.starts_at, o.ends_at, lang, now);
   if (!o.ends_at) return `${day(o.starts_at, lang)} ${clock(o.starts_at, lang)}`;
-  return ymd(o.starts_at) === ymd(o.ends_at) ? `${day(o.starts_at, lang)} ${clock(o.starts_at, lang)}–${clock(o.ends_at, lang)}`
-    : `${day(o.starts_at, lang)} ${clock(o.starts_at, lang)} – ${day(o.ends_at, lang)} ${clock(o.ends_at, lang)}`;
+  return `${day(o.starts_at, lang)} ${clock(o.starts_at, lang)}–${clock(o.ends_at, lang)}`;
 }
-export const isMultiDay = (o) => !!(o?.starts_at && o?.ends_at && ymd(o.starts_at) !== ymd(o.ends_at));
+export const isMultiDay = (o) => spansDays(o?.starts_at, o?.ends_at);
 /** Kerran nimi kielellä (label_en → label). */
 export const occurrenceLabel = (o, lang = 'fi') => (lang === 'en' && o?.label_en) || o?.label || '';
 /** public_events-rivit → slugin tapahtuma tai null (virheellinen data → null). */

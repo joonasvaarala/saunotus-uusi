@@ -39,6 +39,7 @@ import { RITUAL_TEXTS, RITUAL_ERRORS } from './ritual-addon-texts.js';
 import { oneKey } from './plural.js';
 import { eventText, occurrenceText, occurrenceLabel, findEvent, saleState, upcoming, isMultiDay } from './event-sale.js';
 import { groupEventDays, eventDayLabel } from './event-pick.js';
+import { formatWhenRange, formatWhenList, spansDays } from './when-range.js';
 import { createTrainingSignup, isTrainingProduct, listedProducts } from './training-signup.js';
 import { customerInvoiceLock } from './invoice-lock.js';
 import { formPaysOnline, paysByInvoice } from './company-pay.js';
@@ -70,6 +71,8 @@ const h = (tag, attrs, ...kids) => {
 const money = (n) => new Intl.NumberFormat(S.lang === 'fi' ? 'fi-FI' : 'en-FI', { style: 'currency', currency: 'EUR', minimumFractionDigits: Number.isInteger(+n) ? 0 : 2 }).format(+n);
 const fmt = (iso, o) => new Intl.DateTimeFormat(S.lang === 'fi' ? 'fi-FI' : 'en-GB', { timeZone: TZ, ...o }).format(new Date(iso));
 const hm = (iso) => clockFromIso(iso, S.lang);
+// Monipäiväinen kurssi tai tapahtuma: koko väli. Yksipäiväinen säilyttää sameDay-muodon.
+const shownWhen = (start, end, sameDay) => (spansDays(start, end) ? formatWhenRange(start, end, S.lang) : sameDay);
 const dayLong = (iso) => fmt(iso, { weekday: 'long', day: 'numeric', month: 'long' });
 const ymd = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 const todayHel = () => new Date().toLocaleDateString('sv-SE', { timeZone: TZ });
@@ -418,7 +421,7 @@ async function findNextFree(ds, maxDs) {   // seuraava päivä, jolla on vapaita
 }
 function dayItem({ r, p }, ds, withName = false) {
   const ok = r.status === 'available';
-  const title = `${hm(r.starts_at)}–${hm(r.ends_at)}`;
+  const title = shownWhen(r.starts_at, r.ends_at, `${hm(r.starts_at)}–${hm(r.ends_at)}`);
   const cl = cleanLabel(rlabel(r)), sub = cl && !pname(p).toLowerCase().includes(cl.toLowerCase()) ? cl : '';   // ei toisteta tuotteen nimeä
   const price = r.price_mode === 'per_person' ? `${money(r.unit_price)} ${t.perPerson}` : r.price_mode === 'fixed' ? money(r.base_price) : `${t.from} ${money(r.base_price)}`;
   return h('li', { class: `bk-slot ${r.status}` },
@@ -586,15 +589,16 @@ async function viewProduct(slug, dateStr, query) {
   const wrap = h('div', { class: 'bk-prod' });
   // Tapahtuma: tulevat kerrat päivänappeina (aria-pressed). Kellonajat tulevat vasta päivän valinnan jälkeen.
   // Yksi kellonaika näytetään silti yhtenä nappina. Täysi päivä himmennetään (Täynnä); jonotus on kellonajan napissa.
-  function eventTimeLink(r, ds) {
+  function eventTimeLink(r, ds, segs) {
     const ok = r.status === 'available';
-    const title = isMultiDay(r) ? occurrenceText(r, S.lang) : `${hm(r.starts_at)}–${hm(r.ends_at)}`;
+    const range = segs && segs.length > 1 ? formatWhenList(segs, S.lang) : '';
+    const title = range || (isMultiDay(r) ? occurrenceText(r, S.lang) : `${hm(r.starts_at)}–${hm(r.ends_at)}`);
     const sub = cleanLabel(rlabel(r));
     const action = ok ? t.choose : (training ? '' : t.eventWaitlistCta);
     const left = training && r.remaining != null ? t.freeSpots(r.remaining) : '';
     const href = training ? (ok ? bk(`/varaa/${r.rule_id}/${ds}/${p.id}`) : null) : bk(ok ? `/varaa/${r.rule_id}/${ds}/${p.id}` : `/jono/${r.rule_id}/${ds}/${p.id}`);
     return h(href ? 'a' : 'div', {
-      class: `bk-ev-time${ok ? '' : ' is-full'}`,
+      class: `bk-ev-time${ok ? '' : ' is-full'}${range || isMultiDay(r) ? ' is-span' : ''}`,
       href,
       'data-testid': 'event-time',
       'aria-label': [title, sub, left, ok ? null : t.full, href ? action : null].filter(Boolean).join(', '),
@@ -612,21 +616,41 @@ async function viewProduct(slug, dateStr, query) {
     const days = groupEventDays(byDay, { now: Date.now(), today });
     if (sel && !days.some((d) => d.date === sel)) sel = null;
     if (!days.length) { calBox.append(h('p', { class: 'bk-note', 'data-testid': 'event-no-dates', text: t.eventNoDates })); return; }
-    const longOf = (ds) => dayLong(`${ds}T12:00:00Z`);
+    const segByRule = new Map();
+    if (training) {
+      const uniq = [];
+      for (const day of days) for (const r of day.slots) if (!segByRule.has(r.rule_id)) { segByRule.set(r.rule_id, null); uniq.push({ r, date: day.date }); }
+      await Promise.all(uniq.map(async ({ r, date }) => {
+        const offer = await rpc('public_training_checkout', { p_rule_id: r.rule_id, p_date: r.session_date || date }).catch(() => null);
+        const segs = Array.isArray(offer?.segments) ? offer.segments.filter((s) => s?.starts_at && s?.ends_at) : [];
+        segByRule.set(r.rule_id, segs.length > 1 ? segs : null);
+      }));
+    }
+    const dayRange = (day) => {
+      if (day.slots.length !== 1) return '';
+      const r = day.slots[0];
+      const segs = segByRule.get(r.rule_id);
+      if (segs && segs.length > 1) return formatWhenList(segs, S.lang);
+      return isMultiDay(r) ? occurrenceText(r, S.lang) : '';
+    };
     const mark = () => { for (const b of calBox.querySelectorAll('.bk-ev-date')) b.setAttribute('aria-pressed', b.dataset.date === sel ? 'true' : 'false'); };
     const drawTimes = () => {
       const day = days.find((d) => d.date === sel);
       if (!day) { slotBox.replaceChildren(); return; }
       slotBox.replaceChildren(
         h('h3', { id: 'bk-ev-time-h', text: t.eventPickTime }),
-        h('div', { class: 'bk-ev-times', role: 'group', 'aria-labelledby': 'bk-ev-time-h' }, day.slots.map((r) => eventTimeLink(r, day.date))));
+        h('div', { class: 'bk-ev-times', role: 'group', 'aria-labelledby': 'bk-ev-time-h' }, day.slots.map((r) => eventTimeLink(r, day.date, segByRule.get(r.rule_id)))));
     };
     calBox.append(h('div', { class: 'bk-ev-dates', role: 'group', 'aria-labelledby': 'bk-ev-date-h', 'data-testid': 'event-dates' },
-      days.map((day) => h('button', {
-        type: 'button', class: `bk-ev-date${day.full ? ' is-full' : ''}`, 'data-date': day.date, 'data-testid': 'event-date',
-        'aria-pressed': 'false', 'aria-label': day.full ? `${longOf(day.date)}, ${t.full}` : longOf(day.date),
-        onclick: () => { sel = day.date; history.replaceState(null, '', bk(`/tuote/${slug}/${day.date}`)); mark(); drawTimes(); revealForm(slotBox, slotBox.querySelector('h3')); },
-      }, h('span', { class: 'bk-ev-when', text: eventDayLabel(day.date, S.lang) }), day.full ? h('span', { class: 'bk-ev-full', text: t.full }) : null))));
+      days.map((day) => {
+        const range = dayRange(day);
+        const label = range || eventDayLabel(day.date, S.lang);
+        return h('button', {
+          type: 'button', class: `bk-ev-date${day.full ? ' is-full' : ''}${range ? ' is-span' : ''}`, 'data-date': day.date, 'data-testid': 'event-date',
+          'aria-pressed': 'false', 'aria-label': day.full ? `${label}, ${t.full}` : label,
+          onclick: () => { sel = day.date; history.replaceState(null, '', bk(`/tuote/${slug}/${day.date}`)); mark(); drawTimes(); revealForm(slotBox, slotBox.querySelector('h3')); },
+        }, h('span', { class: 'bk-ev-when', text: label }), day.full ? h('span', { class: 'bk-ev-full', text: t.full }) : null);
+      })));
     mark();
     drawTimes();
   }
@@ -935,7 +959,7 @@ async function viewCheckout(ruleId, ds, productId, via) {
     const qv = quietCheckout({ quote: fresh ? code.quote : null, offer: annualOn() || (code.quote && !fresh) ? null : qOffer, sessionTotal: priceFor(s, n), discountBase: quietBase(s, n) });
     total.textContent = money((fresh ? +code.quote.total : priceFor(s, n) - (qv.source === 'quiet' ? qv.amount : 0) + addonsSum() + ritualSum()) + upsellUI.total());
     qNote.hidden = qv.source !== 'quiet';
-    sumList.replaceChildren(h('dt', { text: t.what }), h('dd', { text: pname(p) }), h('dt', { text: t.when }), h('dd', { text: `${dayLong(s.starts_at)}, ${hm(s.starts_at)}–${hm(s.ends_at)}` }), h('dt', { text: t.persons }), h('dd', { text: String(n) }),
+    sumList.replaceChildren(h('dt', { text: t.what }), h('dd', { text: pname(p) }), h('dt', { text: t.when }), h('dd', { text: shownWhen(s.starts_at, s.ends_at, `${dayLong(s.starts_at)}, ${hm(s.starts_at)}–${hm(s.ends_at)}`) }), h('dt', { text: t.persons }), h('dd', { text: String(n) }),
       ...addons.filter((a) => qty.get(a.id) > 0).flatMap((a) => [h('dt', { text: aname(a) }), h('dd', { text: `${qty.get(a.id)} × ${money(a.price)}` })]),
       ...(ritWant() ? [h('dt', { text: ritName() }), h('dd', { 'data-testid': 'checkout-ritual-sum', text: rit.sel.key ? `${rtx('ritualSummary', { time: rtm(rit.sel.key), n: rit.sel.qty })} · ${money(ritualSum())}` : `${rit.sel.qty} × ${money(rit.offer.unit_price ?? ritualPrice(rit.offer, 1))}` })] : []),
       ...(qv.source === 'quiet' ? [h('dt', { text: fillText(t.quietCheckout, { pct: pctText(qv.percent, S.lang) }) }), h('dd', { 'data-testid': 'checkout-quiet', text: `−${money(qv.amount)}` })] : []),
@@ -1076,7 +1100,7 @@ async function viewCheckout(ruleId, ds, productId, via) {
   const dayShort = (iso) => fmt(iso, S.lang === 'fi' ? { weekday: 'short', day: 'numeric', month: 'numeric', year: 'numeric' } : { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
   const pick = h('section', { class: 'bk-pick', 'aria-label': t.pickedSlot },
     h('div', { class: 'bk-pick-main' }, h('strong', { class: 'bk-pick-name', text: pname(p) }),
-      h('span', { class: 'bk-pick-when', text: `${dayShort(s.starts_at)}${S.lang === 'fi' ? ', klo ' : ' · '}${tm(s.starts_at)}${s.ends_at ? `–${tm(s.ends_at)}` : ''}` })),
+      h('span', { class: 'bk-pick-when', text: shownWhen(s.starts_at, s.ends_at, `${dayShort(s.starts_at)}${S.lang === 'fi' ? ', klo ' : ' · '}${tm(s.starts_at)}${s.ends_at ? `–${tm(s.ends_at)}` : ''}`) })),
     h('a', { class: 'bk-pick-change', href: via === 'day' ? bk(`/paiva/${ds}?tuote=${p.slug}`) : bk(`/tuote/${p.slug}/${ds}`), text: t.changeSlot }));
   // Maksuohje: tulee asetuksesta (public_payment_mode) ja palvelimen maksutavoista (MobilePay / lahjakortti) – ei oleteta pay_later-tilaa. Oletusteksti ensin, päivitys kun maksutavat on haettu.
   const payNote = h('p', { class: 'bk-pay', 'data-testid': 'checkout-paynote', text: hm0.legacy ? t.payHold(hmode.minutes) : t.payLater });
@@ -1183,7 +1207,7 @@ async function viewConfirmation({ refresh = false, notice = null, host = null, n
   const dl = h('dl', { class: b.training ? 'bk-sum bk-training' : 'bk-sum' },
     h('dt', { text: t.order }), h('dd', { text: String(b.order_no) }), h('dt', { text: t.what }), h('dd', { text: prodName }),
     optRow ? [h('dt', { text: ox.what }), h('dd', { 'data-testid': 'conf-option', class: it.option ? '' : 'bk-opt-missing', text: optRow })] : null,
-    h('dt', { text: t.when }), h('dd', { text: `${dayLong(it.starts_at)}, ${hm(it.starts_at)}–${hm(it.ends_at)}` }), h('dt', { text: t.persons }), h('dd', { text: String(it.persons) }),
+    h('dt', { text: t.when }), h('dd', { text: shownWhen(it.starts_at, it.ends_at, `${dayLong(it.starts_at)}, ${hm(it.starts_at)}–${hm(it.ends_at)}`) }), h('dt', { text: t.persons }), h('dd', { text: String(it.persons) }),
     (b.addons || []).flatMap((a) => [h('dt', { text: (S.lang === 'en' && a.name_en) || a.name }), h('dd', { text: `${a.quantity} × ${money(a.unit_price)}` })]),
     ritItems.flatMap((x) => [h('dt', { text: (S.lang === 'en' && (x.name_en || ritEn.get(+x.product_id))) || x.product_name }), h('dd', { 'data-testid': 'conf-ritual', text: `${dayLong(x.starts_at)}, ${rtx('ritualSummary', { time: fmt(x.starts_at, { hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).replace('.', ':'), n: x.persons })} · ${money(x.line_total)}` })]),
     ...(b.training ? [
@@ -1311,7 +1335,7 @@ async function viewChange(token, b) {
     const addonsNew = (b.addons || []).reduce((x, a) => x + Math.min(a.quantity, addonLimit(a, n)) * +a.unit_price, 0);
     const newTotal = !inv.showPriceEstimate && s ? null : (s ? priceFor(s, n) + addonsNew : null);
     const changed = !!st.session || (!inv.personsDisabled && n !== it.persons);
-    summary.textContent = s ? `${dayLong(s.starts_at)}, ${hm(s.starts_at)}–${hm(s.ends_at)} · ${n} ${t.person}${inv.showPriceEstimate && newTotal != null ? ` · ${money(newTotal)}` : ''}` : '';
+    summary.textContent = s ? `${shownWhen(s.starts_at, s.ends_at, `${dayLong(s.starts_at)}, ${hm(s.starts_at)}–${hm(s.ends_at)}`)} · ${n} ${t.person}${inv.showPriceEstimate && newTotal != null ? ` · ${money(newTotal)}` : ''}` : '';
     const priceBlocked = inv.showPriceEstimate && b.payment_status === 'paid' && newTotal != null && Math.abs(newTotal - b.total) > 0.005;
     msg.replaceChildren(...(priceBlocked ? [h('p', { class: 'bk-note', text: t.changePaidPrice })] : []));
     submit.disabled = !changed || priceBlocked;
@@ -1327,7 +1351,7 @@ async function viewChange(token, b) {
         const cur = isCur(r);
         const late = new Date(r.starts_at).getTime() < minStart;
         const ok = !late && (r.status === 'available' || cur);
-        const title = `${hm(r.starts_at)}–${hm(r.ends_at)}`;
+        const title = shownWhen(r.starts_at, r.ends_at, `${hm(r.starts_at)}–${hm(r.ends_at)}`);
         const btn = h('button', { type: 'button', role: 'radio', class: 'btn sm', 'aria-checked': (st.session ? st.session === r : cur) ? 'true' : 'false', disabled: !ok || null, onclick: () => {
           st.session = cur ? null : r; sessionsBox.querySelectorAll('[role=radio]').forEach((x) => x.setAttribute('aria-checked', 'false')); btn.setAttribute('aria-checked', 'true'); upd(); } }, cur ? t.currentSlot : t.choose, h('span', { class: 'sr', text: ` ${title}` }));
         const prod = state.catalog.find((x) => x.id === it.product_id);
@@ -1362,7 +1386,7 @@ async function viewChange(token, b) {
     inv.locked ? h('p', { class: 'bk-note', 'data-testid': 'invoiced-sum-note', text: t.invoicedSumNote }) : null, msg, submit);
   mount(h('p', {}, h('a', { href: `#${token}`, text: t.back })), h('h2', { text: t.changeTitle }),
     h('p', { class: 'bk-note', text: t.changeInfo(hours, fmt(b.change_deadline, { day: 'numeric', month: 'numeric', hour: 'numeric', minute: '2-digit', hourCycle: 'h23' })) }),
-    h('dl', { class: 'bk-sum' }, h('dt', { text: t.what }), h('dd', { text: it.product_name }), h('dt', { text: t.when }), h('dd', { text: `${dayLong(it.starts_at)}, ${hm(it.starts_at)}–${hm(it.ends_at)}` }), h('dt', { text: t.persons }), h('dd', { text: String(it.persons) })),
+    h('dl', { class: 'bk-sum' }, h('dt', { text: t.what }), h('dd', { text: it.product_name }), h('dt', { text: t.when }), h('dd', { text: shownWhen(it.starts_at, it.ends_at, `${dayLong(it.starts_at)}, ${hm(it.starts_at)}–${hm(it.ends_at)}`) }), h('dt', { text: t.persons }), h('dd', { text: String(it.persons) })),
     h('div', { class: 'bk-field' }, h('label', { for: 'bk-date', text: t.pickDate }), dateIn), sessionsBox, form);
   await loadSessions(); focusTop();
 }

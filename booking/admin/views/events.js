@@ -5,6 +5,7 @@
 // Tekstit: events-texts.js (FI+EN, pending-import-57 ja imported-pr250). RPC:t booking_158 + booking_202.
 import { rpc } from '../sb.js';
 import { h, dialog, field, toast, badge, errMsg, fmtDate, fmtTime, fmtDT, todayHel, STATUS, PAY } from '../ui.js';
+import { formatWhenRange, spansDays } from '../when-range.js';
 import { downloadCsv } from '../csv.js';
 import { loadEventsTexts, evText as T, courseText as tx } from '../events-texts.js';
 import { getLang } from '../talous-i18n.js';
@@ -15,10 +16,9 @@ import { eventQueueParts } from '../event-waitlist.js';
 const ERR_CODES = new Set(['conflict', 'has_reservations', 'has_waitlist', 'max_below_sold', 'past_move', 'multi_day_training_only', 'invalid_resource', 'not_event', 'event_managed',
   'no_subject', 'subject_long', 'no_body', 'body_long', 'provider_name', 'no_recipients', 'no_confirm', 'bad_range', 'no_weekdays']);
 const evErr = (e) => (e?.code && ERR_CODES.has(e.code) ? T(`err_${e.code}`) : errMsg(e));
-const span = (iso1, iso2) => {
-  const a = localParts(iso1), b = localParts(iso2);
-  return a.date === b.date ? `${fmtDate(iso1)} ${fmtTime(iso1)}–${fmtTime(iso2)}` : `${fmtDate(iso1)} ${fmtTime(iso1)} – ${fmtDate(iso2)} ${fmtTime(iso2)}`;
-};
+const span = (iso1, iso2) => (spansDays(iso1, iso2)
+  ? formatWhenRange(iso1, iso2, getLang())
+  : `${fmtDate(iso1)} ${fmtTime(iso1)}–${fmtTime(iso2)}`);
 const catName = (c) => (c === 'training' ? T('cat_training') : T('cat_event'));
 const occLabel = (r) => (getLang() === 'en' && r.label_en) || r.label || defaultLabel(r.date, r.start_time, getLang());
 const hrefOf = (q) => {
@@ -529,7 +529,7 @@ export async function render({ ctx, refs, reload, query }) {
     const orderBits = h('div', {}, badge(`st-${row.order_status || 'pending'}`, STATUS[row.order_status] || row.order_status || '–'), ' ', badge(`pay-${row.payment_status || 'unpaid'}`, PAY[row.payment_status] || row.payment_status || '–'),
       row.order_no ? h('div', { class: 'muted', text: `#${row.order_no}` }) : null);
     return h('tr', { 'data-testid': 'event-participant' },
-      h('td', { 'data-label': T('occurrences'), text: rule ? occLabel(rule) : (row.occurrence_label || '') }),
+      h('td', { 'data-label': T('occurrences') }, h('div', { text: rule ? occLabel(rule) : (row.occurrence_label || '') }), rule && spansDays(rule.starts_at, rule.ends_at) ? h('div', { class: 'muted', text: formatWhenRange(rule.starts_at, rule.ends_at, getLang()) }) : null),
       h('td', { 'data-label': T('col_name'), text: row.name || '' }),
       h('td', { 'data-label': T('col_contact') }, contact),
       h('td', { 'data-label': T('col_persons'), text: String(row.persons ?? '') }),

@@ -30,6 +30,7 @@ import { normCheckoutOptions } from './mobilepay-logic.js';
 import { customerInvoiceLock } from './invoice-lock.js';
 import { bindLangLinks } from './lang-switch.js';
 import { fixCustomerPhrase } from './arrival-phrase.js';
+import { formatWhenRange, spansDays } from './when-range.js';
 
 const S = window.BOOKING_SHOP;
 if (S.otherHref) bindLangLinks(S.otherHref);
@@ -229,7 +230,7 @@ async function main() {
       h('ul', { class: 'ord-lines', 'data-testid': 'order-reservations' }, o.reservations.map((r) => h('li', {},
         h('span', { class: 'ord-l-main' }, h('strong', { text: r.product_name }), r.status === 'cancelled' ? ' ' : null, r.status === 'cancelled' ? badge('st-cancelled', t.cancelledRow) : null,
           r.option ? h('span', { class: 'ord-l-opt', 'data-testid': 'res-option' }, ` – ${ox.what}: `, h('strong', { text: optName(r.option, L) })) : optionMissingOnOrder(r) && r.status !== 'cancelled' ? [' ', h('span', { class: 'ord-badge opt-missing', 'data-testid': 'res-option-missing', text: `${ox.what}: ${ox.notChosen}` })] : null),
-        h('span', { class: 'ord-l-meta', text: `${dt(r.starts_at)}–${hm(r.ends_at)} · ${t.persons.replace('{n}', r.persons)}${r.addons.length ? ' · ' + r.addons.map((a) => `${nm(a)} × ${a.quantity}`).join(', ') : ''}` }))))) : null;
+        h('span', { class: 'ord-l-meta', text: `${spansDays(r.starts_at, r.ends_at) ? formatWhenRange(r.starts_at, r.ends_at, L) : `${dt(r.starts_at)}–${hm(r.ends_at)}`} · ${t.persons.replace('{n}', r.persons)}${r.addons.length ? ' · ' + r.addons.map((a) => `${nm(a)} × ${a.quantity}`).join(', ') : ''}` }))))) : null;
     const optSec = co && (co.expired || co.cancelled) ? null : optionSection(o);
     let holdEl = null;
     if (holdV && !co.expired) {

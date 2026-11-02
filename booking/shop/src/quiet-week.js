@@ -8,6 +8,7 @@ import { rpc } from './sb.js';
 import { liveImageUrl, publicImageUrl } from './product-image.js';
 import { quietByWeekday, addDaysIso, fillText, pctText, validOffer, bookablePrivateSlots, offerForSlot, weekdayIso, JALKIL_ID } from './quiet-offers-logic.js';
 import { dateForWeekday, shiftIsFull, weekEvents, eventDisplayName, freeShopEvents, cardDates, cardTime, eventIsFull, eventWaitlistPath } from './week-live.js';
+import { formatWhenRange, spansDays } from './when-range.js';
 import { applyCatalogNames } from './catalog-names.js';
 
 const TZ = 'Europe/Helsinki';
@@ -139,7 +140,7 @@ export function applyLiveWeek(list, { availability = null, events = null, catalo
       const a = el('a', 'bk');
       a.href = `${shopHref}#/tuote/${encodeURIComponent(ev.slug)}/${ev.date}`;
       a.append(el('span', 'bk-l', d.quietReserve || ''), el('span', 'sr', ` – ${name}`));
-      if (ev.time) li.append(el('span', 't', ev.time));
+      if (ev.time) li.append(el('span', ev.span ? 't span' : 't', ev.time));
       li.append(el('span', 'n', name), a);
       place(ul, li, ev.time);
       day.classList.remove('off');
@@ -174,8 +175,12 @@ export function applyEventCards(list, events, { lang = 'fi', shopHref = '', now 
   for (const ev of rows) {
     const name = (lang === 'en' && ev.name_en) || ev.name;
     const text = plain((lang === 'en' && ev.description_short_en) || ev.description_short);
-    const dates = [...new Set(ev.occurrences.slice(0, 6).map((o) => cardDates(o, lang, now)))].filter(Boolean).join(' · ');
-    const time = cardTime(ev.occurrences[0], lang);
+    const shown = ev.occurrences.slice(0, 6);
+    const multi = shown.filter((o) => spansDays(o?.starts_at, o?.ends_at));
+    const dates = (multi.length
+      ? multi.map((o) => formatWhenRange(o.starts_at, o.ends_at, lang, now))
+      : [...new Set(shown.map((o) => cardDates(o, lang, now)))]).filter(Boolean).join(' · ');
+    const time = multi.length ? '' : cardTime(shown[0], lang);
     const full = eventIsFull(ev);
     const li = el('li', full ? 'card ev is-full' : 'card ev');
     li.dataset.testid = 'site-event-card';
