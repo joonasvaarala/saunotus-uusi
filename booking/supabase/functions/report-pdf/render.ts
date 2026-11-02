@@ -81,14 +81,39 @@ export async function buildReportPdf(rep: any, kind: string, lang = "fi", tfn: T
     const blank = (b: any) => ["opening", "sold", "redeemed", "other", "expired", "closing"].every((k) => Math.abs(Number(b?.[k] || 0)) < 0.005);
     const balHead = [TX("ui.admin.reports.col_product"), TX("ui.admin.reports.gc_opening"), TX("ui.admin.reports.gc_sold_period"), TX("ui.admin.reports.gc_redeemed_period"), TX("ui.admin.reports.gc_expired"), TX("ui.admin.reports.gc_closing")];
     const balCols = [0, 160, 240, 320, 400, 515];
-    table(TX("ui.admin.reports.gc_open_title"), balHead, balCols, [
-      [TX("ui.admin.reports.gc_bucket_own"), eur(roll.opening), eur(roll.sold), eur(roll.redeemed), eur(roll.expired), eur(roll.closing)],
-    ]);
-    if (blank(roll) && !blank(johku)) { need(28); text(TX("ui.admin.reports.gc_only_johku"), M, 7, font, grey); y -= 14; }
-    table(TX("ui.admin.reports.gc_johku"), balHead, balCols, [
-      [TX("ui.admin.reports.gc_bucket_johku"), eur(johku.opening), eur(johku.sold), eur(johku.redeemed), eur(johku.expired), eur(johku.closing)],
-    ]);
-    need(28); text(TX("ui.admin.reports.gc_johku_liability"), M, 7, font, grey); y -= 14;
+    const srcKey: Record<string, string> = { native_paid: "ui.admin.reports.gc_bucket_own", native_complimentary: "ui.admin.reports.gc_bucket_free", johku: "ui.admin.reports.gc_bucket_johku", elamyslahjat: "ui.admin.reports.gc_src_elamyslahjat", kokemuskauppa: "ui.admin.reports.gc_src_kokemuskauppa", offerilla: "ui.admin.reports.gc_src_offerilla", kiitoskauppa: "ui.admin.reports.gc_src_kiitoskauppa", partner_other: "ui.admin.reports.gc_src_partner_other", partner_voucher: "ui.admin.reports.gc_src_partner_legacy" };
+    const pair = (on: boolean, n: unknown, moneyN: unknown) => on ? `${n ?? 0} · ${eur(moneyN)}` : "–";
+    if (rep.activity && Array.isArray(rep.activity.rows)) {
+      const rows = rep.activity.rows as any[];
+      const ownZero = rows.find((x) => x.source === "native_paid");
+      const johkuRow = rows.find((x) => x.source === "johku");
+      const zeroOwn = !ownZero || ["opening", "sold_gross", "redeemed_gross", "expired_gross", "closing"].every((k) => Math.abs(Number(ownZero[k] || 0)) < 0.005);
+      const johkuMove = johkuRow && ["opening", "sold_gross", "redeemed_gross", "expired_gross", "closing"].some((k) => Math.abs(Number(johkuRow[k] || 0)) >= 0.005);
+      if (zeroOwn && johkuMove) { need(28); text(TX("ui.admin.reports.gc_only_johku"), M, 7, font, grey); y -= 14; }
+      const actHead = [TX("ui.admin.reports.col_product"), TX("ui.admin.reports.gc_col_mark"), TX("ui.admin.reports.gc_sold_period"), TX("ui.admin.reports.gc_redeemed_period"), TX("ui.admin.reports.gc_expired"), TX("ui.admin.reports.gc_closing")];
+      const actRows = rows.map((x) => [TX(srcKey[x.source] || "ui.admin.reports.gc_src_partner_other"), x.accounting ? TX("ui.admin.reports.gc_accounting") : TX("ui.admin.reports.gc_info_only"), pair(x.sold_applicable !== false, x.sold_count, x.sold_gross), `${x.redeemed_count ?? 0} · ${eur(x.redeemed_gross)}`, pair(x.balance_applicable !== false, x.expired_count, x.expired_gross), x.balance_applicable === false ? "–" : eur(x.closing)]);
+      const tot = rep.activity.totals || {};
+      actRows.push([TX("ui.admin.reports.gc_activity_total"), "–", pair(true, tot.sold_count, tot.sold_gross), `${tot.redeemed_count ?? 0} · ${eur(tot.redeemed_gross)}`, pair(true, tot.expired_count, tot.expired_gross), eur(tot.closing)]);
+      table(TX("ui.admin.reports.gc_activity_title"), actHead, balCols, actRows);
+      need(28); text(TX("ui.admin.reports.gc_activity_total_note"), M, 7, font, grey); y -= 14;
+      if (johkuRow) { need(28); text(TX("ui.admin.reports.gc_johku_liability"), M, 7, font, grey); y -= 14; }
+      if (rows.some((x) => x.group === "partner")) { need(28); text(TX("ui.admin.reports.gc_partner_note"), M, 7, font, grey); y -= 14; }
+      for (const x of rows) {
+        const events = Array.isArray(x.events) ? x.events : [];
+        if (!events.length) continue;
+        const kindOf = (k: string) => k === "sale" ? TX("ui.admin.reports.gc_kind_sale") : k === "opening" ? TX("ui.admin.reports.gc_kind_opening") : k === "expiry" ? TX("ui.admin.reports.gc_kind_expiry") : TX("ui.admin.reports.kind_redemption");
+        table(TX(srcKey[x.source] || "ui.admin.reports.gc_src_partner_other"), [TX("ui.admin.reports.col_kind"), TX("ui.admin.reports.col_date"), TX("ui.admin.reports.gc_col_order"), TX("ui.admin.reports.col_gross"), TX("ui.admin.reports.gc_col_code")], [0, 140, 230, 320, 420], events.map((e: any) => [`${kindOf(String(e.kind || ""))}${e.value_card ? " · " + TX("ui.admin.reports.gc_value_card") : ""}`, dfi(String(e.date || "")), e.order_no == null ? "–" : String(e.order_no), eur(e.amount), String(e.code_masked || "")]));
+      }
+    } else {
+      table(TX("ui.admin.reports.gc_open_title"), balHead, balCols, [
+        [TX("ui.admin.reports.gc_bucket_own"), eur(roll.opening), eur(roll.sold), eur(roll.redeemed), eur(roll.expired), eur(roll.closing)],
+      ]);
+      if (blank(roll) && !blank(johku)) { need(28); text(TX("ui.admin.reports.gc_only_johku"), M, 7, font, grey); y -= 14; }
+      table(TX("ui.admin.reports.gc_johku"), balHead, balCols, [
+        [TX("ui.admin.reports.gc_bucket_johku"), eur(johku.opening), eur(johku.sold), eur(johku.redeemed), eur(johku.expired), eur(johku.closing)],
+      ]);
+      need(28); text(TX("ui.admin.reports.gc_johku_liability"), M, 7, font, grey); y -= 14;
+    }
     table(TX("ui.admin.reports.gc_own"), head, cols, (own.rows || []).map(line));
     need(20); text(TX("ui.admin.reports.gc_multi_note"), M, 7, font, grey);
     return await pdf.save();

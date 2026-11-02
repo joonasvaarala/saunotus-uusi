@@ -1,0 +1,502 @@
+[
+  {
+    "key": "ui.admin.reports.gc_accounting",
+    "lang": "fi",
+    "text": "Kirjanpito",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 10,
+    "placeholders": [],
+    "reason": "booking_232: lahjakorttiraportin jakson aktiviteetti lähteittäin. FI+EN."
+  },
+  {
+    "key": "ui.admin.reports.gc_accounting",
+    "lang": "en",
+    "text": "Accounting",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 10,
+    "placeholders": [],
+    "reason": "booking_232: lahjakorttiraportin jakson aktiviteetti lähteittäin. FI+EN."
+  },
+  {
+    "key": "ui.admin.reports.gc_activity_title",
+    "lang": "fi",
+    "text": "Jakson lahjakortit",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 18,
+    "placeholders": [],
+    "reason": "booking_232: lahjakorttiraportin jakson aktiviteetti lähteittäin. FI+EN."
+  },
+  {
+    "key": "ui.admin.reports.gc_activity_title",
+    "lang": "en",
+    "text": "Gift cards in the period",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 24,
+    "placeholders": [],
+    "reason": "booking_232: lahjakorttiraportin jakson aktiviteetti lähteittäin. FI+EN."
+  },
+  {
+    "key": "ui.admin.reports.gc_activity_total",
+    "lang": "fi",
+    "text": "Yhteensä",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 8,
+    "placeholders": [],
+    "reason": "booking_232: lahjakorttiraportin jakson aktiviteetti lähteittäin. FI+EN."
+  },
+  {
+    "key": "ui.admin.reports.gc_activity_total",
+    "lang": "en",
+    "text": "Total",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 5,
+    "placeholders": [],
+    "reason": "booking_232: lahjakorttiraportin jakson aktiviteetti lähteittäin. FI+EN."
+  },
+  {
+    "key": "ui.admin.reports.gc_activity_total_note",
+    "lang": "fi",
+    "text": "Yhteensä kokoaa kaikki rivit. Kirjanpitoon kuuluu vain rivit, jotka on merkitty kirjanpitoon.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 93,
+    "placeholders": [],
+    "reason": "booking_232: lahjakorttiraportin jakson aktiviteetti lähteittäin. FI+EN."
+  },
+  {
+    "key": "ui.admin.reports.gc_activity_total_note",
+    "lang": "en",
+    "text": "The total adds every row. Only rows marked as accounting belong in the books.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 77,
+    "placeholders": [],
+    "reason": "booking_232: lahjakorttiraportin jakson aktiviteetti lähteittäin. FI+EN."
+  },
+  {
+    "key": "ui.admin.reports.gc_col_mark",
+    "lang": "fi",
+    "text": "Merkintä",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 8,
+    "placeholders": [],
+    "reason": "booking_232: lahjakorttiraportin jakson aktiviteetti lähteittäin. FI+EN."
+  },
+  {
+    "key": "ui.admin.reports.gc_col_mark",
+    "lang": "en",
+    "text": "Mark",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 4,
+    "placeholders": [],
+    "reason": "booking_232: lahjakorttiraportin jakson aktiviteetti lähteittäin. FI+EN."
+  },
+  {
+    "key": "ui.admin.reports.gc_col_order",
+    "lang": "fi",
+    "text": "Tilaus",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 6,
+    "placeholders": [],
+    "reason": "booking_232: lahjakorttiraportin jakson aktiviteetti lähteittäin. FI+EN."
+  },
+  {
+    "key": "ui.admin.reports.gc_col_order",
+    "lang": "en",
+    "text": "Order",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 5,
+    "placeholders": [],
+    "reason": "booking_232: lahjakorttiraportin jakson aktiviteetti lähteittäin. FI+EN."
+  },
+  {
+    "key": "ui.admin.reports.gc_events",
+    "lang": "fi",
+    "text": "Tapahtumat",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 10,
+    "placeholders": [],
+    "reason": "booking_232: lahjakorttiraportin jakson aktiviteetti lähteittäin. FI+EN."
+  },
+  {
+    "key": "ui.admin.reports.gc_events",
+    "lang": "en",
+    "text": "Events",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 6,
+    "placeholders": [],
+    "reason": "booking_232: lahjakorttiraportin jakson aktiviteetti lähteittäin. FI+EN."
+  },
+  {
+    "key": "ui.admin.reports.gc_hide_events",
+    "lang": "fi",
+    "text": "Piilota tapahtumat",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 18,
+    "placeholders": [],
+    "reason": "booking_232: lahjakorttiraportin jakson aktiviteetti lähteittäin. FI+EN."
+  },
+  {
+    "key": "ui.admin.reports.gc_hide_events",
+    "lang": "en",
+    "text": "Hide events",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 11,
+    "placeholders": [],
+    "reason": "booking_232: lahjakorttiraportin jakson aktiviteetti lähteittäin. FI+EN."
+  },
+  {
+    "key": "ui.admin.reports.gc_info_only",
+    "lang": "fi",
+    "text": "Vain tiedoksi",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 13,
+    "placeholders": [],
+    "reason": "booking_232: lahjakorttiraportin jakson aktiviteetti lähteittäin. FI+EN."
+  },
+  {
+    "key": "ui.admin.reports.gc_info_only",
+    "lang": "en",
+    "text": "Information only",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 16,
+    "placeholders": [],
+    "reason": "booking_232: lahjakorttiraportin jakson aktiviteetti lähteittäin. FI+EN."
+  },
+  {
+    "key": "ui.admin.reports.gc_kind_expiry",
+    "lang": "fi",
+    "text": "Vanhentuminen",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 13,
+    "placeholders": [],
+    "reason": "booking_232: lahjakorttiraportin jakson aktiviteetti lähteittäin. FI+EN."
+  },
+  {
+    "key": "ui.admin.reports.gc_kind_expiry",
+    "lang": "en",
+    "text": "Expiry",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 6,
+    "placeholders": [],
+    "reason": "booking_232: lahjakorttiraportin jakson aktiviteetti lähteittäin. FI+EN."
+  },
+  {
+    "key": "ui.admin.reports.gc_kind_opening",
+    "lang": "fi",
+    "text": "Avauskirjaus",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 12,
+    "placeholders": [],
+    "reason": "booking_232: lahjakorttiraportin jakson aktiviteetti lähteittäin. FI+EN."
+  },
+  {
+    "key": "ui.admin.reports.gc_kind_opening",
+    "lang": "en",
+    "text": "Opening entry",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 13,
+    "placeholders": [],
+    "reason": "booking_232: lahjakorttiraportin jakson aktiviteetti lähteittäin. FI+EN."
+  },
+  {
+    "key": "ui.admin.reports.gc_kind_sale",
+    "lang": "fi",
+    "text": "Myynti",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 6,
+    "placeholders": [],
+    "reason": "booking_232: lahjakorttiraportin jakson aktiviteetti lähteittäin. FI+EN."
+  },
+  {
+    "key": "ui.admin.reports.gc_kind_sale",
+    "lang": "en",
+    "text": "Sale",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 4,
+    "placeholders": [],
+    "reason": "booking_232: lahjakorttiraportin jakson aktiviteetti lähteittäin. FI+EN."
+  },
+  {
+    "key": "ui.admin.reports.gc_no_events",
+    "lang": "fi",
+    "text": "Ei tapahtumia tällä jaksolla.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 29,
+    "placeholders": [],
+    "reason": "booking_232: lahjakorttiraportin jakson aktiviteetti lähteittäin. FI+EN."
+  },
+  {
+    "key": "ui.admin.reports.gc_no_events",
+    "lang": "en",
+    "text": "No events in this period.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 25,
+    "placeholders": [],
+    "reason": "booking_232: lahjakorttiraportin jakson aktiviteetti lähteittäin. FI+EN."
+  },
+  {
+    "key": "ui.admin.reports.gc_partner_note",
+    "lang": "fi",
+    "text": "Kumppanin kortin myynti ei ole tämän järjestelmän myyntiä. Rivillä näkyvät jakson lunastukset.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 94,
+    "placeholders": [],
+    "reason": "booking_232: lahjakorttiraportin jakson aktiviteetti lähteittäin. FI+EN."
+  },
+  {
+    "key": "ui.admin.reports.gc_partner_note",
+    "lang": "en",
+    "text": "A partner card sale is not a sale of this system. The row shows redemptions in the period.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 90,
+    "placeholders": [],
+    "reason": "booking_232: lahjakorttiraportin jakson aktiviteetti lähteittäin. FI+EN."
+  },
+  {
+    "key": "ui.admin.reports.gc_sold_count",
+    "lang": "fi",
+    "text": "Myyty kpl",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 9,
+    "placeholders": [],
+    "reason": "booking_232: lahjakorttiraportin jakson aktiviteetti lähteittäin. FI+EN."
+  },
+  {
+    "key": "ui.admin.reports.gc_sold_count",
+    "lang": "en",
+    "text": "Sold, count",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 11,
+    "placeholders": [],
+    "reason": "booking_232: lahjakorttiraportin jakson aktiviteetti lähteittäin. FI+EN."
+  },
+  {
+    "key": "ui.admin.reports.gc_sold_eur",
+    "lang": "fi",
+    "text": "Myyty €",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 7,
+    "placeholders": [],
+    "reason": "booking_232: lahjakorttiraportin jakson aktiviteetti lähteittäin. FI+EN."
+  },
+  {
+    "key": "ui.admin.reports.gc_sold_eur",
+    "lang": "en",
+    "text": "Sold, euros",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 11,
+    "placeholders": [],
+    "reason": "booking_232: lahjakorttiraportin jakson aktiviteetti lähteittäin. FI+EN."
+  },
+  {
+    "key": "ui.admin.reports.gc_src_elamyslahjat",
+    "lang": "fi",
+    "text": "Elämyslahjat",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 12,
+    "placeholders": [],
+    "reason": "booking_232: lahjakorttiraportin jakson aktiviteetti lähteittäin. FI+EN."
+  },
+  {
+    "key": "ui.admin.reports.gc_src_elamyslahjat",
+    "lang": "en",
+    "text": "Elämyslahjat",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 12,
+    "placeholders": [],
+    "reason": "booking_232: lahjakorttiraportin jakson aktiviteetti lähteittäin. FI+EN."
+  },
+  {
+    "key": "ui.admin.reports.gc_src_kiitoskauppa",
+    "lang": "fi",
+    "text": "Kiitoskauppa",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 12,
+    "placeholders": [],
+    "reason": "booking_232: lahjakorttiraportin jakson aktiviteetti lähteittäin. FI+EN."
+  },
+  {
+    "key": "ui.admin.reports.gc_src_kiitoskauppa",
+    "lang": "en",
+    "text": "Kiitoskauppa",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 12,
+    "placeholders": [],
+    "reason": "booking_232: lahjakorttiraportin jakson aktiviteetti lähteittäin. FI+EN."
+  },
+  {
+    "key": "ui.admin.reports.gc_src_kokemuskauppa",
+    "lang": "fi",
+    "text": "Kokemuskauppa",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 13,
+    "placeholders": [],
+    "reason": "booking_232: lahjakorttiraportin jakson aktiviteetti lähteittäin. FI+EN."
+  },
+  {
+    "key": "ui.admin.reports.gc_src_kokemuskauppa",
+    "lang": "en",
+    "text": "Kokemuskauppa",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 13,
+    "placeholders": [],
+    "reason": "booking_232: lahjakorttiraportin jakson aktiviteetti lähteittäin. FI+EN."
+  },
+  {
+    "key": "ui.admin.reports.gc_src_offerilla",
+    "lang": "fi",
+    "text": "Offerilla",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 9,
+    "placeholders": [],
+    "reason": "booking_232: lahjakorttiraportin jakson aktiviteetti lähteittäin. FI+EN."
+  },
+  {
+    "key": "ui.admin.reports.gc_src_offerilla",
+    "lang": "en",
+    "text": "Offerilla",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 9,
+    "placeholders": [],
+    "reason": "booking_232: lahjakorttiraportin jakson aktiviteetti lähteittäin. FI+EN."
+  },
+  {
+    "key": "ui.admin.reports.gc_src_partner_legacy",
+    "lang": "fi",
+    "text": "Kumppani, vanha maksutapa",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 25,
+    "placeholders": [],
+    "reason": "booking_232: lahjakorttiraportin jakson aktiviteetti lähteittäin. FI+EN."
+  },
+  {
+    "key": "ui.admin.reports.gc_src_partner_legacy",
+    "lang": "en",
+    "text": "Partner, previous payment method",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 32,
+    "placeholders": [],
+    "reason": "booking_232: lahjakorttiraportin jakson aktiviteetti lähteittäin. FI+EN."
+  },
+  {
+    "key": "ui.admin.reports.gc_src_partner_other",
+    "lang": "fi",
+    "text": "Muu kumppani",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 12,
+    "placeholders": [],
+    "reason": "booking_232: lahjakorttiraportin jakson aktiviteetti lähteittäin. FI+EN."
+  },
+  {
+    "key": "ui.admin.reports.gc_src_partner_other",
+    "lang": "en",
+    "text": "Other partner",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 13,
+    "placeholders": [],
+    "reason": "booking_232: lahjakorttiraportin jakson aktiviteetti lähteittäin. FI+EN."
+  },
+  {
+    "key": "ui.admin.reports.gc_used_count",
+    "lang": "fi",
+    "text": "Käytetty kpl",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 12,
+    "placeholders": [],
+    "reason": "booking_232: lahjakorttiraportin jakson aktiviteetti lähteittäin. FI+EN."
+  },
+  {
+    "key": "ui.admin.reports.gc_used_count",
+    "lang": "en",
+    "text": "Used, count",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 11,
+    "placeholders": [],
+    "reason": "booking_232: lahjakorttiraportin jakson aktiviteetti lähteittäin. FI+EN."
+  },
+  {
+    "key": "ui.admin.reports.gc_used_eur",
+    "lang": "fi",
+    "text": "Käytetty €",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 10,
+    "placeholders": [],
+    "reason": "booking_232: lahjakorttiraportin jakson aktiviteetti lähteittäin. FI+EN."
+  },
+  {
+    "key": "ui.admin.reports.gc_used_eur",
+    "lang": "en",
+    "text": "Used, euros",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 11,
+    "placeholders": [],
+    "reason": "booking_232: lahjakorttiraportin jakson aktiviteetti lähteittäin. FI+EN."
+  },
+  {
+    "key": "ui.admin.reports.gc_value_card",
+    "lang": "fi",
+    "text": "Arvolahjakortti",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 15,
+    "placeholders": [],
+    "reason": "booking_232: lahjakorttiraportin jakson aktiviteetti lähteittäin. FI+EN."
+  },
+  {
+    "key": "ui.admin.reports.gc_value_card",
+    "lang": "en",
+    "text": "Value gift card",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 15,
+    "placeholders": [],
+    "reason": "booking_232: lahjakorttiraportin jakson aktiviteetti lähteittäin. FI+EN."
+  }
+]
