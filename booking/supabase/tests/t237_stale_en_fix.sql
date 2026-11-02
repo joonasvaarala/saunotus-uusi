@@ -68,6 +68,9 @@ declare
   np int;
   nf int;
   stale boolean;
+  u_ed uuid := gen_random_uuid();
+  u_ap uuid := gen_random_uuid();
+  v_at timestamptz;
 begin
   select pg_get_functiondef(sig_stale::regprocedure) into src;
   perform pg_temp.ck(src ilike '%security definer%' and src ilike '%search_path TO ''''%' and src like '%_text_effective_at%' and src not like '%updated_at%', 'A1 stale: definer, ei updated_at-vertailua');
@@ -252,6 +255,48 @@ begin
       and (select vat_rate from kb.products where id = 7) is not distinct from v_vat, 'G11 hinta ja ALV yhä ennallaan');
     perform pg_temp.ck(not (select needs_translation from booking.site_texts where key = 'product.7.name' and lang = 'fi'), 'G12 identtinen tuote nollaa suomen lipun');
   end if;
+
+  -- Oikeudet: ajan päivitys kuittaa englannin ajan tasalla olevaksi, joten se vaatii hyväksyntäoikeuden.
+  insert into auth.users(id, email) values (u_ed, 't237-ed@example.test'), (u_ap, 't237-ap@example.test');
+  insert into booking.text_bots(user_id, label, role_code) values (u_ed, 't237 ehdottaja', 'text_editor'), (u_ap, 't237 hyväksyjä', 'text_editor_approver');
+  perform pg_temp.pair('t237.perm', 'Suomi oikeus', 'Same perm',
+    clock_timestamp(), clock_timestamp() - interval '3 hours',
+    now() - interval '1 day', now() - interval '1 day',
+    null, null, true);
+  select published_at into v_at from booking.site_texts where key = 't237.perm' and lang = 'en';
+  perform test.login(u_ed);
+  v_fi := pg_temp.err($q$select booking.texts_propose('t237.perm', 'en', 'Same perm', 't237')$q$);
+  perform test.logout();
+  perform pg_temp.ck(v_fi = 'no_change', 'H1 pelkkä texts.propose ei kuittaa vanhaa englantia: ' || coalesce(v_fi, 'null'));
+  perform pg_temp.ck((select published_at from booking.site_texts where key = 't237.perm' and lang = 'en') is not distinct from v_at
+    and (select needs_translation from booking.site_texts where key = 't237.perm' and lang = 'fi'), 'H2 aika ja suomen lippu ennallaan');
+  perform test.login(u_ap);
+  r := booking.texts_propose('t237.perm', 'en', 'Same perm', 't237');
+  perform test.logout();
+  perform pg_temp.ck((r ->> 'refreshed')::boolean and not (r ->> 'protected')::boolean, 'H3 texts.approve kuittaa tavallisen: ' || coalesce(r::text, 'null'));
+
+  perform pg_temp.pair('t237.prot', 'Suomi suojattu', 'Same protected',
+    clock_timestamp(), clock_timestamp() - interval '3 hours',
+    now() - interval '1 day', now() - interval '1 day',
+    null, null, true);
+  update booking.site_texts set class = 'protected' where key = 't237.prot';
+  select published_at into v_at from booking.site_texts where key = 't237.prot' and lang = 'en';
+  perform test.login(u_ap);
+  v_fi := pg_temp.err($q$select booking.texts_propose('t237.prot', 'en', 'Same protected', 't237')$q$);
+  perform test.logout();
+  perform pg_temp.ck(v_fi = 'no_change', 'H4 suojattua ei kuitata ilman approve_protected (propose): ' || coalesce(v_fi, 'null'));
+  select id into v_id from booking.site_texts where key = 't237.prot' and lang = 'en';
+  insert into booking.site_text_versions(text_id, version, text, status, base_version, author_kind, author_label, reason, escalation, protected)
+  values (v_id, 2, 'Same protected', 'proposed', 1, 'bot', 't237', 't237', '{}', true)
+  returning id into v_id;
+  perform test.login(u_ap);
+  v_fi := pg_temp.err(format('select booking.admin_texts_approve(%s, %L, true)', v_id, 't237'));
+  perform test.logout();
+  perform pg_temp.ck(v_fi = 'forbidden', 'H5 suojattua ei kuitata ilman approve_protected (approve): ' || coalesce(v_fi, 'null'));
+  perform pg_temp.ck((select published_at from booking.site_texts where key = 't237.prot' and lang = 'en') is not distinct from v_at
+    and (select status from booking.site_text_versions where id = v_id) = 'proposed', 'H6 suojatun aika ja versio ennallaan');
+  r := booking.admin_texts_approve(v_id, 't237', true);
+  perform pg_temp.ck((r ->> 'refreshed')::boolean and (r ->> 'protected')::boolean, 'H7 approve_protected kuittaa suojatun: ' || coalesce(r::text, 'null'));
 
   log := current_setting('t237.log', true);
   np := (select count(*) from regexp_split_to_table(log, E'\n') l where l like 'P %');

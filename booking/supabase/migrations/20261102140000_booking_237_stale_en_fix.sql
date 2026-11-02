@@ -215,7 +215,11 @@ begin
   perform booking._text_validate(t.class, t.kind, t.max_len, t.placeholders, p_text);
   if p_text = t.published_text then
     -- Sama englanti, mutta suomea uudempi julkaisuaika puuttuu: päivitä vain aika, jotta lista ei jää jumiin.
-    if t.lang = 'en' and not coalesce(p_draft, false) and exists (
+    -- Ajan päivitys kuittaa englannin ajan tasalla olevaksi, joten se vaatii saman hyväksyntäoikeuden
+    -- kuin julkaisu (suojattu luokka: approve_protected). Pelkkä texts.propose saa no_change-virheen.
+    if t.lang = 'en' and not coalesce(p_draft, false)
+       and (booking._text_has('texts.approve_protected') or (t.class <> 'protected' and booking._text_has('texts.approve')))
+       and exists (
          select 1 from booking.site_texts fi
           where fi.key = t.key and fi.lang = 'fi' and btrim(fi.published_text) <> ''
             and booking._text_effective_at(t.id) < booking._text_effective_at(fi.id)) then
@@ -231,7 +235,7 @@ begin
         'status', 'published',
         'unchanged', true,
         'refreshed', true,
-        'protected', false,
+        'protected', t.class = 'protected',
         'escalation', '[]'::jsonb,
         'approver', 'texts.approve');
     end if;
@@ -270,8 +274,11 @@ begin
   if not found then perform booking._err('not_found', 'Versiota ei löydy'); end if;
   select * into t from booking.site_texts where id = v.text_id for update;
   if t.class = 'locked' then perform booking._err('text_locked', 'Tämä teksti on lukittu'); end if;
-  -- Sama englanti kuin jo julkaistu: ei uutta versiota, vain julkaisuaika. Suojausluokka ei estä, koska teksti ei muutu.
+  -- Sama englanti kuin jo julkaistu: ei uutta versiota, vain julkaisuaika. Hyväksyntä kuittaa englannin
+  -- ajan tasalla olevaksi, joten suojattu luokka vaatii approve_protected ja botin päiväraja pätee kuten julkaisussa.
   if t.lang = 'en' and v.text is not distinct from t.published_text and v.status in ('proposed', 'approved', 'published') then
+    perform booking._text_need_approve(t.class = 'protected');
+    perform booking._text_bot_guard();
     perform booking._text_touch_en_current(t.id);
     if v.status in ('proposed', 'approved') then
       update booking.site_text_versions
@@ -282,7 +289,7 @@ begin
     end if;
     perform booking._text_audit('TEXT_EN_REFRESH', t.id, t.published_version,
       jsonb_build_object('key', t.key, 'lang', t.lang, 'unchanged', true, 'via', 'admin_texts_approve', 'version_id', v.id));
-    return jsonb_build_object('ok', true, 'version_id', v.id, 'status', 'published', 'unchanged', true, 'refreshed', true, 'protected', false);
+    return jsonb_build_object('ok', true, 'version_id', v.id, 'status', 'published', 'unchanged', true, 'refreshed', true, 'protected', t.class = 'protected');
   end if;
   if v.status <> 'proposed' then perform booking._err('bad_state', 'Vain ehdotetun version voi hyväksyä (tila: ' || v.status || ')'); end if;
   if v.base_version <> t.published_version then
