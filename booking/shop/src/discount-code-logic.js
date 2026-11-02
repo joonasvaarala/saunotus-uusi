@@ -51,3 +51,26 @@ export function codeError(lang, res) {
 }
 export const CODE_ERROR_CODES = Object.freeze(Object.keys(DISCOUNT_TEXTS.fi.codeErrors).filter((k) => k !== 'generic'));
 export const isCodeError = (code) => CODE_ERROR_CODES.includes(code);
+
+// Oma ja Johku-lahjakortti: 12 merkkiä merkistöstä 3479ACEFHJKLMNPRTUVWXY (booking_43, _gc_random_code alkaa HH:lla).
+// Kumppani vain varmalla muodolla (booking._vc_guess, confidence high): KK… = Kokemuskauppa, OK + 5 numeroa + 3 kirjainta = Offerilla.
+// Elämyslahjat-arvaus (mikä tahansa 12-merkkinen, jossa on muita kirjaimia) ei ole varma: alennuskoodi voi näyttää samalta.
+// Ei kutsuta public_check_gift_card / public_resolve_gift_code: ne palauttavat saldon ja kortin tiedot.
+const OWN_GIFT_RE = /^[3479ACEFHJKLMNPRTUVWXY]{12}$/;
+const OFFERILLA_RE = /^OK[0-9]{5}[A-Z]{3}$/;
+export const giftCodeNorm = (code) => String(code ?? '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+export function looksLikeGiftCard(code) {
+  const n = giftCodeNorm(code);
+  if (OWN_GIFT_RE.test(n)) return true;
+  if (n.length < 6 || n.length > 24) return false;
+  return /^KK/.test(n) || OFFERILLA_RE.test(n);
+}
+// Epäonnistunut public_check_code. Lahjakortin muoto + koodia ei löytynyt (tai tarkistus ei vastannut) → lahjakorttiviesti.
+// Tunnettu alennus-/vuosikorttivirhe (vanhentunut, ei koske tuotetta, väärä asiakas, …) jää ennalleen: koodi löytyi sieltä.
+export function codeFailText(lang, res, entered) {
+  const texts = DISCOUNT_TEXTS[lang === 'en' ? 'en' : 'fi'];
+  const code = res?.code;
+  const known = texts.codeErrors[code];
+  if (looksLikeGiftCard(entered) && code !== 'rate_limited' && (code === 'invalid_code' || code === 'generic' || !known)) return texts.codeGiftIsCard;
+  return known || texts.codeErrors.generic;
+}

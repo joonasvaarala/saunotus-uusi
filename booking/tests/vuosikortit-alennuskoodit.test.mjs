@@ -8,7 +8,7 @@ import { fileURLToPath } from 'node:url';
 import { resolve, dirname } from 'node:path';
 import {
   normalizeCode, validCodeFormat, generatedDiscountCode, generatedAnnualCardCode, ANNUAL_ALPHABET, DISCOUNT_ALPHABET,
-  discountSplit, quoteSignature, isAnnualQuote, codeError, CODE_ERROR_CODES, isCodeError,
+  discountSplit, quoteSignature, isAnnualQuote, codeError, codeFailText, looksLikeGiftCard, CODE_ERROR_CODES, isCodeError,
 } from '../shop/src/discount-code-logic.js';
 import { DISCOUNT_TEXTS } from '../shop/src/discount-texts.js';
 import { T } from '../shop/src/i18n.js';
@@ -87,6 +87,32 @@ test('virhekoodit: jokaisella palvelimen _code_msg-koodilla on FI- ja EN-teksti;
   assert.equal(codeError('fi', { code: 'ei_tunnettu' }), DISCOUNT_TEXTS.fi.codeErrors.generic);
 });
 
+test('lahjakortin muoto: oma/Johku 12 merkkiä, KK ja Offerilla; epävarmaa Elämyslahjat-arvausta ei tunnisteta', () => {
+  assert.equal(looksLikeGiftCard('HH3A-7CEF-HJKL'), true);
+  assert.equal(looksLikeGiftCard('hh3a 7cef hjkl'), true);
+  assert.equal(looksLikeGiftCard('3479ACEFHJKL'), true);   // Johku: sama merkistö, ei HH-alkua
+  assert.equal(looksLikeGiftCard('KK12AB34'), true);
+  assert.equal(looksLikeGiftCard('OK12345ABC'), true);
+  assert.equal(looksLikeGiftCard('SUMMER26'), false);       // alennuskoodi
+  assert.equal(looksLikeGiftCard('ABCDEFGHJK'), false);     // vuosikortti, 10 merkkiä
+  assert.equal(looksLikeGiftCard('B3479ACEFHJK'), false);   // 12 merkkiä, kirjain merkistön ulkopuolelta (Elämyslahjat-arvaus)
+  assert.equal(looksLikeGiftCard('KK1'), false);            // liian lyhyt KK-alku
+  assert.equal(looksLikeGiftCard(''), false);
+});
+
+test('epäonnistunut koodi: lahjakortin muoto → lahjakorttiviesti, muu virhe ennallaan', () => {
+  const gift = 'HH3A7CEFHJKL', other = 'KESÄ15';
+  assert.equal(codeFailText('fi', { code: 'invalid_code' }, gift), DISCOUNT_TEXTS.fi.codeGiftIsCard);
+  assert.equal(codeFailText('en', { code: 'invalid_code' }, gift), DISCOUNT_TEXTS.en.codeGiftIsCard);
+  assert.equal(codeFailText('fi', { code: 'generic' }, 'ok12345abc'), DISCOUNT_TEXTS.fi.codeGiftIsCard);
+  assert.equal(codeFailText('fi', { code: 'invalid_code' }, other), DISCOUNT_TEXTS.fi.codeErrors.invalid_code);
+  assert.equal(codeFailText('en', { code: 'code_expired' }, gift), DISCOUNT_TEXTS.en.codeErrors.code_expired);
+  assert.equal(codeFailText('fi', { code: 'annual_card_expired' }, gift), DISCOUNT_TEXTS.fi.codeErrors.annual_card_expired);
+  assert.equal(codeFailText('fi', { code: 'rate_limited' }, gift), DISCOUNT_TEXTS.fi.codeErrors.rate_limited);
+  assert.equal(codeFailText('en', { code: 'ei_tunnettu' }, other), DISCOUNT_TEXTS.en.codeErrors.generic);
+  assert.equal(codeFailText('fi', { code: 'generic' }, other), DISCOUNT_TEXTS.fi.codeErrors.generic);
+});
+
 test('tekstit: FI ja EN samat avaimet, ei paikkamerkkejä, ei hintoja eikä <-merkkiä; kytketty T- ja OT-sanakirjoihin', () => {
   const flat = (o, p = '') => Object.entries(o).flatMap(([k, v]) => (typeof v === 'object' ? flat(v, `${p}${k}.`) : [[`${p}${k}`, v]]));
   const fi = flat(DISCOUNT_TEXTS.fi), en = flat(DISCOUNT_TEXTS.en);
@@ -110,6 +136,26 @@ test('sivutekstien tuontitiedosto 42: FI+EN, sama kuin koodin oletus, vain uudet
   for (const k of keys) assert.ok(rows.some((r) => r.key === k && r.lang === 'fi') && rows.some((r) => r.key === k && r.lang === 'en'), k);
   const fb = JSON.parse(rd('content/site-texts.fallback.json')).texts;
   assert.ok(!fb.some((r) => keys.has(r.key)), 'avaimet eivät ole vielä tuotannossa');
+});
+
+test('sivutekstien tuontitiedosto 122: lahjakorttivihje FI+EN, sama kuin koodin oletus, ei vielä tuotannossa', async () => {
+  const rows = JSON.parse(rd('content/site-texts.pending-import-122.json'));
+  const { collectDefaults, classFor } = await import('../shop/src/text-registry.js');
+  const def = new Map(collectDefaults().map((r) => [`${r.key}|${r.lang}`, r.text]));
+  const want = ['ui.shop.code_gift_hint', 'ui.shop.code_gift_is_card'];
+  assert.equal(rows.length, want.length * 2);
+  const fb = JSON.parse(rd('content/site-texts.fallback.json')).texts;
+  for (const r of rows) {
+    assert.ok(want.includes(r.key), r.key);
+    assert.equal(r.text, def.get(`${r.key}|${r.lang}`), r.key);
+    assert.equal(r.class, classFor(r.key, def.get(`${r.key}|fi`)));
+    assert.equal(r.kind, 'plain');
+    assert.ok(!r.text.includes('<') && r.text.length <= r.max_len && r.placeholders.length === 0, r.key);
+    assert.ok(!fb.some((x) => x.key === r.key && x.lang === r.lang), r.key);
+  }
+  for (const k of want) assert.ok(rows.some((r) => r.key === k && r.lang === 'fi') && rows.some((r) => r.key === k && r.lang === 'en'), k);
+  assert.equal(def.get('ui.shop.code_gift_hint|fi'), DISCOUNT_TEXTS.fi.codeGiftHint);
+  assert.equal(def.get('ui.shop.code_gift_is_card|en'), DISCOUNT_TEXTS.en.codeGiftIsCard);
 });
 
 test('migraatio: SECURITY DEFINER + search_path tyhjä, oikeudet rajattu, verkkomyynti oletuksena pois', () => {
@@ -140,6 +186,8 @@ test('rollback poistaa jokaisen migraation luoman funktion ja triggerin', () => 
 
 test('kauppa: koodikenttä kassalla, vuosikortti lukitsee henkilömäärän ja lisäpalvelut, varaus koodilla vain kun koodi annettu', () => {
   assert.match(SHOP, /'data-testid': 'checkout-code'/);
+  assert.match(SHOP, /'data-testid': 'code-gift-hint'/);
+  assert.match(SHOP, /codeFailText\(S\.lang, r, v\)/);
   assert.match(SHOP, /rpc\('public_check_code'/);
   assert.match(SHOP, /code\.value \? 'public_create_booking_code' : 'public_create_booking'|public_create_booking_code/);
   assert.match(SHOP, /isAnnualQuote/);
@@ -147,7 +195,7 @@ test('kauppa: koodikenttä kassalla, vuosikortti lukitsee henkilömäärän ja l
   assert.match(SHOP, /rpc\('public_annual_card_offer'\)/);
   assert.match(SHOP, /rpc\('public_buy_annual_card'/);
   assert.match(SHOP, /S\.audience === 'business'\) return null/, 'yritysasiakkaille ei vuosikorttimyyntiä');
-  assert.match(CSS, /\.bk-code\b/); assert.match(CSS, /\.bk-annual\b/);
+  assert.match(CSS, /\.bk-code\b/); assert.match(CSS, /\.bk-code-hint\b/); assert.match(CSS, /\.bk-annual\b/);
   assert.doesNotMatch(CSS.slice(CSS.indexOf('/* Alennus- ja vuosikorttikoodi')), /#(00f|0000ff|1e90ff|2563eb|3b82f6|1d4ed8|0070f3)|\bblue\b/i, 'ei sinistä');
 });
 

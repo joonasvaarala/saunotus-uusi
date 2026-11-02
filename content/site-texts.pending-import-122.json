@@ -1,0 +1,42 @@
+[
+ {
+  "key": "ui.shop.code_gift_hint",
+  "lang": "fi",
+  "text": "Lahjakortin koodia ei syötetä tähän – lahjakortti syötetään seuraavalla sivulla maksun yhteydessä.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 250,
+  "placeholders": [],
+  "reason": "Lahjakortin koodi ei kuulu alennus- tai vuosikorttikenttään. Vihje kentän alla ja virhe, kun syötetty koodi on lahjakortin muodossa. FI+EN."
+ },
+ {
+  "key": "ui.shop.code_gift_hint",
+  "lang": "en",
+  "text": "Gift card codes are not entered here – you can use your gift card on the next page at payment.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 250,
+  "placeholders": [],
+  "reason": "Lahjakortin koodi ei kuulu alennus- tai vuosikorttikenttään. Vihje kentän alla ja virhe, kun syötetty koodi on lahjakortin muodossa. FI+EN."
+ },
+ {
+  "key": "ui.shop.code_gift_is_card",
+  "lang": "fi",
+  "text": "Tämä on lahjakortin koodi. Syötä se seuraavalla sivulla maksun yhteydessä.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Lahjakortin koodi ei kuulu alennus- tai vuosikorttikenttään. Vihje kentän alla ja virhe, kun syötetty koodi on lahjakortin muodossa. FI+EN."
+ },
+ {
+  "key": "ui.shop.code_gift_is_card",
+  "lang": "en",
+  "text": "This is a gift card code. Enter it on the next page at payment.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Lahjakortin koodi ei kuulu alennus- tai vuosikorttikenttään. Vihje kentän alla ja virhe, kun syötetty koodi on lahjakortin muodossa. FI+EN."
+ }
+]
