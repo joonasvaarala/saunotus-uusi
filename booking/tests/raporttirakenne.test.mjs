@@ -354,6 +354,55 @@ test('lahjakorttiaktiviteetti: lähteet, tapahtumat ja yhteensä', async () => {
   assert.equal(/johku/i.test(sales), false);
 });
 
+function gcTies(row) {
+  return (row.opening || 0) + (row.sold_gross || 0) - (row.redeemed_gross || 0) + (row.other_gross || 0) - (row.expired_gross || 0);
+}
+
+test('muut muutokset täsmäävät loppusaldon', async () => {
+  const johku = { source: 'johku', group: 'johku', accounting: false, sold_applicable: true, balance_applicable: true, sold_count: 2, sold_gross: 2413, redeemed_count: 3, redeemed_gross: 1878, expired_count: 1, expired_gross: 730, other_count: 1, other_gross: 462, opening: 14911, closing: 15178, value_card_count: 0, events: [{ kind: 'other', reason: 'johku_sync', date: '2026-11-01', amount: 462, code_masked: '****-****-JK12', order_no: null, value_card: false }] };
+  const own = { source: 'native_paid', group: 'own', accounting: true, sold_applicable: true, balance_applicable: true, sold_count: 0, sold_gross: 0, redeemed_count: 0, redeemed_gross: 0, expired_count: 0, expired_gross: 0, other_count: 0, other_gross: 0, opening: 0, closing: 0, value_card_count: 0, events: [] };
+  assert.ok(Math.abs(gcTies(johku) - johku.closing) < 0.01);
+  assert.ok(Math.abs(gcTies(own) - own.closing) < 0.01);
+  const { walk } = installReportDom();
+  globalThis.location = { hash: '#/talous?r=giftcards&from=2026-10-01&to=2026-11-02', search: '' };
+  globalThis.history = { replaceState() {} };
+  const { createReportsTab } = await import(pathToFileURL(join(root, 'admin/views/talous-reports.js')).href);
+  const tab = createReportsTab({
+    api: { reportGiftCards: async () => ({ own: { rows: [] }, activity: { rows: [own, johku], totals: { sold_count: 2, sold_gross: 2413, redeemed_count: 3, redeemed_gross: 1878, expired_count: 1, expired_gross: 730, other_gross: 462, opening: 14911, closing: 15178, accounting_closing: 0 } } }) },
+    canFull: true,
+    ctx: { role: 'admin', can: () => true },
+  });
+  await tab.load();
+  const byId = (id) => walk(tab.node, (el, acc) => { if (el.getAttribute('data-testid') === id) acc.push(el); });
+  const labeled = (id, label) => walk(byId(id)[0], (el, acc) => { if (el.getAttribute('data-label') === label) acc.push(el); })[0];
+  assert.match(flatMoney(labeled('r-gc-johku', 'Muut muutokset').textContent), /462,00/);
+  assert.equal(labeled('r-gc-balance', 'Muut muutokset').textContent, '');
+  assert.match(byId('r-gc-other-note')[0].textContent, /Johku-saldon synkka/);
+  byId('r-gc-toggle-johku')[0].listeners.click[0]();
+  const events = walk(tab.node, (el, acc) => { if (el.getAttribute('data-testid') === 'r-gc-events-johku') acc.push(el); })[0];
+  assert.match(events.textContent, /Johku-saldon synkka/);
+  assert.match(flatMoney(events.textContent), /462,00/);
+  const api = createTalousApi({ mock: true });
+  const rep = await api.reportGiftCards('all', 'json', '2026-11-01', '2026-11-01');
+  const mockJohku = rep.activity.rows.find((x) => x.source === 'johku');
+  assert.equal(mockJohku.other_gross, 462);
+  assert.equal(mockJohku.events.find((e) => e.reason === 'johku_sync').kind, 'other');
+  assert.ok(Math.abs(gcTies(mockJohku) - mockJohku.closing) < 0.01);
+  for (const row of rep.activity.rows.filter((x) => x.balance_applicable)) assert.ok(Math.abs(gcTies(row) - row.closing) < 0.01, row.source);
+  const csv = await api.reportGiftCards('all', 'csv', '2026-11-01', '2026-11-01');
+  assert.match(csv.content, /;muut;/);
+  assert.match(csv.content, /462,00/);
+  assert.match(csv.content, /johku_sync/);
+  assert.equal(csv.content.includes('johku;'), false);
+  const mig = src('supabase/migrations/20261102020000_booking_233_giftcard_other.sql');
+  assert.match(mig, /'kind', 'other'/);
+  assert.doesNotMatch(mig, /function booking\.admin_report_csv|function booking\._report_json/);
+  const t = readFileSync(join(root, 'supabase/tests/talous/t233_giftcard_other.sql'), 'utf8');
+  assert.match(t, /TESTRESULT pass=% fail=%/);
+  assert.match(t, /johku_sync/);
+  assert.match(t, /rollback;\s*$/);
+});
+
 test('booking_232 ei koske myyntiraporttia', () => {
   const mig = src('supabase/migrations/20261102010000_booking_232_giftcard_activity.sql');
   const rb = src('supabase/rollbacks/20261102010000_booking_232_ROLLBACK.sql');

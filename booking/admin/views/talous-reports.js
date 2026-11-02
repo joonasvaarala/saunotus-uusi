@@ -145,7 +145,12 @@ export function createReportsTab({ api, canFull = true, ctx = null }) {
       h('section', { class: 'tl-sec', 'data-testid': 'accrual-advances' }, h('h3', { text: at('ui.admin.accrual.advances') }), h('p', { 'data-testid': 'accrual-advance-gross', text: `${at('ui.admin.accrual.advances_services')}: ${M(svc.gross || 0)}` }), h('p', { 'data-testid': 'accrual-giftcards', text: `${qtyTxt(gc.count || 0)} · ${M(gc.gross || 0)}` }), h('p', { 'data-testid': 'accrual-advance-total', text: `${at('ui.admin.accrual.advances_total')}: ${M(adv.total_gross || 0)}` }))));
   }
   const GC_SRC = { native_paid: 'ui.admin.reports.gc_bucket_own', native_complimentary: 'ui.admin.reports.gc_bucket_free', johku: 'ui.admin.reports.gc_bucket_johku', elamyslahjat: 'ui.admin.reports.gc_src_elamyslahjat', kokemuskauppa: 'ui.admin.reports.gc_src_kokemuskauppa', offerilla: 'ui.admin.reports.gc_src_offerilla', kiitoskauppa: 'ui.admin.reports.gc_src_kiitoskauppa', partner_other: 'ui.admin.reports.gc_src_partner_other', partner_voucher: 'ui.admin.reports.gc_src_partner_legacy' };
-  const gcKind = (k) => rt(k === 'sale' ? 'ui.admin.reports.gc_kind_sale' : k === 'opening' ? 'ui.admin.reports.gc_kind_opening' : k === 'expiry' ? 'ui.admin.reports.gc_kind_expiry' : 'ui.admin.reports.kind_redemption');
+  const GC_REASON = { johku_sync: 'ui.admin.reports.gc_reason_johku_sync', johku_adjust: 'ui.admin.reports.gc_reason_johku_adjust', refund: 'ui.admin.reports.gc_reason_refund', adjust: 'ui.admin.reports.gc_reason_adjust', cancel_refund: 'ui.admin.reports.gc_reason_cancel_refund', single_order_forfeit: 'ui.admin.reports.gc_reason_forfeit' };
+  const gcKind = (e) => {
+    const k = typeof e === 'string' ? e : e?.kind;
+    if (k === 'other') return rt(GC_REASON[e?.reason] || 'ui.admin.reports.gc_reason_other');
+    return rt(k === 'sale' ? 'ui.admin.reports.gc_kind_sale' : k === 'opening' ? 'ui.admin.reports.gc_kind_opening' : k === 'expiry' ? 'ui.admin.reports.gc_kind_expiry' : 'ui.admin.reports.kind_redemption');
+  };
   function giftLegacy(r) {
     const M = fmt.money;
     const cols = [rt('ui.admin.reports.col_product'), rt('ui.admin.reports.gc_opening'), rt('ui.admin.reports.gc_sold_period'), rt('ui.admin.reports.gc_redeemed_period'), rt('ui.admin.reports.gc_expired'), rt('ui.admin.reports.gc_closing')];
@@ -167,14 +172,16 @@ export function createReportsTab({ api, canFull = true, ctx = null }) {
   function giftView(r) {
     if (!r.activity?.rows) return giftLegacy(r);
     const M = fmt.money, dash = '–';
-    const cols = [rt('ui.admin.reports.col_product'), rt('ui.admin.reports.gc_col_mark'), rt('ui.admin.reports.gc_opening'), rt('ui.admin.reports.gc_sold_count'), rt('ui.admin.reports.gc_sold_eur'), rt('ui.admin.reports.gc_used_count'), rt('ui.admin.reports.gc_used_eur'), rt('ui.admin.reports.gc_expired'), rt('ui.admin.reports.gc_closing'), rt('ui.admin.reports.gc_events')];
+    const cols = [rt('ui.admin.reports.col_product'), rt('ui.admin.reports.gc_col_mark'), rt('ui.admin.reports.gc_opening'), rt('ui.admin.reports.gc_sold_count'), rt('ui.admin.reports.gc_sold_eur'), rt('ui.admin.reports.gc_used_count'), rt('ui.admin.reports.gc_used_eur'), rt('ui.admin.reports.gc_expired'), rt('ui.admin.reports.gc_other'), rt('ui.admin.reports.gc_closing'), rt('ui.admin.reports.gc_events')];
     const numOr = (on, n) => (on ? fmt.int(n || 0) : dash);
     const moneyOr = (on, n) => (on ? M(n || 0) : dash);
     const expiredTxt = (row) => (row.balance_applicable ? `${fmt.int(row.expired_count || 0)} · ${M(row.expired_gross || 0)}` : dash);
-    const blank = (row) => !row || ['opening', 'sold_gross', 'redeemed_gross', 'expired_gross', 'closing'].every((k) => Math.abs(Number(row[k] || 0)) < 0.005) && !row.sold_count && !row.redeemed_count;
+    const otherTxt = (row) => (!row?.balance_applicable ? dash : Math.abs(Number(row.other_gross || 0)) < 0.005 ? '' : M(row.other_gross));
+    const blank = (row) => !row || ['opening', 'sold_gross', 'redeemed_gross', 'expired_gross', 'closing', 'other_gross'].every((k) => Math.abs(Number(row[k] || 0)) < 0.005) && !row.sold_count && !row.redeemed_count;
     const ownRow = (r.activity.rows || []).find((x) => x.source === 'native_paid');
     const johkuRow = (r.activity.rows || []).find((x) => x.source === 'johku');
     const hasPartner = (r.activity.rows || []).some((x) => x.group === 'partner');
+    const hasOther = (r.activity.rows || []).some((x) => Math.abs(Number(x.other_gross || 0)) >= 0.005);
     const zeroNote = blank(ownRow) && johkuRow && !blank(johkuRow) ? h('p', { class: 'muted', 'data-testid': 'r-gc-only-johku', text: rt('ui.admin.reports.gc_only_johku') }) : null;
     const toggle = (src) => { if (openGc.has(src)) openGc.delete(src); else openGc.add(src); if (current) out.replaceChildren(giftView(current)); };
     const head = h('tr', {}, cols.map((c, i) => h('th', { scope: 'col', class: i ? 'r' : '', text: c })));
@@ -193,21 +200,22 @@ export function createReportsTab({ api, canFull = true, ctx = null }) {
         cell(fmt.int(row.redeemed_count || 0), cols[5], true),
         cell(M(row.redeemed_gross || 0), cols[6], true),
         cell(expiredTxt(row), cols[7], true),
-        cell(moneyOr(row.balance_applicable, row.closing), cols[8], true),
-        h('td', { class: 'r', 'data-label': cols[9] }, h('button', { type: 'button', class: 'btn tl-btn', 'data-testid': `r-gc-toggle-${row.source}`, 'aria-expanded': String(open), onclick: () => toggle(row.source) }, rt(open ? 'ui.admin.reports.gc_hide_events' : 'ui.admin.reports.gc_events')))));
-      if (row.value_card_count > 0) body.push(h('tr', { class: 'tl-gc-info', 'data-testid': `r-gc-value-${row.source}` }, h('td', { colspan: '10', text: `${rt('ui.admin.reports.gc_value_card')}: ${fmt.int(row.value_card_count)}` })));
+        cell(otherTxt(row), cols[8], true),
+        cell(moneyOr(row.balance_applicable, row.closing), cols[9], true),
+        h('td', { class: 'r', 'data-label': cols[10] }, h('button', { type: 'button', class: 'btn tl-btn', 'data-testid': `r-gc-toggle-${row.source}`, 'aria-expanded': String(open), onclick: () => toggle(row.source) }, rt(open ? 'ui.admin.reports.gc_hide_events' : 'ui.admin.reports.gc_events')))));
+      if (row.value_card_count > 0) body.push(h('tr', { class: 'tl-gc-info', 'data-testid': `r-gc-value-${row.source}` }, h('td', { colspan: '11', text: `${rt('ui.admin.reports.gc_value_card')}: ${fmt.int(row.value_card_count)}` })));
       if (open) {
         const evCols = [rt('ui.admin.reports.col_kind'), rt('ui.admin.reports.col_date'), rt('ui.admin.reports.gc_col_order'), rt('ui.admin.reports.col_gross'), rt('ui.admin.reports.gc_col_code')];
         const events = row.events || [];
-        body.push(h('tr', { 'data-testid': `r-gc-events-${row.source}` }, h('td', { colspan: '10' }, events.length ? h('table', { class: 'tl-table' }, h('thead', {}, h('tr', {}, evCols.map((c, i) => h('th', { scope: 'col', class: i ? 'r' : '', text: c })))), h('tbody', {}, events.map((e) => h('tr', {}, h('th', { scope: 'row', text: `${gcKind(e.kind)}${e.value_card ? ` · ${rt('ui.admin.reports.gc_value_card')}` : ''}` }), h('td', { class: 'r', 'data-label': evCols[1], text: e.date ? fmt.date(e.date) : dash }), h('td', { class: 'r', 'data-label': evCols[2], text: e.order_no == null ? dash : String(e.order_no) }), h('td', { class: 'r', 'data-label': evCols[3], text: M(e.amount) }), h('td', { class: 'r', 'data-label': evCols[4], text: e.code_masked || dash }))))) : h('p', { class: 'muted', text: rt('ui.admin.reports.gc_no_events') }))));
+        body.push(h('tr', { 'data-testid': `r-gc-events-${row.source}` }, h('td', { colspan: '11' }, events.length ? h('table', { class: 'tl-table' }, h('thead', {}, h('tr', {}, evCols.map((c, i) => h('th', { scope: 'col', class: i ? 'r' : '', text: c })))), h('tbody', {}, events.map((e) => h('tr', {}, h('th', { scope: 'row', text: `${gcKind(e)}${e.value_card ? ` · ${rt('ui.admin.reports.gc_value_card')}` : ''}` }), h('td', { class: 'r', 'data-label': evCols[1], text: e.date ? fmt.date(e.date) : dash }), h('td', { class: 'r', 'data-label': evCols[2], text: e.order_no == null ? dash : String(e.order_no) }), h('td', { class: 'r', 'data-label': evCols[3], text: M(e.amount) }), h('td', { class: 'r', 'data-label': evCols[4], text: e.code_masked || dash }))))) : h('p', { class: 'muted', text: rt('ui.admin.reports.gc_no_events') }))));
       }
     }
     const T = r.activity.totals || {};
-    const footVals = [dash, M(T.opening || 0), fmt.int(T.sold_count || 0), M(T.sold_gross || 0), fmt.int(T.redeemed_count || 0), M(T.redeemed_gross || 0), `${fmt.int(T.expired_count || 0)} · ${M(T.expired_gross || 0)}`, M(T.closing || 0), ''];
+    const footVals = [dash, M(T.opening || 0), fmt.int(T.sold_count || 0), M(T.sold_gross || 0), fmt.int(T.redeemed_count || 0), M(T.redeemed_gross || 0), `${fmt.int(T.expired_count || 0)} · ${M(T.expired_gross || 0)}`, Math.abs(Number(T.other_gross || 0)) < 0.005 ? '' : M(T.other_gross), M(T.closing || 0), ''];
     const foot = h('tr', { 'data-testid': 'r-gc-activity-total' }, h('th', { scope: 'row', text: rt('ui.admin.reports.gc_activity_total') }), ...footVals.map((c, i) => h('td', { class: 'r', 'data-label': cols[i + 1], text: c })));
     const own = r.own?.rows || [];
     const tableEl = h('table', { class: 'tl-table', 'data-testid': 'r-gc-activity' }, h('thead', {}, head), h('tbody', {}, body), h('tfoot', {}, foot));
-    return frame(h('div', {}, h('section', { class: 'tl-sec' }, h('h3', { text: rt('ui.admin.reports.gc_activity_title') }), zeroNote, tableEl, h('p', { class: 'muted', text: rt('ui.admin.reports.gc_activity_total_note') }), johkuRow ? h('p', { class: 'muted tl-johku-note', 'data-testid': 'r-gc-johku-note', text: rt('ui.admin.reports.gc_johku_liability') }) : null, hasPartner ? h('p', { class: 'muted', 'data-testid': 'r-gc-partner-note', text: rt('ui.admin.reports.gc_partner_note') }) : null), h('section', { class: 'tl-sec', 'data-testid': 'r-gc-own' }, h('h3', { text: rt('ui.admin.reports.gc_own') }), own.length ? h('p', { class: 'muted', text: rt('ui.admin.reports.gc_count', { n: fmt.int(own.length) }) }) : emptyBox(t('r.empty')))));
+    return frame(h('div', {}, h('section', { class: 'tl-sec' }, h('h3', { text: rt('ui.admin.reports.gc_activity_title') }), zeroNote, tableEl, h('p', { class: 'muted', text: rt('ui.admin.reports.gc_activity_total_note') }), hasOther ? h('p', { class: 'muted', 'data-testid': 'r-gc-other-note', text: rt('ui.admin.reports.gc_other_note') }) : null, johkuRow ? h('p', { class: 'muted tl-johku-note', 'data-testid': 'r-gc-johku-note', text: rt('ui.admin.reports.gc_johku_liability') }) : null, hasPartner ? h('p', { class: 'muted', 'data-testid': 'r-gc-partner-note', text: rt('ui.admin.reports.gc_partner_note') }) : null), h('section', { class: 'tl-sec', 'data-testid': 'r-gc-own' }, h('h3', { text: rt('ui.admin.reports.gc_own') }), own.length ? h('p', { class: 'muted', text: rt('ui.admin.reports.gc_count', { n: fmt.int(own.length) }) }) : emptyBox(t('r.empty')))));
   }
   function invoiceView(r) {
     const M = fmt.money;
