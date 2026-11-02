@@ -6,8 +6,8 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
-const mig = readFileSync(join(root, 'booking/supabase/migrations/20261102120000_booking_235_svc_move_paid_texts.sql'), 'utf8');
-const rb = readFileSync(join(root, 'booking/supabase/rollbacks/20261102120000_booking_235_ROLLBACK.sql'), 'utf8');
+const mig = readFileSync(join(root, 'booking/supabase/migrations/20261102113506_booking_235_svc_move_paid_texts.sql'), 'utf8');
+const rb = readFileSync(join(root, 'booking/supabase/rollbacks/20261102113506_booking_235_ROLLBACK.sql'), 'utf8');
 
 const sigs = [
   'booking.svc_move_reservation(bigint, timestamptz, text, text)',
