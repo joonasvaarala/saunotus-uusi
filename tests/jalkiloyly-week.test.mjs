@@ -56,6 +56,7 @@ before(async () => {
   cpSync(join(root, 'booking/shop/src/quiet-offers-logic.js'), join(booking, 'quiet-offers-logic.js'));
   cpSync(join(root, 'booking/shop/src/week-live.js'), join(booking, 'week-live.js'));
   cpSync(join(root, 'booking/shop/src/event-date.js'), join(booking, 'event-date.js'));
+  cpSync(join(root, 'booking/shop/src/when-range.js'), join(booking, 'when-range.js'));
   writeFileSync(join(booking, 'sb.js'), 'export async function rpc(){ throw new Error("ei verkkoa"); }\n');
   server = spawn('node', ['scripts/serve.mjs', dist, String(port)], { cwd: root, stdio: 'ignore' });
   await new Promise((res, rej) => {
