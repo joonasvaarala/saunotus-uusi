@@ -361,7 +361,23 @@ export function createTalousApi({ rpc, io = {}, mock = wantsMock(), mockFactory 
       const roll = (b) => ({ opening: num(b?.opening), sold: num(b?.sold), redeemed: num(b?.redeemed), other: num(b?.other), expired: num(b?.expired), closing: num(b?.closing), cards: num(b?.cards), accounting: b?.accounting === true, difference: num(b?.difference) });
       const row = (x) => ({ code_masked: x.code_masked ?? '', buyer: x.buyer ?? '', package: x.package ?? '', initial: num(x.initial), balance: num(x.balance), net: num(x.net), vat_rate: num(x.vat_rate), vat: num(x.vat), gross: num(x.gross), sold_on: x.sold_on ?? null, valid_to: x.valid_to ?? null, status: x.status ?? '', source: x.source ?? '', vat_treatment: x.vat_treatment ?? '', complimentary: x.complimentary === true || x.vat_treatment === 'maksuton' });
       const johku = res.statistics?.johku || res.johku;
-      return { filter: res.filter || filter, period: res.period || { from, to, kind: 'giftcards' }, own: { rows: L(res.own?.rows).map(row), at_redemption: bucket(res.own?.at_redemption), at_sale: bucket(res.own?.at_sale), complimentary: bucket(res.own?.complimentary) }, balance: { native_paid: roll(res.balance?.native_paid), native_complimentary: roll(res.balance?.native_complimentary) }, statistics: { johku: johku ? { rows: L(johku.rows).map(row), totals: bucket(johku.totals), balance: roll(johku.balance) } : null } };
+      const optNum = (flag, v) => (flag ? null : num(v));
+      const event = (x) => ({ kind: ['sale', 'opening', 'redemption', 'expiry'].includes(x?.kind) ? x.kind : 'redemption', date: x?.date ?? null, amount: num(x?.amount), code_masked: x?.code_masked ?? '', order_no: x?.order_no == null || x.order_no === '' ? null : num(x.order_no), value_card: x?.value_card === true });
+      const actRow = (x) => {
+        const soldOff = x?.sold_applicable === false;
+        const balOff = x?.balance_applicable === false;
+        return {
+          source: x?.source || '', group: x?.group || '', accounting: x?.accounting === true, sold_applicable: !soldOff, balance_applicable: !balOff,
+          sold_count: optNum(soldOff, x?.sold_count), sold_gross: optNum(soldOff, x?.sold_gross),
+          redeemed_count: num(x?.redeemed_count), redeemed_gross: num(x?.redeemed_gross),
+          expired_count: optNum(balOff, x?.expired_count), expired_gross: optNum(balOff, x?.expired_gross),
+          opening: optNum(balOff, x?.opening), closing: optNum(balOff, x?.closing),
+          value_card_count: num(x?.value_card_count), events: L(x?.events).map(event),
+        };
+      };
+      const act = res.activity && typeof res.activity === 'object' ? res.activity : null;
+      const totals = act?.totals || {};
+      return { filter: res.filter || filter, period: res.period || { from, to, kind: 'giftcards' }, own: { rows: L(res.own?.rows).map(row), at_redemption: bucket(res.own?.at_redemption), at_sale: bucket(res.own?.at_sale), complimentary: bucket(res.own?.complimentary) }, balance: { native_paid: roll(res.balance?.native_paid), native_complimentary: roll(res.balance?.native_complimentary) }, statistics: { johku: johku ? { rows: L(johku.rows).map(row), totals: bucket(johku.totals), balance: roll(johku.balance) } : null }, activity: act ? { partner_accounted: act.partner_accounted === true, rows: L(act.rows).map(actRow), totals: { sold_count: num(totals.sold_count), sold_gross: num(totals.sold_gross), redeemed_count: num(totals.redeemed_count), redeemed_gross: num(totals.redeemed_gross), expired_count: num(totals.expired_count), expired_gross: num(totals.expired_gross), opening: num(totals.opening), closing: num(totals.closing), accounting_closing: num(totals.accounting_closing) } } : null };
     },
     // ALV-huomautus on vain tiedote: virhe/puuttuva RPC/oikeus puuttuu → null (ei mock-varaa, ei bannerin muutosta)
     listVatRates: async () => { if (!real) return normVatRates(await getMock().listVatRates()); try { return normVatRates(await real.listVatRates()); } catch { return null; } },

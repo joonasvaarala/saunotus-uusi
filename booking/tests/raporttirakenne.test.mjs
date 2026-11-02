@@ -292,11 +292,85 @@ test('mockin lahjakorttiraportti tuo Johku-saldon, CSV ja myynti eivät', async 
   assert.equal(rep.statistics.johku.balance.expired, 58);
   assert.equal(rep.statistics.johku.balance.accounting, false);
   assert.equal(rep.balance.native_paid.accounting, true);
+  assert.equal(rep.activity.rows.find((x) => x.source === 'johku').accounting, false);
+  assert.equal(rep.activity.rows.find((x) => x.source === 'johku').redeemed_gross, 156);
+  assert.equal(rep.activity.rows.find((x) => x.source === 'native_paid').accounting, true);
+  assert.equal(rep.activity.rows.find((x) => x.source === 'offerilla').sold_gross, null);
+  assert.equal(rep.activity.rows.find((x) => x.source === 'offerilla').value_card_count, 1);
   const csv = await api.reportGiftCards('all', 'csv', '2026-11-01', '2026-11-01');
-  assert.equal(/johku/i.test(csv.content), false);
-  assert.equal(csv.content.includes('156'), false);
+  assert.match(csv.content, /aktiviteetti;johku_tiedoksi;tiedoksi;/);
+  assert.match(csv.content, /156,00/);
+  assert.match(csv.content, /kumppani_offerilla/);
+  assert.match(csv.content, /arvolahjakortti/);
+  assert.equal(csv.content.includes('johku;'), false);
   const sales = await api.reportCsv({ period: { from: '2026-11-01', to: '2026-11-01' } }, 'summary');
   assert.equal(/johku/i.test(sales.content), false);
+});
+
+test('lahjakorttiaktiviteetti: lähteet, tapahtumat ja yhteensä', async () => {
+  const { walk } = installReportDom();
+  globalThis.location = { hash: '#/talous?r=giftcards&from=2026-11-01&to=2026-11-01', search: '' };
+  globalThis.history = { replaceState(_a, _b, url) { if (typeof url === 'string') location.hash = url; } };
+  const { createReportsTab } = await import(pathToFileURL(join(root, 'admin/views/talous-reports.js')).href);
+  const tab = createReportsTab({
+    api: {
+      reportGiftCards: async () => ({
+        own: { rows: [] },
+        activity: {
+          rows: [
+            { source: 'native_paid', group: 'own', accounting: true, sold_applicable: true, balance_applicable: true, sold_count: 0, sold_gross: 0, redeemed_count: 0, redeemed_gross: 0, expired_count: 0, expired_gross: 0, opening: 0, closing: 0, value_card_count: 0, events: [] },
+            { source: 'johku', group: 'johku', accounting: false, sold_applicable: true, balance_applicable: true, sold_count: 0, sold_gross: 0, redeemed_count: 1, redeemed_gross: 156, expired_count: 1, expired_gross: 58, opening: 15392, closing: 15178, value_card_count: 0, events: [{ kind: 'redemption', date: '2026-11-01', amount: 156, code_masked: '****-****-JK12', order_no: 15019, value_card: false }] },
+            { source: 'offerilla', group: 'partner', accounting: false, sold_applicable: false, balance_applicable: false, redeemed_count: 1, redeemed_gross: 40, value_card_count: 1, events: [{ kind: 'redemption', date: '2026-11-01', amount: 40, code_masked: '…OK19', order_no: 15020, value_card: true }] },
+          ],
+          totals: { sold_count: 0, sold_gross: 0, redeemed_count: 2, redeemed_gross: 196, expired_count: 1, expired_gross: 58, opening: 15392, closing: 15178, accounting_closing: 0 },
+        },
+      }),
+    },
+    canFull: true,
+    ctx: { role: 'admin', can: () => true },
+  });
+  await tab.load();
+  const byId = (id) => walk(tab.node, (el, acc) => { if (el.getAttribute('data-testid') === id) acc.push(el); });
+  const labeled = (id, label) => walk(byId(id)[0], (el, acc) => { if (el.getAttribute('data-label') === label) acc.push(el); })[0];
+  assert.equal(byId('r-gc-balance')[0].getAttribute('data-accounting'), 'true');
+  assert.match(flatMoney(labeled('r-gc-balance', 'Käytetty €').textContent), /^0,00/);
+  assert.equal(byId('r-gc-johku')[0].getAttribute('data-accounting'), 'false');
+  assert.match(flatMoney(labeled('r-gc-johku', 'Käytetty €').textContent), /156,00/);
+  assert.match(byId('r-gc-johku-note')[0].textContent, /vain tilasto/);
+  assert.match(byId('r-gc-only-johku')[0].textContent, /Omia maksettuja lahjakortteja ei ole/);
+  assert.equal(labeled('r-gc-src-offerilla', 'Myyty €').textContent, '–');
+  assert.match(flatMoney(labeled('r-gc-src-offerilla', 'Käytetty €').textContent), /40,00/);
+  assert.match(byId('r-gc-value-offerilla')[0].textContent, /Arvolahjakortti/);
+  assert.match(byId('r-gc-partner-note')[0].textContent, /ei ole tämän järjestelmän myyntiä/);
+  assert.match(flatMoney(byId('r-gc-activity-total')[0].textContent), /196,00/);
+  const btn = byId('r-gc-toggle-offerilla')[0];
+  btn.listeners.click[0]();
+  const events = walk(tab.node, (el, acc) => { if (el.getAttribute('data-testid') === 'r-gc-events-offerilla') acc.push(el); })[0];
+  assert.match(events.textContent, /15020/);
+  assert.match(events.textContent, /OK19/);
+  assert.match(events.textContent, /Arvolahjakortti/);
+  const ui = src('admin/views/talous-reports.js');
+  const sales = ui.slice(ui.indexOf('function salesView'), ui.indexOf('function methodsView'));
+  assert.equal(/johku/i.test(sales), false);
+});
+
+test('booking_232 ei koske myyntiraporttia', () => {
+  const mig = src('supabase/migrations/20261102010000_booking_232_giftcard_activity.sql');
+  const rb = src('supabase/rollbacks/20261102010000_booking_232_ROLLBACK.sql');
+  const t = readFileSync(join(root, 'supabase/tests/talous/t232_giftcard_activity.sql'), 'utf8');
+  assert.match(mig, /booking\._gc_period_activity/);
+  assert.match(mig, /booking\._vc_mask/);
+  assert.doesNotMatch(mig, /function booking\._report_json|function booking\.admin_report_csv|function booking\.admin_report_daily/);
+  assert.match(mig, /voucher_claims\.partner_voucher_accounted/);
+  assert.match(rb, /drop function if exists booking\._gc_period_activity\(date, date\)/);
+  assert.doesNotMatch(rb, /_gc_period_activity\(p_from/);
+  assert.match(t, /^begin;/m);
+  assert.match(t, /rollback;\s*$/);
+  assert.doesNotMatch(t, /\bcommit\s*;/i);
+  assert.doesNotMatch(t, /^\s*\\/m);
+  assert.match(t, /TESTRESULT pass=% fail=%/);
+  assert.match(t, /partner_voucher_offerilla/);
+  assert.match(t, /value_card/);
 });
 
 test('lahjakortti-PDF näyttää Johku-osion, myynti-PDF ei', () => {
@@ -305,6 +379,9 @@ test('lahjakortti-PDF näyttää Johku-osion, myynti-PDF ei', () => {
   assert.match(gift, /gc_johku_liability/);
   assert.match(gift, /gc_bucket_johku/);
   assert.match(gift, /gc_only_johku/);
+  assert.match(gift, /gc_activity_title/);
+  assert.match(gift, /gc_partner_note/);
+  assert.match(gift, /rep\.activity/);
   const salesTail = render.slice(render.lastIndexOf('const gcp = rep.gift_card_period'));
   assert.equal(salesTail.includes('gc_bucket_johku'), false);
   assert.equal(salesTail.includes('gc_johku_liability'), false);
@@ -314,6 +391,8 @@ test('lahjakortti-PDF näyttää Johku-osion, myynti-PDF ei', () => {
     const rep = { period: { from: '2026-11-01', to: '2026-11-01' }, balance: { native_paid: { opening: 0, sold: 0, redeemed: 0, expired: 0, closing: 0 } }, statistics: { johku: { balance: { opening: 15392, sold: 0, redeemed: 156, expired: 58, closing: 15178 } } }, own: { rows: [] } };
     const bytes = await buildReportPdf(rep, 'giftcards', 'fi');
     await Deno.writeFile('/tmp/lahjakortit-report.pdf', bytes);
+    const act = { period: { from: '2026-11-01', to: '2026-11-01' }, balance: { native_paid: { opening: 0, sold: 0, redeemed: 0, expired: 0, closing: 0 } }, activity: { rows: [{ source: 'native_paid', group: 'own', accounting: true, sold_applicable: true, balance_applicable: true, sold_count: 0, sold_gross: 0, redeemed_count: 0, redeemed_gross: 0, expired_count: 0, expired_gross: 0, closing: 0, events: [] }, { source: 'johku', group: 'johku', accounting: false, sold_applicable: true, balance_applicable: true, sold_count: 0, sold_gross: 0, redeemed_count: 1, redeemed_gross: 156, expired_count: 0, expired_gross: 0, closing: 15178, events: [{ kind: 'redemption', date: '2026-11-01', amount: 156, code_masked: '****-****-JK12', order_no: 15019, value_card: false }] }, { source: 'offerilla', group: 'partner', accounting: false, sold_applicable: false, balance_applicable: false, redeemed_count: 1, redeemed_gross: 40, value_card_count: 1, events: [{ kind: 'redemption', date: '2026-11-01', amount: 40, code_masked: '…OK19', order_no: 15020, value_card: true }] }], totals: { sold_count: 0, sold_gross: 0, redeemed_count: 2, redeemed_gross: 196, expired_count: 0, expired_gross: 0, closing: 15178 } }, own: { rows: [] } };
+    await Deno.writeFile('/tmp/lahjakortit-activity.pdf', await buildReportPdf(act, 'giftcards', 'fi'));
   `], { encoding: 'utf8' });
   if (deno.error && deno.error.code === 'ENOENT') {
     assert.equal(process.env.GITHUB_ACTIONS, undefined);
@@ -325,4 +404,11 @@ test('lahjakortti-PDF näyttää Johku-osion, myynti-PDF ei', () => {
   assert.match(text, /156,00/);
   assert.match(text, /vain tilasto/);
   assert.match(text, /Omia maksettuja lahjakortteja ei ole/);
+  const act = pdfStrings(readFileSync('/tmp/lahjakortit-activity.pdf'));
+  assert.match(act, /Jakson lahjakortit/);
+  assert.match(act, /156,00/);
+  assert.match(act, /Offerilla/);
+  assert.match(act, /Arvolahjakortti/);
+  assert.match(act, /Vain tiedoksi/);
+  assert.match(act, /15020/);
 });
