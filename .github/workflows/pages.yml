@@ -210,6 +210,10 @@ jobs:
       - run: node --test booking/tests/asetukset.test.mjs
       # lahjakoodi §13.12: kaupan ja hallinnan lunastuspyyntölogiikka (mockatut RPC:t)
       - run: node --test booking/tests/voucher-claims.test.mjs booking/tests/voucher-claims-admin.test.mjs booking/tests/lahjakoodi-vieritys.test.mjs
+      # booking_236: usea kumppanilahjakortti samaan tilaukseen, yksi erotuksen maksulinkki.
+      # SQL: booking/supabase/tests/giftcards/t236_voucher_claims_multi.sql ajetaan paikallisessa PG:ssä.
+      # Työnkulussa ei ole Postgresia.
+      - run: node --test booking/tests/lahjakortti-monikortti-236.test.mjs
       # jonotuslista (booking_132): kaupan näkymä, tekstit, sähköpostipohja ja migraation rakenne.
       # t132 (booking/supabase/tests/waitlist/t132_waitlist.sql) ei ole tässä ajossa: työnkulussa ei ole Postgresia.
       # Bottiavustus ajaa t132:n psql:llä migraatioiden ja fixtures/10_test_helpers.sql:n jälkeen.
