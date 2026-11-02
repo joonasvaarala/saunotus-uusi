@@ -1,4 +1,4 @@
--- ROLLBACK booking_238 (20261102180000_booking_238_receipt_multiday_when.sql). Uudelleenajettava.
+-- ROLLBACK booking_238 (20261102161228_booking_238_receipt_multiday_when.sql). Uudelleenajettava.
 -- Palauttaa booking_199:n _receipt_text-funktion ja poistaa aikaväliapurit.
 set local lock_timeout = '5s';
 

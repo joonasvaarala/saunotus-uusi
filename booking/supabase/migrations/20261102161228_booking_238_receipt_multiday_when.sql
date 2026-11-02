@@ -4,8 +4,8 @@
 -- Kuitissa vuosiviite on rivin alkupäivä (ei now()): sama kuitti näyttää samalta myös myöhemmin
 -- (tallennettu teksti = PDF). Loppupäivässä vuosi aina, alussa vain vuodenvaihteessa.
 -- Ei hintoja, ALV:tä, slugeja eikä public-skeemaa. Vanhoja kuitteja ei kirjoiteta uusiksi.
--- Tätä migraatiota ei ajeta tästä työkalusta tuotantokantaan.
--- Rollback: rollbacks/20261102180000_booking_238_ROLLBACK.sql
+-- Ajettu: DEV 20261102161213, PROD 20261102161228 (tiedostonimi = PROD-versio, Bottiavustus). Runko muuttumaton, vain kommenttirivejä muokattu.
+-- Rollback: rollbacks/20261102161228_booking_238_ROLLBACK.sql
 -- Testi: tests/talous/t238_receipt_when_range.sql
 set local lock_timeout = '5s';
 
