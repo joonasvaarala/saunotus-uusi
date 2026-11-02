@@ -2,6 +2,7 @@
 // Puhdas moduuli (ei lib.mjs-riippuvuutta), testit: booking/tests/tapahtumakortit.test.mjs.
 import { dayLabel, ymdHel } from '../booking/shop/src/event-date.js';
 import { freeShopEvents, eventIsFull, eventWaitlistPath } from '../booking/shop/src/week-live.js';
+import { formatWhenRange, spansDays } from '../booking/shop/src/when-range.js';
 export { eventIsFull, eventWaitlistPath };
 // - Tulevat kerrat, joilla on paikkoja tai jotka ovat täynnä (available ja full). closed ja menneet eivät näy.
 //   Täysi tapahtuma himmennetään ja linkki vie jonoon (yksi kerta) tai tuotesivulle (useampi kerta).
@@ -44,8 +45,12 @@ export function shopEventsHtml(events, lang, deps) {
     const c = card(ev)?.[lang];
     const title = c?.title || (lang === 'en' && ev.name_en) || ev.name;
     const text = c?.text || plainText((lang === 'en' && ev.description_short_en) || ev.description_short);
-    const dl = [...new Set(ev.occurrences.slice(0, 6).map((o) => occDates(o, lang, Date.now())))].join(' · ');
-    const t = occTime(ev.occurrences[0], lang);
+    const shown = ev.occurrences.slice(0, 6);
+    const multi = shown.filter((o) => spansDays(o?.starts_at, o?.ends_at));
+    const dl = multi.length
+      ? multi.map((o) => formatWhenRange(o.starts_at, o.ends_at, lang, Date.now())).join(' · ')
+      : [...new Set(shown.map((o) => occDates(o, lang, Date.now())))].join(' · ');
+    const t = multi.length ? '' : occTime(shown[0], lang);
     const price = ev.price != null ? money(ev.price, lang) : (ev.price_text || '');
     const full = eventIsFull(ev);
     const cta = full && fullCta ? fullCta : arrow;

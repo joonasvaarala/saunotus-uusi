@@ -98,7 +98,9 @@ button.link{background:none;border:0;padding:6px 0;font:inherit;color:var(--ink)
 .daygrid{display:grid;gap:10px}
 @media(min-width:1000px){.daygrid{grid-template-columns:1fr 1fr}.daygrid.day-view{grid-template-columns:minmax(0,760px)}}
 .session header{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center}
-.session .time{font-size:18px;color:var(--ink)}.session .ttl{font-weight:600;flex:1}.session .cnt{font-size:13px;color:var(--muted)}
+.session .time{font-size:18px;color:var(--ink);overflow-wrap:anywhere;white-space:normal;min-width:0;max-width:100%}.session .ttl{font-weight:600;flex:1}.session .cnt{font-size:13px;color:var(--muted)}
+.rc-when,.rd-when,.tl-sub-meta{overflow-wrap:anywhere;white-space:normal}
+.tbl td .muted{white-space:normal;overflow-wrap:anywhere}
 .session.exclusive{border-left:5px solid #a87b45}.session.shared{border-left:5px solid #7bb28a}
 .reslist{list-style:none;margin:8px 0 0;padding:0;display:grid;gap:4px}
 .resrow{display:flex;flex-wrap:wrap;gap:4px 10px;justify-content:space-between;align-items:center;padding:6px 0;border-top:1px solid var(--line)}

@@ -1,6 +1,7 @@
 // Päivänäkymä: vuorot kapasiteetteineen + varaukset vuoroittain + tapahtumat osallistujineen + päivän tuotto + sulut.
 import { rpc } from '../sb.js';
 import { h, fmtDay, fmtTime, todayHel, addDays, dayStartIso, statusBadge, payBadge, sourceBadge, badge, toast, run, dialog, field, fmtDT, empty, money } from '../ui.js';
+import { formatWhenRange, spansDays } from '../when-range.js';
 import { reservationDialog } from './shared.js';
 import { icon } from '../icons.js';
 import { capacityButton, arrivalButton, addonItems, shiftsBar, prepCard } from './dayparts.js';
@@ -139,19 +140,19 @@ export async function render({ ctx, refs, reload, query }) {
     const prod = refs.productById.get(s.product_id);
     const cap = capacityButton(s, date, mine.length > 0);
     return h('section', { class: `card session ${s.mode}`, 'data-testid': 'session', 'data-start': s.starts_at },
-      h('header', {}, h('strong', { class: 'time', text: `${fmtTime(s.starts_at)}–${fmtTime(s.ends_at)}` }), h('span', { class: 'ttl', text: prod?.name || s.label }),
+      h('header', {}, h('strong', { class: 'time', text: spansDays(s.starts_at, s.ends_at) ? formatWhenRange(s.starts_at, s.ends_at, dayLang() === 'en' ? 'en' : 'fi') : `${fmtTime(s.starts_at)}–${fmtTime(s.ends_at)}` }), h('span', { class: 'ttl', text: prod?.name || s.label }),
         h('span', { class: 'hdr-right' }, h('span', { class: 'cnt', 'data-testid': 'session-persons', text: s.mode === 'exclusive' && !booked ? '' : `${booked} hlö` }), cap)),
       mine.length ? h('ul', { class: 'reslist' }, mine.map(resRow)) : null);
   };
   const slotCard = (list) => { const r0 = list[0];
     return h('section', { class: 'card session slot', 'data-testid': 'slot', 'data-start': r0.starts_at },
-      h('header', {}, h('strong', { class: 'time', text: `${fmtTime(r0.starts_at)}–${fmtTime(r0.ends_at)}` }), h('span', { class: 'ttl', text: slotTitle(list, refs.productById.get(r0.product_id)?.name) || 'Varaus' }),
+      h('header', {}, h('strong', { class: 'time', text: spansDays(r0.starts_at, r0.ends_at) ? formatWhenRange(r0.starts_at, r0.ends_at, dayLang() === 'en' ? 'en' : 'fi') : `${fmtTime(r0.starts_at)}–${fmtTime(r0.ends_at)}` }), h('span', { class: 'ttl', text: slotTitle(list, refs.productById.get(r0.product_id)?.name) || 'Varaus' }),
         h('span', { class: 'hdr-right' }, h('span', { class: 'cnt', 'data-testid': 'session-persons', text: `${sumPersons(list)} hlö` }))),
       h('ul', { class: 'reslist' }, list.map(resRow))); };
   // Tapahtumat (kb.event_dates) samalla kortilla kuin vuorot. Osallistuja ei toistu slotissa. Ilman kelloa kortti menee päivän loppuun.
   const eventCard = (ev, mine) => {
     const label = eventTimeLabel(ev);
-    const time = label.kind === 'text' ? label.text : label.kind === 'range' ? `${fmtTime(label.start)}–${fmtTime(label.end)}` : dayText('ui.admin.day.event_all_day');
+    const time = label.kind === 'text' ? label.text : label.kind === 'range' ? (spansDays(label.start, label.end) ? formatWhenRange(label.start, label.end, dayLang() === 'en' ? 'en' : 'fi') : `${fmtTime(label.start)}–${fmtTime(label.end)}`) : dayText('ui.admin.day.event_all_day');
     const prod = refs.productById.get(ev.product_id);
     const name = (dayLang() === 'en' && (ev.name_en || prod?.name_en)) || ev.name || prod?.name || dayText('ui.admin.day.event_badge');
     return h('section', { class: 'card session event', 'data-testid': 'event', 'data-event-id': ev.event_id ?? '', 'data-product': String(ev.product_id ?? '') },

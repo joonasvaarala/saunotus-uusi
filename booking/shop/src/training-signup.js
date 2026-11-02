@@ -1,4 +1,5 @@
 import { isMultiDay, occurrenceText } from './event-sale.js';
+import { formatWhenList } from './when-range.js';
 
 // Koulutuksen ilmoittautuminen (booking_226). Puhdas hintalasku + kassalomake.
 // Verkossa maksetaan vain varausmaksu. Lisävalinnat nostavat myöhemmin laskutettavaa loppusummaa.
@@ -152,14 +153,18 @@ export function createTrainingSignup(ctx) {
       totalEl.textContent = money(q.payNow);
     }
     paint();
-    const when = isMultiDay(s) ? occurrenceText(s, lang) : `${dayLong(s.starts_at)}, ${hm(s.starts_at)}–${hm(s.ends_at)}`;
+    const segs = Array.isArray(offer?.segments) ? offer.segments : [];
+    const segRange = segs.length > 1 ? formatWhenList(segs, lang) : '';
+    const when = segRange || (isMultiDay(s) ? occurrenceText(s, lang) : `${dayLong(s.starts_at)}, ${hm(s.starts_at)}–${hm(s.ends_at)}`);
     const seatNums = [s.remaining, offer?.seats_remaining].filter((n) => n != null && n !== '').map(Number).filter((n) => Number.isFinite(n));
     const seatsLeft = seatNums.length ? Math.min(...seatNums) : null;
     const places = seatsLeft != null ? h('p', { class: 'bk-note', 'data-testid': 'training-places', text: `${L('places')}: ${seatsLeft}` }) : null;
-    const segs = Array.isArray(offer?.segments) ? offer.segments : [];
     const segList = segs.length > 1 ? h('section', { 'data-testid': 'training-segments' },
       h('h3', { text: L('segments') }),
-      h('ul', { class: 'bk-slotlist' }, segs.map((g) => h('li', { text: `${(lang === 'en' && g.label_en) || g.label || ''}${g.starts_at ? ` · ${dayLong(g.starts_at)}` : ''}`.trim() })))) : null;
+      h('ul', { class: 'bk-slotlist' }, segs.map((g) => {
+        const when = g?.ends_at ? formatWhenList([g], lang) : (g?.starts_at ? dayLong(g.starts_at) : '');
+        return h('li', { text: `${(lang === 'en' && g.label_en) || g.label || ''}${when ? ` · ${when}` : ''}`.trim() });
+      }))) : null;
     const submit = h('button', { type: 'submit', class: 'btn gold', 'data-testid': 'training-submit', disabled: seatsLeft === 0 || null, text: L('pay_online') });
     const form = h('form', { class: 'bk-form', novalidate: true, 'data-testid': 'training-form', onsubmit: async (ev) => {
       ev.preventDefault();

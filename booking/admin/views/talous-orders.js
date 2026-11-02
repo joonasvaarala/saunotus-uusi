@@ -4,6 +4,7 @@ import { h, dialog, toast } from '../ui.js';
 import { icon } from '../icons.js';
 import { receiptsList } from './talous-receipts.js';
 import { t, fmt, getLang } from '../talous-i18n.js';
+import { formatWhenRange, spansDays } from '../when-range.js';
 import { RPC, absLink } from '../talous-api.js';
 import { redeemFields, redeemSubmit } from './talous-giftcards.js';
 import { johkuBadge, SOURCES, sourceLabel, payBadge, sourceBadge, loading, emptyBox, errorBox, pager, pageSizeSelect, selectFld, dateFld, searchFld, expandRow, actionBtn, doneToast, formDialog, methodLabel, pstatBadge } from './talous-ui.js';
@@ -104,7 +105,7 @@ export function createOrdersTab({ api, ctx, gift = null, rpc = null }) {
     const reservations = o.reservations.length
       ? h('ul', { class: 'tl-sub', 'data-testid': 'order-reservations' }, o.reservations.map((r) => h('li', {},
         h('span', { class: 'tl-sub-main' }, h('strong', { text: r.product_name || '–' }), r.status === 'cancelled' ? h('span', { class: 'badge st-cancelled', text: t('cancelled') }) : null),
-        h('span', { class: 'tl-sub-meta', text: `${fmt.dt(r.starts_at)} · ${t('persons', { n: r.persons ?? 1 })}${r.addons?.length ? ' · ' + r.addons.map((a) => `${a.name} ×${a.quantity}`).join(', ') : ''}` }),
+        h('span', { class: 'tl-sub-meta', text: `${spansDays(r.starts_at, r.ends_at) ? formatWhenRange(r.starts_at, r.ends_at, getLang()) : fmt.dt(r.starts_at)} · ${t('persons', { n: r.persons ?? 1 })}${r.addons?.length ? ' · ' + r.addons.map((a) => `${a.name} ×${a.quantity}`).join(', ') : ''}` }),
         h('span', { class: 'tl-sub-sum' }, h('strong', { text: fmt.money(r.item_total) })))))
       : emptyBox(t('order.noReservations'));
     const sum = (label, value, cls = '', tid) => h('div', { class: cls }, h('dt', { text: label }), h('dd', { 'data-testid': tid, text: value }));
@@ -145,7 +146,7 @@ export function createOrdersTab({ api, ctx, gift = null, rpc = null }) {
     const en = getLang() === 'en';
     const type = h('select', { name: 'type', 'data-testid': 'add-type' }, ...(o.reservations.length && addons.length ? [h('option', { value: 'addon', text: t('add.addon') })] : []),
       h('option', { value: 'custom', text: t('add.custom'), disabled: api.isMock('addToOrder') || ctx.can('bookings.override') ? null : true }));
-    const resSel = h('select', { name: 'reservation' }, o.reservations.map((r) => h('option', { value: r.reservation_id, text: `${r.product_name} · ${fmt.dt(r.starts_at)}` })));
+    const resSel = h('select', { name: 'reservation' }, o.reservations.map((r) => h('option', { value: r.reservation_id, text: `${r.product_name} · ${spansDays(r.starts_at, r.ends_at) ? formatWhenRange(r.starts_at, r.ends_at, getLang()) : fmt.dt(r.starts_at)}` })));
     const addonSel = h('select', { name: 'addon' }, addons.map((a) => h('option', { value: a.code, text: `${en ? a.name_en : a.name} · ${fmt.money(a.price)}` })));
     const addonBox = h('div', { class: 'stack', 'data-testid': 'add-addon-box' }, fld(t('add.reservation'), resSel), fld(t('add.addonName'), addonSel));
     const customBox = h('div', { class: 'stack', 'data-testid': 'add-custom-box', hidden: true }, fld(t('add.desc'), h('input', { name: 'desc', maxlength: 120 })),

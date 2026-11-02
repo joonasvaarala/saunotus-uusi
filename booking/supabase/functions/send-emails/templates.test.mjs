@@ -80,6 +80,20 @@ test('tilausvahvistus: varaukset, rivit ja summa; peruttu varaus pois', { skip }
   assert.ok(fi.text.includes('17.00–19.00') || fi.text.includes('17:00–19:00'), fi.text);
 });
 
+test('tilausvahvistus: monipäiväinen kurssi alusta loppuun, yksipäiväinen ennallaan', { skip }, () => {
+  const d = base('fi');
+  d.order.reservations = [
+    { product_name: 'Retreat', starts_at: '2026-11-30T10:30:00Z', ends_at: '2026-12-04T14:00:00Z', persons: 1, status: 'confirmed' },
+    { product_name: 'Yleinen vuoro', starts_at: '2026-11-07T15:00:00Z', ends_at: '2026-11-07T17:00:00Z', persons: 2, status: 'confirmed' },
+  ];
+  d.order.training = { segments: [{ label: 'Sauna healing', starts_at: '2026-11-30T10:30:00Z', ends_at: '2026-12-04T14:00:00Z' }, { label: 'Vihta', starts_at: '2027-02-08T10:30:00Z', ends_at: '2027-02-12T14:00:00Z' }] };
+  const fi = R('order_confirmation', d);
+  assert.ok(fi.text.includes('pe 4.12.2026 klo 16.00') && fi.text.includes('pe 12.2.2027 klo 16.00') && fi.text.includes('klo 12.30'), fi.text);
+  assert.ok(fi.text.includes('17.00–19.00') || fi.text.includes('17:00–19:00'), fi.text);
+  const en = R('order_confirmation', { ...d, locale: 'en' }, 'en');
+  assert.ok(en.text.includes('Fri 4 Dec 2026 16:00') && en.text.includes('Fri 12 Feb 2027 16:00'), en.text);
+});
+
 test('maksulinkki: summa, linkki ja voimassaolo', { skip }, () => {
   const fi = R('payment_link', base('fi'));
   assert.equal(fi.subject, 'Maksulinkki tilaukseen 15321 – Sipoonjoen Perinnesauna');

@@ -114,6 +114,7 @@ ul{margin:0 0 1em;padding-left:1.2em}
 .sess:first-child{border-top:0}
 .sess.nt{grid-template-areas:"n b"}
 .sess .t{grid-area:t;font:600 30px/1.05 var(--head);color:var(--ink);font-variant-numeric:lining-nums tabular-nums}
+.sess .t.span{font-size:15px;line-height:1.35;white-space:normal;overflow-wrap:anywhere;min-width:0}
 .sess .n{grid-area:n;font:500 18px/1.25 var(--head);color:var(--text);margin-top:2px}
 .sess.nt .n{margin:0;font-size:19px;color:var(--ink)}
 .sess .bk{grid-area:b;display:inline-flex;align-items:center;justify-content:center;min-height:46px;min-width:96px;padding:0 20px;border-radius:30px;border:1.5px solid var(--gold);color:var(--gold);background:transparent;font:600 12px/1 var(--label);letter-spacing:.12em;text-transform:uppercase;text-decoration:none;transition:background .15s,color .15s}
@@ -154,6 +155,7 @@ ul{margin:0 0 1em;padding-left:1.2em}
 .sess:first-child{padding-top:6px}
 .sess.nt{grid-template-areas:"n" "b"}
 .sess .t{font-size:30px}
+.sess .t.span{font-size:13px}
 .sess .n{font-size:19px;margin:4px 0 12px}
 .sess.nt .n{margin:0 0 12px;font-size:19px}
 .sess .bk{width:100%;min-width:0;padding:0 10px;min-height:44px}
@@ -211,7 +213,7 @@ details.more p{margin:8px 0 0}
 .elements b{display:block;font:700 10.5px/1 var(--label);letter-spacing:.14em;text-transform:uppercase;color:var(--ink);margin-bottom:8px}
 /* events */
 .events{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:22px;list-style:none;margin:0;padding:0}
-.ev .dates{font:600 12px/1.5 var(--label);color:var(--gold);letter-spacing:.04em;margin:0 0 .6em}
+.ev .dates{font:600 12px/1.5 var(--label);color:var(--gold);letter-spacing:.04em;margin:0 0 .6em;overflow-wrap:anywhere}
 .card.ev.is-full .im img{filter:grayscale(.72) saturate(.28);opacity:.72}
 .card.ev .pill.full{background:#7b2d2d;letter-spacing:.08em}
 .card.ev.is-full .cta{color:var(--muted)}

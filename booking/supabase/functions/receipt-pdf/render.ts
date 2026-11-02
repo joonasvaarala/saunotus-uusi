@@ -4,6 +4,7 @@ import { PDFDocument, StandardFonts, rgb, PDFFont, PDFPage } from "npm:pdf-lib@1
 import { makeT, type TFn } from "../_shared/site_texts.ts";
 import { fetchPdfLogo, pdfSan, wrapPdfText } from "../_shared/pdf-layout.ts";
 import { RECEIPT_PDF_TEXTS } from "./texts.ts";
+import { formatWhenRange, spansDays } from "../_shared/when-range.js";
 export { RECEIPT_PDF_TEXTS };
 const DEFAULT_T: TFn = makeT(RECEIPT_PDF_TEXTS);
 
@@ -114,7 +115,9 @@ export async function buildReceiptPdf(s: any, tfn: TFn = DEFAULT_T): Promise<Uin
   y -= 8; page.drawLine({ start: { x: M, y }, end: { x: M + W, y }, thickness: 0.4, color: grey }); y -= 14;
   for (const l of s.lines) {
     let d = l.description as string;
-    if (l.starts_at) d += ` (${new Intl.DateTimeFormat("fi-FI", { timeZone: "Europe/Helsinki", day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" }).format(new Date(l.starts_at)).replace(",", "")}–${new Intl.DateTimeFormat("fi-FI", { timeZone: "Europe/Helsinki", hour: "2-digit", minute: "2-digit" }).format(new Date(l.ends_at))})`;
+    if (l.starts_at) d += spansDays(l.starts_at, l.ends_at)
+      ? ` (${formatWhenRange(l.starts_at, l.ends_at, loc)})`
+      : ` (${new Intl.DateTimeFormat("fi-FI", { timeZone: "Europe/Helsinki", day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" }).format(new Date(l.starts_at)).replace(",", "")}–${new Intl.DateTimeFormat("fi-FI", { timeZone: "Europe/Helsinki", hour: "2-digit", minute: "2-digit" }).format(new Date(l.ends_at))})`;
     const amt = lineAmounts(l);
     const colW = cx.qty - 36 - M;
     const formula = receiptQtyUnitFormula(l, loc);

@@ -9,6 +9,7 @@ export interface Rendered { subject: string; text: string; html: string }
 import { makeT, type TFn } from "../_shared/site_texts.ts";
 import { EMAIL_TEXTS } from "./texts.ts";
 import { isRichHtml, richToText, emailHtml } from "../_shared/rich-text.js";
+import { formatWhenRange, spansDays } from "../_shared/when-range.js";
 export { EMAIL_TEXTS };
 const DEFAULT_T: TFn = makeT(EMAIL_TEXTS);
 type X = (key: string, vars?: Record<string, string | number | null | undefined>) => string;
@@ -94,6 +95,9 @@ const eur = (n: unknown, en: boolean) => { const v = Number(n ?? 0); const s = M
 const fmt = (iso: unknown, en: boolean, opts: Intl.DateTimeFormatOptions) => { const d = new Date(String(iso ?? "")); return Number.isNaN(d.getTime()) ? "" : new Intl.DateTimeFormat(en ? "en-GB" : "fi-FI", { timeZone: "Europe/Helsinki", ...opts }).format(d); };
 const dt = (iso: unknown, en: boolean) => fmt(iso, en, { weekday: "short", day: "numeric", month: "numeric", year: "numeric", hour: "2-digit", minute: "2-digit" });
 const tm = (iso: unknown, en: boolean) => fmt(iso, en, { hour: "2-digit", minute: "2-digit" });
+// Monipäiväinen: koko väli. Sama päivä jää dt–tm-muotoon (yksipäiväinen näkymä ennallaan).
+const resWhen = (start: unknown, end: unknown, en: boolean) => spansDays(start, end) ? formatWhenRange(start, end, en ? "en" : "fi") : `${dt(start, en)}–${tm(end, en)}`;
+const whenOrStart = (start: unknown, end: unknown, en: boolean) => spansDays(start, end) ? formatWhenRange(start, end, en ? "en" : "fi") : dt(start, en);
 const day = (iso: unknown, en: boolean) => fmt(iso, en, { day: "numeric", month: "numeric", year: "numeric" });
 
 /** Sivuston juuri tilauslinkistä (…/tilaus/?t=…) tai maksulinkistä (…/maksa/?p=…); muuten null. */
@@ -155,14 +159,14 @@ function orderBlock(d: any, en: boolean, X: X): Block {
   const L = { order: X("email.order_block.order"), when: X("email.order_block.when"), product: X("email.order_block.product"), persons: X("email.order_block.persons"), qty: X("email.order_block.qty"),
     sum: X("email.order_block.sum"), total: X("email.order_block.total"), pers: X("email.order_block.pers"), sauna: X("email.order_block.bookings"), lines: X("email.order_block.lines") };
   const tl: string[] = [`${L.order} ${o.order_no}`];
-  if (res.length) { tl.push("", `${L.sauna}:`); for (const r of res) tl.push(`  ${resName(r, en)}: ${dt(r.starts_at, en)}–${tm(r.ends_at, en)}, ${r.persons} ${L.pers}`); }
+  if (res.length) { tl.push("", `${L.sauna}:`); for (const r of res) tl.push(`  ${resName(r, en)}: ${resWhen(r.starts_at, r.ends_at, en)}, ${r.persons} ${L.pers}`); }
   if (items.length) { tl.push("", `${L.lines}:`); for (const i of items) tl.push(`  ${i.quantity} × ${i.name} ${eur(i.line_total, en)}`); }
   const tr = o.training;
   if (tr) {
     tl.push("", `${X("email.training.course")}: ${tr.course_price != null ? eur(tr.course_price, en) : "–"}`);
     if ((tr.segments || []).length > 1) {
       tl.push(X("email.training.segments"));
-      for (const s of tr.segments) tl.push(`  ${s.label || s.rule_id}${s.starts_at ? `: ${dt(s.starts_at, en)}` : ""}`);
+      for (const s of tr.segments) tl.push(`  ${s.label || s.rule_id}${s.starts_at ? `: ${s.ends_at ? resWhen(s.starts_at, s.ends_at, en) : dt(s.starts_at, en)}` : ""}`);
     }
     for (const a of tr.addons || []) tl.push(`  ${a.code === "single_room" ? X("email.training.single") : a.code === "internship" ? X("email.training.internship") : a.code}: +${eur(a.price, en)}`);
     if (tr.total != null) tl.push(`${X("email.training.total")}: ${eur(tr.total, en)}`);
@@ -173,7 +177,7 @@ function orderBlock(d: any, en: boolean, X: X): Block {
   let html = `<tr><td style="padding:4px 32px 4px 32px;font-family:${FONT};font-size:17px;color:${GREEN}">${L.order} ${esc(o.order_no)}</td></tr>`;
   if (res.length) {
     html += `<tr><td style="padding:6px 32px 12px 32px"><table ${FLUID_TABLE}><tr>${th(L.product, "left", "32%")}${th(L.when, "left", "40%")}${th(L.persons, "right", "28%")}</tr>`
-      + res.map((r: any) => `<tr>${td(resName(r, en), "left", false, "32%")}${td(`${dt(r.starts_at, en)}–${tm(r.ends_at, en)}`, "left", false, "40%")}${td(String(r.persons ?? ""), "right", false, "28%")}</tr>`).join("") + `</table></td></tr>`;
+      + res.map((r: any) => `<tr>${td(resName(r, en), "left", false, "32%")}${td(resWhen(r.starts_at, r.ends_at, en), "left", false, "40%")}${td(String(r.persons ?? ""), "right", false, "28%")}</tr>`).join("") + `</table></td></tr>`;
   }
   if (items.length) {
     html += `<tr><td style="padding:6px 32px 8px 32px"><table ${FLUID_TABLE}><tr>${th(L.product, "left", "62%")}${th(L.qty, "right", "14%")}${th(L.sum, "right", "24%")}</tr>`
@@ -590,8 +594,8 @@ export function render(kind: Kind, d: any, locale?: string, t: TFn = DEFAULT_T):
       const intro = X("email.waitlist.intro");
       // booking_148: yksityisvuoron jonovarauksella ei ole henkilömäärää (payload persons null) → rivi ilman henkilömäärää.
       const session = w.persons == null
-        ? X("email.waitlist.session_private", { what: String(w.product_name ?? "").trim(), when: dt(w.starts_at, en) })
-        : X("email.waitlist.session", { what: String(w.product_name ?? "").trim(), when: dt(w.starts_at, en), n: String(Number(w.persons) || 1) });
+        ? X("email.waitlist.session_private", { what: String(w.product_name ?? "").trim(), when: whenOrStart(w.starts_at, w.ends_at, en) })
+        : X("email.waitlist.session", { what: String(w.product_name ?? "").trim(), when: whenOrStart(w.starts_at, w.ends_at, en), n: String(Number(w.persons) || 1) });
       const notice = X("email.waitlist.notice");
       const bookLabel = X("email.waitlist.book_button");
       const leaveLead = X("email.waitlist.leave");
@@ -609,7 +613,7 @@ export function render(kind: Kind, d: any, locale?: string, t: TFn = DEFAULT_T):
       const subject = X("email.waitlist_joined.subject");
       const title = X("email.waitlist_joined.title");
       const intro = X("email.waitlist_joined.intro");
-      const session = X("email.waitlist_joined.session", { what: String(w.product_name ?? "").trim(), when: dt(w.starts_at, en), n: String(Number(w.persons) || 1) });
+      const session = X("email.waitlist_joined.session", { what: String(w.product_name ?? "").trim(), when: whenOrStart(w.starts_at, w.ends_at, en), n: String(Number(w.persons) || 1) });
       const notice = X("email.waitlist_joined.notice");
       const leaveLead = X("email.waitlist_joined.leave");
       const leaveLabel = X("email.waitlist.leave_link");
@@ -625,7 +629,7 @@ export function render(kind: Kind, d: any, locale?: string, t: TFn = DEFAULT_T):
       const u = d?.unpaid_booking || {};
       const retry = safeUrl(u.retry_url);
       const what = String(u.product_name || "").trim();
-      const when = u.starts_at ? dt(u.starts_at, en) : "";
+      const when = u.starts_at ? whenOrStart(u.starts_at, u.ends_at, en) : "";
       const subject = X("email.unpaid_booking.subject", { no });
       const title = X("email.unpaid_booking.title");
       const intro = X("email.unpaid_booking.intro");

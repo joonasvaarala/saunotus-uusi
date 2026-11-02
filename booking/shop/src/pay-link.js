@@ -12,6 +12,7 @@ import { paymentMethodList, setMethodLabel, setBusyState, methodLabelKey } from 
 import { pt } from './pay-choices-texts.js';
 import { PLT, plt } from './pay-link-texts.js';
 import { linkTokenFrom, classifyLinkError, switchHref, normLinkInfo, linkInfoView, fmtDate } from './pay-link-logic.js';
+import { formatLocalRange } from './when-range.js';
 import { applyShopTexts } from './site-texts.js';
 
 export function payLinkView({ L, token, api, loadInfo = null, phone = '', phoneTel = '', navigate = (u) => location.assign(u), money = (n) => String(n) }) {
@@ -94,8 +95,11 @@ export function payLinkView({ L, token, api, loadInfo = null, phone = '', phoneT
   function summary(info, v) {
     const name = (i) => (L === 'en' && i.name_en ? i.name_en : i.name);
     const when = (i) => {
+      if (i.date && i.start && i.end && i.end_date && i.end_date !== i.date) {
+        return formatLocalRange({ startDate: i.date, startTime: i.start, endDate: i.end_date, endTime: i.end }, L);
+      }
       if (!i.date || !i.start) return i.date ? fmtDate(L, i.date) : '';
-      const end = i.end ? (i.end_date && i.end_date !== i.date ? `${fmtDate(L, i.end_date)} ${i.end}` : i.end) : '';
+      const end = i.end || '';
       return tx('sum.when', { date: fmtDate(L, i.date), start: i.start, end }).replace(/–$/, '');
     };
     const items = info.items.map((i) => h('li', { class: 'pl-item', 'data-testid': 'pl-item' },

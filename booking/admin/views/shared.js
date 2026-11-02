@@ -22,6 +22,7 @@ import { memoText } from '../day-memos-texts.js';
 import { stepper } from '../stepper.js';
 import { icon } from '../icons.js';
 import { h, dialog, toast, run, fmtDay, fmtTime, fmtDT, money, statusBadge, payBadge, sourceBadge, isJohku, field, badge, empty, errMsg } from '../ui.js';
+import { formatWhenRange, spansDays } from '../when-range.js';
 import { legsList, resName, resourceBadges, hasLegs } from './legs.js';
 import { missingOpen, grantButton } from './therapist.js';
 import { optionBadge, optionOf, optionPicker, ot, optErr } from '../options.js';
@@ -56,7 +57,7 @@ export function reservationDialog(r, { methods = [], onChange, refs, can = () =>
   };
   const status = (s) => rpc('admin_set_reservation_status', { p_reservation_id: r.reservation_id, p_status: s, p_reason: null });
   const summary = h('section', { class: 'rd-summary', 'data-testid': 'res-summary', 'aria-label': tx('ui.admin.res.summary_label') },
-    h('strong', { class: 'rd-when', text: `${fmtDay(r.starts_at)}, ${fmtTime(r.starts_at)}–${fmtTime(r.ends_at)}` }),
+    h('strong', { class: 'rd-when', text: spansDays(r.starts_at, r.ends_at) ? formatWhenRange(r.starts_at, r.ends_at, 'fi') : `${fmtDay(r.starts_at)}, ${fmtTime(r.starts_at)}–${fmtTime(r.ends_at)}` }),
     h('div', { class: 'muted rd-meta', text: [tx(r.mode === 'exclusive' ? 'ui.admin.res.persons_private' : 'ui.admin.res.persons_shared', { n: r.persons }), r.space_code ? resName(refs, r.space_code) : null, optionOf(r).name].filter(Boolean).join(' · ') }),
     h('div', { class: 'rd-badges' }, statusBadge(r.status), payBadge(r.payment_status),
       isJohku(r) ? sourceBadge(r) : null, r.annual_card_id ? badge('warn', 'Vuosikortti') : null,
@@ -396,7 +397,7 @@ function changeDialog(r, onChange, order = null, role = null) {
     await rpc('admin_change_booking', args);
     toast('Varaus muutettu'); d.close(); onChange?.();
   }); } },
-    h('p', { class: 'muted', text: `Nykyinen: ${fmtDay(r.starts_at)}, ${fmtTime(r.starts_at)}–${fmtTime(r.ends_at)}, ${r.persons} hlö` }),
+    h('p', { class: 'muted', text: `Nykyinen: ${spansDays(r.starts_at, r.ends_at) ? formatWhenRange(r.starts_at, r.ends_at, 'fi') : `${fmtDay(r.starts_at)}, ${fmtTime(r.starts_at)}–${fmtTime(r.ends_at)}`}, ${r.persons} hlö` }),
     changeUi.locked ? h('p', { class: 'muted', role: 'status', 'data-testid': 'invoice-change-hint', text: alt('invoiced_hint') }) : null,
     changeUi.locked ? h('p', { class: 'muted', 'data-testid': 'invoice-persons-hint', text: alt('persons_invoiced_hint') }) : null,
     h('div', { class: 'row wrap' }, field('Päivä', dateIn), field(bookingText('off_time'), timeIn), h('div', { class: 'fld' }, h('span', { class: 'fld-lab', text: 'Henkilömäärä' }), pst.node)),
