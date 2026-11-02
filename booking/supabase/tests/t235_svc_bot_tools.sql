@@ -43,6 +43,9 @@ declare
   v_price numeric;
   v_persons int;
   v_line numeric;
+  v_rp numeric;
+  v_audit_n integer;
+  v_legs_sig text;
   v_pay_n int;
   v_mail_n int;
   v_name text;
@@ -104,15 +107,17 @@ begin
    order by s.starts_at
    limit 1;
   perform pg_temp.ck(s2.rule_id is not null, 'B0b saman tuotteen toinen vapaa vuoro');
+  -- Johku-rivin hinta = kohdesäännön hinta näille henkilöille (H1: muuten price_differs).
+  v_rp := (select pr.total from booking._rule_price(s2.rule_id, 2) pr);
 
   insert into booking.customers(name, email, phone)
   values ('T235 Asiakas ' || tag, 't235-' || lower(tag) || '@example.test', '0402350000')
   returning id into v_cust;
   insert into booking.orders(customer_id, status, payment_status, total_gross, source_channel, locale, external_source, external_id, internal_note)
-  values (v_cust, 'confirmed', 'unpaid', 49, 'johku_import', 'fi', 'johku', 'o' || tag, 'vanha muistiinpano')
+  values (v_cust, 'confirmed', 'unpaid', v_rp, 'johku_import', 'fi', 'johku', 'o' || tag, 'vanha muistiinpano')
   returning id, order_no into v_order, v_ono;
   insert into booking.order_items(order_id, product_id, product_name, kind, quantity, unit_price_gross, line_total_gross, vat_rate)
-  values (v_order, s1.product_id, 'T235 tuote', 'reservation', 1, 49, 49, 25.5)
+  values (v_order, s1.product_id, 'T235 tuote', 'reservation', 1, v_rp, v_rp, 25.5)
   returning id into v_item;
   insert into booking.reservations(
     order_id, order_item_id, product_id, rule_id, space_id, mode, starts_at, ends_at, persons, pool_ids, status,
@@ -150,7 +155,20 @@ begin
   perform pg_temp.ck(pg_temp.err(format('select booking.svc_move_reservation(-1, %L::timestamptz, %L)', s2.starts_at, 'syy')) = 'not_found', 'C4 tuntematon tilaus');
   perform pg_temp.ck(pg_temp.err(format('select booking.svc_move_reservation(%s, %L::timestamptz, %L)', v_ono, s2.starts_at + interval '7 minutes', 'syy')) = 'slot_invalid', 'C5 aikataulun ulkopuolinen minuutti');
 
-  v_price := 49;
+  -- H1: Johku (rule_id NULL), sama kesto, eri hinta -> price_differs eikä mitään kirjoiteta.
+  update booking.order_items set unit_price_gross = v_rp + 1, line_total_gross = v_rp + 1 where id = v_item;
+  v_audit_n := (select count(*) from booking.audit_log where action = 'SVC_MOVE_RESERVATION' and row_pk = v_res::text);
+  v_legs_sig := (select string_agg(l.id || ':' || l.starts_at || ':' || l.resource_id, ',' order by l.id) from booking.reservation_legs l where l.reservation_id = v_res);
+  perform pg_temp.ck(pg_temp.err(format('select booking.svc_move_reservation(%s, %L::timestamptz, %L)', v_ono, s2.starts_at, 'eri hinta')) = 'price_differs', 'H1a Johku sama kesto, eri hinta: price_differs');
+  perform pg_temp.ck((select starts_at = s1.starts_at and ends_at = s1.ends_at and rule_id is null from booking.reservations where id = v_res)
+    and (select starts_at from booking.reservations where id = v_child) = v_child_start
+    and (select string_agg(l.id || ':' || l.starts_at || ':' || l.resource_id, ',' order by l.id) from booking.reservation_legs l where l.reservation_id = v_res) is not distinct from v_legs_sig
+    and (select count(*) from booking.audit_log where action = 'SVC_MOVE_RESERVATION' and row_pk = v_res::text) = v_audit_n
+    and (select line_total_gross from booking.order_items where id = v_item) = v_rp + 1,
+    'H1b hylätty siirto ei kirjoittanut mitään');
+  update booking.order_items set unit_price_gross = v_rp, line_total_gross = v_rp where id = v_item;
+  -- H1: Johku (rule_id NULL), sama kesto, sama hinta -> siirto onnistuu (D1).
+  v_price := v_rp;
   v_persons := 2;
   v_old := s1.starts_at;
   v_mail_n := (select count(*) from booking.email_outbox);
@@ -166,7 +184,7 @@ begin
     'D1 siirto onnistuu, hinta ja henkilöt ennallaan: ' || coalesce(r::text, 'null'));
   perform pg_temp.ck((select rule_id from booking.reservations where id = v_res) = s2.rule_id, 'D2 rule_id ratkesi julkaistuun vuoroon');
   perform pg_temp.ck((select line_total_gross from booking.order_items where id = v_item) = v_line or v_line is null, 'D3 rivihinta');
-  perform pg_temp.ck((select line_total_gross from booking.order_items where id = v_item) = 49 and (select total_gross from booking.orders where id = v_order) = 49, 'D4 hinta ei muuttunut');
+  perform pg_temp.ck((select line_total_gross from booking.order_items where id = v_item) = v_rp and (select total_gross from booking.orders where id = v_order) = v_rp, 'D4 hinta ei muuttunut');
   perform pg_temp.ck((select persons from booking.reservations where id = v_res) = 2, 'D5 henkilöt ennallaan');
   perform pg_temp.ck((select starts_at from booking.reservations where id = v_cancel) = v_cancel_start, 'D6 peruttu sisarus ei siirtynyt');
   if v_leg is not null then

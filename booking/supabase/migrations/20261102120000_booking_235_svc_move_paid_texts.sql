@@ -22,6 +22,9 @@
 --    sama kuin mikä tahansa varauksen siirto.
 --    Vuoropolulla uuden säännön keston pitää olla sama kuin varauksen (duration_differs) ja,
 --    jos varauksella on rule_id, säännön hinnan sama (price_differs): hintaa ei lasketa uudelleen.
+--    Johku-tuonnilla (rule_id NULL) uuden säännön hinta (_rule_price, varauksen henkilöt) pitää olla
+--    sama kuin tilausrivin line_total_gross, muuten price_differs. kb 7 (ei sääntöjä) ei koske.
+--    Lukitusjärjestys varaus -> tilaus kuten hallinnan siirtoytimessä.
 --    therapist_missing nollautuessa myös therapist_exception_* tyhjennetään (kuten _ritual_addon_move).
 --
 -- 2) booking.svc_mark_order_paid_external: payment_status = paid ja rivi internal_noteen.
@@ -112,7 +115,8 @@ begin
     perform booking._err('beyond_horizon', format('Uuden vuoron pitää olla enintään %s päivän päässä', v_horizon));
   end if;
 
-  select * into o from booking.orders where order_no = p_order_no for update;
+  -- Lukitusjärjestys kuten hallinnan siirtoytimessä: ensin varaus, sitten tilaus (ei deadlockia).
+  select * into o from booking.orders where order_no = p_order_no;
   if not found then
     perform booking._err('not_found', 'Tilausta ei löydy');
   end if;
@@ -143,6 +147,10 @@ begin
      and r.parent_reservation_id is null
      and r.hidden_at is null
    for update;
+  select * into o from booking.orders where id = o.id for update;
+  if o.status <> 'confirmed' then
+    perform booking._err('not_changeable', 'Vain vahvistetun tilauksen varauksen voi siirtää');
+  end if;
   if res.checkin_at is not null then
     perform booking._err('already_checked_in', 'Sisäänkirjattua varausta ei voi siirtää');
   end if;
@@ -186,6 +194,12 @@ begin
          and (select pr.total from booking._rule_price(v_rule, res.persons) pr)
              is distinct from (select pr.total from booking._rule_price(res.rule_id, res.persons) pr) then
         perform booking._err('price_differs', 'Uuden vuoron hinta poikkeaa nykyisestä; siirrä hallinnan kautta');
+      end if;
+      -- Johku-tuonti (rule_id NULL): uuden säännön hinta näille henkilöille = varauksen tilausrivin nykyinen hinta.
+      if res.rule_id is null
+         and (select pr.total from booking._rule_price(v_rule, res.persons) pr)
+             is distinct from (select i.line_total_gross from booking.order_items i where i.id = res.order_item_id) then
+        perform booking._err('price_differs', 'Uuden vuoron hinta poikkeaa tilausrivin hinnasta; siirrä hallinnan kautta');
       end if;
     exception when sqlstate 'BK001' then
       get stacked diagnostics v_code = pg_exception_detail, v_msg = message_text;
@@ -518,7 +532,7 @@ begin
       cross join lateral (
         values
           ('name'::text, 'name'::text, p.name, p.name_en, 200),
-          ('description', 'description', p.description, p.description_en, 8000),
+          ('description', 'description', p.description, p.description_en, 4000),
           ('short_description', 'short_description', p.short_description, p.short_description_en, 1000),
           ('duration_text', 'duration_text', p.duration_text, p.duration_text_en, 200)
       ) as f(field, fi_col, fi_text, en_text, max_len)
@@ -581,7 +595,7 @@ begin
       cross join lateral (
         values
           ('name'::text, 'name'::text, p.name, p.name_en, 200),
-          ('description', 'description', p.description, p.description_en, 8000),
+          ('description', 'description', p.description, p.description_en, 4000),
           ('short_description', 'short_description', p.short_description, p.short_description_en, 1000),
           ('duration_text', 'duration_text', p.duration_text, p.duration_text_en, 200)
       ) as f(field, fi_col, fi_text, en_text, max_len)
