@@ -346,6 +346,8 @@ jobs:
       # Tekstit content/site-texts.imported-pr250.json. SQL: booking/supabase/tests/t202_event_admin.sql
       # ajetaan paikallisessa PG17:ssä (migraatiot + fixtures/10_test_helpers.sql). Työnkulussa ei ole Postgresia.
       - run: node --test booking/tests/tapahtumat-202.test.mjs booking/tests/tapahtumat-202-ui.test.mjs
+      # Hallinta: Kopioi linkki (tapahtuma- ja kurssirivi + perusnäkymä). Tekstit pending-import-123. Ei tietokantamuutosta.
+      - run: node --test booking/tests/kopioi-linkki.test.mjs
       # Kauppa: tuotekortin ajankohta omalla rivillään hinnan yläpuolella (card-meta.js); päivänäkymä yksityisvuorot → yleiset → tapahtumat → hoidot (FI/EN)
       # Tapahtumat-chippi (category event) erillään Muut-ryhmästä. Tekstit pending-import-91.
       - run: node --test booking/tests/kortit-jarjestys.test.mjs booking/tests/kategoria-tapahtumat.test.mjs

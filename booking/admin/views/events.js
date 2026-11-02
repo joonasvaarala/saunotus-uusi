@@ -10,7 +10,7 @@ import { downloadCsv } from '../csv.js';
 import { loadEventsTexts, evText as T, courseText as tx } from '../events-texts.js';
 import { getLang } from '../talous-i18n.js';
 import { buildSeries, defaultLabel, validateBlock, blockToRow, blocksPayload, timeline, selectableResources, channelsOf, normChannels, CHANNELS,
-  copyArgs, copyName, conflictsOf, localParts, MAX_BLOCKS, occurrenceFlags, bookingCount, isPastMove, messageDraft, customerMessageText, participantsToCsv, weekdayIso } from '../events-logic.js';
+  copyArgs, copyName, conflictsOf, localParts, MAX_BLOCKS, occurrenceFlags, bookingCount, isPastMove, messageDraft, customerMessageText, participantsToCsv, weekdayIso, publicShopLink } from '../events-logic.js';
 import { eventQueueParts } from '../event-waitlist.js';
 
 const ERR_CODES = new Set(['conflict', 'has_reservations', 'has_waitlist', 'max_below_sold', 'past_move', 'multi_day_training_only', 'invalid_resource', 'not_event', 'event_managed',
@@ -134,12 +134,58 @@ export async function render({ ctx, refs, reload, query }) {
   function kpi(label, value) {
     return h('li', { class: 'card ev-kpi' }, h('span', { class: 'muted', text: label }), h('strong', { text: value }));
   }
+  function shopHref(slug, lang) {
+    return publicShopLink({ href: location.href, slug, lang });
+  }
+  async function writeClipboard(text) {
+    try {
+      if (navigator.clipboard?.writeText) { await navigator.clipboard.writeText(text); return true; }
+    } catch { /* leikepöytä estetty: varalla valinta */ }
+    try {
+      const ta = h('textarea', { readonly: true, value: text, 'aria-hidden': 'true' });
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.append(ta);
+      ta.focus();
+      ta.select();
+      const ok = document.execCommand?.('copy') === true;
+      ta.remove();
+      if (ok) return true;
+    } catch { /* valittava kenttä */ }
+    return false;
+  }
+  async function copyShopUrl(url) {
+    if (!url) return;
+    if (await writeClipboard(url)) { toast(tx('link_copied')); return; }
+    try {
+      const input = h('input', { type: 'text', readonly: true, value: url, class: 'ev-link-fallback', 'data-testid': 'event-link-fallback', 'aria-label': tx('direct_link') });
+      dialog(tx('copy_public_link'), h('div', { class: 'stack' }, h('p', { text: tx('copy_public_manual') }), input));
+      input.focus();
+      input.select();
+    } catch {
+      const shown = globalThis.prompt?.(tx('copy_public_manual'), url);
+      if (shown != null) toast(tx('link_copied'));
+    }
+  }
+  function linkBtn(url, label, testid, name) {
+    if (!url) return null;
+    return h('button', { type: 'button', class: 'btn sm ghost', 'data-testid': testid, onclick: () => copyShopUrl(url) },
+      label, name ? h('span', { class: 'sr', text: ` – ${name}` }) : null);
+  }
+  function publicLinkActions(p) {
+    const nodes = [
+      linkBtn(shopHref(p.slug, 'fi'), tx('copy_public_link'), 'event-copy-link-page', p.name),
+      linkBtn(shopHref(p.slug, 'en'), tx('copy_public_link_en'), 'event-copy-link-en', p.name),
+    ].filter(Boolean);
+    return nodes.length ? h('div', { class: 'row wrap ev-quick', 'data-testid': 'event-public-links' }, nodes) : null;
+  }
   function quickLinks(p, r) {
     const q = { tapahtuma: p.product_id };
     return h('div', { class: 'row wrap ev-quick' },
       h('a', { class: 'btn sm', href: hrefOf(listQuery({ ...q, valilehti: 'yleiskatsaus' })) }, T('open')),
       h('a', { class: 'btn sm ghost', href: hrefOf(listQuery({ ...q, valilehti: 'osallistujat', kerta: r.id })) }, T('quick_people')),
-      h('a', { class: 'btn sm ghost', href: hrefOf(listQuery({ ...q, valilehti: 'viestit', kerta: r.id })) }, T('quick_message')));
+      h('a', { class: 'btn sm ghost', href: hrefOf(listQuery({ ...q, valilehti: 'viestit', kerta: r.id })) }, T('quick_message')),
+      linkBtn(shopHref(p.slug, 'fi'), tx('copy_public_link'), 'event-copy-link', p.name));
   }
   function tableBlock(rows) {
     if (!rows.length) return h('p', { class: 'empty', text: T('overview_empty') });
@@ -179,6 +225,7 @@ export async function render({ ctx, refs, reload, query }) {
     const sold = rows.reduce((n, x) => n + x.flags.sold, 0);
     const next = rows[0];
     return h('div', { class: 'stack' },
+      publicLinkActions(p),
       h('ul', { class: 'ev-kpis' }, kpi(T('kpi_upcoming'), String(rows.length)), kpi(T('kpi_sold'), String(sold)), kpi(T('kpi_next'), next ? span(next.r.starts_at, next.r.ends_at) : '–')),
       rows.length ? tableBlock(rows.slice(0, 8)) : h('p', { class: 'muted', text: T('no_occurrences') }));
   }
@@ -200,15 +247,13 @@ export async function render({ ctx, refs, reload, query }) {
   }
 
   function directLinks(p) {
-    const slug = p.slug || '';
-    const rows = [['fi', `/varaa/#/tuote/${slug}`], ['en', `/en/book/#/tuote/${slug}`]];
-    return h('fieldset', { class: 'card', 'data-testid': 'event-direct-links' }, h('legend', { text: tx('direct_link') }),
-      ...rows.map(([lang, path]) => h('div', { class: 'row wrap' },
+    const rows = [['fi', shopHref(p.slug, 'fi')], ['en', shopHref(p.slug, 'en')]].filter(([, url]) => url);
+    if (!rows.length) return null;
+    return h('fieldset', { class: 'card ev-direct', 'data-testid': 'event-direct-links' }, h('legend', { text: tx('direct_link') }),
+      ...rows.map(([lang, url]) => h('div', { class: 'row wrap' },
         h('label', { text: tx(lang === 'fi' ? 'direct_link_fi' : 'direct_link_en') }),
-        h('input', { readonly: true, value: path, 'data-testid': `event-link-${lang}`, 'aria-label': tx('direct_link') }),
-        h('button', { type: 'button', class: 'btn sm', text: tx('copy_link'), onclick: async (e) => {
-          try { await navigator.clipboard.writeText(path); toast(tx('link_copied')); } catch { e.target.focus(); }
-        } }))));
+        h('input', { readonly: true, value: url, 'data-testid': `event-link-${lang}`, 'aria-label': tx('direct_link') }),
+        h('button', { type: 'button', class: 'btn sm', text: tx('copy_link'), onclick: () => copyShopUrl(url) }))));
   }
 
   function occItem(p, r) {
