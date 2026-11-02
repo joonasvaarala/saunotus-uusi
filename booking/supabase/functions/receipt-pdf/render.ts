@@ -116,7 +116,7 @@ export async function buildReceiptPdf(s: any, tfn: TFn = DEFAULT_T): Promise<Uin
   for (const l of s.lines) {
     let d = l.description as string;
     if (l.starts_at) d += spansDays(l.starts_at, l.ends_at)
-      ? ` (${formatWhenRange(l.starts_at, l.ends_at, loc)})`
+      ? ` (${formatWhenRange(l.starts_at, l.ends_at, loc, Date.parse(l.starts_at))})`
       : ` (${new Intl.DateTimeFormat("fi-FI", { timeZone: "Europe/Helsinki", day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" }).format(new Date(l.starts_at)).replace(",", "")}–${new Intl.DateTimeFormat("fi-FI", { timeZone: "Europe/Helsinki", hour: "2-digit", minute: "2-digit" }).format(new Date(l.ends_at))})`;
     const amt = lineAmounts(l);
     const colW = cx.qty - 36 - M;

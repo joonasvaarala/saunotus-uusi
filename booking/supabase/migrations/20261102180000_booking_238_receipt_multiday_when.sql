@@ -1,6 +1,8 @@
 -- booking_238: tekstikuitin monipäiväinen aika alusta loppuun.
 -- ends_at on jo kuitin snapshotissa. Sama päivä säilyttää vanhan muodon
 -- (DD.MM.YYYY HH24:MI–HH24:MI). Eri päivät: sama muoto kuin booking/shop/src/when-range.js.
+-- Kuitissa vuosiviite on rivin alkupäivä (ei now()): sama kuitti näyttää samalta myös myöhemmin
+-- (tallennettu teksti = PDF). Loppupäivässä vuosi aina, alussa vain vuodenvaihteessa.
 -- Ei hintoja, ALV:tä, slugeja eikä public-skeemaa. Vanhoja kuitteja ei kirjoiteta uusiksi.
 -- Tätä migraatiota ei ajeta tästä työkalusta tuotantokantaan.
 -- Rollback: rollbacks/20261102180000_booking_238_ROLLBACK.sql
@@ -120,7 +122,7 @@ begin
     if l ->> 'starts_at' is not null and l ->> 'ends_at' is not null
        and ((l ->> 'starts_at')::timestamptz at time zone 'Europe/Helsinki')::date
            is distinct from ((l ->> 'ends_at')::timestamptz at time zone 'Europe/Helsinki')::date then
-      d := d || ' (' || booking._when_range((l ->> 'starts_at')::timestamptz, (l ->> 'ends_at')::timestamptz, loc) || ')';
+      d := d || ' (' || booking._when_range((l ->> 'starts_at')::timestamptz, (l ->> 'ends_at')::timestamptz, loc, (l ->> 'starts_at')::timestamptz) || ')';
     elsif l ->> 'starts_at' is not null then
       d := d || ' (' || to_char((l ->> 'starts_at')::timestamptz at time zone 'Europe/Helsinki', 'DD.MM.YYYY HH24:MI') || '–' || to_char((l ->> 'ends_at')::timestamptz at time zone 'Europe/Helsinki', 'HH24:MI') || ')';
     end if;

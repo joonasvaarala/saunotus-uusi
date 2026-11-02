@@ -38,9 +38,13 @@ begin
     'vat', jsonb_build_array(jsonb_build_object('rate', 25.5, 'net', 182.47, 'vat', 46.53, 'gross', 229)),
     'total_gross', 229, 'total_vat', 46.53, 'total_net', 182.47, 'total_paid', 229);
   body := booking._receipt_text(snap);
-  perform pg_temp.ck(position('ti 30.11.2032 klo 12.30 – la 4.12.2032 klo 16.00' in body) > 0, 'B1 kuitin monipäiväinen väli');
+  perform pg_temp.ck(position('ti 30.11. klo 12.30 – la 4.12.2032 klo 16.00' in body) > 0, 'B1 kuitin monipäiväinen väli, vuosiviite rivin alku');
   perform pg_temp.ck(position('30.11.2032 16:00–18:00' in body) > 0, 'B2 yksipäiväinen rivi ennallaan');
   perform pg_temp.ck(position('229,00' in body) > 0 and position('25,5' in body) > 0, 'B3 summa ja ALV ennallaan');
+  snap := jsonb_set(snap, '{lines,0}', (snap -> 'lines' -> 0) || jsonb_build_object('starts_at', '2032-12-30T10:30:00Z', 'ends_at', '2033-01-02T14:00:00Z'));
+  perform pg_temp.ck(position('to 30.12.2032 klo 12.30 – su 2.1.2033 klo 16.00' in booking._receipt_text(snap)) > 0, 'B4 kuitin vuodenvaihde: vuosi molemmissa');
+  snap := jsonb_set(snap, '{locale}', '"en"');
+  perform pg_temp.ck(position('Thu 30 Dec 2032 12:30 – Sun 2 Jan 2033 16:00' in booking._receipt_text(snap)) > 0, 'B5 kuitti EN');
 
   log := current_setting('t238.log', true);
   np := (select count(*) from regexp_split_to_table(log, E'\n') l where l like 'P %');

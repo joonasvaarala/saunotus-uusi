@@ -69,7 +69,7 @@ function dateEn(p, withYear) {
   return withYear ? `${p.d} ${MON[p.m - 1]} ${p.y}` : `${p.d} ${MON[p.m - 1]}`;
 }
 
-/** Sama kalenteripäivä Helsingissä. Puuttuva tai virheellinen pää → false. */
+/** Eri kalenteripäivät Helsingissä → true. Sama päivä, puuttuva tai virheellinen pää → false. */
 export function spansDays(startIso, endIso) {
   const a = ymdOf(startIso);
   const b = ymdOf(endIso);
