@@ -476,6 +476,9 @@ export const COURSE_TEXTS = {
     [`${A}direct_link_en`]: 'Englanti',
     [`${A}copy_link`]: 'Kopioi',
     [`${A}link_copied`]: 'Linkki kopioitu',
+    [`${A}copy_public_link`]: 'Kopioi linkki',
+    [`${A}copy_public_link_en`]: 'Kopioi englanninkielinen linkki',
+    [`${A}copy_public_manual`]: 'Valitse linkki ja kopioi se.',
     [`${A}single_room_max`]: 'Yhden hengen huoneita',
     [`${A}single_room_hint`]: 'Oletus 2. Jaettu paikka kuluttaa tämän kerran huoneita, kun osakerta on merkitty.',
     [`${A}segments`]: 'Osakerrat',
@@ -498,6 +501,9 @@ export const COURSE_TEXTS = {
     [`${A}direct_link_en`]: 'English',
     [`${A}copy_link`]: 'Copy',
     [`${A}link_copied`]: 'Link copied',
+    [`${A}copy_public_link`]: 'Copy link',
+    [`${A}copy_public_link_en`]: 'Copy the English link',
+    [`${A}copy_public_manual`]: 'Select the link and copy it.',
     [`${A}single_room_max`]: 'Single rooms',
     [`${A}single_room_hint`]: 'Default 2. A shared place uses this occurrence’s rooms when it is listed as a segment.',
     [`${A}segments`]: 'Segments',
@@ -542,7 +548,7 @@ export function evText(key, vars = null, lang = getLang()) {
   if (vars) s = s.replace(/\{\{var:([a-z_]+)\}\}/g, (_, n) => (vars[n] == null ? '' : String(vars[n])));
   return s;
 }
-/** Koulutuksen omat hallintatekstit (pending-import-114, avain admin.events.*). */
+/** Koulutuksen omat hallintatekstit (pending-import-114, avain admin.events.*). Kopioi linkki: pending-import-123. */
 export function courseText(key, lang = getLang()) {
   const k = key.startsWith('admin.') ? key : A + key;
   const L = lang === 'en' ? 'en' : 'fi';

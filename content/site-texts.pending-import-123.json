@@ -1,0 +1,62 @@
+[
+  {
+    "key": "admin.events.copy_public_link",
+    "lang": "fi",
+    "text": "Kopioi linkki",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Hallinnan tapahtuma- ja kurssirivi: kopioi julkisen ilmoittautumis- ja maksulinkin."
+  },
+  {
+    "key": "admin.events.copy_public_link",
+    "lang": "en",
+    "text": "Copy link",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Events and courses row: copy the public registration and payment link."
+  },
+  {
+    "key": "admin.events.copy_public_link_en",
+    "lang": "fi",
+    "text": "Kopioi englanninkielinen linkki",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Tapahtuman tai kurssin perusnäkymä: englanninkielinen kaupan linkki toissijaisena."
+  },
+  {
+    "key": "admin.events.copy_public_link_en",
+    "lang": "en",
+    "text": "Copy the English link",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Event or course overview: the English shop link as a secondary action."
+  },
+  {
+    "key": "admin.events.copy_public_manual",
+    "lang": "fi",
+    "text": "Valitse linkki ja kopioi se.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Varakeino, kun leikepöytä ei ole käytettävissä."
+  },
+  {
+    "key": "admin.events.copy_public_manual",
+    "lang": "en",
+    "text": "Select the link and copy it.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Fallback when the clipboard is not available."
+  }
+]

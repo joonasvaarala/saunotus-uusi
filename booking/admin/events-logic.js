@@ -287,6 +287,28 @@ export function participantsToCsv(rows, headers) {
   for (const r of rows || []) lines.push(cols.map((c) => csvText(r?.[c] ?? '')).join(';'));
   return `\uFEFF${lines.join('\r\n')}\r\n`;
 }
+const SHOP_PAGE = { fi: '../varaa/', en: '../en/book/' };
+const SLUG_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+const DAY_RE = /^\d{4}-\d{2}-\d{2}$/;
+
+/**
+ * Julkinen ilmoittautumis- ja maksulinkki hallinnan nykyisestä osoitteesta.
+ * FI …/varaa/#/tuote/<slug>, EN …/en/book/#/tuote/<slug>. Pohja tulee hrefistä
+ * (tuotanto /hallinta/ → https://saunotus.fi/varaa/…, testisivu säilyttää polkuetuliitteen).
+ * date (VVVV-KK-PP) lisää päiväkohtaisen reitin. Tyhjä tai kelvoton slug → ''.
+ */
+export function publicShopLink({ href, slug, lang = 'fi', date = '' } = {}) {
+  const s = String(slug ?? '').trim();
+  if (!SLUG_RE.test(s)) return '';
+  const page = SHOP_PAGE[lang === 'en' ? 'en' : 'fi'];
+  let base;
+  try { base = new URL(page, href || 'https://local.invalid/hallinta/'); }
+  catch { return ''; }
+  const day = DAY_RE.test(String(date || '')) ? `/${date}` : '';
+  base.hash = `/tuote/${encodeURIComponent(s)}${day}`;
+  return base.href;
+}
+
 /** Konfliktilista virheestä (admin_event_blocks_set: details.hint = JSON-taulukko). Tuntematon muoto → []. */
 export function conflictsOf(e) {
   let v = e?.details?.hint ?? e?.hint ?? null;

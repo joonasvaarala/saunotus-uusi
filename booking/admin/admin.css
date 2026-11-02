@@ -1059,7 +1059,14 @@ body.shot #shell .nav .lbl{display:inline}
 .ev-cap-track{display:block;height:8px;border-radius:8px;background:var(--bg);border:1px solid var(--line);overflow:hidden}
 .ev-cap-fill{display:block;height:100%;background:var(--green)}
 .ev-cap-num{font-variant-numeric:tabular-nums;color:var(--ink);font-size:.92rem}
-.ev-quick{gap:6px}
+.ev-filters legend.sr{position:absolute;left:0;top:0;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);float:none}
+.ev-quick{gap:6px;max-width:100%}
+.ev-quick .btn{max-width:100%;white-space:normal;text-align:center}
+.ev-direct{min-width:0;max-width:100%}
+.ev-direct .row{min-width:0;max-width:100%}
+.ev-direct input{min-width:0;flex:1 1 10rem;width:auto}
+.ev-link-fallback:focus,.ev-link-fallback:focus-visible{border-color:var(--green);outline:3px solid var(--gold);outline-offset:2px}
+.ev-link-fallback::selection{background:var(--bg);color:var(--green)}
 .ev-tabs{overflow-x:auto}
 .ev-cal{display:grid;gap:8px}
 .ev-cal-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}
