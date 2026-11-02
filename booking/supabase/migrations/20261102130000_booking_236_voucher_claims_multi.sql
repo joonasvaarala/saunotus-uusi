@@ -5,22 +5,24 @@
 -- (tilauksen summa miinus korttien arvot miinus muut maksut) ja yksi sähköposti.
 -- p_value_card true käyttää samaa arvolahjakortin introa kuin booking_229 (payload value_card).
 --
--- Uusi bottifunktio (service_role), kaksi ylikuormaa:
---   svc_mark_voucher_claims_redeemed(p_claim_ids bigint[], p_amount numeric, p_partner_ref text, p_note text, p_value_card boolean)
---     sama p_amount jokaiseen pyyntöön (kuten yhden kortin p_amount).
---   svc_mark_voucher_claims_redeemed(p_claim_ids bigint[], p_amounts numeric[], p_partner_ref text, p_note text, p_value_card boolean)
---     p_amounts[i] on p_claim_ids[i]:n arvo. null-taulukko = yhden pyynnön täysi maksettava, kuten yhden kortin p_amount null.
--- Esimerkki:
---   select booking.svc_mark_voucher_claims_redeemed(array[101,102], 25, null, null, true);
---   select booking.svc_mark_voucher_claims_redeemed(array[101,102], array[25,30], p_value_card := true);
+-- Uusi bottifunktio (service_role), yksi allekirjoitus (ei ylikuormia):
+--   svc_mark_voucher_claims_redeemed(p_claim_ids bigint[], p_amount numeric default null, p_amounts numeric[] default null,
+--                                    p_partner_ref text default null, p_note text default null, p_value_card boolean default false)
+--   p_amount: sama arvo jokaiselle pyynnölle (toinen argumentti kuten yhden kortin svc_mark_voucher_claim_redeemed).
+--   p_amounts: p_amounts[i] on p_claim_ids[i]:n arvo.
+--   Anna joko p_amount tai p_amounts, ei molempia. Ilman kumpaakaan vain yksi pyyntö (koko maksettava, kuten yhden kortin p_amount null).
+-- Esimerkki (PostgREST rpc nimetyillä argumenteilla):
+--   select booking.svc_mark_voucher_claims_redeemed(p_claim_ids := array[101,102], p_amount := 25, p_value_card := true);
+--   select booking.svc_mark_voucher_claims_redeemed(p_claim_ids := array[101,102], p_amounts := array[25,30]);
 --
--- Kirjaus tapahtuu booking._vc_mark_redeemed-apufunktiolla (sama kuin yhden kortin polku).
+-- Kirjaus tapahtuu booking._vc_mark_redeemed-apufunktiolla (sama kuin yhden kortin polku; se ei itse tee linkkiä eikä viestiä).
 -- svc_mark_voucher_claim_redeemed ja _vc_redeem jätetään ennalleen (ei md5-muutosta).
+-- Lukitus: pyynnöt id-järjestyksessä, sitten tilaus (sama järjestys kuin yhden kortin polussa: pyyntö → tilaus).
 -- Laskulukko: booking._order_invoice_locked → BK001 / order_invoiced, ei kirjoituksia.
--- Erotus > 0 → yksi booking._create_link_payment ja yksi payment_link-sähköposti.
+-- Erotus > 0 → yksi booking._create_link_payment ja yksi payment_link-sähköposti kaikkien kirjausten jälkeen.
 -- Erotus <= 0 → ei linkkiä eikä sähköpostia.
 --
--- Rollback: rollbacks/20261102120000_booking_236_ROLLBACK.sql
+-- Rollback: rollbacks/20261102130000_booking_236_ROLLBACK.sql
 
 set local lock_timeout = '5s';
 set local statement_timeout = '60s';
@@ -64,6 +66,7 @@ declare
   v_bad int;
   v_amt numeric;
   v_sum numeric := 0;
+  v_rec_sum numeric := 0;
   v_nulls int := 0;
   v_due numeric;
   v_payable boolean := false;
@@ -202,9 +205,14 @@ begin
     if coalesce((v ->> 'already')::boolean, false) or (v ->> 'payment_id') is null then
       v_paid_ok := false;
     end if;
+    -- Rivikohtainen katto (_vc_pay / _vc_due): kirjattu summa ei saa jäädä pyydettyä pienemmäksi. Virhe peruu koko kutsun.
+    if v_payable and rec.amt is not null and coalesce((v ->> 'amount')::numeric, 0) <> rec.amt then
+      perform booking._err('voucher_exceeds_total', format('Lahjakortin arvo %s € ylittää maksettavan summan (pyyntö #%s)', rec.amt, rec.id));
+    end if;
     if not coalesce((v ->> 'already')::boolean, false) then
       update booking.voucher_claims set value_card = v_card where id = rec.id;
     end if;
+    v_rec_sum := v_rec_sum + coalesce((v ->> 'amount')::numeric, 0);
     v_ids := v_ids || rec.id;
     v_claims := v_claims || jsonb_build_array(jsonb_build_object(
       'id', rec.id,
@@ -261,7 +269,7 @@ begin
     'order_id', v_order,
     'claim_ids', to_jsonb(v_ids),
     'claims', v_claims,
-    'voucher_value', v_sum,
+    'voucher_value', v_rec_sum,
     'due', v_due,
     'difference', v_diff,
     'payment_link', case when v_pid is not null then booking._link_json(v_pid) || jsonb_build_object('online_payment_enabled', booking._montonio_online()) end,
@@ -276,8 +284,10 @@ revoke all on function booking._vc_redeem_many(bigint[], numeric[], text, text, 
 comment on function booking._vc_redeem_many(bigint[], numeric[], text, text, text, boolean) is
   'booking_236: usean kumppanilahjakortin lunastus samaan tilaukseen. Sisäinen. service_role ei saa kutsua suoraan.';
 
+-- Yksi allekirjoitus. Nimetyt argumentit (PostgREST) ja kutsu pelkällä p_claim_ids:llä ovat yksiselitteisiä.
 create or replace function booking.svc_mark_voucher_claims_redeemed(
   p_claim_ids bigint[],
+  p_amount numeric default null,
   p_amounts numeric[] default null,
   p_partner_ref text default null,
   p_note text default null,
@@ -288,45 +298,22 @@ security definer
 set search_path to ''
 as $function$
 begin
+  if p_amount is not null and p_amounts is not null then
+    perform booking._err('invalid_amount', 'Anna joko p_amount tai p_amounts, ei molempia');
+  end if;
+  if p_amount is not null and p_claim_ids is not null and coalesce(cardinality(p_claim_ids), 0) > 0 then
+    return booking._vc_redeem_many(
+      p_claim_ids,
+      array_fill(p_amount, array[cardinality(p_claim_ids)]),
+      p_partner_ref, p_note, 'bot', coalesce(p_value_card, false)
+    );
+  end if;
   return booking._vc_redeem_many(p_claim_ids, p_amounts, p_partner_ref, p_note, 'bot', coalesce(p_value_card, false));
 end
 $function$;
 
-revoke all on function booking.svc_mark_voucher_claims_redeemed(bigint[], numeric[], text, text, boolean) from public, anon, authenticated;
-grant execute on function booking.svc_mark_voucher_claims_redeemed(bigint[], numeric[], text, text, boolean) to service_role;
+revoke all on function booking.svc_mark_voucher_claims_redeemed(bigint[], numeric, numeric[], text, text, boolean) from public, anon, authenticated;
+grant execute on function booking.svc_mark_voucher_claims_redeemed(bigint[], numeric, numeric[], text, text, boolean) to service_role;
 
-comment on function booking.svc_mark_voucher_claims_redeemed(bigint[], numeric[], text, text, boolean) is
-  'booking_236: botti lunastaa usean kumppanilahjakortin kerralla. p_amounts[i] vastaa p_claim_ids[i]. p_value_card boolean default false. service_role.';
-
--- Sama summa jokaiseen pyyntöön. p_amount on pakollinen argumentti, jotta kutsu ilman summaa osuu taulukko-ylikuormaan.
-create or replace function booking.svc_mark_voucher_claims_redeemed(
-  p_claim_ids bigint[],
-  p_amount numeric,
-  p_partner_ref text default null,
-  p_note text default null,
-  p_value_card boolean default false
-) returns jsonb
-language plpgsql
-security definer
-set search_path to ''
-as $function$
-begin
-  if p_amount is null or p_claim_ids is null or coalesce(cardinality(p_claim_ids), 0) = 0 then
-    return booking._vc_redeem_many(p_claim_ids, null::numeric[], p_partner_ref, p_note, 'bot', coalesce(p_value_card, false));
-  end if;
-  return booking._vc_redeem_many(
-    p_claim_ids,
-    array_fill(p_amount, array[cardinality(p_claim_ids)]),
-    p_partner_ref,
-    p_note,
-    'bot',
-    coalesce(p_value_card, false)
-  );
-end
-$function$;
-
-revoke all on function booking.svc_mark_voucher_claims_redeemed(bigint[], numeric, text, text, boolean) from public, anon, authenticated;
-grant execute on function booking.svc_mark_voucher_claims_redeemed(bigint[], numeric, text, text, boolean) to service_role;
-
-comment on function booking.svc_mark_voucher_claims_redeemed(bigint[], numeric, text, text, boolean) is
-  'booking_236: sama kuin taulukko-ylikuorma, kun jokaisella pyynnöllä on sama p_amount. service_role.';
+comment on function booking.svc_mark_voucher_claims_redeemed(bigint[], numeric, numeric[], text, text, boolean) is
+  'booking_236: botti lunastaa usean kumppanilahjakortin samaan tilaukseen, yksi erotuksen maksulinkki. p_amount (sama arvo kaikille) tai p_amounts[i] = p_claim_ids[i]:n arvo. p_value_card boolean default false. service_role.';
