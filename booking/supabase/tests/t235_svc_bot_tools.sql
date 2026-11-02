@@ -187,6 +187,10 @@ begin
   update booking.reservations set checkin_at = now() where id = v_res;
   perform pg_temp.ck(pg_temp.err(format('select booking.svc_move_reservation(%s, %L::timestamptz, %L)', v_ono, s1.starts_at, 'takaisin')) = 'already_checked_in', 'E1 sisäänkirjattu');
   update booking.reservations set checkin_at = null where id = v_res;
+  -- eri kestoinen vuoro: siirto ei saa venyttää tai lyhentää vuoroa samalla hinnalla
+  update booking.reservations set ends_at = ends_at + interval '30 minutes' where id = v_res;
+  perform pg_temp.ck(pg_temp.err(format('select booking.svc_move_reservation(%s, %L::timestamptz, %L)', v_ono, s1.starts_at, 'kesto')) = 'duration_differs', 'E1b eri kesto');
+  update booking.reservations set ends_at = ends_at - interval '30 minutes' where id = v_res;
 
   -- varattu kohde
   insert into booking.customers(name) values ('T235 Toinen ' || tag) returning id into v_cust;
@@ -218,6 +222,11 @@ begin
 
   update booking.orders set status = 'cancelled', payment_status = 'unpaid' where order_no = v_ono;
   perform pg_temp.ck(pg_temp.err(format('select booking.svc_mark_order_paid_external(%s, %L)', v_ono, 'peruttu')) = 'order_cancelled', 'F10 peruttu tilaus');
+  update booking.orders set status = 'pending', payment_status = 'unpaid' where order_no = v_ono;
+  perform pg_temp.ck(pg_temp.err(format('select booking.svc_mark_order_paid_external(%s, %L)', v_ono, 'kesken')) = 'not_changeable', 'F11 vahvistamaton tilaus');
+  update booking.orders set status = 'confirmed', payment_status = 'invoiced' where order_no = v_ono;
+  perform pg_temp.ck(pg_temp.err(format('select booking.svc_mark_order_paid_external(%s, %L)', v_ono, 'laskulla')) = 'order_invoiced', 'F12 laskutettu tilaus');
+  update booking.orders set status = 'cancelled', payment_status = 'unpaid' where order_no = v_ono;
 
   -- käännös: suomen muutos tekee rivin vanhaksi, en-kirjoitus poistaa, uusi suomi palauttaa.
   -- Taululukemat omistajana (service_rolella ei ole skeemaoikeutta mockissa); funktiot service_rolena.

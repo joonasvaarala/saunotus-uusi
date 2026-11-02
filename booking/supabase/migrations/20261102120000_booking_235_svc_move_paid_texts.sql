@@ -20,10 +20,16 @@
 --    Sisäänkirjattua (checkin_at) ei siirretä. Asiakkaan vahvistusviestiä ei jonoteta
 --    (botti lähettää omansa). Vapautunut aika voi yhä herättää olemassa olevan jonotusviestin,
 --    sama kuin mikä tahansa varauksen siirto.
+--    Vuoropolulla uuden säännön keston pitää olla sama kuin varauksen (duration_differs) ja,
+--    jos varauksella on rule_id, säännön hinnan sama (price_differs): hintaa ei lasketa uudelleen.
+--    therapist_missing nollautuessa myös therapist_exception_* tyhjennetään (kuten _ritual_addon_move).
 --
 -- 2) booking.svc_mark_order_paid_external: payment_status = paid ja rivi internal_noteen.
 --    Ei payments-riviä, ei viestiä. Olemassa oleva maksetuksi-tulemisen triggeri (lahjakortin
---    aktivointi / vuosikortin myöntäminen) saa laueta, koska se on tilan oma seuraus.
+--    aktivointi / vuosikortin myöntäminen) saa laueta, koska se on tilan oma seuraus, mutta jos se
+--    jonottaa tämän tilauksen viestin, merkintä perutaan (email_queued; esim. lahjakorttiostos).
+--    Vain confirmed/completed-tilaus (not_changeable). Laskutettua tai laskulukittua (booking_185)
+--    tilausta ei merkitä (order_invoiced): maksu kirjataan laskulle.
 --
 -- 3) Kääntäjä: booking.svc_texts_stale_en listaa suomenkieliset site_texts-rivit (myös
 --    kb.products-lähteiset), joiden englanti puuttuu tai on vanhempi kuin suomen viimeisin
@@ -156,7 +162,8 @@ begin
      and (r.valid_to is null or v_date <= r.valid_to)
      and date_trunc('minute', ((v_date + r.start_time) at time zone booking._tz()))
          = date_trunc('minute', p_new_start)
-   order by (r.id is not distinct from res.rule_id) desc, r.sort_order, r.id
+   order by (r.duration_minutes = (extract(epoch from (res.ends_at - res.starts_at)) / 60)::int) desc,
+            (r.id is not distinct from res.rule_id) desc, r.sort_order, r.id
    limit 1;
 
   if v_rule is not null then
@@ -171,6 +178,15 @@ begin
       v_space := rs.o_space_id;
       v_mode := rs.o_mode;
       v_pools := coalesce(rs.o_pool_ids, '{}'::bigint[]);
+      -- Hinta ei muutu siirrossa, joten vuoron kesto ja hinta eivät saa muuttua (esim. 2 h -> 7 h samalla hinnalla).
+      if (v_end - v_start) is distinct from (res.ends_at - res.starts_at) then
+        perform booking._err('duration_differs', 'Uuden vuoron kesto poikkeaa nykyisestä; siirrä hallinnan kautta');
+      end if;
+      if res.rule_id is not null and res.rule_id <> v_rule
+         and (select pr.total from booking._rule_price(v_rule, res.persons) pr)
+             is distinct from (select pr.total from booking._rule_price(res.rule_id, res.persons) pr) then
+        perform booking._err('price_differs', 'Uuden vuoron hinta poikkeaa nykyisestä; siirrä hallinnan kautta');
+      end if;
     exception when sqlstate 'BK001' then
       get stacked diagnostics v_code = pg_exception_detail, v_msg = message_text;
       if v_code = 'no_session' then
@@ -292,6 +308,9 @@ begin
       claim_offset_min = case when v_sched then claim_offset_min else v_off end,
       claim_minutes = case when v_sched then claim_minutes else v_cmin end,
       therapist_missing = case when v_sched then therapist_missing else v_missing end,
+      therapist_exception_at = case when v_sched or v_missing then therapist_exception_at end,
+      therapist_exception_by = case when v_sched or v_missing then therapist_exception_by end,
+      therapist_exception_note = case when v_sched or v_missing then therapist_exception_note end,
       off_schedule = false,
       off_schedule_by = null,
       overbooked = false,
@@ -404,9 +423,15 @@ begin
   if o.payment_status in ('paid', 'refunded', 'partially_refunded') then
     perform booking._err('already_paid', 'Tilaus on jo maksettu tai hyvitetty');
   end if;
+  if o.status not in ('confirmed', 'completed') then
+    perform booking._err('not_changeable', 'Vain vahvistetun tilauksen voi merkitä maksetuksi');
+  end if;
+  if o.payment_status = 'invoiced' or booking._order_invoice_locked(o.id) then
+    perform booking._err('order_invoiced', 'Laskutettua tilausta ei merkitä maksetuksi; maksu kirjataan laskulle');
+  end if;
 
   select count(*) into v_pay_n from booking.payments where order_id = o.id;
-  select count(*) into v_mail_n from booking.email_outbox;
+  select count(*) into v_mail_n from booking.email_outbox where order_id = o.id;
   v_line := to_char(now() at time zone booking._tz(), 'YYYY-MM-DD HH24:MI') || ' ' || v_actor || ': ' || v_note;
   update booking.orders
      set payment_status = 'paid',
@@ -417,7 +442,7 @@ begin
   if (select count(*) from booking.payments where order_id = o.id) is distinct from v_pay_n then
     perform booking._err('payment_row', 'Ulkoista maksua ei kirjata maksujen tauluun');
   end if;
-  if (select count(*) from booking.email_outbox) is distinct from v_mail_n then
+  if (select count(*) from booking.email_outbox where order_id = o.id) is distinct from v_mail_n then
     perform booking._err('email_queued', 'Maksun merkintä ei lähetä asiakkaalle viestiä');
   end if;
 
