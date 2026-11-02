@@ -34,6 +34,8 @@ begin
     'A1 oikeudet');
   perform pg_temp.ck(exists (select 1 from booking.payment_methods where code in ('partner_voucher', 'partner_voucher_offerilla', 'partner_voucher_kokemuskauppa')), 'A2 kumppanimaksutavat');
 
+  -- Ympäristön lippu voi olla true (DEV/PROD); testi olettaa lähtötilan false ja kokeilee true-tilan erikseen (E2).
+  update booking.settings set value = 'false'::jsonb where key = 'voucher_claims.partner_voucher_accounted';
   insert into auth.users(id, email) values (u, 't232-mgr@example.test');
   insert into booking.staff(user_id, email, name, role) values (u, 't232-mgr@example.test', 't232 manager', 'manager');
 
@@ -125,12 +127,15 @@ begin
   sales := booking.admin_report_csv(d0, d1, 'summary') ->> 'content';
   perform pg_temp.ck(position('johku' in lower(sales)) = 0 and position('offerilla' in lower(sales)) = 0 and position('kumppani_' in sales) = 0, 'E1 myynti-CSV ilman Johkua ja kumppaneita');
 
+  perform pg_temp.logout();
   update booking.settings set value = 'true'::jsonb where key = 'voucher_claims.partner_voucher_accounted';
+  perform pg_temp.ck(found, 'E2a lippu asetettu');
+  perform pg_temp.login(u);
   gc := booking.admin_report_gift_cards('all', 'json', d0, d1);
   perform pg_temp.ck((select (e ->> 'accounting')::boolean from jsonb_array_elements(gc -> 'activity' -> 'rows') e where e ->> 'source' = 'offerilla')
     and not (select (e ->> 'accounting')::boolean from jsonb_array_elements(gc -> 'activity' -> 'rows') e where e ->> 'source' = 'johku'), 'E2 kumppani kirjanpitoon vain lipulla, Johku ei');
-  update booking.settings set value = 'false'::jsonb where key = 'voucher_claims.partner_voucher_accounted';
   perform pg_temp.logout();
+  update booking.settings set value = 'false'::jsonb where key = 'voucher_claims.partner_voucher_accounted';
 
   log := current_setting('t232.log', true);
   np := (select count(*) from regexp_split_to_table(log, E'\n') l where l like 'P %');
