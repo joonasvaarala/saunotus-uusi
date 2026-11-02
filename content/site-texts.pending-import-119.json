@@ -1,0 +1,22 @@
+[
+  {
+    "key": "ui.admin.reports.gc_only_johku",
+    "lang": "fi",
+    "text": "Omia maksettuja lahjakortteja ei ole. Johku-korttien käyttö näkyy alla, eikä se kuulu kirjanpitoon.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 99,
+    "placeholders": [],
+    "reason": "Lahjakorttiraportti: selite, kun omia maksettuja kortteja ei ole. Johku-käyttö näkyy vain tiedoksi eikä kuulu kirjanpitoon."
+  },
+  {
+    "key": "ui.admin.reports.gc_only_johku",
+    "lang": "en",
+    "text": "There are no own paid gift cards. Johku card use is shown below and is not part of the accounts.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 96,
+    "placeholders": [],
+    "reason": "Lahjakorttiraportti: selite, kun omia maksettuja kortteja ei ole. Johku-käyttö näkyy vain tiedoksi eikä kuulu kirjanpitoon."
+  }
+]

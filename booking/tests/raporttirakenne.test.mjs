@@ -217,3 +217,112 @@ test('tapahtumaraportti: huomautus on taulukon sisar divissä ja nettosumma sulk
   assert.equal(rows.filter((tr) => tr.getAttribute('data-excluded') === 'true').length, 2);
   assert.equal(rows.filter((tr) => tr.getAttribute('data-excluded') == null).length, 2);
 });
+
+function flatMoney(s) { return String(s || '').replace(/[\s\u00a0\u202f]/g, ''); }
+
+test('lahjakorttiraportti: Johku erillään tiedoksi, omat nollana näyttää selitteen', async () => {
+  const { walk } = installReportDom();
+  globalThis.location = { hash: '#/talous?r=giftcards&from=2026-11-01&to=2026-11-01', search: '' };
+  globalThis.history = { replaceState(_a, _b, url) { if (typeof url === 'string') location.hash = url; } };
+  const { createReportsTab } = await import(pathToFileURL(join(root, 'admin/views/talous-reports.js')).href);
+  const johku = { opening: 15392, sold: 0, redeemed: 156, other: 0, expired: 58, closing: 15178, accounting: false };
+  const mount = async (native) => {
+    const tab = createReportsTab({
+      api: { reportGiftCards: async () => ({ balance: { native_paid: native }, statistics: { johku: { balance: johku } }, own: { rows: [] } }) },
+      canFull: true,
+      ctx: { role: 'admin', can: () => true },
+    });
+    await tab.load();
+    return tab;
+  };
+  const cell = (rootNode, id, label) => walk(walk(rootNode, (el, acc) => { if (el.getAttribute('data-testid') === id) acc.push(el); })[0], (el, acc) => { if (el.getAttribute('data-label') === label) acc.push(el); })[0];
+  const zero = await mount({ opening: 0, sold: 0, redeemed: 0, other: 0, expired: 0, closing: 0 });
+  const ownUsed = cell(zero.node, 'r-gc-balance', 'Käytetty jaksolla');
+  const johkuUsed = cell(zero.node, 'r-gc-johku', 'Käytetty jaksolla');
+  const johkuOpen = cell(zero.node, 'r-gc-johku', 'Alkusaldo');
+  const johkuExp = cell(zero.node, 'r-gc-johku', 'Vanhentunut jaksolla');
+  const johkuClose = cell(zero.node, 'r-gc-johku', 'Saldo jakson lopussa');
+  assert.match(flatMoney(ownUsed.textContent), /^0,00/);
+  assert.equal(flatMoney(walk(zero.node, (el, acc) => { if (el.getAttribute('data-testid') === 'r-gc-balance') acc.push(el); })[0].textContent).includes('156'), false);
+  assert.match(flatMoney(johkuUsed.textContent), /156,00/);
+  assert.match(flatMoney(johkuOpen.textContent), /15392,00/);
+  assert.match(flatMoney(johkuExp.textContent), /58,00/);
+  assert.match(flatMoney(johkuClose.textContent), /15178,00/);
+  const johkuBox = walk(zero.node, (el, acc) => { if (el.getAttribute('data-testid') === 'r-gc-johku') acc.push(el); })[0];
+  assert.match(johkuBox.textContent, /Johku-lahjakorttien saldo on vain tilasto/);
+  assert.match(johkuBox.className, /tl-johku-block/);
+  const note = walk(zero.node, (el, acc) => { if (el.getAttribute('data-testid') === 'r-gc-only-johku') acc.push(el); })[0];
+  assert.equal(note.textContent, REPORT_TEXTS.fi['ui.admin.reports.gc_only_johku']);
+  assert.equal(note.parent, johkuBox.parent);
+  const withOwn = await mount({ opening: 0, sold: 50, redeemed: 0, other: 0, expired: 0, closing: 50 });
+  assert.equal(walk(withOwn.node, (el, acc) => { if (el.getAttribute('data-testid') === 'r-gc-only-johku') acc.push(el); }).length, 0);
+  assert.match(flatMoney(cell(withOwn.node, 'r-gc-johku', 'Käytetty jaksolla').textContent), /156,00/);
+  const ui = src('admin/views/talous-reports.js');
+  const sales = ui.slice(ui.indexOf('function salesView'), ui.indexOf('function methodsView'));
+  assert.equal(/johku/i.test(sales), false);
+});
+
+test('pending-import-119 on uusi selite, FI+EN, ei päällekkäin', () => {
+  const rows = JSON.parse(readFileSync(join(repo, 'content/site-texts.pending-import-119.json'), 'utf8'));
+  const taken = new Set();
+  for (const f of readdirSync(join(repo, 'content'))) {
+    if (f === 'site-texts.pending-import-119.json' || !/^site-texts\.(pending-import-|imported|fallback)/.test(f) || !f.endsWith('.json')) continue;
+    const j = JSON.parse(readFileSync(join(repo, 'content', f), 'utf8'));
+    for (const r of Array.isArray(j) ? j : (j.texts || [])) if (r?.key) taken.add(`${r.key}|${r.lang}`);
+  }
+  assert.equal(rows.length, 2);
+  for (const r of rows) {
+    assert.equal(taken.has(`${r.key}|${r.lang}`), false, r.key);
+    assert.equal(r.key, 'ui.admin.reports.gc_only_johku');
+    assert.equal(REPORT_TEXTS[r.lang][r.key], r.text);
+    assert.equal(r.class, 'normal');
+    assert.equal(r.kind, 'plain');
+    assert.ok(r.max_len >= r.text.length);
+    assert.doesNotMatch(r.text, /</);
+    assert.equal(/\d+[.,]\d+/.test(r.text), false);
+  }
+  const pdf = src('supabase/functions/report-pdf/texts.ts');
+  for (const r of rows) assert.match(pdf, new RegExp(r.text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+});
+
+test('mockin lahjakorttiraportti tuo Johku-saldon, CSV ja myynti eivät', async () => {
+  const api = createTalousApi({ mock: true });
+  const rep = await api.reportGiftCards('all', 'json', '2026-11-01', '2026-11-01');
+  assert.equal(rep.statistics.johku.balance.redeemed, 156);
+  assert.equal(rep.statistics.johku.balance.expired, 58);
+  assert.equal(rep.statistics.johku.balance.accounting, false);
+  assert.equal(rep.balance.native_paid.accounting, true);
+  const csv = await api.reportGiftCards('all', 'csv', '2026-11-01', '2026-11-01');
+  assert.equal(/johku/i.test(csv.content), false);
+  assert.equal(csv.content.includes('156'), false);
+  const sales = await api.reportCsv({ period: { from: '2026-11-01', to: '2026-11-01' } }, 'summary');
+  assert.equal(/johku/i.test(sales.content), false);
+});
+
+test('lahjakortti-PDF näyttää Johku-osion, myynti-PDF ei', () => {
+  const render = src('supabase/functions/report-pdf/render.ts');
+  const gift = render.slice(render.indexOf('if (kind === "giftcards")'), render.indexOf('if (kind === "invoices")'));
+  assert.match(gift, /gc_johku_liability/);
+  assert.match(gift, /gc_bucket_johku/);
+  assert.match(gift, /gc_only_johku/);
+  const salesTail = render.slice(render.lastIndexOf('const gcp = rep.gift_card_period'));
+  assert.equal(salesTail.includes('gc_bucket_johku'), false);
+  assert.equal(salesTail.includes('gc_johku_liability'), false);
+  assert.equal(salesTail.includes('Johku'), false);
+  const deno = spawnSync('deno', ['eval', '--no-lock', '--node-modules-dir=none', `
+    import { buildReportPdf } from ${JSON.stringify(join(root, 'supabase/functions/report-pdf/render.ts'))};
+    const rep = { period: { from: '2026-11-01', to: '2026-11-01' }, balance: { native_paid: { opening: 0, sold: 0, redeemed: 0, expired: 0, closing: 0 } }, statistics: { johku: { balance: { opening: 15392, sold: 0, redeemed: 156, expired: 58, closing: 15178 } } }, own: { rows: [] } };
+    const bytes = await buildReportPdf(rep, 'giftcards', 'fi');
+    await Deno.writeFile('/tmp/lahjakortit-report.pdf', bytes);
+  `], { encoding: 'utf8' });
+  if (deno.error && deno.error.code === 'ENOENT') {
+    assert.equal(process.env.GITHUB_ACTIONS, undefined);
+    return;
+  }
+  assert.equal(deno.status, 0, deno.stderr || deno.stdout);
+  const text = pdfStrings(readFileSync('/tmp/lahjakortit-report.pdf'));
+  assert.match(text, /Johku-lahjakortit/);
+  assert.match(text, /156,00/);
+  assert.match(text, /vain tilasto/);
+  assert.match(text, /Omia maksettuja lahjakortteja ei ole/);
+});
