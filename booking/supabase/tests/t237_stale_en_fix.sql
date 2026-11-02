@@ -1,8 +1,15 @@
--- t237: booking_237 käännöslistan korjaus.
--- Aja migraatioiden ja fixtures/10_test_helpers.sql:n jälkeen (kb-mock, jotta tuote 7 on olemassa).
--- Yksi transaktio, lopussa TESTRESULT + ROLLBACK.
--- psql -X -v ON_ERROR_STOP=0 -f booking/supabase/tests/t237_stale_en_fix.sql
+-- t237: booking_237 käännöslistan korjaus (migraatio 20261102122300, tuotannon versio).
+-- RIIPPUVUUS: fixtures/10_test_helpers.sql on ajettava ensin. Testi käyttää test.login / test.logout -apureita
+-- (skeema "test"); ilman niitä ajo kaatuu virheeseen 'schema "test" does not exist'. Lisäksi kb-mock, jotta tuote 7 on olemassa.
+-- Ajo (psql, paikallinen PG17 tai testikanta, migraatiot ja fixtures/10_test_helpers.sql ajettu):
+--   cd booking/supabase/tests && psql -X -v ON_ERROR_STOP=0 -f t237_stale_en_fix.sql
+-- Kaikki yhdessä transaktiossa; lopussa tahallinen poikkeus "TESTRESULT pass=… fail=…" ja rollback kumoavat kaiken. Ei tuotantoon.
 begin;
+do $pre$ begin
+  if to_regnamespace('test') is null or to_regprocedure('test.login(uuid,text)') is null then
+    raise exception 't237: fixtures/10_test_helpers.sql puuttuu (skeema test / test.login). Aja se ensin, ks. otsikko.';
+  end if;
+end $pre$;
 set local lock_timeout = '3s';
 set local statement_timeout = '120s';
 select set_config('t237.log', '', true);
