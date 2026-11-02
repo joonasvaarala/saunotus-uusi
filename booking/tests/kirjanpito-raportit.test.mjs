@@ -14,6 +14,7 @@ const pending104 = JSON.parse(readFileSync(join(repo, 'content/site-texts.pendin
 const pending108 = JSON.parse(readFileSync(join(repo, 'content/site-texts.pending-import-108.json'), 'utf8'));
 const pending119 = JSON.parse(readFileSync(join(repo, 'content/site-texts.pending-import-119.json'), 'utf8'));
 const pending120 = JSON.parse(readFileSync(join(repo, 'content/site-texts.pending-import-120.json'), 'utf8'));
+const pending121 = JSON.parse(readFileSync(join(repo, 'content/site-texts.pending-import-121.json'), 'utf8'));
 
 function tsTable(file) {
   const src = readFileSync(file, 'utf8');
@@ -34,14 +35,15 @@ const SHOP_TEXTS = {
 
 test('pending-import-27 vastaa sanakirjoja, FI+EN, ilman hintoja ja osoitteita', () => {
   const by = new Map(pending.map((r) => [`${r.key}|${r.lang}`, r]));
-  const over = new Map([...pending104, ...pending108, ...pending119, ...pending120].map((r) => [`${r.key}|${r.lang}`, r]));
+  const over = new Map([...pending104, ...pending108, ...pending119, ...pending120, ...pending121].map((r) => [`${r.key}|${r.lang}`, r]));
   assert.equal(by.size, pending.length);
-  assert.equal(over.size, pending104.length + pending108.length + pending119.length + pending120.length);
+  assert.equal(over.size, pending104.length + pending108.length + pending119.length + pending120.length + pending121.length);
   assert.equal(pending.length % 2, 0);
   assert.equal(pending104.length % 2, 0);
   assert.equal(pending108.length % 2, 0);
   assert.equal(pending119.length % 2, 0);
   assert.equal(pending120.length % 2, 0);
+  assert.equal(pending121.length % 2, 0);
   for (const lang of ['fi', 'en']) {
     for (const [key, text] of Object.entries(REPORT_TEXTS[lang])) {
       const row = over.get(`${key}|${lang}`) || by.get(`${key}|${lang}`);
@@ -56,7 +58,7 @@ test('pending-import-27 vastaa sanakirjoja, FI+EN, ilman hintoja ja osoitteita',
       if (!over.has(`${key}|${lang}`)) assert.equal(by.get(`${key}|${lang}`).text, text, key);
     }
   }
-  for (const r of [...pending104, ...pending108, ...pending119, ...pending120]) assert.equal(REPORT_TEXTS[r.lang][r.key], r.text, r.key);
+  for (const r of [...pending104, ...pending108, ...pending119, ...pending120, ...pending121]) assert.equal(REPORT_TEXTS[r.lang][r.key], r.text, r.key);
   for (const key of RECEIPT_KEYS) {
     for (const lang of ['fi', 'en']) {
       const row = by.get(`${key}|${lang}`);
@@ -75,7 +77,7 @@ test('pending-import-27 vastaa sanakirjoja, FI+EN, ilman hintoja ja osoitteita',
     }
   }
   assert.equal(Object.keys(REPORT_TEXTS.fi).length, Object.keys(REPORT_TEXTS.en).length);
-  const covered = new Set([...pending, ...pending104, ...pending108, ...pending119, ...pending120].filter((r) => r.key.startsWith('ui.admin.reports.') || r.key.startsWith('ui.admin.giftcards.vat_') || r.key.startsWith('ui.gift.') || RECEIPT_KEYS.includes(r.key)).map((r) => `${r.key}|${r.lang}`));
+  const covered = new Set([...pending, ...pending104, ...pending108, ...pending119, ...pending120, ...pending121].filter((r) => r.key.startsWith('ui.admin.reports.') || r.key.startsWith('ui.admin.giftcards.vat_') || r.key.startsWith('ui.gift.') || RECEIPT_KEYS.includes(r.key)).map((r) => `${r.key}|${r.lang}`));
   for (const lang of ['fi', 'en']) for (const key of Object.keys(REPORT_TEXTS[lang])) assert.ok(covered.has(`${key}|${lang}`), key);
 });
 

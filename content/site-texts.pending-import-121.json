@@ -1,0 +1,182 @@
+[
+  {
+    "key": "ui.admin.reports.gc_other",
+    "lang": "fi",
+    "text": "Muut muutokset",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 14,
+    "placeholders": [],
+    "reason": "booking_233: lahjakorttiraportin muut muutokset, jotta saldo täsmää. FI+EN."
+  },
+  {
+    "key": "ui.admin.reports.gc_other",
+    "lang": "en",
+    "text": "Other changes",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 13,
+    "placeholders": [],
+    "reason": "booking_233: lahjakorttiraportin muut muutokset, jotta saldo täsmää. FI+EN."
+  },
+  {
+    "key": "ui.admin.reports.gc_other_note",
+    "lang": "fi",
+    "text": "Muut muutokset ovat hyvityksiä, palautuksia ja saldokorjauksia. Johkussa ne ovat Johku-saldon synkkaa, kun Johkun saldo erosi kirjatusta. Ne eivät ole myyntiä eivätkä käyttöä.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 175,
+    "placeholders": [],
+    "reason": "booking_233: lahjakorttiraportin muut muutokset, jotta saldo täsmää. FI+EN."
+  },
+  {
+    "key": "ui.admin.reports.gc_other_note",
+    "lang": "en",
+    "text": "Other changes are refunds, returns and balance corrections. For Johku they are a Johku balance sync, when the Johku balance differed from the recorded one. They are not sales and not redemptions.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 195,
+    "placeholders": [],
+    "reason": "booking_233: lahjakorttiraportin muut muutokset, jotta saldo täsmää. FI+EN."
+  },
+  {
+    "key": "ui.admin.reports.gc_reason_adjust",
+    "lang": "fi",
+    "text": "Korjaus",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 7,
+    "placeholders": [],
+    "reason": "booking_233: lahjakorttiraportin muut muutokset, jotta saldo täsmää. FI+EN."
+  },
+  {
+    "key": "ui.admin.reports.gc_reason_adjust",
+    "lang": "en",
+    "text": "Adjustment",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 10,
+    "placeholders": [],
+    "reason": "booking_233: lahjakorttiraportin muut muutokset, jotta saldo täsmää. FI+EN."
+  },
+  {
+    "key": "ui.admin.reports.gc_reason_cancel_refund",
+    "lang": "fi",
+    "text": "Peruutuksen palautus",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 20,
+    "placeholders": [],
+    "reason": "booking_233: lahjakorttiraportin muut muutokset, jotta saldo täsmää. FI+EN."
+  },
+  {
+    "key": "ui.admin.reports.gc_reason_cancel_refund",
+    "lang": "en",
+    "text": "Cancellation refund",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 19,
+    "placeholders": [],
+    "reason": "booking_233: lahjakorttiraportin muut muutokset, jotta saldo täsmää. FI+EN."
+  },
+  {
+    "key": "ui.admin.reports.gc_reason_forfeit",
+    "lang": "fi",
+    "text": "Käyttämättä jäänyt",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 18,
+    "placeholders": [],
+    "reason": "booking_233: lahjakorttiraportin muut muutokset, jotta saldo täsmää. FI+EN."
+  },
+  {
+    "key": "ui.admin.reports.gc_reason_forfeit",
+    "lang": "en",
+    "text": "Left unused",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 11,
+    "placeholders": [],
+    "reason": "booking_233: lahjakorttiraportin muut muutokset, jotta saldo täsmää. FI+EN."
+  },
+  {
+    "key": "ui.admin.reports.gc_reason_johku_adjust",
+    "lang": "fi",
+    "text": "Johku-korjaus",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 13,
+    "placeholders": [],
+    "reason": "booking_233: lahjakorttiraportin muut muutokset, jotta saldo täsmää. FI+EN."
+  },
+  {
+    "key": "ui.admin.reports.gc_reason_johku_adjust",
+    "lang": "en",
+    "text": "Johku adjustment",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 16,
+    "placeholders": [],
+    "reason": "booking_233: lahjakorttiraportin muut muutokset, jotta saldo täsmää. FI+EN."
+  },
+  {
+    "key": "ui.admin.reports.gc_reason_johku_sync",
+    "lang": "fi",
+    "text": "Johku-saldon synkka",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 19,
+    "placeholders": [],
+    "reason": "booking_233: lahjakorttiraportin muut muutokset, jotta saldo täsmää. FI+EN."
+  },
+  {
+    "key": "ui.admin.reports.gc_reason_johku_sync",
+    "lang": "en",
+    "text": "Johku balance sync",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 18,
+    "placeholders": [],
+    "reason": "booking_233: lahjakorttiraportin muut muutokset, jotta saldo täsmää. FI+EN."
+  },
+  {
+    "key": "ui.admin.reports.gc_reason_other",
+    "lang": "fi",
+    "text": "Muu muutos",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 10,
+    "placeholders": [],
+    "reason": "booking_233: lahjakorttiraportin muut muutokset, jotta saldo täsmää. FI+EN."
+  },
+  {
+    "key": "ui.admin.reports.gc_reason_other",
+    "lang": "en",
+    "text": "Other change",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 12,
+    "placeholders": [],
+    "reason": "booking_233: lahjakorttiraportin muut muutokset, jotta saldo täsmää. FI+EN."
+  },
+  {
+    "key": "ui.admin.reports.gc_reason_refund",
+    "lang": "fi",
+    "text": "Hyvitys kortille",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 16,
+    "placeholders": [],
+    "reason": "booking_233: lahjakorttiraportin muut muutokset, jotta saldo täsmää. FI+EN."
+  },
+  {
+    "key": "ui.admin.reports.gc_reason_refund",
+    "lang": "en",
+    "text": "Refund to the card",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 18,
+    "placeholders": [],
+    "reason": "booking_233: lahjakorttiraportin muut muutokset, jotta saldo täsmää. FI+EN."
+  }
+]

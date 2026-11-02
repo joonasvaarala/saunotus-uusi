@@ -434,17 +434,17 @@ const PREPAID_ON = '2026-10-15';
     const bucket = (opening, sold, redeemed, closing) => ({ opening, sold, redeemed, other: 0, expired: 0, closing, cards: closing > 0 ? 1 : 0, accounting: false, difference: round2(opening + sold - redeemed - closing) });
     const balance = { native_paid: { ...bucket(0, ownOpen.gross, 0, ownOpen.balance), accounting: true }, native_complimentary: bucket(0, 0, 0, 0) };
     const johkuBalance = { opening: 234, sold: 0, redeemed: 156, other: 0, expired: 58, closing: 20, cards: 1, accounting: false, difference: 0 };
-    const ev = (kind, date, amount, code, orderNo, valueCard = false) => ({ kind, date, amount, code_masked: code, order_no: orderNo, value_card: valueCard });
+    const ev = (kind, date, amount, code, orderNo, valueCard = false, reason = null) => ({ kind, date, amount, code_masked: code, order_no: orderNo, value_card: valueCard, reason });
     const activity = {
       partner_accounted: false,
       rows: [
-        { source: 'native_paid', group: 'own', accounting: true, sold_applicable: true, balance_applicable: true, sold_count: 1, sold_gross: ownOpen.gross, redeemed_count: 0, redeemed_gross: 0, expired_count: 0, expired_gross: 0, opening: 0, closing: ownOpen.balance, value_card_count: 0, events: [ev('sale', '2026-10-01', ownOpen.gross, ownOpen.code_masked, 15001)] },
-        { source: 'native_complimentary', group: 'own', accounting: false, sold_applicable: true, balance_applicable: true, sold_count: 0, sold_gross: 0, redeemed_count: 0, redeemed_gross: 0, expired_count: 0, expired_gross: 0, opening: 0, closing: 0, value_card_count: 0, events: [] },
-        { source: 'johku', group: 'johku', accounting: false, sold_applicable: true, balance_applicable: true, sold_count: 0, sold_gross: 0, redeemed_count: 1, redeemed_gross: 156, expired_count: 1, expired_gross: 58, opening: 234, closing: 20, value_card_count: 0, events: [ev('redemption', '2026-11-01', 156, johku.code_masked, 15018), ev('expiry', '2026-11-01', 58, '****-****-JK99', null)] },
+        { source: 'native_paid', group: 'own', accounting: true, sold_applicable: true, balance_applicable: true, sold_count: 1, sold_gross: ownOpen.gross, redeemed_count: 0, redeemed_gross: 0, expired_count: 0, expired_gross: 0, other_count: 0, other_gross: 0, opening: 0, closing: ownOpen.balance, value_card_count: 0, events: [ev('sale', '2026-10-01', ownOpen.gross, ownOpen.code_masked, 15001)] },
+        { source: 'native_complimentary', group: 'own', accounting: false, sold_applicable: true, balance_applicable: true, sold_count: 0, sold_gross: 0, redeemed_count: 0, redeemed_gross: 0, expired_count: 0, expired_gross: 0, other_count: 0, other_gross: 0, opening: 0, closing: 0, value_card_count: 0, events: [] },
+        { source: 'johku', group: 'johku', accounting: false, sold_applicable: true, balance_applicable: true, sold_count: 0, sold_gross: 0, redeemed_count: 1, redeemed_gross: 156, expired_count: 1, expired_gross: 58, other_count: 1, other_gross: 462, opening: 234, closing: 482, value_card_count: 0, events: [ev('redemption', '2026-11-01', 156, johku.code_masked, 15018), ev('expiry', '2026-11-01', 58, '****-****-JK99', null), ev('other', '2026-11-01', 462, '****-****-JK12', null, false, 'johku_sync')] },
         { source: 'offerilla', group: 'partner', accounting: false, sold_applicable: false, balance_applicable: false, redeemed_count: 1, redeemed_gross: 40, value_card_count: 1, events: [ev('redemption', '2026-11-01', 40, '…OK19', 15020, true)] },
         { source: 'elamyslahjat', group: 'partner', accounting: false, sold_applicable: false, balance_applicable: false, redeemed_count: 1, redeemed_gross: 28, value_card_count: 0, events: [ev('redemption', '2026-11-01', 28, '…EL28', 15019, false)] },
       ],
-      totals: { sold_count: 1, sold_gross: ownOpen.gross, redeemed_count: 3, redeemed_gross: 224, expired_count: 1, expired_gross: 58, opening: 234, closing: ownOpen.balance + 20, accounting_closing: ownOpen.balance },
+      totals: { sold_count: 1, sold_gross: ownOpen.gross, redeemed_count: 3, redeemed_gross: 224, expired_count: 1, expired_gross: 58, other_gross: 462, opening: 234, closing: ownOpen.balance + 482, accounting_closing: ownOpen.balance },
     };
     const rep = { filter, period: { from, to, tz: 'Europe/Helsinki', kind: 'giftcards' }, generated_at: `${today}T12:00:00Z`, own: { rows: ownRows, at_redemption: sum(ownRed), at_sale: sum(ownSale), complimentary: sum(ownFreeRows) }, balance, statistics: { johku: { rows: johkuRows, totals: sum(johkuRows), balance: johkuBalance } }, activity };
     if (a.p_format === 'csv') {
@@ -455,7 +455,7 @@ const PREPAID_ON = '2026-10-15';
         for (const [name, key] of [['alkusaldo', 'opening'], ['myyty', 'sold'], ['lunastettu', 'redeemed'], ['muu', 'other'], ['vanhentunut', 'expired'], ['loppusaldo', 'closing']]) rows.push(['saldo', code, name, '', '', '', '', csvMoney(b[key])].join(';'));
       }
       const csvSrc = (s) => (s === 'native_paid' ? 'oma_maksettu' : s === 'native_complimentary' ? 'oma_maksuton' : s === 'johku' ? 'johku_tiedoksi' : `kumppani_${s}`);
-      rows.push('aktiviteetti_otsikko;lahde;merkinta;myyty_kpl;myyty_eur;kaytetty_kpl;kaytetty_eur;vanhentunut_kpl;vanhentunut_eur;alkusaldo;loppusaldo');
+      rows.push('aktiviteetti_otsikko;lahde;merkinta;myyty_kpl;myyty_eur;kaytetty_kpl;kaytetty_eur;vanhentunut_kpl;vanhentunut_eur;muut;alkusaldo;loppusaldo');
       for (const a of activity.rows) {
         const mark = a.accounting ? 'kirjanpito' : 'tiedoksi';
         const cell = (on, n, money) => (on ? [String(n), csvMoney(money)] : ['', '']);
@@ -463,11 +463,12 @@ const PREPAID_ON = '2026-10-15';
         const exp = cell(a.balance_applicable, a.expired_count, a.expired_gross);
         const open = a.balance_applicable ? csvMoney(a.opening) : '';
         const close = a.balance_applicable ? csvMoney(a.closing) : '';
-        rows.push(['aktiviteetti', csvSrc(a.source), mark, ...sold, a.redeemed_count, csvMoney(a.redeemed_gross), ...exp, open, close].join(';'));
-        for (const e of a.events) rows.push(['tapahtuma', csvSrc(a.source), e.kind, e.date, e.order_no ?? '', csvMoney(e.amount), e.code_masked, e.value_card ? 'arvolahjakortti' : ''].join(';'));
+        const muut = a.balance_applicable && Math.abs(a.other_gross || 0) >= 0.005 ? csvMoney(a.other_gross) : '';
+        rows.push(['aktiviteetti', csvSrc(a.source), mark, ...sold, a.redeemed_count, csvMoney(a.redeemed_gross), ...exp, muut, open, close].join(';'));
+        for (const e of a.events) rows.push(['tapahtuma', csvSrc(a.source), e.kind, e.date, e.order_no ?? '', csvMoney(e.amount), e.code_masked, e.value_card ? 'arvolahjakortti' : '', e.reason || ''].join(';'));
       }
       const t = activity.totals;
-      rows.push(['yhteensa', 'kaikki', 'ei_kirjanpitosumma', t.sold_count, csvMoney(t.sold_gross), t.redeemed_count, csvMoney(t.redeemed_gross), t.expired_count, csvMoney(t.expired_gross), csvMoney(t.opening), csvMoney(t.closing)].join(';'));
+      rows.push(['yhteensa', 'kaikki', 'ei_kirjanpitosumma', t.sold_count, csvMoney(t.sold_gross), t.redeemed_count, csvMoney(t.redeemed_gross), t.expired_count, csvMoney(t.expired_gross), Math.abs(t.other_gross || 0) >= 0.005 ? csvMoney(t.other_gross) : '', csvMoney(t.opening), csvMoney(t.closing)].join(';'));
       return csvFile(`lahjakortit_${to}_${filter}.csv`, 'osio;koodi;ostaja;paketti;alkuperainen;saldo;netto;alv_%;alv_eur;brutto;myyntipaiva;voimassa;tila;alv_kasittely', rows);
     }
     return rep;
