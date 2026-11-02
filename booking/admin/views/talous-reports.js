@@ -145,14 +145,21 @@ export function createReportsTab({ api, canFull = true, ctx = null }) {
   }
   function giftView(r) {
     const M = fmt.money;
-    const roll = r.balance || {};
-    const keys = ['native_paid'];
-    const rows = keys.map((key) => {
-      const b = roll[key] || {};
-      return [rt('ui.admin.reports.gc_bucket_own'), M(b.opening || 0), M(b.sold || 0), M(b.redeemed || 0), M(b.expired || 0), M(b.closing || 0)];
-    });
+    const cols = [rt('ui.admin.reports.col_product'), rt('ui.admin.reports.gc_opening'), rt('ui.admin.reports.gc_sold_period'), rt('ui.admin.reports.gc_redeemed_period'), rt('ui.admin.reports.gc_expired'), rt('ui.admin.reports.gc_closing')];
+    const cells = (label, b) => [rt(label), M(b.opening || 0), M(b.sold || 0), M(b.redeemed || 0), M(b.expired || 0), M(b.closing || 0)];
+    const blank = (b) => ['opening', 'sold', 'redeemed', 'other', 'expired', 'closing'].every((k) => Math.abs(Number(b?.[k] || 0)) < 0.005);
+    const ownBal = r.balance?.native_paid || {};
+    const johku = r.statistics?.johku?.balance || {};
     const own = r.own?.rows || [];
-    return frame(h('div', {}, table('r-gc-balance', rt('ui.admin.reports.gc_open_title'), [rt('ui.admin.reports.col_product'), rt('ui.admin.reports.gc_opening'), rt('ui.admin.reports.gc_sold_period'), rt('ui.admin.reports.gc_redeemed_period'), rt('ui.admin.reports.gc_expired'), rt('ui.admin.reports.gc_closing')], rows), h('section', { class: 'tl-sec', 'data-testid': 'r-gc-own' }, h('h3', { text: rt('ui.admin.reports.gc_own') }), own.length ? h('p', { class: 'muted', text: rt('ui.admin.reports.gc_count', { n: fmt.int(own.length) }) }) : emptyBox(t('r.empty')))));
+    const zeroNote = blank(ownBal) && !blank(johku) ? h('p', { class: 'muted', 'data-testid': 'r-gc-only-johku', text: rt('ui.admin.reports.gc_only_johku') }) : null;
+    const johkuRow = cells('ui.admin.reports.gc_bucket_johku', johku);
+    const johkuBlock = h('section', { class: 'tl-sec tl-johku-block', 'data-testid': 'r-gc-johku' },
+      h('h3', { text: rt('ui.admin.reports.gc_johku') }),
+      h('table', { class: 'tl-table' },
+        h('thead', {}, h('tr', {}, cols.map((c, i) => h('th', { scope: 'col', class: i ? 'r' : '', text: c })))),
+        h('tbody', {}, h('tr', {}, johkuRow.map((c, i) => h(i ? 'td' : 'th', i ? { class: 'r', 'data-label': cols[i], text: c } : { scope: 'row', text: c }))))),
+      h('p', { class: 'muted tl-johku-note', text: rt('ui.admin.reports.gc_johku_liability') }));
+    return frame(h('div', {}, table('r-gc-balance', rt('ui.admin.reports.gc_open_title'), cols, [cells('ui.admin.reports.gc_bucket_own', ownBal)]), zeroNote, johkuBlock, h('section', { class: 'tl-sec', 'data-testid': 'r-gc-own' }, h('h3', { text: rt('ui.admin.reports.gc_own') }), own.length ? h('p', { class: 'muted', text: rt('ui.admin.reports.gc_count', { n: fmt.int(own.length) }) }) : emptyBox(t('r.empty')))));
   }
   function invoiceView(r) {
     const M = fmt.money;

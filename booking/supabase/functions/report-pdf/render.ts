@@ -77,9 +77,18 @@ export async function buildReportPdf(rep: any, kind: string, lang = "fi", tfn: T
     const own = rep.own || {};
     const cols = [0, 78, 160, 280, 350, 410, 470, 520, 570, 640, 700, 760];
     const roll = (rep.balance && rep.balance.native_paid) || (rep.gift_card_period && rep.gift_card_period.open && rep.gift_card_period.open.native_paid) || {};
-    table(TX("ui.admin.reports.gc_open_title"), [TX("ui.admin.reports.col_product"), TX("ui.admin.reports.gc_opening"), TX("ui.admin.reports.gc_sold_period"), TX("ui.admin.reports.gc_redeemed_period"), TX("ui.admin.reports.gc_expired"), TX("ui.admin.reports.gc_closing")], [0, 160, 240, 320, 400, 515], [
+    const johku = (rep.statistics && rep.statistics.johku && rep.statistics.johku.balance) || {};
+    const blank = (b: any) => ["opening", "sold", "redeemed", "other", "expired", "closing"].every((k) => Math.abs(Number(b?.[k] || 0)) < 0.005);
+    const balHead = [TX("ui.admin.reports.col_product"), TX("ui.admin.reports.gc_opening"), TX("ui.admin.reports.gc_sold_period"), TX("ui.admin.reports.gc_redeemed_period"), TX("ui.admin.reports.gc_expired"), TX("ui.admin.reports.gc_closing")];
+    const balCols = [0, 160, 240, 320, 400, 515];
+    table(TX("ui.admin.reports.gc_open_title"), balHead, balCols, [
       [TX("ui.admin.reports.gc_bucket_own"), eur(roll.opening), eur(roll.sold), eur(roll.redeemed), eur(roll.expired), eur(roll.closing)],
     ]);
+    if (blank(roll) && !blank(johku)) { need(28); text(TX("ui.admin.reports.gc_only_johku"), M, 7, font, grey); y -= 14; }
+    table(TX("ui.admin.reports.gc_johku"), balHead, balCols, [
+      [TX("ui.admin.reports.gc_bucket_johku"), eur(johku.opening), eur(johku.sold), eur(johku.redeemed), eur(johku.expired), eur(johku.closing)],
+    ]);
+    need(28); text(TX("ui.admin.reports.gc_johku_liability"), M, 7, font, grey); y -= 14;
     table(TX("ui.admin.reports.gc_own"), head, cols, (own.rows || []).map(line));
     need(20); text(TX("ui.admin.reports.gc_multi_note"), M, 7, font, grey);
     return await pdf.save();

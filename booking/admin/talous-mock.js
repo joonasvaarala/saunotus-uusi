@@ -433,7 +433,8 @@ const PREPAID_ON = '2026-10-15';
     const from = /^\d{4}-\d{2}-\d{2}$/.test(a.p_from || '') ? a.p_from : to;
     const bucket = (opening, sold, redeemed, closing) => ({ opening, sold, redeemed, other: 0, expired: 0, closing, cards: closing > 0 ? 1 : 0, accounting: false, difference: round2(opening + sold - redeemed - closing) });
     const balance = { native_paid: { ...bucket(0, ownOpen.gross, 0, ownOpen.balance), accounting: true }, native_complimentary: bucket(0, 0, 0, 0) };
-    const rep = { filter, period: { from, to, tz: 'Europe/Helsinki', kind: 'giftcards' }, generated_at: `${today}T12:00:00Z`, own: { rows: ownRows, at_redemption: sum(ownRed), at_sale: sum(ownSale), complimentary: sum(ownFreeRows) }, balance, statistics: { johku: { rows: johkuRows, totals: sum(johkuRows), balance: bucket(20, 0, 0, 20) } } };
+    const johkuBalance = { opening: 234, sold: 0, redeemed: 156, other: 0, expired: 58, closing: 20, cards: 1, accounting: false, difference: 0 };
+    const rep = { filter, period: { from, to, tz: 'Europe/Helsinki', kind: 'giftcards' }, generated_at: `${today}T12:00:00Z`, own: { rows: ownRows, at_redemption: sum(ownRed), at_sale: sum(ownSale), complimentary: sum(ownFreeRows) }, balance, statistics: { johku: { rows: johkuRows, totals: sum(johkuRows), balance: johkuBalance } } };
     if (a.p_format === 'csv') {
       const line = (osio, x) => [osio, x.code_masked, csvQ(x.buyer), csvQ(x.package), csvMoney(x.initial), csvMoney(x.balance), csvMoney(x.net), csvNum(x.vat_rate), csvMoney(x.vat), csvMoney(x.gross), x.sold_on, x.valid_to || '', x.status, x.vat_treatment].join(';');
       const rows = ownRows.map((x) => line('oma', x));

@@ -93,6 +93,7 @@ export const REPORT_PDF_TEXTS: TextTable = {
   "ui.admin.reports.gc_bucket_free": { fi: "Omat maksuttomat", en: "Own complimentary cards"},
   "ui.admin.reports.gc_bucket_johku": { fi: "Johku", en: "Johku"},
   "ui.admin.reports.gc_johku_liability": { fi: "Johku-lahjakorttien saldo on vain tilasto. Se ei ole tämän järjestelmän kirjanpitovelkaa, koska myynti on kirjattu Johkussa.", en: "Johku gift card balances are statistics only. They are not a liability of this system, because the sale was recorded in Johku."},
+  "ui.admin.reports.gc_only_johku": { fi: "Omia maksettuja lahjakortteja ei ole. Johku-korttien käyttö näkyy alla, eikä se kuulu kirjanpitoon.", en: "There are no own paid gift cards. Johku card use is shown below and is not part of the accounts."},
   "ui.admin.reports.gc_note": { fi: "Johku-osio on erillään ja vain tilastoa. Sen saldo ei ole tämän järjestelmän kirjanpitovelkaa, koska arvonlisävero on kirjattu Johkussa.", en: "The Johku section is separate and for statistics only. Its balance is not a liability of this system, because the VAT was recorded in Johku."},
   "ui.admin.reports.gc_paid_note": { fi: "Maksetun oman kortin arvonlisävero on kirjattu myynnissä.", en: "VAT on a paid own card was recorded when the card was sold."},
   "ui.admin.reports.gc_complimentary": { fi: "Maksuton kortti on merkitty erikseen. Siitä ei ole kirjattu arvonlisäveroa, eikä sen lunastus ole myyntiä.", en: "A complimentary card is marked separately. No VAT was recorded on it, and redeeming it is not a sale."},
