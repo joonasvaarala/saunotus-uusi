@@ -9,8 +9,8 @@ import { fileURLToPath } from 'node:url';
 const here = dirname(fileURLToPath(import.meta.url));
 const root = join(here, '..');
 const rd = (p) => readFileSync(join(root, p), 'utf8');
-const MIG = 'supabase/migrations/20261102130000_booking_236_voucher_claims_multi.sql';
-const RB = 'supabase/rollbacks/20261102130000_booking_236_ROLLBACK.sql';
+const MIG = 'supabase/migrations/20261102114511_booking_236_voucher_claims_multi.sql';
+const RB = 'supabase/rollbacks/20261102114511_booking_236_ROLLBACK.sql';
 const SQL = 'supabase/tests/giftcards/t236_voucher_claims_multi.sql';
 const FI = 'Lahjakortti on voimassa suoraan palveluun yhden vuoden ajan, jonka jälkeen se muuttuu arvolahjakortiksi. Lahjakorttisi arvo on {{var:voucher}}, joten maksettavaa jää vielä {{var:difference}}. Voit maksaa sen alla olevasta linkistä.';
 const EN = 'The gift card is valid directly for the service for one year, after which it turns into a value gift card. Your gift card is worth {{var:voucher}}, so {{var:difference}} remains to be paid. You can pay it using the link below.';
@@ -18,8 +18,8 @@ const EN = 'The gift card is valid directly for the service for one year, after 
 test('booking_236: yksi migraatio ja rollback, yhden kortin funktiota ei kirjoiteta uudelleen', () => {
   const migs = readdirSync(join(root, 'supabase/migrations')).filter((f) => /booking_236/.test(f));
   const rbs = readdirSync(join(root, 'supabase/rollbacks')).filter((f) => /booking_236/.test(f));
-  assert.deepEqual(migs, ['20261102130000_booking_236_voucher_claims_multi.sql']);
-  assert.deepEqual(rbs, ['20261102130000_booking_236_ROLLBACK.sql']);
+  assert.deepEqual(migs, ['20261102114511_booking_236_voucher_claims_multi.sql']);
+  assert.deepEqual(rbs, ['20261102114511_booking_236_ROLLBACK.sql']);
   const mig = rd(MIG);
   const rb = rd(RB);
   assert.match(mig, /create or replace function booking\.svc_mark_voucher_claims_redeemed\(\s*p_claim_ids bigint\[\],\s*p_amount numeric default null,\s*p_amounts numeric\[\] default null,\s*p_partner_ref text default null,\s*p_note text default null,\s*p_value_card boolean default false\s*\)/);
