@@ -32,7 +32,7 @@ import { isRichHtml } from './rich-text.js';
 import { visibleText, richHost } from './rich-view.js';
 import { softenSpaces } from './text-spaces.js';
 import { revealForm, revealIfHidden, bookingJump } from './gift-ui.js';
-import { normalizeCode, quoteSignature, isAnnualQuote, isCodeError } from './discount-code-logic.js';
+import { normalizeCode, quoteSignature, isAnnualQuote, isCodeError, codeFailText } from './discount-code-logic.js';
 import { createQuietOfferCache, indexOffers, findOffer, dayMaxPercent, productMaxPercent, quietPrices, quietCheckout, quietBase, pctText, fillText, quietWindow, offerKey } from './quiet-offers-logic.js';
 import { normalizeOffer, ritualPrice, ritualMax, cardQty, reconcileCard, ritualAddonArg, ritualSig, splitItems, isRitualError } from './ritual-addon-logic.js';
 import { RITUAL_TEXTS, RITUAL_ERRORS } from './ritual-addon-texts.js';
@@ -982,14 +982,15 @@ async function viewCheckout(ruleId, ds, productId, via) {
   // cf.kind on funktio. formPaysOnline vertaa kindiä merkkijonoon, joten olio pitää avata.
   const paysOnline = () => formPaysOnline({ kind: cf.kind(), invoiceMethod: cf.invoiceMethod });
   const submitLabel = () => { if (!submit.disabled) submit.textContent = free() ? t.codeConfirm : paysOnline() && hmode.on ? ht(S.lang, 'checkout.button') : t.book; };
-  const codeInput = h('input', { id: 'bk-code', name: 'discount_code', maxlength: 40, autocomplete: 'off', autocapitalize: 'characters', spellcheck: 'false', 'aria-describedby': 'bk-code-status',
+  const codeHint = h('p', { id: 'bk-code-hint', class: 'bk-hint bk-code-hint', 'data-testid': 'code-gift-hint', text: t.codeGiftHint });
+  const codeInput = h('input', { id: 'bk-code', name: 'discount_code', maxlength: 40, autocomplete: 'off', autocapitalize: 'characters', spellcheck: 'false', 'aria-describedby': 'bk-code-hint bk-code-status',
     oninput: (e) => { const v = normalizeCode(e.target.value); if (v !== e.target.value) e.target.value = v; },
     onkeydown: (e) => { if (e.key === 'Enter') { e.preventDefault(); if (!codeInput.readOnly) applyCode(normalizeCode(codeInput.value)); } } });
   const codeStatus = h('p', { id: 'bk-code-status', class: 'bk-code-status', role: 'status', 'aria-live': 'polite' });
   const codeApply = h('button', { type: 'button', class: 'btn sm', 'data-testid': 'code-apply', text: t.codeApply, onclick: () => applyCode(normalizeCode(codeInput.value)) });
   const codeRemove = h('button', { type: 'button', class: 'bk-code-remove', 'data-testid': 'code-remove', hidden: true, text: t.codeRemove, onclick: () => clearCode(true) });
   const codeBox = h('details', { class: 'bk-section bk-code', 'data-testid': 'checkout-code' }, h('summary', { text: t.codeToggle }),
-    h('div', { class: 'bk-code-body' }, h('label', { for: 'bk-code', text: t.codeLabel }), h('div', { class: 'bk-code-row' }, codeInput, codeApply), codeStatus, codeRemove));
+    h('div', { class: 'bk-code-body' }, h('label', { for: 'bk-code', text: t.codeLabel }), h('div', { class: 'bk-code-row' }, h('div', { class: 'bk-code-field' }, codeInput, codeHint), codeApply), codeStatus, codeRemove));
   const setStatus = (text, ok) => { codeStatus.textContent = text || ''; codeStatus.classList.toggle('ok', !!ok); codeStatus.classList.toggle('err', !!text && !ok); };
   function clearCode(focus) {
     code.value = ''; code.quote = null; code.sig = ''; clearTimeout(code.timer);
@@ -1007,7 +1008,7 @@ async function viewCheckout(ruleId, ds, productId, via) {
         p_email: String(fd.get('email') || '').trim() || null, p_phone: String(fd.get('phone') || '').trim() || null });
     } catch { r = { ok: false, code: 'generic' }; }
     codeApply.disabled = false;
-    if (!r?.ok) { code.value = ''; code.quote = null; code.sig = ''; codeInput.readOnly = false; codeApply.hidden = false; codeRemove.hidden = true; setStatus(t.codeErrors[r?.code] || t.codeErrors.generic, false); upd(); return; }
+    if (!r?.ok) { code.value = ''; code.quote = null; code.sig = ''; codeInput.readOnly = false; codeApply.hidden = false; codeRemove.hidden = true; setStatus(codeFailText(S.lang, r, v), false); upd(); return; }
     code.value = v; code.quote = r;
     if (isAnnualQuote(r)) { n = +r.persons || 1; for (const a of addons) qty.set(a.id, 0); rit.sel = { key: null, qty: 0 }; }
     code.sig = sig();

@@ -1,11 +1,14 @@
 // Alennus- ja vuosikorttikoodien kauppatekstit (FI/EN, paketti 10 / booking_142). Tuodaan i18n.js:n T-objektiin → avaimet ui.shop.code_* ja
-// ui.shop.annual_* (text-registry); tuotannon tekstit tulevat site_textsistä (content/site-texts.pending-import-42.json). Ei hintoja tekstissä:
+// ui.shop.annual_* (text-registry); tuotannon tekstit tulevat site_textsistä (content/site-texts.pending-import-42.json).
+// Lahjakorttivihjeet: content/site-texts.pending-import-122.json (ui.shop.code_gift_hint / ui.shop.code_gift_is_card). Ei hintoja tekstissä:
 // vuosikortin hinta tulee palvelimelta (public_annual_card_offer → kb.products).
 export const DISCOUNT_TEXTS = {
   fi: {
     codeToggle: 'Onko sinulla alennus- tai vuosikorttikoodi?',
     codeLabel: 'Alennus- tai vuosikorttikoodi',
     codeApply: 'Käytä koodi',
+    codeGiftHint: 'Lahjakortin koodia ei syötetä tähän – lahjakortti syötetään seuraavalla sivulla maksun yhteydessä.',
+    codeGiftIsCard: 'Tämä on lahjakortin koodi. Syötä se seuraavalla sivulla maksun yhteydessä.',
     codeChecking: 'Tarkistetaan…',
     codeRemove: 'Poista koodi',
     codeEmpty: 'Kirjoita koodi.',
@@ -50,6 +53,8 @@ export const DISCOUNT_TEXTS = {
     codeToggle: 'Do you have a discount or annual card code?',
     codeLabel: 'Discount or annual card code',
     codeApply: 'Apply code',
+    codeGiftHint: 'Gift card codes are not entered here – you can use your gift card on the next page at payment.',
+    codeGiftIsCard: 'This is a gift card code. Enter it on the next page at payment.',
     codeChecking: 'Checking…',
     codeRemove: 'Remove code',
     codeEmpty: 'Enter a code.',
