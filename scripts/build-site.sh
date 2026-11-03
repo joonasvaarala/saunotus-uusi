@@ -25,13 +25,14 @@ if [[ ! -f "$file" ]]; then
   exit 2
 fi
 
-unset SITE_ENV SITE_URL BOOKING_SUPABASE_URL BOOKING_ANON_KEY IMAGE_TRANSFORMS TEST_ENV_BANNER
+unset SITE_ENV SITE_URL BOOKING_SUPABASE_URL BOOKING_ANON_KEY IMAGE_TRANSFORMS TEST_ENV_BANNER SITE_ANALYTICS
 got_site_env=0
 got_site_url=0
 got_supabase_url=0
 got_anon_key=0
 got_image_transforms=0
 got_test_banner=0
+got_site_analytics=0
 while IFS= read -r line || [[ -n "$line" ]]; do
   [[ "$line" =~ ^[[:space:]]*# ]] && continue
   [[ "$line" =~ ^[[:space:]]*$ ]] && continue
@@ -42,7 +43,7 @@ while IFS= read -r line || [[ -n "$line" ]]; do
   key="${BASH_REMATCH[1]}"
   val="${BASH_REMATCH[2]}"
   case "$key" in
-    SITE_ENV|SITE_URL|BOOKING_SUPABASE_URL|BOOKING_ANON_KEY|IMAGE_TRANSFORMS|TEST_ENV_BANNER) ;;
+    SITE_ENV|SITE_URL|BOOKING_SUPABASE_URL|BOOKING_ANON_KEY|IMAGE_TRANSFORMS|TEST_ENV_BANNER|SITE_ANALYTICS) ;;
     *) echo "build-site: avainta $key ei sallita ympäristötiedostossa" >&2; exit 2 ;;
   esac
   if [[ "$key" == "IMAGE_TRANSFORMS" && "$val" != "on" && "$val" != "off" ]]; then
@@ -51,6 +52,11 @@ while IFS= read -r line || [[ -n "$line" ]]; do
   fi
   if [[ "$key" == "TEST_ENV_BANNER" && "$val" != "on" && "$val" != "off" ]]; then
     echo "build-site: TEST_ENV_BANNER on on tai off" >&2
+    exit 2
+  fi
+  # Evästeetön kävijämittaus (scripts/build-pages.mjs). Vain on tai off; testissä build-pages ei lisää sitä koskaan.
+  if [[ "$key" == "SITE_ANALYTICS" && "$val" != "on" && "$val" != "off" ]]; then
+    echo "build-site: SITE_ANALYTICS on on tai off" >&2
     exit 2
   fi
   if [[ "$val" == *"'"* || "$val" == *'"'* || "$val" == *$'\n'* || "$val" == *" "* ]]; then
@@ -76,6 +82,9 @@ while IFS= read -r line || [[ -n "$line" ]]; do
     TEST_ENV_BANNER)
       if [[ "$got_test_banner" == 1 ]]; then echo "build-site: TEST_ENV_BANNER kahdesti" >&2; exit 2; fi
       got_test_banner=1 ;;
+    SITE_ANALYTICS)
+      if [[ "$got_site_analytics" == 1 ]]; then echo "build-site: SITE_ANALYTICS kahdesti" >&2; exit 2; fi
+      got_site_analytics=1 ;;
   esac
   printf -v "$key" '%s' "$val"
   export "$key"
@@ -111,6 +120,7 @@ if [[ "$print_only" == 1 ]]; then
   printf 'BOOKING_ANON_KEY=%s\n' "$BOOKING_ANON_KEY"
   printf 'TEST_ENV_BANNER=%s\n' "$TEST_ENV_BANNER"
   if [[ -n "${IMAGE_TRANSFORMS:-}" ]]; then printf 'IMAGE_TRANSFORMS=%s\n' "$IMAGE_TRANSFORMS"; fi
+  if [[ -n "${SITE_ANALYTICS:-}" ]]; then printf 'SITE_ANALYTICS=%s\n' "$SITE_ANALYTICS"; fi
   exit 0
 fi
 
