@@ -166,7 +166,7 @@ function watchPurchase() {
   attempt();
 }
 if (!blocked() && cfg?.url && cfg?.anonKey) {
-  // Vasta tässä (mittaus sallittu) koskaan kosketaan sessionStorageen.
+  // Vain tässä (mittaus sallittu) käsitellään sessionStoragea.
   const src = loadOrInitSource(tabStorage(), () => buildSource({
     pathname: location.pathname, search: location.search, referrer: document.referrer,
     width: window.innerWidth, lang: document.documentElement.lang, sessionKey: uuid(), basePath: BASE_PATH,
