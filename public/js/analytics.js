@@ -1,5 +1,9 @@
-// Paketti 11 / booking_144: evästeetön mittaus. Ei cookie-, localStorage- eikä sessionStorage-käyttöä.
-// Yksi satunnainen istunto VAIN tämän dokumentin muistissa; sivun vaihtuessa syntyy uusi.
+// Paketti 11 / booking_144: evästeetön mittaus. Ei evästeitä, localStoragea eikä indexedDB:tä.
+// booking_241: välilehden ENSIMMÄISELLÄ sivunlatauksella käynnin lähde (viittaavan sivuston verkkotunnus, siivotut utm-kentät,
+// laskeutumissivun polku ilman queryä, laitetyyppi, kieli) ja satunnainen istuntotunniste tallennetaan VAIN sessionStorageen
+// (avain saunotus_analytics). Saman välilehden myöhemmät lataukset käyttävät samaa tietuetta, joten istuntotunniste säilyy
+// välilehden ajan ja poistuu, kun välilehti suljetaan. Kauppa liittää lähteen tilaukseen (booking/shop/src/attribution.js).
+// Kun mittaus on estetty (DNT/GPC, webdriver, /hallinta, mock=1, pois päältä), mitään ei tallenneta.
 // Seuranta on best-effort, eikä koskaan estä varaamista tai maksamista.
 // OLETUKSENA POIS: skripti latautuu sivuille vain, jos julkaisussa SITE_ANALYTICS=on ja SITE_ENV != test (scripts/build-pages.mjs),
 // ja silloinkin vain kun konfiguraatiossa enabled === true. Selaimen Do Not Track / Global Privacy Control estää mittauksen.
@@ -34,6 +38,51 @@ export function classifySource({ referrer_domain = '', utm_source, utm_campaign 
   return 'referral';
 }
 export function deviceType(width) { return width < 700 ? 'mobile' : width < 1024 ? 'tablet' : 'desktop'; }
+// --- booking_241: välilehtikohtainen lähde sessionStoragessa ---
+export const STORAGE_KEY = 'saunotus_analytics';
+export const SESSION_KEY_RE = /^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/;
+export function referrerDomain(referrer) {
+  try {
+    const h = referrer ? new URL(referrer).hostname.toLowerCase() : '';
+    return h && h.length <= 180 && h.includes('.') ? h : undefined;
+  } catch { return undefined; }
+}
+/** Ensimmäisen latauksen lähde. Puhdas funktio: ei lue selainta, ei tallenna mitään. */
+export function buildSource({ pathname = '/', search = '', referrer = '', width = 1280, lang = 'fi', sessionKey, basePath = '' } = {}) {
+  if (!SESSION_KEY_RE.test(String(sessionKey || ''))) return null;
+  let q;
+  try { q = new URLSearchParams(search || ''); } catch { q = new URLSearchParams(); }
+  const out = {
+    session_key: sessionKey,
+    referrer_domain: referrerDomain(referrer),
+    utm_source: normUtm(q.get('utm_source'), 40),
+    utm_medium: normUtm(q.get('utm_medium'), 40),
+    utm_campaign: normUtm(q.get('utm_campaign'), 60),
+    landing_path: sitePath(pathname, basePath),
+    device_type: deviceType(Number(width) || 0),
+    locale: String(lang || '').toLowerCase().startsWith('en') ? 'en' : 'fi',
+  };
+  for (const k of Object.keys(out)) if (out[k] === undefined) delete out[k];
+  return out;
+}
+/** Tallennettu tietue tai null. Ei koskaan heitä (yksityinen tila, estetty tallennus, rikkinäinen JSON). */
+export function readStoredSource(storage) {
+  try {
+    const j = JSON.parse(storage?.getItem(STORAGE_KEY) || 'null');
+    return j && typeof j === 'object' && SESSION_KEY_RE.test(String(j.session_key || '')) ? j : null;
+  } catch { return null; }
+}
+/** Saman välilehden aiempi tietue, muuten make():n uusi tietue, joka yritetään tallentaa. Tallennusvirhe ei estä mittausta. */
+export function loadOrInitSource(storage, make) {
+  const old = readStoredSource(storage);
+  if (old) return old;
+  let rec = null;
+  try { rec = make(); } catch { rec = null; }
+  if (!rec || !SESSION_KEY_RE.test(String(rec.session_key || ''))) return null;
+  try { storage?.setItem(STORAGE_KEY, JSON.stringify(rec)); } catch {}
+  return rec;
+}
+function tabStorage() { try { return window.sessionStorage || null; } catch { return null; } }
 let sessionKey = null, lastProduct = '', lastCheckout = '';
 const purchaseTried = new Set();
 function uuid() {
@@ -117,7 +166,12 @@ function watchPurchase() {
   attempt();
 }
 if (!blocked() && cfg?.url && cfg?.anonKey) {
-  sessionKey = uuid();
+  // Vain tässä (mittaus sallittu) käsitellään sessionStoragea.
+  const src = loadOrInitSource(tabStorage(), () => buildSource({
+    pathname: location.pathname, search: location.search, referrer: document.referrer,
+    width: window.innerWidth, lang: document.documentElement.lang, sessionKey: uuid(), basePath: BASE_PATH,
+  }));
+  sessionKey = src?.session_key || null;
   if (sessionKey) {
     track('page_view'); route(); watchPurchase();
     window.addEventListener('hashchange', () => { route(); watchPurchase(); });

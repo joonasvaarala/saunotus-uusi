@@ -1,5 +1,6 @@
 import { isMultiDay, occurrenceText } from './event-sale.js';
 import { formatWhenList } from './when-range.js';
+import { withAttribution } from './attribution.js';
 
 // Koulutuksen ilmoittautuminen (booking_226). Puhdas hintalasku + kassalomake.
 // Verkossa maksetaan vain varausmaksu. Lisävalinnat nostavat myöhemmin laskutettavaa loppusummaa.
@@ -179,13 +180,13 @@ export function createTrainingSignup(ctx) {
       if (q.blocked) { msg.append(errorBox(L('single_room_full'))); reveal?.(msg); return; }
       submit.disabled = true;
       try {
-        const r = await rpc('public_create_training_signup', {
+        const r = await rpc('public_create_training_signup', withAttribution('public_create_training_signup', {
           p_rule_id: s.rule_id, p_date: ds, p_name: name, p_email: email, p_phone: phone,
           p_country: country.value, p_language: language.value, p_locale: lang,
           p_note: String(fd.get('note') || '').trim() || null,
           p_marketing_consent: marketing.checked, p_privacy_consent: true,
           p_addons: [...selected],
-        });
+        }));
         if (!r?.ok) throw Object.assign(new Error(t.errors?.[r?.code] || t.errorGeneric), { mapped: true });
         location.assign(confirmUrl(r.token));
       } catch (e) {

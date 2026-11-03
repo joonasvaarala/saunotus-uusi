@@ -2,6 +2,7 @@
 // Puuttuva RPC (404 / PGRST202 / 42883) → {ok:false, notReady:true}. Mock vain osoitteella ?mock=1.
 import { normalizeCode } from './gift-logic.js';
 import { createGiftMock } from './gift-mock.js';
+import { withAttribution } from './attribution.js';
 export const GRPC = { packages: 'public_gift_card_packages', annual: 'public_annual_card_offer', buy: 'public_buy_gift_card', check: 'public_check_gift_card', apply: 'public_apply_gift_card', orderCards: 'public_get_order_gift_cards', card: 'public_get_gift_card',
   resolve: 'public_resolve_gift_code', submitClaim: 'public_submit_voucher_claim', orderClaims: 'public_get_order_voucher_claims', updateClaim: 'public_update_voucher_claim_code' };   // kumppanilahjakortit: §13.12 (booking_47/48)
 const isMissingRpc = (e) => !!e && (e.status === 404 || e.code === 'PGRST202' || e.code === '42883' || /could not find the function/i.test(e.message || ''));
@@ -23,7 +24,7 @@ export function createGiftApi({ rpc, mock = wantsMock(), mockFactory = () => cre
     mock,
     packages: (force = false) => (pk && !force ? pk : (pk = run(GRPC.packages, {}).then(normPackages).catch((e) => { pk = null; throw e; }))),
     annualOffer: () => run(GRPC.annual, {}),
-    buy: (args) => run(GRPC.buy, args),
+    buy: (args) => run(GRPC.buy, withAttribution(GRPC.buy, args)),
     check: (code) => run(GRPC.check, { p_code: normalizeCode(code) }),
     apply: ({ token, code, amount }) => run(GRPC.apply, amount == null ? { p_token: token, p_code: normalizeCode(code) } : { p_token: token, p_code: normalizeCode(code), p_amount: amount }),
     orderCards: (token) => run(GRPC.orderCards, { p_token: token }),

@@ -2,6 +2,7 @@
 // Data tulee vain julkisista RPC-funktioista (public_catalog / public_product_images / public_availability / public_create_booking / public_get_booking / public_change_booking).
 // Asiakas ei voi itse perua vahvistettua varausta (peruutukset sähköpostilla henkilökunnalle); hän voi MUUTTAA varausta (toinen vuoro / henkilömäärä) asetuksen mukaan vähintään 48 h ennen vuoroa.
 import { rpc, storageUrl, setRpcOverride } from './sb.js';
+import { withAttribution } from './attribution.js';
 import { ensureAllMonths } from './availability-months.js';
 import { runReturn } from './mobilepay-ui.js';
 import { runOnlineReturn } from './online-pay-ui.js';
@@ -364,7 +365,7 @@ async function viewAnnualPurchase() {
     if (!legal.terms.checked) { msg.append(errorBox(t.acceptTermsErr)); legal.terms.focus(); return; }
     submit.disabled = true; submit.textContent = t.annualBuying;
     try {
-      const r = await rpc('public_buy_annual_card', { p_name: val('name'), p_email: val('email'), p_phone: val('phone'), p_marketing_consent: legal.consent.checked, p_locale: S.lang });
+      const r = await rpc('public_buy_annual_card', withAttribution('public_buy_annual_card', { p_name: val('name'), p_email: val('email'), p_phone: val('phone'), p_marketing_consent: legal.consent.checked, p_locale: S.lang }));
       if (!r?.ok) throw Object.assign(new Error((r?.code === 'sale_disabled' ? t.annualUnavailable : t.codeErrors[r?.code] || t.errors[r?.code]) || t.errorGeneric), { mapped: true });
       const orderHref = S.orderHref?.[S.lang] || (S.lang === 'en' ? '/en/order/' : '/tilaus/');
       location.assign(`${orderHref}?t=${encodeURIComponent(r.token)}${MOCK ? '&mock=1&scenario=annual' : ''}`);
@@ -1063,7 +1064,7 @@ async function viewCheckout(ruleId, ds, productId, via) {
       // Alennus- tai vuosikorttikoodi säilyttää oman RPC:nsä. Lisähoitoa ei lähetetä sen kanssa (palvelin hylkää myös).
       if (code.value && extras.length) throw Object.assign(new Error(upsellUI.text('code_conflict') || t.errorGeneric), { mapped: true });
       // Koodi vain kun se on hyväksytty: muuten sama public_create_booking kuin ennen (booking_142 ei muuta sitä).
-      const r = code.value ? await rpc('public_create_booking_code', { ...args, p_code: code.value }) : await rpc('public_create_booking', args);
+      const r = code.value ? await rpc('public_create_booking_code', withAttribution('public_create_booking_code', { ...args, p_code: code.value })) : await rpc('public_create_booking', withAttribution('public_create_booking', args));
       if (!r.ok) throw Object.assign(new Error((isCodeError(r.code) && t.codeErrors[r.code]) || holdError(S.lang, r.code) || t.errors[r.code] || RITUAL_ERRORS[S.lang]?.[r.code] || t.errorGeneric), { code: r.code, mapped: true });
       state.months.clear();
       if (extras.length || upsellUI.hasSuggestedAddon(chosen)) {

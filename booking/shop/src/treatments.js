@@ -6,6 +6,7 @@
 // Rajapinta: /workspace/johku/import/KOODARI_public_treatment_fi.md (booking_25). Hoitotuotteet tulevat public_catalog():sta (booking_kind = 'slots'); ne näkyvät vasta kun
 // Tapio/Joonas asettaa tuotteille bookable + shop_visible -liput (lippuja ei muuteta tässä). Paikallinen mock: booking/shop/src/treatment-mock.js (vastaa dokumenttia).
 import { rpc } from './sb.js';
+import { withAttribution } from './attribution.js';
 import { normOptions, withOption, isOptionError } from './options-logic.js';
 import { fmtMinutes } from './site-texts-logic.js';
 import { allSegments, timelineOf, isPackage, timelineLabel, timelineMinutes } from './timeline.js';
@@ -219,7 +220,7 @@ const wrap = async (fn) => {
 };
 // → { ok:true, token, order_no } | { ok:false, code, message }
 export const createBooking = (p, data) => wrap(async () => {
-  const r = await rpc(RPC.create, args.create(p, data));
+  const r = await rpc(RPC.create, withAttribution(RPC.create, args.create(p, data)));
   clearCache();   // uusi varaus muuttaa saatavuutta
   return r;       // { ok:true, token, order_no, … } | { ok:false, code, message } (wrap)
 });

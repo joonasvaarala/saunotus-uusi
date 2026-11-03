@@ -88,7 +88,8 @@ test('rollback palauttaa booking_144:n määritelmät sellaisenaan ja poistaa 15
 test('analytics.js: ei fetch-käärettä, mittaus edelleen oletuksena pois', () => {
   const src = read('public/js/analytics.js'), c = src.replace(/\/\/[^\n]*/g, '');
   assert.doesNotMatch(c, /window\.fetch\s*=|globalThis\.fetch\s*=|installNetworkListener|\.clone\(\)/);
-  assert.doesNotMatch(c, /document\.cookie|localStorage|sessionStorage|indexedDB/);
+  // booking_241: sessionStorage sallittu (välilehden lähde), evästeet / localStorage / indexedDB eivät.
+  assert.doesNotMatch(c, /document\.cookie|localStorage|indexedDB/);
   assert.match(src, /cfg\?\.enabled !== true/);
   assert.doesNotMatch(c, /source_category/, 'lähdekategoriaa ei lähetetä');
 });
