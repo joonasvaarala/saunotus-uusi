@@ -60,7 +60,7 @@ test('kohta 7 vastaa toteutusta: kerätyt tiedot, ei evästeitä/IP:tä, 13 kk �
   const m157 = R0('booking/supabase/migrations/20261024165608_booking_157_privacy_retention.sql');
   // ei evästeitä / selaintallennusta
   assert.match(s, /ilman evästeitä/);
-  assert.ok(!/document\.cookie|localStorage\.|sessionStorage\./.test(js.replace(/^\/\/.*$/gm, '')));
+  assert.ok(!/document\.cookie|localStorage\./.test(js.replace(/^\/\/.*$/gm, '')));  // booking_241: sessionStorage sallittu (ks. pending-propose-124)
   // kerätyt kentät (selain lähettää vain nämä)
   for (const k of ['path', 'locale', 'device_type', 'referrer_domain', 'utm_source', 'utm_medium', 'utm_campaign', 'session_key']) assert.ok(js.includes(k), k);
   assert.match(s, /osoitteen ilman URL-parametreja/);

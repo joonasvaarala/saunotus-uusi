@@ -52,7 +52,8 @@ test('SQL booking_144: rollback pudottaa vain booking_144:n oliot', () => {
 
 test('selainskripti: ei evästeitä eikä selaintallennusta, oletuksena pois, DNT/GPC kunnioitetaan', async () => {
   const src = read('public/js/analytics.js');
-  assert.doesNotMatch(src.replace(/\/\/[^\n]*/g, ''), /document\.cookie|localStorage|sessionStorage|indexedDB/);
+  // booking_241: välilehden lähde vain sessionStorageen; ei evästeitä, localStoragea eikä indexedDB:tä.
+  assert.doesNotMatch(src.replace(/\/\/[^\n]*/g, ''), /document\.cookie|localStorage|indexedDB/);
   assert.match(src, /credentials: 'omit'/);
   assert.match(src, /cfg\?\.enabled !== true/);
   assert.match(src, /globalPrivacyControl/);
