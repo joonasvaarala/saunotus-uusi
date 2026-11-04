@@ -1,11 +1,12 @@
 // Seurattavat maksut (booking_215). Oletukset FI+EN, samat kuin content/site-texts.pending-import-102.json.
+// booking_215 + pending-propose-125: kind.onsite ja intro muutettu (Ei eräpäivää); DB-rivit vaihtuvat vain texts_propose-reitillä.
 // Paikkamerkit {{var:nimi}}. Näkymä käyttää näitä, kunnes tekstit on tuotu ja kytketty site_texts-hakuun.
 import { getLang } from './talous-i18n.js';
 
 export const PW_TEXTS = {
   fi: {
     'ui.admin.paylink_watch.title': 'Seurattavat maksut',
-    'ui.admin.paylink_watch.intro': 'Avoimet maksulinkit. Ennakkomaksu muistutetaan 3 päivän jälkeen ja vuorokausi ennen eräpäivää. Paikan päällä annettu linkki muistutetaan 3 päivän välein, enintään 4 kertaa.',
+    'ui.admin.paylink_watch.intro': 'Avoimet maksulinkit. Ennakkomaksu muistutetaan 3 päivän jälkeen ja vuorokausi ennen eräpäivää. Linkki ilman eräpäivää muistutetaan 3 päivän välein, enintään 4 kertaa.',
     'ui.admin.paylink_watch.empty': 'Ei avoimia maksulinkkejä.',
     'ui.admin.paylink_watch.search': 'Hae nimellä tai tilausnumerolla',
     'ui.admin.paylink_watch.filter.all': 'Kaikki',
@@ -31,7 +32,7 @@ export const PW_TEXTS = {
     'ui.admin.paylink_watch.status.paused': 'Muistutukset keskeytetty',
     'ui.admin.paylink_watch.status.needs_action': 'Vaatii toimenpiteitä',
     'ui.admin.paylink_watch.kind.prepaid': 'Ennakkomaksu',
-    'ui.admin.paylink_watch.kind.onsite': 'Paikan päällä',
+    'ui.admin.paylink_watch.kind.onsite': 'Ei eräpäivää',
     'ui.admin.paylink_watch.action.remind_now': 'Lähetä muistutus nyt',
     'ui.admin.paylink_watch.action.pause': 'Keskeytä muistutukset',
     'ui.admin.paylink_watch.action.handled': 'Merkitse hoidetuksi',
@@ -52,7 +53,7 @@ export const PW_TEXTS = {
   },
   en: {
     'ui.admin.paylink_watch.title': 'Payments to follow',
-    'ui.admin.paylink_watch.intro': 'Open payment links. A prepaid link is reminded after 3 days and one day before the due date. An on-site link is reminded every 3 days, at most 4 times.',
+    'ui.admin.paylink_watch.intro': 'Open payment links. A prepaid link is reminded after 3 days and one day before the due date. A link without a due date is reminded every 3 days, at most 4 times.',
     'ui.admin.paylink_watch.empty': 'No open payment links.',
     'ui.admin.paylink_watch.search': 'Search by name or order number',
     'ui.admin.paylink_watch.filter.all': 'All',
@@ -78,7 +79,7 @@ export const PW_TEXTS = {
     'ui.admin.paylink_watch.status.paused': 'Reminders paused',
     'ui.admin.paylink_watch.status.needs_action': 'Needs action',
     'ui.admin.paylink_watch.kind.prepaid': 'Prepaid',
-    'ui.admin.paylink_watch.kind.onsite': 'On site',
+    'ui.admin.paylink_watch.kind.onsite': 'No due date',
     'ui.admin.paylink_watch.action.remind_now': 'Send reminder now',
     'ui.admin.paylink_watch.action.pause': 'Pause reminders',
     'ui.admin.paylink_watch.action.handled': 'Mark handled',

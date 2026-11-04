@@ -28,6 +28,7 @@ test('navigaatio: Seurattavat maksut on Kassa ja talous -välilehti, oikeus paym
 
 test('tuontitiedosto 102: FI+EN, ei päällekkäin, sähköposti ja näkymä', () => {
   const rows = JSON.parse(src('../content/site-texts.pending-import-102.json'));
+  const propose125 = JSON.parse(src('../content/site-texts.pending-propose-125.json'));
   const taken = new Set();
   for (const f of readdirSync(join(root, '../content'))) {
     if (!/^site-texts\.pending-import-(?!102\.)/.test(f) || !f.endsWith('.json')) continue;
@@ -45,7 +46,10 @@ test('tuontitiedosto 102: FI+EN, ei päällekkäin, sähköposti ja näkymä', (
   }
   for (const lang of ['fi', 'en']) {
     for (const [key, text] of Object.entries(PW_TEXTS[lang])) {
+      // pending-propose-125: muutetut tekstit; tuontitiedosto 102 jää historiaksi (pohjateksti = base_text).
+      const changed = propose125.find((r) => r.key === key && r.lang === lang);
       const row = rows.find((r) => r.key === key && r.lang === lang);
+      if (changed) { assert.equal(changed.text, text, key); assert.equal(changed.base_text, row?.text, key); continue; }
       assert.equal(row?.text, text, key);
     }
   }
@@ -95,4 +99,17 @@ test('kokeilutila: kolme linkkiä, vaatii toimenpiteitä, toiminnot', async () =
   assert.equal((await mock.rpc('admin_list_payment_link_watch', {})).total, 2);
   const staff = createAdminMock({ delay: 0, perms: ['bookings.manage'] });
   await assert.rejects(() => staff.rpc('admin_list_payment_link_watch', {}), (e) => e.code === 'forbidden');
+});
+
+test('Ei eräpäivää: onsite-linkin merkintä ja ohjeteksti (pending-propose-125), arvo onsite ennallaan', () => {
+  assert.equal(PW_TEXTS.fi['ui.admin.paylink_watch.kind.onsite'], 'Ei eräpäivää');
+  assert.equal(PW_TEXTS.en['ui.admin.paylink_watch.kind.onsite'], 'No due date');
+  assert.equal(PW_TEXTS.fi['ui.admin.paylink_watch.intro'], 'Avoimet maksulinkit. Ennakkomaksu muistutetaan 3 päivän jälkeen ja vuorokausi ennen eräpäivää. Linkki ilman eräpäivää muistutetaan 3 päivän välein, enintään 4 kertaa.');
+  assert.equal(PW_TEXTS.en['ui.admin.paylink_watch.intro'], 'Open payment links. A prepaid link is reminded after 3 days and one day before the due date. A link without a due date is reminded every 3 days, at most 4 times.');
+  for (const l of ['fi', 'en']) assert.doesNotMatch(Object.values(PW_TEXTS[l]).join(' '), /Paikan päällä|On site|on-site/);
+  const rows = JSON.parse(src('../content/site-texts.pending-propose-125.json'));
+  assert.deepEqual(rows.map((r) => `${r.key}|${r.lang}|${r.apply}`).sort(), ['ui.admin.paylink_watch.intro|en|texts_propose', 'ui.admin.paylink_watch.intro|fi|texts_propose',
+    'ui.admin.paylink_watch.kind.onsite|en|texts_propose', 'ui.admin.paylink_watch.kind.onsite|fi|texts_propose']);
+  for (const r of rows) assert.ok(!r.text.includes('<') && r.text.length <= r.max_len);
+  assert.match(src('admin/views/paylink-watch.js'), /row\.link_kind === 'prepaid' \? 'prepaid' : 'onsite'/);
 });
