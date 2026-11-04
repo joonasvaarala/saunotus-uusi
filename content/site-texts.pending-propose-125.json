@@ -1,0 +1,54 @@
+[
+  {
+    "key": "ui.admin.paylink_watch.kind.onsite",
+    "lang": "fi",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "apply": "texts_propose",
+    "base_version": 1,
+    "base_text": "Paikan päällä",
+    "text": "Ei eräpäivää",
+    "reason": "Seurattavat maksut: link_kind onsite -linkin merkintä 'Ei eräpäivää' (ennakkomaksulinkeillä samassa kohdassa näkyy eräpäivä). Arvo 'onsite' ennallaan. Muistutusväli 3 pv / enintään 4 kertaa ennallaan (payment_link.remind_onsite_interval_hours 72, remind_onsite_max 4)."
+  },
+  {
+    "key": "ui.admin.paylink_watch.kind.onsite",
+    "lang": "en",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "apply": "texts_propose",
+    "base_version": 1,
+    "base_text": "On site",
+    "text": "No due date",
+    "reason": "Seurattavat maksut: link_kind onsite -linkin merkintä 'Ei eräpäivää' (ennakkomaksulinkeillä samassa kohdassa näkyy eräpäivä). Arvo 'onsite' ennallaan. Muistutusväli 3 pv / enintään 4 kertaa ennallaan (payment_link.remind_onsite_interval_hours 72, remind_onsite_max 4)."
+  },
+  {
+    "key": "ui.admin.paylink_watch.intro",
+    "lang": "fi",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 450,
+    "placeholders": [],
+    "apply": "texts_propose",
+    "base_version": 1,
+    "base_text": "Avoimet maksulinkit. Ennakkomaksu muistutetaan 3 päivän jälkeen ja vuorokausi ennen eräpäivää. Paikan päällä annettu linkki muistutetaan 3 päivän välein, enintään 4 kertaa.",
+    "text": "Avoimet maksulinkit. Ennakkomaksu muistutetaan 3 päivän jälkeen ja vuorokausi ennen eräpäivää. Linkki ilman eräpäivää muistutetaan 3 päivän välein, enintään 4 kertaa.",
+    "reason": "Seurattavat maksut: link_kind onsite -linkin merkintä 'Ei eräpäivää' (ennakkomaksulinkeillä samassa kohdassa näkyy eräpäivä). Arvo 'onsite' ennallaan. Muistutusväli 3 pv / enintään 4 kertaa ennallaan (payment_link.remind_onsite_interval_hours 72, remind_onsite_max 4)."
+  },
+  {
+    "key": "ui.admin.paylink_watch.intro",
+    "lang": "en",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 450,
+    "placeholders": [],
+    "apply": "texts_propose",
+    "base_version": 1,
+    "base_text": "Open payment links. A prepaid link is reminded after 3 days and one day before the due date. An on-site link is reminded every 3 days, at most 4 times.",
+    "text": "Open payment links. A prepaid link is reminded after 3 days and one day before the due date. A link without a due date is reminded every 3 days, at most 4 times.",
+    "reason": "Seurattavat maksut: link_kind onsite -linkin merkintä 'Ei eräpäivää' (ennakkomaksulinkeillä samassa kohdassa näkyy eräpäivä). Arvo 'onsite' ennallaan. Muistutusväli 3 pv / enintään 4 kertaa ennallaan (payment_link.remind_onsite_interval_hours 72, remind_onsite_max 4)."
+  }
+]
