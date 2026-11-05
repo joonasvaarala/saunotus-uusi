@@ -54,7 +54,7 @@ test('palautusrakenteen järjestys ja kuittitekstin poisto', { skip: !hasFullRep
   const tail = source.slice(at, source.indexOf('  // ---- dialogit ----', at));
   const order = [
     'meta, ...notes', 'sums', 'annualSec(annual, sec)',
-    "sec(t('order.reservations'), reservations)", 'actions',
+    'orderContentsSection(o, sec)', 'actions',
     "sec(t('order.payments'), payments)", 'vbox', "!o.is_native && !o.receipts.length ? null : receipts",
   ];
   let prev = -1;
@@ -68,8 +68,9 @@ test('palautusrakenteen järjestys ja kuittitekstin poisto', { skip: !hasFullRep
 });
 
 test('tilaus-varaus-silta: id:t ja muuttumattomat tiedostot', { skip: !hasFullRepo && 'Täysi GitHub-repo ei ole saatavilla paikallisesti' }, () => {
-  assert.match(source, /'data-testid': 'order-reservations'/);
-  assert.match(source, /o\.reservations\.map\(\(r\) => h\('li'/, 'yksi li jokaista varausta kohden');
+  const contents = read('booking/admin/views/order-contents.js');
+  assert.match(contents, /'data-testid': 'order-reservations'/);
+  assert.match(contents, /reservations\.map\(\(r\) => h\('li'/, 'yksi li jokaista varausta kohden');
   assert.match(source, /row\.dataset\.orderId = o\.order_id/, 'tilausrivin data-order-id');
   for (const action of ['addToOrder', 'createPaymentLink'])
     assert.match(source, new RegExp("key: '" + action + "'"), `bridge-painike ${action}`);

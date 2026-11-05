@@ -1,4 +1,4 @@
-// Talous › Tilaukset: uusin ensin, haku, lajittelu, suodattimet ja PALVELINPUOLEN sivutus (12 000+ tilausta) – rivi aukeaa maksuiksi ja varauksiksi.
+// Talous › Tilaukset: uusin ensin, haku, lajittelu, suodattimet ja PALVELINPUOLEN sivutus (12 000+ tilausta) – rivi aukeaa maksuiksi sekä varauksiksi ja ostoksiksi (./order-contents.js).
 // Datan muoto: ../talous-api.js (admin_list_orders / admin_get_order). Napit (lisää, maksulinkki, maksun kirjaus, hyvitys) kutsuvat api:a; kuitit (lataus, näyttö, uudelleenlähetys): ./talous-receipts.js.
 import { h, dialog, toast } from '../ui.js';
 import { icon } from '../icons.js';
@@ -17,6 +17,7 @@ import { annualCardPanel, showAnnualCardDialog } from './annual-card-panel.js';
 import { acText } from '../annual-card-texts.js';
 import { orderVoucherBox } from './voucher-redeem.js';
 import { visibleOrderActions } from '../order-actions-logic.js';
+import { orderContentsSection } from './order-contents.js';
 import { invoiceLockReason, linkStaleNote, orderInvoiceLocked } from '../addon-lock-logic.js';
 import { alt } from '../addon-lock-texts.js';
 import { linkDeadlineControl } from './link-deadline.js';
@@ -102,12 +103,6 @@ export function createOrdersTab({ api, ctx, gift = null, rpc = null }) {
         h('span', { class: 'tl-sub-sum' }, h('strong', { text: fmt.money(p.amount) }), p.refunded_amount ? h('small', { text: ` ${t('refunded')} ${fmt.money(p.refunded_amount)}` }) : null),
         openRefunds(o, p))))
       : emptyBox(t(o.is_native ? 'order.noPayments' : 'order.noPaymentsJohku'));
-    const reservations = o.reservations.length
-      ? h('ul', { class: 'tl-sub', 'data-testid': 'order-reservations' }, o.reservations.map((r) => h('li', {},
-        h('span', { class: 'tl-sub-main' }, h('strong', { text: r.product_name || '–' }), r.status === 'cancelled' ? h('span', { class: 'badge st-cancelled', text: t('cancelled') }) : null),
-        h('span', { class: 'tl-sub-meta', text: `${spansDays(r.starts_at, r.ends_at) ? formatWhenRange(r.starts_at, r.ends_at, getLang()) : fmt.dt(r.starts_at)} · ${t('persons', { n: r.persons ?? 1 })}${r.addons?.length ? ' · ' + r.addons.map((a) => `${a.name} ×${a.quantity}`).join(', ') : ''}` }),
-        h('span', { class: 'tl-sub-sum' }, h('strong', { text: fmt.money(r.item_total) })))))
-      : emptyBox(t('order.noReservations'));
     const sum = (label, value, cls = '', tid) => h('div', { class: cls }, h('dt', { text: label }), h('dd', { 'data-testid': tid, text: value }));
     const sums = h('dl', { class: 'tl-sums' }, sum(t('order.total'), fmt.money(b.total), '', 'order-total'), sum(t('order.paid'), fmt.money(b.paid)), b.refunded ? sum(t('order.refunded'), fmt.money(b.refunded)) : null,
       b.pending_link ? sum(t('order.pendingLink'), fmt.money(b.pending_link)) : null, sum(t('order.unpaid'), fmt.money(unpaid), unpaid > 0 ? 'due' : '', 'order-unpaid'));
@@ -133,7 +128,7 @@ export function createOrdersTab({ api, ctx, gift = null, rpc = null }) {
       : null;
     const receipts = sec(`${t('receipts.title')} (${o.receipts.length})`, receiptsList({ api, ctx, receipts: o.receipts }));
     return h('div', { class: 'tl-detail' }, meta, ...notes, sums, annualSec(annual, sec),
-      sec(t('order.reservations'), reservations), actions, sec(t('order.payments'), payments), vbox,
+      orderContentsSection(o, sec), actions, sec(t('order.payments'), payments), vbox,
       !o.is_native && !o.receipts.length ? null : receipts);   // Johku-tilaukselle ei synny kuittia (booking_41)
   }
 
