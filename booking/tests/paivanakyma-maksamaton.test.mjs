@@ -27,3 +27,17 @@ test('Päivänäkymä: unpaid-pay-tyyli vain day-viewissä, pale pink var(--unpa
   assert.match(js, /isDayUnpaidHighlight/);
   assert.match(js, /unpaid-pay/);
 });
+
+test('kumppanilunastus: hyväksymätön (unpaid/pending) pinkki, hyväksytty (paid) ei; maksulinkki ennallaan', () => {
+  // Prod: open claim → order.payment_status unpaid kunnes admin_mark_voucher_claim_redeemed;
+  // hyväksynnän jälkeen partner_voucher_* / paid ja payment_status paid. Päivänäkymällä ei claim-kenttää.
+  for (const ps of ['unpaid', 'pending']) {
+    assert.equal(isDayUnpaidHighlight({ status: 'confirmed', payment_status: ps }), true, 'hyväksymätön ' + ps);
+  }
+  assert.equal(isDayUnpaidHighlight({ status: 'confirmed', payment_status: 'paid' }), false, 'hyväksytty paid');
+  // Osittain maksettu (kumppani lunastettu + loppuosuus auki) pysyy pinkkinä maksamattoman loppuosan takia.
+  assert.equal(isDayUnpaidHighlight({ status: 'confirmed', payment_status: 'partially_paid' }), true);
+  // Maksulinkki ilman eräpäivää: pending/unpaid → pinkki (booking_243).
+  assert.equal(isDayUnpaidHighlight({ status: 'confirmed', payment_status: 'pending' }), true);
+  assert.equal(isDayUnpaidHighlight({ status: 'pending', payment_status: 'unpaid' }), true);
+});
