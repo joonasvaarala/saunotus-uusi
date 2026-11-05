@@ -1,0 +1,162 @@
+[
+  {
+    "key": "ui.pos.custom_add",
+    "lang": "fi",
+    "text": "Lisää vapaa rivi"
+  },
+  {
+    "key": "ui.pos.custom_add",
+    "lang": "en",
+    "text": "Add custom line"
+  },
+  {
+    "key": "ui.pos.custom_title",
+    "lang": "fi",
+    "text": "Vapaa rivi"
+  },
+  {
+    "key": "ui.pos.custom_title",
+    "lang": "en",
+    "text": "Custom line"
+  },
+  {
+    "key": "ui.pos.custom_description",
+    "lang": "fi",
+    "text": "Kuvaus"
+  },
+  {
+    "key": "ui.pos.custom_description",
+    "lang": "en",
+    "text": "Description"
+  },
+  {
+    "key": "ui.pos.custom_qty",
+    "lang": "fi",
+    "text": "Määrä"
+  },
+  {
+    "key": "ui.pos.custom_qty",
+    "lang": "en",
+    "text": "Quantity"
+  },
+  {
+    "key": "ui.pos.custom_price",
+    "lang": "fi",
+    "text": "Yksikköhinta (€)"
+  },
+  {
+    "key": "ui.pos.custom_price",
+    "lang": "en",
+    "text": "Unit price (€)"
+  },
+  {
+    "key": "ui.pos.custom_vat",
+    "lang": "fi",
+    "text": "ALV"
+  },
+  {
+    "key": "ui.pos.custom_vat",
+    "lang": "en",
+    "text": "VAT"
+  },
+  {
+    "key": "ui.pos.custom_save",
+    "lang": "fi",
+    "text": "Lisää koriin"
+  },
+  {
+    "key": "ui.pos.custom_save",
+    "lang": "en",
+    "text": "Add to cart"
+  },
+  {
+    "key": "ui.pos.custom_cancel",
+    "lang": "fi",
+    "text": "Peruuta"
+  },
+  {
+    "key": "ui.pos.custom_cancel",
+    "lang": "en",
+    "text": "Cancel"
+  },
+  {
+    "key": "ui.pos.custom_open",
+    "lang": "fi",
+    "text": "Vapaan rivin kentät"
+  },
+  {
+    "key": "ui.pos.custom_open",
+    "lang": "en",
+    "text": "Custom line fields"
+  },
+  {
+    "key": "ui.pos.description_required",
+    "lang": "fi",
+    "text": "Anna kuvaus"
+  },
+  {
+    "key": "ui.pos.description_required",
+    "lang": "en",
+    "text": "Enter a description"
+  },
+  {
+    "key": "ui.pos.description_long",
+    "lang": "fi",
+    "text": "Kuvaus on liian pitkä (enintään 200 merkkiä)"
+  },
+  {
+    "key": "ui.pos.description_long",
+    "lang": "en",
+    "text": "Description is too long (max 200 characters)"
+  },
+  {
+    "key": "ui.pos.description_invalid",
+    "lang": "fi",
+    "text": "Kuvaus ei ole kelvollinen"
+  },
+  {
+    "key": "ui.pos.description_invalid",
+    "lang": "en",
+    "text": "Description is not valid"
+  },
+  {
+    "key": "ui.pos.quantity_invalid",
+    "lang": "fi",
+    "text": "Määrän pitää olla 1–20"
+  },
+  {
+    "key": "ui.pos.quantity_invalid",
+    "lang": "en",
+    "text": "Quantity must be 1–20"
+  },
+  {
+    "key": "ui.pos.price_invalid",
+    "lang": "fi",
+    "text": "Anna hinta euroina (esim. 5,50)"
+  },
+  {
+    "key": "ui.pos.price_invalid",
+    "lang": "en",
+    "text": "Enter the price in euros (e.g. 5.50)"
+  },
+  {
+    "key": "ui.pos.vat_invalid",
+    "lang": "fi",
+    "text": "Valitse sallittu ALV-kanta"
+  },
+  {
+    "key": "ui.pos.vat_invalid",
+    "lang": "en",
+    "text": "Choose an allowed VAT rate"
+  },
+  {
+    "key": "ui.pos.vat_breakdown",
+    "lang": "fi",
+    "text": "ALV-erittely"
+  },
+  {
+    "key": "ui.pos.vat_breakdown",
+    "lang": "en",
+    "text": "VAT breakdown"
+  }
+]

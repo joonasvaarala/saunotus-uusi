@@ -201,6 +201,46 @@ export const POS_PAY_TEXTS = {
   },
 };
 
+
+export const POS_CUSTOM_TEXTS = {
+  fi: {
+    custom_add: 'Lisää vapaa rivi',
+    custom_title: 'Vapaa rivi',
+    custom_description: 'Kuvaus',
+    custom_qty: 'Määrä',
+    custom_price: 'Yksikköhinta (€)',
+    custom_vat: 'ALV',
+    custom_save: 'Lisää koriin',
+    custom_cancel: 'Peruuta',
+    custom_open: 'Vapaan rivin kentät',
+    description_required: 'Anna kuvaus',
+    description_long: 'Kuvaus on liian pitkä (enintään 200 merkkiä)',
+    description_invalid: 'Kuvaus ei ole kelvollinen',
+    quantity_invalid: 'Määrän pitää olla 1–20',
+    price_invalid: 'Anna hinta euroina (esim. 5,50)',
+    vat_invalid: 'Valitse sallittu ALV-kanta',
+    vat_breakdown: 'ALV-erittely',
+  },
+  en: {
+    custom_add: 'Add custom line',
+    custom_title: 'Custom line',
+    custom_description: 'Description',
+    custom_qty: 'Quantity',
+    custom_price: 'Unit price (€)',
+    custom_vat: 'VAT',
+    custom_save: 'Add to cart',
+    custom_cancel: 'Cancel',
+    custom_open: 'Custom line fields',
+    description_required: 'Enter a description',
+    description_long: 'Description is too long (max 200 characters)',
+    description_invalid: 'Description is not valid',
+    quantity_invalid: 'Quantity must be 1–20',
+    price_invalid: 'Enter the price in euros (e.g. 5.50)',
+    vat_invalid: 'Choose an allowed VAT rate',
+    vat_breakdown: 'VAT breakdown',
+  },
+};
+
 const PREFIX = 'ui.pos.';
 let db = new Map();
 let loaded = false;
@@ -234,6 +274,6 @@ export function clearPosTextCache() {
 export function posText(key, lang = getLang()) {
   const live = db.get(`${PREFIX}${key}|${lang}`);
   if (live) return live;
-  return POS_TEXTS[lang]?.[key] || POS_EDIT_TEXTS[lang]?.[key] || POS_PAY_TEXTS[lang]?.[key] || POS_LINK_TEXTS[lang]?.[key] || POS_CUSTOMER_TEXTS[lang]?.[key]
-    || POS_TEXTS.fi[key] || POS_EDIT_TEXTS.fi[key] || POS_PAY_TEXTS.fi[key] || POS_LINK_TEXTS.fi[key] || POS_CUSTOMER_TEXTS.fi[key] || key;
+  return POS_TEXTS[lang]?.[key] || POS_EDIT_TEXTS[lang]?.[key] || POS_PAY_TEXTS[lang]?.[key] || POS_LINK_TEXTS[lang]?.[key] || POS_CUSTOMER_TEXTS[lang]?.[key] || POS_CUSTOM_TEXTS[lang]?.[key]
+    || POS_TEXTS.fi[key] || POS_EDIT_TEXTS.fi[key] || POS_PAY_TEXTS.fi[key] || POS_LINK_TEXTS.fi[key] || POS_CUSTOMER_TEXTS.fi[key] || POS_CUSTOM_TEXTS.fi[key] || key;
 }
