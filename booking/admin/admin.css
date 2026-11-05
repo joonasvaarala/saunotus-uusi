@@ -675,6 +675,18 @@ input[aria-invalid=true],select[aria-invalid=true],textarea[aria-invalid=true]{b
 .pos-lines-count{flex:none;display:inline-flex;align-items:center;justify-content:center;min-width:1.5em;height:1.35em;padding:0 6px;border-radius:999px;background:#EDE3D0;color:var(--green);font-size:13px;font-weight:700;line-height:1}
 .pos-panel{display:grid;gap:8px;margin-top:12px}
 .pos-line{display:flex;gap:8px;align-items:center;flex-wrap:wrap;background:#fff;border:1px solid var(--line);border-radius:10px;padding:8px}
+
+.pos-custom{margin-top:10px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.pos-custom-toggle{align-self:stretch}
+.pos-custom-title{margin:0;font-size:16px;color:var(--green)}
+.pos-custom-row{display:grid;grid-template-columns:1fr;gap:8px;min-width:0}
+.pos-custom-row .fld{min-width:0}
+.pos-custom-row input,.pos-custom-row select{width:100%;max-width:100%;box-sizing:border-box}
+.pos-custom-actions{display:flex;flex-wrap:wrap;gap:8px}
+.pos-vat{margin-top:6px}
+.pos-vat-row{margin:0;font-size:13px}
+@media(min-width:520px){.pos-custom-row{grid-template-columns:minmax(0,0.7fr) minmax(0,1.1fr) minmax(0,0.9fr)}}
+
 .pos-step{min-width:48px;min-height:48px;padding:0}
 .pos-qty{min-width:24px;text-align:center;font-weight:700}
 .pos-methods,.pos-flows{display:grid;gap:8px}

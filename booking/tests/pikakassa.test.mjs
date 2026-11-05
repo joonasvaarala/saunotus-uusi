@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import test from 'node:test';
 import { finnishMobileMsisdn } from '../admin/phone-fi.js';
-import { cartAdd, cartSetQty, cartTotal, checkoutItems, looksLikeAlcohol, posCustomerHits, posSheetTenders, tenderAvailable, tendersFor, validEmail } from '../admin/pos-logic.js';
+import { cartAdd, cartAddCustom, cartSetQty, cartTotal, cartVatBreakdown, checkoutItems, looksLikeAlcohol, parseEuroInput, posCustomerHits, posSheetTenders, tenderAvailable, tendersFor, validEmail, validateCustomLine } from '../admin/pos-logic.js';
 import { POS_TEXTS } from '../admin/pos-texts.js';
 import { qrMatrix } from '../admin/qrsvg.js';
 import { deviceFromSearch, drinksCartAdd, looksLikeAlcohol as drinksAlcohol } from '../drinks/drinks-logic.js';
@@ -233,4 +233,55 @@ test('mock: ilman pos.use tai settings.edit linkkiä ei saa lähettää', async 
   assert.equal(link.ok, true);
   assert.equal(editor.state.resendMode, 'dry_run');
   assert.equal(editor.state.posModes.vismapay_mode, 'dry_run');
+});
+
+test('vapaa rivi: validointi, sentit/eurot, payload ja ALV-erittely', () => {
+  assert.equal(parseEuroInput('5,50'), 5.5);
+  assert.equal(parseEuroInput('5.5'), 5.5);
+  assert.equal(parseEuroInput('0'), 0);
+  assert.equal(parseEuroInput('-1'), null);
+  assert.equal(parseEuroInput('1.234'), null);
+  assert.equal(parseEuroInput('abc'), null);
+
+  const rates = [0, 13.5, 25.5];
+  assert.equal(validateCustomLine({ description: '  Pyyhe  ', quantity: 2, unit_price: '5,50', vat_rate: 25.5 }, rates).ok, true);
+  assert.equal(validateCustomLine({ description: '', quantity: 1, unit_price: 1, vat_rate: 25.5 }, rates).error, 'description_required');
+  assert.equal(validateCustomLine({ description: 'x'.repeat(201), quantity: 1, unit_price: 1, vat_rate: 25.5 }, rates).error, 'description_long');
+  assert.equal(validateCustomLine({ description: 'a < b', quantity: 1, unit_price: 1, vat_rate: 25.5 }, rates).error, 'description_invalid');
+  assert.equal(validateCustomLine({ description: 'x', quantity: 0, unit_price: 1, vat_rate: 25.5 }, rates).error, 'quantity_invalid');
+  assert.equal(validateCustomLine({ description: 'x', quantity: 1, unit_price: -1, vat_rate: 25.5 }, rates).error, 'price_invalid');
+  assert.equal(validateCustomLine({ description: 'x', quantity: 1, unit_price: 1, vat_rate: 10 }, rates).error, 'vat_invalid');
+  assert.equal(validateCustomLine({ description: 'Ilmainen', quantity: 1, unit_price: 0, vat_rate: 0 }, rates).ok, true);
+
+  const vichy = { product_id: 101, name: 'Vichy', price: 3, vat_rate: 13.5 };
+  let cart = cartAdd([], vichy);
+  cart = cartAddCustom(cart, { description: 'Pyyhevuokra', unit_price: 5.5, vat_rate: 25.5, quantity: 2 });
+  assert.equal(cartTotal(cart), 14);
+  const payload = checkoutItems(cart);
+  assert.deepEqual(payload[0], { product_id: 101, quantity: 1 });
+  assert.deepEqual(payload[1], { kind: 'custom', description: 'Pyyhevuokra', quantity: 2, unit_price: 5.5, vat_rate: 25.5 });
+  assert.equal('price' in payload[0], false);
+
+  const key = cart.find((r) => r.kind === 'custom').line_key;
+  cart = cartSetQty(cart, key, 0);
+  assert.equal(cart.length, 1);
+  assert.equal(cartTotal(cart), 3);
+
+  cart = cartAddCustom(cart, { description: 'Zero', unit_price: 0, vat_rate: 0, quantity: 1 });
+  cart = cartAddCustom(cart, { description: 'Full', unit_price: 10, vat_rate: 25.5, quantity: 1 });
+  const vat = cartVatBreakdown(cart);
+  assert.ok(vat.some((r) => r.vat_rate === 13.5 && r.gross === 3));
+  assert.ok(vat.some((r) => r.vat_rate === 0 && r.gross === 0));
+  assert.ok(vat.some((r) => r.vat_rate === 25.5 && r.gross === 10));
+});
+
+test('vapaa rivi: UI-tekstit FI+EN ja nappi pos-screenissä', async () => {
+  const { POS_CUSTOM_TEXTS } = await import('../admin/pos-texts.js');
+  assert.equal(POS_CUSTOM_TEXTS.fi.custom_add, 'Lisää vapaa rivi');
+  assert.equal(POS_CUSTOM_TEXTS.en.custom_add, 'Add custom line');
+  const screen = readFileSync(new URL('../admin/pos-screen.js', import.meta.url), 'utf8');
+  assert.match(screen, /pos-custom-add/);
+  assert.match(screen, /cartAddCustom/);
+  assert.match(screen, /admin_list_vat_rates/);
+  assert.match(screen, /validateCustomLine/);
 });
