@@ -8,7 +8,7 @@ import { capacityButton, arrivalButton, addonItems, shiftsBar, prepCard } from '
 import { legsList, resourceBadges, spaceBadge } from './legs.js';
 import { optionBadge, optionReminder } from '../options.js';
 import { blockList, blockDialog } from './blocks.js';
-import { assignDayCards, canSeeDayRevenue, eventSortIso, eventTimeLabel, revenueView, isGiftCardReservation, slotTitle, sumPersons } from '../day-logic.js';
+import { assignDayCards, canSeeDayRevenue, eventSortIso, eventTimeLabel, revenueView, isGiftCardReservation, slotTitle, sumPersons, isDayUnpaidHighlight } from '../day-logic.js';
 import { dayLang, dayText, loadDayTexts } from '../day-texts.js';
 import { bulletinCard, dayNotesCard, loadDayMemos } from './day-memos.js';
 import { loadMemoTexts, memoText } from '../day-memos-texts.js';
@@ -128,7 +128,8 @@ export async function render({ ctx, refs, reload, query }) {
     const kind = x.customer_kind || r.customer_kind; const company = x.company || r.company; const legs = (x.legs && x.legs.length) ? x.legs : (r.legs || []); const space = x.space_code || r.space_code;
     let stBadge = statusBadge(r.status);
     const arrive = arrivalButton(r, { can: ctx.can, onState: (st) => { clearDayBundleCache(); const nb = statusBadge(st); stBadge.replaceWith(nb); stBadge = nb; } });
-    return h('li', { class: `resrow ${r.status}${ad.length ? ' has-addons' : ''}${arrive ? ' has-arrive' : ''}` },
+    const unpaid = isDayUnpaidHighlight(r);
+    return h('li', { class: `resrow ${r.status}${ad.length ? ' has-addons' : ''}${arrive ? ' has-arrive' : ''}${unpaid ? ' unpaid-pay' : ''}`, 'data-testid': unpaid ? 'unpaid-pay' : undefined },
     h('div', { class: 'resmain' }, h('button', { type: 'button', class: 'link', onclick: () => open(r) }, h('strong', { text: r.customer_name || '–' }), ` · ${r.persons} hlö`, kind === 'company' ? [' ', badge('warn', 'Yritys'), company ? ` ${company}` : ''] : null,
       (legs.length > 1 || (space && space !== 'savusauna')) ? legsList(legs, refs) : null),
     (r.notes || x.notes) ? h('div', { class: 'res-note', 'data-testid': 'res-note', text: r.notes || x.notes }) : null,

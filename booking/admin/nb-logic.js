@@ -132,3 +132,66 @@ export function summary({ session, persons, override = { ok: true, value: null }
   const slot = overridden ? override.value : priceFor(session, persons);
   return { slot, addons, total: Math.round((slot + addons) * 100) / 100, overridden };
 }
+
+// Maksulinkki (payment_link): ei merkitä maksetuksi; sähköposti pakollinen.
+export const isPaymentLinkMethod = (code) => code === 'payment_link';
+export const paidDefaultFor = (code) => (isPaymentLinkMethod(code) ? false : paidDefault(code));
+
+// Asiakkaan sähköposti: valittu asiakas tai lomakkeen arvo. Maksulinkki vaatii kelvollisen osoitteen.
+export function emailForBooking({ customer, formEmail } = {}) {
+  const raw = customer?.email != null ? customer.email : formEmail;
+  const email = String(raw ?? '').trim().toLowerCase();
+  return email || null;
+}
+export function looksLikeEmail(email) {
+  if (!email) return false;
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email).trim());
+}
+
+// Tallennusvalidaatio (UI): maksulinkki → email pakollinen, paid kielletty.
+export function validatePaymentLink({ method, customer, formEmail } = {}) {
+  if (!isPaymentLinkMethod(method)) return { ok: true, errors: [] };
+  const email = emailForBooking({ customer, formEmail });
+  const errors = [];
+  if (!looksLikeEmail(email)) errors.push({ code: 'email_required', field: 'email' });
+  return { ok: errors.length === 0, errors, email };
+}
+
+// RPC-payload admin_create_bookingille. payment_link → p_paid aina false.
+export function buildCreateBookingPayload({
+  ruleId, date, persons, customerId = null, customer = null,
+  method = 'pay_later', paid = false, note = null, price = null,
+  addons = null, invoiceReference = null, discountCode = null,
+  giftCardCode = null, remainderMethod = null,
+  allowOverbook = false, allowOffSchedule = false, start = null, end = null,
+} = {}) {
+  const link = isPaymentLinkMethod(method);
+  const gift = method === 'gift_card';
+  const payload = {
+    p_rule_id: ruleId,
+    p_date: date,
+    p_persons: persons,
+    p_payment_method: gift ? 'gift_card' : method,
+    p_paid: link ? false : (gift ? !!remainderMethod && !!paid : !!paid),
+    p_note: note || null,
+    p_price: price,
+    p_addons: addons && addons.length ? addons : null,
+    p_invoice_reference: invoiceReference || null,
+    p_discount_code: discountCode || null,
+    p_gift_card_code: gift ? (giftCardCode || null) : null,
+    p_remainder_method: gift ? (remainderMethod || null) : null,
+    p_allow_overbook: !!allowOverbook,
+    p_allow_off_schedule: !!allowOffSchedule,
+    p_start: start || null,
+    p_end: end || null,
+  };
+  if (customerId != null) payload.p_customer_id = customerId;
+  else if (customer != null) payload.p_customer = customer;
+  return payload;
+}
+
+// Onnistumisviesti: maksulinkki → "varaus + linkki lähetetty".
+export function createdMessageKind(result) {
+  if (result && (result.payment_link === true || result.payment_link === 'true')) return 'link';
+  return 'plain';
+}

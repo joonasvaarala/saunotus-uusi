@@ -262,3 +262,16 @@ export function slotTitle(list, productName) {
 export function sumPersons(list) {
   return (list || []).reduce((a, r) => a + Math.max(0, Number(r?.persons) || 0), 0);
 }
+
+// Päivänäkymän vaaleanpunainen tausta: vielä maksamatta. Konservatiivinen.
+// Korostetaan: unpaid | pending | failed | partially_paid.
+// Ei korosteta: paid | invoiced | refunded | partially_refunded (laskutettu / maksettu / hyvitetty).
+// Vain aktiiviset varaukset (pending/confirmed/completed). Kumppanilunastus joka on unpaid
+// näkyy pinkkinä (avoimeksi päätökseksi Joonakselle).
+const DAY_UNPAID_PAY = new Set(['unpaid', 'pending', 'failed', 'partially_paid']);
+export function isDayUnpaidHighlight(row) {
+  if (!row) return false;
+  const st = row.status;
+  if (st && !ACTIVE_STATUSES.includes(st)) return false;
+  return DAY_UNPAID_PAY.has(row.payment_status);
+}
