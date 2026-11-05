@@ -1,5 +1,5 @@
 /* Hallinnan tyylit: mobiili ensin (alavalikko), työpöydällä sivupalkki. Ei kirjastoja. Värit samat kuin sivustolla. */
-:root{--ink:#2F2923;--text:#4F443A;--muted:#6B5E52;--gold:#7A5530;--green:#2B3A30;--icon:var(--green);--card:#fff;--bg:#F4EFE7;--line:rgba(63,53,44,.18);--ok:#1d4d2b;--okbg:#e8f3ea;--err:#7b1d12;--errbg:#fbeaea;--warnbg:#fdf1d8;--r:12px}
+:root{--unpaidbg:#F6E0E3;--ink:#2F2923;--text:#4F443A;--muted:#6B5E52;--gold:#7A5530;--green:#2B3A30;--icon:var(--green);--card:#fff;--bg:#F4EFE7;--line:rgba(63,53,44,.18);--ok:#1d4d2b;--okbg:#e8f3ea;--err:#7b1d12;--errbg:#fbeaea;--warnbg:#fdf1d8;--r:12px}
 *,*::before,*::after{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
 body{margin:0;background:var(--bg);color:var(--text);font:400 16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
@@ -1117,3 +1117,6 @@ body.shot #shell .nav .lbl{display:inline}
 @media print{
   .pwa-notices{display:none!important}
 }
+
+/* booking_243: päivänäkymän maksamaton varaus – vaalea pinkki (var --unpaidbg), kontrasti riittää tekstille */
+.day-view .resrow.unpaid-pay{background:var(--unpaidbg);border-radius:6px;padding-left:8px;padding-right:8px;margin:2px 0}

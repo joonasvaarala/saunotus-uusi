@@ -12,7 +12,7 @@ import { icon } from '../icons.js';
 import { stepper } from '../stepper.js';
 import { nbt as T, nbLang } from '../nb-texts.js';
 import { setLang, LANGS, getLang } from '../talous-i18n.js';
-import { priceFor, personsRange, staffPersonsMax, effectiveKind, invoiceRefFor, paidDefault, parsePrice, summary, bookingNotices, applyDiscount, bookingAction, isPrivateConflict, slotBookable } from '../nb-logic.js';
+import { priceFor, personsRange, staffPersonsMax, effectiveKind, invoiceRefFor, paidDefault, paidDefaultFor, parsePrice, summary, bookingNotices, applyDiscount, bookingAction, isPrivateConflict, slotBookable, isPaymentLinkMethod, validatePaymentLink, createdMessageKind } from '../nb-logic.js';
 import { loadBookingTexts, bookingText, noticeText } from '../booking-texts.js';
 import { confirmDialog } from '../confirm.js';
 import { typeSwitch, render as renderResource } from './resbooking.js';
@@ -137,8 +137,9 @@ export async function render({ ctx, refs, query, reload }) {
     const ui = {}; let paidTouched = false;
     const paid = h('input', { type: 'checkbox', name: 'paid' });
     paid.addEventListener('change', () => { paidTouched = true; });
-    const method = h('select', { name: 'method' }, refs.methods.filter((m) => m.active && m.is_manual).map((m) => h('option', { value: m.code, text: m.label, selected: m.code === 'pay_later' || null })));
-    method.addEventListener('change', () => { if (!paidTouched) paid.checked = paidDefault(method.value); syncGift(); upd(); });
+    const methodLabel = (m) => (m.code === 'payment_link' ? T('nb.methodPaymentLink') : m.label);
+    const method = h('select', { name: 'method' }, refs.methods.filter((m) => m.active && m.is_manual).map((m) => h('option', { value: m.code, text: methodLabel(m), selected: m.code === 'pay_later' || null })));
+    method.addEventListener('change', () => { syncPaidForMethod(); syncGift(); upd(); });
     ui.method = method;
     const codeIn = h('input', { name: 'discount', maxlength: 40, autocomplete: 'off', autocapitalize: 'characters', spellcheck: 'false', placeholder: bookingText('discount_ph'), 'data-testid': 'discount-code' });
     const codeStatus = h('p', { class: 'fld-hint', hidden: true, 'data-testid': 'discount-status' });
@@ -147,7 +148,7 @@ export async function render({ ctx, refs, query, reload }) {
     const giftIn = h('input', { name: 'gift', maxlength: 24, autocomplete: 'off', autocapitalize: 'characters', spellcheck: 'false', placeholder: bookingText('gift_ph'), 'data-testid': 'gift-code' });
     const giftStatus = h('p', { class: 'fld-hint', hidden: true, 'data-testid': 'gift-status' });
     const giftCheck = h('button', { type: 'button', class: 'btn sm', 'data-testid': 'gift-check', text: bookingText('gift_check'), onclick: () => checkGift() });
-    const restSel = h('select', { name: 'remainder', 'data-testid': 'gift-remainder' }, h('option', { value: '', text: bookingText('gift_rest_unpaid') }), ...refs.methods.filter((m) => m.active && m.is_manual && m.code !== 'gift_card').map((m) => h('option', { value: m.code, text: m.label })));
+    const restSel = h('select', { name: 'remainder', 'data-testid': 'gift-remainder' }, h('option', { value: '', text: bookingText('gift_rest_unpaid') }), ...refs.methods.filter((m) => m.active && m.is_manual && m.code !== 'gift_card' && m.code !== 'payment_link').map((m) => h('option', { value: m.code, text: m.label })));
     const restWrap = h('div', { hidden: true, 'data-testid': 'gift-rest' }, h('p', { class: 'nb-rest', 'data-testid': 'gift-rest-line' }), h('label', { class: 'fld' }, h('span', { class: 'fld-lab', text: bookingText('gift_rest_method') }), restSel));
     const giftWrap = h('div', { class: 'stack', hidden: true, 'data-testid': 'gift-card-field' },
       h('div', { class: 'nbsearch' }, h('label', { class: 'fld', style: 'flex:1' }, h('span', { class: 'fld-lab', text: bookingText('gift_code') }), giftIn), giftCheck),
@@ -211,7 +212,7 @@ export async function render({ ctx, refs, query, reload }) {
     };
     cardChk.addEventListener('change', syncCard);
     const cf = customerForm({ id: 'nb', reference: false, onKind: (k) => {
-      if (ui.method && !st.customer) { ui.method.value = k === 'company' && refs.methods.some((m) => m.active && m.code === 'invoice') ? 'invoice' : 'pay_later'; if (!paidTouched) paid.checked = paidDefault(ui.method.value); }
+      if (ui.method && !st.customer) { ui.method.value = k === 'company' && refs.methods.some((m) => m.active && m.code === 'invoice') ? 'invoice' : 'pay_later'; syncPaidForMethod(); }
       ui.syncInv?.();
     } });
     ui.syncInv = syncInv;
@@ -221,13 +222,21 @@ export async function render({ ctx, refs, query, reload }) {
     persSec = section(T('nb.s2'), h('div', { class: 'nb-persons' }, pers.node, h('div', { class: 'nb-persinfo' }, persHint, persErr)));
     const custSec = section(T('nb.s3'), h('div', { class: 'nb-search' }, h('span', { class: 'fld-lab', text: T('cu.search') }), cs.row, cs.found), h('p', { class: 'nb-or muted', text: T('cu.or') }), cf.node, cardRow);
     picker.node.classList.add('nb-sec', 'card');
+    function syncPaidForMethod() {
+      const link = isPaymentLinkMethod(method.value);
+      paidRow.hidden = link;
+      paid.disabled = link;
+      if (link) { paid.checked = false; }
+      else if (!paidTouched) paid.checked = paidDefaultFor(method.value);
+    }
+    const paidRow = h('label', { class: 'check big', 'data-testid': 'paid-row' }, paid, h('span', {}, h('strong', { text: T('nb.paid') }), h('small', { text: T('nb.paidHint') })));
     paySec = section(T('nb.s5'),
       h('label', { class: 'fld' }, h('span', { class: 'fld-lab', text: T('nb.method') }), method),
       giftWrap,
       h('div', { class: 'nbsearch' }, h('label', { class: 'fld', style: 'flex:1' }, h('span', { class: 'fld-lab', text: bookingText('discount') }), codeIn), codeApply),
       codeStatus, codeRemove,
       invFld,
-      h('label', { class: 'check big' }, paid, h('span', {}, h('strong', { text: T('nb.paid') }), h('small', { text: T('nb.paidHint') }))),
+      paidRow,
       priceBox);
     const noteSec = section(T('nb.s6'), h('label', { class: 'fld' }, h('span', { class: 'fld-lab', text: T('nb.note') }), h('textarea', { name: 'note', rows: 3 }), h('small', { class: 'fld-hint', text: T('nb.noteHint') })));
     const saveBtn = h('button', { class: 'btn primary lg', type: 'submit', 'data-testid': 'save-booking', text: T('nb.save') });
@@ -240,6 +249,16 @@ export async function render({ ctx, refs, query, reload }) {
       if (!card && (n < rng.min || n > capMax)) { showFieldErr(pers.input, persErr, T('nb.errPersons', { min: rng.min, max: capMax })); bad.push(pers.input); count++; } else clearFieldErr(pers.input, persErr);
       if (!card && method.value === 'gift_card' && !giftIn.value.trim()) { giftStatus.hidden = false; giftStatus.textContent = bookingText('gift_need_code'); bad.push(giftIn); count++; }
       let custBad = 0; if (!st.customer) { const el = cf.validate({ focus: false }); if (el) { custBad = cf.problems().length; bad.push(el); count += custBad; } }
+      if (!card && isPaymentLinkMethod(method.value)) {
+        const formEmail = st.customer ? null : (cf.data()?.email ?? cf.elements?.email?.value);
+        const v = validatePaymentLink({ method: method.value, customer: st.customer, formEmail });
+        if (!v.ok) {
+          const emailEl = cf.elements?.email || cf.node?.querySelector?.('input[name=email],input[type=email]');
+          if (emailEl) { showFieldErr(emailEl, null, T('nb.errEmailRequired')); bad.push(emailEl); }
+          else { errBox.textContent = T('nb.errEmailRequired'); errBox.hidden = false; }
+          count++;
+        }
+      }
       const pp = parsePrice(priceIn.value);
       if (!card && !pp.ok) { showFieldErr(priceIn, priceErr, T('nb.errPrice')); priceBox.open = true; bad.push(priceIn); count++; }
       if (bad.length) {
@@ -267,11 +286,12 @@ export async function render({ ctx, refs, query, reload }) {
         const cust = st.customer ? { p_customer_id: st.customer.id } : { p_customer: cf.data() };
         const addonsSel = picker.node.hidden ? [] : picker.value();
         const gift = method.value === 'gift_card';
+        const link = isPaymentLinkMethod(method.value);
         const r = card ? await rpc('admin_create_annual_card_booking', { p_customer_id: st.customer.id, p_rule_id: s.rule_id, p_date: st.date, p_note: f.elements.note.value || null })
           : await rpc('admin_create_booking', {
             p_rule_id: s.rule_id, p_date: st.date, p_persons: n, ...cust,
             p_payment_method: gift ? 'gift_card' : method.value,
-            p_paid: gift ? !!restSel.value && paid.checked : paid.checked,
+            p_paid: link ? false : (gift ? !!restSel.value && paid.checked : paid.checked),
             p_note: f.elements.note.value || null, p_price: pp.value,
             p_addons: addonsSel.length ? addonsSel : null,
             p_invoice_reference: invoiceRefFor(kindNow(), invRef.value),
@@ -283,7 +303,9 @@ export async function render({ ctx, refs, query, reload }) {
             p_start: s.off_schedule ? s.starts_at : null,
             p_end: s.off_schedule ? s.ends_at : null,
           });
-        if (hasWarning(r)) toast(T('nb.warnMissing'), 'warn'); else toast(T('nb.toast', { no: r.order_no }));
+        const msgKind = createdMessageKind(r);
+        if (hasWarning(r)) toast(T('nb.warnMissing'), 'warn');
+        else toast(T(msgKind === 'link' ? 'nb.toastLink' : 'nb.toast', { no: r.order_no }));
         // booking_175: yrityksen laskumaksu → luonnoslasku auki Laskut-näkymään (ei lähetystä; "Lähetä verkkolasku" / "Lähetä PDF sähköpostilla" napista)
         if (openInvoiceAfterBooking({ card, method: method.value, kind: kindNow(), canInvoices: ctx.can('invoices.manage'), orderId: r.order_id })) {
           try {
@@ -301,13 +323,13 @@ export async function render({ ctx, refs, query, reload }) {
       h('h3', { class: 'nb-picked' }, h('span', { text: T('nb.picked', { name: slotName(s), time: clockSpan(s.starts_at, s.ends_at) }) }), h('small', { text: spansDays(s.starts_at, s.ends_at) ? '' : fmtDay(s.starts_at) })),
       persSec, custSec, picker.node, paySec, noteSec, bar);
     formBox.replaceChildren(f);
-    syncGift(); syncCard(); syncInv();
+    syncGift(); syncPaidForMethod(); syncCard(); syncInv();
     if (reveal) revealForm(f);
   }
 
   function showCreated(r) {
     const canPay = ctx.can('payments.manage');
-    const title = h('h3', { tabindex: '-1', text: T('nb.created', { no: r.order_no }) });
+    const title = h('h3', { tabindex: '-1', text: T(createdMessageKind(r) === 'link' ? 'nb.createdLink' : 'nb.created', { no: r.order_no }) });
     const openBooking = h('button', { type: 'button', class: `btn ${canPay ? 'ghost' : 'primary'}`, text: T('nb.openBooking'), onclick: async () => {
       openBooking.disabled = true;
       try {

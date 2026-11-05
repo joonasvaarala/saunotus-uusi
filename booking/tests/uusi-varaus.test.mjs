@@ -103,3 +103,32 @@ test('Tyylit: ei sinistä focus-rengasta, nav-järjestys: yhdeksän kohtaa (Talo
   assert.deepEqual(order.slice(0, 9), ['', 'kalenteri', 'tilaukset', 'asiakkaat', 'kassa', 'tuotteet', 'viestit', 'tilat', 'asetukset']);
   assert.deepEqual(order.slice(9), ['uusi', 'tarkista']);
 });
+
+test('Maksulinkki: paidDefaultFor false; validate vaatii emailin; payload paid=false', () => {
+  assert.equal(L.isPaymentLinkMethod('payment_link'), true);
+  assert.equal(L.isPaymentLinkMethod('pay_later'), false);
+  assert.equal(L.paidDefaultFor('payment_link'), false);
+  assert.equal(L.paidDefaultFor('cash'), true);
+  assert.equal(L.validatePaymentLink({ method: 'pay_later' }).ok, true);
+  assert.equal(L.validatePaymentLink({ method: 'payment_link', formEmail: '' }).ok, false);
+  assert.equal(L.validatePaymentLink({ method: 'payment_link', formEmail: 'a@b.fi' }).ok, true);
+  assert.equal(L.validatePaymentLink({ method: 'payment_link', customer: { email: 'x@y.fi' } }).ok, true);
+  assert.equal(L.validatePaymentLink({ method: 'payment_link', customer: { email: null } }).ok, false);
+  const payload = L.buildCreateBookingPayload({
+    ruleId: 1, date: '2026-11-10', persons: 2,
+    customer: { name: 'A', email: 'a@b.fi' },
+    method: 'payment_link', paid: true, note: 'x',
+  });
+  assert.equal(payload.p_payment_method, 'payment_link');
+  assert.equal(payload.p_paid, false);
+  assert.deepEqual(payload.p_customer, { name: 'A', email: 'a@b.fi' });
+  assert.equal(L.createdMessageKind({ payment_link: true }), 'link');
+  assert.equal(L.createdMessageKind({ order_no: 1 }), 'plain');
+});
+test('Tekstit: maksulinkki-avaimet FI/EN', () => {
+  for (const k of ['nb.methodPaymentLink', 'nb.createdLink', 'nb.toastLink', 'nb.errEmailRequired']) {
+    assert.ok(NB.fi[k], k); assert.ok(NB.en[k], k);
+  }
+  assert.match(NB.fi['nb.methodPaymentLink'], /Maksulinkki/);
+  assert.match(NB.en['nb.methodPaymentLink'], /Payment link/);
+});
