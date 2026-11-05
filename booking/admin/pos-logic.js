@@ -12,25 +12,103 @@ export function looksLikeAlcohol(text) {
   return ALCOHOL.test(String(text ?? ''));
 }
 
+export function cartLineKey(row) {
+  if (!row) return null;
+  if (row.kind === 'custom') return row.line_key;
+  return row.product_id;
+}
+
 export function cartAdd(cart, product) {
   const next = cart.map((r) => ({ ...r }));
-  const row = next.find((r) => r.product_id === product.product_id);
+  const row = next.find((r) => r.kind !== 'custom' && r.product_id === product.product_id);
   if (row) row.quantity += 1;
   else next.push({ product_id: product.product_id, name: product.name, unit_price: Number(product.price), vat_rate: product.vat_rate, quantity: 1, age_restricted: !!product.age_restricted });
   return next;
 }
 
-export function cartSetQty(cart, productId, quantity) {
+/** Vapaa rivi: oma line_key, ei yhdistetä muihin. */
+export function cartAddCustom(cart, { description, unit_price, vat_rate, quantity = 1 } = {}) {
+  const name = String(description ?? '').trim();
+  const q = Math.max(1, Math.min(20, Number(quantity) || 1));
+  const key = `c-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+  return [...(cart || []).map((r) => ({ ...r })), {
+    kind: 'custom',
+    line_key: key,
+    name,
+    unit_price: Number(unit_price),
+    vat_rate: Number(vat_rate),
+    quantity: q,
+  }];
+}
+
+export function cartSetQty(cart, key, quantity) {
   const q = Math.max(0, Math.min(20, quantity));
-  return cart.map((r) => ({ ...r })).map((r) => (r.product_id === productId ? { ...r, quantity: q } : r)).filter((r) => r.quantity > 0);
+  return (cart || []).map((r) => ({ ...r })).map((r) => (cartLineKey(r) === key ? { ...r, quantity: q } : r)).filter((r) => r.quantity > 0);
 }
 
 export function cartTotal(cart) {
-  return Math.round(cart.reduce((s, r) => s + Number(r.unit_price) * r.quantity, 0) * 100) / 100;
+  return Math.round((cart || []).reduce((s, r) => s + Number(r.unit_price) * r.quantity, 0) * 100) / 100;
+}
+
+/** ALV-erittely ostoskorista (brutto → netto/vero per kanta). */
+export function cartVatBreakdown(cart) {
+  const map = new Map();
+  for (const r of cart || []) {
+    if (!r || !(r.quantity > 0)) continue;
+    const rate = Number(r.vat_rate);
+    const gross = Math.round(Number(r.unit_price) * r.quantity * 100) / 100;
+    const cur = map.get(rate) || { vat_rate: rate, gross: 0, net: 0, vat: 0 };
+    cur.gross = Math.round((cur.gross + gross) * 100) / 100;
+    map.set(rate, cur);
+  }
+  const rows = [...map.values()].sort((a, b) => a.vat_rate - b.vat_rate);
+  for (const row of rows) {
+    const vat = Math.round((row.gross * row.vat_rate / (100 + row.vat_rate)) * 100) / 100;
+    row.vat = vat;
+    row.net = Math.round((row.gross - vat) * 100) / 100;
+  }
+  return rows;
+}
+
+/** Euro-syöte: pilkku tai piste, max 2 desimaalia. Palauttaa numeron tai null. */
+export function parseEuroInput(raw) {
+  const t = String(raw ?? '').trim().replace(/\s/g, '').replace(',', '.');
+  if (!t) return null;
+  if (!/^\d+(\.\d{1,2})?$/.test(t)) return null;
+  const n = Number(t);
+  if (!Number.isFinite(n) || n < 0 || n > 100000) return null;
+  return Math.round(n * 100) / 100;
+}
+
+/** Vapaan rivin kenttien tarkistus (sama henki kuin palvelin). allowedRates = active vat rates. */
+export function validateCustomLine({ description, quantity, unit_price, vat_rate } = {}, allowedRates = []) {
+  const name = String(description ?? '').trim();
+  if (!name) return { ok: false, error: 'description_required' };
+  if (name.length > 200) return { ok: false, error: 'description_long' };
+  if (name.includes('<')) return { ok: false, error: 'description_invalid' };
+  const q = Number(quantity);
+  if (!Number.isInteger(q) || q < 1 || q > 20) return { ok: false, error: 'quantity_invalid' };
+  const price = typeof unit_price === 'number' ? unit_price : parseEuroInput(unit_price);
+  if (price == null || price < 0 || price !== Math.round(price * 100) / 100) return { ok: false, error: 'price_invalid' };
+  const rate = Number(vat_rate);
+  const allowed = (allowedRates || []).map(Number);
+  if (!Number.isFinite(rate) || (allowed.length && !allowed.includes(rate))) return { ok: false, error: 'vat_invalid' };
+  return { ok: true, description: name, quantity: q, unit_price: price, vat_rate: rate };
 }
 
 export function checkoutItems(cart) {
-  return cart.filter((r) => r.quantity > 0).map((r) => ({ product_id: r.product_id, quantity: r.quantity }));
+  return (cart || []).filter((r) => r.quantity > 0).map((r) => {
+    if (r.kind === 'custom') {
+      return {
+        kind: 'custom',
+        description: r.name,
+        quantity: r.quantity,
+        unit_price: Number(r.unit_price),
+        vat_rate: Number(r.vat_rate),
+      };
+    }
+    return { product_id: r.product_id, quantity: r.quantity };
+  });
 }
 
 export function tendersFor(list, channel) {

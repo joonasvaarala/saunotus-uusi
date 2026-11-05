@@ -3,7 +3,7 @@
 import { h, toast, money, errMsg } from './ui.js';
 import { icon } from './icons.js';
 import { loadPosTexts, posText as tx } from './pos-texts.js';
-import { cartAdd, cartSetQty, cartTotal, checkoutItems, posSheetTenders, tenderAvailable, joinUrl, posCandidates, filterProducts, tillEditorOpen, moveSort, validEmail, posCustomerHits } from './pos-logic.js';
+import { cartAdd, cartAddCustom, cartLineKey, cartSetQty, cartTotal, cartVatBreakdown, checkoutItems, parseEuroInput, validateCustomLine, posSheetTenders, tenderAvailable, joinUrl, posCandidates, filterProducts, tillEditorOpen, moveSort, validEmail, posCustomerHits } from './pos-logic.js';
 import { searchCustomers } from './customer-hits.js';
 import { qrSvgElement } from './qrsvg.js';
 
@@ -22,6 +22,10 @@ export async function renderPos({ ctx, rpc, fn }) {
   let find = '';
   let cart = [];
   let showLines = false;
+  let customOpen = false;
+  let customForm = { description: '', quantity: '1', price: '', vat_rate: '' };
+  let customError = '';
+  let vatRates = [];
   let tender = null;
   let email = '';
   const suggest = { items: [], hi: -1, gen: 0, req: 0, timer: null };
@@ -193,13 +197,19 @@ export async function renderPos({ ctx, rpc, fn }) {
 
   async function load() {
     await loadPosTexts(rpc);
-    const [cat, ten, products] = await Promise.all([
+    const [cat, ten, products, vatRes] = await Promise.all([
       rpc('admin_pos_catalog'),
       rpc('admin_pos_tenders'),
       canEdit ? rpc('admin_list_products').catch(() => []) : Promise.resolve([]),
+      rpc('admin_list_vat_rates').catch(() => null),
     ]);
     catalog = Array.isArray(cat) ? cat : [];
     modes = ten || modes;
+    const rates = Array.isArray(vatRes?.rates) ? vatRes.rates.filter((r) => r && r.active) : [];
+    vatRates = rates.map((r) => Number(r.rate)).filter((n) => Number.isFinite(n));
+    if (!customForm.vat_rate && vatRates.length) {
+      customForm = { ...customForm, vat_rate: String(vatRates.includes(25.5) ? 25.5 : vatRates[vatRates.length - 1]) };
+    }
     try {
       const st = await rpc('admin_get_montonio_status');
       if (st && st.mode) modes = { ...modes, montonio_mode: st.mode };
@@ -548,15 +558,93 @@ export async function renderPos({ ctx, rpc, fn }) {
     if (showLines) {
       if (!cart.length) lines.append(h('p', { class: 'muted', text: t('empty') }));
       for (const r of cart) {
-        lines.append(h('div', { class: 'pos-line' },
+        const key = cartLineKey(r);
+        lines.append(h('div', { class: 'pos-line', 'data-testid': r.kind === 'custom' ? 'pos-custom-line' : 'pos-product-line' },
           h('span', { class: 'grow', text: r.name }),
-          h('button', { type: 'button', class: 'btn pos-step', 'aria-label': t('qty'), text: '−', onclick: () => { cart = cartSetQty(cart, r.product_id, r.quantity - 1); if (phase === 'paying') voidOpen(); draw(); } }),
+          h('button', { type: 'button', class: 'btn pos-step', 'aria-label': t('qty'), text: '−', onclick: () => { cart = cartSetQty(cart, key, r.quantity - 1); if (phase === 'paying') voidOpen(); draw(); } }),
           h('span', { class: 'pos-qty', text: String(r.quantity) }),
-          h('button', { type: 'button', class: 'btn pos-step', 'aria-label': t('qty'), text: '+', onclick: () => { cart = cartSetQty(cart, r.product_id, r.quantity + 1); if (phase === 'paying') voidOpen(); draw(); } }),
+          h('button', { type: 'button', class: 'btn pos-step', 'aria-label': t('qty'), text: '+', onclick: () => { cart = cartSetQty(cart, key, r.quantity + 1); if (phase === 'paying') voidOpen(); draw(); } }),
           h('strong', { text: money(r.unit_price * r.quantity) }),
-          h('button', { type: 'button', class: 'btn ghost', text: t('remove'), onclick: () => { cart = cartSetQty(cart, r.product_id, 0); if (phase === 'paying') voidOpen(); draw(); } })));
+          h('button', { type: 'button', class: 'btn ghost', text: t('remove'), onclick: () => { cart = cartSetQty(cart, key, 0); if (phase === 'paying') voidOpen(); draw(); } })));
+      }
+      const vatRows = cartVatBreakdown(cart);
+      if (vatRows.length) {
+        const box = h('div', { class: 'pos-vat', 'data-testid': 'pos-vat-breakdown', 'aria-label': t('vat_breakdown') });
+        for (const v of vatRows) {
+          box.append(h('p', { class: 'muted pos-vat-row', text: `${t('custom_vat')} ${String(v.vat_rate).replace('.', ',')} %: ${money(v.vat)}` }));
+        }
+        lines.append(box);
       }
     }
+
+
+    function submitCustom() {
+      const parsedPrice = parseEuroInput(customForm.price);
+      const qty = Number.parseInt(String(customForm.quantity || '1'), 10);
+      const check = validateCustomLine({
+        description: customForm.description,
+        quantity: qty,
+        unit_price: parsedPrice,
+        vat_rate: customForm.vat_rate,
+      }, vatRates);
+      if (!check.ok) { customError = t(check.error); draw(); return; }
+      customError = '';
+      if (phase === 'paying') voidOpen();
+      cart = cartAddCustom(cart, check);
+      showLines = true;
+      customOpen = false;
+      customForm = { description: '', quantity: '1', price: '', vat_rate: customForm.vat_rate || (vatRates.includes(25.5) ? '25.5' : String(vatRates[0] || '')) };
+      draw();
+    }
+
+    const customBox = h('div', { class: 'pos-custom', 'data-testid': 'pos-custom' });
+    if (!customOpen) {
+      customBox.append(h('button', {
+        type: 'button', class: 'btn ghost pos-custom-toggle', 'data-testid': 'pos-custom-add',
+        text: t('custom_add'),
+        onclick: () => { customOpen = true; customError = ''; draw(); queueMicrotask(() => document.getElementById('pos-custom-description')?.focus?.()); },
+      }));
+    } else {
+      const vatSelect = h('select', {
+        id: 'pos-custom-vat', 'data-testid': 'pos-custom-vat', 'aria-label': t('custom_vat'),
+        onchange: (e) => { customForm = { ...customForm, vat_rate: e.target.value }; },
+      });
+      for (const rate of vatRates) {
+        const opt = h('option', { value: String(rate), text: `${String(rate).replace('.', ',')} %` });
+        if (String(rate) === String(customForm.vat_rate)) opt.selected = true;
+        vatSelect.append(opt);
+      }
+      customBox.append(
+        h('h2', { class: 'pos-custom-title', text: t('custom_title') }),
+        h('label', { class: 'fld', for: 'pos-custom-description' }, h('span', { text: t('custom_description') }),
+          h('input', {
+            id: 'pos-custom-description', type: 'text', maxlength: '200', autocomplete: 'off',
+            'data-testid': 'pos-custom-description', 'aria-label': t('custom_description'),
+            value: customForm.description,
+            oninput: (e) => { customForm = { ...customForm, description: e.target.value }; },
+          })),
+        h('div', { class: 'pos-custom-row' },
+          h('label', { class: 'fld', for: 'pos-custom-qty' }, h('span', { text: t('custom_qty') }),
+            h('input', {
+              id: 'pos-custom-qty', type: 'number', min: '1', max: '20', step: '1', inputmode: 'numeric',
+              'data-testid': 'pos-custom-qty', 'aria-label': t('custom_qty'), value: customForm.quantity,
+              oninput: (e) => { customForm = { ...customForm, quantity: e.target.value }; },
+            })),
+          h('label', { class: 'fld', for: 'pos-custom-price' }, h('span', { text: t('custom_price') }),
+            h('input', {
+              id: 'pos-custom-price', type: 'text', inputmode: 'decimal', autocomplete: 'off',
+              'data-testid': 'pos-custom-price', 'aria-label': t('custom_price'), value: customForm.price,
+              oninput: (e) => { customForm = { ...customForm, price: e.target.value }; },
+            })),
+          h('label', { class: 'fld', for: 'pos-custom-vat' }, h('span', { text: t('custom_vat') }), vatSelect)),
+        customError ? h('p', { role: 'alert', class: 'err', 'data-testid': 'pos-custom-error', text: customError }) : null,
+        h('div', { class: 'pos-custom-actions' },
+          h('button', { type: 'button', class: 'btn primary', 'data-testid': 'pos-custom-save', text: t('custom_save'), onclick: () => submitCustom() }),
+          h('button', { type: 'button', class: 'btn ghost', 'data-testid': 'pos-custom-cancel', text: t('custom_cancel'),
+            onclick: () => { customOpen = false; customError = ''; draw(); } })),
+      );
+    }
+    lines.append(customBox);
 
     const side = h('aside', { class: 'pos-side', 'data-testid': 'pos-side' },
       h('p', { class: 'pos-total-label', text: t('total') }),
