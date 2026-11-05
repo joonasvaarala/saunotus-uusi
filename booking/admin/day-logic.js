@@ -266,8 +266,11 @@ export function sumPersons(list) {
 // Päivänäkymän vaaleanpunainen tausta: vielä maksamatta. Konservatiivinen.
 // Korostetaan: unpaid | pending | failed | partially_paid.
 // Ei korosteta: paid | invoiced | refunded | partially_refunded (laskutettu / maksettu / hyvitetty).
-// Vain aktiiviset varaukset (pending/confirmed/completed). Kumppanilunastus joka on unpaid
-// näkyy pinkkinä (avoimeksi päätökseksi Joonakselle).
+// Vain aktiiviset varaukset (pending/confirmed/completed).
+// Kumppanilunastus (Elämyslahjat / Kokemuskauppa / Offerilla): ennen hyväksyntää tilaus on
+// payment_status unpaid/pending → pinkki. Hyväksynnän jälkeen (redeemed) tilaus on paid → ei pinkkiä.
+// Päivänäkymä saa vain payment_status-kentän (admin_day_view); erillistä claim-tilaa ei palauteta,
+// joten sääntö nojaa payment_statusiin. Maksulinkki ilman eräpäivää (pending/unpaid) ennallaan.
 const DAY_UNPAID_PAY = new Set(['unpaid', 'pending', 'failed', 'partially_paid']);
 export function isDayUnpaidHighlight(row) {
   if (!row) return false;
