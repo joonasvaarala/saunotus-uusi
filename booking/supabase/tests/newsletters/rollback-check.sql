@@ -4,3 +4,8 @@ do $$begin
  if not exists(select 1 from booking.email_outbox where dedupe_key='t259-rollback-newsletter' and status='skipped') then raise exception 'Newsletter queue not stopped';end if;
  if not exists(select 1 from booking.email_outbox where dedupe_key='t259-rollback-existing' and status='pending') then raise exception 'Existing mail changed';end if;
 end$$;
+do $$begin
+ if to_regclass('booking.newsletter_optout_tokens') is null or to_regclass('booking.newsletter_suppressions') is null then raise exception 'Rollback must preserve opt-out history';end if;
+ perform booking.public_newsletter_unsubscribe('00000000-0000-4000-8000-000000000259');
+ if not exists(select 1 from booking.newsletter_suppressions where address_fingerprint=repeat('a',64))then raise exception 'Old opt-out token broken after rollback';end if;
+end$$;

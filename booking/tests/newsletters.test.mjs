@@ -15,8 +15,8 @@ test('newsletter renderer is standalone, branded, responsive and keeps the bot s
 });
 test('marketing opt-out is mandatory and localized',()=>{
  assert.equal(renderNewsletter({...data,unsubscribe_url:null}),null);
- assert.match(renderNewsletter(data).html,/Peruuta markkinointiviestit/);
- assert.match(renderNewsletter({...data,locale:'en'}).html,/Unsubscribe from marketing emails/);
+ assert.match(renderNewsletter(data).html,/Peruuta uutiskirjeet/);
+ assert.match(renderNewsletter({...data,locale:'en'}).html,/Unsubscribe from newsletters/);
  assert.match(renderNewsletter({...data,locale:'en'}).text,/Open: https:/);
 });
 test('all bot text is escaped; unsafe URLs and CSS never enter HTML',()=>{
@@ -55,4 +55,16 @@ test('isolated entry and route integration hook do not require shell/nav edits',
  const view=read('booking/admin/views/newsletters.js');
  assert.match(view,/sandbox:''/);assert.match(view,/default-src/);assert.match(view,/p_confirm:false/);assert.match(view,/p_confirm:true/);
  assert.doesNotMatch(view,/console\.log|innerHTML/);
+});
+
+
+test('scoped opt-out is explicit, clears its opaque fragment and has no admin session requirement',async()=>{
+ const js=readFileSync(new URL('../admin/newsletter-unsubscribe.js',import.meta.url),'utf8');
+ const sql=readFileSync(new URL('../supabase/migrations/20261106220300_booking_259_newsletters.sql',import.meta.url),'utf8');
+ assert.match(js,/history\.replaceState/);assert.match(js,/onclick:async/);
+ assert.match(js,/rpc\('public_newsletter_unsubscribe'/);assert.doesNotMatch(js,/getSession|console\./);
+ assert.doesNotMatch(sql,/create (?:or replace )?function booking\.public_marketing_unsubscribe/i);
+ assert.match(sql,/create unique index newsletter_outbox_address_uq/);
+ assert.match(sql,/status in \('failed','dead'\)/);
+ assert.match(sql,/booking\._newsletter_fingerprint\(c\.email\) is distinct from expected/);
 });

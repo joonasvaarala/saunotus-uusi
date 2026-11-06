@@ -49,7 +49,13 @@ export const NEWSLETTER_TEXTS = {
     "email_disabled": "Sähköpostilähetys on pois käytöstä. Pyydä ylläpitäjää tarkistamaan lähetysasetukset.",
     "no_recipients": "Valitussa kohderyhmässä ei ole vastaanottajia.",
     "newsletter_conflict": "Luonnos muuttui tai on jo lähetetty. Lataa uudelleen.",
-    "newsletter_preview_required": "Vastaanottajat tai luonnos muuttuivat. Esikatsele uudelleen."
+    "newsletter_preview_required": "Vastaanottajat tai luonnos muuttuivat. Esikatsele uudelleen.",
+    "unsubscribe_title": "Peruuta uutiskirjeet",
+    "unsubscribe_lead": "Vahvistamalla estät uutiskirjeet tähän sähköpostiosoitteeseen, myös jos osoite on usealla asiakasprofiililla. Tämä ei muuta palveluviestejä tai muita markkinointilupia.",
+    "unsubscribe_confirm": "Vahvista uutiskirjeiden peruutus",
+    "unsubscribe_done": "Peruutus on käsitelty. Uutiskirjeitä ei enää toimiteta tämän linkin osoitteeseen.",
+    "unsubscribe_invalid": "Peruutuslinkki puuttuu tai on virheellinen. Avaa linkki saamastasi uutiskirjeestä.",
+    "unsubscribe_error": "Peruutusta ei voitu vahvistaa. Yritä uudelleen."
   },
   "en": {
     "title": "Newsletters",
@@ -99,7 +105,13 @@ export const NEWSLETTER_TEXTS = {
     "email_disabled": "Email delivery is disabled. Ask an administrator to check delivery settings.",
     "no_recipients": "No recipients in the selected audience.",
     "newsletter_conflict": "The draft changed or was already sent. Reload it.",
-    "newsletter_preview_required": "The audience or draft changed. Preview again."
+    "newsletter_preview_required": "The audience or draft changed. Preview again.",
+    "unsubscribe_title": "Unsubscribe from newsletters",
+    "unsubscribe_lead": "Confirm to stop newsletters to this email address, including duplicate customer profiles. This does not change service messages or other marketing permissions.",
+    "unsubscribe_confirm": "Confirm newsletter unsubscribe",
+    "unsubscribe_done": "Unsubscribe processed. Newsletters will no longer be delivered to the address linked to this token.",
+    "unsubscribe_invalid": "This unsubscribe link is missing or invalid. Open the link from your newsletter.",
+    "unsubscribe_error": "The unsubscribe could not be confirmed. Please try again."
   }
 };
 let remote = {};

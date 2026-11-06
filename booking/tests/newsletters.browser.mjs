@@ -68,5 +68,26 @@ try{
  await page.goto(base+'/hallinta/newsletters.html');
  await page.getByText('Kirjaudu ensin hallintaan ja palaa sitten tälle sivulle.',{exact:true}).waitFor();
  assert.equal(await page.getByRole('button',{name:'Lähetä uutiskirje',exact:true}).count(),0);
- await ctx.close();console.log('PASS newsletter browser anonymous session gate');
+ console.log('PASS newsletter browser anonymous session gate');
+ const publicErrors=[];page.on('pageerror',e=>publicErrors.push(e.message));
+ let optoutCalls=0;
+ await page.route('**/rest/v1/rpc/public_newsletter_unsubscribe',async route=>{
+  optoutCalls++;assert.equal(route.request().method(),'POST');
+  assert.equal(route.request().postDataJSON().p_token,'00000000-0000-4000-8000-000000000259');
+  await route.fulfill({contentType:'application/json',body:'{"ok":true}',headers:{'access-control-allow-origin':'*'}});
+ });
+ for(const lang of ['fi','en']){
+  const before=optoutCalls;
+  await page.goto(`${base}/hallinta/newsletter-unsubscribe.html#token=00000000-0000-4000-8000-000000000259&lang=${lang}`);
+  const button=page.getByRole('button',{name:lang==='en'?'Confirm newsletter unsubscribe':'Vahvista uutiskirjeiden peruutus'});
+  await button.waitFor();assert.equal(new URL(page.url()).hash,'');assert.equal(optoutCalls,before,'Opening link must not unsubscribe');
+  assert.equal(await page.locator('#newsletter-view').count(),0,'Public opt-out must not render admin');
+  await button.click();await page.getByRole('status').filter({hasText:lang==='en'?'Unsubscribe processed.':'Peruutus on käsitelty.'}).waitFor();
+  assert.equal(optoutCalls,before+1);
+ }
+ await page.goto(`${base}/hallinta/newsletter-unsubscribe.html#token=invalid&lang=en`);
+ await page.getByRole('alert').waitFor();
+ assert.equal(await page.getByRole('button').count(),0);assert.equal(optoutCalls,2);
+ assert.deepEqual(publicErrors,[]);await ctx.close();
+ console.log('Public FI/EN explicit opt-out, invalid link and fragment privacy PASS');
 }finally{await browser.close();await new Promise(r=>server.close(r));}

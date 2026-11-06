@@ -986,5 +986,125 @@
     "max_len": 400,
     "placeholders": [],
     "reason": "booking_259: uutiskirjeen turvalliset virhetekstit"
+  },
+  {
+    "key": "admin.newsletter.unsubscribe_title",
+    "lang": "fi",
+    "text": "Peruuta uutiskirjeet",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 600,
+    "placeholders": [],
+    "reason": "booking_259: uutiskirjeeseen rajattu osoitekohtainen peruutus"
+  },
+  {
+    "key": "admin.newsletter.unsubscribe_title",
+    "lang": "en",
+    "text": "Unsubscribe from newsletters",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 600,
+    "placeholders": [],
+    "reason": "booking_259: uutiskirjeeseen rajattu osoitekohtainen peruutus"
+  },
+  {
+    "key": "admin.newsletter.unsubscribe_lead",
+    "lang": "fi",
+    "text": "Vahvistamalla estät uutiskirjeet tähän sähköpostiosoitteeseen, myös jos osoite on usealla asiakasprofiililla. Tämä ei muuta palveluviestejä tai muita markkinointilupia.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 600,
+    "placeholders": [],
+    "reason": "booking_259: uutiskirjeeseen rajattu osoitekohtainen peruutus"
+  },
+  {
+    "key": "admin.newsletter.unsubscribe_lead",
+    "lang": "en",
+    "text": "Confirm to stop newsletters to this email address, including duplicate customer profiles. This does not change service messages or other marketing permissions.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 600,
+    "placeholders": [],
+    "reason": "booking_259: uutiskirjeeseen rajattu osoitekohtainen peruutus"
+  },
+  {
+    "key": "admin.newsletter.unsubscribe_confirm",
+    "lang": "fi",
+    "text": "Vahvista uutiskirjeiden peruutus",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 600,
+    "placeholders": [],
+    "reason": "booking_259: uutiskirjeeseen rajattu osoitekohtainen peruutus"
+  },
+  {
+    "key": "admin.newsletter.unsubscribe_confirm",
+    "lang": "en",
+    "text": "Confirm newsletter unsubscribe",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 600,
+    "placeholders": [],
+    "reason": "booking_259: uutiskirjeeseen rajattu osoitekohtainen peruutus"
+  },
+  {
+    "key": "admin.newsletter.unsubscribe_done",
+    "lang": "fi",
+    "text": "Peruutus on käsitelty. Uutiskirjeitä ei enää toimiteta tämän linkin osoitteeseen.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 600,
+    "placeholders": [],
+    "reason": "booking_259: uutiskirjeeseen rajattu osoitekohtainen peruutus"
+  },
+  {
+    "key": "admin.newsletter.unsubscribe_done",
+    "lang": "en",
+    "text": "Unsubscribe processed. Newsletters will no longer be delivered to the address linked to this token.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 600,
+    "placeholders": [],
+    "reason": "booking_259: uutiskirjeeseen rajattu osoitekohtainen peruutus"
+  },
+  {
+    "key": "admin.newsletter.unsubscribe_invalid",
+    "lang": "fi",
+    "text": "Peruutuslinkki puuttuu tai on virheellinen. Avaa linkki saamastasi uutiskirjeestä.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 600,
+    "placeholders": [],
+    "reason": "booking_259: uutiskirjeeseen rajattu osoitekohtainen peruutus"
+  },
+  {
+    "key": "admin.newsletter.unsubscribe_invalid",
+    "lang": "en",
+    "text": "This unsubscribe link is missing or invalid. Open the link from your newsletter.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 600,
+    "placeholders": [],
+    "reason": "booking_259: uutiskirjeeseen rajattu osoitekohtainen peruutus"
+  },
+  {
+    "key": "admin.newsletter.unsubscribe_error",
+    "lang": "fi",
+    "text": "Peruutusta ei voitu vahvistaa. Yritä uudelleen.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 600,
+    "placeholders": [],
+    "reason": "booking_259: uutiskirjeeseen rajattu osoitekohtainen peruutus"
+  },
+  {
+    "key": "admin.newsletter.unsubscribe_error",
+    "lang": "en",
+    "text": "The unsubscribe could not be confirmed. Please try again.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 600,
+    "placeholders": [],
+    "reason": "booking_259: uutiskirjeeseen rajattu osoitekohtainen peruutus"
   }
 ]

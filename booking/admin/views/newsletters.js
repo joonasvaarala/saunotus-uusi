@@ -79,7 +79,7 @@ export async function render({ctx}) {
   }
 }
 function previewFrame(draft,lang){
-  const mail=renderNewsletter({subject:draft['subject_'+lang],body:draft['body_'+lang],style:draft.style,locale:lang,unsubscribe_url:'https://saunotus.fi/tilaus/?u=PREVIEW'});
+  const mail=renderNewsletter({subject:draft['subject_'+lang],body:draft['body_'+lang],style:draft.style,locale:lang,unsubscribe_url:'https://saunotus.fi/hallinta/newsletter-unsubscribe.html#token=PREVIEW'});
   const csp='<meta http-equiv="Content-Security-Policy" content="default-src \'none\'; img-src https:; style-src \'unsafe-inline\'; base-uri \'none\'; form-action \'none\'">';
   return h('section',{},h('h2',{text:T(lang+'_preview')}),h('iframe',{title:T(lang+'_preview'),sandbox:'',referrerpolicy:'no-referrer',srcdoc:mail?.html.replace('<head>','<head>'+csp)||'',class:'newsletter-frame'}));
 }

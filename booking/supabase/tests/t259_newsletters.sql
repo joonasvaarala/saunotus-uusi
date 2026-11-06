@@ -28,8 +28,8 @@ begin
   update booking.integration_config set mode='dry_run' where key='resend';
   select id into sauna from booking.resources order by id limit 1;
   for i in 1..8 loop
-    insert into booking.customers(name,email,marketing_consent,language)
-      values('newsletter259-'||i,'newsletter259-'||i||'@example.test',i<>7,case when i=2 then 'en' else 'fi' end) returning id into c;
+    insert into booking.customers(name,email,marketing_consent,marketing_consent_at,language)
+      values('newsletter259-'||i,'newsletter259-'||i||'@example.test',i<>7,now(),case when i=2 then 'en' else 'fi' end) returning id into c;
     ids:=array_append(ids,c);
   end loop;
   update booking.customers set anonymized_at=now() where id=ids[8];
@@ -57,7 +57,7 @@ begin
   insert into booking.orders(customer_id,status,payment_status,locale,created_at)
     values(ids[5],'confirmed','paid','fi',date_trunc('year',now())-interval '1 month') returning id into oid;
   insert into booking.gift_cards(code,initial_amount,balance,status,purchase_order_id,buyer_customer_id)
-    values('TEST-NEWSLETTER-259-'||uid,1,1,'active',oid,ids[5]);
+    values('HH'||upper(left(replace(uid::text,'-',''),10)),1,1,'active',oid,ids[5]);
   perform pg_temp.ck((select count(*) from booking._newsletter_recipients('gift_buyers','all'))=1,'gift buyer segment');
   perform pg_temp.ck((select count(*) from booking._newsletter_recipients('christmas_gift_buyers','all'))=1,'previous Nov-Dec gift buyers');
   data:='{"subject_fi":"Testi","subject_en":"Test","body_fi":"Suomeksi","body_en":"English","style":{"layout":"editorial","accent":"#123456","cta_url":"https://saunotus.fi/lahjakortti/","cta_fi":"Avaa","cta_en":"Open"},"segment":"all","language":"all"}';
@@ -96,15 +96,15 @@ begin
   select id into eid from booking.email_outbox where kind='newsletter' and payload->>'customer_id'=ids[2]::text order by id desc limit 1;
   update booking.email_outbox set status='sending' where id=eid;
   y:=booking.email_newsletter_payload(eid);
-  perform pg_temp.ck(y->>'allowed'='true' and y->>'locale'='en' and y->>'subject'='Test' and y->>'body'='English' and y->>'unsubscribe_url' like '%/en/order/?u=%','English payload with opt-out and bot style');
+  perform pg_temp.ck(y->>'allowed'='true' and y->>'locale'='en' and y->>'subject'='Test' and y->>'body'='English' and y->>'unsubscribe_url' like '%/hallinta/newsletter-unsubscribe.html#token=%&lang=en','English payload with opt-out and bot style');
   update booking.customers set marketing_consent=false where id=ids[2];
   perform pg_temp.ck(booking.email_newsletter_payload(eid)->>'allowed'='false','delivery rechecks consent after queueing');
   perform pg_temp.ck(not exists(select 1 from information_schema.columns where table_schema='booking' and table_name='newsletter_logs' and column_name ~ 'email|recipient.*id'),'no recipient address/list in logs');
   blocked:=false;begin perform booking.svc_newsletter_save(nid,data,v);exception when sqlstate 'BK001' then blocked:=true;end;
   perform pg_temp.ck(blocked,'sent newsletter is immutable to bots');
   -- 5000 is a hard cap, not a silent LIMIT that loses part of the audience.
-  insert into booking.customers(name,email,marketing_consent,language)
-    select 'newsletter259-cap','newsletter259-cap-'||uid||'-'||g||'@example.test',true,'fi' from generate_series(1,5001) g;
+  insert into booking.customers(name,email,marketing_consent,marketing_consent_at,language)
+    select 'newsletter259-cap','newsletter259-cap-'||uid||'-'||g||'@example.test',true,now(),'fi' from generate_series(1,5001) g;
   draft:=booking.svc_newsletter_save(null,data);nid:=(draft->>'id')::bigint;v:=(draft->>'version')::int;
   blocked:=false;begin perform booking.admin_newsletter_dispatch(nid,v,false);exception when sqlstate 'BK001' then blocked:=true;end;
   perform pg_temp.ck(blocked,'recipient cap rejects oversized audience without partial dispatch');

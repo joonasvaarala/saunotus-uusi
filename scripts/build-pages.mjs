@@ -107,6 +107,13 @@ let nImports = 0;
   if (bannerOn) t = injectTestBanner(t, { lang: 'fi', kind: 'hallinta' });
   writeFileSync(hp, t);
 }
+// booking_259: public, newsletter-only opt-out page; no admin login or GET-side mutation.
+{
+  const hp = join(A, 'newsletter-unsubscribe.html');
+  let t = readFileSync(hp, 'utf8').replace(/((?:href|src)=")(admin\.css|newsletter\.css|config\.js|newsletter-unsubscribe\.js)(")/g, `$1$2${VER}$3`);
+  if (bannerOn) t = injectTestBanner(t, { lang: 'fi', kind: 'hallinta' });
+  writeFileSync(hp, t);
+}
 // Julkaisun tunnus erillisessä tiedostossa. Hallinta hakee sen ilman välimuistia (cache: 'no-store' + ?ts=).
 // sw.js ohittaa tiedoston, joten vanha service worker ei voi tarjoilla edellistä tunnusta.
 writeFileSync(join(A, 'version.json'), JSON.stringify({ assetVer: VER }) + '\n');
