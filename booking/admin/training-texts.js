@@ -115,7 +115,8 @@ export const TRAINING_TEXTS = {
     "payment_subject": "Muistutus kurssimaksusta",
     "payment_body": "Hei!\n\nMuistathan tarkistaa kurssimaksusi. Jos olet jo maksanut, tämä viesti ei vaadi toimenpiteitä. Ota yhteyttä, jos tarvitset maksutiedot.",
     "complete_template": "Kirjoita jakson saapumisohje molemmilla kielillä ennen esikatselua.",
-    "places_free": "Vapaita paikkoja"
+    "places_free": "Vapaita paikkoja",
+    "review_balance": "Tilausta on jo muutettu. Avaa tilaus ja tarkista loppumaksu ennen laskutusta."
   },
   "en": {
     "title": "Trainings",
@@ -231,7 +232,8 @@ export const TRAINING_TEXTS = {
     "payment_subject": "Course payment reminder",
     "payment_body": "Hello!\n\nPlease check your course payment. If you have already paid, no action is needed. Contact us if you need payment details.",
     "complete_template": "Write the arrival instructions in both languages before previewing.",
-    "places_free": "Places available"
+    "places_free": "Places available",
+    "review_balance": "This order has already been changed. Open the order and check the balance before billing."
   }
 };
 let remote = {};

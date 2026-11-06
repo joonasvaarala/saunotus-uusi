@@ -570,6 +570,11 @@
     "text": "Vapaita paikkoja"
   },
   {
+    "key": "admin.training.review_balance",
+    "lang": "fi",
+    "text": "Tilausta on jo muutettu. Avaa tilaus ja tarkista loppumaksu ennen laskutusta."
+  },
+  {
     "key": "admin.training.title",
     "lang": "en",
     "text": "Trainings"
@@ -1138,5 +1143,10 @@
     "key": "admin.training.places_free",
     "lang": "en",
     "text": "Places available"
+  },
+  {
+    "key": "admin.training.review_balance",
+    "lang": "en",
+    "text": "This order has already been changed. Open the order and check the balance before billing."
   }
 ]

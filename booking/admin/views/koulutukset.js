@@ -17,7 +17,7 @@ const link = (text, href, cls = 'btn') => h('a', { class: cls, href, text });
 const nameOf = p => getLang() === 'en' && p.name_en ? p.name_en : p.name;
 const dates = r => `${fmtDate(r.starts_at || r.date)}${r.ends_at ? ` – ${fmtDate(r.session_ends_at || r.ends_at)}` : ''}`;
 const spaceBlocks = (r, refs) => (r.blocks || []).filter(b => b.mode === 'exclusive' && (b.resource_kind === 'space' || TRAINING_SPACES.has(b.resource_code) || (refs?.resources || []).some(s => s.id === b.resource_id && TRAINING_SPACES.has(s.code))));
-const safeError = e => (e?.code === 'conflict' ? T('conflict') : e?.code === 'queue_order' ? T('queue_order') : errMsg(e));
+const safeError = e => (e?.code === 'conflict' ? T('conflict') : e?.code === 'queue_order' ? T('queue_order') : e?.code === 'training_balance_review' ? T('review_balance') : errMsg(e));
 async function act(button, job) { return run(button, async () => { try { await job(); } catch (e) { toast(safeError(e), 'err'); } }); }
 
 export async function render(args) {

@@ -327,13 +327,15 @@ end $$;
 -- Loppumaksu lisätään vain nimenomaisella henkilökunnan teolla, nykyisen lisäostotoiminnon kautta.
 -- Snapshot-hinnat ja alkuperäisen rivin ALV säilyvät, ei uutta hinnanlaskentaa. Toistokutsu ei lisää toista riviä.
 create function booking.admin_training_prepare_balance(p_rule_id bigint,p_order_id bigint) returns jsonb
-language plpgsql security definer set search_path = '' as $$ declare tp booking.training_participants; rem numeric; vat numeric; result jsonb; begin
+language plpgsql security definer set search_path = '' as $$ declare tp booking.training_participants; rem numeric; vat numeric; billed numeric; result jsonb; begin
   perform booking._require_permission('payments.manage'); perform booking._training_work_rule(p_rule_id);
   if not exists(select 1 from booking._event_rule_res_ids(p_rule_id) ids join booking.reservations r on r.id=ids.id where r.order_id=p_order_id and r.status<>'cancelled') then perform booking._err('not_found','Osallistuja ei kuulu jaksoon'); end if;
-  perform 1 from booking.orders where id=p_order_id for update;
+  select total_gross into billed from booking.orders where id=p_order_id for update;
   select * into tp from booking.training_participants where order_id=p_order_id order by id limit 1;
   if tp.total is null then perform booking._err('invalid_price','Kurssin kokonaishintaa ei ole tallennettu'); end if;
   if exists(select 1 from booking.order_items where order_id=p_order_id and price_breakdown->>'training_balance'='true') then return jsonb_build_object('ok',true,'already_prepared',true); end if;
+  -- Älä lisää nimellistä loppumaksua tilaukseen, jota on jo laskutettu käsin osittain.
+  if abs(billed-tp.deposit_paid)>0.004 then perform booking._err('training_balance_review','Tilausta on jo muutettu. Avaa tilaus ja tarkista loppumaksu ennen laskutusta'); end if;
   rem:=round(tp.total-tp.deposit_paid,2);
   if rem<=0 then return jsonb_build_object('ok',true,'already_prepared',true); end if;
   select vat_rate into vat from booking.order_items where order_id=p_order_id and kind='reservation' order by id limit 1;

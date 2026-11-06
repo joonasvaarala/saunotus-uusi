@@ -56,6 +56,12 @@ begin
   perform booking.admin_training_person_save(resid,'{"diet":"vegan","accommodation":"single","arrival":"15:00","language":"en","present":true}');
   person:=booking.admin_training_people(r)->0;
   perform pg_temp.ck(person->>'diet'='vegan' and (person->>'present')::boolean and (person->>'paid_actual')::numeric=0 and (person->>'due_actual')::numeric=1950,'practical details and real unpaid amount, not nominal deposit_paid');
+  begin
+    perform booking.admin_add_to_order(oid,'[{"type":"custom","description":"Existing manual partial balance","amount":100,"vat_rate":25.5,"quantity":1}]',false,false,null);
+    hit:=false;begin perform booking.admin_training_prepare_balance(r,oid);exception when sqlstate 'BK001' then hit:=true;end;
+    raise sqlstate 'P9255' using message='rollback partial billing fixture';
+  exception when sqlstate 'P9255' then null;end;
+  perform pg_temp.ck(hit,'existing manual billing requires review instead of adding a duplicate nominal balance');
   x:=booking.admin_training_prepare_balance(r,oid);
   perform pg_temp.ck((select total_gross from booking.orders where id=oid)=1950,'saved final balance added using existing billing logic');
   perform booking.admin_training_prepare_balance(r,oid);
