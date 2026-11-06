@@ -26,7 +26,9 @@ test('saunavuorot: ilman tuotekuvaa toimituksellinen kuva, tuotekuva korvaa sen'
   try {
     const block = between(R.sauna('fi'), 'data-slug="yleinensauna"', 'data-slug="miestensauna-2"');
     assert.match(block, /<img [^>]*src="[^"]*products\/1-newimg2\.webp[^"]*v=2026-10-28T18/);
-    assert.match(block, /alt="Uusi yleinen"/);
+    const dataAlt = block.match(/data-alt="([^"]+)"/)?.[1];
+    assert.ok(dataAlt, 'data-alt puuttuu');
+    assert.ok(block.includes(`alt="${dataAlt}"`), `img alt ei vastaa data-altia (${dataAlt})`);
     assert.match(block, /<template class="pi-fallback">[\s\S]*j-yleinen-/);
     assert.doesNotMatch(block.split('<template')[0], /j-yleinen-/);
   } finally { restore(); }
@@ -66,4 +68,32 @@ test('booking_212 lisää updated_at:n eikä muuta kuvien joukkoa', () => {
   const back = readFileSync(new URL('../booking/supabase/rollbacks/20261028194142_booking_212_ROLLBACK.sql', import.meta.url), 'utf8');
   assert.match(back, /'path', pc\.image_path/);
   assert.doesNotMatch(back, /'updated_at'/);
+});
+
+test('EN-lahjakorttipaketin kuva-alt on englanniksi, ei suomenkielinen image_alt', () => {
+  const restore = setProductImages([{ slug: 'yleinensauna', path: 'products/1-newimg2.webp', alt: 'Yleinen vuoro', width: 900, height: 600, updated_at: '2026-10-28T18:00:00.000Z' }]);
+  try {
+    const entry = between(R.gift('en'), 'data-gift-package="entry_2"', 'data-gift-package="peat_mask_2"');
+    const dataAlt = entry.match(/data-alt="([^"]+)"/)?.[1];
+    assert.ok(dataAlt);
+    assert.notEqual(dataAlt, 'Yleinen vuoro');
+    assert.doesNotMatch(dataAlt, /Yleinen|Saunarituaali|Saunotus/);
+    assert.ok(entry.includes(`alt="${dataAlt}"`));
+    assert.doesNotMatch(entry.split('<template')[0], /alt="Yleinen vuoro"/);
+  } finally { restore(); }
+});
+
+test('FI-lahjakorttipaketin kuva-alt pysyy suomeksi', () => {
+  const entry = between(R.gift('fi'), 'data-gift-package="entry_2"', 'data-gift-package="peat_mask_2"');
+  const dataAlt = entry.match(/data-alt="([^"]+)"/)?.[1];
+  assert.ok(dataAlt);
+  assert.doesNotMatch(dataAlt, /Smoke sauna/i);
+  assert.ok(entry.includes(`alt="${dataAlt}"`));
+});
+
+test('product-cards-live suosii data-altia suomenkielisen row.altin sijaan', () => {
+  const src = readFileSync(new URL('../booking/shop/src/product-cards-live.js', import.meta.url), 'utf8');
+  const line = src.split('\n').find((l) => l.includes('const alt =') && l.includes('dataset.alt'));
+  assert.ok(line, 'alt-valintarivi puuttuu');
+  assert.ok(line.indexOf('dataset.alt') < line.indexOf('row.alt'), line);
 });

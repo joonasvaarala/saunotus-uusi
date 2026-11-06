@@ -59,7 +59,8 @@ function paint(host, row, base) {
   if (box.dataset.piVer === ver) return;
   const img = box.querySelector('img');
   if (img && img.getAttribute('src') === url) { box.dataset.piVer = ver; return; }
-  const alt = (row.alt && String(row.alt).trim()) || box.dataset.alt || host.dataset.alt || img?.alt || '';
+  // Esirenderöity data-alt on sivun kielen mukainen; row.alt on vain suomeksi.
+  const alt = (box.dataset.alt || host.dataset.alt || (row.alt && String(row.alt).trim()) || img?.alt || '').trim();
   const w = Number(img?.getAttribute('width')) || 900;
   const hgt = Number(img?.getAttribute('height')) || 600;
   const sizes = box.dataset.sizes || host.dataset.sizes || SIZES.shop;
