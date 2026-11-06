@@ -4,7 +4,7 @@
 -- Do not run if feature objects still exist. Review/package with a reserved number later.
 begin;
 set local lock_timeout='5s';
-do $$begin
+do $$declare retained_max bigint;next_log numeric;begin
  if to_regclass('booking.newsletters') is not null or to_regclass('booking.newsletter_logs') is not null then
    raise exception 'Re-enable requires completed feature rollback';end if;
  if to_regclass('booking.newsletter_suppressions') is null or to_regclass('booking.newsletter_optout_tokens') is null
@@ -16,13 +16,26 @@ do $$begin
    and t.tgname='newsletter_capture_general_optout' and not t.tgisinternal and t.tgenabled in ('O','A')
    and t.tgfoid=to_regprocedure('booking._newsletter_capture_general_optout()')) then
    raise exception 'Approved permanent general opt-out capture required before re-enable';end if;
+ -- Retain BOTH WAL-logged, unowned sequences; never recreate/reset them.
+ if to_regclass('booking.newsletter_campaign_id_seq') is null or to_regclass('booking.newsletter_log_id_seq') is null then
+   raise exception 'Permanent campaign/log identity high-water missing; STOP, never restart at1';end if;
+ if (select count(*) from pg_catalog.pg_sequence s join pg_catalog.pg_class c on c.oid=s.seqrelid
+   where s.seqrelid in('booking.newsletter_campaign_id_seq'::regclass,'booking.newsletter_log_id_seq'::regclass)
+   and c.relpersistence='p' and s.seqtypid='bigint'::regtype and not s.seqcycle and s.seqincrement=1)<>2
+   or exists(select 1 from pg_catalog.pg_depend where classid='pg_class'::regclass
+     and objid in('booking.newsletter_campaign_id_seq'::regclass,'booking.newsletter_log_id_seq'::regclass)and deptype in('a','i'))then
+   raise exception 'Identity sequences must be permanent, bigint, monotonic, NO CYCLE, OWNED BY NONE';end if;
+ select coalesce(max((payload->>'newsletter_log_id')::bigint),0) into retained_max from booking.email_outbox
+   where kind='newsletter' and payload->>'newsletter_log_id' ~ '^[0-9]+$';
+ select last_value::numeric+case when is_called then 1 else 0 end into next_log from booking.newsletter_log_id_seq;
+ if next_log<=retained_max then raise exception 'Log identity high-water does not exceed retained outbox history; STOP for review';end if;
  if not exists(select 1 from pg_catalog.pg_constraint where conrelid='booking.email_outbox'::regclass
    and conname='email_outbox_kind_check' and position('newsletter' in pg_get_constraintdef(oid))>0)then
    raise exception 'Retained newsletter outbox kind missing';end if;
 end$$;
 -- Feature definitions below match corrected259; permanent infrastructure is NOT recreated.
 create table booking.newsletters (
-  id bigint generated always as identity primary key,
+  id bigint primary key default nextval('booking.newsletter_campaign_id_seq'::regclass),
   subject_fi text not null check (length(btrim(subject_fi)) between 1 and 200),
   subject_en text not null check (length(btrim(subject_en)) between 1 and 200),
   body_fi text not null check (length(btrim(body_fi)) between 1 and 16000),
@@ -37,7 +50,7 @@ create table booking.newsletters (
   created_at timestamptz not null default now(), updated_at timestamptz not null default now()
 );
 create table booking.newsletter_logs (
-  id bigint generated always as identity primary key,
+  id bigint primary key default nextval('booking.newsletter_log_id_seq'::regclass),
   newsletter_id bigint not null unique references booking.newsletters(id),
   subject_fi text not null, subject_en text not null,
   body_fi text not null, body_en text not null, style jsonb not null,

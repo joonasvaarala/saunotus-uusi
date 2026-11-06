@@ -1,7 +1,9 @@
--- PROPOSAL ONLY — NOT PART OF migration 259. Requires parent + Koodari agreement.
--- Never run automatically. Depends ONLY on retained infrastructure from reviewed 259.
--- Permanent infrastructure: independent of draft/dispatch tables; survives feature rollback.
-begin;
+-- booking_262: permanent newsletter general-opt-out capture + atomic backfill.
+-- RESERVED/REVIEW PACKAGE ONLY. HOLD: no execution, push, merge or release approval.
+-- Depends only on259 permanent infrastructure; no258/260/261 dependency, no text import.
+-- REQUIRED: run in a caller-owned transaction with ON_ERROR_STOP. NO internal BEGIN/COMMIT.
+-- Customer-write lock below MUST cover trigger installation AND backfill until outer commit.
+-- Permanent capture survives259 feature rollback; never disable it to run tests.
 set local lock_timeout='5s';
 -- Conflicts with INSERT/UPDATE/DELETE. Hold through hook installation AND backfill.
 lock table booking.customers in share row exclusive mode;
@@ -36,4 +38,3 @@ for each row execute function booking._newsletter_capture_general_optout();
 insert into booking.newsletter_suppressions(address_fingerprint)
 select distinct booking._newsletter_fingerprint(c.email) from booking.customers c
 where c.marketing_unsubscribed_at is not null and booking._valid_email(c.email) on conflict do nothing;
-commit;

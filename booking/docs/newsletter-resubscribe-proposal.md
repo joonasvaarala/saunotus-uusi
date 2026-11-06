@@ -1,7 +1,7 @@
 # Newsletter re-subscribe — separate design proposal, NOT implemented
 
 HOLD. No endpoint, grant, token flow, automatic consent restoration or suppression clearing
-is provided by259 or its re-enable proposal. Read-only compatibility approval of capture is
+is provided by259/262 or the re-enable proposal. Read-only compatibility approval of capture is
 NOT execution/release approval and does not approve this future re-subscribe design.
 
 ## Why sticky is intentional

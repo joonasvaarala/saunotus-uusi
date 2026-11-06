@@ -1,8 +1,8 @@
--- REVIEW ONLY, not approval to run. Prepared hosted-safe attendance/language regression.
--- Transaction+ROLLBACK; synthetic customers/orders/reservations/rules ONLY, real catalog READ.
--- NO all-customer consent update, global config, staff/JWT writes, preview or dispatch.
--- Any sequence/audit/other trigger side effects need review; sequence IDs still advance.
--- Requires approved259 + capture; NEVER use local-fixture/rollback-seed/rollback-check hosted.
+-- DISPOSABLE LOCAL DATABASE ONLY. NEVER DEV/PROD or any shared/hosted database.
+-- Even synthetic confirmed reservations fire existing _expire_holds / global
+-- _release_unpaid_additions(null,null), which can lock/mutate unrelated orders.
+-- ROLLBACK does NOT make this safe. Do NOT disable or replace those triggers.
+-- Only an isolated disposable database may run these attendance/language scenarios.
 begin;
 set local lock_timeout='3s';
 set local statement_timeout='120s';

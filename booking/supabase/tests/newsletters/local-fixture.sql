@@ -1,5 +1,5 @@
 -- LOCAL EMPTY DATABASE ONLY. Minimal dependencies to exercise booking_259 without live data.
--- This is NOT a production migration or a substitute for the full DEV regression suite.
+-- This is NOT a hosted migration or a substitute for read-only real-schema review. NEVER DEV/PROD.
 create role anon; create role authenticated; create role service_role;
 create schema auth; create schema booking; create schema kb; create schema extensions;
 create extension pgcrypto with schema extensions;

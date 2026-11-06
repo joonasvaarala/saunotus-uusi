@@ -1,4 +1,4 @@
--- DISPOSABLE LOCAL DATABASE ONLY. Before unapproved capture proposal is installed.
+-- DISPOSABLE LOCAL DATABASE ONLY. Before262 is installed.
 begin;
 do $$declare u uuid:=gen_random_uuid();d jsonb;x text;blocked boolean:=false;begin
  insert into auth.users(id,email)values(u,'n259-required@example.test');

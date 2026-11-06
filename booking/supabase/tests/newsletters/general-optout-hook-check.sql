@@ -1,5 +1,5 @@
 -- DISPOSABLE LOCAL DATABASE ONLY. Hosted-safe real-token test is ../t259_newsletters_capture_hosted_safe.sql.
--- After explicitly approved proposal on an isolated fixture only.
+-- After262 on an isolated fixture only.
 -- This test demonstrates the shared-boundary integration requiring Koodari agreement.
 begin;
 do $$declare a bigint;b bigint;addr text;fp text;begin

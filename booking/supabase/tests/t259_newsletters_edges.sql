@@ -1,6 +1,6 @@
 -- DISPOSABLE LOCAL DATABASE ONLY. Updates broad fixture consent/config; NEVER hosted.
 -- Sequence advances DO NOT roll back. Hosted-safe coverage is a separate file.
--- Run after 259 + separately approved hook proposal on an isolated local fixture.
+-- Run after 259 + reviewed262 package on an isolated local fixture.
 begin;
 set local statement_timeout='120s';
 create function pg_temp.ck(ok boolean,label text) returns void language plpgsql as $$begin

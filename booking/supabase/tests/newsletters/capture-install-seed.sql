@@ -1,4 +1,4 @@
--- DISPOSABLE LOCAL DATABASE ONLY. Fixed fixtures + temp contract snapshot before proposal.
+-- DISPOSABLE LOCAL DATABASE ONLY. Fixed fixtures + temp contract snapshot before262.
 create temp table newsletter_shared_contract as select oid,pg_get_functiondef(oid) as definition,proacl::text as acl
 from pg_proc where oid='booking.public_marketing_unsubscribe(uuid)'::regprocedure;
 insert into booking.customers(name,email,marketing_consent,marketing_consent_at,marketing_unsubscribed_at)

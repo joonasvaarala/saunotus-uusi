@@ -1,12 +1,18 @@
 -- booking_259: bot-authored newsletters, human-only review/dispatch.
 -- Generated with supabase migration new; timestamp ordered after reserved booking_257.
--- HOLD: shared general-opt-out durability hook is a separate proposal pending Koodari agreement.
+-- HOLD: booking_262 packages capture; allocation/compatibility are NOT execution approval.
 -- Bottiavustus: review first; no DEV/production execution from this work.
 -- Rollback: ../rollbacks/20261106220300_booking_259_ROLLBACK.sql
 set local lock_timeout = '5s';
 
+-- Permanent, WAL-logged monotonic identities. NOT owned by feature tables: their
+-- high-water survives DROP TABLE / feature rollback / re-enable. Never reset them.
+create sequence booking.newsletter_campaign_id_seq as bigint no cycle cache 1 owned by none;
+create sequence booking.newsletter_log_id_seq as bigint no cycle cache 1 owned by none;
+revoke all on sequence booking.newsletter_campaign_id_seq,booking.newsletter_log_id_seq from public,anon,authenticated,service_role;
+
 create table booking.newsletters (
-  id bigint generated always as identity primary key,
+  id bigint primary key default nextval('booking.newsletter_campaign_id_seq'::regclass),
   subject_fi text not null check (length(btrim(subject_fi)) between 1 and 200),
   subject_en text not null check (length(btrim(subject_en)) between 1 and 200),
   body_fi text not null check (length(btrim(body_fi)) between 1 and 16000),
@@ -21,7 +27,7 @@ create table booking.newsletters (
   created_at timestamptz not null default now(), updated_at timestamptz not null default now()
 );
 create table booking.newsletter_logs (
-  id bigint generated always as identity primary key,
+  id bigint primary key default nextval('booking.newsletter_log_id_seq'::regclass),
   newsletter_id bigint not null unique references booking.newsletters(id),
   subject_fi text not null, subject_en text not null,
   body_fi text not null, body_en text not null, style jsonb not null,

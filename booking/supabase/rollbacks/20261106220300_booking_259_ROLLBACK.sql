@@ -6,6 +6,8 @@ set local lock_timeout='5s';
 update booking.email_outbox set status='skipped',last_error='newsletter_rollback',locked_at=null
  where kind='newsletter' and status in ('pending','failed','sending');
 -- Permanent capture infrastructure MUST keep running throughout feature rollback.
+-- Retain OWNED BY NONE newsletter_campaign_id_seq + newsletter_log_id_seq without
+-- reset/restart/setval: retained outbox keys MUST never alias a later campaign/log.
 -- Never drop newsletter_capture_general_optout or _newsletter_capture_general_optout.
 drop function if exists booking.admin_newsletter_dispatch(bigint,integer,boolean,uuid);
 drop function if exists booking.admin_newsletter_save(bigint,jsonb,integer);

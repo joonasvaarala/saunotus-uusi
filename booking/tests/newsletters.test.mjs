@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {readFileSync} from 'node:fs';
+import {readFileSync,existsSync,readdirSync} from 'node:fs';
 import {renderNewsletter,newsletterUrl} from '../supabase/functions/_shared/newsletter-render.js';
 import {newsletterCanSend,newsletterPatch,NEWSLETTER_SEGMENTS} from '../admin/newsletter-logic.js';
 import {NEWSLETTER_TEXTS} from '../admin/newsletter-texts.js';
@@ -73,7 +73,7 @@ test('scoped opt-out is explicit, clears its opaque fragment and has no admin se
 test('permanent suppression lifecycle is independent of feature rollback and re-enable',()=>{
  const core=read('booking/supabase/migrations/20261106220300_booking_259_newsletters.sql');
  const rollback=read('booking/supabase/rollbacks/20261106220300_booking_259_ROLLBACK.sql');
- const hook=read('booking/docs/newsletter-general-optout-hook-proposal.sql');
+ const hook=read('booking/supabase/migrations/20261106221404_booking_262_newsletter_capture.sql');
  const enable=read('booking/docs/newsletter-reenable-proposal.sql');
  const fixture=read('booking/supabase/tests/newsletters/local-fixture.sql');
  const shared=read('booking/supabase/migrations/20261021145208_booking_121_messages.sql');
@@ -82,16 +82,31 @@ test('permanent suppression lifecycle is independent of feature rollback and re-
  assert.match(fixture,/constraint schedule_rules_event_shape/);
  assert.equal((core.match(/t\.tgname='newsletter_capture_general_optout'/g)||[]).length,2,'capture is hard gate in BOTH dispatch and payload');
  assert.doesNotMatch(core,/insert into booking\.newsletter_suppressions\(address_fingerprint\)\s*select distinct/i);
- assert.ok(hook.indexOf('begin;')<hook.indexOf('lock table booking.customers in share row exclusive mode;'));
+ assert.doesNotMatch(hook,/^begin;|^commit;/mi,'262 must compose in one caller-owned transaction');
  assert.ok(hook.indexOf('lock table')<hook.indexOf('create trigger'));
  assert.ok(hook.indexOf('create trigger')<hook.indexOf('select distinct booking._newsletter_fingerprint'));
- assert.ok(hook.indexOf('select distinct booking._newsletter_fingerprint')<hook.lastIndexOf('commit;'));
- assert.doesNotMatch(rollback,/^drop (?:table|function|trigger|index).*?(?:newsletter_suppressions|newsletter_optout_tokens|newsletter_capture_general_optout|_newsletter_fingerprint|_newsletter_address_blocked|public_newsletter_unsubscribe|newsletter_customers_optout_email_idx)/mi);
- assert.doesNotMatch(enable,/^(?:drop |truncate |delete )/mi);
+ assert.match(hook,/REQUIRED: run in a caller-owned transaction/);
+ assert.doesNotMatch(rollback,/^drop (?:table|function|trigger|index).*?(?:newsletter_suppressions|newsletter_optout_tokens|newsletter_capture_general_optout|_newsletter_fingerprint|_newsletter_address_blocked|public_newsletter_unsubscribe|newsletter_customers_optout_email_idx|newsletter_campaign_id_seq|newsletter_log_id_seq)/mi);
+ assert.doesNotMatch(enable,/^(?:drop |truncate |delete |create sequence|alter sequence|select setval)/mi);
+ assert.match(core,/create sequence booking\.newsletter_log_id_seq as bigint no cycle cache 1 owned by none/);
+ assert.match(core,/default nextval\('booking\.newsletter_campaign_id_seq'/);
+ assert.match(core,/default nextval\('booking\.newsletter_log_id_seq'/);
+ assert.match(enable,/next_log<=retained_max/);
  assert.doesNotMatch(enable,/^create (?:table|function).*?(?:newsletter_suppressions|newsletter_optout_tokens|_newsletter_fingerprint|_newsletter_address_blocked|public_newsletter_unsubscribe)/mi);
  const featureHead=core.slice(core.indexOf('create table booking.newsletters'),core.indexOf('-- Separate, durable'));
  assert.ok(enable.includes(featureHead),'re-enable feature schema must match259');
  const featureFunctions=core.slice(core.indexOf('-- Helpers are in the non-public'),core.indexOf('-- Revoke every direct/default'));
  assert.ok(enable.includes(featureFunctions),'re-enable must not drift from reviewed feature RPCs');
  for(const sql of [core,hook,enable,rollback])assert.doesNotMatch(sql,/^create (?:or replace )?function booking\.public_marketing_unsubscribe/mi);
+});
+
+
+test('reservation scenarios cannot be mistaken for the sole hosted capture candidate',()=>{
+ const tests=new URL('../supabase/tests/',import.meta.url);
+ assert.deepEqual(readdirSync(tests).filter(p=>/^t259_newsletters.*hosted_safe\.sql$/.test(p)),['t259_newsletters_capture_hosted_safe.sql']);
+ assert.equal(existsSync(new URL('t259_newsletters_attendance_hosted_safe.sql',tests)),false);
+ assert.match(read('booking/supabase/tests/t259_newsletters_attendance_local_only.sql'),/NEVER DEV\/PROD/);
+ assert.doesNotMatch(read('booking/supabase/tests/t259_newsletters_capture_hosted_safe.sql'),/insert into booking\.(?:reservations|orders|schedule_rules)/i);
+ const captureRollback=read('booking/supabase/rollbacks/20261106221404_booking_262_ROLLBACK.sql');
+ assert.match(captureRollback,/raise exception/i);assert.doesNotMatch(captureRollback,/^(?:drop|alter|delete|truncate) /mi);
 });
