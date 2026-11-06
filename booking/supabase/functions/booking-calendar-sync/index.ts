@@ -1,4 +1,4 @@
-// booking-calendar-sync: yksisuuntainen vienti varausjärjestelmä -> Google-kalenteri.
+// booking-calendar-sync: vienti + koulutusten tilavarausten kaksisuuntainen aika/poisto.
 // pg_cron kutsuu POST + x-sync-secret (booking.booking_calendar_dispatch), sama salaisuus kuin sulkusynkassa.
 //
 // Autentikointi (ei uusia salaisuuksia):
@@ -114,9 +114,18 @@ Deno.serve(async (req) => {
   });
   const db: Db = {
     async plan() {
-      const r = await supa.rpc("booking_calendar_export_plan");
+      const r = await supa.rpc("booking_calendar_training_export_plan");
       if (r.error) throw new Error("plan_failed");
       return (r.data ?? {}) as ExportPlan;
+    },
+    async applyTraining(runId, events) {
+      const r = await supa.rpc("apply_training_calendar_events", { p_run_id: runId, p_events: events });
+      if (r.error) {
+        const code = /^[a-z][a-z0-9_]{0,60}$/.test(r.error.details ?? "") ? r.error.details : r.error.code || "unknown";
+        throw new Error(`training_inbound_failed_${code}`);
+      }
+      if (!Array.isArray(r.data?.events)) throw new Error("training_inbound_invalid_response");
+      return r.data;
     },
     async finish(payload) {
       const r = await supa.rpc("booking_calendar_export_finish", { p: payload });

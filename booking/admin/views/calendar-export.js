@@ -79,7 +79,7 @@ export function renderCalendarExport({ state, failed, isAdmin, reload }) {
   }) });
   return h('section', { class: 'card', 'data-testid': 'calendar-export' },
     h('h2', { text: cx('ui.admin.calendar_export.title') }),
-    h('p', { class: 'muted', text: cx('ui.admin.calendar_export.lead') }),
+    h('p', { class: 'muted', text: cx('ui.admin.calendar_export.lead_training') }),
     modeNote,
     h('p', { 'data-testid': 'calendar-export-last', text: last }),
     h('div', { class: 'stack' },

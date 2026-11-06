@@ -8,6 +8,7 @@ export const PREFIX = 'ui.admin.calendar_export.';
 export const CALENDAR_EXPORT_TEXTS = {
   fi: {
     'ui.admin.calendar_export.title': 'Varauskalenteri',
+    'ui.admin.calendar_export.lead_training': 'Hoidot, yksityisvaraukset, rituaalit ja tapahtumat viedään omiksi tapahtumikseen. Arjen yleinen vuoro näkyy koko vuoron mittaisena, viikonloppuna yhtenä palkkina päivässä. Turvetorstai näkyy erikseen. Koulutusten tilavaraukset viedään tilan omaan Savusaunan, Raunin tai Lovin kalenteriin, myös yli vienti-ikkunan. Niiden aikaa voi muuttaa ja tilavarauksen poistaa kalenterissa. Uusi tilavaraus luodaan vain jakson Tilat-kohdasta. Muut kalenterimuutokset eivät muuta varauksia. Oletus on pois päältä.',
     'ui.admin.calendar_export.lead': 'Hoidot, yksityisvaraukset, saunotusrituaalit ja tapahtumat viedään omiksi tapahtumikseen. Arjen yleinen vuoro näkyy koko vuoron mittaisena, kun sillä on varaus. Turvetorstai näkyy erikseen. Viikonloppuna yleiset vuorot ovat yksi palkki päivässä. Kalenterit ovat Savusauna, Rauni ja Lovi. Yhteinen kalenteri on vain varalla. Sulku- ja vuorokalentereita ei käytetä. Kalenterissa tehty muutos ei muuta varausta. Oletus on pois päältä.',
     'ui.admin.calendar_export.mode': 'Tila',
     'ui.admin.calendar_export.mode_off': 'Pois päältä',
@@ -50,6 +51,7 @@ export const CALENDAR_EXPORT_TEXTS = {
   },
   en: {
     'ui.admin.calendar_export.title': 'Booking calendar',
+    'ui.admin.calendar_export.lead_training': 'Treatments, private bookings, rituals and events are exported separately. A weekday public shift spans the full shift; weekends use one bar per day. Turvetorstai is separate. Training space bookings use the room’s own Savusauna, Rauni or Lovi calendar, including dates beyond the export window. You can edit their times or delete them in Google Calendar. Create a new space booking only in the course session’s Spaces section. Other calendar edits do not change bookings. The default is off.',
     'ui.admin.calendar_export.lead': 'Treatments, private bookings, sauna rituals and events are exported as their own events. A weekday public shift is shown for its full scheduled length when it has a booking. Turvetorstai is separate. On weekends, public shifts are one bar per day. The calendars are Savusauna, Rauni and Lovi. The shared calendar is only a fallback. Closure and shift calendars are not used. An edit in the calendar does not change the booking. The default is off.',
     'ui.admin.calendar_export.mode': 'Mode',
     'ui.admin.calendar_export.mode_off': 'Off',

@@ -12,6 +12,7 @@ const logic = await import(pathToFileURL(join(root, 'admin/calendar-export-logic
 const pending = JSON.parse(readFileSync(join(repo, 'content/site-texts.pending-import-25.json'), 'utf8'));
 const pending26 = JSON.parse(readFileSync(join(repo, 'content/site-texts.pending-import-26.json'), 'utf8'));
 const pending116 = JSON.parse(readFileSync(join(repo, 'content/site-texts.pending-import-116.json'), 'utf8'));
+const pending128 = JSON.parse(readFileSync(join(repo, 'content/site-texts.pending-import-128.json'), 'utf8'));
 const fallback = JSON.parse(readFileSync(join(repo, 'content/site-texts.fallback.json'), 'utf8'));
 const settings = readFileSync(join(root, 'admin/views/settings.js'), 'utf8');
 const view = readFileSync(join(root, 'admin/views/calendar-export.js'), 'utf8');
@@ -23,7 +24,7 @@ test('sanakirja, tuontitiedostot ja varateksti täsmäävät', () => {
   const overlay = new Map();
   for (const row of pending) overlay.set(row.key + '|' + row.lang, row);
   for (const row of pending26) overlay.set(row.key + '|' + row.lang, row);
-  for (const row of pending116) overlay.set(row.key + '|' + row.lang, row);
+  for (const row of [...pending116,...pending128]) overlay.set(row.key + '|' + row.lang, row);
   for (const lang of ['fi', 'en']) {
     for (const [key, text] of Object.entries(texts.CALENDAR_EXPORT_TEXTS[lang])) {
       const row = overlay.get(key + '|' + lang);

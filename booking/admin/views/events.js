@@ -308,7 +308,8 @@ export async function render({ ctx, refs, reload, query, section = null }) {
     const label = occLabel(r);
     const blocksHost = h('div', { class: 'ev-blocks-host' });
     const editHost = h('div');
-    const showBlocks = () => { blocksHost.replaceChildren(canEdit ? blocksEditor(p, r) : blocksReadOnly(r)); };
+    // Training rooms have one creation path: the session workspace, not the legacy block editor.
+    const showBlocks = () => { blocksHost.replaceChildren(canEdit && p.category !== 'training' ? blocksEditor(p, r) : blocksReadOnly(r)); };
     const btn = (testid, text, onclick, cls = 'btn sm') => h('button', { type: 'button', class: cls, 'data-testid': testid, onclick }, text, h('span', { class: 'sr', text: ` – ${label}` }));
     const booked = bookingCount(r);
     const queue = eventQueueParts(h, { lang: getLang(), ruleId: r.id, rpc });
@@ -317,7 +318,10 @@ export async function render({ ctx, refs, reload, query, section = null }) {
         h('div', {}, h('strong', { class: 'ev-occ-label', text: label }), h('div', { class: 'muted', text: span(r.starts_at, r.ends_at) }), p.category === 'training' ? h('div', { class: 'muted', 'data-testid': 'event-occ-id', text: `Id ${r.id}` }) : null),
         h('div', { class: 'meta' }, capNode(flags), ...statusNodes(flags), flags.waitlist ? h('span', { class: 'muted', text: T('waitlist', { n: flags.waitlist }) }) : null)),
       h('div', { class: 'row wrap ev-occ-actions' },
-        btn('event-occ-blocks', T('blocks'), () => showBlocks(), 'btn sm ghost'),
+        btn('event-occ-blocks', T('blocks'), () => {
+          if (p.category === 'training') location.hash = '#/koulutukset?' + new URLSearchParams({ tapahtuma: p.product_id, kerta: r.id, valilehti: 'tilat' });
+          else showBlocks();
+        }, 'btn sm ghost'),
         h('a', { class: 'btn sm ghost', href: hrefOf(listQuery({ tapahtuma: p.product_id, valilehti: 'osallistujat', kerta: r.id })) }, T('quick_people')),
         queue.button,
         canEdit ? btn('event-occ-edit', T('edit_occurrence'), () => { editHost.replaceChildren(inlineForm(p, r, () => editHost.replaceChildren())); }) : null,
