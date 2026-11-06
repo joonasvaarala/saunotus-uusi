@@ -10,7 +10,7 @@ export const CUSTOMER_MESSAGE_TEXTS = {
     "ui.admin.customer_message.tab_templates": "Pohjat",
     "ui.admin.customer_message.tab": "Viesti asiakkaalle",
     "ui.admin.customer_message.title": "Viesti asiakkaalle",
-    "ui.admin.customer_message.lead": "Valitse yksi päivä tai aikaväli ja tuotteet. Viesti lähtee niille, jotka ovat varanneet valitun tuotteen kyseiselle päivälle (varauksen alkupäivä Helsingissä) tai ostaneet sen (tilauksen maksupäivä Helsingissä). Sama asiakas saa yhden viestin. Peruutetut varaukset, vanhentuneet pidot ja jonotuslista jäävät pois. Markkinointilupaa ei tarvita. Esikatsele ennen lähetystä. Jokainen saa viestin tilauksen kielellä.",
+    "ui.admin.customer_message.lead": "Valitse yksi päivä tai aikaväli. Tuotevalintaan tulevat vain tuotteet, joita tuona päivänä tai välillä on varattu (varauksen alkupäivä Helsingissä) tai myyty (tilauksen maksupäivä Helsingissä). Viesti lähtee niille, jotka ovat varanneet tai ostaneet valitun tuotteen. Sama asiakas saa yhden viestin. Peruutetut varaukset, vanhentuneet pidot ja jonotuslista jäävät pois. Markkinointilupaa ei tarvita. Esikatsele ennen lähetystä. Jokainen saa viestin tilauksen kielellä.",
     "ui.admin.customer_message.from": "Päivä tai alku",
     "ui.admin.customer_message.to": "Loppu",
     "ui.admin.customer_message.to_hint": "Tyhjä = sama päivä. Molemmat päät ovat mukana. Päivämäärät ovat Helsingin aikaa.",
@@ -45,13 +45,17 @@ export const CUSTOMER_MESSAGE_TEXTS = {
     "ui.admin.customer_message.error_products": "Valitse vähintään yksi tuote.",
     "ui.admin.customer_message.error_text": "Kirjoita aihe ja viesti suomeksi ja englanniksi.",
     "ui.admin.customer_message.recipients": "Vastaanottajat",
-    "ui.admin.customer_message.skipped": "Ohitetut"
+    "ui.admin.customer_message.skipped": "Ohitetut",
+    "ui.admin.customer_message.products_need_dates": "Valitse ensin päivä tai aikaväli. Tuotevalintaan tulevat vain kyseisenä päivänä tai välillä varatut tai myydyt tuotteet.",
+    "ui.admin.customer_message.products_loading": "Ladataan tuotteita…",
+    "ui.admin.customer_message.products_empty": "Ei varattuja tai myytyjä tuotteita valitulla päivällä tai aikavälillä.",
+    "ui.admin.customer_message.products_error": "Tuotteiden haku epäonnistui."
   },
   "en": {
     "ui.admin.customer_message.tab_templates": "Templates",
     "ui.admin.customer_message.tab": "Message to customer",
     "ui.admin.customer_message.title": "Message to customer",
-    "ui.admin.customer_message.lead": "Choose one day or a date range and the products. The message goes to people who booked a selected product on that day (reservation start date in Helsinki) or bought it (order payment date in Helsinki). Each customer receives one message. Cancelled reservations, expired holds and the waitlist are left out. Marketing consent is not required. Preview before sending. Each person receives the message in their order language.",
+    "ui.admin.customer_message.lead": "Choose one day or a date range. The product list shows only products reserved (reservation start date in Helsinki) or sold (order payment date in Helsinki) on that day or range. The message goes to people who booked or bought a selected product. Each customer receives one message. Cancelled reservations, expired holds and the waitlist are left out. Marketing consent is not required. Preview before sending. Each person receives the message in their order language.",
     "ui.admin.customer_message.from": "Day or start",
     "ui.admin.customer_message.to": "End",
     "ui.admin.customer_message.to_hint": "Leave empty for a single day. Both ends are inclusive. Dates use Helsinki time.",
@@ -86,7 +90,11 @@ export const CUSTOMER_MESSAGE_TEXTS = {
     "ui.admin.customer_message.error_products": "Choose at least one product.",
     "ui.admin.customer_message.error_text": "Write the subject and message in Finnish and English.",
     "ui.admin.customer_message.recipients": "Recipients",
-    "ui.admin.customer_message.skipped": "Skipped"
+    "ui.admin.customer_message.skipped": "Skipped",
+    "ui.admin.customer_message.products_need_dates": "Choose a day or date range first. Only products reserved or sold on that day or range appear here.",
+    "ui.admin.customer_message.products_loading": "Loading products…",
+    "ui.admin.customer_message.products_empty": "No reserved or sold products for the selected day or date range.",
+    "ui.admin.customer_message.products_error": "Could not load products."
   }
 };
 

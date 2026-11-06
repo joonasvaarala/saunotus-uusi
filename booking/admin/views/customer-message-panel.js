@@ -1,16 +1,22 @@
-// booking_257: Hallinnan Viestit-sivun «Viesti asiakkaalle» -välilehti.
+// booking_257/258: Hallinnan Viestit-sivun «Viesti asiakkaalle» -välilehti.
+// booking_258: tuotevalinta vain valitun päivän/välin varatuista/myydyistä (ei katalogia).
 import { rpc } from '../sb.js';
 import { h, field, toast, run } from '../ui.js';
 import { customerMessageText as T } from '../customer-message-texts.js';
-import { CUSTOMER_MESSAGE_PLACEHOLDERS, fillCustomerMessage, validateCustomerMessageDraft } from '../customer-message-logic.js';
+import {
+  CUSTOMER_MESSAGE_PLACEHOLDERS,
+  fillCustomerMessage,
+  validateCustomerMessageDraft,
+  parseCustomerMessageDates,
+  pruneSelectedProductIds,
+  groupCustomerMessageProducts,
+} from '../customer-message-logic.js';
 
 const ERR = {
   invalid_dates: () => T('ui.admin.customer_message.error_dates'),
   invalid_products: () => T('ui.admin.customer_message.error_products'),
   invalid_text: () => T('ui.admin.customer_message.error_text'),
 };
-
-const CAT_ORDER = ['public_sauna', 'private_sauna', 'corporate', 'treatment', 'ritual', 'ceremony', 'event', 'gift_card', 'season_card', 'training', 'add_on', 'product_rental', 'other'];
 
 function fmtWhen(iso) {
   if (!iso) return '';
@@ -41,36 +47,90 @@ export function currentMessagesTab() {
   }
 }
 
-export async function renderCustomerMessagePanel({ wrap, refs }) {
-  const products = [...(refs?.products || [])].sort((a, b) => String(a.name).localeCompare(String(b.name), 'fi'));
-  const grouped = new Map();
-  for (const p of products) {
-    const cat = p.category || 'other';
-    if (!grouped.has(cat)) grouped.set(cat, []);
-    grouped.get(cat).push(p);
-  }
-  const cats = [...grouped.keys()].sort((a, b) => {
-    const ia = CAT_ORDER.indexOf(a); const ib = CAT_ORDER.indexOf(b);
-    return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib) || a.localeCompare(b, 'fi');
-  });
-
+export async function renderCustomerMessagePanel({ wrap }) {
   const from = h('input', { type: 'date', required: true, 'data-testid': 'customer-message-from' });
   const to = h('input', { type: 'date', 'data-testid': 'customer-message-to' });
-  const boxes = [];
-  const productBox = h('div', { class: 'msg-products', 'data-testid': 'customer-message-products' },
-    cats.map((cat) => {
-      const items = grouped.get(cat);
-      return h('fieldset', { class: 'box' },
-        h('legend', { text: items[0]?.category_label || cat }),
-        items.map((p) => {
-          const cb = h('input', { type: 'checkbox', name: 'product', value: String(p.id), 'data-testid': `customer-message-product-${p.id}` });
-          boxes.push(cb);
-          return h('label', { class: 'check' }, cb, ` ${p.name}${p.active === false ? ` ${T('ui.admin.customer_message.hidden')}` : ''}`);
-        }));
-    }));
+  const productHost = h('div', { class: 'msg-products', 'data-testid': 'customer-message-products' });
+  const productStatus = h('p', {
+    class: 'muted',
+    'data-testid': 'customer-message-products-status',
+    text: T('ui.admin.customer_message.products_need_dates'),
+  });
+  let boxes = [];
+  let availableIds = [];
+  let productFetchSeq = 0;
 
   function selectedIds() {
     return boxes.filter((el) => el.checked).map((el) => Number(el.value));
+  }
+
+  function paintProducts(products, keepIds) {
+    const keep = new Set(pruneSelectedProductIds(keepIds, (products || []).map((p) => p.id)));
+    boxes = [];
+    availableIds = (products || []).map((p) => Number(p.id)).filter((n) => Number.isInteger(n) && n > 0);
+    const { cats, grouped } = groupCustomerMessageProducts(products);
+    productHost.replaceChildren(
+      ...cats.map((cat) => {
+        const items = grouped.get(cat);
+        return h('fieldset', { class: 'box' },
+          h('legend', { text: items[0]?.category_label || cat }),
+          items.map((p) => {
+            const cb = h('input', {
+              type: 'checkbox', name: 'product', value: String(p.id),
+              'data-testid': `customer-message-product-${p.id}`,
+            });
+            if (keep.has(Number(p.id))) cb.checked = true;
+            cb.addEventListener('change', invalidate);
+            boxes.push(cb);
+            return h('label', { class: 'check' }, cb, ` ${p.name}${p.active === false ? ` ${T('ui.admin.customer_message.hidden')}` : ''}`);
+          }));
+      }),
+    );
+  }
+
+  async function refreshProducts() {
+    const my = ++productFetchSeq;
+    const keep = selectedIds();
+    invalidate();
+    const parsed = parseCustomerMessageDates(from.value, to.value);
+    if (!parsed.ok) {
+      if (my !== productFetchSeq) return;
+      boxes = [];
+      availableIds = [];
+      productHost.replaceChildren();
+      productStatus.hidden = false;
+      productStatus.textContent = T('ui.admin.customer_message.products_need_dates');
+      return;
+    }
+    productStatus.hidden = false;
+    productStatus.textContent = T('ui.admin.customer_message.products_loading');
+    productHost.replaceChildren();
+    boxes = [];
+    availableIds = [];
+    try {
+      const rows = await rpc('admin_customer_message_products', {
+        p_from: parsed.value.from,
+        p_to: parsed.value.to,
+      });
+      if (my !== productFetchSeq) return;
+      const products = Array.isArray(rows) ? rows : [];
+      if (!products.length) {
+        productStatus.textContent = T('ui.admin.customer_message.products_empty');
+        productStatus.hidden = false;
+        productHost.replaceChildren();
+        return;
+      }
+      productStatus.hidden = true;
+      productStatus.textContent = '';
+      paintProducts(products, keep);
+    } catch {
+      if (my !== productFetchSeq) return;
+      boxes = [];
+      availableIds = [];
+      productHost.replaceChildren();
+      productStatus.hidden = false;
+      productStatus.textContent = T('ui.admin.customer_message.products_error');
+    }
   }
 
   const fields = {};
@@ -88,26 +148,11 @@ export async function renderCustomerMessagePanel({ wrap, refs }) {
   const confirm = h('input', { type: 'checkbox', 'data-testid': 'customer-message-confirm' });
   let previewOk = false;
 
-  function invalidate() {
-    previewOk = false;
-    confirm.checked = false;
-    send.disabled = true;
-    previewHost.hidden = true;
-  }
-
-  from.addEventListener('input', invalidate);
-  to.addEventListener('input', invalidate);
-  boxes.forEach((cb) => cb.addEventListener('change', invalidate));
-  ['fi', 'en'].forEach((lang) => {
-    fields[lang].subject.addEventListener('input', invalidate);
-    fields[lang].body.addEventListener('input', invalidate);
-  });
-
   function draft() {
     return validateCustomerMessageDraft({
       from: from.value,
       to: to.value,
-      productIds: selectedIds(),
+      productIds: pruneSelectedProductIds(selectedIds(), availableIds),
       subjectFi: fields.fi.subject.value,
       bodyFi: fields.fi.body.value,
       subjectEn: fields.en.subject.value,
@@ -141,6 +186,22 @@ export async function renderCustomerMessagePanel({ wrap, refs }) {
       await drawLog();
       return res;
     }),
+  });
+
+  function invalidate() {
+    previewOk = false;
+    confirm.checked = false;
+    send.disabled = true;
+    previewHost.hidden = true;
+  }
+
+  from.addEventListener('change', refreshProducts);
+  to.addEventListener('change', refreshProducts);
+  from.addEventListener('input', invalidate);
+  to.addEventListener('input', invalidate);
+  ['fi', 'en'].forEach((lang) => {
+    fields[lang].subject.addEventListener('input', invalidate);
+    fields[lang].body.addEventListener('input', invalidate);
   });
   confirm.addEventListener('change', () => { send.disabled = !previewOk || !confirm.checked; });
 
@@ -205,9 +266,18 @@ export async function renderCustomerMessagePanel({ wrap, refs }) {
     h('fieldset', { class: 'box' },
       h('legend', { text: T('ui.admin.customer_message.products') }),
       h('div', { class: 'row wrap' },
-        h('button', { type: 'button', class: 'btn ghost', 'data-testid': 'customer-message-select-all', text: T('ui.admin.customer_message.select_all'), onclick: () => { boxes.forEach((cb) => { cb.checked = true; }); invalidate(); } }),
-        h('button', { type: 'button', class: 'btn ghost', 'data-testid': 'customer-message-clear', text: T('ui.admin.customer_message.clear'), onclick: () => { boxes.forEach((cb) => { cb.checked = false; }); invalidate(); } })),
-      products.length ? productBox : h('p', { class: 'muted', text: 'Tuotteita ei löytynyt.' })),
+        h('button', {
+          type: 'button', class: 'btn ghost', 'data-testid': 'customer-message-select-all',
+          text: T('ui.admin.customer_message.select_all'),
+          onclick: () => { boxes.forEach((cb) => { cb.checked = true; }); invalidate(); },
+        }),
+        h('button', {
+          type: 'button', class: 'btn ghost', 'data-testid': 'customer-message-clear',
+          text: T('ui.admin.customer_message.clear'),
+          onclick: () => { boxes.forEach((cb) => { cb.checked = false; }); invalidate(); },
+        })),
+      productStatus,
+      productHost),
     editor,
     h('div', { class: 'box', 'data-testid': 'customer-message-placeholders' },
       h('strong', { text: T('ui.admin.customer_message.vars') }),
