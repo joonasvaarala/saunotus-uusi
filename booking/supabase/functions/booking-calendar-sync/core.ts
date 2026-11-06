@@ -1,10 +1,5 @@
-// Varauskalenterin viennin ydin. Ei Deno- eikä Google-riippuvuutta: testit antavat feikin.
-// Suunta on vain varausjärjestelmä -> kalenteri. Kalenterin muutos ei palaa varaukseksi.
-// Live-ajossa Googleen kirjoitetaan vain, kun content_hash on muuttunut. Kun suunnitelma
-// sanoo reconcile=true (kanta: edellisestä täydestä kirjoituksesta on yli tunti), olemassa
-// oleva tapahtuma kirjoitetaan uudelleen. Patch, joka kertoo tapahtuman puuttuvan, luo sen
-// takaisin, joten kalenterista poistettu tapahtuma palautuu. Kuivaharjoitus ja pois-tila
-// eivät kutsu kirjoitusmetodeja.
+// Booking-calendar export; mapped e:block:* training space blocks also accept time edits/deletion.
+// Read/apply inbound under the export lease before reconciliation. Other event kinds stay one-way.
 
 export interface DesiredEvent {
   event_key: string;
@@ -19,6 +14,8 @@ export interface DesiredEvent {
   ends_at: string;
   content_hash: string;
   timezone: string;
+  /** Optimistic write protection for a training event read in this run. */
+  google_etag?: string;
 }
 
 export interface MappedEvent {
@@ -34,7 +31,7 @@ export interface ExportPlan {
   ok?: boolean;
   mode: string;
   busy?: boolean;
-  /** Täysi uudelleenkirjoitus: sama tarkiste kirjoitetaan silti, jotta poistettu tapahtuma palautuu. */
+  /** Full rewrite for one-way events; training inbound always runs first. */
   reconcile?: boolean;
   run_id?: string | null;
   events?: DesiredEvent[];
@@ -56,9 +53,23 @@ export interface GWriteEvent {
   reminders: { useDefault: false };
 }
 
+export interface GReadEvent {
+  id: string;
+  status?: string;
+  etag?: string;
+  start?: { dateTime?: string; date?: string };
+  end?: { dateTime?: string; date?: string };
+  recurrence?: string[];
+  recurringEventId?: string;
+  extendedProperties?: { private?: Record<string, string> };
+}
+
+export function isTrainingBlock(key: string): boolean { return /^e:block:[0-9]+$/.test(key); }
+
 export interface Google {
+  getEvent?(calendarId: string, eventId: string): Promise<GReadEvent>;
   insertEvent(calendarId: string, ev: GWriteEvent): Promise<"created" | "exists">;
-  patchEvent(calendarId: string, eventId: string, ev: GWriteEvent): Promise<"patched" | "missing">;
+  patchEvent(calendarId: string, eventId: string, ev: GWriteEvent, etag?: string): Promise<"patched" | "missing">;
   deleteEvent(calendarId: string, eventId: string): Promise<"deleted" | "gone">;
 }
 
@@ -172,6 +183,7 @@ export function safeError(err: unknown): string {
 export interface Db {
   plan(): Promise<ExportPlan>;
   finish(payload: Record<string, unknown>): Promise<void>;
+  applyTraining?(runId: string, events: Record<string, unknown>[]): Promise<{ events: DesiredEvent[] }>;
 }
 
 function counts(ops: SyncOp[]) {
@@ -188,6 +200,36 @@ export async function runExport(db: Db, google: Google, opts: { dryRun?: boolean
   const empty = { inserted: 0, patched: 0, deleted: 0, failed: 0, unconfigured: 0, blocked: 0, unchanged: 0 };
   if (mode === "off") return { ok: true, mode, skipped: "off", ...empty };
   if (plan.busy) return { ok: true, mode, skipped: "busy", ...empty };
+  if (mode === "live" && !opts.dryRun) {
+    try {
+      const forbidden = new Set([...(plan.closure_calendar_ids ?? []), ...(plan.shift_calendar_ids ?? [])]);
+      const wanted = new Map((plan.events ?? []).map((e) => [e.event_key, e]));
+      const observations: Record<string, unknown>[] = [];
+      const etags = new Map<string, string>();
+      for (const m of plan.mapped ?? []) {
+        const ev = wanted.get(m.event_key);
+        // Deleted/inactive/local-moved blocks are outbound-only. Never inspect arbitrary Google events.
+        if (!isTrainingBlock(m.event_key) || !ev || ev.google_calendar_id !== m.google_calendar_id || forbidden.has(m.google_calendar_id)) continue;
+        if (!google.getEvent || !db.applyTraining || !plan.run_id) throw new Error("training_sync_not_available");
+        const remote = await google.getEvent(m.google_calendar_id, m.google_event_id);
+        if (remote.id !== m.google_event_id) throw new Error("training_event_identity_mismatch");
+        const props = remote.extendedProperties?.private;
+        if (remote.status !== "cancelled" && (props?.booking_source !== "booking_calendar" || props?.booking_key !== m.event_key)) throw new Error("training_event_not_owned");
+        if (remote.status !== "cancelled" && (remote.status !== "confirmed" || remote.recurrence?.length || remote.recurringEventId || !remote.start?.dateTime || !remote.end?.dateTime)) throw new Error("training_event_requires_single_timed_event");
+        observations.push({ ...m, status: remote.status, starts_at: remote.start?.dateTime, ends_at: remote.end?.dateTime,
+          booking_source: props?.booking_source, booking_key: props?.booking_key });
+        if (remote.etag) etags.set(m.event_key, remote.etag);
+      }
+      if (observations.length) {
+        const applied = await db.applyTraining!(plan.run_id!, observations);
+        plan.events = applied.events.map((ev) => ({ ...ev, google_etag: etags.get(ev.event_key) }));
+      }
+    } catch (err) {
+      const error = safeError(err);
+      await db.finish({ run_id: plan.run_id ?? null, error, stats: { inbound_failed: true }, upserts: [], deletes: [] });
+      return { ok: false, mode, ...empty, failed: 1, error };
+    }
+  }
   const { ops, unconfigured, blocked, unchanged } = planOps(plan);
   const base = counts(ops);
   if (mode !== "live" || opts.dryRun) {
@@ -212,15 +254,31 @@ export async function runExport(db: Db, google: Google, opts: { dryRun?: boolean
       } else if (op.op === "insert" && op.body && op.row) {
         const status = await google.insertEvent(op.calendarId, op.body);
         if (status === "exists") {
+          if (isTrainingBlock(op.eventKey)) {
+            // Recover an interrupted first export only if its identity and times still match.
+            // Never overwrite/adopt an edited or cancelled orphan on an INSERT conflict.
+            if (!google.getEvent) throw new Error("training_sync_not_available");
+            const existing = await google.getEvent(op.calendarId, op.eventId);
+            const props = existing.extendedProperties?.private;
+            if (existing.id !== op.eventId || existing.status !== "confirmed" || existing.recurrence?.length || existing.recurringEventId
+              || props?.booking_source !== "booking_calendar" || props?.booking_key !== op.eventKey
+              || Date.parse(existing.start?.dateTime ?? "") !== Date.parse(op.row.starts_at)
+              || Date.parse(existing.end?.dateTime ?? "") !== Date.parse(op.row.ends_at)) throw new Error("training_unmapped_event_conflict");
+            upserts.push(rowOf(op.row)); inserted++; continue;
+          }
           const { id: _id, ...rest } = op.body;
           const p = await google.patchEvent(op.calendarId, op.eventId, rest);
-          if (p === "missing") await google.insertEvent(op.calendarId, op.body);
+          if (p === "missing") {
+            if (isTrainingBlock(op.eventKey)) throw new Error("training_event_changed_during_export");
+            await google.insertEvent(op.calendarId, op.body);
+          }
         }
         upserts.push(rowOf(op.row));
         inserted++;
       } else if (op.op === "patch" && op.body && op.row) {
-        const p = await google.patchEvent(op.calendarId, op.eventId, op.body);
+        const p = await google.patchEvent(op.calendarId, op.eventId, op.body, op.row.google_etag);
         if (p === "missing") {
+          if (isTrainingBlock(op.eventKey)) throw new Error("training_event_changed_during_export");
           const created = toGoogleEvent(op.row);
           const ins = await google.insertEvent(op.calendarId, created);
           if (ins === "exists") await google.patchEvent(op.calendarId, op.eventId, { ...created, id: undefined });

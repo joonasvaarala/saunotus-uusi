@@ -147,10 +147,16 @@ test('opening space form does not reserve; cancellation asks confirmation',async
  assert.ok(dom.body.textContent.includes('Peruuta'));
 });
 test('all new FI/EN texts are in pending-import and contain no angle brackets',()=>{
- const rows=JSON.parse(read('content/site-texts.pending-import-127.json'));
+ const rows=[...JSON.parse(read('content/site-texts.pending-import-127.json')),...JSON.parse(read('content/site-texts.pending-import-128.json'))];
  for(const lang of ['fi','en'])for(const [k,text] of Object.entries(TRAINING_TEXTS[lang])){
   assert.equal(rows.find(x=>x.key==='admin.training.'+k&&x.lang===lang)?.text,text,k);assert.doesNotMatch(text,/[<>]/);
  }
+});
+test('legacy training block editor links to the session Spaces workspace',()=>{
+ const view=read('booking/admin/views/events.js');
+ assert.match(view,/canEdit && p.category !== 'training' \? blocksEditor/);
+ assert.match(view,/if \(p.category === 'training'\) location.hash = '#\/koulutukset\?'/);
+ assert.match(view,/valilehti: 'tilat'/);
 });
 test('migration does not replace existing capacity/checkout functions or schedule messages',()=>{
  const sql=read('booking/supabase/migrations/20261106180719_booking_255_training_workspace.sql');

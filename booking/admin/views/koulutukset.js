@@ -132,7 +132,7 @@ export async function render(args) {
   }
   function spacesPanel() {
     const spaces = (refs?.resources||[]).filter(x=>x.active!==false&&TRAINING_SPACES.has(x.code)&&x.kind==='space');
-    return [h('h2',{text:T('spaces')}),h('p',{text:T('space_hint')}), canSpace ? btn(T('reserve'),()=>formBox(T('reserve'),[
+    return [h('h2',{text:T('spaces')}),h('p',{text:T('space_hint')}),h('p',{text:T('space_calendar_hint')}), canSpace ? btn(T('reserve'),()=>formBox(T('reserve'),[
       field(T('space'),h('select',{name:'space',required:true},spaces.map(s=>h('option',{value:s.id,text:s.name})))),input('date','date',rule.date,'date',{required:true}),
       input('start','start','14:00','time',{required:true}),input('end','end','16:00','time',{required:true})],T('reserve'),async fd=>{
         if(!validSpaceTime(fd.get('date'),fd.get('start'),fd.get('end'))) throw new Error(T('bad_time'));

@@ -1,0 +1,42 @@
+[
+  {
+    "key": "ui.admin.calendar_export.lead_training",
+    "lang": "fi",
+    "text": "Hoidot, yksityisvaraukset, rituaalit ja tapahtumat viedään omiksi tapahtumikseen. Arjen yleinen vuoro näkyy koko vuoron mittaisena, viikonloppuna yhtenä palkkina päivässä. Turvetorstai näkyy erikseen. Koulutusten tilavaraukset viedään tilan omaan Savusaunan, Raunin tai Lovin kalenteriin, myös yli vienti-ikkunan. Niiden aikaa voi muuttaa ja tilavarauksen poistaa kalenterissa. Uusi tilavaraus luodaan vain jakson Tilat-kohdasta. Muut kalenterimuutokset eivät muuta varauksia. Oletus on pois päältä.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 700,
+    "placeholders": [],
+    "reason": "booking_256: koulutusten tilavarausten kalenterisynkka"
+  },
+  {
+    "key": "ui.admin.calendar_export.lead_training",
+    "lang": "en",
+    "text": "Treatments, private bookings, rituals and events are exported separately. A weekday public shift spans the full shift; weekends use one bar per day. Turvetorstai is separate. Training space bookings use the room’s own Savusauna, Rauni or Lovi calendar, including dates beyond the export window. You can edit their times or delete them in Google Calendar. Create a new space booking only in the course session’s Spaces section. Other calendar edits do not change bookings. The default is off.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 700,
+    "placeholders": [],
+    "reason": "booking_256: koulutusten tilavarausten kalenterisynkka"
+  },
+  {
+    "key": "admin.training.space_calendar_hint",
+    "lang": "fi",
+    "text": "Uusi tilavaraus tehdään vain tästä. Käytössä oleva kalenterisynkka vie varauksen tilan omaan Savusaunan, Raunin tai Lovin kalenteriin. Kalenterissa voit muuttaa aikaa tai poistaa tilavarauksen; poisto vapauttaa tilan myös täällä.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 700,
+    "placeholders": [],
+    "reason": "booking_256: koulutusten tilavarausten kalenterisynkka"
+  },
+  {
+    "key": "admin.training.space_calendar_hint",
+    "lang": "en",
+    "text": "Create new space bookings only here. When calendar sync is on, the booking appears in the room’s own Savusauna, Rauni or Lovi calendar. Edit its times or delete it there; deletion also releases the room here.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 700,
+    "placeholders": [],
+    "reason": "booking_256: koulutusten tilavarausten kalenterisynkka"
+  }
+]
