@@ -114,6 +114,15 @@ test('session page has summary and four sections in fixed order, no send on rend
  assert.ok(host.textContent.includes('Participant <img src=x>'));assert.equal(host.querySelectorAll('img').length,0);
  assert.ok(!s.calls.some(([fn])=>fn.endsWith('_send')));
 });
+test('capacity-only course dates remain selectable for spaces without separate signups or copies',async()=>{
+ const s=setup();const original=s.mock.handlers.admin_training_work_list;
+ s.mock.handlers.admin_training_work_list=()=>original().map(x=>x.rule_id===s.r.id?{...x,training_segment_only:true}:x);
+ const get=s.mock.handlers.admin_training_work_get;
+ s.mock.handlers.admin_training_work_get=a=>({...get(a),rule:{...get(a).rule,training_segment_only:true}});
+ const host=await show(s,'tilat');assert.ok(host.querySelector('[data-testid="training-reserve"]'));
+ assert.equal(host.querySelector('[data-testid="training-copy"]'),null);
+ const people=await show(s);assert.equal(people.querySelector('[data-testid="training-add-person"]'),null);
+});
 test('messages require preview + explicit confirmation; an edit revokes preview',async()=>{
  const s=setup(),host=await show(s,'viestit');
  const send=host.querySelector('[data-testid="training-message-send"]');

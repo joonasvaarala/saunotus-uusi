@@ -47,7 +47,8 @@ export async function render(args) {
       h('h2', { text: T('now') }), h('div', { class: 'training-cards', 'data-testid': 'training-cards' }, rows.length ? rows.map(card) : h('p', { class: 'empty', text: T('empty') })),
       h('label', { class: 'check' }, h('input', { type: 'checkbox', checked: query.get('menneet') === '1' || null, onchange: e => { location.hash = href(e.target.checked ? { menneet: '1' } : {}); } }), T('past')))];
   }
-  const rules = [...(p.rules || [])].filter(r => !r.training_segment_only).sort((a,b) => String(a.starts_at).localeCompare(String(b.starts_at)));
+  // Capacity-only dates stay off the home cards, but remain available for on-site work.
+  const rules = [...(p.rules || [])].sort((a,b) => String(a.starts_at).localeCompare(String(b.starts_at)));
   let rule = rules.find(r => r.id === Number(query.get('kerta'))) || rules.find(r => !r.cancelled_at && String(r.ends_at).slice(0,10) >= todayHel()) || rules[0];
   if (!rule) return [title, nav, h('p', { text: T('empty') }), more()];
   let data;
@@ -83,7 +84,7 @@ export async function render(args) {
     return h('details', { class: 'training-more' }, h('summary', { text: T('more') }), h('div', { class: 'row wrap' },
       link(T('texts'), href({ tapahtuma: p.product_id, valilehti:'tekstit' })),
       link(T('more'), href({ tapahtuma: p.product_id, valilehti:'kerrat' })),
-      canEdit && rule ? btn(T('copy'), () => copySession(), 'training-copy') : null));
+      canEdit && rule && !rule.training_segment_only ? btn(T('copy'), () => copySession(), 'training-copy') : null));
   }
   function check(label, done) { return h('p', { class: done?'training-done':'training-todo' }, h('span', { 'aria-hidden':'true', text:done?'✓ ':'— ' }), label); }
   function fact(label, value) { return h('div', {}, h('span', { class:'muted',text:label+' ' }), h('strong',{text:value})); }
@@ -110,7 +111,7 @@ export async function render(args) {
     const payBadge = row => badge({paid:'ok',partial:'warn',unpaid:'err'}[paymentState(row)],T(paymentState(row)));
     const heads = ['name','persons','payments','contact','present'];
     return [h('h2',{text:T('people')}), h('div',{class:'row wrap training-no-print'},
-      canBook ? btn(T('add_person'),()=>formBox(T('add_person'),personInputs(),T('save'),async fd=>{ await rpc('admin_training_person_add',{p_rule_id:rule.id,p_customer:Object.fromEntries(fd)}); refresh(); },'training-person-add'),'training-add-person','btn primary') : null,
+      canBook && !rule.training_segment_only ? btn(T('add_person'),()=>formBox(T('add_person'),personInputs(),T('save'),async fd=>{ await rpc('admin_training_person_add',{p_rule_id:rule.id,p_customer:Object.fromEntries(fd)}); refresh(); },'training-person-add'),'training-add-person','btn primary') : null,
       btn(T('export'),()=>downloadCsv(`osallistujat_${p.product_id}_${rule.id}.csv`,trainingExport(people,['name','email','phone','persons','diet','accommodation','arrival','language','present','actual_paid','remaining'].map(T))),'training-export'),
       btn(T('print'),()=>{ document.body.classList.add('training-printing'); const finish=()=>{document.body.classList.remove('training-printing');window.removeEventListener('afterprint',finish);};window.addEventListener('afterprint',finish);window.print(); },'training-print')),
       people.length ? h('div',{class:'ev-table-wrap training-print-area'},h('h3',{class:'training-print-only',text:nameOf(p)+' · '+dates(rule)}), h('table',{class:'ev-table training-people'},h('thead',{},h('tr',{},heads.map(x=>h('th',{scope:'col',text:T(x)})))), h('tbody',{},people.map(row=>h('tr',{'data-testid':'training-person'},

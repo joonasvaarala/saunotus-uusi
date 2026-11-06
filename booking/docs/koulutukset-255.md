@@ -12,6 +12,9 @@ https://cursor.com/canvas/store-7b3bca7e-e6e8-4cc1-936c-22d4666c6717/b3122fe1-99
 - **Muut tiedot → Tekstit** säilyttää #309:n FI/EN-sisältöeditorin.
 - Osallistujan tiedot: ruokavalio, majoitus, saapumisaika ja kieli. Läsnäolorasti.
   Puolipiste-CSV avautuu Excelissä (UTF-8 BOM, kaavainjektiosuojaus); myös tulostus.
+- Osakertojen piilotetut kapasiteettipäivät eivät näy etusivun kortteina, mutta ne voi
+  valita koulutuksen päivävalitsimesta tilojen, viestien ja läsnäolon hoitamiseksi.
+  Niihin ei lisätä erillisiä ilmoittautumisia eikä niistä kopioida irrallista koulutusta.
 - Käsin lisättävä osallistuja on yksi henkilö/tilaus ja käyttää nykyistä varausmaksua.
   Osakertojen kapasiteetti kulutetaan nykyisillä koulutusapureilla.
 - Odottajat on **käsin hoidettava FIFO-lista**. Seuraavan tarjous merkitään vasta oman
@@ -62,9 +65,9 @@ Tekstien tuontia ei ole tehty tässä työssä.
 
 ## Tarkistukset
 
-- `node --test booking/tests/*.test.mjs`: 1313 testiä, 1312 hyväksyttyä; ainoa
+- `node --test booking/tests/*.test.mjs`: 1314 testiä, 1313 hyväksyttyä; ainoa
   epäonnistuminen on ennestään sallittu `uusi-varaus.test.mjs` / ”yhdeksän kohtaa”.
-- Uusi `koulutukset-tyokalu.test.mjs`: 12/12; aiempi `koulutukset-hallinta.test.mjs`: 6/6.
+- Uusi `koulutukset-tyokalu.test.mjs`: 13/13; aiempi `koulutukset-hallinta.test.mjs`: 6/6.
 - `npm run build:prod`: onnistuu, ei julkaise.
 - Paikallinen PostgreSQL 17, `booking/supabase/tests/t255_training_workspace.sql`: 40
   tarkistusta, transaktio päättyy rollbackiin. Kattaa sulut ja varauskonfliktit,
