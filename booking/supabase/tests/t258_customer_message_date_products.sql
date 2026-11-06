@@ -91,13 +91,13 @@ begin
 
   insert into booking.customers(name, email) values ('Ostaja', 't258-buy@example.test') returning id into v_cu;
   insert into booking.orders(customer_id, status, payment_status, total_gross, source_channel, locale, confirmed_at)
-  values (v_cu, 'confirmed', 'paid', 58, 'shop', 'en', now()) returning id into v_buy;
+  values (v_cu, 'confirmed', 'paid', 58, 'web', 'en', now()) returning id into v_buy;
   insert into booking.order_items(order_id, product_id, product_name, kind, quantity, unit_price_gross, line_total_gross, vat_rate)
   values (v_buy, 38, 'Avoin lahjakortti', 'gift_card', 1, 58, 58, 25.5);
   alter table booking.payments disable trigger payments_paid_ins;
   alter table booking.payments disable trigger payments_paid_upd;
   insert into booking.payments(order_id, method, provider, status, amount, paid_at)
-  values (v_buy, 'manual', 'manual', 'paid', 58, ((d_pay::text || ' 12:00')::timestamp at time zone 'Europe/Helsinki'));
+  values (v_buy, 'other', 'manual', 'paid', 58, ((d_pay::text || ' 12:00')::timestamp at time zone 'Europe/Helsinki'));
   alter table booking.payments enable trigger payments_paid_ins;
   alter table booking.payments enable trigger payments_paid_upd;
 
@@ -128,6 +128,9 @@ begin
   perform pg_temp.ck(res = '[]'::jsonb, 'C5: tyhjä päivä → []');
 
   -- Sama kelpoisuus kuin hits: distinct product_id hits(null) = products RPC.
+  -- hits on apufunktio ilman authenticated-executea → service_role.
+  -- hits: ei granttia authenticated/service_role → superuser (logout)
+  perform test.logout();
   perform pg_temp.ck(
     (select coalesce(array_agg(distinct h.product_id order by h.product_id), '{}'::bigint[])
        from booking._customer_message_hits(d, d, null) h)
@@ -143,6 +146,7 @@ begin
   select count(*) into v_noint from booking._customer_message_hits(d, d, null) h
    where h.cust_name in ('Peruttu', 'Vanhentunut', 'Johku', 'Jono');
   perform pg_temp.ck(v_noint = 0 and v_wl is not null, 'D3: poissulut eivät osu');
+  perform test.login(u_mgr);
 
   -- Esikatselu ei lähetä (regressio): products + preview.
   select count(*) into v_noint from booking.email_outbox where kind = 'event_message';

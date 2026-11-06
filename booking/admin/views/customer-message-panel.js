@@ -259,7 +259,7 @@ export async function renderCustomerMessagePanel({ wrap }) {
   wrap.replaceChildren(
     messagesTabBar('asiakkaalle'),
     h('h1', { id: 'messages-h', text: T('ui.admin.customer_message.title') }),
-    h('p', { class: 'muted', text: T('ui.admin.customer_message.lead') }),
+    h('p', { class: 'muted', text: T('ui.admin.customer_message.lead_date_products') }),
     h('div', { class: 'row wrap' },
       field(T('ui.admin.customer_message.from'), from),
       field(T('ui.admin.customer_message.to'), to, T('ui.admin.customer_message.to_hint'))),

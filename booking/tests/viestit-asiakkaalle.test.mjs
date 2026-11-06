@@ -102,11 +102,13 @@ test('pending-import-129+130 ja fallback-tekstit täsmäävät', () => {
     }
   }
   assert.ok(pending130.some((r) => r.key === 'ui.admin.customer_message.products_empty' && r.lang === 'fi'));
-  assert.ok(pending130.some((r) => r.key === 'ui.admin.customer_message.lead' && r.lang === 'fi'));
+  assert.ok(pending130.some((r) => r.key === 'ui.admin.customer_message.lead_date_products' && r.lang === 'fi'));
+  assert.ok(!pending130.some((r) => r.key === 'ui.admin.customer_message.lead'));
   assert.equal(pending129.length, 78);
   assert.equal(pending130.length, 10);
   clearCustomerMessageTextCache();
   assert.equal(customerMessageText('ui.admin.customer_message.tab', 'fi'), 'Viesti asiakkaalle');
+  assert.ok(customerMessageText('ui.admin.customer_message.lead_date_products', 'fi').includes('Tuotevalintaan tulevat vain'));
   assert.equal(customerMessageText('ui.admin.customer_message.products_empty', 'fi'), 'Ei varattuja tai myytyjä tuotteita valitulla päivällä tai aikavälillä.');
   assert.equal(customerMessageText('ui.admin.customer_message.products_empty', 'en'), 'No reserved or sold products for the selected day or date range.');
 });
@@ -139,6 +141,7 @@ test('migraatio 257/258, rollback ja hallinta', () => {
   assert.match(panelJs, /pruneSelectedProductIds/);
   assert.match(panelJs, /products_empty/);
   assert.match(panelJs, /products_need_dates/);
+  assert.match(panelJs, /lead_date_products/);
   assert.doesNotMatch(panelJs, /refs\?\.products/);
   assert.doesNotMatch(panelJs, /refs\.products/);
   assert.match(panelJs, /p_confirm: confirmSend/);
