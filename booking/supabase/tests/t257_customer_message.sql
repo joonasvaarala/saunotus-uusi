@@ -102,13 +102,13 @@ begin
   -- Lahjakorttiosto (tuote 38) maksupäivällä d_pay Helsingissä.
   insert into booking.customers(name, email) values ('Ostaja', 't257-buy@example.test') returning id into v_cu;
   insert into booking.orders(customer_id, status, payment_status, total_gross, source_channel, locale, confirmed_at)
-  values (v_cu, 'confirmed', 'paid', 58, 'shop', 'en', now()) returning id into v_buy;
+  values (v_cu, 'confirmed', 'paid', 58, 'web', 'en', now()) returning id into v_buy;
   insert into booking.order_items(order_id, product_id, product_name, kind, quantity, unit_price_gross, line_total_gross, vat_rate)
   values (v_buy, 38, 'Avoin lahjakortti', 'gift_card', 1, 58, 58, 25.5);
   alter table booking.payments disable trigger payments_paid_ins;
   alter table booking.payments disable trigger payments_paid_upd;
   insert into booking.payments(order_id, method, provider, status, amount, paid_at)
-  values (v_buy, 'manual', 'manual', 'paid', 58, ((d_pay::text || ' 12:00')::timestamp at time zone 'Europe/Helsinki'));
+  values (v_buy, 'other', 'manual', 'paid', 58, ((d_pay::text || ' 12:00')::timestamp at time zone 'Europe/Helsinki'));
   alter table booking.payments enable trigger payments_paid_ins;
   alter table booking.payments enable trigger payments_paid_upd;
 
@@ -165,9 +165,9 @@ begin
   ), 'E4: ostajan locale en');
 
   -- Annan viesti: varaus ensisijainen, molemmat tuotenimet jos 38 ei osumaa hänellä... vain 33.
-  select e.payload ->> 'body' into v_mail from booking.email_outbox e
+  select e.payload::text into v_mail from booking.email_outbox e
    where e.kind = 'event_message' and e.order_id = v_ord order by e.id desc limit 1;
-  perform pg_temp.ck(v_mail like '%Anna Asiakas%' and v_mail like '%Sipoonjoen Kekri%' and v_mail like '%17:00%'
+  perform pg_temp.ck(v_mail is not null and v_mail like '%Anna Asiakas%' and v_mail like '%Sipoonjoen Kekri%' and v_mail like '%17:00%'
     and v_mail like '%https://saunotus.fi/tilaus/?t=%'
     and v_mail not like '%Montonio%' and v_mail not like '%event_name%', 'E5: Annan FI-varausviesti');
 
