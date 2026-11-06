@@ -211,6 +211,16 @@ export async function render({ ctx, refs, query, reload }) {
       persSec.hidden = card; paySec.hidden = card; upd();
     };
     cardChk.addEventListener('change', syncCard);
+    // paidRow ennen customerFormia: customerForm kutsuu onKind→setKind heti, ja syncPaidForMethod
+    // käyttää paidRowta. #306:n jälkeen const paidRow oli TDZ:ssä → ReferenceError ja lomake jäi nb.pickSlot-vihjeeseen.
+    const paidRow = h('label', { class: 'check big', 'data-testid': 'paid-row' }, paid, h('span', {}, h('strong', { text: T('nb.paid') }), h('small', { text: T('nb.paidHint') })));
+    function syncPaidForMethod() {
+      const link = isPaymentLinkMethod(method.value);
+      paidRow.hidden = link;
+      paid.disabled = link;
+      if (link) { paid.checked = false; }
+      else if (!paidTouched) paid.checked = paidDefaultFor(method.value);
+    }
     const cf = customerForm({ id: 'nb', reference: false, onKind: (k) => {
       if (ui.method && !st.customer) { ui.method.value = k === 'company' && refs.methods.some((m) => m.active && m.code === 'invoice') ? 'invoice' : 'pay_later'; syncPaidForMethod(); }
       ui.syncInv?.();
@@ -222,14 +232,6 @@ export async function render({ ctx, refs, query, reload }) {
     persSec = section(T('nb.s2'), h('div', { class: 'nb-persons' }, pers.node, h('div', { class: 'nb-persinfo' }, persHint, persErr)));
     const custSec = section(T('nb.s3'), h('div', { class: 'nb-search' }, h('span', { class: 'fld-lab', text: T('cu.search') }), cs.row, cs.found), h('p', { class: 'nb-or muted', text: T('cu.or') }), cf.node, cardRow);
     picker.node.classList.add('nb-sec', 'card');
-    function syncPaidForMethod() {
-      const link = isPaymentLinkMethod(method.value);
-      paidRow.hidden = link;
-      paid.disabled = link;
-      if (link) { paid.checked = false; }
-      else if (!paidTouched) paid.checked = paidDefaultFor(method.value);
-    }
-    const paidRow = h('label', { class: 'check big', 'data-testid': 'paid-row' }, paid, h('span', {}, h('strong', { text: T('nb.paid') }), h('small', { text: T('nb.paidHint') })));
     paySec = section(T('nb.s5'),
       h('label', { class: 'fld' }, h('span', { class: 'fld-lab', text: T('nb.method') }), method),
       giftWrap,

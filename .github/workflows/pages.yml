@@ -363,6 +363,8 @@ jobs:
       # SQL: booking/supabase/tests/hallinta/t194_private_no_double_book.sql
       # ajetaan paikallisessa PG17:ssä (migraatiot + fixtures/10_test_helpers.sql). Työnkulussa ei ole Postgresia.
       - run: node --test booking/tests/admin-ylivaraus.test.mjs
+      # P0 hotfix 6.11.2026: Uusi varaus – exclusive-vuoron valinta avaa lomakkeen (#306 paidRow TDZ).
+      - run: node --test booking/tests/uusi-varaus-slot-select.test.mjs booking/tests/paivanakyma-maksamaton.test.mjs
       # booking_161: kb.products-kuvausten Johku-linkit → uuden kaupan osoitteet (migraatio + rollback, md5-vartijat). SQL: t161 PG17:ssä.
       - run: node --test booking/tests/kb-johku-linkit-161.test.mjs
       # booking_163: kb.products.booking_url Johku → uuden kaupan tuotesivu (migraatio + rollback, vartijat). SQL: t163 PG17:ssä.
