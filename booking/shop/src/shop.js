@@ -43,6 +43,7 @@ import { groupEventDays, eventDayLabel } from './event-pick.js';
 import { formatWhenRange, formatWhenList, spansDays } from './when-range.js';
 import { createTrainingSignup, isTrainingProduct, listedProducts } from './training-signup.js';
 import { isTrainingCategory, sessionDateText, trainingSessions, scheduleRows, trainingDateText } from './training-dates.js';
+import { checkoutPath, ensureCheckoutProduct, findCheckoutSession } from './checkout-route.js';
 import { customerInvoiceLock } from './invoice-lock.js';
 import { formPaysOnline, paysByInvoice } from './company-pay.js';
 import { clockFromIso } from './clock.js';
@@ -603,7 +604,7 @@ async function viewProduct(slug, dateStr, query) {
     const sub = cleanLabel(rlabel(r));
     const action = ok ? t.choose : (training ? '' : t.eventWaitlistCta);
     const left = training && r.remaining != null ? t.freeSpots(r.remaining) : '';
-    const href = training ? (ok ? bk(`/varaa/${r.rule_id}/${ds}/${p.id}`) : null) : bk(ok ? `/varaa/${r.rule_id}/${ds}/${p.id}` : `/jono/${r.rule_id}/${ds}/${p.id}`);
+    const href = training ? (ok ? bk(checkoutPath(r.rule_id, ds, p)) : null) : bk(ok ? `/varaa/${r.rule_id}/${ds}/${p.id}` : `/jono/${r.rule_id}/${ds}/${p.id}`);
     return h(href ? 'a' : 'div', {
       class: `bk-ev-time${ok ? '' : ' is-full'}${range || isMultiDay(r) ? ' is-span' : ''}`,
       href,
@@ -671,7 +672,7 @@ async function viewProduct(slug, dateStr, query) {
       sessions.map((s) => {
         const label = sessionDateText(s.r, s.segs, S.lang);
         const left = s.full ? '' : (s.remaining != null ? t.freeSpots(s.remaining) : '');
-        const href = s.full ? null : bk(`/varaa/${s.r.rule_id}/${s.date}/${p.id}`);
+        const href = s.full ? null : bk(checkoutPath(s.r.rule_id, s.date, p));
         return h(href ? 'a' : 'div', {
           class: `bk-ev-date is-span${s.full ? ' is-full' : ''}`, href, 'data-date': s.date, 'data-rule': s.r.rule_id, 'data-testid': 'event-date',
           'aria-current': !s.full && s.date === sel ? 'true' : null, 'aria-disabled': s.full ? 'true' : null,
@@ -760,7 +761,7 @@ function slotItem(r, ds, p) {
     h('div', { class: 'bk-slot-main' }, h('strong', { class: 'bk-time', text: title }), sub ? h('span', { class: 'bk-sub', text: sub }) : null, h('span', { class: 'bk-price', text: price, ...qAttrs(ok, p, r, 'slot') })),
     h('div', { class: 'bk-slot-side' },
       spotBadge(r, p, ok, p.category === 'event' ? t.full : t.waitlistSessionSoldOut),
-      ok ? h('a', { class: 'btn sm', href: bk(`/varaa/${r.rule_id}/${ds}/${p.id}`) }, t.choose, h('span', { class: 'sr', text: ` ${title}` })) : h('a', { class: 'btn sm light bk-waitlist-link', href: bk(`/jono/${r.rule_id}/${ds}/${p.id}`), text: p.category === 'event' ? t.eventWaitlistCta : t.waitlistJoinShort })));
+      ok ? h('a', { class: 'btn sm', href: bk(checkoutPath(r.rule_id, ds, p)) }, t.choose, h('span', { class: 'sr', text: ` ${title}` })) : h('a', { class: 'btn sm light bk-waitlist-link', href: bk(`/jono/${r.rule_id}/${ds}/${p.id}`), text: p.category === 'event' ? t.eventWaitlistCta : t.waitlistJoinShort })));
 }
 
 // booking_158: tapahtumat (public_events, kanava shop). Virhe tai vanha kanta ilman RPC:tä → [] (vanha käytös).
@@ -866,17 +867,11 @@ const trainingSignup = createTrainingSignup({
   reveal: revealIfHidden,
   confirmUrl: (token) => `${S.confirmHref}${mockQs()}#${token}`,
 });
-async function viewCheckout(ruleId, ds, productId, via) {
+async function viewCheckout(ruleId, ds, productId, via, slug) {
   // Haetaan vuoro tuotteen kuukausidatasta (tuote-id tulee linkissä; ilman sitä käydään tuotteet läpi)
-  let s = null, p = null;
-  const order = [...state.catalog].sort((a, b) => (b.id === +productId) - (a.id === +productId));
-  for (const prod of order) {
-    const [y, m] = ds.split('-').map(Number);
-    const byDay = await loadMonth(prod.id, y, m - 1).catch(() => ({}));
-    const f = (byDay[ds] || []).find((r) => r.rule_id === +ruleId);
-    if (f) { s = f; p = prod; break; }
-    if (+productId === prod.id) break;
-  }
+  // Refresh: linkkikoulutus ei ole public_catalogissa → haetaan slugilla (?tuote=) kuten tuotesivulla (checkout-route.js).
+  await ensureCheckoutProduct(state.catalog, productId, slug, (x) => rpc('public_product_by_slug', { p_slug: x }));
+  const { s, p } = await findCheckoutSession(state.catalog, ruleId, ds, productId, loadMonth);
   setHero(p);
   if (!s) { mount(h('p', {}, h('a', { href: bk('/'), text: t.backList })), errorBox(t.noSlots)); focusTop(); return; }
   if (isTrainingProduct(p)) return trainingSignup.viewCheckout(s, p, ds);
@@ -1465,7 +1460,7 @@ async function route(keep = false) {
     else if (parts[0] === 'paiva') await viewDay(parts[1], keep, q.get('tuote'));
     else if (parts[0] === 'tuote' && parts[1]) await viewProduct(parts[1], /^\d{4}-\d\d-\d\d$/.test(parts[2] || '') ? parts[2] : null, q);
     else if (parts[0] === 'hoito' && parts[1]) { const tp = state.treatments.find((x) => x.slug === parts[1]); if (tp) await tv.viewCheckout(tp, parts[2], parts[3], q); else await viewProduct(parts[1], null, q); }
-    else if (parts[0] === 'varaa' && parts[1] && parts[2]) await viewCheckout(parts[1], parts[2], parts[3], q.get('via'));
+    else if (parts[0] === 'varaa' && parts[1] && parts[2]) await viewCheckout(parts[1], parts[2], parts[3], q.get('via'), q.get('tuote'));
     else if (parts[0] === 'jono' && parts[1] && parts[2] && parts[3]) await wv.viewWaitlist(parts[1], parts[2], parts[3], q.get('via'));
     else { await viewList(q); focusTop(); }
   } catch (e) {

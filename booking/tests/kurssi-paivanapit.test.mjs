@@ -98,7 +98,7 @@ test('kauppa: kurssilla ei "Valitse aika" -osiota; päivänappi vie suoraan kerr
   const course = body.slice(body.indexOf('function drawCourse'), body.indexOf('const draw = async'));
   assert.doesNotMatch(course, /eventPickTime|pickTime|drawTimes|bk-ev-time/, 'kurssinäkymässä ei kellonaikavalintaa');
   assert.match(course, /slotBox\.replaceChildren\(\)/);
-  assert.match(course, /bk\(`\/varaa\/\$\{s\.r\.rule_id\}\/\$\{s\.date\}\/\$\{p\.id\}`\)/, 'sama reitti kuin ennen kellonajan napista');
+  assert.match(course, /bk\(checkoutPath\(s\.r\.rule_id, s\.date, p\)\)/, 'sama reitti kuin kellonajan napista: #/varaa/<rule_id>/<pvm>/<tuote_id>?tuote=<slug> (refresh, varaa-refresh-koulutus.test.mjs)');
   assert.match(course, /sessionDateText\(s\.r, s\.segs, S\.lang\)/);
   assert.doesNotMatch(course, /\bhm\(|occurrenceText|formatWhenList/, 'napissa ei kellonaikoja');
   assert.match(course, /is-full/);
