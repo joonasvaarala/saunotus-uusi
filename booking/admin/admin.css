@@ -1132,3 +1132,44 @@ body.shot #shell .nav .lbl{display:inline}
 
 /* booking_243: päivänäkymän maksamaton varaus – vaalea pinkki (var --unpaidbg), kontrasti riittää tekstille */
 .day-view .resrow.unpaid-pay{background:var(--unpaidbg);border-radius:6px;padding-left:8px;padding-right:8px;margin:2px 0}
+
+/* booking_255: Lauran koulutus-/matkatyötila. Sama vihreä runko ja navi, väljä sisältö. */
+.training-work { max-width: 70rem; margin: 0 auto; display: grid; gap: 1.5rem; }
+.training-work h1 { font-size: clamp(1.7rem, 3vw, 2.4rem); line-height: 1.25; margin: 0 0 .75rem; }
+.training-work h2 { font-size: 1.5rem; margin: 0 0 1rem; }
+.training-work h3 { font-size: 1.2rem; }
+.training-work .btn { min-height: 48px; padding: .65rem 1.1rem; }
+.training-work .btn.sm { min-height: 42px; }
+.training-cards { display: grid; grid-template-columns: repeat(auto-fit,minmax(min(100%,310px),1fr)); gap: 1.5rem; }
+.training-card, .training-summary, .training-check, .training-panel { padding: clamp(1rem,3vw,2rem); }
+.training-card { display: flex; flex-direction: column; gap: .75rem; }
+.training-card > .row:last-child { margin-top: auto; }
+.training-dates { font-size: 1.15rem; color: var(--green); }
+.training-facts { display: flex; flex-wrap: wrap; gap: 1.25rem 3rem; margin: 1.5rem 0; }
+.training-check { display: grid; grid-template-columns: repeat(auto-fit,minmax(200px,1fr)); gap: .5rem 1.25rem; }
+.training-check h2 { grid-column: 1 / -1; }
+.training-check p { margin: .3rem 0; }
+.training-done { color: var(--green); }
+.training-todo { color: var(--gold); }
+.training-work .tl-tabbtn { text-decoration: none; min-height: 48px; padding: .8rem 1.2rem; display: inline-flex; align-items: center; }
+.training-work .tl-tabbtn.active { color: var(--card); background: var(--green); border-radius: .5rem; }
+.training-tabs { flex-wrap: wrap; gap: .5rem; }
+.training-panel { background: var(--card); border: 1px solid var(--line); border-radius: 12px; }
+.training-people td { vertical-align: top; }
+.training-people .btn { display: block; margin-top: .5rem; }
+.training-waiters li { padding: 1rem 0; border-bottom: 1px solid var(--line); }
+.training-blocks { list-style: none; padding: 0; display: grid; gap: 1rem; }
+.training-language-editors { display: grid; grid-template-columns: repeat(auto-fit,minmax(min(100%,300px),1fr)); gap: 1rem; }
+.training-form { min-width: min(360px,80vw); }
+.training-more { padding: 1rem; border-top: 1px solid var(--line); }
+.training-more summary { cursor: pointer; padding: .5rem 0; }
+.training-cal-block { background: var(--warnbg); border-left: 4px solid var(--gold); }
+.training-print-only { display: none; }
+@media print {
+  body.training-printing * { visibility: hidden; }
+  body.training-printing .training-print-area, body.training-printing .training-print-area * { visibility: visible; }
+  body.training-printing .training-print-area { position: absolute; top: 0; left: 0; width: 100%; overflow: visible; }
+  body.training-printing .training-no-print { display: none !important; }
+  body.training-printing .training-print-only { display: block; }
+  body.training-printing table { font-size: 10pt; width: 100%; }
+}

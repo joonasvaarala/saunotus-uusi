@@ -1,0 +1,1152 @@
+[
+  {
+    "key": "admin.training.title",
+    "lang": "fi",
+    "text": "Koulutukset"
+  },
+  {
+    "key": "admin.training.trips",
+    "lang": "fi",
+    "text": "Matkat"
+  },
+  {
+    "key": "admin.training.now",
+    "lang": "fi",
+    "text": "Nyt ajankohtaista"
+  },
+  {
+    "key": "admin.training.lead",
+    "lang": "fi",
+    "text": "Avaa jakso. Näet seuraavaksi, mitä vielä puuttuu."
+  },
+  {
+    "key": "admin.training.open",
+    "lang": "fi",
+    "text": "Avaa"
+  },
+  {
+    "key": "admin.training.back",
+    "lang": "fi",
+    "text": "Takaisin"
+  },
+  {
+    "key": "admin.training.people",
+    "lang": "fi",
+    "text": "Osallistujat"
+  },
+  {
+    "key": "admin.training.messages",
+    "lang": "fi",
+    "text": "Viestit"
+  },
+  {
+    "key": "admin.training.payments",
+    "lang": "fi",
+    "text": "Maksut"
+  },
+  {
+    "key": "admin.training.spaces",
+    "lang": "fi",
+    "text": "Tilat"
+  },
+  {
+    "key": "admin.training.reserve",
+    "lang": "fi",
+    "text": "Varaa tila"
+  },
+  {
+    "key": "admin.training.cancel",
+    "lang": "fi",
+    "text": "Peruuta"
+  },
+  {
+    "key": "admin.training.save",
+    "lang": "fi",
+    "text": "Tallenna"
+  },
+  {
+    "key": "admin.training.saved",
+    "lang": "fi",
+    "text": "Tallennettu"
+  },
+  {
+    "key": "admin.training.empty",
+    "lang": "fi",
+    "text": "Ei tulevia jaksoja."
+  },
+  {
+    "key": "admin.training.past",
+    "lang": "fi",
+    "text": "Näytä myös menneet"
+  },
+  {
+    "key": "admin.training.places",
+    "lang": "fi",
+    "text": "Paikat"
+  },
+  {
+    "key": "admin.training.spaces_ok",
+    "lang": "fi",
+    "text": "Tilat varattu"
+  },
+  {
+    "key": "admin.training.spaces_missing",
+    "lang": "fi",
+    "text": "Tilat puuttuvat"
+  },
+  {
+    "key": "admin.training.open_payments",
+    "lang": "fi",
+    "text": "Avoimet maksut"
+  },
+  {
+    "key": "admin.training.ready",
+    "lang": "fi",
+    "text": "Onko valmis?"
+  },
+  {
+    "key": "admin.training.message_done",
+    "lang": "fi",
+    "text": "Viesti lähetetty"
+  },
+  {
+    "key": "admin.training.payments_done",
+    "lang": "fi",
+    "text": "Maksut kunnossa"
+  },
+  {
+    "key": "admin.training.materials",
+    "lang": "fi",
+    "text": "Materiaalit jaettu"
+  },
+  {
+    "key": "admin.training.next",
+    "lang": "fi",
+    "text": "Seuraava teko"
+  },
+  {
+    "key": "admin.training.add_person",
+    "lang": "fi",
+    "text": "Lisää osallistuja"
+  },
+  {
+    "key": "admin.training.details",
+    "lang": "fi",
+    "text": "Käytännön tiedot"
+  },
+  {
+    "key": "admin.training.name",
+    "lang": "fi",
+    "text": "Nimi"
+  },
+  {
+    "key": "admin.training.email",
+    "lang": "fi",
+    "text": "Sähköposti"
+  },
+  {
+    "key": "admin.training.phone",
+    "lang": "fi",
+    "text": "Puhelin"
+  },
+  {
+    "key": "admin.training.language",
+    "lang": "fi",
+    "text": "Kieli"
+  },
+  {
+    "key": "admin.training.diet",
+    "lang": "fi",
+    "text": "Ruokavalio"
+  },
+  {
+    "key": "admin.training.accommodation",
+    "lang": "fi",
+    "text": "Majoitus"
+  },
+  {
+    "key": "admin.training.arrival",
+    "lang": "fi",
+    "text": "Saapumisaika"
+  },
+  {
+    "key": "admin.training.present",
+    "lang": "fi",
+    "text": "Paikalla"
+  },
+  {
+    "key": "admin.training.paid",
+    "lang": "fi",
+    "text": "Maksettu"
+  },
+  {
+    "key": "admin.training.partial",
+    "lang": "fi",
+    "text": "Osittain"
+  },
+  {
+    "key": "admin.training.unpaid",
+    "lang": "fi",
+    "text": "Avoin"
+  },
+  {
+    "key": "admin.training.contact",
+    "lang": "fi",
+    "text": "Yhteystiedot"
+  },
+  {
+    "key": "admin.training.persons",
+    "lang": "fi",
+    "text": "Paikkamäärä"
+  },
+  {
+    "key": "admin.training.none_people",
+    "lang": "fi",
+    "text": "Ei osallistujia."
+  },
+  {
+    "key": "admin.training.export",
+    "lang": "fi",
+    "text": "Vie Exceliin (CSV)"
+  },
+  {
+    "key": "admin.training.print",
+    "lang": "fi",
+    "text": "Tulosta lista"
+  },
+  {
+    "key": "admin.training.waitlist",
+    "lang": "fi",
+    "text": "Odottajat"
+  },
+  {
+    "key": "admin.training.add_waiter",
+    "lang": "fi",
+    "text": "Lisää odottaja"
+  },
+  {
+    "key": "admin.training.none_waiters",
+    "lang": "fi",
+    "text": "Ei odottajia."
+  },
+  {
+    "key": "admin.training.waiting",
+    "lang": "fi",
+    "text": "Odottaa"
+  },
+  {
+    "key": "admin.training.offered",
+    "lang": "fi",
+    "text": "Paikka tarjottu"
+  },
+  {
+    "key": "admin.training.offer",
+    "lang": "fi",
+    "text": "Tarjoa paikka seuraavalle"
+  },
+  {
+    "key": "admin.training.offer_hint",
+    "lang": "fi",
+    "text": "Ota yhteyttä tähän henkilöön. Merkitse tarjous vasta yhteydenoton jälkeen. Viestiä ei lähetetä automaattisesti eikä paikkaa pidetä varattuna."
+  },
+  {
+    "key": "admin.training.mark_offered",
+    "lang": "fi",
+    "text": "Olen tarjonnut paikan"
+  },
+  {
+    "key": "admin.training.booked",
+    "lang": "fi",
+    "text": "On ilmoittautunut"
+  },
+  {
+    "key": "admin.training.remove_waiter",
+    "lang": "fi",
+    "text": "Poista odottajista"
+  },
+  {
+    "key": "admin.training.remove_confirm",
+    "lang": "fi",
+    "text": "Poistetaanko henkilö odottajista?"
+  },
+  {
+    "key": "admin.training.date",
+    "lang": "fi",
+    "text": "Päivä"
+  },
+  {
+    "key": "admin.training.start",
+    "lang": "fi",
+    "text": "Alkuaika"
+  },
+  {
+    "key": "admin.training.end",
+    "lang": "fi",
+    "text": "Loppuaika"
+  },
+  {
+    "key": "admin.training.space",
+    "lang": "fi",
+    "text": "Tila"
+  },
+  {
+    "key": "admin.training.none_spaces",
+    "lang": "fi",
+    "text": "Ei tilavarauksia."
+  },
+  {
+    "key": "admin.training.space_hint",
+    "lang": "fi",
+    "text": "Tämä varaa tilan vain jakson käyttöön. Aika poistuu muiden varattavista."
+  },
+  {
+    "key": "admin.training.space_cancel",
+    "lang": "fi",
+    "text": "Peru tilavaraus"
+  },
+  {
+    "key": "admin.training.space_confirm",
+    "lang": "fi",
+    "text": "Perutaanko tämä tilavaraus? Aika vapautuu muiden varattavaksi."
+  },
+  {
+    "key": "admin.training.template",
+    "lang": "fi",
+    "text": "Viestipohja"
+  },
+  {
+    "key": "admin.training.arrival_template",
+    "lang": "fi",
+    "text": "Saapumisohje"
+  },
+  {
+    "key": "admin.training.payment_template",
+    "lang": "fi",
+    "text": "Maksumuistutus"
+  },
+  {
+    "key": "admin.training.free_template",
+    "lang": "fi",
+    "text": "Oma viesti"
+  },
+  {
+    "key": "admin.training.subject",
+    "lang": "fi",
+    "text": "Aihe"
+  },
+  {
+    "key": "admin.training.body",
+    "lang": "fi",
+    "text": "Viesti"
+  },
+  {
+    "key": "admin.training.preview",
+    "lang": "fi",
+    "text": "Esikatsele"
+  },
+  {
+    "key": "admin.training.send",
+    "lang": "fi",
+    "text": "Lähetä viesti"
+  },
+  {
+    "key": "admin.training.send_confirm",
+    "lang": "fi",
+    "text": "Tarkistin vastaanottajat ja molempien kielten viestit."
+  },
+  {
+    "key": "admin.training.manual_hint",
+    "lang": "fi",
+    "text": "Viesti menee vain tämän jakson osallistujille heidän kielellään. Mitään ei lähetetä ilman esikatselua ja Lähetä-painallusta. Kirjoita oma allekirjoitus viestiin."
+  },
+  {
+    "key": "admin.training.preview_again",
+    "lang": "fi",
+    "text": "Esikatsele viesti ensin uudelleen."
+  },
+  {
+    "key": "admin.training.sent",
+    "lang": "fi",
+    "text": "Viestit lisätty lähetysjonoon."
+  },
+  {
+    "key": "admin.training.save_template",
+    "lang": "fi",
+    "text": "Tallenna pohja tälle jaksolle"
+  },
+  {
+    "key": "admin.training.log",
+    "lang": "fi",
+    "text": "Aiemmat viestit"
+  },
+  {
+    "key": "admin.training.none_messages",
+    "lang": "fi",
+    "text": "Ei lähetettyjä viestejä."
+  },
+  {
+    "key": "admin.training.deposit",
+    "lang": "fi",
+    "text": "Varausmaksu"
+  },
+  {
+    "key": "admin.training.course_price",
+    "lang": "fi",
+    "text": "Kurssihinta"
+  },
+  {
+    "key": "admin.training.remaining",
+    "lang": "fi",
+    "text": "Maksamatta yhteensä"
+  },
+  {
+    "key": "admin.training.actual_paid",
+    "lang": "fi",
+    "text": "Maksettu yhteensä"
+  },
+  {
+    "key": "admin.training.balance",
+    "lang": "fi",
+    "text": "Loppumaksu"
+  },
+  {
+    "key": "admin.training.prepare_balance",
+    "lang": "fi",
+    "text": "Lisää loppumaksu tilaukseen"
+  },
+  {
+    "key": "admin.training.prepare_hint",
+    "lang": "fi",
+    "text": "Lisätään tallennettu loppumaksu tilaukselle. Hinta ja verokanta eivät muutu. Ei lähetä viestiä."
+  },
+  {
+    "key": "admin.training.paylink",
+    "lang": "fi",
+    "text": "Lähetä maksulinkki valituille"
+  },
+  {
+    "key": "admin.training.select",
+    "lang": "fi",
+    "text": "Valitse"
+  },
+  {
+    "key": "admin.training.pay_preview",
+    "lang": "fi",
+    "text": "Tarkista maksulinkit ennen lähetystä"
+  },
+  {
+    "key": "admin.training.pay_hint",
+    "lang": "fi",
+    "text": "Lähetetään vain tilauksella jo laskutettu avoin summa. Lisää tarvittaessa loppumaksu ensin."
+  },
+  {
+    "key": "admin.training.invoice",
+    "lang": "fi",
+    "text": "Avaa lasku"
+  },
+  {
+    "key": "admin.training.order",
+    "lang": "fi",
+    "text": "Avaa tilaus"
+  },
+  {
+    "key": "admin.training.copy",
+    "lang": "fi",
+    "text": "Kopioi seuraavaksi jaksoksi"
+  },
+  {
+    "key": "admin.training.copy_name",
+    "lang": "fi",
+    "text": "Uuden jakson nimi"
+  },
+  {
+    "key": "admin.training.copy_date",
+    "lang": "fi",
+    "text": "Uusi aloituspäivä"
+  },
+  {
+    "key": "admin.training.copy_hint",
+    "lang": "fi",
+    "text": "Päivät ja tilavaraukset siirtyvät samalla määrällä päiviä. Viestipohjat kopioidaan, osallistujat jäävät tyhjiksi. Uusi koulutus pysyy piilotettuna."
+  },
+  {
+    "key": "admin.training.more",
+    "lang": "fi",
+    "text": "Muut tiedot"
+  },
+  {
+    "key": "admin.training.texts",
+    "lang": "fi",
+    "text": "Tekstit"
+  },
+  {
+    "key": "admin.training.unavailable",
+    "lang": "fi",
+    "text": "Jakson lisätietoja ei saatu. Kokeile uudelleen."
+  },
+  {
+    "key": "admin.training.loading",
+    "lang": "fi",
+    "text": "Ladataan…"
+  },
+  {
+    "key": "admin.training.unknown",
+    "lang": "fi",
+    "text": "Ei vielä tarkistettu"
+  },
+  {
+    "key": "admin.training.readonly",
+    "lang": "fi",
+    "text": "Voit tarkastella tietoja. Muutoksiin tarvitaan lisäoikeus."
+  },
+  {
+    "key": "admin.training.conflict",
+    "lang": "fi",
+    "text": "Tila on jo varattu tai suljettu tälle ajalle. Valitse toinen aika."
+  },
+  {
+    "key": "admin.training.bad_time",
+    "lang": "fi",
+    "text": "Tarkista päivä ja kellonajat. Loppuajan pitää olla alkuajan jälkeen."
+  },
+  {
+    "key": "admin.training.queue_order",
+    "lang": "fi",
+    "text": "Tarjoa paikka ensin jonon ensimmäiselle."
+  },
+  {
+    "key": "admin.training.no_selection",
+    "lang": "fi",
+    "text": "Valitse ainakin yksi osallistuja."
+  },
+  {
+    "key": "admin.training.hidden",
+    "lang": "fi",
+    "text": "Piilotettu koulutus – ei vielä myynnissä"
+  },
+  {
+    "key": "admin.training.payment_info",
+    "lang": "fi",
+    "text": "Varausmaksu ja loppumaksu näkyvät erikseen. Maksutiedot tulevat kirjatuista maksuista, eivät varausmaksun nimestä."
+  },
+  {
+    "key": "admin.training.confirm",
+    "lang": "fi",
+    "text": "Vahvista"
+  },
+  {
+    "key": "admin.training.no_email",
+    "lang": "fi",
+    "text": "Sähköpostiosoite puuttuu"
+  },
+  {
+    "key": "admin.training.arrival_subject",
+    "lang": "fi",
+    "text": "Saapumisohje"
+  },
+  {
+    "key": "admin.training.arrival_body",
+    "lang": "fi",
+    "text": "Tervetuloa!\n\nKirjoita tähän jakson saapumisohje, osoite ja mukaan tarvittavat tavarat."
+  },
+  {
+    "key": "admin.training.payment_subject",
+    "lang": "fi",
+    "text": "Muistutus kurssimaksusta"
+  },
+  {
+    "key": "admin.training.payment_body",
+    "lang": "fi",
+    "text": "Hei!\n\nMuistathan tarkistaa kurssimaksusi. Jos olet jo maksanut, tämä viesti ei vaadi toimenpiteitä. Ota yhteyttä, jos tarvitset maksutiedot."
+  },
+  {
+    "key": "admin.training.complete_template",
+    "lang": "fi",
+    "text": "Kirjoita jakson saapumisohje molemmilla kielillä ennen esikatselua."
+  },
+  {
+    "key": "admin.training.places_free",
+    "lang": "fi",
+    "text": "Vapaita paikkoja"
+  },
+  {
+    "key": "admin.training.review_balance",
+    "lang": "fi",
+    "text": "Tilausta on jo muutettu. Avaa tilaus ja tarkista loppumaksu ennen laskutusta."
+  },
+  {
+    "key": "admin.training.title",
+    "lang": "en",
+    "text": "Trainings"
+  },
+  {
+    "key": "admin.training.trips",
+    "lang": "en",
+    "text": "Trips"
+  },
+  {
+    "key": "admin.training.now",
+    "lang": "en",
+    "text": "Coming up"
+  },
+  {
+    "key": "admin.training.lead",
+    "lang": "en",
+    "text": "Open a session to see what needs doing next."
+  },
+  {
+    "key": "admin.training.open",
+    "lang": "en",
+    "text": "Open"
+  },
+  {
+    "key": "admin.training.back",
+    "lang": "en",
+    "text": "Back"
+  },
+  {
+    "key": "admin.training.people",
+    "lang": "en",
+    "text": "Participants"
+  },
+  {
+    "key": "admin.training.messages",
+    "lang": "en",
+    "text": "Messages"
+  },
+  {
+    "key": "admin.training.payments",
+    "lang": "en",
+    "text": "Payments"
+  },
+  {
+    "key": "admin.training.spaces",
+    "lang": "en",
+    "text": "Spaces"
+  },
+  {
+    "key": "admin.training.reserve",
+    "lang": "en",
+    "text": "Reserve a space"
+  },
+  {
+    "key": "admin.training.cancel",
+    "lang": "en",
+    "text": "Cancel"
+  },
+  {
+    "key": "admin.training.save",
+    "lang": "en",
+    "text": "Save"
+  },
+  {
+    "key": "admin.training.saved",
+    "lang": "en",
+    "text": "Saved"
+  },
+  {
+    "key": "admin.training.empty",
+    "lang": "en",
+    "text": "No upcoming sessions."
+  },
+  {
+    "key": "admin.training.past",
+    "lang": "en",
+    "text": "Include past sessions"
+  },
+  {
+    "key": "admin.training.places",
+    "lang": "en",
+    "text": "Places"
+  },
+  {
+    "key": "admin.training.spaces_ok",
+    "lang": "en",
+    "text": "Spaces reserved"
+  },
+  {
+    "key": "admin.training.spaces_missing",
+    "lang": "en",
+    "text": "Spaces needed"
+  },
+  {
+    "key": "admin.training.open_payments",
+    "lang": "en",
+    "text": "Outstanding payments"
+  },
+  {
+    "key": "admin.training.ready",
+    "lang": "en",
+    "text": "Ready?"
+  },
+  {
+    "key": "admin.training.message_done",
+    "lang": "en",
+    "text": "Message sent"
+  },
+  {
+    "key": "admin.training.payments_done",
+    "lang": "en",
+    "text": "Payments in order"
+  },
+  {
+    "key": "admin.training.materials",
+    "lang": "en",
+    "text": "Materials shared"
+  },
+  {
+    "key": "admin.training.next",
+    "lang": "en",
+    "text": "Next step"
+  },
+  {
+    "key": "admin.training.add_person",
+    "lang": "en",
+    "text": "Add participant"
+  },
+  {
+    "key": "admin.training.details",
+    "lang": "en",
+    "text": "Practical details"
+  },
+  {
+    "key": "admin.training.name",
+    "lang": "en",
+    "text": "Name"
+  },
+  {
+    "key": "admin.training.email",
+    "lang": "en",
+    "text": "Email"
+  },
+  {
+    "key": "admin.training.phone",
+    "lang": "en",
+    "text": "Phone"
+  },
+  {
+    "key": "admin.training.language",
+    "lang": "en",
+    "text": "Language"
+  },
+  {
+    "key": "admin.training.diet",
+    "lang": "en",
+    "text": "Diet"
+  },
+  {
+    "key": "admin.training.accommodation",
+    "lang": "en",
+    "text": "Accommodation"
+  },
+  {
+    "key": "admin.training.arrival",
+    "lang": "en",
+    "text": "Arrival time"
+  },
+  {
+    "key": "admin.training.present",
+    "lang": "en",
+    "text": "Present"
+  },
+  {
+    "key": "admin.training.paid",
+    "lang": "en",
+    "text": "Paid"
+  },
+  {
+    "key": "admin.training.partial",
+    "lang": "en",
+    "text": "Part paid"
+  },
+  {
+    "key": "admin.training.unpaid",
+    "lang": "en",
+    "text": "Unpaid"
+  },
+  {
+    "key": "admin.training.contact",
+    "lang": "en",
+    "text": "Contact details"
+  },
+  {
+    "key": "admin.training.persons",
+    "lang": "en",
+    "text": "Places"
+  },
+  {
+    "key": "admin.training.none_people",
+    "lang": "en",
+    "text": "No participants."
+  },
+  {
+    "key": "admin.training.export",
+    "lang": "en",
+    "text": "Export for Excel (CSV)"
+  },
+  {
+    "key": "admin.training.print",
+    "lang": "en",
+    "text": "Print list"
+  },
+  {
+    "key": "admin.training.waitlist",
+    "lang": "en",
+    "text": "Waiting list"
+  },
+  {
+    "key": "admin.training.add_waiter",
+    "lang": "en",
+    "text": "Add to waiting list"
+  },
+  {
+    "key": "admin.training.none_waiters",
+    "lang": "en",
+    "text": "No one waiting."
+  },
+  {
+    "key": "admin.training.waiting",
+    "lang": "en",
+    "text": "Waiting"
+  },
+  {
+    "key": "admin.training.offered",
+    "lang": "en",
+    "text": "Place offered"
+  },
+  {
+    "key": "admin.training.offer",
+    "lang": "en",
+    "text": "Offer the next place"
+  },
+  {
+    "key": "admin.training.offer_hint",
+    "lang": "en",
+    "text": "Contact this person, then mark the offer. No message is sent automatically and no place is held."
+  },
+  {
+    "key": "admin.training.mark_offered",
+    "lang": "en",
+    "text": "I have offered the place"
+  },
+  {
+    "key": "admin.training.booked",
+    "lang": "en",
+    "text": "Has enrolled"
+  },
+  {
+    "key": "admin.training.remove_waiter",
+    "lang": "en",
+    "text": "Remove from waiting list"
+  },
+  {
+    "key": "admin.training.remove_confirm",
+    "lang": "en",
+    "text": "Remove this person from the waiting list?"
+  },
+  {
+    "key": "admin.training.date",
+    "lang": "en",
+    "text": "Date"
+  },
+  {
+    "key": "admin.training.start",
+    "lang": "en",
+    "text": "Start time"
+  },
+  {
+    "key": "admin.training.end",
+    "lang": "en",
+    "text": "End time"
+  },
+  {
+    "key": "admin.training.space",
+    "lang": "en",
+    "text": "Space"
+  },
+  {
+    "key": "admin.training.none_spaces",
+    "lang": "en",
+    "text": "No spaces reserved."
+  },
+  {
+    "key": "admin.training.space_hint",
+    "lang": "en",
+    "text": "This reserves the space for this session and prevents other bookings."
+  },
+  {
+    "key": "admin.training.space_cancel",
+    "lang": "en",
+    "text": "Cancel space reservation"
+  },
+  {
+    "key": "admin.training.space_confirm",
+    "lang": "en",
+    "text": "Cancel this space reservation? The time will become available to others."
+  },
+  {
+    "key": "admin.training.template",
+    "lang": "en",
+    "text": "Message template"
+  },
+  {
+    "key": "admin.training.arrival_template",
+    "lang": "en",
+    "text": "Arrival instructions"
+  },
+  {
+    "key": "admin.training.payment_template",
+    "lang": "en",
+    "text": "Payment reminder"
+  },
+  {
+    "key": "admin.training.free_template",
+    "lang": "en",
+    "text": "Your own message"
+  },
+  {
+    "key": "admin.training.subject",
+    "lang": "en",
+    "text": "Subject"
+  },
+  {
+    "key": "admin.training.body",
+    "lang": "en",
+    "text": "Message"
+  },
+  {
+    "key": "admin.training.preview",
+    "lang": "en",
+    "text": "Preview"
+  },
+  {
+    "key": "admin.training.send",
+    "lang": "en",
+    "text": "Send message"
+  },
+  {
+    "key": "admin.training.send_confirm",
+    "lang": "en",
+    "text": "I checked the recipients and both language versions."
+  },
+  {
+    "key": "admin.training.manual_hint",
+    "lang": "en",
+    "text": "Only participants in this session receive a message, in their language. Preview and Send are always required. Add your signature to the message."
+  },
+  {
+    "key": "admin.training.preview_again",
+    "lang": "en",
+    "text": "Preview the message again first."
+  },
+  {
+    "key": "admin.training.sent",
+    "lang": "en",
+    "text": "Messages queued for delivery."
+  },
+  {
+    "key": "admin.training.save_template",
+    "lang": "en",
+    "text": "Save template for this session"
+  },
+  {
+    "key": "admin.training.log",
+    "lang": "en",
+    "text": "Previous messages"
+  },
+  {
+    "key": "admin.training.none_messages",
+    "lang": "en",
+    "text": "No messages sent."
+  },
+  {
+    "key": "admin.training.deposit",
+    "lang": "en",
+    "text": "Deposit"
+  },
+  {
+    "key": "admin.training.course_price",
+    "lang": "en",
+    "text": "Course price"
+  },
+  {
+    "key": "admin.training.remaining",
+    "lang": "en",
+    "text": "Total outstanding"
+  },
+  {
+    "key": "admin.training.actual_paid",
+    "lang": "en",
+    "text": "Total paid"
+  },
+  {
+    "key": "admin.training.balance",
+    "lang": "en",
+    "text": "Course balance"
+  },
+  {
+    "key": "admin.training.prepare_balance",
+    "lang": "en",
+    "text": "Add course balance to order"
+  },
+  {
+    "key": "admin.training.prepare_hint",
+    "lang": "en",
+    "text": "Add the saved course balance to the order. Price and tax rate stay unchanged. No message is sent."
+  },
+  {
+    "key": "admin.training.paylink",
+    "lang": "en",
+    "text": "Send payment link to selected"
+  },
+  {
+    "key": "admin.training.select",
+    "lang": "en",
+    "text": "Select"
+  },
+  {
+    "key": "admin.training.pay_preview",
+    "lang": "en",
+    "text": "Review payment links before sending"
+  },
+  {
+    "key": "admin.training.pay_hint",
+    "lang": "en",
+    "text": "Only the outstanding amount already on the order is sent. Add the course balance first if needed."
+  },
+  {
+    "key": "admin.training.invoice",
+    "lang": "en",
+    "text": "Open invoice"
+  },
+  {
+    "key": "admin.training.order",
+    "lang": "en",
+    "text": "Open order"
+  },
+  {
+    "key": "admin.training.copy",
+    "lang": "en",
+    "text": "Copy as next session"
+  },
+  {
+    "key": "admin.training.copy_name",
+    "lang": "en",
+    "text": "New session name"
+  },
+  {
+    "key": "admin.training.copy_date",
+    "lang": "en",
+    "text": "New starting date"
+  },
+  {
+    "key": "admin.training.copy_hint",
+    "lang": "en",
+    "text": "Dates and space reservations move by the same number of days. Message templates are copied, participants start empty. The new training stays hidden."
+  },
+  {
+    "key": "admin.training.more",
+    "lang": "en",
+    "text": "Other details"
+  },
+  {
+    "key": "admin.training.texts",
+    "lang": "en",
+    "text": "Texts"
+  },
+  {
+    "key": "admin.training.unavailable",
+    "lang": "en",
+    "text": "Session details could not be loaded. Please try again."
+  },
+  {
+    "key": "admin.training.loading",
+    "lang": "en",
+    "text": "Loading…"
+  },
+  {
+    "key": "admin.training.unknown",
+    "lang": "en",
+    "text": "Not yet checked"
+  },
+  {
+    "key": "admin.training.readonly",
+    "lang": "en",
+    "text": "You can view these details. Changes require additional permission."
+  },
+  {
+    "key": "admin.training.conflict",
+    "lang": "en",
+    "text": "This space is already booked or blocked. Choose another time."
+  },
+  {
+    "key": "admin.training.bad_time",
+    "lang": "en",
+    "text": "Check the date and times. End must be after start."
+  },
+  {
+    "key": "admin.training.queue_order",
+    "lang": "en",
+    "text": "Offer the first person a place first."
+  },
+  {
+    "key": "admin.training.no_selection",
+    "lang": "en",
+    "text": "Select at least one participant."
+  },
+  {
+    "key": "admin.training.hidden",
+    "lang": "en",
+    "text": "Hidden training – not on sale yet"
+  },
+  {
+    "key": "admin.training.payment_info",
+    "lang": "en",
+    "text": "Deposit and course balance are shown separately. Paid amounts come from recorded payments."
+  },
+  {
+    "key": "admin.training.confirm",
+    "lang": "en",
+    "text": "Confirm"
+  },
+  {
+    "key": "admin.training.no_email",
+    "lang": "en",
+    "text": "Email address missing"
+  },
+  {
+    "key": "admin.training.arrival_subject",
+    "lang": "en",
+    "text": "Arrival instructions"
+  },
+  {
+    "key": "admin.training.arrival_body",
+    "lang": "en",
+    "text": "Welcome!\n\nWrite the arrival instructions, address and what to bring for this session here."
+  },
+  {
+    "key": "admin.training.payment_subject",
+    "lang": "en",
+    "text": "Course payment reminder"
+  },
+  {
+    "key": "admin.training.payment_body",
+    "lang": "en",
+    "text": "Hello!\n\nPlease check your course payment. If you have already paid, no action is needed. Contact us if you need payment details."
+  },
+  {
+    "key": "admin.training.complete_template",
+    "lang": "en",
+    "text": "Write the arrival instructions in both languages before previewing."
+  },
+  {
+    "key": "admin.training.places_free",
+    "lang": "en",
+    "text": "Places available"
+  },
+  {
+    "key": "admin.training.review_balance",
+    "lang": "en",
+    "text": "This order has already been changed. Open the order and check the balance before billing."
+  }
+]

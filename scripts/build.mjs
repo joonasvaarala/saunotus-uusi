@@ -61,6 +61,6 @@ const alt = (k) => ['fi', 'en'].filter((l) => site.pages[k][l]).map((l) => `<xht
 const xe = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
 const articleUrls = articles.sitemap.map((u) => `<url><loc>${xe(u.loc)}</loc><lastmod>${u.lastmod}</lastmod>${u.alternates.map((a) => `<xhtml:link rel="alternate" hreflang="${xe(a.hreflang)}" href="${xe(a.href)}"/>`).join('')}</url>`);
 write('/sitemap.xml', `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n${[...urls.map((u) => `<url><loc>${abs(u.path)}</loc><lastmod>${today}</lastmod>${alt(u.key)}</url>`), ...articleUrls].join('\n')}\n</urlset>\n`);
-write('/robots.txt', isTest ? 'User-agent: *\nDisallow: /\n' : `User-agent: *\nAllow: /\n\nSitemap: ${SITE_URL}/sitemap.xml\n`);
+write('/robots.txt', isTest ? 'User-agent: *\nDisallow: /\n' : `User-agent: *\nAllow: /\nDisallow: /_siirto/\n\nSitemap: ${SITE_URL}/sitemap.xml\n`);
 if (!imageTransformsOn()) assertNoRenderImageUrls(OUT);
 console.log(`build ok: ${urls.length + 1 + articles.pages.length} sivua (sisältöosio ${articles.pages.length}, vanhojen osoitteiden ohjaussivuja ${legacy.length}), ympäristö=${isTest ? 'test (noindex)' : 'prod'}, ${SITE_URL}`);
