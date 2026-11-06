@@ -26,9 +26,19 @@ function vatChoices(current) {
 }
 const vatLabel = (v) => `${String(v).replace('.', ',')} %`;
 
-// "Verkossa" = tuote näkyy ja on varattavissa verkkokaupassa: sama ehto kuin public_catalog:ssa (product_config: bookable, shop_visible, lifecycle = 'current').
+// "Verkossa" = tuote on myynnissä uudessa verkkokaupassa (Joonas 6.11.2026, t1367u). Sama ehto kuin palvelimella:
+//  - kauppalistalla (public_catalog): aktiivinen, bookable, shop_visible, lifecycle ei 'old', kanava 'shop';
+//  - TAI koulutus suoralla linkillä (public_product_by_slug, /varaa/#/tuote/<slug> ja /en/book/#/tuote/<slug>): aktiivinen, bookable,
+//    lifecycle ei 'old', kanava 'link' (shop_visible = false on koulutuksella normaali).
+// EI perustu vanhaan Johku-kenttään booking_url. Kanavat: product_config.channels; puuttuu → training: widget, muut: shop (booking._channels_effective).
 // Puuttuva kenttä ei estä (shop_visible/lifecycle voivat puuttua vanhemmasta kannasta); puuttuva product_config = ei verkossa.
-export const isOnline = (p) => { const c = p?.config; return !!c && c.bookable === true && c.shop_visible !== false && c.lifecycle !== 'old'; };
+export const effectiveChannels = (p) => (Array.isArray(p?.config?.channels) ? p.config.channels : (p?.category === 'training' ? ['widget'] : ['shop']));
+export const isOnline = (p) => {
+  const c = p?.config;
+  if (!c || p?.active === false || c.bookable !== true || c.lifecycle === 'old') return false;
+  const ch = effectiveChannels(p);
+  return (c.shop_visible !== false && ch.includes('shop')) || (p.category === 'training' && ch.includes('link'));
+};
 export const CATEGORY_LABELS = { public_sauna: 'Yleiset saunavuorot', private_sauna: 'Yksityiset saunavuorot', corporate: 'Yritykset', treatment: 'Hoidot', ritual: 'Rituaalit', ceremony: 'Seremoniat', event: 'Tapahtumat', gift_card: 'Lahjakortit', season_card: 'Kausikortit', product_rental: 'Tuotteet ja vuokrat', training: 'Koulutukset', add_on: 'Lisäpalvelut', other: 'Muu' };
 export const catLabel = (c) => (c === 'product_rental' ? productText('cat_rental') : c === 'other' ? productText('cat_other') : (CATEGORY_LABELS[c] || c || 'Ilman kategoriaa'));
 export const VISIBILITY = [['', 'Kaikki'], ['online', 'Verkossa'], ['offline', 'Ei verkossa']];

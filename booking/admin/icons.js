@@ -11,6 +11,7 @@ export const ICONS = {
   plus: [C(12, 12, 10), P('M8 12h8M12 8v8')],                                                 // Uusi varaus
   percent: [P('M19 5L5 19'), C(6.5, 6.5, 2.5), C(17.5, 17.5, 2.5)],                          // Alennuskoodit
   users: [P('M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2'), C(9, 7, 4), P('M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75')], // Asiakkaat
+  school: [P('M2 9l10-5 10 5-10 5z'), P('M6 11v5c0 1.7 2.7 3 6 3s6-1.3 6-3v-5'), P('M22 9v6')], // Koulutukset
   tag: [P('M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z'), P('M7.5 7.5h.01')], // Tuotteet
   cabin: [P('M3 11l9-8 9 8M5 9.5V20h14V9.5M10 20v-6h4v6')],                                  // Resurssit: sauna/mökki
   sliders: [P('M3 6h9M16 6h5M3 12h3M10 12h11M3 18h11M18 18h3'), C(14, 6, 2), C(8, 12, 2), C(16, 18, 2)], // Asetukset

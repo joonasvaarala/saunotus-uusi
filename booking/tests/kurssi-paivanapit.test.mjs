@@ -134,7 +134,7 @@ test('Lue lisää: aikataulu ennen peruutusehtoa, ei pelkkä peruutusehto', () =
 });
 
 test('pending-import-126: FI+EN, sama kuin koodin oletus, ei <, ei päällekkäin', () => {
-  const rows = JSON.parse(read('content/site-texts.pending-import-126.json'));
+  const rows = JSON.parse(read('content/site-texts.pending-import-126.json')).filter((r) => r.key === 'ui.shop.training.schedule');
   assert.equal(rows.length, 2);
   for (const r of rows) {
     assert.equal(r.key, 'ui.shop.training.schedule');

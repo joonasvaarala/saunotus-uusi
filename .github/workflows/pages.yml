@@ -70,6 +70,8 @@ jobs:
       - run: node --test booking/tests/hoitovalitsin.test.mjs
       # kurssin tuotesivu (category training): vain päivänapit ilman kellonaikoja, aikataulu Lue lisää -osiossa; tapahtumat ennallaan
       - run: node --test booking/tests/kurssi-paivanapit.test.mjs
+      # hallinta: Koulutukset omana osionaan, koulutuksen Tekstit-välilehti (kb.products), Verkossa-merkki ilman booking_url-kenttää
+      - run: node --test booking/tests/koulutukset-hallinta.test.mjs
       # hoito valitsematta: muistutuslinkki, varauslistan suodatin, booking_72 vain luku
       - run: node --test booking/tests/hoito-valitsematta.test.mjs
       # hallinnan päivänäkymä: päivän tuotto (käyntipäivä, brutto, perutut pois) ja tapahtumien sijoittelu

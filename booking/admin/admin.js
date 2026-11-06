@@ -62,6 +62,7 @@ const ROUTES = [
   { path: 'lahjakortit', label: 'Lahjakortit', labelFn: () => navText('ui.admin.nav.giftcards'), icon: 'gift', any: ['giftcards.manage'], mod: () => loadView('lahjakortit') },
   { path: 'kassa', label: 'Kassa ja talous', labelFn: () => navText('ui.admin.nav.cash_finance'), icon: 'euro', groupId: 'cash', mod: () => loadView('nav-group') },
   { path: 'tuotteet', label: 'Tuotteet', labelFn: () => navText('ui.admin.nav.products'), icon: 'tag', groupId: 'products', mod: () => loadView('nav-group') },
+  { path: 'koulutukset', label: 'Koulutukset', labelFn: () => navText('ui.admin.nav.trainings'), icon: 'school', mod: () => loadView('koulutukset') },
   { path: 'viestit', label: 'Viestit', icon: 'mail', any: ['messages.edit'], mod: () => loadView('messages') },
   { path: 'tilat', label: 'Tilat ja sulut', labelFn: () => navText('ui.admin.nav.spaces_blocks'), icon: 'cabin', groupId: 'spaces', mod: () => loadView('nav-group') },
   { path: 'asetukset', label: 'Asetukset', labelFn: () => navText('ui.admin.nav.settings'), icon: 'sliders', groupId: 'settings', mod: () => loadView('nav-group') },
