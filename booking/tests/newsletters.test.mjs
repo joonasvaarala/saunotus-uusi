@@ -81,11 +81,14 @@ test('permanent suppression lifecycle is independent of feature rollback and re-
  assert.ok(fixture.includes(contract.trim()),'disposable fixture must use real unchanged shared token RPC');
  assert.match(fixture,/constraint schedule_rules_event_shape/);
  assert.equal((core.match(/t\.tgname='newsletter_capture_general_optout'/g)||[]).length,2,'capture is hard gate in BOTH dispatch and payload');
- assert.doesNotMatch(core,/insert into booking\.newsletter_suppressions\(address_fingerprint\)\s*select distinct/i);
+ assert.match(core,/insert into booking\.newsletter_suppressions\(address_fingerprint\)\s*select distinct/i);
+ assert.ok(core.indexOf('lock table booking.customers')<core.indexOf('create sequence'),'259 locks before ANY newsletter DDL');
  assert.doesNotMatch(hook,/^begin;|^commit;/mi,'262 must compose in one caller-owned transaction');
- assert.ok(hook.indexOf('lock table')<hook.indexOf('create trigger'));
- assert.ok(hook.indexOf('create trigger')<hook.indexOf('select distinct booking._newsletter_fingerprint'));
- assert.match(hook,/REQUIRED: run in a caller-owned transaction/);
+ assert.ok(core.indexOf('lock table')<core.indexOf('create trigger'));
+ assert.ok(core.indexOf('create trigger')<core.indexOf('select distinct booking._newsletter_fingerprint'));
+ assert.doesNotMatch(hook,/^(?:create|alter|drop|insert|update|delete|truncate|lock table|notify|grant|revoke) /mi,'262 verifies only');
+ assert.match(hook,/p\.prosrc/);assert.match(hook,/t\.tgtype=21/);
+ assert.doesNotMatch(core,/^begin;|^commit;/mi,'official apply_migration owns259 transaction/history');
  assert.doesNotMatch(rollback,/^drop (?:table|function|trigger|index).*?(?:newsletter_suppressions|newsletter_optout_tokens|newsletter_capture_general_optout|_newsletter_fingerprint|_newsletter_address_blocked|public_newsletter_unsubscribe|newsletter_customers_optout_email_idx|newsletter_campaign_id_seq|newsletter_log_id_seq)/mi);
  assert.doesNotMatch(enable,/^(?:drop |truncate |delete |create sequence|alter sequence|select setval)/mi);
  assert.match(core,/create sequence booking\.newsletter_log_id_seq as bigint no cycle cache 1 owned by none/);

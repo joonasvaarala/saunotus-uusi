@@ -1,9 +1,12 @@
 -- booking_259: bot-authored newsletters, human-only review/dispatch.
 -- Generated with supabase migration new; timestamp ordered after reserved booking_257.
--- HOLD: booking_262 packages capture; allocation/compatibility are NOT execution approval.
+-- HOLD: capture implementation moved into atomic259;262 verifies/provides provenance only.
 -- Bottiavustus: review first; no DEV/production execution from this work.
 -- Rollback: ../rollbacks/20261106220300_booking_259_ROLLBACK.sql
 set local lock_timeout = '5s';
+-- First operational statement after timeout: hold customer writes BEFORE ANY newsletter DDL.
+-- Official apply_migration owns this transaction, including this lock and capture/backfill.
+lock table booking.customers in share row exclusive mode;
 
 -- Permanent, WAL-logged monotonic identities. NOT owned by feature tables: their
 -- high-water survives DROP TABLE / feature rollback / re-enable. Never reset them.
@@ -61,8 +64,40 @@ create function booking._newsletter_fingerprint(p_email text) returns text
 language sql immutable strict set search_path='' as $$
   select encode(extensions.digest(convert_to(lower(btrim(p_email)),'UTF8'),'sha256'),'hex');
 $$;
--- Backfill belongs ONLY to the separately approved capture-hook transaction, with
--- customer writes locked. Never perform a stand-alone seed followed by a later hook.
+-- Capture originally reserved as262; packaging moved implementation into259 so
+-- one official apply_migration transaction also records its complete atomic installation.
+-- Does NOT replace public_marketing_unsubscribe or change its grants/signature.
+-- A tiny AFTER trigger records only address fingerprints in NEWSLETTER suppression.
+-- Needed to retain future general marketing opt-outs after profile edits/deletion.
+-- No raw addresses, customer ids, send capability, auto-resubscribe or external calls.
+create function booking._newsletter_capture_general_optout() returns trigger
+language plpgsql security definer set search_path='' as $$ begin
+  if tg_op='INSERT' then
+    if new.marketing_unsubscribed_at is not null and booking._valid_email(new.email) then
+      insert into booking.newsletter_suppressions(address_fingerprint)
+      values(booking._newsletter_fingerprint(new.email)) on conflict do nothing;
+    end if;
+  elsif (old.marketing_consent is true and new.marketing_consent is not true)
+      or (new.marketing_unsubscribed_at is not null and new.marketing_unsubscribed_at is distinct from old.marketing_unsubscribed_at) then
+    if booking._valid_email(old.email) then
+      insert into booking.newsletter_suppressions(address_fingerprint)
+      values(booking._newsletter_fingerprint(old.email)) on conflict do nothing;
+    end if;
+    if booking._valid_email(new.email) then
+      insert into booking.newsletter_suppressions(address_fingerprint)
+      values(booking._newsletter_fingerprint(new.email)) on conflict do nothing;
+    end if;
+  end if;
+  return new;
+end $$;
+revoke all on function booking._newsletter_capture_general_optout() from public,anon,authenticated,service_role;
+create trigger newsletter_capture_general_optout after insert or update of marketing_consent,marketing_unsubscribed_at on booking.customers
+for each row execute function booking._newsletter_capture_general_optout();
+-- The ONLY backfill: atomic with trigger installation under the same customer-write lock.
+insert into booking.newsletter_suppressions(address_fingerprint)
+select distinct booking._newsletter_fingerprint(c.email) from booking.customers c
+where c.marketing_unsubscribed_at is not null and booking._valid_email(c.email) on conflict do nothing;
+
 create index newsletter_customers_optout_email_idx on booking.customers ((lower(btrim(email)))) where marketing_unsubscribed_at is not null;
 
 create function booking._newsletter_address_blocked(p_fingerprint text,p_email text) returns boolean

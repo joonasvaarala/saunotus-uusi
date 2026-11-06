@@ -1,13 +1,12 @@
--- DISPOSABLE LOCAL DATABASE ONLY. Before262 is installed.
-begin;
-do $$declare u uuid:=gen_random_uuid();d jsonb;x text;blocked boolean:=false;begin
- insert into auth.users(id,email)values(u,'n259-required@example.test');
- insert into booking.staff(user_id,email,name,role)values(u,'n259-required@example.test','Synthetic capture guard','manager');
- perform set_config('request.jwt.claims',jsonb_build_object('sub',u,'role','authenticated')::text,true);
- d:=booking.svc_newsletter_save(null,'{"subject_fi":"Testi","subject_en":"Test","body_fi":"Testi","body_en":"Test","style":{"layout":"letter"},"segment":"all"}'::jsonb);
- begin perform booking.admin_newsletter_dispatch((d->>'id')::bigint,(d->>'version')::integer,false);
- exception when sqlstate 'BK001'then get stacked diagnostics x=pg_exception_detail;blocked:=x like '%newsletter_capture_required%';end;
- if not blocked then raise exception 'Dispatch did not fail closed before capture approval';end if;
- if booking.email_newsletter_payload(0)->>'allowed' is distinct from 'false'then raise exception 'Delivery not blocked without capture';end if;
+-- DISPOSABLE LOCAL DATABASE ONLY.259 now installs capture in its own atomic transaction.
+-- Check installed guards without disabling/replacing any trigger or function.
+do $$declare sig text;definition text;begin
+ foreach sig in array array['booking.admin_newsletter_dispatch(bigint,integer,boolean,uuid)','booking.email_newsletter_payload(bigint)']loop
+  select pg_get_functiondef(to_regprocedure(sig))into definition;
+  if definition is null or position('newsletter_capture_general_optout' in definition)=0
+   or position('tgenabled' in definition)=0 or position('to_regprocedure' in definition)=0 then
+   raise exception 'Capture hard gate missing from dispatch/payload';end if;
+ end loop;
+ if not exists(select 1 from pg_trigger where tgrelid='booking.customers'::regclass and tgname='newsletter_capture_general_optout'and tgenabled='O')then
+  raise exception 'Atomic259 did not install enabled capture';end if;
 end$$;
-rollback;
