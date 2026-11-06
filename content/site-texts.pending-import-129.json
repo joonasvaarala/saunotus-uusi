@@ -1,0 +1,782 @@
+[
+  {
+    "key": "ui.admin.customer_message.body",
+    "lang": "en",
+    "text": "Message",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "booking_257: hallinnan Viesti asiakkaalle"
+  },
+  {
+    "key": "ui.admin.customer_message.body",
+    "lang": "fi",
+    "text": "Viesti",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "booking_257: hallinnan Viesti asiakkaalle"
+  },
+  {
+    "key": "ui.admin.customer_message.clear",
+    "lang": "en",
+    "text": "Clear",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "booking_257: hallinnan Viesti asiakkaalle"
+  },
+  {
+    "key": "ui.admin.customer_message.clear",
+    "lang": "fi",
+    "text": "Tyhjennä",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "booking_257: hallinnan Viesti asiakkaalle"
+  },
+  {
+    "key": "ui.admin.customer_message.error_dates",
+    "lang": "en",
+    "text": "Choose a day or a date range.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "booking_257: hallinnan Viesti asiakkaalle"
+  },
+  {
+    "key": "ui.admin.customer_message.error_dates",
+    "lang": "fi",
+    "text": "Valitse päivä tai aikaväli.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "booking_257: hallinnan Viesti asiakkaalle"
+  },
+  {
+    "key": "ui.admin.customer_message.error_products",
+    "lang": "en",
+    "text": "Choose at least one product.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "booking_257: hallinnan Viesti asiakkaalle"
+  },
+  {
+    "key": "ui.admin.customer_message.error_products",
+    "lang": "fi",
+    "text": "Valitse vähintään yksi tuote.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "booking_257: hallinnan Viesti asiakkaalle"
+  },
+  {
+    "key": "ui.admin.customer_message.error_text",
+    "lang": "en",
+    "text": "Write the subject and message in Finnish and English.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 150,
+    "placeholders": [],
+    "reason": "booking_257: hallinnan Viesti asiakkaalle"
+  },
+  {
+    "key": "ui.admin.customer_message.error_text",
+    "lang": "fi",
+    "text": "Kirjoita aihe ja viesti suomeksi ja englanniksi.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "booking_257: hallinnan Viesti asiakkaalle"
+  },
+  {
+    "key": "ui.admin.customer_message.from",
+    "lang": "en",
+    "text": "Day or start",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "booking_257: hallinnan Viesti asiakkaalle"
+  },
+  {
+    "key": "ui.admin.customer_message.from",
+    "lang": "fi",
+    "text": "Päivä tai alku",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "booking_257: hallinnan Viesti asiakkaalle"
+  },
+  {
+    "key": "ui.admin.customer_message.hidden",
+    "lang": "en",
+    "text": "(hidden)",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "booking_257: hallinnan Viesti asiakkaalle"
+  },
+  {
+    "key": "ui.admin.customer_message.hidden",
+    "lang": "fi",
+    "text": "(piilotettu)",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "booking_257: hallinnan Viesti asiakkaalle"
+  },
+  {
+    "key": "ui.admin.customer_message.lang_en",
+    "lang": "en",
+    "text": "English",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "booking_257: hallinnan Viesti asiakkaalle"
+  },
+  {
+    "key": "ui.admin.customer_message.lang_en",
+    "lang": "fi",
+    "text": "English",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "booking_257: hallinnan Viesti asiakkaalle"
+  },
+  {
+    "key": "ui.admin.customer_message.lang_fi",
+    "lang": "en",
+    "text": "Suomi",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "booking_257: hallinnan Viesti asiakkaalle"
+  },
+  {
+    "key": "ui.admin.customer_message.lang_fi",
+    "lang": "fi",
+    "text": "Suomi",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "booking_257: hallinnan Viesti asiakkaalle"
+  },
+  {
+    "key": "ui.admin.customer_message.lead",
+    "lang": "en",
+    "text": "Choose one day or a date range and the products. The message goes to people who booked a selected product on that day (reservation start date in Helsinki) or bought it (order payment date in Helsinki). Each customer receives one message. Cancelled reservations, expired holds and the waitlist are left out. Marketing consent is not required. Preview before sending. Each person receives the message in their order language.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 500,
+    "placeholders": [],
+    "reason": "booking_257: hallinnan Viesti asiakkaalle"
+  },
+  {
+    "key": "ui.admin.customer_message.lead",
+    "lang": "fi",
+    "text": "Valitse yksi päivä tai aikaväli ja tuotteet. Viesti lähtee niille, jotka ovat varanneet valitun tuotteen kyseiselle päivälle (varauksen alkupäivä Helsingissä) tai ostaneet sen (tilauksen maksupäivä Helsingissä). Sama asiakas saa yhden viestin. Peruutetut varaukset, vanhentuneet pidot ja jonotuslista jäävät pois. Markkinointilupaa ei tarvita. Esikatsele ennen lähetystä. Jokainen saa viestin tilauksen kielellä.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 500,
+    "placeholders": [],
+    "reason": "booking_257: hallinnan Viesti asiakkaalle"
+  },
+  {
+    "key": "ui.admin.customer_message.log",
+    "lang": "en",
+    "text": "Sent",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "booking_257: hallinnan Viesti asiakkaalle"
+  },
+  {
+    "key": "ui.admin.customer_message.log",
+    "lang": "fi",
+    "text": "Lähetetyt",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "booking_257: hallinnan Viesti asiakkaalle"
+  },
+  {
+    "key": "ui.admin.customer_message.log_empty",
+    "lang": "en",
+    "text": "No messages sent yet.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "booking_257: hallinnan Viesti asiakkaalle"
+  },
+  {
+    "key": "ui.admin.customer_message.log_empty",
+    "lang": "fi",
+    "text": "Ei lähetettyjä viestejä.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "booking_257: hallinnan Viesti asiakkaalle"
+  },
+  {
+    "key": "ui.admin.customer_message.need_preview",
+    "lang": "en",
+    "text": "Preview first and confirm sending.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "booking_257: hallinnan Viesti asiakkaalle"
+  },
+  {
+    "key": "ui.admin.customer_message.need_preview",
+    "lang": "fi",
+    "text": "Esikatsele ensin ja vahvista lähetys.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "booking_257: hallinnan Viesti asiakkaalle"
+  },
+  {
+    "key": "ui.admin.customer_message.no_email",
+    "lang": "en",
+    "text": "No email",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "booking_257: hallinnan Viesti asiakkaalle"
+  },
+  {
+    "key": "ui.admin.customer_message.no_email",
+    "lang": "fi",
+    "text": "Ei sähköpostia",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "booking_257: hallinnan Viesti asiakkaalle"
+  },
+  {
+    "key": "ui.admin.customer_message.none",
+    "lang": "en",
+    "text": "No recipients for this selection.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "booking_257: hallinnan Viesti asiakkaalle"
+  },
+  {
+    "key": "ui.admin.customer_message.none",
+    "lang": "fi",
+    "text": "Ei vastaanottajia tällä valinnalla.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "booking_257: hallinnan Viesti asiakkaalle"
+  },
+  {
+    "key": "ui.admin.customer_message.preview",
+    "lang": "en",
+    "text": "Preview",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "booking_257: hallinnan Viesti asiakkaalle"
+  },
+  {
+    "key": "ui.admin.customer_message.preview",
+    "lang": "fi",
+    "text": "Esikatsele",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "booking_257: hallinnan Viesti asiakkaalle"
+  },
+  {
+    "key": "ui.admin.customer_message.preview_n",
+    "lang": "en",
+    "text": "{n} recipients",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "booking_257: hallinnan Viesti asiakkaalle"
+  },
+  {
+    "key": "ui.admin.customer_message.preview_n",
+    "lang": "fi",
+    "text": "{n} vastaanottajaa",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "booking_257: hallinnan Viesti asiakkaalle"
+  },
+  {
+    "key": "ui.admin.customer_message.products",
+    "lang": "en",
+    "text": "Products",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "booking_257: hallinnan Viesti asiakkaalle"
+  },
+  {
+    "key": "ui.admin.customer_message.products",
+    "lang": "fi",
+    "text": "Tuotteet",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "booking_257: hallinnan Viesti asiakkaalle"
+  },
+  {
+    "key": "ui.admin.customer_message.recipients",
+    "lang": "en",
+    "text": "Recipients",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "booking_257: hallinnan Viesti asiakkaalle"
+  },
+  {
+    "key": "ui.admin.customer_message.recipients",
+    "lang": "fi",
+    "text": "Vastaanottajat",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "booking_257: hallinnan Viesti asiakkaalle"
+  },
+  {
+    "key": "ui.admin.customer_message.sample",
+    "lang": "en",
+    "text": "Example for the first recipient",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "booking_257: hallinnan Viesti asiakkaalle"
+  },
+  {
+    "key": "ui.admin.customer_message.sample",
+    "lang": "fi",
+    "text": "Esimerkki ensimmäiselle vastaanottajalle",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "booking_257: hallinnan Viesti asiakkaalle"
+  },
+  {
+    "key": "ui.admin.customer_message.select_all",
+    "lang": "en",
+    "text": "Select all",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "booking_257: hallinnan Viesti asiakkaalle"
+  },
+  {
+    "key": "ui.admin.customer_message.select_all",
+    "lang": "fi",
+    "text": "Valitse kaikki",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "booking_257: hallinnan Viesti asiakkaalle"
+  },
+  {
+    "key": "ui.admin.customer_message.send",
+    "lang": "en",
+    "text": "Send",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "booking_257: hallinnan Viesti asiakkaalle"
+  },
+  {
+    "key": "ui.admin.customer_message.send",
+    "lang": "fi",
+    "text": "Lähetä",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "booking_257: hallinnan Viesti asiakkaalle"
+  },
+  {
+    "key": "ui.admin.customer_message.send_confirm",
+    "lang": "en",
+    "text": "Yes, send the message to the selected people",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "booking_257: hallinnan Viesti asiakkaalle"
+  },
+  {
+    "key": "ui.admin.customer_message.send_confirm",
+    "lang": "fi",
+    "text": "Kyllä, lähetä viesti valituille",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "booking_257: hallinnan Viesti asiakkaalle"
+  },
+  {
+    "key": "ui.admin.customer_message.sent",
+    "lang": "en",
+    "text": "Message queued",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "booking_257: hallinnan Viesti asiakkaalle"
+  },
+  {
+    "key": "ui.admin.customer_message.sent",
+    "lang": "fi",
+    "text": "Viesti laitettu jonoon",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "booking_257: hallinnan Viesti asiakkaalle"
+  },
+  {
+    "key": "ui.admin.customer_message.skipped",
+    "lang": "en",
+    "text": "Skipped",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "booking_257: hallinnan Viesti asiakkaalle"
+  },
+  {
+    "key": "ui.admin.customer_message.skipped",
+    "lang": "fi",
+    "text": "Ohitetut",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "booking_257: hallinnan Viesti asiakkaalle"
+  },
+  {
+    "key": "ui.admin.customer_message.skipped_n",
+    "lang": "en",
+    "text": "{n} without an email address",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "booking_257: hallinnan Viesti asiakkaalle"
+  },
+  {
+    "key": "ui.admin.customer_message.skipped_n",
+    "lang": "fi",
+    "text": "{n} ilman sähköpostia",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "booking_257: hallinnan Viesti asiakkaalle"
+  },
+  {
+    "key": "ui.admin.customer_message.subject",
+    "lang": "en",
+    "text": "Subject",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "booking_257: hallinnan Viesti asiakkaalle"
+  },
+  {
+    "key": "ui.admin.customer_message.subject",
+    "lang": "fi",
+    "text": "Aihe",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "booking_257: hallinnan Viesti asiakkaalle"
+  },
+  {
+    "key": "ui.admin.customer_message.tab",
+    "lang": "en",
+    "text": "Message to customer",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "booking_257: hallinnan Viesti asiakkaalle"
+  },
+  {
+    "key": "ui.admin.customer_message.tab",
+    "lang": "fi",
+    "text": "Viesti asiakkaalle",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "booking_257: hallinnan Viesti asiakkaalle"
+  },
+  {
+    "key": "ui.admin.customer_message.tab_templates",
+    "lang": "en",
+    "text": "Templates",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "booking_257: hallinnan Viesti asiakkaalle"
+  },
+  {
+    "key": "ui.admin.customer_message.tab_templates",
+    "lang": "fi",
+    "text": "Pohjat",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "booking_257: hallinnan Viesti asiakkaalle"
+  },
+  {
+    "key": "ui.admin.customer_message.title",
+    "lang": "en",
+    "text": "Message to customer",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "booking_257: hallinnan Viesti asiakkaalle"
+  },
+  {
+    "key": "ui.admin.customer_message.title",
+    "lang": "fi",
+    "text": "Viesti asiakkaalle",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "booking_257: hallinnan Viesti asiakkaalle"
+  },
+  {
+    "key": "ui.admin.customer_message.to",
+    "lang": "en",
+    "text": "End",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "booking_257: hallinnan Viesti asiakkaalle"
+  },
+  {
+    "key": "ui.admin.customer_message.to",
+    "lang": "fi",
+    "text": "Loppu",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "booking_257: hallinnan Viesti asiakkaalle"
+  },
+  {
+    "key": "ui.admin.customer_message.to_hint",
+    "lang": "en",
+    "text": "Leave empty for a single day. Both ends are inclusive. Dates use Helsinki time.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 150,
+    "placeholders": [],
+    "reason": "booking_257: hallinnan Viesti asiakkaalle"
+  },
+  {
+    "key": "ui.admin.customer_message.to_hint",
+    "lang": "fi",
+    "text": "Tyhjä = sama päivä. Molemmat päät ovat mukana. Päivämäärät ovat Helsingin aikaa.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 150,
+    "placeholders": [],
+    "reason": "booking_257: hallinnan Viesti asiakkaalle"
+  },
+  {
+    "key": "ui.admin.customer_message.var_hlot",
+    "lang": "en",
+    "text": "Party size. Empty for a purchase without a reservation.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 150,
+    "placeholders": [],
+    "reason": "booking_257: hallinnan Viesti asiakkaalle"
+  },
+  {
+    "key": "ui.admin.customer_message.var_hlot",
+    "lang": "fi",
+    "text": "Henkilömäärä. Tyhjä ostolle ilman varausta.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "booking_257: hallinnan Viesti asiakkaalle"
+  },
+  {
+    "key": "ui.admin.customer_message.var_kello",
+    "lang": "en",
+    "text": "Booking time. Empty for a purchase without a reservation time.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 150,
+    "placeholders": [],
+    "reason": "booking_257: hallinnan Viesti asiakkaalle"
+  },
+  {
+    "key": "ui.admin.customer_message.var_kello",
+    "lang": "fi",
+    "text": "Varauksen kellonaika. Tyhjä ostolle ilman varausaikaa.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 150,
+    "placeholders": [],
+    "reason": "booking_257: hallinnan Viesti asiakkaalle"
+  },
+  {
+    "key": "ui.admin.customer_message.var_linkki",
+    "lang": "en",
+    "text": "Link to the order page",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "booking_257: hallinnan Viesti asiakkaalle"
+  },
+  {
+    "key": "ui.admin.customer_message.var_linkki",
+    "lang": "fi",
+    "text": "Linkki tilaussivulle",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "booking_257: hallinnan Viesti asiakkaalle"
+  },
+  {
+    "key": "ui.admin.customer_message.var_nimi",
+    "lang": "en",
+    "text": "Customer name",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "booking_257: hallinnan Viesti asiakkaalle"
+  },
+  {
+    "key": "ui.admin.customer_message.var_nimi",
+    "lang": "fi",
+    "text": "Asiakkaan nimi",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "booking_257: hallinnan Viesti asiakkaalle"
+  },
+  {
+    "key": "ui.admin.customer_message.var_paiva",
+    "lang": "en",
+    "text": "Date of the primary booking or purchase",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "booking_257: hallinnan Viesti asiakkaalle"
+  },
+  {
+    "key": "ui.admin.customer_message.var_paiva",
+    "lang": "fi",
+    "text": "Ensisijaisen varauksen tai oston päivämäärä",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "booking_257: hallinnan Viesti asiakkaalle"
+  },
+  {
+    "key": "ui.admin.customer_message.var_tuote",
+    "lang": "en",
+    "text": "The recipient’s products in their language",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "booking_257: hallinnan Viesti asiakkaalle"
+  },
+  {
+    "key": "ui.admin.customer_message.var_tuote",
+    "lang": "fi",
+    "text": "Vastaanottajan tuotteet hänen kielellään",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "booking_257: hallinnan Viesti asiakkaalle"
+  },
+  {
+    "key": "ui.admin.customer_message.vars",
+    "lang": "en",
+    "text": "Placeholders",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "booking_257: hallinnan Viesti asiakkaalle"
+  },
+  {
+    "key": "ui.admin.customer_message.vars",
+    "lang": "fi",
+    "text": "Paikkamerkit",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "booking_257: hallinnan Viesti asiakkaalle"
+  }
+]
