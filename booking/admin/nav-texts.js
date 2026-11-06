@@ -2,7 +2,8 @@
 // public_get_site_texts peittää sanakirjan. Haku epäonnistuu, rivi puuttuu tai paikkamerkki ei täyty → NAV_TEXTS.
 // Tuonti: content/site-texts.pending-import-38.json (alkuperäiset avaimet) ja
 // content/site-texts.pending-import-88.json (ryhmien ja välilehtien nimet) ja
-// content/site-texts.pending-import-118.json (Lahjakortit). Ei ylikirjoita olemassa olevia.
+// content/site-texts.pending-import-118.json (Lahjakortit) ja
+// content/site-texts.pending-import-126.json (Koulutukset). Ei ylikirjoita olemassa olevia.
 import { getLang } from './talous-i18n.js';
 import { getSiteTexts } from './site-texts-cache.js';
 
@@ -57,6 +58,7 @@ export const NAV_TEXTS = {
     'ui.admin.nav.giftcards': 'Lahjakortit',
     'ui.admin.nav.giftcards_own': 'Omat lahjakortit',
     'ui.admin.nav.giftcards_claims': 'Lunastuspyynnöt',
+    'ui.admin.nav.trainings': 'Koulutukset',
   },
   en: {
     'ui.admin.nav.orders': 'Orders',
@@ -106,6 +108,7 @@ export const NAV_TEXTS = {
     'ui.admin.nav.giftcards': 'Gift cards',
     'ui.admin.nav.giftcards_own': 'Our gift cards',
     'ui.admin.nav.giftcards_claims': 'Redemption requests',
+    'ui.admin.nav.trainings': 'Trainings',
   },
 };
 

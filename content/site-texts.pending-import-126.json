@@ -1,0 +1,222 @@
+[
+  {
+    "key": "ui.shop.training.schedule",
+    "lang": "fi",
+    "text": "Ajankohdat ja aikataulu",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Kurssin tuotesivu (Joonas 6.11.2026): Lue lisää -osion otsikko kurssikertojen nimille ja alku- ja loppuajoille."
+  },
+  {
+    "key": "ui.shop.training.schedule",
+    "lang": "en",
+    "text": "Dates and schedule",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Course product page (Joonas 6 Nov 2026): Read more heading for course session names with start and end times."
+  },
+  {
+    "key": "ui.admin.nav.trainings",
+    "lang": "fi",
+    "text": "Koulutukset",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Hallinnan päänavigaatio: koulutukset omana kohtana (Joonas 6.11.2026). booking/admin/nav-texts.js"
+  },
+  {
+    "key": "ui.admin.nav.trainings",
+    "lang": "en",
+    "text": "Trainings",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Admin main navigation: trainings as their own item. booking/admin/nav-texts.js"
+  },
+  {
+    "key": "admin.events.trainings_title",
+    "lang": "fi",
+    "text": "Koulutukset",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Koulutukset-osio ja Tekstit-välilehti (Joonas 6.11.2026). booking/admin/events-texts.js COURSE_TEXTS"
+  },
+  {
+    "key": "admin.events.trainings_lead",
+    "lang": "fi",
+    "text": "Koulutusten kerrat, osallistujat, viestit, myyntikanavat ja kaupassa näkyvät tekstit.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 125,
+    "placeholders": [],
+    "reason": "Koulutukset-osio ja Tekstit-välilehti (Joonas 6.11.2026). booking/admin/events-texts.js COURSE_TEXTS"
+  },
+  {
+    "key": "admin.events.tab_texts",
+    "lang": "fi",
+    "text": "Tekstit",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Koulutukset-osio ja Tekstit-välilehti (Joonas 6.11.2026). booking/admin/events-texts.js COURSE_TEXTS"
+  },
+  {
+    "key": "admin.events.texts_lead",
+    "lang": "fi",
+    "text": "Lyhyt kuvaus ja kuvaus näkyvät kurssin sivulla verkkokaupassa (suomi ja englanti). Kurssin ajat tulevat kerroista.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 154,
+    "placeholders": [],
+    "reason": "Koulutukset-osio ja Tekstit-välilehti (Joonas 6.11.2026). booking/admin/events-texts.js COURSE_TEXTS"
+  },
+  {
+    "key": "admin.events.texts_desc_fi",
+    "lang": "fi",
+    "text": "Kuvaus (suomi)",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Koulutukset-osio ja Tekstit-välilehti (Joonas 6.11.2026). booking/admin/events-texts.js COURSE_TEXTS"
+  },
+  {
+    "key": "admin.events.texts_desc_en",
+    "lang": "fi",
+    "text": "Kuvaus (englanti)",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Koulutukset-osio ja Tekstit-välilehti (Joonas 6.11.2026). booking/admin/events-texts.js COURSE_TEXTS"
+  },
+  {
+    "key": "admin.events.texts_save",
+    "lang": "fi",
+    "text": "Tallenna tekstit",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Koulutukset-osio ja Tekstit-välilehti (Joonas 6.11.2026). booking/admin/events-texts.js COURSE_TEXTS"
+  },
+  {
+    "key": "admin.events.texts_saved",
+    "lang": "fi",
+    "text": "Tekstit tallennettu. Ne näkyvät kurssin sivulla, kun sivu ladataan uudelleen.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 117,
+    "placeholders": [],
+    "reason": "Koulutukset-osio ja Tekstit-välilehti (Joonas 6.11.2026). booking/admin/events-texts.js COURSE_TEXTS"
+  },
+  {
+    "key": "admin.events.texts_missing",
+    "lang": "fi",
+    "text": "Tuotteen tekstejä ei löytynyt. Lataa sivu uudelleen.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 92,
+    "placeholders": [],
+    "reason": "Koulutukset-osio ja Tekstit-välilehti (Joonas 6.11.2026). booking/admin/events-texts.js COURSE_TEXTS"
+  },
+  {
+    "key": "admin.events.trainings_title",
+    "lang": "en",
+    "text": "Trainings",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Koulutukset-osio ja Tekstit-välilehti (Joonas 6.11.2026). booking/admin/events-texts.js COURSE_TEXTS"
+  },
+  {
+    "key": "admin.events.trainings_lead",
+    "lang": "en",
+    "text": "Training occurrences, participants, messages, sales channels and the texts shown in the shop.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 133,
+    "placeholders": [],
+    "reason": "Koulutukset-osio ja Tekstit-välilehti (Joonas 6.11.2026). booking/admin/events-texts.js COURSE_TEXTS"
+  },
+  {
+    "key": "admin.events.tab_texts",
+    "lang": "en",
+    "text": "Texts",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Koulutukset-osio ja Tekstit-välilehti (Joonas 6.11.2026). booking/admin/events-texts.js COURSE_TEXTS"
+  },
+  {
+    "key": "admin.events.texts_lead",
+    "lang": "en",
+    "text": "The short description and description are shown on the course page in the online shop (Finnish and English). Course times come from the occurrences.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 188,
+    "placeholders": [],
+    "reason": "Koulutukset-osio ja Tekstit-välilehti (Joonas 6.11.2026). booking/admin/events-texts.js COURSE_TEXTS"
+  },
+  {
+    "key": "admin.events.texts_desc_fi",
+    "lang": "en",
+    "text": "Description (Finnish)",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Koulutukset-osio ja Tekstit-välilehti (Joonas 6.11.2026). booking/admin/events-texts.js COURSE_TEXTS"
+  },
+  {
+    "key": "admin.events.texts_desc_en",
+    "lang": "en",
+    "text": "Description (English)",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Koulutukset-osio ja Tekstit-välilehti (Joonas 6.11.2026). booking/admin/events-texts.js COURSE_TEXTS"
+  },
+  {
+    "key": "admin.events.texts_save",
+    "lang": "en",
+    "text": "Save texts",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Koulutukset-osio ja Tekstit-välilehti (Joonas 6.11.2026). booking/admin/events-texts.js COURSE_TEXTS"
+  },
+  {
+    "key": "admin.events.texts_saved",
+    "lang": "en",
+    "text": "Texts saved. They appear on the course page when the page is reloaded.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 110,
+    "placeholders": [],
+    "reason": "Koulutukset-osio ja Tekstit-välilehti (Joonas 6.11.2026). booking/admin/events-texts.js COURSE_TEXTS"
+  },
+  {
+    "key": "admin.events.texts_missing",
+    "lang": "en",
+    "text": "The product texts were not found. Reload the page.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 90,
+    "placeholders": [],
+    "reason": "Koulutukset-osio ja Tekstit-välilehti (Joonas 6.11.2026). booking/admin/events-texts.js COURSE_TEXTS"
+  }
+]

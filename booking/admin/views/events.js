@@ -1,3 +1,6 @@
+// Joonas 6.11.2026 (t1370u): koulutukset omana päänavigaation kohtana (#/koulutukset, views/koulutukset.js → render({ section: 'training' })).
+// Sama näkymä, kategoria lukittu training; lisäksi Tekstit-välilehti (kb.products: lyhyt kuvaus ja kuvaus FI+EN, admin_update_product).
+// #/tapahtumat näyttää vain tapahtumat; vanha #/tapahtumat?kategoria=training ohjautuu #/koulutukset-osioon.
 // booking_202: Tapahtumat ja koulutukset (#/tapahtumat). Yleiskatsaus (lista tai kalenteri), tapahtuman välilehdet
 // (Yleiskatsaus, Kerrat, Osallistujat, Viestit, Asetukset), kertojen lisäys kalenterista ja viikkotoistolla,
 // osallistujalista (CSV + tuloste, henkilökunnan muistiinpanot) ja viesti osallistujille.
@@ -9,6 +12,9 @@ import { formatWhenRange, spansDays } from '../when-range.js';
 import { downloadCsv } from '../csv.js';
 import { loadEventsTexts, evText as T, courseText as tx } from '../events-texts.js';
 import { getLang } from '../talous-i18n.js';
+import { mountRichFields, syncRichFields } from '../rich-editor.js';
+import { loadRichTexts, richText } from '../rich-texts.js';
+import { loadProductTexts, productText } from '../product-texts.js';
 import { buildSeries, defaultLabel, validateBlock, blockToRow, blocksPayload, timeline, selectableResources, channelsOf, normChannels, CHANNELS,
   copyArgs, copyName, conflictsOf, localParts, MAX_BLOCKS, occurrenceFlags, bookingCount, isPastMove, messageDraft, customerMessageText, participantsToCsv, weekdayIso, publicShopLink } from '../events-logic.js';
 import { eventQueueParts } from '../event-waitlist.js';
@@ -21,31 +27,45 @@ const span = (iso1, iso2) => (spansDays(iso1, iso2)
   : `${fmtDate(iso1)} ${fmtTime(iso1)}–${fmtTime(iso2)}`);
 const catName = (c) => (c === 'training' ? T('cat_training') : T('cat_event'));
 const occLabel = (r) => (getLang() === 'en' && r.label_en) || r.label || defaultLabel(r.date, r.start_time, getLang());
+let BASE = 'tapahtumat';   // render asettaa: 'koulutukset' (section training) tai 'tapahtumat'
 const hrefOf = (q) => {
   const s = new URLSearchParams();
-  for (const [k, v] of Object.entries(q || {})) if (v != null && v !== '' && v !== false) s.set(k, String(v));
+  for (const [k, v] of Object.entries(q || {})) if (v != null && v !== '' && v !== false && !(BASE === 'koulutukset' && k === 'kategoria')) s.set(k, String(v));
   const str = s.toString();
-  return `#/tapahtumat${str ? `?${str}` : ''}`;
+  return `#/${BASE}${str ? `?${str}` : ''}`;
 };
 const STATUS_KEY = { on_sale: 'status_on_sale', full: 'status_full', cancelled: 'status_cancelled', sales_closed: 'status_sales_closed', past: 'badge_past' };
 const STATUS_KIND = { on_sale: 'ok', full: 'err', cancelled: 'err', sales_closed: 'warn', past: 'muted' };
 const TABS = [['yleiskatsaus', 'tab_overview'], ['kerrat', 'tab_occurrences'], ['osallistujat', 'tab_participants'], ['viestit', 'tab_messages'], ['asetukset', 'tab_settings']];
+// Koulutuksen Tekstit-välilehti (vain category training). Otsikko courseText-sanakirjasta (admin.events.tab_texts).
+const TEXTS_TAB = 'tekstit';
+const tabsFor = (p) => (p?.category === 'training' ? [...TABS.slice(0, 1), [TEXTS_TAB, null], ...TABS.slice(1)] : TABS);
+const tabLabel = (id, key) => (id === TEXTS_TAB ? tx('tab_texts') : T(key));
 const SAFE_EMAIL = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[A-Za-z]{2,}$/;
 const SAFE_PHONE = /^\+?[0-9][0-9 ().-]{5,28}$/;
 
-export async function render({ ctx, refs, reload, query }) {
+export async function render({ ctx, refs, reload, query, section = null }) {
   await loadEventsTexts(rpc);
+  const trainingSection = section === 'training';
+  BASE = trainingSection ? 'koulutukset' : 'tapahtumat';
   const canEdit = ctx.can('catalog.edit');
   const canSend = ctx.can('messages.edit');
   const q = query || new URLSearchParams();
-  const cat = ['event', 'training'].includes(q.get('kategoria')) ? q.get('kategoria') : '';
+  if (!trainingSection && q.get('kategoria') === 'training') {   // vanha linkki: koulutukset ovat omassa osiossaan
+    const nq = new URLSearchParams(q); nq.delete('kategoria');
+    const str = nq.toString();
+    location.replace?.(`#/koulutukset${str ? `?${str}` : ''}`);
+    return [];
+  }
+  const cat = trainingSection ? 'training' : 'event';
+  const sectionTitle = trainingSection ? tx('trainings_title') : T('title');
   const when = ['tulevat', 'menneet', 'kaikki'].includes(q.get('jakso')) ? q.get('jakso') : (q.get('menneet') === '1' ? 'menneet' : 'tulevat');
   const viewMode = q.get('nakyma') === 'kalenteri' ? 'kalenteri' : 'lista';
   const statusFilter = ['on_sale', 'full', 'cancelled', 'sales_closed'].includes(q.get('tila')) ? q.get('tila') : '';
   const productFilter = Number(q.get('tuote')) || 0;
   const dayFilter = /^\d{4}-\d{2}-\d{2}$/.test(q.get('paiva') || '') ? q.get('paiva') : '';
   const openId = Number(q.get('tapahtuma')) || null;
-  const tab = TABS.some(([id]) => id === q.get('valilehti')) ? q.get('valilehti') : 'yleiskatsaus';
+  const tab = [...TABS, [TEXTS_TAB]].some(([id]) => id === q.get('valilehti')) ? q.get('valilehti') : 'yleiskatsaus';
   const kertaQ = Number(q.get('kerta')) || 0;
   const res = selectableResources(refs?.resources);
   const resName = new Map((refs?.resources || []).map((r) => [r.id, r.name]));
@@ -53,11 +73,12 @@ export async function render({ ctx, refs, reload, query }) {
   const listQuery = (extra = {}) => ({ kategoria: state.cat, jakso: state.when === 'tulevat' ? '' : state.when, tuote: state.productFilter || '', tila: state.statusFilter, nakyma: state.viewMode === 'kalenteri' ? 'kalenteri' : '', paiva: state.dayFilter, kk: state.viewMode === 'kalenteri' ? state.month : '', ...extra });
   const go = (extra = {}) => { location.hash = hrefOf(listQuery(extra)); };
   const refresh = () => { ctx.refs = null; reload(); };
-  const list = await rpc('admin_event_list', { p_category: cat || null, p_include_past: when !== 'tulevat' || !!openId });
+  const list = await rpc('admin_event_list', { p_category: cat, p_include_past: when !== 'tulevat' || !!openId });
 
   if (openId) {
     const p = (list || []).find((x) => x.product_id === openId);
-    if (!p) return [h('p', {}, h('a', { href: hrefOf(listQuery()), text: `‹ ${T('title')}` })), h('p', { class: 'empty', text: T('empty') })];
+    if (!p) return [h('p', {}, h('a', { href: hrefOf(listQuery()), text: `‹ ${sectionTitle}` })), h('p', { class: 'empty', text: T('empty') })];
+    if (p.category === 'training') { await loadRichTexts(rpc); await loadProductTexts(rpc); }
     const [peopleRaw, logRaw] = await Promise.all([
       rpc('admin_event_participants', { p_product_id: p.product_id, p_rule_id: null }).catch((e) => ({ error: e })),
       rpc('admin_event_messages_list', { p_product_id: p.product_id }).catch((e) => ({ error: e })),
@@ -105,7 +126,7 @@ export async function render({ ctx, refs, reload, query }) {
     const upcoming = rows.filter((x) => !x.flags.past);
     const soldSum = upcoming.reduce((n, x) => n + x.flags.sold, 0);
     const next = upcoming[0];
-    const seg = (name, value, options, testid) => h('fieldset', { class: 'srcset ev-filter', 'data-testid': testid }, h('legend', { class: 'sr', text: T('title') }),
+    const seg = (name, value, options, testid) => h('fieldset', { class: 'srcset ev-filter', 'data-testid': testid }, h('legend', { class: 'sr', text: sectionTitle }),
       options.map(([v, label]) => h('label', { class: 'srcopt' },
         h('input', { type: 'radio', name, value: v, checked: v === value || null, 'data-testid': name === 'evwhen' && v === 'menneet' ? 'events-past' : null, onchange: () => {
           if (name === 'evwhen') state.when = v; else if (name === 'evcat') state.cat = v; else state.viewMode = v;
@@ -122,11 +143,10 @@ export async function render({ ctx, refs, reload, query }) {
       kpi(T('kpi_sold'), String(soldSum)),
       kpi(T('kpi_next'), next ? span(next.r.starts_at, next.r.ends_at) : '–'));
     const body = state.viewMode === 'kalenteri' ? calendarBlock(rows, products) : tableBlock(rows);
-    return [h('h1', { text: T('title') }), h('p', { class: 'muted', text: canEdit ? T('lead_manage') : T('lead_staff') }),
+    return [h('h1', { text: sectionTitle }), h('p', { class: 'muted', text: trainingSection ? tx('trainings_lead') : (canEdit ? T('lead_manage') : T('lead_staff')) }),
       saleOff ? h('p', { class: 'ev-note', role: 'note', 'data-testid': 'events-sale-off', text: T('sale_off_note') }) : null,
       h('div', { class: 'ev-filters stack', 'data-testid': 'events-overview' },
         h('div', { class: 'row wrap' }, seg('evwhen', state.when, [['tulevat', T('when_upcoming')], ['menneet', T('when_past')], ['kaikki', T('when_all')]], 'events-when'),
-          seg('evcat', state.cat, [['', T('filter_all')], ['event', T('filter_event')], ['training', T('filter_training')]], 'events-filter'),
           seg('evview', state.viewMode, [['lista', T('view_list')], ['kalenteri', T('view_calendar')]], 'events-view')),
         h('div', { class: 'row wrap' }, field(T('filter_pick_event'), eventSel), field(T('filter_status'), statusSel))),
       kpis, body];
@@ -205,15 +225,16 @@ export async function render({ ctx, refs, reload, query }) {
   }
 
   function detail(p, people, peopleErr, log, logErr) {
-    const back = h('p', {}, h('a', { href: hrefOf(listQuery()), 'data-testid': 'events-back', text: `‹ ${T('title')}` }));
+    const back = h('p', {}, h('a', { href: hrefOf(listQuery()), 'data-testid': 'events-back', text: `‹ ${sectionTitle}` }));
     const head = h('div', { class: 'row between wrap' }, h('h1', { class: 'ev-name', text: p.name }),
       h('span', { class: 'meta' }, badge('muted', catName(p.category)), p.sale_enabled === false ? badge('warn', T('badge_sale_off')) : null, p.active === false ? badge('err', T('badge_hidden')) : null, canEdit ? null : badge('muted', T('read_only'))));
     const tablist = h('div', { class: 'tl-tabs ev-tabs', role: 'tablist', 'aria-label': p.name, 'data-testid': 'event-tabs' },
-      TABS.map(([id, key]) => h('button', { type: 'button', class: 'tl-tabbtn', role: 'tab', 'aria-selected': String(id === tab), 'data-testid': `event-tab-${id}`, onclick: () => go({ tapahtuma: p.product_id, valilehti: id, kerta: kertaQ || '' }) }, T(key))));
+      tabsFor(p).map(([id, key]) => h('button', { type: 'button', class: 'tl-tabbtn', role: 'tab', 'aria-selected': String(id === tab), 'data-testid': `event-tab-${id}`, onclick: () => go({ tapahtuma: p.product_id, valilehti: id, kerta: kertaQ || '' }) }, tabLabel(id, key))));
     const panel = (id, ...nodes) => h('div', { hidden: tab !== id || null, 'data-testid': `event-panel-${id}`, class: id === tab ? null : 'ev-no-print' }, nodes);
     const rules = [...(p.rules || [])].sort((a, b) => String(a.starts_at).localeCompare(String(b.starts_at)));
     return [back, head, p.sale_enabled === false ? h('p', { class: 'ev-note ev-no-print', role: 'note', text: T('sale_off_note') }) : null, tablist,
       panel('yleiskatsaus', eventOverview(p, rules)),
+      p.category === 'training' ? panel(TEXTS_TAB, textsPanel(p)) : null,
       panel('kerrat', canEdit ? addPanel(p) : null, rules.length ? h('ul', { class: 'ev-occ' }, rules.map((r) => occItem(p, r))) : h('p', { class: 'muted', text: T('no_occurrences') })),
       panel('osallistujat', participantsPanel(p, rules, people, peopleErr)),
       panel('viestit', messagesPanel(p, rules, people, log, logErr)),
@@ -244,6 +265,32 @@ export async function render({ ctx, refs, reload, query }) {
         canEdit ? h('button', { type: 'button', class: 'btn', 'data-testid': 'event-copy', text: T('copy_event'), onclick: () => copyEvent(p) }) : null),
       h('fieldset', { class: 'card ev-chan', 'data-testid': 'event-channels' }, h('legend', { text: T('channels') }), h('div', { class: 'row wrap' }, boxes, chanSave)),
       p.category === 'training' ? directLinks(p) : null);
+  }
+
+  // Koulutuksen tuotetekstit suoraan kb.products-tauluun (admin_update_product, vain tekstikentät: ei hintaa, ALV:tä eikä slugia).
+  // Kauppa lukee samat kentät (public_product_by_slug / public_catalog), joten tallennus näkyy kurssisivulla seuraavalla latauksella.
+  function textsPanel(p) {
+    const prod = refs?.productById?.get?.(p.product_id) || (refs?.products || []).find((x) => x.id === p.product_id) || null;
+    if (!prod) return h('p', { class: 'muted', 'data-testid': 'training-texts-missing', text: tx('texts_missing') });
+    const area = (name, v, testid) => h('textarea', { name, value: v ?? '', rows: 5, 'data-rich': '1', 'data-testid': testid, disabled: !canEdit });
+    const f = h('form', { class: 'stack', 'data-testid': 'training-texts-form' },
+      h('p', { class: 'muted', text: tx('texts_lead') }),
+      field(productText('short_fi'), area('short_description', prod.short_description, 'training-short-fi'), productText('short_hint')),
+      field(productText('short_en'), area('short_description_en', prod.short_description_en, 'training-short-en'), productText('short_hint')),
+      field(tx('texts_desc_fi'), area('description', prod.description, 'training-desc-fi'), richText('hint')),
+      field(tx('texts_desc_en'), area('description_en', prod.description_en, 'training-desc-en'), richText('hint')),
+      canEdit ? h('button', { type: 'submit', class: 'btn primary', 'data-testid': 'training-texts-save', text: tx('texts_save') }) : h('p', { class: 'muted', text: T('read_only') }));
+    f.addEventListener('submit', (ev) => { ev.preventDefault(); act(f.querySelector('button[type=submit]'), async () => {
+      syncRichFields(f);
+      const fd = new FormData(f);
+      const patch = {};
+      for (const k of ['short_description', 'short_description_en', 'description', 'description_en']) patch[k] = String(fd.get(k) ?? '');
+      await rpc('admin_update_product', { p_product_id: p.product_id, p_patch: patch });
+      toast(tx('texts_saved'));
+      ctx.refs = null; reload();
+    }); });
+    if (tab === TEXTS_TAB && canEdit) setTimeout(() => { mountRichFields(f).catch((e) => console.error(e)); }, 0);
+    return h('div', { class: 'stack' }, f, directLinks(p));
   }
 
   function directLinks(p) {
