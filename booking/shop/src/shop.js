@@ -42,6 +42,7 @@ import { eventText, occurrenceText, occurrenceLabel, findEvent, saleState, upcom
 import { groupEventDays, eventDayLabel } from './event-pick.js';
 import { formatWhenRange, formatWhenList, spansDays } from './when-range.js';
 import { createTrainingSignup, isTrainingProduct, listedProducts } from './training-signup.js';
+import { isTrainingCategory, sessionDateText, trainingSessions, scheduleRows, trainingDateText } from './training-dates.js';
 import { customerInvoiceLock } from './invoice-lock.js';
 import { formPaysOnline, paysByInvoice } from './company-pay.js';
 import { clockFromIso } from './clock.js';
@@ -285,9 +286,11 @@ const cardExcerpt = (p) => cardShort(h, p, S.lang, pdesc(p));
 // Tuotesivun Lue lisää heti lyhyen kuvauksen jälkeen: pitkä kuvaus (sis. uima-asuohjeen) + yleinen peruutusehto
 // (page.info.cancel_text). Suljettu oletuksena. Painike, ei <details>: lataus ei jätä fokuskehystä (Chrome laskee
 // ohjelmallisen fokuksen :focus-visibleksi). Näppäimistö toimii natiivisti (Enter/välilyönti), aria-expanded kertoo tilan.
-function moreInfo(desc) {
+// Koulutus (category training): kurssin ajankohdat ja aikataulu (extra) ennen peruutusehtoa.
+function moreInfo(desc, extra = null) {
   const bits = [
     desc ? richHost(h, desc, 'bk-desc') : null,
+    extra,
     S.cancelRule ? h('p', { class: 'bk-note bk-cancel-rule', 'data-testid': 'product-cancel', text: S.cancelRule }) : null,
   ].filter(Boolean);
   if (!bits.length) return null;
@@ -585,6 +588,9 @@ async function viewProduct(slug, dateStr, query) {
   const training = isTrainingProduct(p);
   const horizon = training ? 400 : (state.settings.booking_horizon_days || 120);
   const eventProduct = p.category === 'event' || training;
+  // Joonas 6.11.2026 (t1366u): kurssilla vain "Valitse päivä". Ehto on category = 'training', ei kind/event eikä vuorojen määrä.
+  const course = isTrainingCategory(p);
+  const schedBox = course ? h('section', { class: 'bk-course-sched', 'data-testid': 'training-schedule', 'aria-labelledby': 'bk-course-sched-h', hidden: true }) : null;
   let [y, m] = (dateStr || today).split('-').map(Number); m -= 1;
   let sel = dateStr || null;
   const wrap = h('div', { class: 'bk-prod' });
@@ -634,6 +640,7 @@ async function viewProduct(slug, dateStr, query) {
       if (segs && segs.length > 1) return formatWhenList(segs, S.lang);
       return isMultiDay(r) ? occurrenceText(r, S.lang) : '';
     };
+    if (course) { drawCourse(calBox, slotBox, days, segByRule); return; }
     const mark = () => { for (const b of calBox.querySelectorAll('.bk-ev-date')) b.setAttribute('aria-pressed', b.dataset.date === sel ? 'true' : 'false'); };
     const drawTimes = () => {
       const day = days.find((d) => d.date === sel);
@@ -655,6 +662,35 @@ async function viewProduct(slug, dateStr, query) {
     mark();
     drawTimes();
   }
+  // Kurssi: yksi päivänappi per kurssikerta. Klikkaus vie suoraan kerran ilmoittautumiseen (sama reitti kuin ennen kellonajan napista).
+  // Napissa vain päiväväli ja paikat (N vapaana / Täynnä), ei kellonaikoja. "Valitse aika" -osiota ei ole.
+  function drawCourse(calBox, slotBox, days, segByRule) {
+    const sessions = trainingSessions(days, segByRule);
+    slotBox.replaceChildren();
+    calBox.append(h('div', { class: 'bk-ev-dates', role: 'group', 'aria-labelledby': 'bk-ev-date-h', 'data-testid': 'event-dates' },
+      sessions.map((s) => {
+        const label = sessionDateText(s.r, s.segs, S.lang);
+        const left = s.full ? '' : (s.remaining != null ? t.freeSpots(s.remaining) : '');
+        const href = s.full ? null : bk(`/varaa/${s.r.rule_id}/${s.date}/${p.id}`);
+        return h(href ? 'a' : 'div', {
+          class: `bk-ev-date is-span${s.full ? ' is-full' : ''}`, href, 'data-date': s.date, 'data-rule': s.r.rule_id, 'data-testid': 'event-date',
+          'aria-current': !s.full && s.date === sel ? 'true' : null, 'aria-disabled': s.full ? 'true' : null,
+          'aria-label': [label, s.full ? t.full : left].filter(Boolean).join(', '),
+        }, h('span', { class: 'bk-ev-when', text: label }),
+          left ? h('span', { class: 'bk-ev-sub', 'data-testid': 'training-remaining', text: left }) : null,
+          s.full ? h('span', { class: 'bk-ev-full', text: t.full }) : null);
+      })));
+    const rows = scheduleRows(sessions, S.lang);
+    if (schedBox && rows.length) {
+      schedBox.replaceChildren(h('h4', { id: 'bk-course-sched-h', text: trainingDateText('schedule', S.lang, (k) => texts.tx(k)) }),
+        h('ul', { class: 'bk-course-list' }, rows.map((x) => h('li', { 'data-testid': 'training-schedule-row' },
+          x.title ? h('strong', { text: x.title }) : null,
+          x.when ? h('span', { class: 'bk-course-when', text: x.when }) : null,
+          x.full ? h('span', { class: 'bk-course-full', text: t.full }) : null,
+          x.parts.length ? h('ul', {}, x.parts.map((g) => h('li', {}, g.title ? h('span', { text: g.title }) : null, g.when ? h('span', { class: 'bk-course-when', text: g.when }) : null))) : null))));
+      schedBox.hidden = false;
+    }
+  }
   const draw = async () => {
     const calBox = h('div', eventProduct ? { class: 'bk-ev', 'data-testid': 'event-pick' } : { class: 'bk-cal' }), slotBox = h('div', { class: 'bk-slots', 'aria-live': 'polite' });
     const desc = pdesc(p) || '';
@@ -667,7 +703,7 @@ async function viewProduct(slug, dateStr, query) {
           h('p', { class: 'bk-meta' }, h('strong', { text: training ? `${priceText({ ...p, price: p.deposit_amount ?? p.price })}` : priceText(p) }), pdur(p) ? ` · ${pdur(p)}` : ''),
           training ? h('p', { class: 'bk-note', 'data-testid': 'training-course-price', text: p.course_price != null ? `${S.lang === 'en' ? 'Course price' : 'Kurssin hinta'} ${money(p.course_price)}. ${S.lang === 'en' ? 'The balance is invoiced later.' : 'Loppusumma laskutetaan myöhemmin.'}` : (S.lang === 'en' ? 'The balance is invoiced later.' : 'Loppusumma laskutetaan myöhemmin.') }) : null,
           leadShort(h, p, S.lang, desc),
-          moreInfo(desc),
+          moreInfo(desc, schedBox),
           eventProduct ? null : bookingJump(h, t.pickTime)),
         h('div', { class: 'bk-prod-cal', id: 'valitse-aika' }, h('h3', eventProduct ? { id: 'bk-ev-date-h', text: t.pickDate } : { text: t.pickDate }), calBox, slotBox)));
     if (eventProduct) { await fillEventDates(calBox, slotBox); return; }

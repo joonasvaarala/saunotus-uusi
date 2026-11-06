@@ -78,9 +78,10 @@ function trainingSlots(now) {
   const at = (d, hh) => { const x = new Date(now()); x.setUTCDate(x.getUTCDate() + d); x.setUTCHours(hh - 2, 0, 0, 0); return x; };
   const row = (rule, d, days, status, remaining) => {
     const start = at(d, 10), end = new Date(start.getTime() + days * 864e5);
-    return { rule_id: rule, product_id: 22601, label: null, label_en: null, mode: 'shared', session_date: start.toLocaleDateString('sv-SE', { timeZone: 'Europe/Helsinki' }), starts_at: start.toISOString(), ends_at: end.toISOString(), status, remaining, min_persons: 1, max_persons: 6, price_mode: 'per_person', unit_price: 200, base_price: null };
+    return { rule_id: rule, product_id: 22601, label: `Sauna healing ${rule - 22609}`, label_en: `Sauna healing ${rule - 22609}`, mode: 'shared', session_date: start.toLocaleDateString('sv-SE', { timeZone: 'Europe/Helsinki' }), starts_at: start.toISOString(), ends_at: end.toISOString(), status, remaining, min_persons: 1, max_persons: 6, price_mode: 'per_person', unit_price: 200, base_price: null };
   };
-  return [row(22611, 21, 5, 'available', 3), row(22612, 70, 14, 'available', 6)];
+  // 22610 täynnä (kurssinäkymä: harmaa päivänappi), 22612 kaksijaksoinen (public_training_checkout.segments)
+  return [row(22610, 10, 2, 'full', 0), row(22611, 21, 5, 'available', 3), row(22612, 70, 14, 'available', 6)];
 }
 const MUTATING = new Set(['public_create_treatment_booking', 'public_change_treatment_booking']);
 // scenario=pay|pay-prod|pay-off: vahvistussivun maksuvalinta (MobilePay + lahjakortti) – maksutila, lahjakortit ja mobilepay-funktiot tulevat order-mock.js:stä (sama mock kuin tilaussivulla); mpResult = paluutulos (paid|failed|pending|…).
@@ -183,7 +184,13 @@ export function createShopMock({ storage = globalThis.sessionStorage, now = () =
       }
       case 'public_training_checkout': {
         const full = String(args.p_date || '').endsWith('01');
-        return { ok: true, rule_id: +args.p_rule_id, course_price: 1500, deposit_amount: 200, single_rooms_remaining: full ? 0 : 2,
+        const two = +args.p_rule_id === 22612 ? trainingSlots(now).find((r) => r.rule_id === 22612) : null;
+        const half = two ? new Date((Date.parse(two.starts_at) + Date.parse(two.ends_at)) / 2) : null;
+        const segments = two ? [
+          { position: 1, rule_id: 22612, label: 'Jakso 1', label_en: 'Part 1', starts_at: two.starts_at, ends_at: new Date(half.getTime() - 3 * 864e5).toISOString() },
+          { position: 2, rule_id: 22613, label: 'Jakso 2', label_en: 'Part 2', starts_at: half.toISOString(), ends_at: two.ends_at },
+        ] : [];
+        return { ok: true, rule_id: +args.p_rule_id, course_price: 1500, deposit_amount: 200, single_rooms_remaining: full ? 0 : 2, segments,
           addons: [{ code: 'single_room', price: 200, remaining: full ? 0 : 2, available: !full }, { code: 'internship', price: 500, available: true }] };
       }
       case 'public_create_training_signup': {

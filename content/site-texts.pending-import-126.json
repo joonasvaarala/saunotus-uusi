@@ -1,0 +1,22 @@
+[
+  {
+    "key": "ui.shop.training.schedule",
+    "lang": "fi",
+    "text": "Ajankohdat ja aikataulu",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Kurssin tuotesivu (Joonas 6.11.2026): Lue lisää -osion otsikko kurssikertojen nimille ja alku- ja loppuajoille."
+  },
+  {
+    "key": "ui.shop.training.schedule",
+    "lang": "en",
+    "text": "Dates and schedule",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Course product page (Joonas 6 Nov 2026): Read more heading for course session names with start and end times."
+  }
+]

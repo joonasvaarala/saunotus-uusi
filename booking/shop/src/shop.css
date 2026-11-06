@@ -62,7 +62,7 @@ button.bk-cell:hover{filter:brightness(.97)}
 .bk-ev-date.is-span,.bk-ev-time.is-span{flex:1 1 100%;justify-content:flex-start;text-align:left}
 .bk-ev-when{min-width:0;overflow-wrap:anywhere;white-space:normal}
 .bk-ev-date.is-full,.bk-ev-time.is-full{background:#f3eeee;border-color:#d4b9b9;color:#7b4a4a;opacity:.85}
-.bk-ev-date[aria-pressed="true"]{background:var(--green);border-color:var(--green);color:#fff;opacity:1}
+.bk-ev-date[aria-current="true"],.bk-ev-date[aria-pressed="true"]{background:var(--green);border-color:var(--green);color:#fff;opacity:1}
 .bk-ev-date:hover,.bk-ev-time:hover{filter:brightness(.97)}
 .bk-ev-date:focus-visible,.bk-ev-time:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
 .bk-ev-full{font:700 14px/1.2 var(--body)}
@@ -670,6 +670,17 @@ button.bk-cell.quiet.sel{box-shadow:inset 0 -4px 0 #F4EFE7}
 .bk-more-panel{padding:0 0 4px}
 .bk-more-panel[hidden]{display:none}
 .bk-more .bk-cancel-rule{margin:8px 0 14px}
+/* Koulutus (category training): kurssin ajankohdat ja aikataulu Lue lisää -osiossa (vuorosääntöjen nimet + alku- ja loppuaika). */
+.bk-course-sched{margin:8px 0 4px}
+.bk-course-sched[hidden]{display:none}
+.bk-course-sched h4{margin:0 0 6px;font:700 16px/1.3 var(--body);color:var(--ink)}
+.bk-course-list{margin:0;padding:0;list-style:none;display:grid;gap:8px}
+.bk-course-list>li{display:flex;flex-direction:column;gap:2px;min-width:0;overflow-wrap:anywhere}
+.bk-course-list ul{margin:2px 0 0;padding-left:18px;display:grid;gap:4px}
+.bk-course-list ul li{display:flex;flex-direction:column;gap:0;overflow-wrap:anywhere}
+.bk-course-when{font-size:15px}
+.bk-course-full{font:700 14px/1.2 var(--body);color:#7b4a4a}
+div.bk-ev-date.is-full{cursor:default}
 #valitse-aika{scroll-margin-top:84px}   /* sticky-yläpalkki ei peitä varausosiota, kun "Valitse aika" vierittää siihen */
 .bk-jump{display:inline-flex;align-items:center;min-height:44px;margin-top:8px;padding:0;border:0;background:transparent;color:var(--gold);font:inherit;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
 .bk-jump:hover{color:var(--ink)}
