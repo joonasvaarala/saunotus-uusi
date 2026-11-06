@@ -49,14 +49,17 @@ test('viikon tapahtuma: vain vapaa kerta omalle viikonpäivälle, ei päivämä�
 
 test('tapahtumakortit: täydet tulevat mukana aikajärjestyksessä, menneet ja closed pois', () => {
   const free = freeShopEvents(kb.events_shop, NOW);
-  assert.deepEqual(free.map((e) => e.slug), ['sipoonjoen-kekri', 'perinnesaunotusilta', 'naisten-joulusauna', 'saunottajien-yhteisopaiva-2']);
+  assert.deepEqual(free.map((e) => e.slug), ['sipoonjoen-kekri', 'perinnesaunotusilta', 'naisten-joulusauna', 'sipoonjoen-joulusauna', 'saunottajien-yhteisopaiva-2']);
   assert.equal(eventIsFull(free[0]), true);
   assert.equal(eventIsFull(free[1]), true);
   assert.equal(eventIsFull(free[2]), false);
+  assert.equal(eventIsFull(free[3]), false);
   assert.equal(cardDates(free[2].occurrences[0], 'fi', NOW), '18.12.');
-  assert.equal(cardDates(free[3].occurrences[0], 'fi', NOW), '20.2.2027');
+  assert.equal(cardDates(free[3].occurrences[0], 'fi', NOW), '19.12.');
+  assert.equal(cardDates(free[4].occurrences[0], 'fi', NOW), '20.2.2027');
   assert.equal(cardTime(free[2].occurrences[0], 'fi'), 'klo 16.00–19.00');
   assert.equal(cardTime(free[2].occurrences[0], 'en'), '16:00–19:00');
+  assert.equal(cardTime(free[3].occurrences[0], 'fi'), 'klo 14.00–16.00');
   assert.equal(freeShopEvents(null, NOW).length, 0);
   const fullOnly = freeShopEvents([{ category: 'event', slug: 'x', name: 'X', product_id: 9, occurrences: [{ rule_id: 3, status: 'full', starts_at: '2026-12-01T14:00:00Z', ends_at: '2026-12-01T17:00:00Z' }] }], NOW);
   assert.equal(fullOnly.length, 1);

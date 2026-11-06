@@ -15,7 +15,7 @@ import { quietWeekAttrs } from './quiet-week.mjs';
 import { experienceHtml, traditionHtml, infoStrip, companyStrip, homeText, homeBookCta } from './home-front.mjs';
 import { treatmentsBody } from './treatments-page.mjs';
 import { faqFor, policyFor, eventTimeFor } from './kb-en.mjs';
-import { selectShopEvents, shopEventsHtml, shopHash, eventWaitlistPath } from './event-cards.mjs';
+import { selectHomeEvents, shopEventsHtml, shopHash, eventWaitlistPath } from './event-cards.mjs';
 import { EVENT_CARD_TEXTS } from './event-full-texts.mjs';
 import { productCardInner } from './product-card-image.mjs';
 import { testBannerEnabled, testBannerHtml, testBannerStyleTag } from './test-env-banner.mjs';
@@ -185,7 +185,7 @@ export function upcomingEvents(lang) {
 // Muuten (ei events_shop-dataa) vanha data (kb.event_dates + cards.json), linkki silti kaupan tuotesivulle.
 const eventCardText = (key, lang) => tx(key, lang, { fallback: EVENT_CARD_TEXTS[key][lang] ?? EVENT_CARD_TEXTS[key].fi, log: { warn() {} } });
 function shopEventsSection(lang, limit, empty) {
-  let list = selectShopEvents(kb.events_shop, Date.now());
+  let list = selectHomeEvents(kb.events_shop, Date.now());
   if (!list.length) return null;
   if (limit) list = list.slice(0, limit);
   const cardOf = (ev) => Object.entries(cards.events).find(([id, c]) => !id.startsWith('_') && (c.kb || id) === ev.slug)?.[1] || null;

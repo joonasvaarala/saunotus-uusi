@@ -113,6 +113,27 @@ test('XSS: tietokannan nimet, kuvaukset ja slug escapattuina; kuvaus pelkkänä 
   assert.equal(C.plainText('<p>A&nbsp;<b>B</b></p>'), 'A B');
 });
 
+
+test('selectHomeEvents: Sipoonjoen joulusauna etusivulle, Naisten jouluista saunailtaa ei nosteta', () => {
+  const list = [
+    ev({ product_id: 32, slug: 'naisten-joulusauna', name: 'Naisten jouluinen saunailta' }, [o('2026-12-18T14:00:00Z', '2026-12-18T17:00:00Z')]),
+    ev({ product_id: 113, slug: 'sipoonjoen-joulusauna', name: 'Sipoonjoen joulusauna', price: 59 }, [o('2026-12-19T12:00:00Z', '2026-12-19T14:00:00Z')]),
+    ev({}, [o('2026-11-14T14:00:00Z', '2026-11-14T17:00:00Z')]),
+  ];
+  assert.deepEqual(C.selectShopEvents(list, NOW).map((x) => x.slug), ['perinnesaunotusilta', 'naisten-joulusauna', 'sipoonjoen-joulusauna']);
+  assert.deepEqual(C.selectHomeEvents(list, NOW).map((x) => x.slug), ['perinnesaunotusilta', 'sipoonjoen-joulusauna']);
+  const html = C.shopEventsHtml(C.selectHomeEvents(list, NOW), 'fi', {
+    e: lib.e, money: lib.money, arrow: 'Varaa →',
+    link: (x) => lib.pageHref('book', 'fi', C.shopHash(x.slug)), img: () => '',
+  });
+  assert.match(html, /data-hide-events="naisten-joulusauna"/);
+  assert.match(html, /href="\/varaa\/#\/tuote\/sipoonjoen-joulusauna"/);
+  assert.match(html, /Sipoonjoen joulusauna/);
+  assert.match(html, /59/);
+  assert.doesNotMatch(html, /Naisten jouluinen saunailta/);
+  assert.doesNotMatch(html, /href="\/varaa\/#\/tuote\/naisten-joulusauna"/);
+});
+
 test('kb-vienti ja snapshot: events_shop public_eventsistä, vain julkiset kentät, puuttuessa pois', () => {
   const sql = readFileSync(join(repo, 'docs/kb-export.sql'), 'utf8');
   assert.match(sql, /'events_shop', booking\.public_events\(current_date, 'shop'\)/);
