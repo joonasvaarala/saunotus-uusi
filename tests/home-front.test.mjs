@@ -10,6 +10,7 @@ process.env.IMAGE_TRANSFORMS = 'on';
 const { experienceHtml, HOME_TEXTS, HOME_EXPERIENCES, cardDuration } = await import('../src/home-front.mjs');
 const { setLiveCatalog, clearLiveCatalog } = await import('../src/catalog-live.mjs');
 const { setArticlesState } = await import('../src/articles/runtime.mjs');
+const { selectHomeEvents, eventIsFull } = await import('../src/event-cards.mjs');
 const R = await import('../src/render.mjs');
 
 const kb = JSON.parse(readFileSync(new URL('../content/kb/kb.json', import.meta.url), 'utf8'));
@@ -19,24 +20,15 @@ const partial = JSON.parse(readFileSync(new URL('../content/partials/saunotus-pe
 const pending = JSON.parse(readFileSync(new URL('../content/site-texts.pending-import-85.json', import.meta.url), 'utf8'));
 const prod = (slug) => kb.products.find((p) => p.slug === slug);
 
-// Sama sääntö kuin freeShopEvents (booking/shop/src/week-live.js): category event, kerta available tai full, ends_at > now.
-// Mennyt kerta (Kekri päättyy 2026-10-31T17:00:00Z) ei ole etusivulla. Otsikko on cards.jsonista, kuten renderöinti.
+// Etusivun kortit = selectHomeEvents: freeShopEvents ilman nostosta poistettuja (naisten-joulusauna).
+// Mennyt kerta (Kekri päättyy 2026-10-31T17:00:00Z) ei ole etusivulla. Otsikko on cards.jsonista tai tuotteen nimi.
 function homeShopEvents(now = Date.now()) {
-  if (!Number.isFinite(+now)) return [];
-  const upcomingOf = (ev) => (Array.isArray(ev.occurrences) ? ev.occurrences : [])
-    .filter((o) => o && (o.status === 'available' || o.status === 'full') && o.starts_at && Date.parse(o.ends_at || o.starts_at) > +now)
-    .sort((a, b) => String(a.starts_at).localeCompare(String(b.starts_at)));
-  return (Array.isArray(kb.events_shop) ? kb.events_shop : [])
-    .filter((ev) => ev && ev.category === 'event' && typeof ev.slug === 'string' && ev.slug && ev.name)
-    .map((ev) => ({ ev, upcoming: upcomingOf(ev) }))
-    .filter((x) => x.upcoming.length)
-    .map(({ ev, upcoming }) => ({
-      slug: ev.slug,
-      title: cardsDoc.events?.[ev.slug]?.fi?.title || ev.name,
-      full: upcoming.every((o) => o.status === 'full'),
-      starts: upcoming[0].starts_at,
-    }))
-    .sort((a, b) => String(a.starts).localeCompare(String(b.starts)) || a.slug.localeCompare(b.slug));
+  return selectHomeEvents(kb.events_shop, now).map((ev) => ({
+    slug: ev.slug,
+    title: cardsDoc.events?.[ev.slug]?.fi?.title || ev.name,
+    full: eventIsFull(ev),
+    starts: ev.occurrences[0].starts_at,
+  }));
 }
 
 // events_shop tyhjä tulevista → render.mjs upcomingEvents (kb.events + cards.json, ei Täynnä-merkkiä).
@@ -188,7 +180,8 @@ test('etusivu: järjestys, ei varaa-verkosta-listaa, torstai 16:00, kaksi tapaht
   const evFix = eventsSlice(frozenFi);
   const nFix = (evFix.match(/<li class="card ev"/g) || []).length;
   assert.equal(nFix, 2, `vapaita tapahtumia ${nFix}`);
-  assert.match(evFix, /Naisten jouluinen saunailta/);
+  assert.match(evFix, /Sipoonjoen joulusauna/);
+  assert.doesNotMatch(evFix, /Naisten jouluinen saunailta/);
   assert.match(evFix, /Saunottajien yhteisöpäivä/);
   // booking_210: täydet tapahtumat näkyvät himmennettyinä Täynnä-merkillä ja jonolinkillä.
   const fullFix = evFix.match(/<li class="card ev is-full"[\s\S]*?<\/li>/g) || [];
@@ -199,11 +192,11 @@ test('etusivu: järjestys, ei varaa-verkosta-listaa, torstai 16:00, kaksi tapaht
   assert.deepEqual(homeShopEvents(Date.parse('2026-10-28T08:00:00Z')).map((x) => [x.slug, x.full]), [
     ['sipoonjoen-kekri', true],
     ['perinnesaunotusilta', true],
-    ['naisten-joulusauna', false],
+    ['sipoonjoen-joulusauna', false],
     ['saunottajien-yhteisopaiva-2', false],
   ]);
   assert.deepEqual(homeShopEvents(Date.parse('2026-10-31T17:00:00Z')).map((x) => x.slug), [
-    'perinnesaunotusilta', 'naisten-joulusauna', 'saunottajien-yhteisopaiva-2',
+    'perinnesaunotusilta', 'sipoonjoen-joulusauna', 'saunottajien-yhteisopaiva-2',
   ]);
   // Nykyhetki: etusivu näyttää täsmälleen sen, mitä data ja kello sallivat. Päättynyt kerta ei jää kortiksi.
   const ev = eventsSlice(fi);

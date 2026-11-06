@@ -893,6 +893,27 @@
    "price": 3.5,
    "price_type": "per_unit",
    "price_text": "3,50 €"
+  },
+  {
+   "id": 113,
+   "slug": "sipoonjoen-joulusauna",
+   "name": "Sipoonjoen joulusauna",
+   "name_en": "Sipoonjoki Christmas Sauna",
+   "category": "event",
+   "price": 59,
+   "price_type": "per_person",
+   "price_text": "59,00 € / hlö",
+   "duration_minutes": 120,
+   "duration_text": "2 h",
+   "duration_text_en": "2 h",
+   "capacity_min": 1,
+   "capacity_max": 9,
+   "includes_smoke_sauna": true,
+   "location_id": 2,
+   "description": "<p>Jouluna on aika pysähtyä, käydä läpi menneen vuoden tapahtumia ja valmistautua uuteen alkuun. Tule juhlistamaan tätä tärkeää käännekohtaa saunottajan ohjaamassa joulusaunaseremoniassa. Joulusaunassa pääosassa ovat oljet, havut ja olut, mutta myös muuta kesän satoa otetaan käyttöön.</p><p><strong>Hintaan sisältyy:</strong></p><ul><li>Alkumalja (havuteetä)</li><li>Ohjattu joulusaunaseremonia (kesto n. 30 min)</li><li>Vapaata saunomista savusaunan pehmeissä löylyissä (n. 1 h)</li><li>Alkoholiton olut</li></ul><p>Joulusaunan ikäraja on 15 v.</p>",
+   "description_en": "<p>Christmas is a time to pause, look back on the year gone by and prepare for a new beginning. Come and celebrate this important turning point in a Christmas sauna ceremony led by a sauna practitioner (saunottaja). In the Christmas sauna, straw, spruce and pine sprigs and beer play the leading roles, but other gifts of the summer's harvest are used too.</p><p><strong>What's included:</strong></p><ul><li>A welcome drink (conifer needle tea)</li><li>A guided Christmas sauna ceremony (approx. 30 min)</li><li>Free sauna bathing in the soft löyly of the smoke sauna (approx. 1 h)</li><li>A non-alcoholic beer</li></ul><p>The minimum age for the Christmas sauna is 15.</p>",
+   "short_description": "<p>Jouluna on aika pysähtyä, käydä läpi menneen vuoden tapahtumia ja valmistautua uuteen alkuun. Tule juhlistamaan tätä tärkeää käännekohtaa Sipoonjoen Perinnesaunan pehmeisiin löylyihin saunottajan ohjaaman joulusaunaseremonian myötä.</p>",
+   "short_description_en": "<p>Christmas is a time to pause, look back on the year gone by and prepare for a new beginning. Come and celebrate this important turning point in the soft löyly of Sipoonjoen perinnesauna with a Christmas sauna ceremony led by a sauna practitioner (saunottaja).</p>"
   }
  ],
  "variants": [
@@ -1985,6 +2006,172 @@
     "label": "18.12.2026 klo 16.00",
     "time_text": "pe 18.12. klo 16.00–19.00",
     "time_text_en": "Fri 18 Dec 16:00–19:00",
+    "status": "available"
+   }
+  ]
+ },
+ {
+  "product_id": 113,
+  "slug": "sipoonjoen-joulusauna",
+  "name": "Sipoonjoen joulusauna",
+  "name_en": "Sipoonjoki Christmas Sauna",
+  "description_short": "<p>Jouluna on aika pysähtyä, käydä läpi menneen vuoden tapahtumia ja valmistautua uuteen alkuun. Tule juhlistamaan tätä tärkeää käännekohtaa Sipoonjoen Perinnesaunan pehmeisiin löylyihin saunottajan ohjaaman joulusaunaseremonian myötä.</p>",
+  "description_short_en": "<p>Christmas is a time to pause, look back on the year gone by and prepare for a new beginning. Come and celebrate this important turning point in the soft löyly of Sipoonjoen perinnesauna with a Christmas sauna ceremony led by a sauna practitioner (saunottaja).</p>",
+  "price": 59.0,
+  "price_text": "59,00 € / hlö",
+  "image_path": "products/113-7o91squq.jpg",
+  "image_alt": "Sipoonjoen joulusauna",
+  "category": "event",
+  "sale_open": true,
+  "occurrences": [
+   {
+    "rule_id": 89,
+    "starts_at": "2026-12-19T12:00:00+00:00",
+    "ends_at": "2026-12-19T14:00:00+00:00",
+    "label": "19.12.2026 klo 14.00",
+    "label_en": "19.12.2026 at 14:00",
+    "time_text": "la 19.12. klo 14.00–16.00",
+    "time_text_en": "Sat 19 Dec 14:00–16:00",
+    "status": "available"
+   },
+   {
+    "rule_id": 94,
+    "starts_at": "2026-12-19T14:00:00+00:00",
+    "ends_at": "2026-12-19T16:00:00+00:00",
+    "label": "19.12.2026 klo 16.00",
+    "label_en": "19.12.2026 at 16:00",
+    "time_text": "la 19.12. klo 16.00–18.00",
+    "time_text_en": "Sat 19 Dec 16:00–18:00",
+    "status": "available"
+   },
+   {
+    "rule_id": 99,
+    "starts_at": "2026-12-19T16:00:00+00:00",
+    "ends_at": "2026-12-19T18:00:00+00:00",
+    "label": "19.12.2026 klo 18.00",
+    "label_en": "19.12.2026 at 18:00",
+    "time_text": "la 19.12. klo 18.00–20.00",
+    "time_text_en": "Sat 19 Dec 18:00–20:00",
+    "status": "available"
+   },
+   {
+    "rule_id": 90,
+    "starts_at": "2026-12-20T12:00:00+00:00",
+    "ends_at": "2026-12-20T14:00:00+00:00",
+    "label": "20.12.2026 klo 14.00",
+    "label_en": "20.12.2026 at 14:00",
+    "time_text": "su 20.12. klo 14.00–16.00",
+    "time_text_en": "Sun 20 Dec 14:00–16:00",
+    "status": "available"
+   },
+   {
+    "rule_id": 95,
+    "starts_at": "2026-12-20T14:00:00+00:00",
+    "ends_at": "2026-12-20T16:00:00+00:00",
+    "label": "20.12.2026 klo 16.00",
+    "label_en": "20.12.2026 at 16:00",
+    "time_text": "su 20.12. klo 16.00–18.00",
+    "time_text_en": "Sun 20 Dec 16:00–18:00",
+    "status": "available"
+   },
+   {
+    "rule_id": 100,
+    "starts_at": "2026-12-20T16:00:00+00:00",
+    "ends_at": "2026-12-20T18:00:00+00:00",
+    "label": "20.12.2026 klo 18.00",
+    "label_en": "20.12.2026 at 18:00",
+    "time_text": "su 20.12. klo 18.00–20.00",
+    "time_text_en": "Sun 20 Dec 18:00–20:00",
+    "status": "available"
+   },
+   {
+    "rule_id": 91,
+    "starts_at": "2026-12-21T12:00:00+00:00",
+    "ends_at": "2026-12-21T14:00:00+00:00",
+    "label": "21.12.2026 klo 14.00",
+    "label_en": "21.12.2026 at 14:00",
+    "time_text": "ma 21.12. klo 14.00–16.00",
+    "time_text_en": "Mon 21 Dec 14:00–16:00",
+    "status": "available"
+   },
+   {
+    "rule_id": 96,
+    "starts_at": "2026-12-21T14:00:00+00:00",
+    "ends_at": "2026-12-21T16:00:00+00:00",
+    "label": "21.12.2026 klo 16.00",
+    "label_en": "21.12.2026 at 16:00",
+    "time_text": "ma 21.12. klo 16.00–18.00",
+    "time_text_en": "Mon 21 Dec 16:00–18:00",
+    "status": "available"
+   },
+   {
+    "rule_id": 101,
+    "starts_at": "2026-12-21T16:00:00+00:00",
+    "ends_at": "2026-12-21T18:00:00+00:00",
+    "label": "21.12.2026 klo 18.00",
+    "label_en": "21.12.2026 at 18:00",
+    "time_text": "ma 21.12. klo 18.00–20.00",
+    "time_text_en": "Mon 21 Dec 18:00–20:00",
+    "status": "available"
+   },
+   {
+    "rule_id": 92,
+    "starts_at": "2026-12-22T12:00:00+00:00",
+    "ends_at": "2026-12-22T14:00:00+00:00",
+    "label": "22.12.2026 klo 14.00",
+    "label_en": "22.12.2026 at 14:00",
+    "time_text": "ti 22.12. klo 14.00–16.00",
+    "time_text_en": "Tue 22 Dec 14:00–16:00",
+    "status": "available"
+   },
+   {
+    "rule_id": 97,
+    "starts_at": "2026-12-22T14:00:00+00:00",
+    "ends_at": "2026-12-22T16:00:00+00:00",
+    "label": "22.12.2026 klo 16.00",
+    "label_en": "22.12.2026 at 16:00",
+    "time_text": "ti 22.12. klo 16.00–18.00",
+    "time_text_en": "Tue 22 Dec 16:00–18:00",
+    "status": "available"
+   },
+   {
+    "rule_id": 102,
+    "starts_at": "2026-12-22T16:00:00+00:00",
+    "ends_at": "2026-12-22T18:00:00+00:00",
+    "label": "22.12.2026 klo 18.00",
+    "label_en": "22.12.2026 at 18:00",
+    "time_text": "ti 22.12. klo 18.00–20.00",
+    "time_text_en": "Tue 22 Dec 18:00–20:00",
+    "status": "available"
+   },
+   {
+    "rule_id": 93,
+    "starts_at": "2026-12-23T12:00:00+00:00",
+    "ends_at": "2026-12-23T14:00:00+00:00",
+    "label": "23.12.2026 klo 14.00",
+    "label_en": "23.12.2026 at 14:00",
+    "time_text": "ke 23.12. klo 14.00–16.00",
+    "time_text_en": "Wed 23 Dec 14:00–16:00",
+    "status": "available"
+   },
+   {
+    "rule_id": 98,
+    "starts_at": "2026-12-23T14:00:00+00:00",
+    "ends_at": "2026-12-23T16:00:00+00:00",
+    "label": "23.12.2026 klo 16.00",
+    "label_en": "23.12.2026 at 16:00",
+    "time_text": "ke 23.12. klo 16.00–18.00",
+    "time_text_en": "Wed 23 Dec 16:00–18:00",
+    "status": "available"
+   },
+   {
+    "rule_id": 103,
+    "starts_at": "2026-12-23T16:00:00+00:00",
+    "ends_at": "2026-12-23T18:00:00+00:00",
+    "label": "23.12.2026 klo 18.00",
+    "label_en": "23.12.2026 at 18:00",
+    "time_text": "ke 23.12. klo 18.00–20.00",
+    "time_text_en": "Wed 23 Dec 18:00–20:00",
     "status": "available"
    }
   ]

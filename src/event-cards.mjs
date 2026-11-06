@@ -1,9 +1,9 @@
 // booking_158 / booking_210: etusivun tapahtumakortit (booking.public_events → kb.json events_shop).
 // Puhdas moduuli (ei lib.mjs-riippuvuutta), testit: booking/tests/tapahtumakortit.test.mjs.
 import { dayLabel, ymdHel } from '../booking/shop/src/event-date.js';
-import { freeShopEvents, eventIsFull, eventWaitlistPath } from '../booking/shop/src/week-live.js';
+import { freeShopEvents, eventIsFull, eventWaitlistPath, HOME_UNFEATURED_EVENT_SLUGS, homeEventCards } from '../booking/shop/src/week-live.js';
 import { formatWhenRange, spansDays } from '../booking/shop/src/when-range.js';
-export { eventIsFull, eventWaitlistPath };
+export { eventIsFull, eventWaitlistPath, HOME_UNFEATURED_EVENT_SLUGS, homeEventCards };
 // - Tulevat kerrat, joilla on paikkoja tai jotka ovat täynnä (available ja full). closed ja menneet eivät näy.
 //   Täysi tapahtuma himmennetään ja linkki vie jonoon (yksi kerta) tai tuotesivulle (useampi kerta).
 // - Linkki: kaupan sivu FI /varaa/#/…, EN /en/book/#/… (ei Johkua).
@@ -35,13 +35,17 @@ export const plainText = (s) => String(s ?? '').replace(/<[^>]*>/g, ' ').replace
 export function selectShopEvents(list, now = Date.now()) {
   return freeShopEvents(list, now);
 }
+/** Etusivun ja /varaa-sivun tapahtumalista: samat kortit kuin kaupassa, ilman nostosta poistettuja. */
+export function selectHomeEvents(list, now = Date.now()) {
+  return homeEventCards(selectShopEvents(list, now));
+}
 /**
  * Kortin HTML. deps: { e, money, link(ev) → href, img(ev) → <picture>-HTML, card(ev) → cards.json-kortti tai null, arrow, fullText }.
  * Kaupan linkki avautuu samaan välilehteen (oma sivusto).
  */
 export function shopEventsHtml(events, lang, deps) {
   const { e, money, link, img, card = () => null, arrow = '', fullText = '', fullCta = '', empty = '' } = deps;
-  return `<ul class="events" data-live-events data-empty="${e(empty)}" data-full-label="${e(fullText)}" data-full-cta="${e(fullCta || arrow)}">${events.map((ev) => {
+  return `<ul class="events" data-live-events data-hide-events="${e([...HOME_UNFEATURED_EVENT_SLUGS].join(','))}" data-empty="${e(empty)}" data-full-label="${e(fullText)}" data-full-cta="${e(fullCta || arrow)}">${events.map((ev) => {
     const c = card(ev)?.[lang];
     const title = c?.title || (lang === 'en' && ev.name_en) || ev.name;
     const text = c?.text || plainText((lang === 'en' && ev.description_short_en) || ev.description_short);

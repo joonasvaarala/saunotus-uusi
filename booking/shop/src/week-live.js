@@ -136,6 +136,13 @@ export function freeShopEvents(events, now = Date.now()) {
     .sort((a, b) => String(a.occurrences[0].starts_at).localeCompare(String(b.occurrences[0].starts_at)) || String(a.slug).localeCompare(String(b.slug)));
 }
 
+/** Näitä ei nosteta etusivun tapahtumakortteihin; kaupassa (/varaa) ne pysyvät varattavina. */
+export const HOME_UNFEATURED_EVENT_SLUGS = new Set(['naisten-joulusauna']);
+
+export function homeEventCards(rows) {
+  return (Array.isArray(rows) ? rows : []).filter((ev) => ev && !HOME_UNFEATURED_EVENT_SLUGS.has(ev.slug));
+}
+
 /** Kortti on täynnä, kun jokainen tuleva kerta on full (ei yhtään available). */
 export function eventIsFull(ev) {
   const occ = ev?.occurrences;

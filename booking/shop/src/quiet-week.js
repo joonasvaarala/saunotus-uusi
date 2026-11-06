@@ -7,7 +7,7 @@
 import { rpc } from './sb.js';
 import { liveImageUrl, publicImageUrl } from './product-image.js';
 import { quietByWeekday, addDaysIso, fillText, pctText, validOffer, bookablePrivateSlots, offerForSlot, weekdayIso, JALKIL_ID } from './quiet-offers-logic.js';
-import { dateForWeekday, shiftIsFull, weekEvents, eventDisplayName, freeShopEvents, cardDates, cardTime, eventIsFull, eventWaitlistPath } from './week-live.js';
+import { dateForWeekday, shiftIsFull, weekEvents, eventDisplayName, freeShopEvents, cardDates, cardTime, eventIsFull, eventWaitlistPath, homeEventCards } from './week-live.js';
 import { formatWhenRange, spansDays } from './when-range.js';
 import { applyCatalogNames } from './catalog-names.js';
 
@@ -155,7 +155,8 @@ const plain = (s) => String(s ?? '').replace(/<[^>]*>/g, ' ').replace(/&nbsp;/g,
 /** Etusivun tapahtumakortit public_eventsistä. events === null → lista jää ennalleen. Vapaat ja täydet tulevat kerrat. */
 export function applyEventCards(list, events, { lang = 'fi', shopHref = '', now = Date.now(), reserve = '', imageBase = '' } = {}) {
   if (events == null || !list) return 0;
-  const rows = freeShopEvents(events, now);
+  const hide = new Set(String(list.dataset.hideEvents || '').split(',').map((s) => s.trim()).filter(Boolean));
+  const rows = homeEventCards(freeShopEvents(events, now)).filter((ev) => !hide.has(ev.slug));
   const doc = list.ownerDocument;
   const el = (tag, cls, text) => { const n = doc.createElement(tag); if (cls) n.className = cls; if (text != null) n.textContent = text; return n; };
   const money = (n) => new Intl.NumberFormat(lang === 'fi' ? 'fi-FI' : 'en-FI', { style: 'currency', currency: 'EUR', minimumFractionDigits: Number.isInteger(+n) ? 0 : 2 }).format(+n);
