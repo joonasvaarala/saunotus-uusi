@@ -1,5 +1,6 @@
+-- DISPOSABLE LOCAL DATABASE ONLY; broad fixture consent/config updates, NEVER hosted.
 -- booking_259: rollback-only integration test, psql -X -v ON_ERROR_STOP=1 -1 -f ...
--- DEV/local test data only. No mail sender runs; all fixture writes roll back.
+-- Local synthetic fixture only. No mail sender runs; all fixture writes roll back.
 begin;
 set local statement_timeout='120s';
 create function pg_temp.ck(ok boolean,label text) returns void language plpgsql as $$begin
@@ -23,7 +24,7 @@ begin
   insert into booking.staff(user_id,email,name,role) values(uid,'newsletter259-manager@example.test','Newsletter test','manager');
   perform set_config('request.jwt.claims',jsonb_build_object('sub',uid,'role','authenticated')::text,true);
   -- Existing consented contacts must not affect deterministic test audience counts.
-  -- These changes are transaction-local and rolled back; never run this suite in production.
+  -- Disposable fixture-wide changes: NEVER run this suite on any hosted database.
   update booking.customers set marketing_consent=false where marketing_consent;
   update booking.integration_config set mode='dry_run' where key='resend';
   select id into sauna from booking.resources order by id limit 1;

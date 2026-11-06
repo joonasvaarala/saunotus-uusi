@@ -55,13 +55,8 @@ create function booking._newsletter_fingerprint(p_email text) returns text
 language sql immutable strict set search_path='' as $$
   select encode(extensions.digest(convert_to(lower(btrim(p_email)),'UTF8'),'sha256'),'hex');
 $$;
--- Persist existing explicit opt-outs. Re-consenting one duplicate profile does NOT clear
--- newsletter suppression; any future address re-subscription needs a separately reviewed flow.
-insert into booking.newsletter_suppressions(address_fingerprint)
-select distinct booking._newsletter_fingerprint(c.email) from booking.customers c
-where c.marketing_unsubscribed_at is not null and booking._valid_email(c.email)
-on conflict do nothing;
-
+-- Backfill belongs ONLY to the separately approved capture-hook transaction, with
+-- customer writes locked. Never perform a stand-alone seed followed by a later hook.
 create index newsletter_customers_optout_email_idx on booking.customers ((lower(btrim(email)))) where marketing_unsubscribed_at is not null;
 
 create function booking._newsletter_address_blocked(p_fingerprint text,p_email text) returns boolean
@@ -250,6 +245,9 @@ declare n booking.newsletters; ids bigint[]; langs text[]; fingerprints text[]; 
   -- Even a service-role bot must not be able to send with this function.
   if auth.uid() is null or coalesce(booking._jwt_role(),'')<>'authenticated' then perform booking._err('forbidden','Lähetys vain kirjautuneesta hallinnasta'); end if;
   perform booking._require_permission('messages.edit');
+  if not exists(select 1 from pg_catalog.pg_trigger t where t.tgrelid='booking.customers'::regclass
+    and t.tgname='newsletter_capture_general_optout' and not t.tgisinternal and t.tgenabled in ('O','A')
+    and t.tgfoid=to_regprocedure('booking._newsletter_capture_general_optout()')) then perform booking._err('newsletter_capture_required','Uutiskirjeiden peruutussuoja ei ole käytössä'); end if;
   select * into n from booking.newsletters where id=p_id for update;
   if not found then perform booking._err('not_found','Uutiskirjettä ei löydy'); end if;
   if n.state='sent' then return jsonb_build_object('ok',true,'sent',true,'already_sent',true); end if;
@@ -288,6 +286,9 @@ end $$;
 create function booking.email_newsletter_payload(p_id bigint) returns jsonb
 language plpgsql stable security definer set search_path='' as $$
 declare e booking.email_outbox; c booking.customers; l booking.newsletter_logs; loc text; site text; expected text; optout uuid; begin
+  if not exists(select 1 from pg_catalog.pg_trigger t where t.tgrelid='booking.customers'::regclass
+    and t.tgname='newsletter_capture_general_optout' and not t.tgisinternal and t.tgenabled in ('O','A')
+    and t.tgfoid=to_regprocedure('booking._newsletter_capture_general_optout()')) then return jsonb_build_object('allowed',false); end if;
   select * into e from booking.email_outbox where id=p_id and kind='newsletter' and status='sending';
   if not found then return jsonb_build_object('allowed',false); end if;
   select * into c from booking.customers where id=(e.payload->>'customer_id')::bigint;

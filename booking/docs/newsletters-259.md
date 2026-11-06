@@ -4,7 +4,9 @@
 
 The corrected implementation is local only. Do not push, open a PR, merge, deploy,
 import texts or run SQL on DEV/production from this branch. Bottiavustus must review
-the new commit and migration SHA256 first. **General-marketing opt-out durability
+the new commit and migration SHA256 first. Koodari’s read-only compatibility check found
+no conflict with current send-emails/public_marketing_unsubscribe; this confirms design
+compatibility ONLY, not hosted execution, merge or release permission. **General-marketing opt-out durability
 needs a shared-boundary decision with Koodari** (proposal below); the number reservation
 is not execution approval. Nothing has been run on either hosted project.
 
@@ -156,101 +158,129 @@ These are conservative operational booking-history segments, not certification p
 No purchases, prices or customer promises are created. Legacy campaign_sends is not used
 because it stores recipient addresses.
 
-## Address opt-out: scoped implementation and shared-interface HOLD
+## Permanent opt-out infrastructure / shared-interface HOLD
 
-`newsletter_optout_tokens` maps a random opaque UUID to an address SHA256 fingerprint;
-`newsletter_suppressions` persists address-level opt-out independently of customer profiles,
-log/outbox retention and email changes/deletions. Both are private RLS tables with no direct
-public/anon/authenticated/service_role access. The token-only RPC
-`booking.public_newsletter_unsubscribe(uuid)` returns the same generic result for known,
-unknown or previously used tokens; it reveals no addresses or token existence. It can only
-add suppression, never enumerate, send, remove suppression or change customer records.
+The permanent layer consists of newsletter_suppressions, newsletter_optout_tokens,
+_newsletter_fingerprint, _newsletter_address_blocked, public_newsletter_unsubscribe,
+the customer opt-out index, and (after coordination/approval) the capture trigger/helper.
+These have no dependency on newsletter draft/log/dispatch tables. Feature rollback MUST
+retain all of them and the public opt-out page/dependencies. No re-consent, profile address
+change, account deletion, outbox cleanup or UI rollback clears suppression. Raw addresses
+are not stored in the suppression/token maps; SHA256 hashes remain sensitive pseudonyms.
+Tables have RLS and no direct public/anon/authenticated/service_role access; private helpers
+have no direct grants. No arbitrary-address public RPC or suppression-clear RPC is added.
 
 The mandatory link is `/hallinta/newsletter-unsubscribe.html#token=<uuid>&lang=fi|en`.
-A GET never unsubscribes: the page clears the URL fragment, then waits for explicit human
-confirmation before calling that RPC. New fragment navigation reinitializes safely rather
-than retaining a previously opened token/language. FI/EN copy clearly says newsletter-only; other service
-messages/marketing permissions are not modified. The token is permanently bound to the
-approved address, not the profile's future address. Any duplicate/new consented profile at
-that address stays suppressed. No bot/admin re-consent silently clears suppression; a future
-resubscription mechanism requires a separately reviewed policy. Hashes are still sensitive
-pseudonymous data and are never returned by admin preview/list or written to application logs.
+GET never unsubscribes. The page clears the fragment and requires an explicit click before
+calling only the new token-limited public_newsletter_unsubscribe(uuid). New fragment
+navigation resets the token/language safely. Responses reveal neither addresses nor token
+existence. The token stays bound to the approved address, never a profile's future address.
+FI/EN copy accurately says newsletter-only; service messages/other marketing flags unchanged.
 
-Core 259 seeds existing `marketing_unsubscribed_at` addresses into durable suppression and
-checks current explicit general opt-outs across all duplicate profiles at preview/send/delivery.
-A scoped partial customer-email index avoids scanning all customers for each such check.
-**Remaining integration gap:** future general opt-outs can disappear if that profile is later
-edited/deleted before its address is durably captured. No newsletter-only link implementation
-can observe that past shared-path mutation without an integration hook. Do not claim this gap
-is solved by the core migration or enable live newsletters before the policy is agreed.
+**Separate UNAPPROVED shared integration:**
+`booking/docs/newsletter-general-optout-hook-proposal.sql`.
+Parent must coordinate this customer-table AFTER INSERT/UPDATE capture trigger with Koodari
+before approval or any hosted installation. Planning is not execution/release permission.
+The proposal does not replace public_marketing_unsubscribe(uuid), change its grants,
+response or existing after_marketing-message cancellation. It captures valid OLD + NEW
+fingerprints on true→false consent / a new explicit opt-out timestamp. Ordinary never-consented
+profiles are NOT suppressed. Explicit opt-out INSERTs are captured. Nothing removes history.
+Johku227 true→false capture is intentionally sticky even if later sync/profile edits restore
+true: newsletter eligibility stays blocked. No automatic restoration is implemented. Separate
+unimplemented design: `booking/docs/newsletter-resubscribe-proposal.md`, requiring verified
+fresh address-owner proof and an approved revocation-generation/shared-path design. It grants
+no new right now and must not be implemented as a profile/Johku-based clear operation.
+Existing event_message/customer service messages remain outside newsletter suppression;
+only newsletter payloads consult it. The shared after_marketing cancellation remains unchanged.
 
-Prepared, NOT installed / NOT automatically included in 259:
-`booking/docs/newsletter-general-optout-hook-proposal.sql`. Proposed private newsletter-only
-AFTER INSERT/UPDATE trigger captures old/new address hashes on explicit general opt-out or
-true→false consent. It does not replace the shared unsubscribe, change customer flags, add
-broad grants or affect transactional mail. Parent must agree this customer-table trigger with
-Koodari (or choose an equivalent hook in the shared unsubscribe/consent writers) and obtain
-review of its rollout packaging before hosted execution. Local proposal tests demonstrate
-persistence after address edit/deletion and across duplicate-profile re-consent. No proposal
-has been applied on DEV/PROD. The core migration has **no dependency on booking_258**.
+The proposal is a self-contained BEGIN/COMMIT transaction with lock_timeout and an explicit
+SHARE ROW EXCLUSIVE lock on booking.customers BEFORE installing the trigger/helper and
+backfilling existing explicit opt-outs. The lock excludes customer INSERT/UPDATE/DELETE until
+both capture and backfill commit together: there is no separate backfill→hook deployment gap.
+Core259 does NOT perform a separate seed. Core dispatch (including preview) and delivery
+fail closed unless the expected capture trigger/function is installed and enabled. Therefore
+installing259 alone cannot enable live newsletters before the shared boundary is approved.
+Like any first installation, already-deleted historical addresses cannot be reconstructed;
+no claim is made to recover data no longer present before capture starts.
 
-## Bottiavustus rollout note — do not run from this branch automatically
-
-1. Keep HOLD until Bottiavustus reviews the corrected commit/hash and parent agrees the
-   shared opt-out integration with Koodari. Also agree the nav hook. Numbers 259/131 are
-   reserved, NOT execution permission. Ensure booking_257 is
-   represented in the deployment history; it remains independent and unchanged.
-2. Only after explicit review/approval, Bottiavustus may run `booking/supabase/migrations/20261106220300_booking_259_newsletters.sql`
-   transactionally on DEV **aoejjmfzulhkhxbehphs** first, then production
-   **sxbofnuisemspgquoxyv**, BEFORE merge. Apply only the reviewed 259 transactionally
-   (for psql: `-X -v ON_ERROR_STOP=1 --single-transaction -f <migration>` against the
-   explicitly selected project); do not blanket-push unrelated reserved migrations.
-   Do not change email mode, DNS or live WordPress.
-3. On DEV only, after review of write-test side effects, run rollback-only
-   `booking/supabase/tests/t259_newsletters.sql` and `t259_newsletters_edges.sql` with
-   `psql -X -v ON_ERROR_STOP=1 -f ...`. These create synthetic fixtures and temporarily
-   change consent/config inside transactions; NEVER run them in production. **ROLLBACK
-   restores rows but DOES NOT undo sequence advances** (customer/order/reservation/outbox/
-   newsletter IDs etc.). The local minimal fixture file is NEVER for either hosted DB.
-   Proposal-hook test is separate and only appropriate after that integration is approved.
-4. After both migrations pass, merge only via the normal reviewed workflow. At merge,
-   import `content/site-texts.pending-import-131.json` through the established
-   site-text import process, DEV first, then production. This branch imports nothing.
-5. Deploy the updated **send-emails Edge Function and its _shared/newsletter-render.js**
-   through the normal approved process, then the admin assets. Do not queue a newsletter
-   until the updated sender is deployed. Existing mode / allowlist stay unchanged.
-6. DEV: create a synthetic bot draft; review FI/EN; preview counts; confirm using controlled
-   test recipients / dry_run; verify no real customers receive mail. Production use only
-   after review, with the existing live-send process and explicit human confirmation.
+## Rollback and forward-only re-enable
 
 Rollback: `booking/supabase/rollbacks/20261106220300_booking_259_ROLLBACK.sql`.
-Stop newsletter dispatch/sender first and back up drafts/history. It skips pending/failed/
-sending newsletter rows and removes feature dispatch/draft/log helpers/tables/indexes,
-including the optional proposed customer trigger if it was separately approved. Preserves
-other outbox rows/settings and **retains newsletter_optout_tokens, newsletter_suppressions
-and public_newsletter_unsubscribe** so already delivered links remain valid. It intentionally leaves the allowed `newsletter` kind in the constraint
-for retained outbox history. It does not undo site-text imports or assets. Keep the minimal public opt-out page/JS,
-shared sb/ui/text dependencies, public config and opt-out texts available for shipped links;
-do not blindly remove those when reverting the admin newsletter feature. No rollback was run against a Supabase project.
+Stop feature dispatch/sender and back up drafts/logs before any approved rollback. This is a
+FEATURE rollback: it skips pending/failed/sending newsletter rows, removes draft/log tables,
+feature-only indexes and draft/dispatch/render RPCs. Other mail rows/settings and retained
+outbox history are not removed. The newsletter kind remains allowed. Importantly it NEVER
+drops the permanent capture trigger/helper, fingerprint/address-blocked helpers, private
+suppression/token tables, customer opt-out index or public token RPC. General marketing
+opt-outs continue being captured while newsletter UI/dispatch is rolled back.
+
+Keep newsletter-unsubscribe.html/.js, newsletter-texts.js and fallbacks/imported opt-out
+texts, sb.js, ui.js, i18n.js, required transitive modules, admin/newsletter CSS and public config
+available for shipped links. Do not blindly revert the complete admin directory or remove
+those dependencies with the newsletter view. Retained public token RPC needs no UI tables.
+
+Core259 is NOT directly replayable after rollback because permanent objects survive.
+UNNUMBERED forward-only proposal: `booking/docs/newsletter-reenable-proposal.sql`.
+No number has been reserved, and it is not in migrations/. It checks retained infrastructure,
+enabled approved capture, retained outbox kind and absent feature tables, then reconstructs
+ONLY feature tables/indexes/RPCs transactionally. It never drops/truncates history, recreates
+suppression infrastructure or re-seeds/changes public/shared RPCs. Static tests enforce feature
+schema/function parity with corrected259; later packaging needs its own review and number.
+
+## Bottiavustus rollout note — HOLD, review only
+
+1. Nothing is authorized to run on DEV/PROD, push, open a PR, merge or publish. Parent first
+   coordinates the shared trigger with Koodari and submits this corrected commit/hash for review.
+   booking_259 / pending-import-131 remain reserved; no second numbered migration was created.
+   No dependency on booking_258. Nav and bot-gateway integration are separate owner decisions.
+2. After explicit approval only: apply the specifically reviewed259 to DEV aoejjmfzulhkhxbehphs,
+   then the approved atomic capture proposal as its own transaction before any live use. Do
+   NOT split its customer-write lock, trigger and backfill across transactions. Do not wrap
+   that BEGIN/COMMIT file in another transaction. Use ON_ERROR_STOP and stop on errors.
+   Repeat only after DEV review/approval on production sxbofnuisemspgquoxyv before merge.
+   No blanket migration push, mode change, DNS or WordPress work. Re-enable is a future,
+   separately reviewed/numbered forward migration, NOT a step in first installation.
+3. Prepared hosted-safe tests (not executed hosted):
+   - tests/t259_newsletters_attendance_hosted_safe.sql: only synthetic customers/orders/
+     reservations/event rules; real catalog reads; no global consent/config changes or dispatch.
+   - tests/t259_newsletters_capture_hosted_safe.sql: actual existing token RPC, synthetic rows
+     only, repeated opt-out, duplicate re-consent, later email edit/deletion, simultaneous OLD+NEW
+     withdrawal, never-consented profile, shared definition/grants/response checks. This test
+     also runs unchanged during feature rollback because it uses ONLY permanent infrastructure.
+   Both BEGIN/ROLLBACK; no real recipients, no emails dispatched. Review audit/trigger side
+   effects first. ROLLBACK DOES NOT undo sequence advances. Hosted-safe means isolated shape,
+   NOT approval to execute. Do not run write tests in production without a separate decision.
+4. **DISPOSABLE LOCAL ONLY:** local-fixture.sql, rollback-seed.sql, rollback-check.sql, other
+   tests/newsletters/* helper files AND original t259_newsletters.sql / edges.sql. The original
+   suites change broad fixture consent/config and are NOT hosted-safe. Never install copied
+   fixture functions/schema/roles or perform the fixture feature rollback against hosted DBs.
+5. Merge/import/deploy only after separate normal approval. Pending-import131 is for merge-time
+   import DEV then production; nothing imported here. Deploy updated send-emails/renderer and
+   public opt-out dependencies before human dispatch. Bots still only save drafts; no send scope.
 
 ## Verification
 
 Passed:
+- Local two-session check confirmed concurrent customer withdrawal blocks during the
+  hook/backfill write lock and succeeds with capture after commit.
 - Corrected migration, original SQL suite (34 assertions including 5000 cap), edge suite
-  (41 assertions), separately proposed
+  (42 assertions), separately proposed
   general-opt-out capture test, rollback and persistent-token checks on isolated local
   PostgreSQL 18.6 using `tests/newsletters/local-fixture.sql`. Fixture now enforces actual
   consent timestamps, native HH + exactly 12 uppercase-alnum gift codes and dead status.
-  This minimal fixture is LOCAL EMPTY DATABASE ONLY, never DEV/production.
+  This minimal fixture is LOCAL EMPTY DATABASE ONLY, never DEV/production. It includes the
+  unchanged real public_marketing_unsubscribe function/grants copied from booking_121 and
+  schedule_rules_event_shape (valid_from=valid_to, matching ISO weekday).
 - Edge regressions: absent, past unchecked, cancelled, no-show, future-only, prior-plus-future
   courses, check-in/out, missing/future/absent/all-present required sessions, standalone
   segment, language-before-dedup, changed preview address, queued fingerprint, normalized
   address, unique log/address, post-queue change/convergence, missing fingerprint, dead count,
   anonymous token privacy, durable duplicate suppression, retained old links, current general
   opt-out. Proposal separately tests later address editing/deletion/re-consent.
-- 106 Node tests: newsletter render/security/gates/texts, browser-module syntax and
+- 107 Node tests: newsletter render/security/gates/texts, browser-module syntax and
   existing mail templates/transport.
-- Full `npm run build:test` including resource checks.
+- Previous full `npm run build:test` including resource checks passed; this SQL-only lifecycle
+  correction does not change frontend assets. Latest unit suite was rerun.
 - Mocked Playwright at 1280px and 390px: edit/save/preview, invalidation, cancel/confirm,
   queue lock, no horizontal overflow or page errors; anonymous session gate; FI/EN public
   opt-out requires a click, clears fragment, handles invalid token and renders no admin UI.
@@ -263,16 +293,23 @@ Known pre-existing verification limits (not changed here):
   newsletter code. That unrelated template file is untouched.
 - npm ci reports one existing high-severity dependency advisory; no dependency/lock update.
 
-Local SQL reproduction on a disposable PostgreSQL instance:
-1. local-fixture.sql (empty DB only)
-2. migration 259
-3. t259_newsletters.sql (rolls its test data back)
-4. t259_newsletters_edges.sql (rolls rows back; sequences still advance)
-5. Optional isolated-only integration test: docs/newsletter-general-optout-hook-proposal.sql,
-   then tests/newsletters/general-optout-hook-check.sql; NOT part of automatic 259 rollout.
-6. newsletters/rollback-seed.sql
-7. rollback 259
-8. newsletters/rollback-check.sql (old public token still works)
+Local SQL reproduction on a disposable PostgreSQL instance, in order:
+1. tests/newsletters/local-fixture.sql (empty DB ONLY)
+2. migration259; tests/newsletters/capture-required-check.sql (fail-closed before hook)
+3. tests/newsletters/capture-install-seed.sql (existing explicit + never-consented fixtures)
+4. docs/newsletter-general-optout-hook-proposal.sql (LOCAL ONLY for proposal verification)
+5. tests/newsletters/capture-install-check.sql (backfill + unchanged shared contract)
+6. t259_newsletters.sql; t259_newsletters_edges.sql; both *_hosted_safe.sql test files;
+   tests/newsletters/shared-message-compat-check.sql (after_marketing vs event/service separation)
+7. tests/newsletters/rollback-seed.sql; rollback259; tests/newsletters/rollback-check.sql
+8. t259_newsletters_capture_hosted_safe.sql AGAIN while feature rolled back (capture works)
+9. docs/newsletter-reenable-proposal.sql (LOCAL ONLY); tests/newsletters/reenable-check.sql
+10. capture-install-check.sql and original + hosted-safe capture suites again.
+No proposal/rollback/install test was executed against a Supabase project.
 
 Browser reproduction: `npm run build:test && node booking/tests/newsletters.browser.mjs`.
 Unit tests: `node --test booking/tests/newsletters.test.mjs`.
+
+Review integrity: `booking/docs/newsletter-review-sha256.txt` lists the complete feature package
+(including unchanged131 texts and standalone assets). Verify from repo root with
+`sha256sum -c booking/docs/newsletter-review-sha256.txt`. The manifest excludes itself.

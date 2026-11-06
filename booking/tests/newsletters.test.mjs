@@ -68,3 +68,30 @@ test('scoped opt-out is explicit, clears its opaque fragment and has no admin se
  assert.match(sql,/status in \('failed','dead'\)/);
  assert.match(sql,/booking\._newsletter_fingerprint\(c\.email\) is distinct from expected/);
 });
+
+
+test('permanent suppression lifecycle is independent of feature rollback and re-enable',()=>{
+ const core=read('booking/supabase/migrations/20261106220300_booking_259_newsletters.sql');
+ const rollback=read('booking/supabase/rollbacks/20261106220300_booking_259_ROLLBACK.sql');
+ const hook=read('booking/docs/newsletter-general-optout-hook-proposal.sql');
+ const enable=read('booking/docs/newsletter-reenable-proposal.sql');
+ const fixture=read('booking/supabase/tests/newsletters/local-fixture.sql');
+ const shared=read('booking/supabase/migrations/20261021145208_booking_121_messages.sql');
+ const contract=shared.slice(shared.indexOf('create function booking.public_marketing_unsubscribe('),shared.indexOf('\n--',shared.indexOf('grant execute on function booking.public_marketing_unsubscribe')));
+ assert.ok(fixture.includes(contract.trim()),'disposable fixture must use real unchanged shared token RPC');
+ assert.match(fixture,/constraint schedule_rules_event_shape/);
+ assert.equal((core.match(/t\.tgname='newsletter_capture_general_optout'/g)||[]).length,2,'capture is hard gate in BOTH dispatch and payload');
+ assert.doesNotMatch(core,/insert into booking\.newsletter_suppressions\(address_fingerprint\)\s*select distinct/i);
+ assert.ok(hook.indexOf('begin;')<hook.indexOf('lock table booking.customers in share row exclusive mode;'));
+ assert.ok(hook.indexOf('lock table')<hook.indexOf('create trigger'));
+ assert.ok(hook.indexOf('create trigger')<hook.indexOf('select distinct booking._newsletter_fingerprint'));
+ assert.ok(hook.indexOf('select distinct booking._newsletter_fingerprint')<hook.lastIndexOf('commit;'));
+ assert.doesNotMatch(rollback,/^drop (?:table|function|trigger|index).*?(?:newsletter_suppressions|newsletter_optout_tokens|newsletter_capture_general_optout|_newsletter_fingerprint|_newsletter_address_blocked|public_newsletter_unsubscribe|newsletter_customers_optout_email_idx)/mi);
+ assert.doesNotMatch(enable,/^(?:drop |truncate |delete )/mi);
+ assert.doesNotMatch(enable,/^create (?:table|function).*?(?:newsletter_suppressions|newsletter_optout_tokens|_newsletter_fingerprint|_newsletter_address_blocked|public_newsletter_unsubscribe)/mi);
+ const featureHead=core.slice(core.indexOf('create table booking.newsletters'),core.indexOf('-- Separate, durable'));
+ assert.ok(enable.includes(featureHead),'re-enable feature schema must match259');
+ const featureFunctions=core.slice(core.indexOf('-- Helpers are in the non-public'),core.indexOf('-- Revoke every direct/default'));
+ assert.ok(enable.includes(featureFunctions),'re-enable must not drift from reviewed feature RPCs');
+ for(const sql of [core,hook,enable,rollback])assert.doesNotMatch(sql,/^create (?:or replace )?function booking\.public_marketing_unsubscribe/mi);
+});

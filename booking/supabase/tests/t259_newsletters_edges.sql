@@ -1,5 +1,6 @@
--- DEV/local only, synthetic data, rolls back rows. Sequence advances DO NOT roll back.
--- Run after reviewed 259, never production. Shared opt-out hook is tested separately.
+-- DISPOSABLE LOCAL DATABASE ONLY. Updates broad fixture consent/config; NEVER hosted.
+-- Sequence advances DO NOT roll back. Hosted-safe coverage is a separate file.
+-- Run after 259 + separately approved hook proposal on an isolated local fixture.
 begin;
 set local statement_timeout='120s';
 create function pg_temp.ck(ok boolean,label text) returns void language plpgsql as $$begin
@@ -21,7 +22,7 @@ declare
  uid uuid:=gen_random_uuid();bad boolean;cat text;p_train bigint;p_treat bigint;p_event bigint;p_session bigint;
  c bigint;c_old bigint;c_absent bigint;c_unchecked bigint;c_cancel bigint;c_future bigint;c_multi bigint;
  c_a bigint;c_b bigint;c_dupfi bigint;c_dupen bigint;c_general bigint;c_sibling bigint;r bigint;r2 bigint;
- root_rule bigint;part_rule bigint;space bigint;oid bigint;token uuid;ntoken uuid;nid bigint;eid bigint;eidb bigint;
+ root_rule bigint;part_rule bigint;space bigint;event_day date:=(now() at time zone 'Europe/Helsinki')::date-7;oid bigint;token uuid;ntoken uuid;nid bigint;eid bigint;eidb bigint;
  data jsonb:='{"subject_fi":"Testi","subject_en":"Test","body_fi":"Testiteksti","body_en":"Test text","style":{"layout":"letter"},"segment":"all","language":"all"}';
  draft jsonb;x jsonb;y jsonb;v integer;email_a text;email_b text;fingerprint_a text;fingerprint_b text;
 begin
@@ -71,11 +72,16 @@ begin
  c:=pg_temp.nc('checkout');r:=pg_temp.nr(c,p_event,'confirmed');update booking.reservations set checkout_at=now()-interval '3 days' where id=r;
  perform pg_temp.ck(exists(select 1 from booking._newsletter_recipients('event','all')where customer_id=c),'past event with checkout qualifies');
 
+ bad:=false;begin
+ insert into booking.schedule_rules(product_id,label,mode,space_id,weekdays,start_time,duration_minutes,kind,valid_from,valid_to)
+ values(p_train,'n259 invalid event','shared',space,array[extract(isodow from event_day)::smallint],'12:00',60,'event',event_day,event_day+1);
+ exception when check_violation then bad:=true;end;
+ perform pg_temp.ck(bad,'real event-shape constraint rejects multi-date event rules');
  -- Configured multi-session course: required child cannot be missing, future or absent.
- insert into booking.schedule_rules(product_id,label,mode,space_id,weekdays,start_time,duration_minutes,kind,training_segment_only)
- values(p_train,'n259 main','shared',space,array[1]::smallint[],'12:00',60,'event',false)returning id into root_rule;
- insert into booking.schedule_rules(product_id,label,mode,space_id,weekdays,start_time,duration_minutes,kind,training_segment_only)
- values(p_train,'n259 required','shared',space,array[1]::smallint[],'12:00',60,'event',true)returning id into part_rule;
+ insert into booking.schedule_rules(product_id,label,mode,space_id,weekdays,start_time,duration_minutes,kind,training_segment_only,valid_from,valid_to)
+ values(p_train,'n259 main','shared',space,array[extract(isodow from event_day)::smallint],'12:00',60,'event',false,event_day,event_day)returning id into root_rule;
+ insert into booking.schedule_rules(product_id,label,mode,space_id,weekdays,start_time,duration_minutes,kind,training_segment_only,valid_from,valid_to)
+ values(p_train,'n259 required','shared',space,array[extract(isodow from event_day)::smallint],'12:00',60,'event',true,event_day,event_day)returning id into part_rule;
  insert into booking.training_segments(option_rule_id,position,segment_rule_id)values(root_rule,1,part_rule);
  c_multi:=pg_temp.nc('multi');r:=pg_temp.nr(c_multi,p_train,'completed',false,root_rule);insert into booking.training_participant_details(reservation_id,present)values(r,true);
  select order_id into oid from booking.reservations where id=r;
