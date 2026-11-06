@@ -2,6 +2,7 @@
 // Vastaa booking_158-migraation RPC-muotoja (admin_event_list, admin_event_rule_upsert/_delete/_copy, admin_event_blocks_set,
 // admin_event_set_channels, admin_event_copy, admin_product_copy, public_events). Myynti suljettu (events.sale_enabled = false) kuten tuotannossa.
 // Esimerkki: Perinnesaunotusilta, Rauni +0…+120 min ja Savusauna +120 min…19:00 (kellonaika); koulutus kahdelle päivälle.
+import { trainingMockHandlers } from './training-mock.js';
 import { helsinkiIso, localParts, addDays, defaultLabel, copyName, CHANNELS, messageDraft } from './events-logic.js';
 
 export const EVENT_MOCK_RESOURCES = [
@@ -200,6 +201,7 @@ export function createEventsMock({ today, resources = EVENT_MOCK_RESOURCES, prod
       })).filter((p) => p.occurrences.length);
     },
   };
+  Object.assign(handlers, trainingMockHandlers({ st, locate, ruleObj, resources, err }));
   const shiftClock = (b, from, to) => {
     const days = Math.round((Date.parse(`${to}T12:00:00Z`) - Date.parse(`${from}T12:00:00Z`)) / 864e5);
     const mv = (iso) => { const x = localParts(iso); return helsinkiIso(`${addDays(x.date, days)}T${x.time}`); };

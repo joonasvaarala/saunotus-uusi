@@ -4,6 +4,8 @@
 import { rpc } from '../sb.js';
 import { h, fmtTime, todayHel, addDays, dayStartIso, errMsg, statusBadge, badge, empty } from '../ui.js';
 import { reservationDialog } from './shared.js';
+import { loadTrainingTexts, trainingText as T } from '../training-texts.js';
+import { calendarSpaceDays } from '../training-logic.js';
 
 const TZ = 'Europe/Helsinki';
 const dayKey = (iso) => new Date(iso).toLocaleDateString('sv-SE', { timeZone: TZ });
@@ -26,6 +28,7 @@ export const needsNotice = (s) => !(s.names && s.names.length);
 function isoWeek(ds) { const d = new Date(`${ds}T12:00:00Z`); const day = (d.getUTCDay() + 6) % 7; d.setUTCDate(d.getUTCDate() - day + 3); const y = d.getUTCFullYear(); const j = new Date(Date.UTC(y, 0, 4)); return 1 + Math.round(((d - j) / 864e5 - 3 + ((j.getUTCDay() + 6) % 7)) / 7); }
 
 export async function render({ ctx, refs, reload }) {
+  await loadTrainingTexts(rpc);
   const canShifts = ctx.can('shifts.view') || ctx.can('shifts.view_all');
   const allShifts = ctx.can('shifts.view_all');
   const state = { mode: 'month', date: todayHel(), sel: todayHel() };
@@ -38,11 +41,13 @@ export async function render({ ctx, refs, reload }) {
   };
   async function load({ start, days }) {
     const from = dayStartIso(start), to = dayStartIso(addDays(start, days));
-    const out = { bookings: [], shifts: [], notice: null };
+    const out = { bookings: [], shifts: [], blocks: [], notice: null };
     const bk = (async () => { let all = [], off = 0; for (;;) { const rows = await rpc('admin_list_reservations', { p_from: from, p_to: to, p_status: 'active', p_limit: 500, p_offset: off }); all = all.concat(rows || []); if (!rows || rows.length < 500 || off >= 1000) break; off += 500; } return all; })();
     const sh = canShifts ? rpc('admin_upcoming_shifts', { p_from: from, p_to: to }).catch((e) => { out.notice = `Työvuorotietoja ei saatu haettua (${errMsg(e)}). Varaukset näytetään silti.`; return []; }) : Promise.resolve([]);
     if (!canShifts) out.notice = 'Sinulla ei ole oikeutta nähdä työvuoroja; näytetään vain varaukset.';
-    const [b, s] = await Promise.all([bk, sh]);
+    const bl = rpc('admin_calendar_space_blocks', { p_from: from, p_to: to }).catch(() => { out.notice = [out.notice, T('unavailable')].filter(Boolean).join(' '); return []; });
+    const [b, s, blocks] = await Promise.all([bk, sh, bl]);
+    out.blocks = blocks || [];
     out.bookings = b;
     const byId = new Map();   // admin_upcoming_shifts palauttaa rivin per työntekijä → yhdistetään vuoroksi
     for (const r of s) { const x = byId.get(r.shift_id) || { ...r, names: [] }; if (r.staff_name) x.names.push(r.staff_name); byId.set(r.shift_id, x); }
@@ -61,12 +66,15 @@ export async function render({ ctx, refs, reload }) {
     h('button', { type: 'button', class: 'link cal-txt', onclick: () => reservationDialog(r, { methods: refs.methods, onChange: () => draw(), refs, can: ctx?.can, role: ctx?.role }) }, h('strong', { text: r.customer_name || '–' }), ` · ${r.persons} hlö`, h('br'), h('small', { text: r.product_name || '' })),
     statusBadge(r.status));
 
+  const blockItem = b => h('li', { class: 'cal-item training-cal-block', 'data-kind': 'space-block' }, h('strong', { text: b.space_name }), h('span', { text: `${fmtTime(b.starts_at)}–${fmtTime(b.ends_at)} · ${b.reason || T('spaces_ok')}` }));
+
   async function draw() {
     const rg = rangeOf();
     body.replaceChildren(h('p', { class: 'muted pad', text: 'Ladataan…' }));
     let data;
     try { data = await load(rg); } catch (e) { body.replaceChildren(h('p', { class: 'err pad', role: 'alert', text: errMsg(e) })); return; }
     const sh = group(data.shifts, 'starts_at'), bk = group(data.bookings, 'starts_at');
+    const blocked = calendarSpaceDays(data.blocks, rg.start, addDays(rg.start, rg.days));
     const today = todayHel();
     // Koko päiväruutu avaa saman päivän kuin päivänumeron painike. Painike peittää ruudun (näppäimistö, Enter/Space, aria-label).
     // Viikon varauslinkki on ruudun päällä ja tekee vain oman toimintonsa: se ei vaihda valittua päivää.
@@ -79,9 +87,11 @@ export async function render({ ctx, refs, reload }) {
       const ns = (sh.get(ds) || []).length, nb = (bk.get(ds) || []);
       const persons = nb.reduce((a, r) => a + (r.persons || 0), 0);
       const items = state.mode === 'week'
-        ? h('ul', { class: 'cal-list' }, ...(sh.get(ds) || []).map(shiftItem), ...nb.slice().sort((a, c) => a.starts_at.localeCompare(c.starts_at)).map(bookingItem))
+        ? h('ul', { class: 'cal-list' }, ...(sh.get(ds) || []).map(shiftItem), ...nb.slice().sort((a, c) => a.starts_at.localeCompare(c.starts_at)).map(bookingItem), ...(blocked.get(ds) || []).map(blockItem))
         : h('span', { class: 'cal-chips' }, ns ? h('span', { class: 'chip shift', title: `${ns} työvuoroa` }, h('b', { text: String(ns) }), h('span', { class: 'lbl', text: ' vuoroa' })) : null, nb.length ? h('span', { class: 'chip booking', title: `${nb.length} varausta, ${persons} henkilöä` }, h('b', { text: String(nb.length) }), h('span', { class: 'lbl', text: ` var. · ${persons} hlö` })) : null);
-      const label = `${fmtLong(ds)}: ${ns} työvuoroa, ${nb.length} varausta`;
+      const blockCount = (blocked.get(ds) || []).length;
+      if (blockCount && state.mode === 'month') items.append(h('span', { class: 'chip training-cal-block', text: `${T('spaces')}: ${blockCount}` }));
+      const label = `${fmtLong(ds)}: ${ns} työvuoroa, ${nb.length} varausta, ${T('spaces')}: ${blockCount}`;
       const opener = h('button', {
         type: 'button', class: 'cal-dnum', 'aria-label': label, 'aria-pressed': ds === state.sel ? 'true' : 'false',
         onclick: (ev) => { ev.stopPropagation(); openDay(ds); },
@@ -107,7 +117,8 @@ export async function render({ ctx, refs, reload }) {
     const selShifts = sh.get(state.sel) || [], selBk = (bk.get(state.sel) || []).slice().sort((a, c) => a.starts_at.localeCompare(c.starts_at));
     const detail = h('section', { class: 'cal-detail card', 'aria-live': 'polite' }, h('h2', { text: fmtLong(state.sel) }),
       h('h3', { class: 'shift-h', text: `Työvuorot (${selShifts.length})` }), selShifts.length ? h('ul', { class: 'cal-list' }, selShifts.map(shiftItem)) : empty(canShifts && !data.notice ? 'Ei työvuoroja tänä päivänä.' : 'Ei työvuorotietoja.'),
-      h('h3', { class: 'booking-h', text: `Varaukset (${selBk.length})` }), selBk.length ? h('ul', { class: 'cal-list' }, selBk.map(bookingItem)) : empty('Ei varauksia tänä päivänä.'));
+      h('h3', { class: 'booking-h', text: `Varaukset (${selBk.length})` }), selBk.length ? h('ul', { class: 'cal-list' }, selBk.map(bookingItem)) : empty('Ei varauksia tänä päivänä.'),
+      h('h3', { text: T('spaces') }), (blocked.get(state.sel) || []).length ? h('ul', { class: 'cal-list', 'data-testid': 'calendar-space-blocks' }, blocked.get(state.sel).map(blockItem)) : empty(T('none_spaces')));
     body.replaceChildren(...[data.notice ? h('p', { class: 'notice', role: 'status', text: data.notice }) : null, grid, detail].filter(Boolean));
     titleEl.textContent = state.mode === 'month'
       ? new Intl.DateTimeFormat('fi-FI', { timeZone: 'UTC', month: 'long', year: 'numeric' }).format(new Date(`${state.date.slice(0, 7)}-01T12:00:00Z`))
