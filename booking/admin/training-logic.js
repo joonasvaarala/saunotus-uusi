@@ -4,6 +4,10 @@ export const TRAINING_SPACES = new Set(['savusauna', 'rauni', 'lovi', 'hoitosaun
 export function trainingGroup(product, statuses = []) {
   return statuses.find(x => (product.rules || []).some(r => r.id === x.rule_id))?.group_kind || (product.product_id === 121 ? 'trip' : 'training');
 }
+// The legacy list RPC predates training_segment_only: enrich without replacing it.
+export function enrichTrainingProducts(products = [], statuses = []) {
+  return products.map(p => ({...p, rules:(p.rules || []).map(r => ({...r,...statuses.find(s => s.rule_id === r.id)}))}));
+}
 export function trainingCards(products, { group = 'training', includePast = false, today, statuses = [] } = {}) {
   return products.filter(p => p.category === 'training' && trainingGroup(p, statuses) === group)
     .flatMap(p => (p.rules || []).filter(r => !r.training_segment_only && !r.cancelled_at && (includePast || String(r.ends_at || r.date).slice(0, 10) >= today)).map(r => ({ p, r, status: statuses.find(s => s.rule_id === r.id) || null })))

@@ -5,7 +5,7 @@ import { tmpdir } from 'node:os';
 import { join, dirname } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { createEventsMock, EVENT_MOCK_RESOURCES } from '../admin/events-mock.js';
-import { trainingCards, paymentState, validSpaceTime, nextTrainingStep, trainingExport, messagePreviewGate, orderedWaiters, calendarSpaceDays } from '../admin/training-logic.js';
+import { trainingCards, enrichTrainingProducts, paymentState, validSpaceTime, nextTrainingStep, trainingExport, messagePreviewGate, orderedWaiters, calendarSpaceDays } from '../admin/training-logic.js';
 import { TRAINING_TEXTS } from '../admin/training-texts.js';
 const root=join(dirname(fileURLToPath(import.meta.url)), '..');
 const read=rel=>readFileSync(join(root,'..',rel),'utf8');
@@ -75,6 +75,12 @@ test('cards use category, split Journey by id and hide capacity-only segments',(
  assert.deepEqual(trainingCards(rows,{group:'training',today:'2026-11-06'}).map(x=>x.p.product_id),[114]);
  assert.deepEqual(trainingCards(rows,{group:'trip',today:'2026-11-06'}).map(x=>x.p.product_id),[121]);
  assert.equal(trainingCards([{...rows[0],rules:[{...rows[0].rules[0],training_segment_only:true}]}],{today:'2026-11-06'}).length,0);
+});
+test('legacy rule JSON is enriched with hidden segments and true shared availability',()=>{
+ const products=[{product_id:114,category:'training',rules:[{id:1,date:'2027-01-01'},{id:2,date:'2027-02-01'}]}];
+ const enriched=enrichTrainingProducts(products,[{rule_id:1,training_segment_only:false,seats_remaining:0},{rule_id:2,training_segment_only:true,seats_remaining:6}]);
+ assert.deepEqual(trainingCards(enriched,{today:'2026-11-06'}).map(x=>x.r.id),[1]);
+ assert.equal(enriched[0].rules[0].seats_remaining,0);assert.equal(products[0].rules[0].seats_remaining,undefined);
 });
 test('payment status is based on actual payment, not nominal signup deposit',()=>{
  assert.equal(paymentState({deposit_paid:570,paid_actual:0,due_actual:1950}),'unpaid');

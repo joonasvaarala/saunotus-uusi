@@ -111,6 +111,7 @@ begin
   perform pg_temp.ck(not exists(select 1 from booking.training_waitlist where rule_id=copied) and not exists(select 1 from booking.event_messages where rule_id=copied),'copy leaves waitlist and message history empty');
   perform pg_temp.ck(hash_before=md5(pg_get_functiondef('booking._training_option_seats_left(bigint)'::regprocedure)),'existing capacity function unchanged');
 
+  perform pg_temp.ck((booking.admin_training_work_get(segment)#>>'{rule,training_segment_only}')::boolean and exists(select 1 from jsonb_array_elements(booking.admin_training_work_list()) j where (j->>'rule_id')::bigint=r and (j->>'seats_remaining')::int=booking._training_option_seats_left(r)),'workspace exposes hidden-segment flag and current shared availability');
   cap_before:=booking._training_option_seats_left(r);
   perform booking.admin_training_person_add(segment,'{"name":"Retreat only","email":"retreat255@example.test"}');
   perform pg_temp.ck(booking._training_option_seats_left(r)=cap_before-1,'standalone retreat signup reduces full-training shared capacity');

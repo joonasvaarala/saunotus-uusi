@@ -62,11 +62,11 @@ Tekstien tuontia ei ole tehty tässä työssä.
 
 ## Tarkistukset
 
-- `node --test booking/tests/*.test.mjs`: 1312 testiä, 1311 hyväksyttyä; ainoa
+- `node --test booking/tests/*.test.mjs`: 1313 testiä, 1312 hyväksyttyä; ainoa
   epäonnistuminen on ennestään sallittu `uusi-varaus.test.mjs` / ”yhdeksän kohtaa”.
-- Uusi `koulutukset-tyokalu.test.mjs`: 11/11; aiempi `koulutukset-hallinta.test.mjs`: 6/6.
+- Uusi `koulutukset-tyokalu.test.mjs`: 12/12; aiempi `koulutukset-hallinta.test.mjs`: 6/6.
 - `npm run build:prod`: onnistuu, ei julkaise.
-- Paikallinen PostgreSQL 17, `booking/supabase/tests/t255_training_workspace.sql`: 39
+- Paikallinen PostgreSQL 17, `booking/supabase/tests/t255_training_workspace.sql`: 40
   tarkistusta, transaktio päättyy rollbackiin. Kattaa sulut ja varauskonfliktit,
   nykyisen käsisulun säilymisen, päivän/kalenterin, molemminpuolisen Full–Retreat-kapasiteetin,
   oikeat maksut ja atomisen maksulinkkiryhmän, manuaalisen jonon, esikatseluportin,

@@ -114,7 +114,8 @@ export const TRAINING_TEXTS = {
     "arrival_body": "Tervetuloa!\n\nKirjoita tähän jakson saapumisohje, osoite ja mukaan tarvittavat tavarat.",
     "payment_subject": "Muistutus kurssimaksusta",
     "payment_body": "Hei!\n\nMuistathan tarkistaa kurssimaksusi. Jos olet jo maksanut, tämä viesti ei vaadi toimenpiteitä. Ota yhteyttä, jos tarvitset maksutiedot.",
-    "complete_template": "Kirjoita jakson saapumisohje molemmilla kielillä ennen esikatselua."
+    "complete_template": "Kirjoita jakson saapumisohje molemmilla kielillä ennen esikatselua.",
+    "places_free": "Vapaita paikkoja"
   },
   "en": {
     "title": "Trainings",
@@ -229,7 +230,8 @@ export const TRAINING_TEXTS = {
     "arrival_body": "Welcome!\n\nWrite the arrival instructions, address and what to bring for this session here.",
     "payment_subject": "Course payment reminder",
     "payment_body": "Hello!\n\nPlease check your course payment. If you have already paid, no action is needed. Contact us if you need payment details.",
-    "complete_template": "Write the arrival instructions in both languages before previewing."
+    "complete_template": "Write the arrival instructions in both languages before previewing.",
+    "places_free": "Places available"
   }
 };
 let remote = {};

@@ -5,7 +5,7 @@ import { h, dialog, field, toast, run, errMsg, fmtDate, fmtDT, money, todayHel, 
 import { getLang } from '../talous-i18n.js';
 import { render as renderEvents } from './events.js';
 import { loadTrainingTexts, trainingText as T } from '../training-texts.js';
-import { trainingCards, trainingGroup, TRAINING_SPACES, validSpaceTime, paymentState, nextTrainingStep, trainingExport, messagePreviewGate, orderedWaiters } from '../training-logic.js';
+import { trainingCards, enrichTrainingProducts, trainingGroup, TRAINING_SPACES, validSpaceTime, paymentState, nextTrainingStep, trainingExport, messagePreviewGate, orderedWaiters } from '../training-logic.js';
 import { clearDayBundles } from '../day-bundle-cache.js';
 import { downloadCsv } from '../csv.js';
 import { customerMessageText } from '../events-logic.js';
@@ -26,9 +26,10 @@ export async function render(args) {
   if (['tekstit','kerrat','asetukset'].includes(query.get('valilehti'))) return renderEvents({ ...args, section: 'training' });
   await loadTrainingTexts(rpc);
   const canSpace = ctx.can('blocks.manage'), canEdit = ctx.can('catalog.edit'), canBook = ctx.can('bookings.manage'), canSend = ctx.can('messages.edit'), canPay = ctx.can('payments.manage');
-  const products = await rpc('admin_event_list', { p_category: 'training', p_include_past: true });
+  let products = await rpc('admin_event_list', { p_category: 'training', p_include_past: true });
   let statuses = null;
   try { statuses = await rpc('admin_training_work_list'); } catch { /* migration not installed: show unknown, never pretend ready */ }
+  products = enrichTrainingProducts(products || [], statuses || []);
   const productId = Number(query.get('tapahtuma'));
   const p = (products || []).find(x => x.product_id === productId && x.category === 'training');
   const group = p ? trainingGroup(p, statuses || []) : query.get('ryhma') === 'matkat' ? 'trip' : 'training';
@@ -64,7 +65,7 @@ export async function render(args) {
   const summary = h('section', { class: 'card training-summary', 'data-testid': 'training-summary' },
     h('h1', { text: nameOf(p) }), p.active === false ? badge('warn',T('hidden')) : null,
     rules.length > 1 ? field(T('date'), h('select', { 'aria-label': T('date'), onchange: e => go('osallistujat', Number(e.target.value)) }, rules.map(r => h('option', { value: r.id, selected: r.id === rule.id || null, text: dates(r) })))) : h('p', { class: 'training-dates', text: dates(rule) }),
-    h('div', { class: 'training-facts' }, fact(T('people'), `${rule.sold_persons || 0} / ${rule.max_persons ?? '–'}`), fact(T('spaces'), blocks.length ? T('spaces_ok') : T('spaces_missing')), fact(T('open_payments'), String(people.filter(x => Number(x.due_actual)>0.004).length))),
+    h('div', { class: 'training-facts' }, fact(T('places_free'), String(rule.seats_remaining ?? '–')), fact(T('people'), `${rule.sold_persons || 0} / ${rule.max_persons ?? '–'}`), fact(T('spaces'), blocks.length ? T('spaces_ok') : T('spaces_missing')), fact(T('open_payments'), String(people.filter(x => Number(x.due_actual)>0.004).length))),
     h('div', { class: 'row wrap' }, h('strong', { text: `${T('next')}:` }), btn(next === 'materials' ? T('materials') : next === 'spaces' ? T('reserve') : T(next), () => go(nextPanel), 'training-next')));
   const tabs = h('nav', { class: 'tl-tabs training-tabs', 'aria-label': nameOf(p) }, PANELS.map((id,i) => link(T(KEYS[i]), href({ tapahtuma: p.product_id, kerta: rule.id, valilehti: id }), `tl-tabbtn${id===panel?' active':''}`)));
   const content = panel === 'osallistujat' ? peoplePanel() : panel === 'viestit' ? messagesPanel() : panel === 'maksut' ? paymentsPanel() : spacesPanel();
@@ -74,7 +75,7 @@ export async function render(args) {
     const reserved = spaceBlocks(r, refs).length > 0;
     const args = { tapahtuma: item.product_id, kerta: r.id };
     return h('article', { class: 'card training-card', 'data-testid': 'training-card' }, h('h3', { text: nameOf(item) }), h('p', { class: 'training-dates', text: dates(r) }),
-      fact(T('places'), `${r.sold_persons || 0} / ${r.max_persons ?? '–'}`), h('p', {}, badge(reserved?'ok':'warn',T(reserved?'spaces_ok':'spaces_missing'))),
+      fact(T('places'), `${r.sold_persons || 0} / ${r.max_persons ?? '–'}`), fact(T('places_free'), String(r.seats_remaining ?? '–')), h('p', {}, badge(reserved?'ok':'warn',T(reserved?'spaces_ok':'spaces_missing'))),
       fact(T('open_payments'), status ? String(status.open_payments) : T('unknown')),
       h('div', { class: 'row wrap' }, link(T('open'), href(args), 'btn primary'), !reserved && canSpace ? link(T('reserve'), href({ ...args,valilehti:'tilat' }), 'btn ghost') : null));
   }
@@ -121,7 +122,7 @@ export async function render(args) {
   function waitlistPanel() {
     const waiters = orderedWaiters(data.waitlist||[]);
     function update(w,status) { return rpc('admin_training_waitlist_update',{p_rule_id:rule.id,p_id:w.id,p_status:status}).then(refresh); }
-    return h('details',{class:'card training-no-print',open:(rule.sold_persons||0)>=(rule.max_persons||Infinity)||null},h('summary',{text:`${T('waitlist')} (${waiters.length})`}),
+    return h('details',{class:'card training-no-print',open:rule.seats_remaining===0||(rule.sold_persons||0)>=(rule.max_persons||Infinity)||null},h('summary',{text:`${T('waitlist')} (${waiters.length})`}),
       btn(T('add_waiter'),()=>formBox(T('add_waiter'),[...personInputs({},false),input('persons','persons',1,'number',{min:1,max:20,required:true})],T('save'),async fd=>{await rpc('admin_training_waitlist_add',{p_rule_id:rule.id,p_person:Object.fromEntries(fd)});refresh();},'training-waiter-save'),'training-add-waiter'),
       waiters.length ? h('ol',{class:'training-waiters'},waiters.map((w,i)=>h('li',{},h('strong',{text:w.name}),h('p',{text:[w.persons,w.email,w.phone,T(w.status)].filter(Boolean).join(' · ')}),
         i===0 && w.status==='waiting' ? btn(T('offer'),()=>formBox(T('offer'),[h('p',{text:w.name+' · '+[w.email,w.phone].filter(Boolean).join(' · ')}),h('p',{text:T('offer_hint')})],T('mark_offered'),()=>update(w,'offered'),'training-offer-confirm'),'training-offer') : null,

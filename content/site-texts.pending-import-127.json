@@ -565,6 +565,11 @@
     "text": "Kirjoita jakson saapumisohje molemmilla kielillä ennen esikatselua."
   },
   {
+    "key": "admin.training.places_free",
+    "lang": "fi",
+    "text": "Vapaita paikkoja"
+  },
+  {
     "key": "admin.training.title",
     "lang": "en",
     "text": "Trainings"
@@ -1128,5 +1133,10 @@
     "key": "admin.training.complete_template",
     "lang": "en",
     "text": "Write the arrival instructions in both languages before previewing."
+  },
+  {
+    "key": "admin.training.places_free",
+    "lang": "en",
+    "text": "Places available"
   }
 ]
