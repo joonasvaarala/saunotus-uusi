@@ -9,6 +9,7 @@ import { fetchSiteTexts, makeT } from "../_shared/site_texts.ts";
 import { GMAIL_SECRET_ERROR, outboxAllowlistBlock, parseTestRecipients, resolveTransport, sendViaGmail } from "./mailer.ts";
 import { gmailSmtpSend } from "./gmail_smtp.ts";
 import { STAFF_NOTICE_KIND, renderStaffNotice } from "./staff_notice.ts";
+import { renderNewsletter } from "../_shared/newsletter-render.js";
 
 const json = (o: unknown, status = 200) => new Response(JSON.stringify(o), { status, headers: { "content-type": "application/json" } });
 const b64 = (u8: Uint8Array) => { let s = ""; for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode(...u8.subarray(i, i + 0x8000)); return btoa(s); };
@@ -46,6 +47,16 @@ Deno.serve(async (req) => {
   for (const r of rows) {
     try {
       if (mode === "off") { await bk.rpc("email_outbox_mark", { p_id: r.id, p_result: "skipped", p_error: "resend.mode=off" }); stats.skipped++; continue; }
+      // newsletter recipients are resolved only here, with a fresh consent check.
+      // Fail closed; never fall back to the order/event template or snapshot addresses.
+      let newsletter: any = null;
+      if (r.kind === "newsletter") {
+        const payload = await bk.rpc("email_newsletter_payload", { p_id: r.id });
+        if (payload.error) throw new Error("newsletter_payload_failed");
+        newsletter = payload.data;
+        if (newsletter?.allowed !== true) { await bk.rpc("email_outbox_mark", { p_id: r.id, p_result: "skipped", p_error: "newsletter_ineligible" }); stats.skipped++; continue; }
+        r.to = newsletter.to; r.locale = newsletter.locale;
+      }
       if (!r.to || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(r.to)) { await bk.rpc("email_outbox_mark", { p_id: r.id, p_result: "skipped", p_error: "ei kelvollista vastaanottajaa" }); stats.skipped++; continue; }
       const blocked = outboxAllowlistBlock(mode, r, testRecipients);
       if (blocked) { await bk.rpc("email_outbox_mark", { p_id: r.id, p_result: "skipped", p_error: blocked }); stats.skipped++; continue; }
@@ -64,10 +75,10 @@ Deno.serve(async (req) => {
       if (pmBlock) { await bk.rpc("email_outbox_mark", { p_id: r.id, p_result: "skipped", p_error: pmBlock }); stats.skipped++; continue; }
       const acBlock = annualCardBlock(r);
       if (acBlock) { await bk.rpc("email_outbox_mark", { p_id: r.id, p_result: "skipped", p_error: acBlock }); stats.skipped++; continue; }
-      const m = r.kind === STAFF_NOTICE_KIND ? renderStaffNotice(staffNotices[String(r.id)]) : render(r.kind as Kind, r, r.locale, t);
-      if (!m) { await bk.rpc("email_outbox_mark", { p_id: r.id, p_result: "skipped", p_error: "vuoroilmoituksen teksti puuttuu" }); stats.skipped++; continue; }
+      const m = r.kind === "newsletter" ? renderNewsletter(newsletter) : r.kind === STAFF_NOTICE_KIND ? renderStaffNotice(staffNotices[String(r.id)]) : render(r.kind as Kind, r, r.locale, t);
+      if (!m) { await bk.rpc("email_outbox_mark", { p_id: r.id, p_result: "skipped", p_error: r.kind === "newsletter" ? "newsletter_render_invalid" : "vuoroilmoituksen teksti puuttuu" }); stats.skipped++; continue; }
       if (!m.subject || !m.text || !m.html) throw new Error("tyhjä mallipohja");
-      if (mode !== "live") { await bk.rpc("email_outbox_mark", { p_id: r.id, p_result: "dry_run", p_error: `dry_run: ${m.subject}` }); stats.dry_run++; continue; }
+      if (mode !== "live") { await bk.rpc("email_outbox_mark", { p_id: r.id, p_result: "dry_run", p_error: r.kind === "newsletter" ? "newsletter_dry_run" : `dry_run: ${m.subject}` }); stats.dry_run++; continue; }
       if (transport === "gmail_smtp") { if (!gmailUser?.trim() || !gmailPass) throw new Error(GMAIL_SECRET_ERROR); }
       else if (!key) throw new Error("RESEND_API_KEY puuttuu");
       const attachments: { filename: string; content: string }[] = [];
@@ -109,7 +120,7 @@ Deno.serve(async (req) => {
       if (!res.ok) throw new Error(`resend ${res.status}: ${JSON.stringify(body).slice(0, 300)}`);
       await bk.rpc("email_outbox_mark", { p_id: r.id, p_result: "sent", p_provider_id: body.id ?? null }); stats.sent++;
     } catch (e) {
-      await bk.rpc("email_outbox_mark", { p_id: r.id, p_result: "failed", p_error: String((e as Error).message ?? e) }); stats.failed++;
+      await bk.rpc("email_outbox_mark", { p_id: r.id, p_result: "failed", p_error: r.kind === "newsletter" ? "newsletter_delivery_failed" : String((e as Error).message ?? e) }); stats.failed++;
     }
   }
   return json({ ok: true, ...stats });

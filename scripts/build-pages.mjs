@@ -50,6 +50,8 @@ rmSync(A, { recursive: true, force: true });
 mkdirSync(A, { recursive: true });
 cpSync('booking/admin', A, { recursive: true, filter: (s) => !/config\.example\.js$/.test(s) });
 cpSync('booking/shared/sb.js', join(A, 'sb.js'));
+// booking_259: the admin preview and sender use the exact same structured renderer.
+cpSync('booking/supabase/functions/_shared/newsletter-render.js', join(A, 'newsletter-render.js'));
 // options-mock.js (admin.js tuo sen staattisesti) tuo '../shop/src/invoice-validate.js' → /shop/src/invoice-validate.js; ilman tätä koko hallinta-SPA:n moduulipuu kaatuu 404:ään (tyhjä sivu).
 mkdirSync(join(OUT, 'shop', 'src'), { recursive: true });
 cpSync('booking/shop/src/invoice-validate.js', join(OUT, 'shop', 'src', 'invoice-validate.js'));
@@ -97,6 +99,13 @@ let nImports = 0;
     const off = join(A, 'offline.html');
     writeFileSync(off, injectTestBanner(readFileSync(off, 'utf8'), { lang: 'fi', kind: 'offline' }));
   }
+}
+// booking_259: the separate newsletter entry uses the same cache version and test banner.
+{
+  const hp = join(A, 'newsletters.html');
+  let t = readFileSync(hp, 'utf8').replace(/((?:href|src)=")(admin\.css|newsletter\.css|config\.js|newsletter-page\.js)(")/g, `$1$2${VER}$3`);
+  if (bannerOn) t = injectTestBanner(t, { lang: 'fi', kind: 'hallinta' });
+  writeFileSync(hp, t);
 }
 // Julkaisun tunnus erillisessä tiedostossa. Hallinta hakee sen ilman välimuistia (cache: 'no-store' + ?ts=).
 // sw.js ohittaa tiedoston, joten vanha service worker ei voi tarjoilla edellistä tunnusta.
