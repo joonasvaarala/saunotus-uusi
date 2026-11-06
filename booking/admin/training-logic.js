@@ -8,9 +8,13 @@ export function trainingGroup(product, statuses = []) {
 export function enrichTrainingProducts(products = [], statuses = []) {
   return products.map(p => ({...p, rules:(p.rules || []).map(r => ({...r,...statuses.find(s => s.rule_id === r.id)}))}));
 }
+export function trainingSessionRules(product, products) {
+  const ids=new Set((product.rules||[]).flatMap(r=>[r.id,...(r.segment_ids||[])]));
+  return products.flatMap(p=>p.rules||[]).filter(r=>ids.has(r.id)).sort((a,b)=>String(a.starts_at).localeCompare(String(b.starts_at))||a.id-b.id);
+}
 export function trainingCards(products, { group = 'training', includePast = false, today, statuses = [] } = {}) {
   return products.filter(p => p.category === 'training' && trainingGroup(p, statuses) === group)
-    .flatMap(p => (p.rules || []).filter(r => !r.training_segment_only && !r.cancelled_at && (includePast || String(r.ends_at || r.date).slice(0, 10) >= today)).map(r => ({ p, r, status: statuses.find(s => s.rule_id === r.id) || null })))
+    .flatMap(p => (p.rules || []).filter(r => !r.training_segment_only && !r.cancelled_at && (includePast || String(r.session_ends_at || r.ends_at || r.date).slice(0, 10) >= today)).map(r => ({ p, r, status: statuses.find(s => s.rule_id === r.id) || null })))
     .sort((a, b) => String(a.r.starts_at).localeCompare(String(b.r.starts_at)) || a.r.id - b.r.id);
 }
 export function paymentState(person) {

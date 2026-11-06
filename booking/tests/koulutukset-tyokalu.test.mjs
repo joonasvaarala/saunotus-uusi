@@ -5,7 +5,7 @@ import { tmpdir } from 'node:os';
 import { join, dirname } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { createEventsMock, EVENT_MOCK_RESOURCES } from '../admin/events-mock.js';
-import { trainingCards, enrichTrainingProducts, paymentState, validSpaceTime, nextTrainingStep, trainingExport, messagePreviewGate, orderedWaiters, calendarSpaceDays } from '../admin/training-logic.js';
+import { trainingCards, enrichTrainingProducts, trainingSessionRules, paymentState, validSpaceTime, nextTrainingStep, trainingExport, messagePreviewGate, orderedWaiters, calendarSpaceDays } from '../admin/training-logic.js';
 import { TRAINING_TEXTS } from '../admin/training-texts.js';
 const root=join(dirname(fileURLToPath(import.meta.url)), '..');
 const read=rel=>readFileSync(join(root,'..',rel),'utf8');
@@ -81,6 +81,11 @@ test('legacy rule JSON is enriched with hidden segments and true shared availabi
  const enriched=enrichTrainingProducts(products,[{rule_id:1,training_segment_only:false,seats_remaining:0},{rule_id:2,training_segment_only:true,seats_remaining:6}]);
  assert.deepEqual(trainingCards(enriched,{today:'2026-11-06'}).map(x=>x.r.id),[1]);
  assert.equal(enriched[0].rules[0].seats_remaining,0);assert.equal(products[0].rules[0].seats_remaining,undefined);
+});
+test('full course stays current through last segment and its shared retreat dates are selectable',()=>{
+ const products=[{product_id:118,category:'training',rules:[{id:1,product_id:118,starts_at:'2026-11-30',ends_at:'2026-12-04',session_ends_at:'2027-06-11',segment_ids:[2,3]}]},{product_id:115,category:'training',rules:[{id:2,product_id:115,starts_at:'2026-11-30'}]},{product_id:117,category:'training',rules:[{id:3,product_id:117,starts_at:'2027-06-07'}]}];
+ assert.ok(trainingCards(products,{today:'2027-03-01'}).some(x=>x.p.product_id===118));
+ assert.deepEqual(trainingSessionRules(products[0],products).map(x=>x.id),[1,2,3]);
 });
 test('payment status is based on actual payment, not nominal signup deposit',()=>{
  assert.equal(paymentState({deposit_paid:570,paid_actual:0,due_actual:1950}),'unpaid');

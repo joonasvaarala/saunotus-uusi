@@ -101,7 +101,7 @@ end $$;
 create function booking.admin_training_work_get(p_rule_id bigint) returns jsonb
 language plpgsql stable security definer set search_path = '' as $$ declare r booking.schedule_rules; begin
   perform booking._require_staff(); r := booking._training_work_rule(p_rule_id);
-  return jsonb_build_object('rule',booking._event_rule_json(r.id)||jsonb_build_object('training_segment_only',r.training_segment_only,'seats_remaining',booking._training_option_seats_left(r.id)), 'people',booking.admin_training_people(r.id),
+  return jsonb_build_object('rule',booking._event_rule_json(r.id)||jsonb_build_object('session_ends_at',greatest(upper(booking._training_rule_range(r.id)),(select max(upper(booking._training_rule_range(s.rule_id))) from booking._training_segments_of(r.id) s)),'segment_ids',(select jsonb_agg(s.rule_id order by s.sort_pos) from booking._training_segments_of(r.id) s),'training_segment_only',r.training_segment_only,'seats_remaining',booking._training_option_seats_left(r.id)), 'people',booking.admin_training_people(r.id),
     'work',coalesce((select to_jsonb(w) from booking.training_session_work w where w.rule_id = r.id),'{}'::jsonb),
     'waitlist',coalesce((select jsonb_agg(to_jsonb(w) order by w.created_at,w.id) from booking.training_waitlist w where w.rule_id = r.id and w.status in ('waiting','offered')),'[]'::jsonb),
     'messages',coalesce((select jsonb_agg(to_jsonb(m) order by m.created_at desc) from booking.event_messages m where m.rule_id = r.id),'[]'::jsonb));
@@ -110,7 +110,7 @@ create function booking.admin_training_work_list() returns jsonb
 language plpgsql stable security definer set search_path = '' as $$ begin
   perform booking._require_staff();
   return coalesce((select jsonb_agg(jsonb_build_object('rule_id',r.id,'group_kind',coalesce(g.group_kind,'training'),
-    'training_segment_only',r.training_segment_only,'seats_remaining',booking._training_option_seats_left(r.id),
+    'session_ends_at',greatest(upper(booking._training_rule_range(r.id)),(select max(upper(booking._training_rule_range(s.rule_id))) from booking._training_segments_of(r.id) s)),'segment_ids',(select jsonb_agg(s.rule_id order by s.sort_pos) from booking._training_segments_of(r.id) s),'training_segment_only',r.training_segment_only,'seats_remaining',booking._training_option_seats_left(r.id),
     'materials_shared',coalesce(w.materials_shared,false), 'message_sent',exists(select 1 from booking.event_messages m where m.rule_id=r.id and m.queued_count>0),
     'open_payments',(select count(*) from jsonb_array_elements(booking.admin_training_people(r.id)) j where (j->>'due_actual')::numeric>0.004)))
     from booking.schedule_rules r join kb.products p on p.id=r.product_id and p.category='training'

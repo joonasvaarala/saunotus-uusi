@@ -14,6 +14,8 @@ https://cursor.com/canvas/store-7b3bca7e-e6e8-4cc1-936c-22d4666c6717/b3122fe1-99
   Puolipiste-CSV avautuu Excelissä (UTF-8 BOM, kaavainjektiosuojaus); myös tulostus.
 - Osakertojen piilotetut kapasiteettipäivät eivät näy etusivun kortteina, mutta ne voi
   valita koulutuksen päivävalitsimesta tilojen, viestien ja läsnäolon hoitamiseksi.
+  Valitsimessa ovat myös samaan koulutukseen kytketyt muiden tuotteiden retriitit.
+  Pääkoulutuksen kortti pysyy ajankohtaisena viimeisen osakerran loppuun asti.
   Niihin ei lisätä erillisiä ilmoittautumisia eikä niistä kopioida irrallista koulutusta.
 - Käsin lisättävä osallistuja on yksi henkilö/tilaus ja käyttää nykyistä varausmaksua.
   Osakertojen kapasiteetti kulutetaan nykyisillä koulutusapureilla.
@@ -65,9 +67,9 @@ Tekstien tuontia ei ole tehty tässä työssä.
 
 ## Tarkistukset
 
-- `node --test booking/tests/*.test.mjs`: 1314 testiä, 1313 hyväksyttyä; ainoa
+- `node --test booking/tests/*.test.mjs`: 1315 testiä, 1314 hyväksyttyä; ainoa
   epäonnistuminen on ennestään sallittu `uusi-varaus.test.mjs` / ”yhdeksän kohtaa”.
-- Uusi `koulutukset-tyokalu.test.mjs`: 13/13; aiempi `koulutukset-hallinta.test.mjs`: 6/6.
+- Uusi `koulutukset-tyokalu.test.mjs`: 14/14; aiempi `koulutukset-hallinta.test.mjs`: 6/6.
 - `npm run build:prod`: onnistuu, ei julkaise.
 - Paikallinen PostgreSQL 17, `booking/supabase/tests/t255_training_workspace.sql`: 40
   tarkistusta, transaktio päättyy rollbackiin. Kattaa sulut ja varauskonfliktit,
