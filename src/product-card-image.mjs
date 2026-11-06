@@ -15,7 +15,9 @@ export function productCardInner({ slug = '', alt = '', fallbackHtml = '', sizes
     ? ` data-product-image data-slug="${e(id)}"${sizes ? ` data-sizes="${e(sizes)}"` : ''}${widths?.length ? ` data-widths="${widths.join(',')}"` : ''}${alt ? ` data-alt="${e(alt)}"` : ''}`
     : '';
   if (url) {
-    const productAlt = (row.alt && String(row.alt).trim()) || alt;
+    // alt = sivun kielen mukainen nimi (esim. lahjapaketin name_en). row.alt on
+    // product_config.image_alt, jossa on vain suomi — ei saa ylikirjoittaa EN-sivua.
+    const productAlt = (alt && String(alt).trim()) || (row.alt && String(row.alt).trim()) || '';
     const spec = { widths, alt: productAlt, width: row.width || width, height: row.height || height, lazy };
     if (sizes) spec.sizes = sizes;
     const html = productImageHtml(url, spec);
