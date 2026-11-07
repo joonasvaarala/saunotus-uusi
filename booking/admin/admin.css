@@ -1201,3 +1201,21 @@ body.shot #shell .nav .lbl{display:inline}
 .nb-summary-line{margin:0 0 8px;font-size:14px;line-height:1.4}
 .nb-summary-price{margin:0;font-size:15px;font-weight:700;color:var(--ink)}
 @media (max-width:900px){.nb-layout{grid-template-columns:1fr}.nb-summary{position:static}}
+
+
+.paylink-chips{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 12px}
+.paylink-chip.on{background:var(--green);border-color:var(--green);color:#fff}
+.paylink-cards{display:flex;flex-direction:column;gap:12px}
+.paylink-card{padding:16px 18px}
+.paylink-card-top{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+.paylink-card-who{display:flex;flex-direction:column;gap:2px;min-width:0}
+.paylink-card-amount{text-align:right}
+.paylink-card-amount strong{display:block;font-size:22px;font-weight:800;line-height:1.15}
+.paylink-card-res{margin:8px 0}
+.paylink-card-meta{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;margin:0 0 12px;font-size:13px}
+.paylink-card-actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.paylink-more{position:relative}
+.paylink-more-btn{min-width:40px;font-size:18px;line-height:1}
+.paylink-more-menu{position:absolute;right:0;bottom:calc(100% + 4px);z-index:5;min-width:220px;padding:6px;border:1px solid var(--line);border-radius:10px;background:#fff;box-shadow:0 8px 24px rgba(0,0,0,.12)}
+.paylink-more-item{display:block;width:100%;text-align:left;border:0;background:transparent;padding:10px 12px;border-radius:8px;font:inherit;cursor:pointer}
+.paylink-more-item:hover,.paylink-more-item:focus-visible{background:#f3efe8}

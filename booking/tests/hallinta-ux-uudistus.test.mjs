@@ -75,3 +75,15 @@ test('Uusi varaus: Saunavuoro, Hoito tai tila, Jälkikirjaus + yhden rivin selit
   assert.match(src('admin/admin.css'), /\.nb-typecard/);
   assert.match(src('admin/views/reservations.js'), /Jälkikirjaus/);
 });
+
+test('Seurattavat maksut: kortit, suodatinsirut ja ⋯-valikko', () => {
+  const view = src('admin/views/paylink-watch.js');
+  assert.match(view, /paylink-card/);
+  assert.match(view, /paylink-chips/);
+  assert.match(view, /paylink-more/);
+  assert.match(view, /data-testid': 'paylink-row'/);
+  assert.match(view, /data-testid': 'paylink-remind'/);
+  assert.match(view, /data-testid': 'paylink-handled'/);
+  assert.doesNotMatch(view, /<thead/);
+  assert.match(src('admin/admin.css'), /\.paylink-card-amount/);
+});
