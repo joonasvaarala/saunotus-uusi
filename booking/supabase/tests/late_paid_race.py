@@ -51,7 +51,7 @@ def wait_state(bg, timeout=6.0):
 
 SETUP = psycopg.connect(dbname=DB, autocommit=True, **kw)
 if MODE == "fix":
-    SETUP.execute((HERE.parent / "migrations" / "20261107095100_booking_263_late_paid_cancelled_order.sql").read_text())
+    SETUP.execute((HERE.parent / "migrations" / "20261107075613_booking_263_late_paid_cancelled_order.sql").read_text())
 elif MODE.startswith("file="):   # vertailu: esim. edellinen luonnos (a0f00c2)
     SETUP.execute(pathlib.Path(MODE[5:]).read_text())
 SETUP.execute("""update booking.settings set value = '"hold_until_paid"'::jsonb where key = 'public_payment_mode'""")
