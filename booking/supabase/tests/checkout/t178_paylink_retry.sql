@@ -133,7 +133,7 @@ begin
       'A3 oikeudet: apply/lookup vain service_role, link_info anon, ei PUBLIC');
   perform pg_temp.ck(md5(pg_get_functiondef('booking.vismapay_payment_prepare(uuid,uuid)'::regprocedure)) in ('703c03c301f5a3008192cdbe65e559e2', 'cca997c4e900e78b8bb9e2e0c7da25d4', 'd1f8df803a45c2b77aa9f8554fc41890', 'd22cda7beb5cea5967b267e52d79ab99')
       and md5(pg_get_functiondef('booking.vismapay_payment_event(text,text,text,text,jsonb)'::regprocedure)) = 'e6834eb7c9da8a0a8c531706eb6692fc'
-      and md5(pg_get_functiondef('booking.payment_mark_paid(text,text,numeric,jsonb)'::regprocedure)) = '8ceb0a7dea60d37e3ea6a17cec0e4c25'
+      and md5(pg_get_functiondef('booking.payment_mark_paid(text,text,numeric,jsonb)'::regprocedure)) in ('8ceb0a7dea60d37e3ea6a17cec0e4c25', 'b35618b8cd17fa9e7c5902719d0804a2') -- booking_53 tai late_paid_cancelled_order (booking_263)
       and md5(pg_get_functiondef('booking.payment_mark_failed(text,text,text,jsonb)'::regprocedure)) = '2dfe2d2c0757157be90484d60cef8046'
       and md5(pg_get_functiondef('booking._create_link_payment(bigint,integer,text)'::regprocedure)) in ('533ac9af831c0c11e1f504e377a17827', '5e432077c560a10822db8ac0d2bbe7c2', 'f40db96ca201e40467f20cc1db5866c9', 'adc14e6983e60d80498508c9b969f60d')
       and md5(pg_get_functiondef('booking._order_balance(bigint)'::regprocedure)) = 'a6b31f93559de53d75a52d8a285f1170'
