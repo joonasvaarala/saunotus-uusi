@@ -14,10 +14,19 @@ import { loadBookingTexts, bookingText, noticeText } from '../booking-texts.js';
 import { confirmDialog } from '../confirm.js';
 import { capacityNotice, scheduleNotice, bookingAction } from '../nb-logic.js';
 
-export const BOOKING_TYPES = [['', 'Vuoro'], ['resurssi', 'Resurssivaraus'], ['vanha', 'Vanha varaus']];
-// Varaustyypin valinta (radiogroup; nuolinäppäimet): vuoropohjainen / resurssivaraus / vanha varaus. Vaihto tallentuu URL:iin (#/uusi?tyyppi=…).
-export const typeSwitch = (current, d) => h('fieldset', { class: 'srcset typeset', 'data-testid': 'booking-type' }, h('legend', { text: 'Varaustyyppi' }),
-  BOOKING_TYPES.map(([v, label]) => h('label', { class: 'srcopt' }, h('input', { type: 'radio', name: 'btype', value: v, checked: v === current || null, onchange: () => { location.hash = `#/uusi${v ? `?tyyppi=${v}` : ''}${d && !v ? `?d=${d}` : ''}`; } }), h('span', { text: label }))));
+export const BOOKING_TYPES = [
+  ['', 'Saunavuoro', 'Yleinen tai yksityinen vuoro'],
+  ['resurssi', 'Hoito tai tila', 'Saunahoito, rituaali, Rauni, Lovi'],
+  ['vanha', 'Jälkikirjaus', 'Mennyt käynti, jota ei ole vielä kirjattu'],
+];
+// Varaustyypin valinta (kortit + radiot): Saunavuoro / Hoito tai tila / Jälkikirjaus. Vaihto tallentuu URL:iin (#/uusi?tyyppi=…).
+export const typeSwitch = (current, d) => h('fieldset', { class: 'nb-types', 'data-testid': 'booking-type' }, h('legend', { class: 'sr', text: 'Varaustyyppi' }),
+  h('div', { class: 'nb-typegrid', role: 'radiogroup', 'aria-label': 'Varaustyyppi' }, BOOKING_TYPES.map(([v, label, hint]) => {
+    const on = v === current || (current == null && v === '');
+    return h('label', { class: `nb-typecard${on ? ' on' : ''}` },
+      h('input', { type: 'radio', name: 'btype', value: v, checked: on || null, onchange: () => { location.hash = `#/uusi${v ? `?tyyppi=${v}` : ''}${d && !v ? `?d=${d}` : ''}`; } }),
+      h('strong', { text: label }), h('small', { text: hint }));
+  })));
 
 const addMin = (hhmm, n) => { const [a, b] = hhmm.split(':').map(Number); const t = (a * 60 + b + n) % 1440; return `${String(Math.floor(t / 60)).padStart(2, '0')}:${String(t % 60).padStart(2, '0')}`; };
 
@@ -131,8 +140,8 @@ export async function render({ ctx, refs, query, kind }) {
   persons.addEventListener('input', () => { picker.sync(); reloadSoon(); }); date.addEventListener('change', () => { if (st.product) loadParents(st.product); availFrom = date.value || todayHel(); avail?.clearSelection(); loadAvail(); });
   if (avail) { ovr.addEventListener('change', loadAvail); ovrReason.addEventListener('change', loadAvail); }
 
-  const f = h('form', { class: 'stack card nbform', novalidate: true, 'data-testid': old ? 'old-booking-form' : 'resource-booking-form' }, h('h3', { text: old ? 'Vanha varaus' : 'Resurssivaraus' }),
-    h('p', { class: 'muted', text: old ? 'Kirjaa varaus vanhalle tuotteelle (esim. siirtynyt hoito). Resurssivaikutus säilyy: sulut, päällekkäisyys ja saunottaja tarkistetaan.' : 'Nykyinen resurssituote (hoito, saunotus, rituaali, seremonia, lisäpalvelu) ylläpidon kautta. Tila ja saunottaja varataan tuotteen sääntöjen mukaan.' }),
+  const f = h('form', { class: 'stack card nbform', novalidate: true, 'data-testid': old ? 'old-booking-form' : 'resource-booking-form' }, h('h3', { text: old ? 'Jälkikirjaus' : 'Hoito tai tila' }),
+    h('p', { class: 'muted', text: old ? 'Kirjaa mennyt käynti, jota ei ole vielä kirjattu (esim. siirtynyt hoito). Sulut, päällekkäisyys ja saunottaja tarkistetaan.' : 'Saunahoito, rituaali tai tilavaraus (Rauni, Lovi). Tila ja saunottaja varataan tuotteen sääntöjen mukaan.' }),
     field('Tuote', prodSel), avail ? avail.node : null,
     h('div', { class: 'row wrap' }, field('Päivä', date), field('Alkaa', time), field('Päättyy (valinnainen)', end, null)), endHint, windowHint,
     h('div', { class: 'row wrap' }, h('div', { class: 'fld' }, h('span', { class: 'fld-lab', text: 'Henkilömäärä' }), pst.node), field('Hinta € (ohita automaattinen)', price)), personsHint,
@@ -188,5 +197,5 @@ export async function render({ ctx, refs, query, kind }) {
   } catch (e) { errBox.textContent = optErr(e); errBox.hidden = false; revealIfHidden(errBox); } }); });
   const body = products.length ? [f, result] : [h('p', { class: 'empty', text: old ? 'Ei vanhoja tuotteita, joille voisi kirjata varauksen.' : 'Ei resurssituotteita, joille voisi luoda varauksen.' })];
   if (products.length) sync();
-  return [h('h1', { text: old ? 'Vanha varaus' : 'Resurssivaraus' }), typeSwitch(kind), ...body];
+  return [h('h1', { text: old ? 'Jälkikirjaus' : 'Hoito tai tila' }), typeSwitch(kind), ...body];
 }

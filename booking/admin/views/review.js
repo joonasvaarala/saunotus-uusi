@@ -1,15 +1,16 @@
-// Tarkista-lista (admin_review_list): ei saunottajaa (migraatio 22; poikkeuksen myöntö oikeudella bookings.override),
-// saunottajakonfliktit, sulkukonfliktit (kuittaus booking_73: blocks.manage tai bookings.override, ei muuta saatavuutta),
-// kuitatut sulkukonfliktit, ylitykset ja orvot lisäpalvelut.
+// Tarkista-lista (admin_review_list): vain huomiota vaativat osiot; nollat yhdelle Kunnossa-riville.
 // booking_173: lunastamattomat kumppanilahjakortit (admin_unredeemed_voucher_claims; views/voucher-redeem.js).
 // Tyhjä lista on hyvä uutinen; rivistä pääsee päivänäkymään tai varauksen tietoihin.
 import { rpc } from '../sb.js';
-import { h, fmtDay, fmtTime, errMsg, empty, badge, sourceBadge, toast, run } from '../ui.js';
+import { h, fmtDay, fmtTime, errMsg, badge, sourceBadge, toast, run } from '../ui.js';
 import { resName, SKILL_FI } from './legs.js';
 import { grantButton } from './therapist.js';
 import { loadReviewTexts, reviewText as rt } from '../review-texts.js';
 import { unredeemedSection } from './voucher-redeem.js';
-import { canAckBlockConflict, conflictReason, nextAckStep, nextUnackStep, ackArgs, unackArgs, reviewAttentionCount } from '../review-logic.js';
+import {
+  canAckBlockConflict, conflictReason, nextAckStep, nextUnackStep, ackArgs, unackArgs,
+  reviewAttentionCount, reviewAttentionSections, attentionKeysEmpty, ATTENTION_LABELS_FI,
+} from '../review-logic.js';
 
 const day = (iso) => new Date(iso).toLocaleDateString('sv-SE', { timeZone: 'Europe/Helsinki' });
 const when = (iso) => `${fmtDay(iso)} ${fmtTime(iso)}`;
@@ -94,35 +95,54 @@ export async function render({ ctx, refs, reload }) {
   };
   const ackedMeta = (x) => h('small', { text: rt('ui.admin.review.acked_meta', { by: x.acked_by_label ? ` (${x.acked_by_label})` : '', reason: x.ack_reason || '' }) });
   const SECTIONS = [
-    ['missing_therapist', 'Ei saunottajaa', 'Varaus on tehty, mutta työvuoroissa ei ole vapaata saunottajaa. Lisää saunottaja työvuoroon (merkintä purkautuu tuonnissa) tai myönnä poikkeus perustelulla.',
+    ['missing_therapist', ATTENTION_LABELS_FI.missing_therapist, 'Varaus on tehty, mutta työvuoroissa ei ole vapaata saunottajaa. Lisää saunottaja työvuoroon tai myönnä poikkeus perustelulla.',
       (x) => [link(x.reservation_id, x.starts_at), ` · ${x.product_name || ''}${x.persons ? ` · ${x.persons} hlö` : ''}${x.order_no ? ` · tilaus #${x.order_no}` : ''}`, sourceBadge(x) ? [' ', sourceBadge(x)] : null,
         x.days_to_start != null ? [' ', badge(x.days_to_start <= 2 ? 'warn' : 'muted', days(x.days_to_start))] : null, ' ',
         grantButton({ ...x, therapist_missing: true }, { ctx, onDone: () => reload() })]],
-    ['therapist_conflicts', 'Saunottajakonfliktit', 'Varaus tarvitsee saunottajan, mutta vuoroja tai taitoa ei ole riittävästi (esim. vuoro muuttui varauksen jälkeen).',
+    ['therapist_conflicts', ATTENTION_LABELS_FI.therapist_conflicts, 'Varaus tarvitsee saunottajan, mutta vuoroja tai taitoa ei ole riittävästi (esim. vuoro muuttui varauksen jälkeen).',
       (x) => [link(x.reservation_id, x.starts_at), x.skill ? ` · taito: ${SKILL_FI[x.skill] || x.skill}` : '']],
-    ['block_conflicts', 'Sulkukonfliktit', rt('ui.admin.review.block_hint'),
+    ['block_conflicts', ATTENTION_LABELS_FI.block_conflicts, rt('ui.admin.review.block_hint'),
       (x) => [link(x.reservation_id, x.starts_at), resourceBit(x), ' ', reasonBit(x)], { extra: ackForm }],
-    ['acked_block_conflicts', rt('ui.admin.review.acked_title'), rt('ui.admin.review.acked_hint'),
-      (x) => [link(x.reservation_id, x.starts_at), resourceBit(x), ' ', reasonBit(x), ' ', ackedMeta(x)],
-      { extra: unackForm, empty: rt('ui.admin.review.acked_empty'), acked: true, badge: (n) => (n ? 'muted' : 'ok') }],
-    ['overrides', 'Ylitykset', 'Varaukset, jotka on tehty ohittamalla sulku- tai saunottajatarkistus (oikeus bookings.override).',
+    ['overrides', ATTENTION_LABELS_FI.overrides, 'Varaukset, jotka on tehty ohittamalla sulku- tai saunottajatarkistus.',
       (x) => [link(x.reservation_id, x.starts_at), h('br'), h('small', { text: `Syy: ${x.reason || '–'}` })]],
-    ['orphan_addons', 'Orvot lisäpalvelut', 'Lisäpalvelun vanhempi (jälkilöyly / yksityisvuoro) on peruttu tai puuttuu.',
+    ['orphan_addons', ATTENTION_LABELS_FI.orphan_addons, 'Lisäpalvelun vanhempi (jälkilöyly / yksityisvuoro) on peruttu tai puuttuu.',
       (x) => [link(x.reservation_id, x.starts_at)]],
   ];
-  const total = reviewAttentionCount(v);
   let vouchers = null;
-  try { vouchers = await unredeemedSection({ rpc }); } catch { vouchers = null; }   // rajapinta puuttuu (vanha tietokanta) → osio jää pois
+  try { vouchers = await unredeemedSection({ rpc, hideEmpty: true }); } catch { vouchers = null; }
+  const voucherCount = vouchers ? Number(vouchers.dataset.count || 0) : 0;
+  const total = reviewAttentionCount(v, voucherCount);
+  const sectionCount = reviewAttentionSections(v, voucherCount);
+  const emptyKeys = attentionKeysEmpty(v);
+  // Kunnossa-riville myös lunastamattomat, jos niitä ei ole.
+  const okBits = emptyKeys.map((k) => `${ATTENTION_LABELS_FI[k]} 0`);
+  if (!voucherCount) okBits.unshift(`${ATTENTION_LABELS_FI.unredeemed_vouchers} 0`);
+  const statusText = sectionCount
+    ? `${sectionCount} asiaa vaatii huomiota. Muut kunnossa.`
+    : 'Ei tarkistettavaa – kaikki tulevat varaukset ovat kunnossa.';
   const sec = ([k, title, hint, row, opt = {}]) => {
     const rows = Array.isArray(v[k]) ? v[k] : [];
-    const kind = opt.badge ? opt.badge(rows.length) : (rows.length ? 'warn' : 'ok');
-    return h('section', { class: `card review-sec${rows.length ? ' has' : ''}${opt.acked ? ' acked' : ''}`, 'data-testid': `review-${k}`, 'data-count': String(rows.length) },
-      h('h2', {}, title, ' ', badge(kind, String(rows.length))), h('p', { class: 'muted', text: hint }),
-      rows.length ? h('ul', { class: 'reslist' }, rows.map((x) => h('li', { class: 'resrow' }, h('span', {}, ...[].concat(row(x))), opt.extra ? opt.extra(x) : null))) : empty(opt.empty || 'Ei tarkistettavaa.'));
+    if (!rows.length) return null; // nollat → Kunnossa-rivi
+    const kind = opt.badge ? opt.badge(rows.length) : 'warn';
+    return h('section', { class: `card review-sec has${opt.acked ? ' acked' : ''}`, 'data-testid': `review-${k}`, 'data-count': String(rows.length) },
+      h('h2', {}, title, ' ', badge(kind, `${rows.length} kpl`)), h('p', { class: 'muted', text: hint }),
+      h('ul', { class: 'reslist' }, rows.map((x) => h('li', { class: 'resrow' }, h('span', {}, ...[].concat(row(x))), opt.extra ? opt.extra(x) : null)));
   };
+  const ackedRows = Array.isArray(v.acked_block_conflicts) ? v.acked_block_conflicts : [];
+  const ackedSec = ackedRows.length ? h('section', { class: 'card review-sec acked', 'data-testid': 'review-acked_block_conflicts', 'data-count': String(ackedRows.length) },
+    h('h2', {}, rt('ui.admin.review.acked_title'), ' ', badge('muted', String(ackedRows.length))),
+    h('p', { class: 'muted', text: rt('ui.admin.review.acked_hint') }),
+    h('ul', { class: 'reslist' }, ackedRows.map((x) => h('li', { class: 'resrow' },
+      h('span', {}, link(x.reservation_id, x.starts_at), resourceBit(x), ' ', reasonBit(x), ' ', ackedMeta(x)),
+      unackForm(x))))) : null;
+  const okRow = okBits.length ? h('div', { class: 'review-ok', role: 'status', 'data-testid': 'review-ok' },
+    h('span', { class: 'review-ok-mark', 'aria-hidden': 'true', text: '✓' }),
+    h('span', { text: `Kunnossa: ${okBits.join(' · ')}` })) : null;
   return [h('h1', { text: 'Tarkista' }),
-    h('p', { class: 'muted', role: 'status', 'data-testid': 'review-total', text: total ? `${total} tarkistettavaa. Lista päivittyy tietokannasta joka kerta kun avaat sivun.` : 'Ei tarkistettavaa – kaikki tulevat varaukset ovat kunnossa.' }),
+    h('p', { class: 'muted', role: 'status', 'data-testid': 'review-total', 'data-count': String(total), 'data-sections': String(sectionCount), text: statusText }),
     h('button', { type: 'button', class: 'btn ghost sm', text: 'Päivitä', onclick: () => reload() }),
-    vouchers,   // booking_173: lunastamattomat kumppanilahjakortit (Kokemuskauppa, Offerilla, Elämyslahjat)
-    ...SECTIONS.map(sec)];
+    vouchers,
+    ...SECTIONS.map(sec).filter(Boolean),
+    okRow,
+    ackedSec];
 }

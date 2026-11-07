@@ -9,6 +9,8 @@ import { needsManualRoute, parseAdminHash } from './reservation-query.js';
 import { resolveAdminPath, legacyFinanceGiftTarget, compactIdentity, toggleMobileNav, navGroupById, groupAllowed, selectGroupTab, shouldCollapseMobileNav, shouldCollapseOnNavLink } from './admin-navigation.js';
 import { setupQuickSearch } from './quick-search.js';
 import { loadNavTexts, navText } from './nav-texts.js';
+import { reviewAttentionCount } from './review-logic.js';
+import { VCR_RPC } from './voucher-redeem-logic.js';
 import { startHallintaPwa } from './pwa.js';
 import { getVersionController, startHallintaVersionWatch } from './version-check.js';
 
@@ -112,6 +114,7 @@ async function route() {
   try {
     const m = await r.mod();
     if (r.path === '') { dayModule = m; if (lastPath !== null && lastPath !== '') m.clearDayBundleCache?.(); }
+    const prevPath = lastPath;
     lastPath = r.path;
     await refs();
     const group = resolved.groupId ? navGroupById(resolved.groupId) : null;
@@ -121,6 +124,8 @@ async function route() {
     view.replaceChildren(...[].concat(out).filter(Boolean));
     const title = tab ? navText(tab.labelKey) : (r.labelFn ? r.labelFn() : r.label);
     document.title = `${title} – hallinta`;
+    // Määrämerkki: ensimmäinen lataus + Tarkista-sivulle tulo/lähtö (kuittauksen jälkeen luku päivittyy).
+    if (prevPath === null || r.path === 'tarkista' || prevPath === 'tarkista') void refreshReviewBadge();
     if (r.path === '') setTimeout(() => m.prefetchAdjacentDay?.(query.get('d') || todayHel()), 0);
   } catch (e) {
     if (seq !== routeSeq) return;
@@ -185,6 +190,39 @@ $('login').addEventListener('submit', async (ev) => {
 });
 // Yläpalkin ja sivupalkin painikkeiden ikonit (icons.js, currentColor) ja tekstit (nav-texts.js, ui.admin.nav.*).
 for (const el of document.querySelectorAll('#shell [data-icon]')) el.replaceChildren(icon(el.dataset.icon, el.closest('.nav-toggle') ? 26 : 20));
+
+/** Yläpalkin Tarkista-määrämerkki: avoimet tarkistettavat (+ lunastamattomat kumppanikortit). Virhe/puuttuva migraatio → piiloon. */
+async function refreshReviewBadge() {
+  const el = $('quick-review-count');
+  const link = $('quick-review');
+  if (!el || !link) return;
+  try {
+    const [list, vouchers] = await Promise.all([
+      rpc('admin_review_list').catch(() => null),
+      rpc(VCR_RPC.unredeemed, { p_limit: 1 }).catch(() => null),
+    ]);
+    let voucherN = 0;
+    if (vouchers && typeof vouchers === 'object') {
+      voucherN = Number(vouchers.total);
+      if (!Number.isFinite(voucherN)) {
+        voucherN = Object.values(vouchers.counts || {}).reduce((s, n) => s + (Number(n) || 0), 0);
+      }
+    }
+    const n = reviewAttentionCount(list || {}, voucherN);
+    if (n > 0) {
+      el.textContent = String(n);
+      el.hidden = false;
+      link.setAttribute('aria-label', `${navText('ui.admin.nav.review')} (${n})`);
+    } else {
+      el.textContent = '';
+      el.hidden = true;
+      link.setAttribute('aria-label', navText('ui.admin.nav.review'));
+    }
+  } catch {
+    el.hidden = true;
+  }
+}
+
 function paintTopBarTexts() {
   const tn = (k) => navText(`ui.admin.nav.${k}`);
   const attr = (id, a, k) => $(id)?.setAttribute(a, tn(k));
