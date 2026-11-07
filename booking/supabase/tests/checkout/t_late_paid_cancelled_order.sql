@@ -1,6 +1,6 @@
 -- LOCAL ONLY – EI DEV/PROD. Numeroimaton late_paid_cancelled_order-luonnos (payment_mark_paid perutulle tilaukselle).
 -- Ajo: cd booking/supabase/tests/checkout && psql -X -d <paikallinen testikanta> -f t_late_paid_cancelled_order.sql
--- Yksi transaktio, lopussa tahallinen TESTRESULT-poikkeus + rollback. Rinnakkaisuus: ../late_paid_race.py (erilliset yhteydet, kaikki peruutuspolut).
+-- Yksi transaktio, lopussa tahallinen TESTRESULT-poikkeus + rollback. Rinnakkaisuus: ../late_paid_race.py (erilliset yhteydet, baseline vs fix).
 \set ON_ERROR_STOP on
 begin;
 set local lock_timeout = '3s';
@@ -22,7 +22,7 @@ do $t$
 declare
   r jsonb; r2 jsonb; tok uuid; o bigint; ono bigint; a1 text; a2 text; amt numeric; pid bigint; d text; st text;
   v_slots timestamptz[]; r_s record; v_cancel_at timestamptz; v_res_snap jsonb; v_claims0 bigint; v_res0 bigint; v_aud int; v_note text;
-  ares bigint; aitem bigint; ahold timestamptz; mres bigint;
+  ares bigint; aitem bigint; ahold timestamptz; mres bigint; rhold timestamptz; v_conf timestamptz;
 begin
   update booking.settings set value = '"hold_until_paid"'::jsonb where key = 'public_payment_mode';
   insert into booking.integration_config(key, mode, settings) values ('montonio', 'test', '{"approved_by":"tlp"}'::jsonb)
@@ -33,7 +33,7 @@ begin
      where q.status = 'available' order by q.starts_at loop
     if v_slots is null or r_s.starts_at >= v_slots[cardinality(v_slots)] + interval '5 hours' then v_slots := array_append(v_slots, r_s.starts_at); end if;
   end loop;
-  if v_slots is null or cardinality(v_slots) < 10 then raise exception 'TESTRESULT_ABORT vapaita hoitoaikoja %', coalesce(cardinality(v_slots), 0); end if;
+  if v_slots is null or cardinality(v_slots) < 12 then raise exception 'TESTRESULT_ABORT vapaita hoitoaikoja %', coalesce(cardinality(v_slots), 0); end if;
 
   perform pg_temp.ck(md5(pg_get_functiondef('booking.montonio_payment_apply(text,text,numeric,jsonb)'::regprocedure)) = 'ef052d2d9baa94bbe8cc4a9e1784d0ed'
       and md5(pg_get_functiondef('booking.vismapay_payment_apply(text,text,numeric,jsonb)'::regprocedure)) = '2f8a7e56ae9bb4e29f4025f91e7ea706',
@@ -187,15 +187,19 @@ begin
   perform pg_temp.logout();
   perform pg_temp.ck(r ->> 'ok' = 'true' and ares is not null and ahold is not null and (select status from booking.reservations where id = ares) = 'pending' and a1 is not null,
       'H0 vahvistettu tilaus + pending-lisäys pidolla + lisäyksen maksu ' || left(r::text, 60) || ' ' || left(r2::text, 60));
+  select hold_expires_at into rhold from booking.reservations where id = ares;
   -- fixture (LOCAL): tilaus perutaan suoraan, lisäys jää pending + pito (puolustava tapaus)
   update booking.reservations set status = 'cancelled', cancelled_at = now(), cancel_reason = 'tlp-h' where id = mres;
   update booking.orders set status = 'cancelled', cancelled_at = now() where id = o;
+  select cancelled_at, confirmed_at into v_cancel_at, v_conf from booking.orders where id = o;
   perform pg_temp.svc();
   r := booking.montonio_payment_apply(a1, 'paid', amt, '{}'::jsonb);
   perform pg_temp.logout();
   perform pg_temp.ck((r ->> 'order_cancelled')::boolean and (select status from booking.orders where id = o) = 'cancelled', 'H1 tilaus pysyy cancelled ' || left(r::text, 100));
   perform pg_temp.ck((select status = 'pending' and hold_expires_at is not null from booking.reservations where id = ares)
-      and (select hold_expires_at from booking.order_items where id = aitem) = ahold, 'H2 pending-lisäys ei vahvistu, rivipito ennallaan');
+      and (select hold_expires_at from booking.order_items where id = aitem) = ahold
+      and (select hold_expires_at from booking.reservations where id = ares) = rhold
+      and (select cancelled_at = v_cancel_at and confirmed_at is not distinct from v_conf from booking.orders where id = o), 'H2 pending-lisäys ei vahvistu, rivipito ennallaan');
   perform pg_temp.ck((select status from booking.payments where id = pid) = 'paid' and (select count(*) from booking.receipts where payment_id = pid) = 1
       and (select payment_status from booking.orders where id = o) = 'paid', 'H3 lisäyksen maksu kirjattu kerran, payment_status paid');
 
@@ -219,9 +223,32 @@ begin
   perform pg_temp.logout();
   perform pg_temp.ck(pg_temp.mails(o, 'receipt') = 1 and pg_temp.mails(o, 'order_confirmation') = 1, 'I2 auto_send=true: normaali polku jonottaa kuitin + vahvistuksen kuten ennen');
 
-  -- ===== J NOWAIT-sopimus rakenteessa (toiminnallinen todiste: ../late_paid_race.py)
-  perform pg_temp.ck(pg_get_functiondef('booking.payment_mark_paid(text,text,numeric,jsonb)'::regprocedure) ~ 'order by r\.id for update nowait'
-      and pg_get_functiondef('booking.payment_mark_paid(text,text,numeric,jsonb)'::regprocedure) ~ 'for update nowait;\s+update booking\.payments', 'J1 varaukset+tilaus NOWAIT ennen maksun päivitystä');
+  -- ===== K osittainen monivarausperuutus (svc, yksi varaus): tilaus ei peruttu → baseline-polku; peruttu varaus pysyy peruttuna
+  r := pg_temp.mk(v_slots[11], 'k@tlp.example'); tok := (r ->> 'token')::uuid; o := pg_temp.oid(tok);
+  select order_no into ono from booking.orders where id = o;
+  perform pg_temp.svc();
+  r := booking.montonio_payment_prepare(tok, null, 'paymentInitiation');
+  r := booking.montonio_payment_apply(r ->> 'order_number', 'paid', (r ->> 'amount')::numeric, '{}'::jsonb);
+  perform pg_temp.logout();
+  select id into mres from booking.reservations where order_id = o order by id limit 1;
+  r := booking.public_add_to_order(tok, jsonb_build_array(jsonb_build_object('type', 'reservation', 'product_id', 11, 'persons', 1, 'start', v_slots[12])));
+  select rv.id into ares from booking.reservations rv where rv.order_id = o and rv.id <> mres order by rv.id desc limit 1;
+  perform pg_temp.svc();
+  r2 := booking.montonio_payment_prepare(tok, null, 'paymentInitiation');
+  a1 := r2 ->> 'order_number'; amt := (r2 ->> 'amount')::numeric; pid := (r2 ->> 'payment_id')::bigint;
+  perform booking.svc_cancel_reservation(ono, 'tlp k osittainen', ares);
+  r := booking.montonio_payment_apply(a1, 'paid', amt, '{}'::jsonb);
+  perform pg_temp.logout();
+  perform pg_temp.ck(r ->> 'ok' = 'true' and r -> 'order_cancelled' is null and (select status from booking.orders where id = o) = 'confirmed'
+      and (select status from booking.reservations where id = mres) = 'confirmed' and (select status from booking.reservations where id = ares) = 'cancelled'
+      and (select status from booking.payments where id = pid) = 'paid'
+      and (select count(*) from booking.audit_log where row_pk = pid::text and action = 'LATE_PAID_CANCELLED_ORDER') = 0,
+      'K1 osittainen peruutus: baseline-polku, peruttu varaus ei herää ' || left(r::text, 80));
+
+  -- ===== J lukitus kuten baseline: ei NOWAITia, tilauslukko (FOR NO KEY UPDATE) vasta maksun UPDATEn (kuitti-triggerit) jälkeen
+  perform pg_temp.ck(position('nowait' in lower(pg_get_functiondef('booking.payment_mark_paid(text,text,numeric,jsonb)'::regprocedure))) = 0
+      and pg_get_functiondef('booking.payment_mark_paid(text,text,numeric,jsonb)'::regprocedure) ~ 'update booking\.payments set status = ''paid''[^;]*;\s+--[^\n]*\n\s+select o\.status into v_ostatus from booking\.orders o where o\.id = pay\.order_id for no key update;',
+      'J1 ei NOWAITia; tilaus lukitaan maksun UPDATEn jälkeen FOR NO KEY UPDATE');
 
   raise exception 'TESTRESULT pass=% fail=% %', (select count(*) from tlp_r where ok), (select count(*) from tlp_r where not ok),
     coalesce((select string_agg(label, ' | ') from tlp_r where not ok), '');

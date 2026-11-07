@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""LOCAL ONLY – EI DEV/PROD. booking_263 late_paid_cancelled_order: deterministiset rinnakkaistestit erillisillä yhteyksillä.
-Peruutuspolut: svc_cancel_reservation, public_cancel_booking, _expire_holds, _cancel_unpaid_expired_orders, _release_unpaid_additions.
-Kullekin: W1 peruutus voittaa (peruutus-tx auki, maksu-callback rinnalla), W2 maksu voittaa (maksu-tx auki, peruutus rinnalla),
-ja lomittuva D-tapaus (kolmas yhteys pitää lukkoa niin, että peruutus on puolivälissä), joka ilman NOWAIT-sopimusta tuottaa deadlockin.
-Odotus tunnistetaan pg_stat_activity.wait_event_type = 'Lock' -kyselyllä (ei unia). 55P03 maksupuolella = edge 503 → uusintayritys (simuloidaan).
-Käyttö: PGHOST=127.0.0.1 PGPORT=54329 PGUSER=postgres python late_paid_race.py <pohjakanta> fix|baseline   (vaatii psycopg 3)
-Luo kertakäyttöisen kannan pohjakannasta, asentaa (fix) numeroimattoman luonnoksen, poistaa kannan lopuksi."""
+"""LOCAL ONLY – EI DEV/PROD. booking_263 late_paid_cancelled_order: rinnakkaistestit erillisillä yhteyksillä, baseline vs fix.
+Peruutuspolut: svc_cancel_reservation (koko tilaus + osittainen yksi varaus), public_cancel_booking, _expire_holds,
+_cancel_unpaid_expired_orders, _release_unpaid_additions. W1 = peruutus-tx auki ensin, maksu-callback rinnalla; W2 = maksu-tx auki ensin;
+D = kolmas yhteys pitää lukkoa niin, että peruutus on todistetusti puolivälissä (cancel_wait_L == 'blocked' vaaditaan).
+Odotus tunnistetaan pg_stat_activity.wait_event_type = 'Lock'. 40P01/55P03 maksupuolella kirjataan; 'retry' simuloi palveluntarjoajan
+uusintaa (OLETUS, ei taattu). Tulokset JSON-riveinä; vertailu: late_paid_race_compare.py baseline.json fix.json.
+Käyttö: PGHOST=… python late_paid_race.py <pohjakanta> fix|baseline|file=<sql> [tulos.json]"""
 import os, sys, time, json, threading, pathlib
 import psycopg
 from psycopg import errors
@@ -89,6 +89,12 @@ def mk_addition(email):
     SETUP.execute("update booking.reservations set hold_expires_at = now() - interval '1 minute' where id = %s", (ares,))
     f.update(a=m["order_number"], amt=m["amount"], pid=m["payment_id"], ares=ares, aitem=aitem); return f
 
+def mk_partial(email):
+    f = mk_addition(email)   # vahvistettu päävaraus + pending-lisäys (pito voimassa) + lisäyksen maksu
+    SETUP.execute("update booking.order_items set hold_expires_at = now() + interval '30 minutes' where id = %s", (f["aitem"],))
+    SETUP.execute("update booking.reservations set hold_expires_at = now() + interval '30 minutes' where id = %s", (f["ares"],))
+    return f
+
 def mk_expired(email):
     f = mk_hold(email)
     SETUP.execute("update booking.reservations set status = 'expired', hold_expires_at = now() - interval '2 minutes' where order_id = %s", (f["oid"],))
@@ -113,18 +119,19 @@ PAY = "select booking.montonio_payment_apply(%s::text, 'paid', %s::numeric, '{}'
 CRON = {"expire_holds", "cancel_expired", "release"}   # sisäiset funktiot: cron/trigger ajaa omistajana (ei service_role-granttia)
 ACT = {
     "svc": lambda f: ("select booking.svc_cancel_reservation(%s, 'race')", (f["ono"],)),
+    "svc_partial": lambda f: ("select booking.svc_cancel_reservation(%s, 'race osittainen', %s)", (f["ono"], f["ares"])),
     "public": lambda f: ("select booking.public_cancel_booking(%s::uuid)", (f["tok"],)),
     "expire_holds": lambda f: ("select booking._expire_holds(null, null)", ()),
     "cancel_expired": lambda f: ("select booking._cancel_unpaid_expired_orders()", ()),
     "release": lambda f: ("select booking._release_unpaid_additions(%s, null, 'hold_expired')", (f["oid"],)),
 }
-FIX = {"svc": mk_hold, "public": mk_hold, "expire_holds": mk_holdexp, "cancel_expired": mk_expired, "release": mk_addition}
+FIX = {"svc": mk_hold, "svc_partial": mk_partial, "public": mk_hold, "expire_holds": mk_holdexp, "cancel_expired": mk_expired, "release": mk_addition}
 
 def finish_pay(bg, f, log):
     """Maksu-callbackin lopputulos; 55P03/40P01 → rollback + uusintayritys (edge 503 → palveluntarjoaja yrittää uudelleen)."""
     if bg.err is None: bg.c.commit(); log["pay"] = "ok"; log["pay_res"] = bg.res; return
     bg.c.rollback(); log["pay"] = type(bg.err).__name__ + ":" + (bg.err.sqlstate or "")
-    c = conn(); r = one(c, PAY, (f["a"], f["amt"])); c.commit(); c.close(); log["pay_retry"] = r
+    c = conn(); r = one(c, PAY, (f["a"], f["amt"])); c.commit(); c.close(); log["pay_retry_ASSUMED"] = r
 
 def finish_cancel(bg, log):
     if bg.err is None: bg.c.commit(); log["cancel"] = "ok"; log["cancel_res"] = bg.res
@@ -156,52 +163,25 @@ def d(path):
     L.commit(); A.join(25); B.join(25)
     finish_cancel(A, log); finish_pay(B, f, log); log["state"] = state(f); return f, log
 
-def expect(name, ok):
-    results.append((name, bool(ok)))
-
-def chk_cancel_won(path, f, log, how):
-    s = log["state"]; nores = all(v == "cancelled" for v in (s["res"] or {}).values())
-    if path == "release":
-        expect(f"{how} release: lisäys pysyy cancelled, maksu kerran, ei kapasiteettia", s["res"][str(f["ares"])] == "cancelled" and s["paid_n"] <= 2 and s["res_n"] == 2
-               and s["order"] == "confirmed" and (s["pay"] != "paid" or "YLIMAKSU" in s["note"]))
-    elif path == "public" and how == "W2":
-        pass
-    else:
-        expect(f"{how} {path}: peruttu säilyy, maksu kerran, tarkistukseen, ei vahvistusviestiä, varaukset cancelled",
-               s["order"] == "cancelled" and s["pay"] == "paid" and s["paid_n"] == 1 and s["receipts"] == 1 and s["late_audit"] == 1
-               and s["confirm_mail"] == 0 and nores and s["res_n"] == 1)
-
-def chk_pay_won(path, f, log):
-    s = log["state"]
-    if path in ("svc",):  # henkilökunnan peruutus maksun jälkeen: normaali maksetun tilauksen peruutus
-        expect("W2 svc: maksu kerran, sitten peruutus (ei tarkistusmerkintää)", s["order"] == "cancelled" and s["pay"] == "paid" and s["paid_n"] == 1 and s["late_audit"] == 0 and log["cancel"] == "ok")
-    elif path == "release":
-        expect("W2 release: lisäys vahvistettu maksulla, ei vapautusta", s["res"][str(f["ares"])] == "confirmed" and s["pay"] == "paid" and s["order"] == "confirmed" and log["cancel"] == "ok")
-    else:
-        expect(f"W2 {path}: maksu voitti, vahvistettu, peruutus/siivous ei vapauta paikkaa", s["order"] == "confirmed" and s["pay"] == "paid" and s["paid_n"] == 1
-               and all(v == "confirmed" for v in s["res"].values()) and s["late_audit"] == 0 and log["cancel"] == "ok")
+def classify(f, log):
+    s = log["state"]; t = s["pay"]
+    pay_class = "recorded" if t == "paid" and s["receipts"] == 1 else ("amount_mismatch_review" if "summa ei täsmää" in s["note"] else f"not_recorded:{t}")
+    revived = s["order"] == "confirmed" and all(v == "cancelled" for v in (s["res"] or {}).values())
+    return {"order": s["order"], "pay_class": pay_class, "paid_n": s["paid_n"], "res": sorted((s["res"] or {}).values()),
+            "late_audit": s["late_audit"], "confirm_mail": s["confirm_mail"], "revived_cancelled_order": revived,
+            "errors": sorted(v for k, v in log.items() if k in ("pay", "cancel") and v != "ok"),
+            "interleave_proven": log.get("cancel_wait_L") == "blocked" if "cancel_wait_L" in log else None}
 
 out = []
-for p in ["svc", "public", "expire_holds", "cancel_expired", "release"]:
-    for fn in (w1, w2) + ((d,) if p != "svc" else ()):
+for p in ["svc", "svc_partial", "public", "expire_holds", "cancel_expired", "release"]:
+    for fn in (w1, w2) + ((d,) if p in ("public", "expire_holds", "cancel_expired", "release") else ()):
         try:
-            f, log = fn(p)
+            f, log = fn(p); log["class"] = classify(f, log)
         except Exception as e:
-            log = {"case": f"{fn.__name__} {p}", "harness_error": repr(e)}; out.append(log); expect(log["case"] + " harness", False); continue
+            log = {"case": f"{fn.__name__.upper()} {p}", "harness_error": repr(e)}
+        log["key"] = f"{fn.__name__.upper()} {p}"
         out.append(log)
-        if fn is w2: chk_pay_won(p, f, log)
-        else: chk_cancel_won(p, f, log, "W1" if fn is w1 else "D")
-        if fn is d:
-            expect(f"D {p}: ei deadlockia (40P01)", "40P01" not in json.dumps(log, default=str))
-            expect(f"D {p}: peruutus onnistui", log.get("cancel") == "ok")
-            if MODE == "fix":
-                expect(f"D {p}: maksu ei jäänyt odottamaan (NOWAIT 55P03 heti)", log["pay_wait"] == "done" and log["pay"].endswith("55P03") and (log["pay_dt_before_L_release"] or 9) < 1.0)
-        if fn is w1 and MODE == "fix":
-            expect(f"W1 {p}: maksu ei deadlockannut", "40P01" not in json.dumps(log, default=str))
-for l in out: print(json.dumps(l, default=str, ensure_ascii=False))
-np = sum(ok for _, ok in results); nf = len(results) - np
-for n, ok in results: print(("PASS " if ok else "FAIL ") + n)
-print(f"RACERESULT mode={MODE} pass={np} fail={nf}")
+res = "\n".join(json.dumps(l, default=str, ensure_ascii=False) for l in out)
+print(res)
+if len(sys.argv) > 3: pathlib.Path(sys.argv[3]).write_text(res + "\n")
 SETUP.close()
-adm.execute(f"drop database if exists {DB} with (force)")
-sys.exit(1 if nf else 0)

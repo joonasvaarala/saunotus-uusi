@@ -1,12 +1,12 @@
 -- ROLLBACK: late_paid_cancelled_order (booking_263). Palauttaa PRODin booking_53-määrittelyn (md5 8ceb0a7dea60d37e3ea6a17cec0e4c25) sanatarkasti.
--- Lähtöhashvartija: ajetaan vain, jos nykyinen määrittely on täsmälleen tämä korjaus (1a36897aac7d3978535259fecacd9633) – ei korvaa myöhempää korjausta.
+-- Lähtöhashvartija: ajetaan vain, jos nykyinen määrittely on täsmälleen tämä korjaus (b35618b8cd17fa9e7c5902719d0804a2) – ei korvaa myöhempää korjausta.
 -- Jo valmiiksi palautettu (8ceb…) → ei muutosta. Ei koske dataan (maksut, internal_note, audit_log, skipped-kuittiviestit jäävät).
 do $pre$
 declare v text := md5(pg_get_functiondef('booking.payment_mark_paid(text,text,numeric,jsonb)'::regprocedure));
 begin
   if v = '8ceb0a7dea60d37e3ea6a17cec0e4c25' then raise notice 'rollback: payment_mark_paid on jo booking_53-versio'; return; end if;
-  if v is distinct from '1a36897aac7d3978535259fecacd9633' then
-    raise exception 'rollback: payment_mark_paid md5 % ei ole late_paid_cancelled_order-versio (1a36897a…). Ei muutoksia.', v;
+  if v is distinct from 'b35618b8cd17fa9e7c5902719d0804a2' then
+    raise exception 'rollback: payment_mark_paid md5 % ei ole late_paid_cancelled_order-versio (b35618b8…). Ei muutoksia.', v;
   end if;
 end $pre$;
 

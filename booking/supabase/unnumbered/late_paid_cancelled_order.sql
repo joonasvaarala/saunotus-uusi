@@ -1,36 +1,29 @@
--- NUMEROIMATON LUONNOS → booking_263 (Bottiavustus varasi 7.11.; tiedostoa ei vielä nimetty, ei ajettu DEV/PROD).
--- Myöhäinen "maksettu"-ilmoitus perutulle tilaukselle. Käyttäjän hyväksyntä: Asiakaspalvelu t236u 7.11. 09.19 ("Joo toi bugi pitää kyllä korjata").
+-- NUMEROIMATON LUONNOS → booking_263 (varattu; tarkka nimeäminen Bottiavustuksen putkessa). Ei ajettu DEV/PROD.
+-- Kapea, ei-regressoiva korjaus: myöhäinen "maksettu"-ilmoitus perutulle tilaukselle (Joonas, Asiakaspalvelu t236u 7.11. 09.19: "Joo toi bugi pitää kyllä korjata").
 --
--- Bugi: booking.payment_mark_paid(text,text,numeric,jsonb) (booking_53, PROD md5 8ceb0a7dea60d37e3ea6a17cec0e4c25) kirjasi maksun ja asetti
--- ehdoitta orders.status = 'confirmed' myös perutulle tilaukselle (orders_confirmed_upd jonotti tilausvahvistuksen). Lisäksi
--- _refresh_order_payment vahvisti maksettujen rivien pending-varaukset ja tyhjensi rivipidot tilauksen tilasta riippumatta.
--- Kutsujat: montonio_payment_apply, vismapay_payment_apply (lukitsevat maksurivin ensin), mobilepay-flow (edge RPC).
+-- Bugi: booking.payment_mark_paid(text,text,numeric,jsonb) (booking_53, PROD md5 8ceb0a7dea60d37e3ea6a17cec0e4c25) asetti ehdoitta
+-- orders.status = 'confirmed' myös perutulle tilaukselle (→ tilausvahvistus asiakkaalle) ja _refresh_order_payment vahvisti maksettujen
+-- rivien pending-varaukset / purki rivipidot tilauksen tilasta riippumatta.
 --
--- LUKITUSSOPIMUS (vain tämä funktio muuttuu):
---  * Maksurivi on aina lukittu ensin (kutsujat + tämän funktion ensimmäinen SELECT … FOR UPDATE); sitä ei voi muuttaa muuttamatta kutsujia.
---  * Peruutuspolut lukitsevat varaus/tilaus ensin ja maksun viimeisenä (public_cancel_booking, _expire_holds: varaukset→tilaus→maksut;
---    _cancel_unpaid_expired_orders, _release_unpaid_additions: tilaus→varaukset→maksut; svc_cancel_reservation: varaukset→tilaus, ei maksua).
---  * Siksi maksupolku EI odota varaus-/tilauslukkoa: tilauksen varaukset (id-järjestys) ja tilaus lukitaan NOWAIT. Jos peruutus/siivous pitää
---    lukkoa, funktio kaatuu heti SQLSTATE 55P03 (lock_not_available) → koko transaktio (myös maksurivin lukko) perutaan, peruutus etenee eikä
---    kumoudu, eikä lukkosykliä (deadlockia) synny. Edge: montonio-notify/vismapay-notify palauttavat RPC-virheestä 503 → palveluntarjoaja
---    yrittää uudelleen; uusintayritys näkee peruutuksen lopputuloksen. Jos maksu ehti lukita ensin, peruutuspolut odottavat ja arvioivat
---    ehtonsa uudelleen (READ COMMITTED) maksun jälkeen.
---  * Tilauksen tila luetaan lukitsemisen jälkeen → tuorein sitoutunut tila.
---
--- Perutulle tilaukselle (status = 'cancelled'):
---  * aito maksu kirjataan kerran (payments paid, orders.payment_status lasketaan samalla kaavalla kuin _refresh_order_payment, mutta
---    _refresh_order_payment-funktiota EI kutsuta → pending-varaukset/lisäykset eivät vahvistu, rivipitoja ei tyhjennetä);
---  * tilaus ja varaukset eivät muutu, tilausvahvistusta ei jonoteta, kuitti kirjanpitoon, kuittisähköposti (jos email.receipt_auto_send=true
---    jonotti sen) merkitään skipped; internal_note (näkyy admin_get_order / Talous-tilaus) + audit_log LATE_PAID_CANCELLED_ORDER;
---    ei automaattista palautusta. Paluuarvo: ok, needs_manual_review, order_cancelled, overpaid_amount.
---  * Muut tilat: käyttäytyminen ennallaan. Allekirjoitus, SECURITY DEFINER, search_path '', grantit ennallaan.
--- Rollback: rollbacks/late_paid_cancelled_order_ROLLBACK.sql (vartija: korvaa vain tämän version).
+-- Muutos (vain tämä funktio):
+--  * Baseline säilyy: maksurivin lukko ja vartijat (not_found / already / amount_mismatch) sekä maksun UPDATE ja sen triggerit
+--    (kirjanpitokuitti, payment_lines, kuittiviestin jonotus) samassa järjestyksessä kuin ennen.
+--  * Heti maksun UPDATEn jälkeen – kohdassa, jossa baseline siirtyy tilauksen päivitykseen (_refresh_order_payment → UPDATE orders) –
+--    tilaus lukitaan FOR NO KEY UPDATE (sama lukkotaso kuin baselinen UPDATE) ja sen tila luetaan tuoreena. Ei NOWAITia, ei varausten
+--    ennakkolukitusta, ei aiempaa lukkoa kuittikirjauksen edelle → lukitusjärjestys ja odotuskäytös kuten baselinessa.
+--  * status = 'cancelled': vain payment_status lasketaan (sama kaava kuin _refresh_order_payment), ei _refresh_order_payment-kutsua,
+--    ei varaus-/rivipito-/status-/cancelled_at-muutoksia, ei tilausvahvistusta; samassa transaktiossa jonotettu kuittiviesti (jos
+--    email.receipt_auto_send=true) → skipped; ylimaksuvartija kuten ennen; internal_note + audit LATE_PAID_CANCELLED_ORDER;
+--    paluu needs_manual_review + order_cancelled. Ei automaattista palautusta eikä asiakasviestiä.
+--  * Muut tilat: baseline-polku sellaisenaan.
+-- Ei kuulu tähän: globaalit baseline-deadlockit, retry/reconcile, MobilePay capture-retry, lisäyksen amount_mismatch, jo lähteneet viestit.
+-- Rollback: rollbacks/late_paid_cancelled_order_ROLLBACK.sql (lähtöhashvartija).
 
 do $pre$
 declare v text;
 begin
   v := md5(pg_get_functiondef('booking.payment_mark_paid(text,text,numeric,jsonb)'::regprocedure));
-  if v is null or v not in ('8ceb0a7dea60d37e3ea6a17cec0e4c25', '1a36897aac7d3978535259fecacd9633') then  -- booking_53 tai tämä korjaus (uudelleenajo)
+  if v is null or v not in ('8ceb0a7dea60d37e3ea6a17cec0e4c25', 'b35618b8cd17fa9e7c5902719d0804a2') then  -- booking_53 tai tämä korjaus (uudelleenajo)
     raise exception 'late_paid_cancelled_order: payment_mark_paid md5 % ei vastaa odotettua (8ceb0a7d… booking_53 / tämä). Ei muutoksia.', v;
   end if;
 end $pre$;
@@ -47,22 +40,21 @@ begin
   if not found then perform booking._err('payment_not_found', 'Maksua ei löydy'); end if;
   if pay.status = 'paid' then return jsonb_build_object('ok', true, 'already', true); end if;
   if p_amount is not null and p_amount <> pay.amount then perform booking._err('amount_mismatch', 'Summa ei täsmää'); end if;
-  -- late-paid (booking_263): maksu on jo lukittu → varaukset ja tilaus NOWAIT (55P03 → transaktio perutaan, palveluntarjoaja yrittää uudelleen)
-  perform 1 from booking.reservations r where r.order_id = pay.order_id order by r.id for update nowait;
-  select o.status into v_ostatus from booking.orders o where o.id = pay.order_id for update nowait;
   update booking.payments set status = 'paid', paid_at = now(), provider_status = 'paid', raw = coalesce(p_raw, raw) where id = pay.id;
+  -- booking_263: tilaus lukitaan ja luetaan tuoreena tässä, missä baseline siirtyy tilauksen päivitykseen (sama lukkotaso kuin UPDATE)
+  select o.status into v_ostatus from booking.orders o where o.id = pay.order_id for no key update;
   if v_ostatus = 'cancelled' then
-    -- sama payment_status-kaava kuin _refresh_order_payment, ilman varausten vahvistusta / rivipitojen purkua
-    select total_gross into v_total from booking.orders where id = pay.order_id;
-    select coalesce(sum(amount) filter (where status in ('paid','partially_refunded','refunded')), 0), coalesce(sum(refunded_amount), 0), count(*) filter (where status = 'pending')
-      into v_paid, v_refunded, v_pending from booking.payments where order_id = pay.order_id;
+    -- booking_263: vain payment_status (kaava = _refresh_order_payment), ei varausten vahvistusta eikä rivipitojen purkua
+    select o.total_gross into v_total from booking.orders o where o.id = pay.order_id;
+    select coalesce(sum(p.amount) filter (where p.status in ('paid','partially_refunded','refunded')), 0), coalesce(sum(p.refunded_amount), 0), count(*) filter (where p.status = 'pending')
+      into v_paid, v_refunded, v_pending from booking.payments p where p.order_id = pay.order_id;
     update booking.orders set payment_status = case
         when v_paid > 0 and v_refunded >= v_paid then 'refunded'
         when v_refunded > 0 then 'partially_refunded'
         when coalesce(v_total, 0) <= 0.004 then 'paid'
         when v_paid >= v_total and v_total > 0 then 'paid'
         when v_paid > 0 then 'partially_paid'
-        when v_pending > 0 and exists (select 1 from booking.payments where order_id = pay.order_id and status = 'pending' and provider <> 'manual') then 'pending'
+        when v_pending > 0 and exists (select 1 from booking.payments x where x.order_id = pay.order_id and x.status = 'pending' and x.provider <> 'manual') then 'pending'
         else 'unpaid' end
      where id = pay.order_id;
   else
@@ -74,8 +66,8 @@ begin
   if v_over > 0.004 then
     update booking.orders set internal_note = coalesce(internal_note || E'\n', '') || format('YLIMAKSU %s € – palauta asiakkaalle (admin_refund)', round(v_over, 2)) where id = pay.order_id;
   else v_over := 0; end if;
-  -- late-paid (booking_263): perutulle tilaukselle maksu kirjataan, mutta tilaus/varaukset eivät herää eikä asiakkaalle lähde automaattiviestiä
   if v_ostatus = 'cancelled' then
+    -- booking_263: perutulle tilaukselle ei automaattista kuittiviestiä; käsin tarkistettavaksi
     update booking.email_outbox set status = 'skipped', last_error = 'late_paid_cancelled_order: ei automaattista kuittia perutulle tilaukselle'
      where payment_id = pay.id and kind = 'receipt' and status = 'pending';
     update booking.orders set internal_note = coalesce(internal_note || E'\n', '') || format('MAKSU PERUTULLE TILAUKSELLE %s € (%s %s) – tilaus pysyy peruttuna, tarkista käsin / palauta maksu', round(pay.amount, 2), p_provider, p_provider_ref)
