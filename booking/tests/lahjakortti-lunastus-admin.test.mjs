@@ -140,7 +140,13 @@ test('tekstit: FI = EN avaimet, pending-import-68 (+ 69, booking_174) täsmää,
   const rows = [...JSON.parse(rd('../content/site-texts.pending-import-68.json')), ...JSON.parse(rd('../content/site-texts.pending-import-69.json')).filter((r) => r.key.startsWith('ui.admin.vcr.'))];   // booking_174: arvo käsin
   assert.equal(new Set(rows.map((r) => `${r.key}|${r.lang}`)).size, rows.length);
   for (const lang of ['fi', 'en']) for (const [k, v] of Object.entries(VCR_TEXTS[lang])) {
-    const r = rows.find((x) => x.key === k && x.lang === lang); assert.ok(r, `${k} ${lang}`); assert.equal(r.text, v);
+    const r = rows.find((x) => x.key === k && x.lang === lang); assert.ok(r, `${k} ${lang}`);
+    // PR #318 changed only this heading; imports 68/69 are immutable history,
+    // not a snapshot of every subsequent UI copy change.
+    if (k === 'ui.admin.vcr.section_title') {
+      assert.equal(r.text, lang === 'fi' ? 'Lunastamattomat kumppanilahjakortit' : 'Unredeemed partner gift cards');
+      assert.equal(v, lang === 'fi' ? 'Kumppanilahjakortit lunastamatta' : 'Partner gift cards unredeemed');
+    } else assert.equal(r.text, v);
     assert.deepEqual(r.placeholders.sort(), [...new Set(v.match(/\{\{[^{}]+\}\}/g) || [])].sort(), k);
   }
   for (const r of rows) { assert.ok(!r.text.includes('<'), r.key); assert.doesNotMatch(r.text, /\p{Extended_Pictographic}|https?:\/\//u, r.key); assert.ok(r.max_len >= r.text.length); assert.equal(r.class, 'normal'); }
@@ -152,7 +158,7 @@ test('tekstit: FI = EN avaimet, pending-import-68 (+ 69, booking_174) täsmää,
 });
 
 test('kytkennät: Tarkista-osio, tilauksen ikkuna, Talous-tilaus, Procountor-tilit myyjittäin, Lunastussivut-asetus, build-lista', () => {
-  assert.match(rd('admin/views/review.js'), /unredeemedSection\(\{ rpc \}\)/);
+  assert.match(rd('admin/views/review.js'), /unredeemedSection\(\{ rpc, hideEmpty: true \}\)/);
   assert.match(rd('admin/views/shared.js'), /orderVoucherBox\(\{ rpc, orderId: r\.order_id/);
   assert.match(rd('admin/views/talous-orders.js'), /orderVoucherBox\(\{ rpc, orderId: id/);
   assert.match(rd('admin/views/orders.js'), /createOrdersTab\(\{ api, ctx, gift, rpc \}\)/, 'Tilaukset-näkymä antaa rpc:n');

@@ -11,6 +11,7 @@ import { pt } from './pay-choices-texts.js';
 import { T } from './i18n.js';
 import { createWaitlistView } from './waitlist-ui.js';
 import { visibleWaitlistSlots, fullyBooked, hasWaitlistSlots } from './waitlist-logic.js';
+import { daySlotsAvailableFirst } from './day-slot-order.js';
 import { indexShopEvents, missingEventProducts, eventIsFull, eventWaitlistPath, byEventStart } from './event-full.js';
 import { loadProducts as loadTreatmentProducts, splitCatalog, isListed as treatmentListed, isTreatmentBooking, loadAvailability as loadTreatmentSlots, horizonDays as treatmentHorizon, timeToken as treatmentTimeToken, isRetryable as treatmentRetryable } from './treatments.js';
 import { pickCatalog } from './catalog-audience.js';
@@ -476,7 +477,7 @@ function prodCard(p, rs, ds, open, onToggle, treat = false) {
   const rawDesc = pdesc(p) || '', desc = (isRichHtml(rawDesc) ? visibleText(rawDesc) : rawDesc).replace(/\s+/g, ' ').trim(), short = desc.length > 90 ? `${desc.slice(0, 90).replace(/\s+\S*$/, '')}…` : desc;
   const panel = h('div', { id: `${id}-panel`, class: 'bk-pc-panel', role: 'region', 'aria-labelledby': `${id}-btn`, hidden: open ? null : true },
     treat && tv.timelineText(p) ? h('p', { class: 'bk-note bk-pc-tl', text: tv.timelineText(p) }) : null,
-    h('ul', { class: 'bk-slotlist' }, (treat ? rs : visibleWaitlistSlots(rs)).map((x) => (treat ? treatItem(x, ds) : dayItem(x, ds)))),
+    h('ul', { class: 'bk-slotlist' }, (treat ? rs : daySlotsAvailableFirst(rs)).map((x) => (treat ? treatItem(x, ds) : dayItem(x, ds)))),
     h('p', { class: 'bk-pc-more' }, h('a', { href: treat ? bk(`/tuote/${p.slug}?n=1&d=${ds}`) : bk(`/tuote/${p.slug}/${ds}`), text: t.productInfo })));
   const btn = h('button', { type: 'button', id: `${id}-btn`, class: 'bk-pc-head', 'aria-expanded': open ? 'true' : 'false', 'aria-controls': `${id}-panel`, onclick: () => onToggle(p, li) },
     pimg(p, 'pc-img', { alt: false, w: 160, hgt: 160 }),
