@@ -1,11 +1,11 @@
--- LOCAL ONLY – EI DEV/PROD. Numeroimaton late_paid_cancelled_order-luonnos (payment_mark_paid perutulle tilaukselle).
+-- LOCAL ONLY – EI DEV/PROD. booking_263 late_paid_cancelled_order (payment_mark_paid perutulle tilaukselle).
 -- Ajo: cd booking/supabase/tests/checkout && psql -X -d <paikallinen testikanta> -f t_late_paid_cancelled_order.sql
 -- Yksi transaktio, lopussa tahallinen TESTRESULT-poikkeus + rollback. Rinnakkaisuus: ../late_paid_race.py (erilliset yhteydet, baseline vs fix).
 \set ON_ERROR_STOP on
 begin;
 set local lock_timeout = '3s';
 set local statement_timeout = '120s';
-\ir ../../unnumbered/late_paid_cancelled_order.sql
+\ir ../../migrations/20261107095100_booking_263_late_paid_cancelled_order.sql
 create temp table tlp_r(ok boolean, label text) on commit drop;
 create function pg_temp.ck(p_ok boolean, p_label text) returns void language sql as $$ insert into tlp_r values (coalesce(p_ok, false), p_label) $$;
 create function pg_temp.mk(p_start timestamptz, p_email text) returns jsonb language sql as $$
