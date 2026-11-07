@@ -126,7 +126,7 @@ export async function render({ ctx, refs, reload }) {
     const kind = opt.badge ? opt.badge(rows.length) : 'warn';
     return h('section', { class: `card review-sec has${opt.acked ? ' acked' : ''}`, 'data-testid': `review-${k}`, 'data-count': String(rows.length) },
       h('h2', {}, title, ' ', badge(kind, `${rows.length} kpl`)), h('p', { class: 'muted', text: hint }),
-      h('ul', { class: 'reslist' }, rows.map((x) => h('li', { class: 'resrow' }, h('span', {}, ...[].concat(row(x))), opt.extra ? opt.extra(x) : null)));
+      h('ul', { class: 'reslist' }, rows.map((x) => h('li', { class: 'resrow' }, h('span', {}, ...[].concat(row(x))), opt.extra ? opt.extra(x) : null))));
   };
   const ackedRows = Array.isArray(v.acked_block_conflicts) ? v.acked_block_conflicts : [];
   const ackedSec = ackedRows.length ? h('section', { class: 'card review-sec acked', 'data-testid': 'review-acked_block_conflicts', 'data-count': String(ackedRows.length) },
