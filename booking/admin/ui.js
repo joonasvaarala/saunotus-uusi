@@ -70,7 +70,7 @@ export const ERR_FI = {
   busy: 'Palvelin on kiireinen – yritä hetken päästä uudelleen.',
   rate_limited: 'Liian monta hakua – yritä hetken päästä uudelleen.',
   override_reason_required: 'Ylitys vaatii perustelun (vähintään 3 merkkiä).',
-  wrong_lifecycle: 'Väärän tyyppinen tuote: vanhat tuotteet kirjataan "Vanha varaus" -lomakkeella, nykyiset resurssivarauksena.',
+  wrong_lifecycle: 'Väärän tyyppinen tuote: vanhat tuotteet kirjataan Jälkikirjaus-lomakkeella, nykyiset Hoito tai tila -lomakkeella.',
   space_not_allowed: 'Tuote tai henkilömäärä ei sovi valittuun tilaan.',
   no_space: 'Tuotteelle ei ole sääntöä valitulle tilalle.',
   no_pool_for_start: 'Alkuajalle ei ole kapasiteettipoolia. Valitse tuotteen mukainen alkamisaika.',

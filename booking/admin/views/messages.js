@@ -52,7 +52,7 @@ export async function render({ ctx, refs }) {
       messagesTabBar('pohjat'),
       h('div', { class: 'row between wrap' }, h('h1', { id: 'messages-h' }, icon('mail', 22), ' Viestit'), h('button', { type: 'button', class: 'btn', 'data-testid': 'message-new', onclick: () => edit(emptyMessage()) }, 'Uusi viesti')),
       h('p', { class: 'muted', text: 'Ohjeen lyhyt teksti näkyy tilausvahvistuksessa ja tilaussivulla, ja täysi teksti avautuu napista Näytä ohjeet. Jälkimarkkinointi ja palautepyyntö lähtevät vain ajastettuna. Jälkimarkkinointi lähtee vain, jos asiakkaalla on markkinointilupa, ja viestin loppuun tulee peruutuslinkki. Ohje ja palautepyyntö ovat palveluviestejä. Sama viesti lähtee tilauksesta kerran, vaikka tuotteita olisi useita.' }),
-      h('label', { class: 'check big', 'data-testid': 'messages-timed-label' }, sw, h('span', {}, h('strong', { text: 'Ajastetut viestit päällä' }), h('small', { text: 'Oletus pois. Ennen päälle kytkemistä tarkista pohjat. Lähetys kunnioittaa yhä sähköpostin tilaa (off, dry_run, live) ja vastaanottajarajausta. Kytkin ei lähetä yli 36 tuntia myöhässä olevia vanhoja viestejä.' }))),
+      h('label', { class: 'check big', 'data-testid': 'messages-timed-label' }, sw, h('span', {}, h('strong', { text: 'Ajastetut viestit päällä' }), h('small', { text: 'Oletus pois. Ennen päälle kytkemistä tarkista pohjat. Lähetys kunnioittaa yhä sähköpostin tilaa (pois / harjoitus / käytössä) ja vastaanottajarajausta. Kytkin ei lähetä yli 36 tuntia myöhässä olevia vanhoja viestejä.' }))),
       list);
   }
 

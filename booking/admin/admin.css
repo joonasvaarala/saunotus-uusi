@@ -160,6 +160,26 @@ h2 .icon,h3 .icon,.addon-mark .icon{display:inline-block;vertical-align:-3px;mar
 .moverow{margin-top:10px;border-top:1px solid var(--line);padding-top:8px}
 .moverow .row{align-items:flex-end}
 .typeset{margin:0 0 12px}
+
+/* Hallinnan UX-uudistus: Tarkista Kunnossa-rivi + Uusi varaus -tyyppikortit + yläpalkin määrä */
+.review-ok{display:flex;align-items:flex-start;gap:10px;margin:12px 0;padding:12px 14px;border-radius:10px;background:var(--okbg);color:var(--ok);border:1px solid var(--line);font-size:14px;font-weight:600}
+.review-ok-mark{flex:none;font-size:16px;line-height:1.2}
+.nb-types{border:0;padding:0;margin:0 0 14px;min-width:0}
+.nb-types>legend{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0}
+.nb-typegrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.nb-typecard{position:relative;display:flex;flex-direction:column;gap:4px;min-height:72px;padding:14px 16px;border:1px solid var(--line);border-radius:12px;background:var(--card);cursor:pointer;color:var(--ink)}
+.nb-typecard input{position:absolute;opacity:0;inset:0;width:100%;height:100%;margin:0;cursor:pointer}
+.nb-typecard strong{font-size:15px;font-weight:700;line-height:1.25}
+.nb-typecard small{font-size:13px;font-weight:500;color:var(--muted);line-height:1.35}
+.nb-typecard.on,.nb-typecard:has(input:checked){background:var(--green);border-color:var(--green);color:var(--card)}
+.nb-typecard.on small,.nb-typecard:has(input:checked) small{color:var(--card);opacity:.88}
+.nb-typecard:has(input:focus-visible){outline:3px solid var(--gold);outline-offset:2px}
+.top .quick-action{position:relative}
+.top .quick-review-count{display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;padding:0 5px;margin-left:2px;border-radius:999px;background:var(--warnbg);color:var(--gold);font-size:11px;font-weight:700;line-height:1}
+.top .quick-review-count[hidden]{display:none!important}
+@media (max-width:45em){.nb-typegrid{grid-template-columns:1fr}}
+@media (max-width:899px){.top .quick-review-count{position:absolute;top:2px;right:2px;margin:0}}
+
 .override-box{border-color:rgba(107,75,0,.45);background:var(--warnbg)}
 .override-box .ovr-reason[hidden]{display:none}
 .review-sec h2{display:flex;align-items:center;gap:8px;margin:0 0 4px;font-size:17px}
@@ -1173,3 +1193,29 @@ body.shot #shell .nav .lbl{display:inline}
   body.training-printing .training-print-only { display: block; }
   body.training-printing table { font-size: 10pt; width: 100%; }
 }
+
+
+.nb-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(220px,280px);gap:14px;align-items:start}
+.nb-summary{position:sticky;top:72px;padding:14px 16px}
+.nb-summary h3{margin:0 0 8px;font-size:16px}
+.nb-summary-line{margin:0 0 8px;font-size:14px;line-height:1.4}
+.nb-summary-price{margin:0;font-size:15px;font-weight:700;color:var(--ink)}
+@media (max-width:56.25em){.nb-layout{grid-template-columns:1fr}.nb-summary{position:static}}
+
+
+.paylink-chips{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 12px}
+.paylink-chip.on{background:var(--green);border-color:var(--green);color:var(--card)}
+.paylink-cards{display:flex;flex-direction:column;gap:12px}
+.paylink-card{padding:16px 18px}
+.paylink-card-top{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+.paylink-card-who{display:flex;flex-direction:column;gap:2px;min-width:0}
+.paylink-card-amount{text-align:right}
+.paylink-card-amount strong{display:block;font-size:22px;font-weight:800;line-height:1.15}
+.paylink-card-res{margin:8px 0}
+.paylink-card-meta{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;margin:0 0 12px;font-size:13px}
+.paylink-card-actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.paylink-more{position:relative}
+.paylink-more-btn{min-width:40px;font-size:18px;line-height:1}
+.paylink-more-menu{position:absolute;right:0;bottom:calc(100% + 4px);z-index:5;min-width:12rem;padding:6px;border:1px solid var(--line);border-radius:10px;background:var(--card);box-shadow:0 8px 24px var(--line)}
+.paylink-more-item{display:block;width:100%;text-align:left;border:0;background:transparent;padding:10px 12px;border-radius:8px;font:inherit;cursor:pointer}
+.paylink-more-item:hover,.paylink-more-item:focus-visible{background:var(--bg)}

@@ -143,7 +143,7 @@ export async function orderVoucherBox({ rpc, orderId, onChanged = () => {} }) {
 }
 
 /** Tarkista-sivun osio: lunastamattomat, suodatus myyjän mukaan, ryhmittely myyjittäin. */
-export async function unredeemedSection({ rpc }) {
+export async function unredeemedSection({ rpc, hideEmpty = false } = {}) {
   await loadVcrTexts(rpc);
   const st = { source: null };
   const body = h('div', { class: 'vcr-body', 'aria-live': 'polite' });
@@ -159,8 +159,10 @@ export async function unredeemedSection({ rpc }) {
     }
     const claims = Array.isArray(v?.claims) ? v.claims : [];
     const total = Number(v?.total) || Object.values(v?.counts || {}).reduce((s, n) => s + (Number(n) || 0), 0);
-    countBadge.textContent = String(total); countBadge.className = `badge ${total ? 'warn' : 'ok'}`;
+    countBadge.textContent = total ? `${total} kpl` : '0'; countBadge.className = `badge ${total ? 'warn' : 'ok'}`;
     sec.dataset.count = String(total); sec.classList.toggle('has', total > 0);
+    if (hideEmpty && !total && !st.source) { sec.hidden = true; return; }
+    sec.hidden = false;
     chipsEl.replaceChildren(...filterChips(v?.counts, st.source).map((c) => h('button', {
       type: 'button', class: `btn sm vcr-chip${c.active ? ' on' : ''}`, 'aria-pressed': c.active ? 'true' : 'false', 'data-testid': `vcr-chip-${c.source || 'all'}`,
       onclick: () => { st.source = c.source; load(); },

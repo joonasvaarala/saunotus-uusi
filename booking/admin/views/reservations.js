@@ -136,7 +136,7 @@ export async function render({ ctx, refs, reload, query, routePath = 'varaukset'
   const reviewCount = h('span', { class: 'badge warn', hidden: true });
   rpc('admin_review_list').then((v) => { const n = reviewAttentionCount(v); if (n) { reviewCount.textContent = String(n); reviewCount.hidden = false; reviewCount.setAttribute('aria-label', `${n} tarkistettavaa`); } }).catch(() => {});
   const actions = h('div', { class: 'row wrap pageactions' },
-    h('a', { class: 'btn', href: '#/uusi?tyyppi=vanha', text: 'Vanha varaus' }),
+    h('a', { class: 'btn', href: '#/uusi?tyyppi=vanha', text: 'Jälkikirjaus' }),
     h('a', { class: 'btn ghost', href: '#/tarkista' }, 'Tarkista ', reviewCount));
   return [h('h1', { text: 'Varaukset' }), actions, drawer.node, count, list, more];
 }
