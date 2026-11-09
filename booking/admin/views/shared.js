@@ -266,7 +266,7 @@ export function reservationDialog(r, { methods = [], onChange, refs, can = () =>
       addPurchase: () => h('button', { type: 'button', class: 'btn primary', 'data-testid': 'order-reservation-add', text: tx('ui.admin.res.add_purchase'), onclick: doPurchase }),
       createLink: () => h('button', { type: 'button', class: 'btn', 'data-testid': 'order-reservation-create-link', text: tx('ui.admin.res.payment_link'), onclick: doLink }),
       arrive: () => act('Merkitse saapuneeksi', () => status('completed'), 'btn', 'res-arrive'),
-      change: () => h('button', { type: 'button', class: 'btn', 'data-testid': 'res-change', text: 'Muuta varausta', onclick: () => { d.close(); changeDialog(r, onChange, order, role); } }),
+      change: () => h('button', { type: 'button', class: 'btn', 'data-testid': 'res-change', text: 'Muuta varausta', onclick: () => { d.close(); changeDialog(r, onChange, order, can); } }),
       noShow: () => h('button', { type: 'button', class: 'btn ghost', 'data-testid': 'res-no-show', text: 'Ei saapunut', onclick: () => formDialog(tx('ui.admin.res.no_show_title'), [h('p', { text: tx('ui.admin.res.no_show_text') })], tx('ui.admin.res.no_show_submit'), async () => { await status('no_show'); after(); }) }),
       cancel: () => h('button', { type: 'button', class: 'btn danger rd-danger', 'data-testid': 'res-cancel', text: 'Peru varaus', onclick: async (event) => {
         const btn = event.currentTarget; btn.disabled = true;
@@ -313,8 +313,8 @@ export function reservationDialog(r, { methods = [], onChange, refs, can = () =>
 }
 
 // Varauksen muutos hallinnasta: sama voimassa oleva RPC ja samat parametrit kuin ennen.
-function changeDialog(r, onChange, order = null, role = null) {
-  const isAdmin = role === 'admin';
+function changeDialog(r, onChange, order = null, can = () => false) {
+  const isAdmin = !!can('bookings.override');
   loadBookingTexts(rpc).catch(() => {});
   const day = (iso) => new Date(iso).toLocaleDateString('sv-SE', { timeZone: 'Europe/Helsinki' });
   const st = { date: day(r.starts_at), session: null, blocks: [] };

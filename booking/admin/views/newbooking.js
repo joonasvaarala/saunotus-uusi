@@ -20,7 +20,7 @@ import { invoiceHref, openInvoiceAfterBooking } from '../invoice-link.js';
 const clockSpan = (start, end) => (spansDays(start, end) ? formatWhenRange(start, end, getLang() === 'en' ? 'en' : 'fi') : `${fmtTime(start)}–${fmtTime(end)}`);
 
 export async function render({ ctx, refs, query, reload }) {
-  const isAdmin = ctx.role === 'admin';
+  const isAdmin = ctx.can('bookings.override');
   const kind = query.get('tyyppi');   // migraatio 17: resurssivaraus / vanha varaus omalla lomakkeellaan
   if (kind === 'resurssi' || kind === 'vanha') return renderResource({ ctx, refs, query, kind });
   const [addons, rules] = await Promise.all([
