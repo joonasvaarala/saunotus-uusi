@@ -110,3 +110,53 @@ test('Migraatio: liput vain hallinnan RPC:issä, julkinen kapasiteetti ei negati
   assert.match(move, /p_allow_off_schedule/);
   assert.match(move, /Haluatko varmasti|over_ask|bookingText\('over_ask'\)/);
 });
+
+
+test('Manager-ylibuukkaus sallittu (bookings.override = true)', () => {
+  const notice = L.capacityNotice({ mode: 'shared', remaining: 0, max_persons: 16, pool_capacity: 10, pool_peak: 10, status: 'full' }, 2);
+  const mgr = L.bookingAction([notice], true);
+  assert.equal(mgr.blocked.length, 0);
+  assert.equal(mgr.allowOverbook, true);
+  assert.equal(mgr.allowOff, false);
+});
+
+test('Staff-ylibuukkaus estetty (bookings.override = false)', () => {
+  const notice = L.capacityNotice({ mode: 'shared', remaining: 0, max_persons: 16, pool_capacity: 10, pool_peak: 10, status: 'full' }, 2);
+  const staff = L.bookingAction([notice], false);
+  assert.equal(staff.blocked[0].kind, 'admin_only');
+  assert.equal(staff.allowOverbook, false);
+  assert.equal(noticeText(staff.blocked[0]), 'Vuoro on täynnä – vain admin voi ylibuukata.');
+});
+
+test('UI käyttää bookings.override, ei role === admin -ylibuukkauspolkua', () => {
+  const nb = readFileSync(join(root, 'admin/views/newbooking.js'), 'utf8');
+  const rb = readFileSync(join(root, 'admin/views/resbooking.js'), 'utf8');
+  const sh = readFileSync(join(root, 'admin/views/shared.js'), 'utf8');
+  assert.match(nb, /const isAdmin = ctx\.can\('bookings\.override'\)/);
+  assert.doesNotMatch(nb, /const isAdmin = ctx\.role === 'admin'/);
+  assert.match(rb, /const isAdmin = ctx\.can\('bookings\.override'\)/);
+  assert.doesNotMatch(rb, /const isAdmin = ctx\.role === 'admin'/);
+  assert.match(rb, /ctx\.can\('bookings\.override'\)/);
+  assert.match(sh, /const isAdmin = !!can\('bookings\.override'\)/);
+  assert.doesNotMatch(sh, /role === 'admin'/);
+  assert.doesNotMatch(sh, /ctx\.role === 'admin'/);
+  assert.match(sh, /changeDialog\(r, onChange, order, can\)/);
+});
+
+test('booking_268: has_permission(bookings.override) molemmissa funktioissa', () => {
+  const sql268 = readFileSync(join(root, 'supabase/migrations/20261109181007_booking_268_manager_overbook.sql'), 'utf8');
+  assert.match(sql268, /booking\._arm_staff_overrides/);
+  assert.match(sql268, /booking\._staff_overbook/);
+  const hits = [...sql268.matchAll(/has_permission\('bookings\.override'\)/g)];
+  assert.equal(hits.length, 2);
+});
+
+test('Turvetorstai / yhteinen pooli 16: ei väärää 12+/8-ylitystä', () => {
+  // binding pool 16, peak 12 → 13/16 ok; yli 16 capacity_exceeded. max_persons=8 säilyy persons_max-polkuna ilman poolia.
+  const shared = { mode: 'shared', max_persons: 8, pool_capacity: 16, pool_peak: 12, remaining: 4, status: 'available' };
+  assert.equal(L.capacityNotice(shared, 1), null); // 13/16
+  assert.equal(L.capacityNotice(shared, 4), null); // 16/16
+  assert.deepEqual(L.capacityNotice(shared, 5), { kind: 'overbook', code: 'capacity_exceeded', used: 17, capacity: 16 });
+  assert.equal(L.capacityNotice({ mode: 'shared', max_persons: 8, remaining: 20, status: 'available' }, 9).code, 'persons_max');
+  assert.equal(L.capacityNotice({ mode: 'shared', max_persons: 8, remaining: 20, status: 'available' }, 8), null);
+});

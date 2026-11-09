@@ -31,7 +31,7 @@ export const typeSwitch = (current, d) => h('fieldset', { class: 'nb-types', 'da
 const addMin = (hhmm, n) => { const [a, b] = hhmm.split(':').map(Number); const t = (a * 60 + b + n) % 1440; return `${String(Math.floor(t / 60)).padStart(2, '0')}:${String(t % 60).padStart(2, '0')}`; };
 
 export async function render({ ctx, refs, query, kind }) {
-  const isAdmin = ctx.role === 'admin';
+  const isAdmin = ctx.can('bookings.override');
   const old = kind === 'vanha';
   const [addons, rules, optCfg] = await Promise.all([
     rpc('admin_list_addons').catch(() => []),
