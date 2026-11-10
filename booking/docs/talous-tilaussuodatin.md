@@ -4,7 +4,7 @@ Hallinnan Talous-sivun tilauslista (`booking/admin/views/talous-orders.js`). Mig
 
 ## Maksutilat ja tilauksen tila
 
-`orders.payment_status` (booking_02): `unpaid`, `pending`, `paid`, `partially_paid`, `refunded`, `partially_refunded`, `failed`.
+`orders.payment_status` (booking_02, booking_90): `unpaid`, `pending`, `paid`, `partially_paid`, `refunded`, `partially_refunded`, `failed`, `invoiced`.
 
 `orders.status`: `draft`, `pending`, `confirmed`, `cancelled`, `expired`, `completed`.
 
@@ -26,6 +26,7 @@ Johku-tilauksella ei ole `payments`-rivejä (booking_41). Jos maksutila on `paid
 |---|---|---|
 | Maksetut (oletus) | `paid` | paid ja partially_refunded, netto > 0, ei peruttu eikä vanhentunut |
 | Maksamattomat | `unpaid` | unpaid, pending, failed, partially_paid; ei peruttu eikä vanhentunut |
+| Laskutetut | `invoiced` | payment_status invoiced; ei peruttu eikä vanhentunut. Ei kuulu Maksetut-suodattimeen (raha ei ole vielä tullut). |
 | Kaikki | `all` | ei maksu- eikä peruutusrajausta (muut suodattimet ennallaan) |
 | Hyvitetyt | `refunded` | refunded ja partially_refunded |
 | Peruttu | `cancelled` | tilauksen tila cancelled tai expired |
@@ -36,7 +37,7 @@ Vanha parametri `p_payment_status` rajaa yhä yhteen maksutilaan ja yhdistyy AND
 
 ## Haku
 
-Palvelin ei laajenna hakua itse. Hallinta lähettää `p_payment_filter` = `all`, kun hakukentässä on tekstiä ja valinta on yhä oletus Maksetut. Maksamaton tilaus löytyy numerolla tai nimellä. Jos käyttäjä on valinnut Maksamattomat, Hyvitetyt, Peruttu tai Kaikki, haku pysyy siinä joukossa. Kun haku tyhjennetään, oletus palaa. Haun aikana näkyy teksti «Haku kaikista tilauksista».
+Palvelin ei laajenna hakua itse. Hallinta lähettää `p_payment_filter` = `all`, kun hakukentässä on tekstiä ja valinta on yhä oletus Maksetut. Maksamaton tilaus löytyy numerolla tai nimellä. Jos käyttäjä on valinnut Maksamattomat, Laskutetut, Hyvitetyt, Peruttu tai Kaikki, haku pysyy siinä joukossa. Kun haku tyhjennetään, oletus palaa. Haun aikana näkyy teksti «Haku kaikista tilauksista».
 
 Valittu maksutila näkyy siruna, kun suodatinpaneeli on kiinni. Oletus Maksetut ei kasvata «Suodattimia: N» -lukua, koska se on oletus. Kaikki kasvattaa.
 
