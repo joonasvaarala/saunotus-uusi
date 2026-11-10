@@ -37,6 +37,8 @@ export type TemplatePayload = {
   recipient_type: "individual";
   to: string;
   type: "template";
+  // 132001-korjaus: numero voi kuulua useaan messaging-tiliin → tili nimetään (WHATSAPP_MESSAGING_ACCOUNT_ID).
+  messaging_account_id?: string;
   template: {
     // booking_153: nimi voi tulla asetuksesta (shift_offer.wa_templates), esim. tyovuoro_kysely.
     name: TemplateName | string;
@@ -99,7 +101,26 @@ export type WhatsappEnv = {
   phoneNumberId: string;
   appSecret: string;
   verifyToken: string;
+  // WABA id (ei salainen). Tyhjä/puuttuu → kenttää messaging_account_id ei lähetetä.
+  messagingAccountId?: string;
 };
+
+// Metan virhe 132001: puhelinnumero voi kuulua useaan messaging-tiliin, joten jokainen /messages-kutsu
+// nimeää tilin. Tyhjä arvo → kenttä jätetään kokonaan pois (vanha käytös).
+export function cleanMessagingAccountId(value: string | null | undefined): string | null {
+  const v = (value ?? "").trim();
+  return v ? v : null;
+}
+
+export function withMessagingAccount<T extends TemplatePayload | SessionPayload>(
+  payload: T,
+  messagingAccountId: string | null | undefined,
+): T {
+  const id = cleanMessagingAccountId(messagingAccountId);
+  const { messaging_account_id: _old, ...rest } = payload as T & { messaging_account_id?: string };
+  if (!id) return rest as T;
+  return { ...rest, messaging_account_id: id } as T;
+}
 
 export type CompleteResult = {
   id: number;
@@ -324,7 +345,11 @@ export function templateForKind(kind: string): TemplateName | null {
   return null;
 }
 
-export function buildTemplatePayload(msg: ClaimedMessage, phoneE164: string): TemplatePayload | null {
+export function buildTemplatePayload(
+  msg: ClaimedMessage,
+  phoneE164: string,
+  messagingAccountId?: string | null,
+): TemplatePayload | null {
   const name = templateForKind(msg.kind);
   if (!name) return null;
   const when = templateText(formatShiftWhen(msg.starts_at, msg.ends_at));
@@ -355,13 +380,13 @@ export function buildTemplatePayload(msg: ClaimedMessage, phoneE164: string): Te
       parameters: [{ type: "text", text: msg.token }],
     });
   }
-  return {
+  return withMessagingAccount({
     messaging_product: "whatsapp",
     recipient_type: "individual",
     to: phoneE164,
     type: "template",
     template: { name, language: { code: TEMPLATE_LANGUAGE }, components },
-  };
+  }, messagingAccountId);
 }
 
 // booking_153: mikä pohja viestille. "legacy" = vanha KIND_TEMPLATE-käytös (ei pohja-asetuksia tai
@@ -414,7 +439,11 @@ export function resolveTemplate(msg: ClaimedMessage, templates: TemplateSettings
   return { kind: "legacy" };
 }
 
-export function buildChosenTemplate(choice: Extract<TemplateChoice, { kind: "template" }>, phoneE164: string): TemplatePayload | null {
+export function buildChosenTemplate(
+  choice: Extract<TemplateChoice, { kind: "template" }>,
+  phoneE164: string,
+  messagingAccountId?: string | null,
+): TemplatePayload | null {
   const components: Array<BodyComponent | ButtonComponent> = [
     { type: "body", parameters: choice.params.map((text) => ({ type: "text", text: templateText(text) })) },
   ];
@@ -422,13 +451,13 @@ export function buildChosenTemplate(choice: Extract<TemplateChoice, { kind: "tem
     if (!choice.buttonToken) return null;
     components.push({ type: "button", sub_type: "url", index: "0", parameters: [{ type: "text", text: choice.buttonToken }] });
   }
-  return {
+  return withMessagingAccount({
     messaging_product: "whatsapp",
     recipient_type: "individual",
     to: phoneE164,
     type: "template",
     template: { name: choice.name, language: { code: TEMPLATE_LANGUAGE }, components },
-  };
+  }, messagingAccountId);
 }
 
 function allowlisted(settings: Settings, staffId: string | null): boolean {
@@ -462,7 +491,7 @@ function toEmail(reason: string, email: string | null, detail?: string): Plan {
   return { action: "fail_no_contact", error: detail ? `${NO_WORKING_CHANNEL}:${detail}` : NO_WORKING_CHANNEL };
 }
 
-export function planMessage(msg: ClaimedMessage, settings: Settings): Plan {
+export function planMessage(msg: ClaimedMessage, settings: Settings, messagingAccountId?: string | null): Plan {
   if (msg.wamid || TERMINAL.has(msg.status) || msg.status !== "sending") return { action: "already_sent" };
   if (isBotStaff(msg) || msg.channel === "bot") return { action: "bot_channel" };
   const phone = normalizeFinnishPhone(msg.phone_raw);
@@ -477,20 +506,20 @@ export function planMessage(msg: ClaimedMessage, settings: Settings): Plan {
   if (settings.whatsapp_hours_open === false) return release("quiet_hours", "whatsapp", phone, null, 30);
   if (choice.kind === "session") {
     // Ei hyväksyttyä pohjaa: vapaamuotoinen viesti vain avoimessa 24 h ikkunassa, muuten sähköposti / no_working_channel.
-    const session = msg.session_open && msg.body ? buildSessionPayload(phone, msg.body) : null;
+    const session = msg.session_open && msg.body ? buildSessionPayload(phone, msg.body, [], messagingAccountId) : null;
     if (!session) return toEmail("template_not_approved", email);
     if (!settings.sender_enabled) return release("sender_disabled", "whatsapp", phone, null, 15);
     if (settings.whatsapp_dry_run) return release("dry_run", "whatsapp", phone, session, 15);
     return { action: "send", payload: session, to: phone };
   }
   if (choice.kind === "template") {
-    const chosen = buildChosenTemplate(choice, phone);
+    const chosen = buildChosenTemplate(choice, phone, messagingAccountId);
     if (!chosen) return release("no_token", "whatsapp", phone, null, 60);
     if (!settings.sender_enabled) return release("sender_disabled", "whatsapp", phone, null, 15);
     if (settings.whatsapp_dry_run) return release("dry_run", "whatsapp", phone, chosen, 15);
     return { action: "send", payload: chosen, to: phone };
   }
-  const payload = buildTemplatePayload(msg, phone);
+  const payload = buildTemplatePayload(msg, phone, messagingAccountId);
   if (!payload) {
     if (!templateForKind(msg.kind)) return { action: "fail", error: "unknown_kind" };
     return release("no_token", "whatsapp", phone, null, 60);
@@ -585,7 +614,7 @@ export async function postTemplate(
       authorization: `Bearer ${env.token}`,
       "content-type": "application/json",
     },
-    body: JSON.stringify(payload),
+    body: JSON.stringify(withMessagingAccount(payload, env.messagingAccountId)),
   });
   const text = await res.text();
   return { status: res.status, ...readSendResponse(res.status, text) };
@@ -604,7 +633,7 @@ export async function handleClaimedMessage(
   if (msg.wamid || TERMINAL.has(msg.status) || msg.status !== "sending") {
     return { id: msg.id, action: "already_sent" };
   }
-  const plan = planMessage(msg, settings);
+  const plan = planMessage(msg, settings, env.messagingAccountId);
   if (plan.action === "release" && plan.reason === "dry_run" && plan.payload) {
     log("whatsapp_dry_run", {
       message_id: msg.id,
@@ -769,6 +798,7 @@ export type SessionPayload =
     messaging_product: "whatsapp";
     recipient_type: "individual";
     to: string;
+    messaging_account_id?: string;
     type: "text";
     text: { body: string; preview_url: false };
   }
@@ -776,6 +806,7 @@ export type SessionPayload =
     messaging_product: "whatsapp";
     recipient_type: "individual";
     to: string;
+    messaging_account_id?: string;
     type: "interactive";
     interactive: {
       type: "button";
@@ -851,7 +882,12 @@ export function sessionDestination(phone: string): string | null {
 
 // Istuntoviesti 24 h ikkunassa. Nappien otsikko enintään 20 merkkiä, enintään 3 nappia.
 // Yli 1024 merkin teksti lähtee tavallisena tekstinä, koska interaktiivisen rungon raja on 1024.
-export function buildSessionPayload(to: string, body: string, buttons: ReplyButton[] = []): SessionPayload | null {
+export function buildSessionPayload(
+  to: string,
+  body: string,
+  buttons: ReplyButton[] = [],
+  messagingAccountId?: string | null,
+): SessionPayload | null {
   const phone = sessionDestination(to);
   const clean = body.replace(/\u0000/g, "").trim();
   if (!phone || !clean) return null;
@@ -860,15 +896,15 @@ export function buildSessionPayload(to: string, body: string, buttons: ReplyButt
     .filter((b) => b.id && b.title)
     .slice(0, 3);
   if (usable.length === 0 || clean.length > 1024) {
-    return {
+    return withMessagingAccount({
       messaging_product: "whatsapp",
       recipient_type: "individual",
       to: phone,
       type: "text",
       text: { body: clean.slice(0, 4000), preview_url: false },
-    };
+    } as SessionPayload, messagingAccountId);
   }
-  return {
+  return withMessagingAccount({
     messaging_product: "whatsapp",
     recipient_type: "individual",
     to: phone,
@@ -878,7 +914,7 @@ export function buildSessionPayload(to: string, body: string, buttons: ReplyButt
       body: { text: clean },
       action: { buttons: usable.map((b) => ({ type: "reply", reply: { id: b.id, title: b.title } })) },
     },
-  };
+  } as SessionPayload, messagingAccountId);
 }
 
 export async function postSession(
@@ -891,7 +927,7 @@ export async function postSession(
   const res = await fetchImpl(url, {
     method: "POST",
     headers: { authorization: `Bearer ${env.token}`, "content-type": "application/json" },
-    body: JSON.stringify(payload),
+    body: JSON.stringify(withMessagingAccount(payload, env.messagingAccountId)),
   });
   const text = await res.text();
   return { status: res.status, ...readSendResponse(res.status, text) };

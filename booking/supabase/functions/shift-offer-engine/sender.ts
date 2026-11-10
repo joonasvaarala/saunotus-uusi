@@ -6,6 +6,7 @@ import { processInboundMessage, type ActResult, type Intent, type StoreResult } 
 import {
   buildSessionPayload,
   classifyHttp,
+  cleanMessagingAccountId,
   handleClaimedMessage,
   handleWebhookRequest,
   messagesUrl,
@@ -28,6 +29,8 @@ export function readWhatsappEnv(env: { get(name: string): string | undefined }):
     phoneNumberId: env.get("WHATSAPP_PHONE_NUMBER_ID") ?? "",
     appSecret: env.get("WHATSAPP_APP_SECRET") ?? "",
     verifyToken: env.get("WHATSAPP_VERIFY_TOKEN") ?? "",
+    // 132001-korjaus: WABA id jokaiseen /messages-kutsuun; tyhjä → kenttä jätetään pois.
+    messagingAccountId: cleanMessagingAccountId(env.get("WHATSAPP_MESSAGING_ACCOUNT_ID")) ?? undefined,
   };
 }
 
@@ -239,7 +242,7 @@ export async function deliverInbound(
       return asAct(data);
     },
     async send(to, body, buttons) {
-      const payload = buildSessionPayload(to, body, buttons);
+      const payload = buildSessionPayload(to, body, buttons, env.messagingAccountId);
       if (!payload || !env.token || !messagesUrl(env.phoneNumberId)) {
         log("whatsapp_inbound_missing_credentials", {});
         return { ok: false, wamid: null };
