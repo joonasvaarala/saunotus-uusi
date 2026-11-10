@@ -109,7 +109,8 @@ test('tick-ajastus: vain käsiskripti, ei migraatioissa', () => {
   assert.match(s, /functions\/v1\/shift-offer-engine/);
   assert.match(s, /calendar_sync_cron_secret/);
   assert.match(s, /cron\.unschedule\('shift-offer-engine-5m'\)/);
-  for (const f of migs) assert.doesNotMatch(rd(`booking/supabase/migrations/${f}`), /shift-offer-engine-5m/, f);
+  // Migraatio ei saa ajastaa moottoria (booking_275 mainitsee ajon nimen vain kommentissa ja kutsuu moottoria käsin).
+  for (const f of migs) assert.doesNotMatch(rd(`booking/supabase/migrations/${f}`), /cron\.schedule\s*\([^;]*shift-offer-engine/, f);
 });
 
 test('tekstit pending-import-55: FI+EN, ei <, ei päällekkäin aiempien tuontien kanssa', () => {
