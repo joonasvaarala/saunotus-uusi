@@ -2,6 +2,7 @@
 // public_get_site_texts peittää sanakirjan. Haku epäonnistuu tai paikkamerkki ei täyty → REPORT_TEXTS.
 // Tuonti: content/site-texts.pending-import-27.json. Luokka normal. Hinnat, ALV-kannat ja osoitteet eivät ole tekstejä.
 import { getLang } from './talous-i18n.js';
+import { getSiteTexts, clearSiteTextsCache } from './site-texts-cache.js';
 import { FEE_TEXTS } from './fee-report-texts.js';
 
 export const PREFIXES = ['ui.admin.reports.', 'ui.admin.giftcards.vat_'];
@@ -462,7 +463,7 @@ export async function loadReportTexts(rpcFn) {
   if (loaded) return true;
   if (typeof rpcFn !== 'function') return false;
   try {
-    const t = await rpcFn('public_get_site_texts', { p_lang: null });
+    const t = await getSiteTexts(rpcFn);
     if (!t || t.ok !== true || !Array.isArray(t.texts)) return false;
     const next = new Map();
     for (const r of t.texts) {
@@ -480,6 +481,7 @@ export async function loadReportTexts(rpcFn) {
 }
 
 export function clearReportTextCache() {
+  clearSiteTextsCache();
   db = new Map();
   loaded = false;
 }

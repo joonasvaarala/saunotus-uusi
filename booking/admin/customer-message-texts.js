@@ -2,6 +2,7 @@
 // public_get_site_texts peittää sanakirjan. Haku epäonnistuu tai rivi puuttuu → CUSTOMER_MESSAGE_TEXTS.
 // Tuonti: content/site-texts.pending-import-129.json.
 import { getLang } from './talous-i18n.js';
+import { getSiteTexts, clearSiteTextsCache } from './site-texts-cache.js';
 
 export const PREFIX = 'ui.admin.customer_message.';
 
@@ -107,7 +108,7 @@ export async function loadCustomerMessageTexts(rpcFn) {
   if (loaded) return true;
   if (typeof rpcFn !== 'function') return false;
   try {
-    const t = await rpcFn('public_get_site_texts', { p_lang: null });
+    const t = await getSiteTexts(rpcFn);
     if (!t || t.ok !== true || !Array.isArray(t.texts)) return false;
     const next = new Map();
     for (const r of t.texts) {
@@ -125,6 +126,7 @@ export async function loadCustomerMessageTexts(rpcFn) {
 }
 
 export function clearCustomerMessageTextCache() {
+  clearSiteTextsCache();
   db = new Map();
   loaded = false;
 }

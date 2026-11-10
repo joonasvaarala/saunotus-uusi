@@ -2,6 +2,7 @@
 // Sama mekanismi kuin päivänäkymä: public_get_site_texts, kieli talous-i18n.
 // Sanakirja on vain varalla. Tuonti: content/site-texts.pending-import-6.json.
 import { getLang } from './talous-i18n.js';
+import { getSiteTexts, clearSiteTextsCache } from './site-texts-cache.js';
 
 export const REVIEW_TEXTS = {
   fi: {
@@ -75,7 +76,7 @@ export async function loadReviewTexts(rpcFn) {
   if (loaded) return true;
   if (typeof rpcFn !== 'function') return false;
   try {
-    const t = await rpcFn('public_get_site_texts', { p_lang: null });
+    const t = await getSiteTexts(rpcFn);
     if (!t || t.ok !== true || !Array.isArray(t.texts)) return false;
     const next = new Map();
     for (const r of t.texts) {
@@ -93,6 +94,7 @@ export async function loadReviewTexts(rpcFn) {
 }
 
 export function clearReviewTextCache() {
+  clearSiteTextsCache();
   db = new Map();
   loaded = false;
 }

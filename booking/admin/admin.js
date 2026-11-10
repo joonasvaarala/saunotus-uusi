@@ -2,7 +2,6 @@
 import { signIn, signOut, getSession, onAuthChange, rpc, select, adoptSessionFromHash, setPassword, setRpcOverride, setMockSession } from './sb.js';
 import { h, toast, errMsg, todayHel } from './ui.js';
 import { icon } from './icons.js';
-import { createAdminMock } from './options-mock.js';
 import { loadFilterTexts } from './filter-texts.js';
 import { primeSiteTexts, clearSiteTextsCache } from './site-texts-cache.js';
 import { needsManualRoute, parseAdminHash } from './reservation-query.js';
@@ -21,6 +20,8 @@ if (MOCK) {
   const mockRole = new URLSearchParams(location.search).get('role');
   const role = ['admin', 'manager', 'staff'].includes(mockRole) ? mockRole : 'manager';
   const staffPerms = ['blocks.manage', 'bookings.manage', 'customers.manage', 'giftcards.manage', 'payments.manage', 'pos.use', 'reports.daily', 'shifts.view'];
+  // Kokeilutilan mock-data (options-mock.js + sen apumoduulit) ladataan vain tässä tilassa, ei tuotannon ensilataukseen.
+  const { createAdminMock } = await import(new URL('./options-mock.js' + new URL(import.meta.url).search, import.meta.url).href);
   const mock = createAdminMock({ delay: 60, role, perms: role === 'staff' ? staffPerms : undefined });
   setRpcOverride((fn, args) => mock.rpc(fn, args));
   setMockSession({ access_token: 'mock', refresh_token: 'mock', expires_at: 4102444800, user: { email: 'kokeilu@example.com' } });
@@ -126,7 +127,8 @@ async function route() {
     document.title = `${title} – hallinta`;
     // Määrämerkki: ensimmäinen lataus + Tarkista-sivulle tulo/lähtö (kuittauksen jälkeen luku päivittyy).
     if (prevPath === null || r.path === 'tarkista' || prevPath === 'tarkista') void refreshReviewBadge();
-    if (r.path === '') setTimeout(() => m.prefetchAdjacentDay?.(query.get('d') || todayHel()), 0);
+    // Viereisten päivien nippua ei enää esihaeta avauksessa (3 raskasta kutsua → 1). Päivänäkymä esihakee
+    // edellisen/seuraavan päivän vasta, kun ‹/›-painiketta osoitetaan, kosketetaan tai se saa fokuksen (views/day.js).
   } catch (e) {
     if (seq !== routeSeq) return;
     console.warn(e);

@@ -2,6 +2,7 @@
 // Sama mekanismi kuin Tarkista-sivu (review-texts.js): public_get_site_texts, kieli talous-i18n. Sanakirja on varalla.
 // Tuonti: content/site-texts.pending-import-68.json (booking_174: arvo käsin + erotuksen maksulinkki → pending-import-69). Arvoissa ei '<'-merkkiä.
 import { getLang } from './talous-i18n.js';
+import { getSiteTexts, clearSiteTextsCache } from './site-texts-cache.js';
 
 export const VCR_TEXTS = {
   fi: {
@@ -146,7 +147,7 @@ export async function loadVcrTexts(rpcFn) {
   if (loaded) return true;
   if (typeof rpcFn !== 'function') return false;
   try {
-    const t = await rpcFn('public_get_site_texts', { p_lang: null });
+    const t = await getSiteTexts(rpcFn);
     if (!t || t.ok !== true || !Array.isArray(t.texts)) return false;
     const next = new Map();
     for (const r of t.texts) {
@@ -160,7 +161,7 @@ export async function loadVcrTexts(rpcFn) {
   } catch { return false; }
 }
 
-export function clearVcrTextCache() { db = new Map(); loaded = false; }
+export function clearVcrTextCache() { clearSiteTextsCache(); db = new Map(); loaded = false; }
 
 /** Teksti: tuotannon teksti, muuten sanakirja (FI varalla). Puuttuva muuttuja → tyhjä, ei koskaan "null"/"undefined". */
 export function vcrText(key, vars, lang = getLang()) {

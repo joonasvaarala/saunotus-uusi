@@ -1,5 +1,6 @@
 // booking_255. Site texts + identical FI/EN fallbacks before import.
 import { getLang } from './talous-i18n.js';
+import { getSiteTexts } from './site-texts-cache.js';
 export const TRAINING_TEXTS = {
   "fi": {
     "title": "Koulutukset",
@@ -240,7 +241,7 @@ export const TRAINING_TEXTS = {
 };
 let remote = {};
 export async function loadTrainingTexts(rpc) {
-  try { const out = await rpc('public_get_site_texts', { p_lang: null });
+  try { const out = await getSiteTexts(rpc);
     remote = Object.fromEntries((out?.texts || []).map(x => [x.key.replace('admin.training.', '') + '|' + x.lang, x.text]));
   } catch { remote = {}; }
 }

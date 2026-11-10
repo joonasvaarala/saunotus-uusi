@@ -174,7 +174,7 @@ test('käyttöliittymä: tilauksen tiedot + maksun kirjauksen jälkeinen dialogi
   assert.match(panel, /navigator\.clipboard\?\.writeText/);
   assert.match(panel, /'data-testid': 'annual-card-code'/); assert.match(panel, /'data-testid': 'annual-card-copy'/); assert.match(panel, /'aria-live': 'polite'/);
   assert.doesNotMatch(panel, /\p{Extended_Pictographic}/u);
-  assert.match(rd('booking/admin/views/talous.js'), /await loadAcTexts\(rpc\);/);
+  assert.match(rd('booking/admin/views/talous.js'), /loadAcTexts\(rpc\)/);
   const css = rd('booking/admin/admin.css'); const block = css.slice(css.indexOf('/* vuosikorttikoodi kassalla (booking_146)')).replace(/\/\*[\s\S]*?\*\//g, '');
   assert.ok(block.length > 300); assert.doesNotMatch(block, /#[0-9a-f]{3,8}\b|rgb\(|hsl\(|blue/i);
   assert.match(block, /\.ac-code\{[^}]*font:700 30px/);

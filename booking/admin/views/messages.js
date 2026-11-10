@@ -23,8 +23,7 @@ const ERR = {
 const catLabel = (id) => CATEGORIES.find((c) => c.id === id)?.label || id;
 
 export async function render({ ctx, refs }) {
-  await loadRichTexts(rpc);
-  await loadCustomerMessageTexts(rpc);
+  await Promise.all([loadRichTexts(rpc), loadCustomerMessageTexts(rpc)]);
   const can = ctx.can('messages.edit');
   const wrap = h('section', { class: 'stack', 'data-testid': 'messages-page', 'aria-labelledby': 'messages-h' });
   if (!can) {

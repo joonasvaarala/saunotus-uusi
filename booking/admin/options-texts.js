@@ -4,6 +4,7 @@
 // Tuonti: content/site-texts.pending-import-10.json (käyttäjä ajaa admin_texts_importin; ei vielä fallbackissa).
 // pending-import-4.json on toisen muutoksen tekstejä (myyntikäyrä ja suodatinpainike) — siihen ei lisätä näitä avaimia.
 import { getLang } from './talous-i18n.js';
+import { getSiteTexts, clearSiteTextsCache } from './site-texts-cache.js';
 
 export const OPTION_TEXTS = {
   fi: {
@@ -64,7 +65,7 @@ export async function loadOptionTexts(rpcFn, rows = null) {
   if (loaded) return true;
   if (typeof rpcFn !== 'function') return false;
   try {
-    const t = await rpcFn('public_get_site_texts', { p_lang: null });
+    const t = await getSiteTexts(rpcFn);
     if (!t || t.ok !== true || !Array.isArray(t.texts)) return false;
     if (!t.texts.length) { db = new Map(); loaded = true; return true; }
     return primeOptionTexts(t.texts);
@@ -74,6 +75,7 @@ export async function loadOptionTexts(rpcFn, rows = null) {
 }
 
 export function clearOptionTextCache() {
+  clearSiteTextsCache();
   db = new Map();
   loaded = false;
 }

@@ -2,6 +2,7 @@
 // (content/site-texts.pending-import-30.json). Sanakirja on varalla, kunnes tuonti on ajettu.
 // Hintoja, ALV-kantoja ja osoitteita ei ole näissä teksteissä.
 import { getLang } from './talous-i18n.js';
+import { getSiteTexts, clearSiteTextsCache } from './site-texts-cache.js';
 
 export const PREFIX = 'ui.admin.rich.';
 
@@ -53,7 +54,7 @@ export async function loadRichTexts(rpcFn) {
   if (loaded) return true;
   if (typeof rpcFn !== 'function') return false;
   try {
-    const t = await rpcFn('public_get_site_texts', { p_lang: null });
+    const t = await getSiteTexts(rpcFn);
     if (!t || t.ok !== true || !Array.isArray(t.texts)) return false;
     const next = new Map();
     for (const r of t.texts) {
@@ -71,6 +72,7 @@ export async function loadRichTexts(rpcFn) {
 }
 
 export function clearRichTextCache() {
+  clearSiteTextsCache();
   db = new Map();
   loaded = false;
 }

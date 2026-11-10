@@ -3,6 +3,7 @@
 // Tuonti: content/site-texts.pending-import-4.json (alkuperäiset) ja pending-import-7.json (akseli).
 // Bottiavustus ajaa admin_texts_import; ei ylikirjoita olemassa olevia.
 import { getLang } from './talous-i18n.js';
+import { getSiteTexts, clearSiteTextsCache } from './site-texts-cache.js';
 
 export const PREFIX = 'ui.admin.sales_chart.';
 
@@ -75,7 +76,7 @@ export async function loadSalesChartTexts(rpcFn) {
   if (loaded) return true;
   if (typeof rpcFn !== 'function') return false;
   try {
-    const t = await rpcFn('public_get_site_texts', { p_lang: null });
+    const t = await getSiteTexts(rpcFn);
     if (!t || t.ok !== true || !Array.isArray(t.texts)) return false;
     const next = new Map();
     for (const r of t.texts) {
@@ -93,6 +94,7 @@ export async function loadSalesChartTexts(rpcFn) {
 }
 
 export function clearSalesChartTextCache() {
+  clearSiteTextsCache();
   db = new Map();
   loaded = false;
 }
