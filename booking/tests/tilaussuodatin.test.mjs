@@ -68,6 +68,7 @@ test('haku ohittaa vain oletuksen paid', () => {
   assert.equal(F.effectivePaymentFilter({ search: '15001', paymentFilter: 'unpaid' }), 'unpaid');
   assert.equal(F.effectivePaymentFilter({ search: '15001', paymentFilter: 'refunded' }), 'refunded');
   assert.equal(F.effectivePaymentFilter({ search: '15001', paymentFilter: 'cancelled' }), 'cancelled');
+  assert.equal(F.effectivePaymentFilter({ search: '15001', paymentFilter: 'invoiced' }), 'invoiced');
   assert.equal(F.effectivePaymentFilter({ search: '15001', paymentFilter: 'all' }), 'all');
 });
 
@@ -117,6 +118,8 @@ test('migraatio booking_76, rollback ja tuontitekstit', () => {
   assert.match(doc, /partially_refunded/);
   assert.match(doc, /Johku/);
   assert.match(doc, /booking_76/);
+  assert.match(doc, /Laskutetut/);
+  assert.match(doc, /`invoiced`/);
 
   const rows = JSON.parse(readFileSync(join(repo, 'content/site-texts.pending-import-8.json'), 'utf8'));
   assert.equal(rows.length, 16);
@@ -316,4 +319,62 @@ test('siru näyttää Maksetut kun suodattimet on kiinni, Kaikki vaihtaa sen, ha
   await new Promise((r) => setTimeout(r, 0));
   assert.equal(byTest(tab.node, 'orders-pay-chip').textContent, 'Paid');
   setLang('fi');
+});
+
+
+test('Maksutila-valinnassa on Laskutetut, valinta lähettää invoiced', async () => {
+  setLang('fi');
+  clearOrderTextCache();
+  const calls = [];
+  const api = {
+    listOrders: async (a) => { calls.push({ ...a }); return { total: 0, rows: [] }; },
+    changed() {},
+    isMock() { return true; },
+  };
+  const tab = createOrdersTab({ api, ctx: { can: () => false } });
+  byTest(tab.node, 'orders-filters-toggle').dispatch('click');
+  const sel = byTest(tab.node, 'orders-f-pay');
+  const opts = sel.children.filter((c) => c.tagName === 'OPTION');
+  assert.deepEqual(opts.map((o) => o.value), F.PAYMENT_FILTERS);
+  assert.equal(opts.filter((o) => o.value === 'invoiced').length, 1);
+  assert.equal(opts.find((o) => o.value === 'invoiced').textContent, 'Laskutetut');
+  sel.value = 'invoiced';
+  sel.dispatch('change');
+  await new Promise((r) => setTimeout(r, 0));
+  assert.equal(calls.at(-1).paymentFilter, 'invoiced');
+  assert.equal(byTest(tab.node, 'orders-pay-chip').textContent, 'Laskutetut');
+  assert.equal(byTest(tab.node, 'orders-pay-chip').getAttribute('data-filter'), 'invoiced');
+});
+
+test('tilausrivi näyttää laskunumeron ja tilan, ilman kenttiä ei roskaa', async () => {
+  setLang('fi');
+  clearOrderTextCache();
+  const rows = [
+    { order_id: 1, order_no: 15051, customer_name: 'A', payment_status: 'invoiced', total_gross: 10, created_at: '2026-11-01T10:00:00Z', invoice_no: 'L000001', invoice_status: 'sent', invoice_kind: 'debit' },
+    { order_id: 2, order_no: 15046, customer_name: 'B', payment_status: 'invoiced', total_gross: 10, created_at: '2026-11-01T10:00:00Z', invoice_status: 'draft' },
+    { order_id: 3, order_no: 15000, customer_name: 'C', payment_status: 'paid', total_gross: 10, created_at: '2026-11-01T10:00:00Z' },
+    { order_id: 4, order_no: 15154, customer_name: 'D', payment_status: 'paid', total_gross: 10, created_at: '2026-11-01T10:00:00Z', invoice_no: 'L000010', invoice_status: 'paid' },
+    { order_id: 5, order_no: 15100, customer_name: 'E', payment_status: 'invoiced', total_gross: 10, created_at: '2026-11-01T10:00:00Z', invoice_no: 'L000020', invoice_status: 'sent', invoice_kind: 'credit' },
+  ];
+  const api = {
+    listOrders: async () => ({ total: rows.length, rows }),
+    changed() {},
+    isMock() { return true; },
+  };
+  const tab = createOrdersTab({ api, ctx: { can: () => false } });
+  await tab.load();
+  const list = byTest(tab.node, 'orders-list');
+  const orderLis = walk(list).filter((n) => n.getAttribute && n.getAttribute('data-testid') === 'order');
+  assert.equal(orderLis.length, 5);
+  const cap = (li) => {
+    const el = walk(li).find((n) => n.getAttribute && n.getAttribute('data-testid') === 'order-invoice');
+    return el ? el.textContent.trim() : null;
+  };
+  assert.equal(cap(orderLis[0]), 'L000001 / Lähetetty');
+  assert.equal(cap(orderLis[1]), 'Luonnos');
+  assert.equal(cap(orderLis[2]), null);
+  assert.equal(cap(orderLis[3]), 'L000010 / Maksettu');
+  assert.equal(cap(orderLis[4]), 'L000020 / Hyvitys · Lähetetty');
+  const paidRowText = orderLis[2].textContent;
+  assert.equal(/L0|Luonnos|Lähetetty|undefined|null|ui\.admin\.invoices/.test(paidRowText), false);
 });

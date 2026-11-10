@@ -122,6 +122,32 @@ export function createMock({ n = 12000, seed = 20261017, today = new Date().toLo
     orders.push(o);
   }
   orders.reverse();   // uusin ensin (ensisijainen järjestys)
+  // Laskukentät listariville (booking_270). Ei satunnaislukuja, jotta muu mock-data pysyy ennallaan.
+  const unpaidWeb = orders.filter((o) => o.is_native && o.source_channel === 'web' && o.payment_status === 'unpaid');
+  const invSpecs = [
+    { invoice_no: 'L000001', invoice_status: 'sent', invoice_kind: 'debit' },
+    { invoice_no: 'L000002', invoice_status: 'sent', invoice_kind: 'debit' },
+    { invoice_no: 'L000003', invoice_status: 'sent', invoice_kind: 'debit' },
+    { invoice_no: null, invoice_status: 'draft', invoice_kind: 'debit' },
+    { invoice_no: null, invoice_status: 'draft', invoice_kind: 'debit' },
+    { invoice_no: 'L000004', invoice_status: 'sent', invoice_kind: 'credit' },
+  ];
+  invSpecs.forEach((spec, i) => {
+    const o = unpaidWeb[i];
+    if (!o) return;
+    o.payment_status = 'invoiced';
+    o.invoice_id = 9001 + i;
+    o.invoice_no = spec.invoice_no;
+    o.invoice_status = spec.invoice_status;
+    o.invoice_kind = spec.invoice_kind;
+  });
+  const paidInv = orders.find((o) => o.is_native && o.payment_status === 'paid');
+  if (paidInv) {
+    paidInv.invoice_id = 9100;
+    paidInv.invoice_no = 'L000010';
+    paidInv.invoice_status = 'paid';
+    paidInv.invoice_kind = 'debit';
+  }
   const byId = new Map(orders.map((o) => [o.order_id, o]));
   const payById = new Map(payments.map((p) => [p.payment_id, p]));
   // kuitit: viittaus maksuun + summa (hyvityskuitti negatiivinen); rcById = admin_get_receipt-haku
@@ -164,7 +190,8 @@ export function createMock({ n = 12000, seed = 20261017, today = new Date().toLo
       order_id: o.order_id, order_no: o.order_no, johku_order_no: o.johku_order_no, created_at: o.created_at, status: orderStatus(o), payment_status: o.payment_status, source_channel: o.source_channel,
       is_native: o.is_native, total: o.total_gross, paid: o.paid_amount, refunded: o.refunded_amount, unpaid: o.unpaid_amount, customer_id: o.order_id % 5000, customer_name: o.customer_name,
       customer_company: o.company, customer_kind: o.company ? 'company' : 'private', first_start: o.first_reservation_at, last_end: o.reservations.length ? o.reservations[o.reservations.length - 1].ends_at : null,
-      reservation_count: o.reservations.length, payment_count: o.payments.length, last_paid_at: o.payments.filter((p) => p.paid_at).map((p) => p.paid_at).sort().pop() || null, receipt_count: o.receipts.length })) };
+      reservation_count: o.reservations.length, payment_count: o.payments.length, last_paid_at: o.payments.filter((p) => p.paid_at).map((p) => p.paid_at).sort().pop() || null, receipt_count: o.receipts.length,
+      invoice_id: o.invoice_id ?? null, invoice_no: o.invoice_no ?? null, invoice_status: o.invoice_status ?? null, invoice_kind: o.invoice_kind ?? null })) };
   }
 
   // ---- admin_get_order(p_order_id) ----

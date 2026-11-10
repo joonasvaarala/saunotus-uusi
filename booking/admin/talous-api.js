@@ -44,7 +44,8 @@ export function normOrderRow(r) {
     source_channel: r.source_channel ?? '', is_native: r.is_native !== false, total_gross: total, paid_amount: paid, refunded_amount: num(r.refunded ?? r.refunded_amount),
     unpaid_amount: r.unpaid != null || r.unpaid_amount != null ? num(r.unpaid ?? r.unpaid_amount) : round2(Math.max(0, total - paid)),
     customer_name: r.customer_name ?? '', customer_company: r.customer_company ?? null, customer_kind: r.customer_kind ?? null,
-    first_reservation_at: r.first_start ?? r.first_reservation_at ?? null, last_end: r.last_end ?? null, reservation_count: num(r.reservation_count), payment_count: num(r.payment_count), receipt_count: num(r.receipt_count), last_paid_at: r.last_paid_at ?? null };
+    first_reservation_at: r.first_start ?? r.first_reservation_at ?? null, last_end: r.last_end ?? null, reservation_count: num(r.reservation_count), payment_count: num(r.payment_count), receipt_count: num(r.receipt_count), last_paid_at: r.last_paid_at ?? null,
+    invoice_id: r.invoice_id ?? null, invoice_no: r.invoice_no ?? null, invoice_status: r.invoice_status ?? null, invoice_kind: r.invoice_kind ?? null };
 }
 // admin_list_payments.rows[] (EI laskurivejä: line_count; rivit haetaan admin_get_order:sta)
 export function normPaymentRow(p) {

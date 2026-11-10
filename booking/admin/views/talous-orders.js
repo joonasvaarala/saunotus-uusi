@@ -23,6 +23,7 @@ import { alt } from '../addon-lock-texts.js';
 import { linkDeadlineControl } from './link-deadline.js';
 import { linkValidityText, linkSubmitOnce } from '../payment-link-logic.js';
 import { billingMethodText } from '../billing-method-texts.js';
+import { orderInvoiceCaption } from '../order-invoice-label.js';
 
 export const ORDER_SORTS = ['created', 'order_no', 'total', 'payment_status', 'first_reservation'];
 const VAT_CHOICES = [25.5, 13.5, 0];
@@ -66,9 +67,11 @@ export function createOrdersTab({ api, ctx, gift = null, rpc = null }) {
 
   // ---- rivi ----
   function orderRow(o) {
+    const inv = orderInvoiceCaption(o);
     const head = [
       h('span', { class: 'tl-c tl-main' }, h('strong', { text: `#${o.order_no}` }), ' ', h('span', { class: 'tl-name', text: [o.customer_name || '–', o.customer_company].filter(Boolean).join(' · ') }),
-        o.johku_order_no ? h('small', { class: 'tl-johku', text: ` Johku #${o.johku_order_no}` }) : null),
+        o.johku_order_no ? h('small', { class: 'tl-johku', text: ` Johku #${o.johku_order_no}` }) : null,
+        inv ? h('small', { class: 'tl-invoice', 'data-testid': 'order-invoice', text: ` ${inv}` }) : null),
       h('span', { class: 'tl-c tl-date' }, h('small', { class: 'tl-lab', text: t('col.created') }), h('span', { text: fmt.dt(o.created_at) })),
       h('span', { class: 'tl-c tl-first' }, h('small', { class: 'tl-lab', text: t('col.first') }), h('span', { text: o.first_reservation_at ? fmt.date(o.first_reservation_at) : '–' })),
       h('span', { class: 'tl-c tl-sum' }, h('strong', { text: fmt.money(o.total_gross) })),
