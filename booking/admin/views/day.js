@@ -26,10 +26,20 @@ function rpcMissing(e) {
   const msg = `${e?.status || ''} ${e?.code || ''} ${e?.message || ''}`;
   return e?.status === 404 || /42883|PGRST202|could not find the function|function .* does not exist|schema cache/i.test(msg);
 }
+// booking_276: päivänvaihto, paluu Päivään ja esihaku käyttävät kevyttä admin_day_data-nippua (ei roolia, oikeuksia,
+// tuotteita, maksutapoja, resursseja eikä tekstejä: ne ovat jo muistissa avauksen admin_day_bundlesta). Avauksen nippu
+// tulee admin.js:stä primeDayBundle-kutsulla. Vanha kanta / rollback: admin_day_data puuttuu → admin_day_bundle kuten ennen.
+let dataMissing = 0;
+async function fetchDay(d) {
+  if (Date.now() - dataMissing >= 60000) {
+    try { return await rpc('admin_day_data', { p_date: d }); } catch (e) { if (!rpcMissing(e)) throw e; dataMissing = Date.now(); }
+  }
+  return rpc('admin_day_bundle', { p_date: d });
+}
 async function loadBundle(date) {
   if (Date.now() - bundleMissing < 60000) return null;
   try {
-    const bundle = await cachedDayBundle(date, (d) => rpc('admin_day_bundle', { p_date: d }));
+    const bundle = await cachedDayBundle(date, fetchDay);
     return bundle && typeof bundle === 'object' ? bundle : null;
   } catch (e) {
     if (rpcMissing(e)) bundleMissing = Date.now();
@@ -75,7 +85,7 @@ export async function render({ ctx, refs, reload, query }) {
     view = bundle.view || { sessions: [], reservations: [], blocks: [], addon_totals: [], prep: [] };
     resv = bundle.reservations || [];
     addonList = bundle.addons || [];   // lisäpalvelun koodi addon_id:llä (ikonin tunnistus, jos admin_day_view ei anna code-kenttää)
-    optNote = await optionReminder(Array.isArray(bundle.options) ? bundle.options : null, bundle.site_texts?.texts || []);
+    optNote = await optionReminder(Array.isArray(bundle.options) ? bundle.options : null, Array.isArray(bundle.site_texts?.texts) ? bundle.site_texts.texts : null);   // kevyt nippu: tekstit jaetusta välimuistista
     extras = bundle.extras;   // tapahtumat + tuotto (admin/manager; muilla revenue = null)
     revenueRpc = undefined;   // extras sisältää tuoton; erillistä admin_day_revenue-kutsua ei tarvita
     await loadDayTexts(rpc, Array.isArray(bundle.site_texts?.texts) ? bundle.site_texts.texts : null);

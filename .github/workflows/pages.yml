@@ -250,6 +250,8 @@ jobs:
       - run: node --test booking/tests/paiva-ja-saatavuus-nopeutus.test.mjs
       # Hallinnan nopeus (t427u): sivustotekstit kerran istunnossa jaetusta välimuistista, ei viereisten päivien esihakua avauksessa, mock vain ?mock=1
       - run: node --test booking/tests/hallinta-nopeus-tekstit.test.mjs
+      # booking_276: admin_ui_texts + kevyt admin_day_data, varapolut vanhaan kantaan (t276 SQL-testi ajetaan paikallisessa PG17:ssä)
+      - run: node --test booking/tests/hallinta-nopeus-paivanippu.test.mjs
       # Paketti 05 / booking_138: hallinnan päänavigaatio (Tilaukset + Varaukset-välilehti, vanhat #/varaukset-linkit), yläpalkin pikahaku ja
       # käyttäjävalikko, mobiilin 54 px ikonisivupalkki, varauslistan palvelinpuolinen lajittelu (p_sort) ja suora linkki (p_reservation_id),
       # tekstit ui.admin.nav.* (content/site-texts.pending-import-38.json); migraatio + rollback olemassa.

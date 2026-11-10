@@ -569,6 +569,13 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
         options: handlers.admin_list_product_options({}), extras: handlers.admin_day_extras(a),
         site_texts: handlers.public_get_site_texts(), notes_bundle: handlers.admin_list_day_notes(a) };
     },
+    // booking_276: kevyt päivänvaihtonippu ja hallinnan tekstit (sama sisältö kuin admin_day_bundlessa / public_get_site_texts)
+    admin_day_data: (a) => {
+      const b = handlers.admin_day_bundle(a);
+      return { date: b.date, light: true, view: b.view, reservations: b.reservations, shifts: b.shifts, addons: b.addons,
+        options: b.options, extras: b.extras, notes_bundle: b.notes_bundle };
+    },
+    admin_ui_texts: () => handlers.public_get_site_texts(),
     admin_day_view: (a) => {
       const rs = st.reservations.filter((r) => r.starts_at >= helIso(a.p_date, '00:00') && r.starts_at < helIso(addDays(a.p_date, 1), '00:00'));
       return { date: a.p_date, sessions: [], blocks: [], prep: [], addon_totals: [],
