@@ -16,28 +16,30 @@ const TEXTS = { ok: true, texts: [
 ] };
 const counter = (reply = () => TEXTS) => { const calls = []; const fn = async (name, args) => { calls.push([name, args]); return reply(calls.length); }; fn.calls = calls; return fn; };
 
-test('välimuisti: rinnakkaiset ja peräkkäiset haut → yksi public_get_site_texts', async () => {
+test('välimuisti: rinnakkaiset ja peräkkäiset haut → yksi tekstihaku (booking_276: admin_ui_texts)', async () => {
   clearSiteTextsCache();
   const rpc = counter();
   const [a, b] = await Promise.all([getSiteTexts(rpc), getSiteTexts(rpc)]);
   const c = await getSiteTexts(rpc);
   assert.equal(rpc.calls.length, 1);
-  assert.deepEqual(rpc.calls[0], ['public_get_site_texts', { p_lang: null }]);
+  assert.deepEqual(rpc.calls[0], ['admin_ui_texts', { p_lang: null }]);
   assert.equal(a, b); assert.equal(b, c);
 });
 
 test('välimuisti: virhe tai kelvoton vastaus ei jää muistiin (seuraava yrittää uudelleen)', async () => {
   clearSiteTextsCache();
-  const bad = counter((n) => (n === 1 ? { ok: false } : TEXTS));
+  // 1. kierros: admin_ui_texts kelvoton → varapolku public_get_site_texts myös kelvoton → ei välimuistiin.
+  const bad = counter((n) => (n <= 2 ? { ok: false } : TEXTS));
   assert.deepEqual(await getSiteTexts(bad), { ok: false });
   assert.equal(await getSiteTexts(bad), TEXTS);
-  assert.equal(bad.calls.length, 2);
+  assert.equal(bad.calls.length, 3);
+  assert.deepEqual(bad.calls.map((c) => c[0]), ['admin_ui_texts', 'public_get_site_texts', 'public_get_site_texts']);
   clearSiteTextsCache();
   let n = 0;
-  const failing = async () => { n += 1; if (n === 1) throw new Error('verkko'); return TEXTS; };
+  const failing = async () => { n += 1; if (n <= 2) throw new Error('verkko'); return TEXTS; };
   await assert.rejects(getSiteTexts(failing));
   assert.equal(await getSiteTexts(failing), TEXTS);
-  assert.equal(n, 2);
+  assert.equal(n, 3);
 });
 
 test('välimuisti: primeSiteTexts (päivänippu) → ei verkkokutsua; kelvoton prime ohitetaan', async () => {
