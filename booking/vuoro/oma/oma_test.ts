@@ -90,3 +90,12 @@ Deno.test("oma sivu: FI- ja EN-avaimet täsmäävät, ei '<', aika Helsingissä"
   const w = whenText({ starts_at: "2026-11-07T14:00:00Z", ends_at: "2026-11-07T18:00:00Z" }, "fi");
   assert(/16[.:]00/.test(w) && /20[.:]00/.test(w), w);
 });
+
+Deno.test("palvelinvirhe näyttää 'Sivua ei saatu ladattua', vain kelvoton poletti 'Linkki ei kelpaa'", () => {
+  const a = doc();
+  render(a as never, "fi", { ok: false, error: "server_error" }, null);
+  assertEquals(a.nodes.intro.textContent, TEXTS.fi.load_error);
+  const b = doc();
+  render(b as never, "fi", { ok: false, error: "bad_token" }, null);
+  assertEquals(b.nodes.intro.textContent, TEXTS.fi.bad_token);
+});

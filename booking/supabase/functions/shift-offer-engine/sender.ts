@@ -297,6 +297,18 @@ export async function deliverInbound(
       const { error } = await supa.schema("booking").rpc("shift_staff_welcome_release", { p_staff: staffId });
       if (error) log("whatsapp_inbound_failed", { step: "welcome_release" });
     },
+    // booking_274: pelkkä "ei" on abort vain, jos vahvistamaton ylläpitomuutos odottaa (sama ehto kuin whatsapp_inbound_act).
+    async hasPendingAction(staffId) {
+      const { data, error } = await supa
+        .from("whatsapp_pending_actions")
+        .select("id")
+        .eq("staff_id", staffId)
+        .is("consumed_at", null)
+        .gt("expires_at", new Date().toISOString())
+        .limit(1);
+      if (error) throw new Error("pending_lookup_failed");
+      return Array.isArray(data) && data.length > 0;
+    },
     async storeOutbound(record) {
       const { error } = await supa.rpc("whatsapp_store_outbound", {
         p_staff_id: record.staffId,

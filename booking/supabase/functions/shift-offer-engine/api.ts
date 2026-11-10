@@ -35,13 +35,45 @@ function cardFromRow(raw: Record<string, unknown>): ShiftOfferCard | null {
   };
 }
 
-async function loadOpenOffers(db: OfferDb, token: string): Promise<
-  { ok: true; focusOfferId: string; offers: ShiftOfferCard[] } | { ok: false }
-> {
-  const { data, error } = await db.rpc("shift_offer_open_for_token", { p_token: token });
-  if (error || !data || typeof data !== "object") return { ok: false };
-  const row = data as { ok?: boolean; focus_offer_id?: unknown; offers?: unknown };
-  if (row.ok !== true || typeof row.focus_offer_id !== "string" || !row.focus_offer_id) return { ok: false };
+// booking_274: linkin tarjouksen tila tälle henkilölle (shift_offer_open_for_token.focus).
+// state: open | yours | filled_other | expired | withdrawn | cancelled | declined | not_recipient.
+// title ja text ovat tietokannan valmiit tekstit; open-tilassa text on null.
+export type OfferFocus = {
+  state: string;
+  title: string | null;
+  text: string | null;
+  offerId: string | null;
+};
+
+function focusFromRow(raw: unknown): OfferFocus | null {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return null;
+  const r = raw as Record<string, unknown>;
+  if (typeof r.state !== "string" || !r.state) return null;
+  const str = (v: unknown) => (typeof v === "string" && v.trim() ? v : null);
+  return { state: r.state, title: str(r.title), text: str(r.text), offerId: str(r.offer_id) };
+}
+
+// Ei-avoin fokus, jolla on näytettävä teksti (muuten vanha käytös).
+function closedFocus(focus: OfferFocus | null): OfferFocus | null {
+  return focus && focus.state !== "open" && focus.text ? focus : null;
+}
+
+// error "bad_token" = oikeasti kelvoton / vanhentunut poletti; "server_error" = tietokanta- tai verkkovirhe.
+type Loaded =
+  | { ok: true; focusOfferId: string; focus: OfferFocus | null; offers: ShiftOfferCard[] }
+  | { ok: false; error: "bad_token" | "server_error" };
+
+async function loadOpenOffers(db: OfferDb, token: string): Promise<Loaded> {
+  let res: { data: unknown; error: { message?: string } | null };
+  try {
+    res = await db.rpc("shift_offer_open_for_token", { p_token: token });
+  } catch {
+    return { ok: false, error: "server_error" };
+  }
+  const { data, error } = res;
+  if (error || !data || typeof data !== "object") return { ok: false, error: "server_error" };
+  const row = data as { ok?: boolean; focus_offer_id?: unknown; offers?: unknown; focus?: unknown };
+  if (row.ok !== true || typeof row.focus_offer_id !== "string" || !row.focus_offer_id) return { ok: false, error: "bad_token" };
   const offers = Array.isArray(row.offers)
     ? row.offers.flatMap((item) => {
       if (!item || typeof item !== "object") return [];
@@ -49,13 +81,16 @@ async function loadOpenOffers(db: OfferDb, token: string): Promise<
       return card ? [card] : [];
     })
     : [];
-  return { ok: true, focusOfferId: row.focus_offer_id, offers };
+  return { ok: true, focusOfferId: row.focus_offer_id, focus: focusFromRow(row.focus), offers };
 }
 
 export type OfferPayload = {
   ok: boolean;
   result: string | null;
   title: string;
+  // booking_274: fokustarjouksen tila ja valmis teksti (null = ei erillistä tilatekstiä)
+  focus_state: string | null;
+  message: string | null;
   focus_offer_id: string | null;
   acted: OfferJson | null;
   snooze_open_offer_id: string | null;
@@ -77,11 +112,15 @@ function payload(
   offers: ShiftOfferCard[],
   acted: ShiftOfferCard | null,
   snoozeOpen: string | null,
+  state: OfferFocus | null = null,
+  shown: OfferFocus | null = null,
 ): OfferPayload {
   return {
-    ok: result !== "bad_token",
+    ok: result !== "bad_token" && result !== "server_error",
     result,
-    title: resultTitle(result),
+    title: shown?.title ?? resultTitle(result),
+    focus_state: state?.state ?? null,
+    message: shown?.text ?? null,
     focus_offer_id: focus,
     acted: acted ? offerJson(acted) : null,
     snooze_open_offer_id: snoozeOpen,
@@ -126,24 +165,39 @@ export async function handleOfferRequest(
       },
     });
   }
+  const failed = (error: "bad_token" | "server_error") =>
+    json(origin, error === "server_error" ? 503 : 400, payload(error, null, [], null, null), allowed);
   if (route === "offers") {
     const token = queryToken ?? "";
-    if (!token) return json(origin, 400, payload("bad_token", null, [], null, null), allowed);
+    if (!token) return failed("bad_token");
     const open = await loadOpenOffers(db, token);
-    if (!open.ok) return json(origin, 400, payload("bad_token", null, [], null, null), allowed);
-    return json(origin, 200, payload(null, open.focusOfferId, open.offers, null, null), allowed);
+    if (!open.ok) return failed(open.error);
+    // booking_274: linkin vuoro ei ole enää auki (esim. jo mennyt) → kerro se, älä näytä "Ei avoimia tarjouksia".
+    // Muut avoimet tarjoukset säilyvät listassa.
+    const closed = closedFocus(open.focus);
+    if (closed && !open.offers.some((o) => o.offerId === open.focusOfferId)) {
+      return json(origin, 200, payload(closed.state, open.focusOfferId, open.offers, null, null, open.focus, closed), allowed);
+    }
+    return json(origin, 200, payload(null, open.focusOfferId, open.offers, null, null, open.focus), allowed);
   }
   if (route !== "respond") return new Response("method not allowed", { status: 405 });
 
   const body = await req.json().catch(() => null);
   const record = body && typeof body === "object" && !Array.isArray(body) ? body as Record<string, unknown> : null;
   const token = typeof record?.token === "string" ? record.token : "";
-  if (!token) return json(origin, 400, payload("bad_token", null, [], null, null), allowed);
+  if (!token) return failed("bad_token");
   const open = await loadOpenOffers(db, token);
-  if (!open.ok) return json(origin, 400, payload("bad_token", null, [], null, null), allowed);
+  if (!open.ok) return failed(open.error);
   const action = parseAction(typeof record?.response === "string" ? record.response : null);
-  const show = (result: string | null, acted: ShiftOfferCard | null, offers: ShiftOfferCard[], snoozeOpen: string | null, status = 200) =>
-    json(origin, status, payload(result, open.focusOfferId, offers, acted, snoozeOpen), allowed);
+  const show = (
+    result: string | null,
+    acted: ShiftOfferCard | null,
+    offers: ShiftOfferCard[],
+    snoozeOpen: string | null,
+    status = 200,
+    state: OfferFocus | null = open.focus,
+    shown: OfferFocus | null = null,
+  ) => json(origin, status, payload(result, open.focusOfferId, offers, acted, snoozeOpen, state, shown), allowed);
   if (!action) return show(null, null, open.offers, null);
   const posted = typeof record?.offer_id === "string" ? record.offer_id : "";
   const target = posted ? (UUID.test(posted) ? posted : "") : open.focusOfferId;
@@ -151,15 +205,28 @@ export async function handleOfferRequest(
   const until = typeof record?.until === "string" ? record.until : "";
   const snooze = action === "snooze" ? helsinkiMorning(until) : null;
   if (action === "snooze" && !snooze) return show(null, null, open.offers, target);
-  const { data, error } = await db.rpc("shift_offer_respond_as_staff", {
-    p_token: token,
-    p_offer_id: target,
-    p_response: action,
-    p_snooze_until: snooze,
-  });
-  if (error || !data || typeof data !== "object") return show("bad_token", null, open.offers, null, 400);
+  let res: { data: unknown; error: { message?: string } | null };
+  try {
+    res = await db.rpc("shift_offer_respond_as_staff", {
+      p_token: token,
+      p_offer_id: target,
+      p_response: action,
+      p_snooze_until: snooze,
+    });
+  } catch {
+    return show("server_error", null, open.offers, null, 503);
+  }
+  const { data, error } = res;
+  // Tietokantavirhe ei ole "Linkki ei kelpaa": poletti tarkistettiin juuri kelvolliseksi.
+  if (error || !data || typeof data !== "object") return show("server_error", null, open.offers, null, 503);
   const row = data as Record<string, unknown>;
   const result = typeof row.result === "string" ? row.result : "bad_token";
   const again = await loadOpenOffers(db, token);
-  return show(result, cardFromRow(row), again.ok ? again.offers : open.offers, null, result === "bad_token" ? 400 : 200);
+  const offers = again.ok ? again.offers : open.offers;
+  const state = again.ok ? again.focus : open.focus;
+  // booking_274: vuoro ei ole enää auki → tietokannan otsikko ja teksti (vain linkin omalle vuorolle).
+  const closed = CLOSED_RESULTS.has(result) && target === open.focusOfferId ? closedFocus(state) : null;
+  return show(result, cardFromRow(row), offers, null, result === "bad_token" ? 400 : 200, state, closed);
 }
+
+const CLOSED_RESULTS = new Set(["already_taken", "already_filled", "offer_closed", "not_recipient", "invalid_state"]);
