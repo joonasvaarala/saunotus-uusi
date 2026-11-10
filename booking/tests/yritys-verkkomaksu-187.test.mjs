@@ -175,7 +175,7 @@ test('hallinta: normOrder.billing_method ja tekstit kolmelle arvolle, null ei n√
   assert.equal(billingMethodText('online'), 'Online payment (no invoice)');
   setLang('fi');
   const orders = rd('booking/admin/views/talous-orders.js');
-  const shared = rd('booking/admin/views/shared.js');
+  const shared = rd('booking/admin/views/order-card.js');
   assert.match(orders, /data-testid': 'order-billing-method'/);
   assert.match(orders, /o\.customer_kind === 'company' \? o\.billing_method : null/);
   assert.match(shared, /data-testid': 'res-billing-method'/);

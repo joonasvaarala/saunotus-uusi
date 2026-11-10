@@ -84,7 +84,7 @@ test('Tekstit: FI ja EN sisältävät samat avaimet, ei tyhjiä', () => {
   assert.match(NB.en['step.inc'], /Increase: \{name\}/);
 });
 test('Tekstit: näkymissä käytetyt nbt-avaimet löytyvät', () => {
-  for (const f of ['admin/views/newbooking.js', 'admin/views/customerform.js', 'admin/views/addons.js', 'admin/views/shared.js', 'admin/stepper.js']) {
+  for (const f of ['admin/views/newbooking.js', 'admin/views/customerform.js', 'admin/views/addons.js', 'admin/views/shared.js', 'admin/views/order-card.js', 'admin/stepper.js']) {
     const src = readFileSync(join(root, f), 'utf8');
     for (const m of src.matchAll(/\b(?:T|nbt)\('([\w.]+)'/g)) assert.ok(NB.fi[m[1]] != null, `${f}: avain ${m[1]} puuttuu`);
     for (const m of src.matchAll(/nbt\(`([\w.]+)\.\$\{/g)) assert.ok(Object.keys(NB.fi).some((k) => k.startsWith(`${m[1]}.`)), `${f}: avainryhmä ${m[1]}`);

@@ -76,7 +76,9 @@ test('tilaus-varaus-silta: id:t ja muuttumattomat tiedostot', { skip: !hasFullRe
     assert.match(source, new RegExp("key: '" + action + "'"), `bridge-painike ${action}`);
   assert.match(read('booking/admin/views/talous-ui.js'), /'data-action': key/, 'actionBtn välittää data-actionin');
   const bridge = read('booking/admin/views/order-reservation-bridge.js');
-  const shared = read('booking/admin/views/shared.js');
+  const shared = read('booking/admin/views/order-card.js');
+  assert.match(source, /openOrderCard\(/);
+  assert.match(source, /onclick: \(\) => openCard\(o\)/);
   assert.match(bridge, /flow:\s*\{/);
   assert.match(bridge, /order-open-reservation/);
   assert.match(bridge, /data-action=/);
