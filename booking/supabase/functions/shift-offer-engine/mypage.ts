@@ -41,6 +41,16 @@ function json(origin: string | null, status: number, body: unknown, allowed: rea
 }
 
 const BAD = { ok: false, error: "bad_token" };
+// Tietokanta- tai verkkovirhe ei ole "Linkki ei kelpaa" (sivu näyttää "Sivua ei saatu ladattua").
+const SERVER = { ok: false, error: "server_error" };
+
+async function call(db: MyPageDb, name: string, args: Record<string, unknown>) {
+  try {
+    return await db.rpc(name, args);
+  } catch {
+    return { data: null, error: { message: "rpc_failed" } };
+  }
+}
 
 export async function handleMyPageRequest(
   req: Request,
@@ -59,8 +69,9 @@ export async function handleMyPageRequest(
   if (route === "my") {
     const token = url.searchParams.get("token");
     if (!validStaffToken(token)) return json(origin, 400, BAD, allowed);
-    const { data, error } = await db.rpc("shift_staff_page", { p_token: token });
-    if (error || !data || typeof data !== "object" || (data as { ok?: unknown }).ok !== true) return json(origin, 400, BAD, allowed);
+    const { data, error } = await call(db, "shift_staff_page", { p_token: token });
+    if (error || !data || typeof data !== "object") return json(origin, 503, SERVER, allowed);
+    if ((data as { ok?: unknown }).ok !== true) return json(origin, 400, BAD, allowed);
     return json(origin, 200, data, allowed);
   }
   if (route === "my_respond") {
@@ -70,8 +81,8 @@ export async function handleMyPageRequest(
     const offer = typeof rec.offer_id === "string" && UUID.test(rec.offer_id) ? rec.offer_id : null;
     const response = rec.response === "accept" || rec.response === "decline" ? rec.response : null;
     if (!offer || !response) return json(origin, 400, { ok: false, error: "bad_request" }, allowed);
-    const { data, error } = await db.rpc("shift_staff_page_respond", { p_token: rec.token, p_offer_id: offer, p_response: response });
-    if (error || !data || typeof data !== "object") return json(origin, 400, BAD, allowed);
+    const { data, error } = await call(db, "shift_staff_page_respond", { p_token: rec.token, p_offer_id: offer, p_response: response });
+    if (error || !data || typeof data !== "object") return json(origin, 503, SERVER, allowed);
     const row = data as Record<string, unknown>;
     return json(origin, row.result === "bad_token" ? 400 : 200, row, allowed);
   }

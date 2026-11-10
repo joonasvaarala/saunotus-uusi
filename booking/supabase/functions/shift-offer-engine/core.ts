@@ -292,6 +292,13 @@ export function resultTitle(result: string | null): string {
   if (result === "offer_closed") return "Tarjous ei ole enää auki";
   if (result === "snooze_not_allowed") return "Tähän vuoroon ei voi palata myöhemmin";
   if (result === "invalid_state") return "Vastausta ei voitu kirjata";
+  // booking_274: varaotsikot linkin vuoron tilalle (tietokannan focus.title on ensisijainen)
+  if (result === "yours") return "Vuoro on sinun";
+  if (result === "filled_other") return "Tämä vuoro on jo mennyt";
+  if (result === "expired") return "Vastausaika on päättynyt";
+  if (result === "withdrawn") return "Vuoroa ei enää tarjota sinulle";
+  if (result === "cancelled") return "Vuoro on peruttu";
+  if (result === "server_error") return "Jokin meni vikaan, yritä hetken päästä uudelleen.";
   return "Vahvista vastauksesi";
 }
 
