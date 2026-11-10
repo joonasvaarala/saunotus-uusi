@@ -152,7 +152,7 @@ test('käyttöliittymä: kysymykset oletuksena Ei, oikeudet tarkistetaan, peruut
   assert.match(rc, /if \(canRefund\) \{\s*try \{ plan = await rpc\('admin_reservation_refund_preview'/, 'esikatselu vain payments.refund-oikeudella');
   assert.match(rc, /rpc\('admin_cancel_reservation'/);
   assert.match(rc, /processOnlineRefunds\(online, res\?\.refunds\)/, 'verkkohyvitys käsitellään Edge-funktiolla');
-  const sh = read('booking/admin/views/shared.js');
+  const sh = read('booking/admin/views/order-card.js');
   assert.match(sh, /canRefund: !!can\('payments\.refund'\)/);
   assert.doesNotMatch(sh, /confirm\('Perutaanko varaus\?'\)/, 'vanha confirm korvattu dialogilla');
   const to = read('booking/admin/views/talous-orders.js');

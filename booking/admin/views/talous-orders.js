@@ -44,8 +44,8 @@ export function createOrdersTab({ api, ctx, gift = null, rpc = null }) {
       if (st.offset >= r.total && r.total > 0) { st.offset = Math.max(0, Math.floor((r.total - 1) / st.limit) * st.limit); return load(); }
       count.textContent = r.total ? t('orders.count', { from: fmt.int(st.offset + 1), to: fmt.int(Math.min(st.offset + st.limit, r.total)), total: fmt.int(r.total) }) : '';
       list.replaceChildren(...(r.rows.length ? r.rows.map(orderRow) : [emptyBox(t('orders.none'))]));
-      if (reopen != null) { list.querySelector(`[data-order-id="${reopen}"] .tl-head`)?.click(); reopen = null; }
-      if (autoOpen) { autoOpen = false; if (r.rows.length === 1) { const row = list.firstElementChild; row.style.scrollMarginTop = '70px'; row.querySelector('.tl-head')?.click(); row.scrollIntoView({ block: 'start' }); } }   // syvälinkki (#/talous?order=<tilausnro>): ainoa osuma avataan
+      if (reopen != null) { const hit = r.rows.find((x) => String(x.order_id) === String(reopen)); if (hit) openCard(hit); reopen = null; }
+      if (autoOpen) { autoOpen = false; if (r.rows.length === 1) { const row = list.firstElementChild; if (row) { row.style.scrollMarginTop = '70px'; row.scrollIntoView({ block: 'start' }); } openCard(r.rows[0]); } }   // syvälinkki (#/talous?order=<tilausnro> tai #/tilaukset?order=): ainoa osuma avataan
       const mk = () => (r.total > st.limit ? pager({ total: r.total, offset: st.offset, limit: st.limit, onPage: (o) => { st.offset = o; load(); document.querySelector('[data-testid=orders-count]')?.scrollIntoView({ block: 'nearest' }); } }) : h('span'));
       pagers[0].replaceChildren(mk()); pagers[1].replaceChildren(mk());
     } catch (e) { if (my === seq) { list.replaceChildren(errorBox(e, load)); count.textContent = ''; pagers.forEach((p) => p.replaceChildren()); } }
@@ -77,9 +77,35 @@ export function createOrdersTab({ api, ctx, gift = null, rpc = null }) {
       h('span', { class: 'tl-c tl-sum' }, h('strong', { text: fmt.money(o.total_gross) })),
       h('span', { class: 'tl-c tl-badges' }, payBadge(o.payment_status), sourceBadge(o.source_channel)),
     ];
-    const row = expandRow({ id: `o${o.order_id}`, head, testid: 'order', build: () => orderDetail(o.order_id) });
+    const btn = h('button', { type: 'button', class: 'tl-head', 'data-testid': 'order-head', onclick: () => openCard(o) }, head, h('span', { class: 'tl-chev', 'aria-hidden': 'true' }, icon('chev', 20)));
+    const row = h('li', { class: 'tl-row', 'data-testid': 'order' }, btn);
     row.dataset.orderId = o.order_id;
     return row;
+  }
+  function openCard(o) {
+    const canRefund = api.isMock('refund') || ctx.can('payments.refund');
+    const canAdd = api.isMock('addToOrder') || ctx.can('bookings.manage');
+    const flow = {
+      addPurchase: (ord) => addDialog(ord || o),
+      createLink: (ord) => linkDialog(ord || o),
+      recordPayment: (ord) => recordDialog(ord || o),
+      refund: (ord) => {
+        const cur = ord || o;
+        const refundable = (cur.payments || []).filter((p) => ['paid', 'partially_refunded'].includes(p.status) && p.amount > (p.refunded_amount || 0));
+        if (refundable.length && canRefund) refundDialog(cur, refundable);
+      },
+    };
+    void canAdd;
+    import('./order-card.js').then(({ openOrderCard }) => openOrderCard({
+      reservation: null,
+      orderId: o.order_id,
+      methods: ctx.refs?.methods || [],
+      refs: ctx.refs,
+      can: ctx.can,
+      role: ctx.role,
+      flow,
+      onChange: () => afterChange(null, o.order_id),
+    }));
   }
   // Keskeneräiset / epäonnistuneet hyvitykset (requested, processing, failed) maksun alla; MobilePay-hyvityksen voi käsitellä uudelleen (§14.4: retry_later → kutsu uudelleen, Idempotency-Key estää tuplahyvityksen)
   function openRefunds(o, p) {

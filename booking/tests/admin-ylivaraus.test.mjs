@@ -106,7 +106,7 @@ test('Migraatio: liput vain hallinnan RPC:issä, julkinen kapasiteetti ei negati
   assert.match(pub, /data-testid': 'discount-code'/);
   assert.match(pub, /p_allow_overbook/);
   assert.match(pub, /p_gift_card_code/);
-  const move = readFileSync(join(root, 'admin/views/shared.js'), 'utf8');
+  const move = readFileSync(join(root, 'admin/views/order-card.js'), 'utf8');
   assert.match(move, /p_allow_off_schedule/);
   assert.match(move, /Haluatko varmasti|over_ask|bookingText\('over_ask'\)/);
 });
@@ -131,7 +131,7 @@ test('Staff-ylibuukkaus estetty (bookings.override = false)', () => {
 test('UI käyttää bookings.override, ei role === admin -ylibuukkauspolkua', () => {
   const nb = readFileSync(join(root, 'admin/views/newbooking.js'), 'utf8');
   const rb = readFileSync(join(root, 'admin/views/resbooking.js'), 'utf8');
-  const sh = readFileSync(join(root, 'admin/views/shared.js'), 'utf8');
+  const sh = readFileSync(join(root, 'admin/views/order-card.js'), 'utf8');
   assert.match(nb, /const isAdmin = ctx\.can\('bookings\.override'\)/);
   assert.doesNotMatch(nb, /const isAdmin = ctx\.role === 'admin'/);
   assert.match(rb, /const isAdmin = ctx\.can\('bookings\.override'\)/);

@@ -5,6 +5,7 @@ import { navText } from '../nav-texts.js';
 import { normalizeCode } from '../../shop/src/discount-code-logic.js';
 import { amText, loadAmTexts, amCreatedMessage } from '../annual-manage-texts.js';
 import { h, fmtDT, fmtDate, todayHel, addDays, money, dialog, field, toast, run, empty, payBadge, statusBadge, badge } from '../ui.js';
+import { openOrderCard } from './order-card.js';
 
 export async function render({ ctx, reload, query = new URLSearchParams() }) {
   const PAGE = 50; let offset = 0, search = query.get('q') || '';
@@ -38,7 +39,10 @@ export async function render({ ctx, reload, query = new URLSearchParams() }) {
       h('button', { class: 'btn primary', type: 'submit', text: 'Tallenna' }));
     f.marketing_consent.checked = !!c.marketing_consent;
     const d = dialog(c.name, h('div', { class: 'stack' }, f, cardsBox(c), h('h3', { text: 'Tilaushistoria' }),
-      (c.orders || []).length ? h('ul', { class: 'reslist' }, c.orders.map((o) => h('li', { class: 'resrow' }, h('span', {}, h('strong', { text: `#${o.order_no}` }), ` ${fmtDT(o.created_at)} · ${money(o.total)} · ${o.channel}`, h('br'), (o.reservations || []).map((r) => `${r.product_name} ${fmtDT(r.starts_at)} (${r.persons} hlö)`).join('; ')), h('span', { class: 'meta' }, statusBadge(o.status), payBadge(o.payment_status))))) : empty('Ei tilauksia.')));
+      (c.orders || []).length ? h('ul', { class: 'reslist' }, c.orders.map((o) => h('li', { class: 'resrow' }, h('button', { type: 'button', class: 'linkish', 'data-testid': 'customer-open-order', onclick: () => {
+        if (o.order_id) openOrderCard({ orderId: o.order_id, methods: ctx.refs?.methods || [], refs: ctx.refs, can: ctx.can, role: ctx.role });
+        else if (o.order_no) location.hash = `#/tilaukset?order=${encodeURIComponent(o.order_no)}`;
+      } }, h('strong', { text: `#${o.order_no}` }), ` ${fmtDT(o.created_at)} · ${money(o.total)} · ${o.channel}`, h('br'), (o.reservations || []).map((r) => `${r.product_name} ${fmtDT(r.starts_at)} (${r.persons} hlö)`).join('; ')), h('span', { class: 'meta' }, statusBadge(o.status), payBadge(o.payment_status))))) : empty('Ei tilauksia.')));
     f.addEventListener('submit', (ev) => { ev.preventDefault(); run(f.querySelector('button'), async () => {
       const fd = new FormData(f);
       const patch = { name: fd.get('name'), email: fd.get('email') || null, phone: fd.get('phone') || null, company: fd.get('company') || null, notes: fd.get('notes') || null, marketing_consent: f.marketing_consent.checked };

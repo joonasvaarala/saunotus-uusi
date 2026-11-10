@@ -159,7 +159,7 @@ test('tekstit: FI = EN avaimet, pending-import-68 (+ 69, booking_174) täsmää,
 
 test('kytkennät: Tarkista-osio, tilauksen ikkuna, Talous-tilaus, Procountor-tilit myyjittäin, Lunastussivut-asetus, build-lista', () => {
   assert.match(rd('admin/views/review.js'), /unredeemedSection\(\{ rpc, hideEmpty: true \}\)/);
-  assert.match(rd('admin/views/shared.js'), /orderVoucherBox\(\{ rpc, orderId: r\.order_id/);
+  assert.match(rd('admin/views/order-card.js'), /orderVoucherBox\(\{ rpc, orderId: order\.order_id \|\| r\?\.order_id/);
   assert.match(rd('admin/views/talous-orders.js'), /orderVoucherBox\(\{ rpc, orderId: id/);
   assert.match(rd('admin/views/orders.js'), /createOrdersTab\(\{ api, ctx, gift, rpc \}\)/, 'Tilaukset-näkymä antaa rpc:n');
   const s = rd('admin/views/settings.js');

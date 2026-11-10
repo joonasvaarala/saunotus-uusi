@@ -1007,6 +1007,58 @@ body.shot #shell .nav .lbl{display:inline}
 .vcr-chip.on{background:var(--green);color:var(--card);border-color:var(--green)}
 .vcr-group h3{margin:10px 0 2px;font-size:15px}
 .vcr-box h3{display:flex;align-items:center;gap:6px}
+/* Yhteinen varaus- ja tilauskortti (luonnos 10.11.2026) */
+.oc-hero{background:var(--bg);border-radius:12px;padding:14px 16px;min-width:0}
+.oc-hero-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.oc-name{margin:0;font-size:20px;line-height:1.3;font-weight:700;color:var(--ink)}
+.oc-oid{font-size:13px;color:var(--muted);font-weight:600;white-space:nowrap;padding-top:4px}
+.oc-when{margin:4px 0 0;font-size:16px;line-height:1.4;font-weight:600;color:var(--ink)}
+.oc-meta{margin:2px 0 0;font-size:14px;color:var(--text);overflow-wrap:anywhere}
+.oc-badges{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px;align-items:center}
+.oc-badges .badge.pay,.oc-badges .badge.err{font-size:13px;padding:4px 10px}
+.oc-contact{margin-top:10px;display:flex;flex-wrap:wrap;gap:2px 16px;align-items:center}
+.oc-contact a{color:var(--ink);text-decoration:underline;text-underline-offset:3px;min-height:32px;display:inline-flex;align-items:center;overflow-wrap:anywhere}
+.oc-actions{display:flex;flex-wrap:wrap;gap:8px}
+.oc-actions .btn{flex:1 1 145px;min-height:44px;white-space:normal;overflow-wrap:anywhere}
+.oc-actions .btn.primary{flex-grow:2}
+.oc-actions.no-primary .btn{flex:1 1 160px}
+.oc-sections{display:grid;gap:8px}
+.oc-sec{border:1px solid var(--line);background:var(--card);border-radius:12px;padding:0 14px}
+.oc-sec>summary{display:flex;align-items:center;justify-content:space-between;gap:10px;cursor:pointer;list-style:none;min-height:52px;padding:10px 0;font-weight:600;color:var(--ink)}
+.oc-sec>summary::-webkit-details-marker{display:none}
+.oc-sec>summary .oc-sum{font-weight:500;color:var(--muted);font-size:14px;margin-left:auto;text-align:right;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.oc-sec>summary .oc-chev{flex:none;width:20px;height:20px;color:var(--muted);transition:transform .15s}
+.oc-sec[open]>summary{border-bottom:1px solid var(--line)}
+.oc-sec[open]>summary .oc-chev{transform:rotate(90deg)}
+.oc-sec-body{padding:10px 0 14px;display:grid;gap:8px;min-width:0}
+.oc-line{display:flex;justify-content:space-between;gap:12px;align-items:baseline;font-size:14px}
+.oc-line .nm{color:var(--ink)}
+.oc-line .pr{font-variant-numeric:tabular-nums;color:var(--ink);font-weight:600;white-space:nowrap}
+.oc-line.total{border-top:2px solid var(--green);padding-top:8px;margin-top:4px;font-weight:700;font-size:16px;color:var(--ink)}
+.oc-line .vat{font-weight:500;color:var(--muted);font-size:13px}
+.oc-payrow{display:grid;grid-template-columns:1fr auto;gap:2px 12px;font-size:14px;padding:6px 0;border-bottom:1px solid var(--line);align-items:center}
+.oc-payrow:last-of-type{border-bottom:0}
+.oc-payrow .how{grid-column:1;grid-row:1;color:var(--ink);font-weight:600}
+.oc-payrow .when{grid-column:1;grid-row:2;color:var(--muted);font-size:13px}
+.oc-payrow .amt{grid-column:2;grid-row:1 / span 2;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums}
+.oc-log{display:grid;gap:8px;margin:0;padding:0;list-style:none}
+.oc-log li{display:grid;gap:1px;padding:0 0 8px;border-bottom:1px solid var(--line);font-size:14px}
+.oc-log li:last-child{border-bottom:0;padding-bottom:0}
+.oc-log .t{color:var(--muted);font-size:13px}
+.oc-footer{display:flex;justify-content:center;padding-top:2px}
+.oc-footer .linkish,.oc-footer button.linkish{background:none;border:0;padding:8px 0;min-height:44px;font:600 14px/1.2 inherit;color:var(--gold);cursor:pointer;text-decoration:underline;text-underline-offset:3px;text-align:center}
+.rd-dialog .oc-sec .rd-card,.rd-dialog .oc-sec .rd-more{border:0;padding:0;margin:0;background:none;border-radius:0}
+@media(max-width:43.6875em){
+  .oc-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .oc-actions .btn.primary{grid-column:1 / -1}
+  .oc-actions.no-primary{grid-template-columns:1fr}
+  .oc-name{font-size:19px}
+  .oc-when{font-size:15px}
+  .oc-sec>summary{min-height:48px;padding:8px 0;gap:8px}
+  .oc-sec>summary .oc-sum{font-size:13px}
+  .oc-hero{padding:12px}
+}
+
 /* booking_174: lahjakortin arvo käsin vahvistuksessa + erotuksen maksulinkki. Vain teeman muuttujat (vihreä, hiekka, kulta, tumma teksti), ei sinistä; kapealla näytöllä ei vaakavieritystä. */
 .vcr-field{display:grid;grid-template-columns:minmax(0,1fr);gap:4px;margin:0 0 8px;max-width:22rem}
 .vcr-value{width:100%;max-width:12rem;min-height:40px;padding:6px 10px;border:1px solid var(--muted);border-radius:8px;background:var(--card);color:var(--ink);font:inherit;font-size:16px}
@@ -1219,3 +1271,4 @@ body.shot #shell .nav .lbl{display:inline}
 .paylink-more-menu{position:absolute;right:0;bottom:calc(100% + 4px);z-index:5;min-width:12rem;padding:6px;border:1px solid var(--line);border-radius:10px;background:var(--card);box-shadow:0 8px 24px var(--line)}
 .paylink-more-item{display:block;width:100%;text-align:left;border:0;background:transparent;padding:10px 12px;border-radius:8px;font:inherit;cursor:pointer}
 .paylink-more-item:hover,.paylink-more-item:focus-visible{background:var(--bg)}
+

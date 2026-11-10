@@ -1,0 +1,758 @@
+[
+  {
+    "key": "ui.admin.res.pay_unpaid_amount",
+    "lang": "fi",
+    "text": "Maksamatta {{var:amount}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:amount}}"
+    ],
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
+  },
+  {
+    "key": "ui.admin.res.pay_unpaid_amount",
+    "lang": "en",
+    "text": "Unpaid {{var:amount}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:amount}}"
+    ],
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
+  },
+  {
+    "key": "ui.admin.res.pay_paid_amount",
+    "lang": "fi",
+    "text": "Maksettu {{var:amount}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:amount}}"
+    ],
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
+  },
+  {
+    "key": "ui.admin.res.pay_paid_amount",
+    "lang": "en",
+    "text": "Paid {{var:amount}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:amount}}"
+    ],
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
+  },
+  {
+    "key": "ui.admin.res.pay_invoiced_amount",
+    "lang": "fi",
+    "text": "Laskutettu {{var:amount}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:amount}}"
+    ],
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
+  },
+  {
+    "key": "ui.admin.res.pay_invoiced_amount",
+    "lang": "en",
+    "text": "Invoiced {{var:amount}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:amount}}"
+    ],
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
+  },
+  {
+    "key": "ui.admin.res.pay_refunded_amount",
+    "lang": "fi",
+    "text": "Palautettu {{var:amount}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:amount}}"
+    ],
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
+  },
+  {
+    "key": "ui.admin.res.pay_refunded_amount",
+    "lang": "en",
+    "text": "Refunded {{var:amount}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:amount}}"
+    ],
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
+  },
+  {
+    "key": "ui.admin.res.pay_pending_amount",
+    "lang": "fi",
+    "text": "Maksu kesken {{var:amount}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:amount}}"
+    ],
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
+  },
+  {
+    "key": "ui.admin.res.pay_pending_amount",
+    "lang": "en",
+    "text": "Payment pending {{var:amount}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:amount}}"
+    ],
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
+  },
+  {
+    "key": "ui.admin.res.arrived",
+    "lang": "fi",
+    "text": "Saapunut",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
+  },
+  {
+    "key": "ui.admin.res.arrived",
+    "lang": "en",
+    "text": "Arrived",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
+  },
+  {
+    "key": "ui.admin.res.take_payment",
+    "lang": "fi",
+    "text": "Ota maksu",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
+  },
+  {
+    "key": "ui.admin.res.take_payment",
+    "lang": "en",
+    "text": "Take payment",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
+  },
+  {
+    "key": "ui.admin.res.send_pay_link",
+    "lang": "fi",
+    "text": "Lähetä maksulinkki",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
+  },
+  {
+    "key": "ui.admin.res.send_pay_link",
+    "lang": "en",
+    "text": "Send payment link",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
+  },
+  {
+    "key": "ui.admin.res.section_addons",
+    "lang": "fi",
+    "text": "Lisäostot",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
+  },
+  {
+    "key": "ui.admin.res.section_addons",
+    "lang": "en",
+    "text": "Add-ons",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
+  },
+  {
+    "key": "ui.admin.res.section_items",
+    "lang": "fi",
+    "text": "Ostokset",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
+  },
+  {
+    "key": "ui.admin.res.section_items",
+    "lang": "en",
+    "text": "Items",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
+  },
+  {
+    "key": "ui.admin.res.section_payments",
+    "lang": "fi",
+    "text": "Maksut ja laskut",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
+  },
+  {
+    "key": "ui.admin.res.section_payments",
+    "lang": "en",
+    "text": "Payments and invoices",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
+  },
+  {
+    "key": "ui.admin.res.section_messages",
+    "lang": "fi",
+    "text": "Viestit",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
+  },
+  {
+    "key": "ui.admin.res.section_messages",
+    "lang": "en",
+    "text": "Messages",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
+  },
+  {
+    "key": "ui.admin.res.section_history",
+    "lang": "fi",
+    "text": "Historia",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
+  },
+  {
+    "key": "ui.admin.res.section_history",
+    "lang": "en",
+    "text": "History",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
+  },
+  {
+    "key": "ui.admin.res.section_notes",
+    "lang": "fi",
+    "text": "Muistiinpanot",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
+  },
+  {
+    "key": "ui.admin.res.section_notes",
+    "lang": "en",
+    "text": "Notes",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
+  },
+  {
+    "key": "ui.admin.res.sum_no_addons",
+    "lang": "fi",
+    "text": "ei lisäostoksia",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
+  },
+  {
+    "key": "ui.admin.res.sum_no_addons",
+    "lang": "en",
+    "text": "no add-ons",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
+  },
+  {
+    "key": "ui.admin.res.sum_addons",
+    "lang": "fi",
+    "text": "{{var:n}} tuotetta, {{var:amount}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:n}}",
+      "{{var:amount}}"
+    ],
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
+  },
+  {
+    "key": "ui.admin.res.sum_addons",
+    "lang": "en",
+    "text": "{{var:n}} items, {{var:amount}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:n}}",
+      "{{var:amount}}"
+    ],
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
+  },
+  {
+    "key": "ui.admin.res.sum_items",
+    "lang": "fi",
+    "text": "{{var:n}} riviä, {{var:amount}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:n}}",
+      "{{var:amount}}"
+    ],
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
+  },
+  {
+    "key": "ui.admin.res.sum_items",
+    "lang": "en",
+    "text": "{{var:n}} lines, {{var:amount}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:n}}",
+      "{{var:amount}}"
+    ],
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
+  },
+  {
+    "key": "ui.admin.res.sum_unpaid",
+    "lang": "fi",
+    "text": "maksamatta {{var:amount}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:amount}}"
+    ],
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
+  },
+  {
+    "key": "ui.admin.res.sum_unpaid",
+    "lang": "en",
+    "text": "unpaid {{var:amount}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:amount}}"
+    ],
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
+  },
+  {
+    "key": "ui.admin.res.sum_paid",
+    "lang": "fi",
+    "text": "maksettu {{var:amount}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:amount}}"
+    ],
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
+  },
+  {
+    "key": "ui.admin.res.sum_paid",
+    "lang": "en",
+    "text": "paid {{var:amount}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:amount}}"
+    ],
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
+  },
+  {
+    "key": "ui.admin.res.sum_invoiced",
+    "lang": "fi",
+    "text": "laskutettu {{var:amount}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:amount}}"
+    ],
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
+  },
+  {
+    "key": "ui.admin.res.sum_invoiced",
+    "lang": "en",
+    "text": "invoiced {{var:amount}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:amount}}"
+    ],
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
+  },
+  {
+    "key": "ui.admin.res.sum_no_messages",
+    "lang": "fi",
+    "text": "ei viestejä",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
+  },
+  {
+    "key": "ui.admin.res.sum_no_messages",
+    "lang": "en",
+    "text": "no messages",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
+  },
+  {
+    "key": "ui.admin.res.sum_messages",
+    "lang": "fi",
+    "text": "{{var:n}} viestiä",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:n}}"
+    ],
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
+  },
+  {
+    "key": "ui.admin.res.sum_messages",
+    "lang": "en",
+    "text": "{{var:n}} messages",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:n}}"
+    ],
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
+  },
+  {
+    "key": "ui.admin.res.sum_add_note",
+    "lang": "fi",
+    "text": "lisää muistiinpano",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
+  },
+  {
+    "key": "ui.admin.res.sum_add_note",
+    "lang": "en",
+    "text": "add a note",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
+  },
+  {
+    "key": "ui.admin.res.no_booking",
+    "lang": "fi",
+    "text": "ei ajanvarausta",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
+  },
+  {
+    "key": "ui.admin.res.no_booking",
+    "lang": "en",
+    "text": "no booking time",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
+  },
+  {
+    "key": "ui.admin.res.ordered_at",
+    "lang": "fi",
+    "text": "Tilattu {{var:when}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:when}}"
+    ],
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
+  },
+  {
+    "key": "ui.admin.res.ordered_at",
+    "lang": "en",
+    "text": "Ordered {{var:when}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:when}}"
+    ],
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
+  },
+  {
+    "key": "ui.admin.res.gift_title",
+    "lang": "fi",
+    "text": "Lahjakortti",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
+  },
+  {
+    "key": "ui.admin.res.gift_title",
+    "lang": "en",
+    "text": "Gift card",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
+  },
+  {
+    "key": "ui.admin.res.order_title",
+    "lang": "fi",
+    "text": "Tilaus",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
+  },
+  {
+    "key": "ui.admin.res.order_title",
+    "lang": "en",
+    "text": "Order",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
+  },
+  {
+    "key": "ui.admin.res.webshop",
+    "lang": "fi",
+    "text": "Verkkokauppa",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
+  },
+  {
+    "key": "ui.admin.res.webshop",
+    "lang": "en",
+    "text": "Web shop",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
+  },
+  {
+    "key": "ui.admin.res.option_missing",
+    "lang": "fi",
+    "text": "Hoito valitsematta",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
+  },
+  {
+    "key": "ui.admin.res.option_missing",
+    "lang": "en",
+    "text": "Treatment not selected",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
+  },
+  {
+    "key": "ui.admin.res.no_open_invoices",
+    "lang": "fi",
+    "text": "Ei avoimia laskuja.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
+  },
+  {
+    "key": "ui.admin.res.no_open_invoices",
+    "lang": "en",
+    "text": "No open invoices.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
+  },
+  {
+    "key": "ui.admin.res.refund_order",
+    "lang": "fi",
+    "text": "Hyvitä tilaus",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
+  },
+  {
+    "key": "ui.admin.res.refund_order",
+    "lang": "en",
+    "text": "Refund order",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
+  },
+  {
+    "key": "ui.admin.res.incl_vat",
+    "lang": "fi",
+    "text": "sis. alv",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
+  },
+  {
+    "key": "ui.admin.res.incl_vat",
+    "lang": "en",
+    "text": "incl. VAT",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
+  },
+  {
+    "key": "ui.admin.res.history_created",
+    "lang": "fi",
+    "text": "Luotu {{var:when}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:when}}"
+    ],
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
+  },
+  {
+    "key": "ui.admin.res.history_created",
+    "lang": "en",
+    "text": "Created {{var:when}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:when}}"
+    ],
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
+  },
+  {
+    "key": "ui.admin.res.resend_card",
+    "lang": "fi",
+    "text": "Lähetä lahjakortti uudelleen",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
+  },
+  {
+    "key": "ui.admin.res.resend_card",
+    "lang": "en",
+    "text": "Resend gift card",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
+  },
+  {
+    "key": "ui.admin.res.copy_code",
+    "lang": "fi",
+    "text": "Kopioi koodi",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
+  },
+  {
+    "key": "ui.admin.res.copy_code",
+    "lang": "en",
+    "text": "Copy code",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
+  }
+]

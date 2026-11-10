@@ -159,5 +159,5 @@ test('rakenne: migraatio booking_50 sisältää sopimuksen funktiot; ei begin/co
 });
 test('rakenne: kauppa lähettää valinnan (create, add_to_order, change) ja admin lähettää p_option_code / admin_set_reservation_option', () => {
   assert.match(read('shop/src/treatments.js'), /p_option_code/); assert.match(read('shop/src/order-api.js'), /p_option_code/); assert.match(read('shop/src/order-api.js'), /option_code/);
-  assert.match(read('admin/views/resbooking.js'), /p_option_code/); assert.match(read('admin/views/shared.js'), /admin_set_reservation_option/);
+  assert.match(read('admin/views/resbooking.js'), /p_option_code/); assert.match(read('admin/views/order-card.js'), /admin_set_reservation_option/);
 });
