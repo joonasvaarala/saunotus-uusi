@@ -46,10 +46,8 @@ const VIS_URL = { online: 'verkossa', offline: 'ei-verkossa' };
 const norm = (x) => String(x ?? '').toLocaleLowerCase('fi');   // kirjainkoolla ei ole merkitystä
 
 export async function render({ ctx, refs, reload, query }) {
-  await loadPosTexts(rpc);
-  await loadProductTexts(rpc);
-  await loadRichTexts(rpc);
-  await loadEventsTexts(rpc);   // booking_158: Kopioi-tekstit (ui.admin.product.copy*)
+  // booking_158: Kopioi-tekstit (ui.admin.product.copy*) tulevat events-teksteistä. Kaikki jaetusta välimuistista rinnakkain.
+  await Promise.all([loadPosTexts(rpc), loadProductTexts(rpc), loadRichTexts(rpc), loadEventsTexts(rpc)]);
   const isAdmin = ctx.can('catalog.edit');  // manager + admin
   const fresh = () => { ctx.refs = null; reload(); };   // tuotelista haetaan uudelleen (refs on välimuistissa; muuten uusi kuva/tiedot eivät näy listassa)
   const list = h('div', { class: 'list' });

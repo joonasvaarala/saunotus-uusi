@@ -39,12 +39,14 @@ async function loadBundle(date) {
 export const primeDayBundle = (date, bundle) => seedDayBundle(date, bundle);
 export const rememberDayBundleError = (e) => { if (rpcMissing(e)) bundleMissing = Date.now(); };
 export const clearDayBundleCache = () => { clearDayBundles(); bundleMissing = 0; };
-export const prefetchAdjacentDay = (date) => {
+// Yhden päivän esihaku käyttäjän aikeesta (‹/›-painikkeen hover, kosketus tai fokus). Sama nippu jaetaan
+// day-bundle-cache.js:n kautta, joten painalluksen jälkeinen render käyttää jo käynnissä olevaa pyyntöä.
+export const prefetchDay = (date) => {
   if (Date.now() - bundleMissing < 60000) return;
-  for (const d of [addDays(date, -1), addDays(date, 1)]) {
-    void loadBundle(d);  // errors swallowed by loadBundle; no forced redraw
-  }
+  void loadBundle(date);  // errors swallowed by loadBundle; no forced redraw
 };
+// Vanha nimi (kumpikin viereinen päivä). Hallinnan kuori ei kutsu tätä enää avauksessa.
+export const prefetchAdjacentDay = (date) => { prefetchDay(addDays(date, -1)); prefetchDay(addDays(date, 1)); };
 // admin_day_extras puuttuu kunnes migraatio booking_68 on ajettu: näytä selite, älä kaada päivänäkymää. 404:ää ei toisteta minuuttiin.
 let extrasMissing = 0;
 async function loadExtras(date) {
@@ -100,10 +102,11 @@ export async function render({ ctx, refs, reload, query }) {
     : null;
   const codes = new Map((addonList || []).map((a) => [a.id, a.code]));
   const go = (d) => { location.hash = `#/?d=${d}`; };
+  const intent = (d) => { let done = false; const f = () => { if (!done) { done = true; prefetchDay(d); } }; return { onpointerenter: f, onfocus: f, ontouchstart: f }; };
   const toolbar = h('div', { class: 'toolbar' },
-    h('button', { class: 'btn ghost', type: 'button', 'aria-label': 'Edellinen päivä', onclick: () => go(addDays(date, -1)) }, '‹'),
+    h('button', { class: 'btn ghost', type: 'button', 'aria-label': 'Edellinen päivä', onclick: () => go(addDays(date, -1)), ...intent(addDays(date, -1)) }, '‹'),
     h('input', { type: 'date', value: date, 'aria-label': 'Päivä', onchange: (e) => e.target.value && go(e.target.value) }),
-    h('button', { class: 'btn ghost', type: 'button', 'aria-label': 'Seuraava päivä', onclick: () => go(addDays(date, 1)) }, '›'),
+    h('button', { class: 'btn ghost', type: 'button', 'aria-label': 'Seuraava päivä', onclick: () => go(addDays(date, 1)), ...intent(addDays(date, 1)) }, '›'),
     h('button', { class: 'btn ghost sm', type: 'button', onclick: () => go(todayHel()) }, 'Tänään'),
     h('button', { class: 'btn ghost sm', type: 'button', 'data-testid': 'next-own-shift', text: memoText('ui.admin.day_memos.next_own_shift'), onclick: async (ev) => {
       const b = ev.currentTarget; b.disabled = true;

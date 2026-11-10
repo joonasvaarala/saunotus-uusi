@@ -1,6 +1,7 @@
 // Hallinnan Laskut-näkymän tekstit (FI + EN). Avaimet ui.admin.invoices.* .
 // Tuonti: content/site-texts.pending-import-13.json. Maksuehto ja tietosuoja ovat protected.
 import { getLang } from './talous-i18n.js';
+import { getSiteTexts, clearSiteTextsCache } from './site-texts-cache.js';
 
 export const PREFIX = 'ui.admin.invoices.';
 
@@ -268,7 +269,7 @@ export async function loadInvoiceTexts(rpcFn) {
   if (loaded) return true;
   if (typeof rpcFn !== 'function') return false;
   try {
-    const t = await rpcFn('public_get_site_texts', { p_lang: null });
+    const t = await getSiteTexts(rpcFn);
     if (!t || t.ok !== true || !Array.isArray(t.texts)) return false;
     const next = new Map();
     for (const r of t.texts) {
@@ -286,6 +287,7 @@ export async function loadInvoiceTexts(rpcFn) {
 }
 
 export function clearInvoiceTextCache() {
+  clearSiteTextsCache();
   db = new Map();
   loaded = false;
 }

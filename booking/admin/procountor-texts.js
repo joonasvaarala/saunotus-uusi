@@ -3,6 +3,7 @@
 // Tilakortin tekstit: content/site-texts.pending-import-11.json (jo tuotu, älä muuta).
 // Lomakkeen uudet avaimet: content/site-texts.pending-import-15.json.
 import { getLang } from './talous-i18n.js';
+import { getSiteTexts, clearSiteTextsCache } from './site-texts-cache.js';
 
 export const PREFIX = 'ui.admin.procountor.';
 
@@ -160,7 +161,7 @@ export async function loadProcountorTexts(rpcFn) {
   if (loaded) return true;
   if (typeof rpcFn !== 'function') return false;
   try {
-    const t = await rpcFn('public_get_site_texts', { p_lang: null });
+    const t = await getSiteTexts(rpcFn);
     if (!t || t.ok !== true || !Array.isArray(t.texts)) return false;
     const next = new Map();
     for (const r of t.texts) {
@@ -178,6 +179,7 @@ export async function loadProcountorTexts(rpcFn) {
 }
 
 export function clearProcountorTextCache() {
+  clearSiteTextsCache();
   db = new Map();
   loaded = false;
 }

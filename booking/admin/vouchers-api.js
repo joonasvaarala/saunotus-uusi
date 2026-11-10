@@ -1,6 +1,7 @@
 // Lunastuspyynnöt (hallinta): DATAKERROS. Sopimus: KOODARI_talous_A_D_fi.md §13.12 / §13.12.1 (migraatiot booking_47/48). Näkymä ei tunne RPC-nimiä eikä p_-parametreja.
 // Sama `rpc(nimi, parametrit)` -rajapinta kuin giftcards-api.js:ssä: oikea = sb.js:n rpc, mock = vouchers-mock.js (osoitteessa ?mock=1). Kirjoittava toiminto (resolve) menee oikeassa tilassa aina palvelimelle.
-import { createVoucherMock } from './vouchers-mock.js';
+// Mock-data ladataan vasta kun sitä tarvitaan (?mock=1 tai puuttuvan RPC:n varapolku): ei tuotannon ensilataukseen. Sama ?v=-tunnus kuin tällä moduulilla.
+const lazyMockModule = () => import(new URL('./vouchers-mock.js' + new URL(import.meta.url).search, import.meta.url).href);
 import { FeatureNotReady, RpcError, isMissingRpc, wantsMock } from './talous-api.js';
 
 export const VC_RPC = { list: 'admin_list_voucher_claims', get: 'admin_get_voucher_claim', resolve: 'admin_resolve_voucher_claim', summary: 'admin_voucher_claim_summary' };
@@ -60,7 +61,7 @@ export function rpcBackend(rpc) {
   };
 }
 
-export function createVoucherApi({ rpc, mock = wantsMock(), mockFactory = () => createVoucherMock({ delay: 80 }) } = {}) {
+export function createVoucherApi({ rpc, mock = wantsMock(), mockFactory = () => { const inst = lazyMockModule().then((m) => m.createVoucherMock({ delay: 80 })); return { rpc: async (n, a) => (await inst).rpc(n, a) }; } } = {}) {
   const forced = !!mock, real = rpc && !forced ? rpcBackend(rpc) : null;
   let mb = null;
   const backend = () => real || (mb ||= rpcBackend(mockFactory().rpc));

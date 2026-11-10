@@ -8,7 +8,8 @@
 //     siirtyy mockiin, sivu näyttää "ominaisuus ei vielä käytössä" -ilmoituksen (api.missing) – muut toiminnot pysyvät oikeina.
 //   · Kirjoittavat toiminnot (lisäys, maksulinkki, maksun kirjaus, hyvitys, kuitin uudelleenlähetys) menevät oikeassa tilassa aina oikealle palvelimelle (ei mock-varakutsua → ei näennäisiä onnistumisia).
 //   · Kuitit: getReceipt (teksti + snapshot), resendReceipt, receiptPdfUrl (receipt-pdf?t=<public_token>, URL muodostetaan hallinnan Supabase-asetuksesta, ei palvelimen pdf_url-kentästä).
-import { createMock } from './talous-mock.js';
+// Mock-data ladataan vasta kun sitä tarvitaan (?mock=1 tai puuttuvan RPC:n varapolku): ei tuotannon ensilataukseen. Sama ?v=-tunnus kuin tällä moduulilla.
+const lazyMockModule = () => import(new URL('./talous-mock.js' + new URL(import.meta.url).search, import.meta.url).href);
 
 export const RPC = {
   listOrders: 'admin_list_orders', getOrder: 'admin_get_order', listPayments: 'admin_list_payments', listAddons: 'admin_list_addons',
@@ -264,7 +265,7 @@ export function normAccrual(r) {
   };
 }
 
-export function createTalousApi({ rpc, io = {}, mock = wantsMock(), mockFactory = () => createMock({ delay: 120 }) } = {}) {
+export function createTalousApi({ rpc, io = {}, mock = wantsMock(), mockFactory = () => { const inst = lazyMockModule().then((m) => m.createMock({ delay: 120 })); return { rpc: async (n, a) => (await inst).rpc(n, a) }; } } = {}) {
   const forced = !!mock, missing = new Set(), listeners = new Set();
   let mockBackend = null;
   const real = rpc && !forced ? rpcBackend(rpc) : null;

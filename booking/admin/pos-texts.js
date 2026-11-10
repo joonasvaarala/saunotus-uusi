@@ -5,6 +5,7 @@
 // Asiakaskentän uusi otsikko ja vihje: pending-import-113 (POS_CUSTOMER_TEXTS). Vanhat ui.pos.email / email_help jäävät tuoduiksi.
 // public_get_site_texts peittää ui.pos.*-avaimet. Haku epäonnistuu tai rivi puuttuu → sanakirja.
 import { getLang } from './talous-i18n.js';
+import { getSiteTexts, clearSiteTextsCache } from './site-texts-cache.js';
 
 export const POS_TEXTS = {
   fi: {
@@ -249,7 +250,7 @@ export async function loadPosTexts(rpcFn) {
   if (loaded) return true;
   if (typeof rpcFn !== 'function') return false;
   try {
-    const t = await rpcFn('public_get_site_texts', { p_lang: null });
+    const t = await getSiteTexts(rpcFn);
     if (!t || t.ok !== true || !Array.isArray(t.texts)) return false;
     const next = new Map();
     for (const r of t.texts) {
@@ -267,6 +268,7 @@ export async function loadPosTexts(rpcFn) {
 }
 
 export function clearPosTextCache() {
+  clearSiteTextsCache();
   db = new Map();
   loaded = false;
 }
