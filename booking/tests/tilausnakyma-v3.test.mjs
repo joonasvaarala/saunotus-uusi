@@ -268,7 +268,7 @@ test('näkymät: ei kovakoodattuja värejä, ei emojeja; poistolle paikka; logii
 test('migraatio booking_278: vain lukufunktiot, SECURITY DEFINER, search_path, oikeudet; rollback palauttaa', () => {
   const dir = 'booking/supabase/migrations';
   const names = readdirSync(join(root, dir)).filter((n) => /booking_278_/.test(n));
-  assert.deepEqual(names, ['20261111160000_booking_278_admin_order_customer_read.sql']);
+  assert.deepEqual(names, ['20261111162544_booking_278_admin_order_customer_read.sql']);
   const sql = read(`${dir}/${names[0]}`);
   for (const f of ['admin_get_order', 'admin_get_customer', 'admin_order_history', 'admin_order_lookup']) {
     assert.match(sql, new RegExp(`create or replace function booking\\.${f}\\(`, 'i'), f);
@@ -278,8 +278,8 @@ test('migraatio booking_278: vain lukufunktiot, SECURITY DEFINER, search_path, o
   assert.equal((sql.match(/set search_path to ''|set search_path = ''/gi) || []).length, 4);
   assert.doesNotMatch(sql.replace(/--.*$/gm, ''), /\b(insert\s+into|update\s+booking\.\w+\s+set|delete\s+from|truncate|alter\s+table|drop\s+table)\b/i, 'ei datamuutoksia');
   assert.doesNotMatch(sql, /\bpublic\./);
-  assert.ok(existsSync(join(root, 'booking/supabase/rollbacks/20261111160000_booking_278_ROLLBACK.sql')));
-  const rb = read('booking/supabase/rollbacks/20261111160000_booking_278_ROLLBACK.sql');
+  assert.ok(existsSync(join(root, 'booking/supabase/rollbacks/20261111162544_booking_278_ROLLBACK.sql')));
+  const rb = read('booking/supabase/rollbacks/20261111162544_booking_278_ROLLBACK.sql');
   assert.match(rb, /drop function if exists booking\.admin_order_history\(bigint, integer\)/i);
   assert.match(rb, /drop function if exists booking\.admin_order_lookup\(bigint\)/i);
   assert.ok(existsSync(join(root, 'booking/supabase/tests/t278_admin_order_customer_read.sql')));

@@ -21,11 +21,11 @@ Määrittely: `tilausnakyma-luonnos/v3/toteutusmaarittely.md` §8 kohta 1 (lukuf
 `order-view.js` vaarakortissa on `h('div', { 'data-slot': 'order-delete' })` – PR #334 liittää poistonapin tähän (admin+manager, menneet maksamattomat).
 
 ## Migraatio booking_278
-- `booking/supabase/migrations/20261111160000_booking_278_admin_order_customer_read.sql` – vain lukufunktiot:
+- `booking/supabase/migrations/20261111162544_booking_278_admin_order_customer_read.sql` – vain lukufunktiot:
   A `admin_get_order` (+ locale, invoice, overpaid, refundable_by_payment, voucher_claims, reservation_meta),
   H `admin_get_customer` (+ open_balance, open_orders, stats, gift_cards),
   J `admin_order_history(bigint, int default 200)` (uusi), `admin_order_lookup(bigint)` (uusi).
-- Rollback: `booking/supabase/rollbacks/20261111160000_booking_278_ROLLBACK.sql` (palauttaa PROD-versiot, pudottaa uudet funktiot).
+- Rollback: `booking/supabase/rollbacks/20261111162544_booking_278_ROLLBACK.sql` (palauttaa PROD-versiot, pudottaa uudet funktiot).
 - Testi: `booking/supabase/tests/t278_admin_order_customer_read.sql` (aja migraation jälkeen DEV:ssä, kaikki rivit PASS).
 - Käyttöliittymä toimii myös ilman migraatiota (puuttuvat kentät → fallbackit; historia ja lookup → virhe/fallback).
 

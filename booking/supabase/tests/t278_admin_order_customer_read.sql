@@ -6,7 +6,7 @@
 begin;
 set local statement_timeout = '120s';
 set local lock_timeout = '3s';
-\ir ../migrations/20261111160000_booking_278_admin_order_customer_read.sql
+\ir ../migrations/20261111162544_booking_278_admin_order_customer_read.sql
 
 create function pg_temp.ck(ok boolean, label text) returns void language plpgsql as $$
 begin
@@ -150,7 +150,7 @@ end $test$;
 
 
 -- Rollback palauttaa PRODin rungot sellaisinaan (md5 11.11.2026) ja poistaa uudet funktiot.
-\ir ../rollbacks/20261111160000_booking_278_ROLLBACK.sql
+\ir ../rollbacks/20261111162544_booking_278_ROLLBACK.sql
 do $rb$
 begin
   perform pg_temp.ck(md5(pg_get_functiondef('booking.admin_get_order(bigint)'::regprocedure)) = '588767e4dd1967267df8d12501aa6898', 'RB1: admin_get_order = PROD ennen 278:aa');
