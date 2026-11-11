@@ -6,11 +6,12 @@ import { loadPosTexts, posText as tx } from './pos-texts.js';
 import { cartAdd, cartAddCustom, cartLineKey, cartSetQty, cartTotal, cartVatBreakdown, checkoutItems, parseEuroInput, validateCustomLine, posSheetTenders, tenderAvailable, joinUrl, posCandidates, filterProducts, tillEditorOpen, moveSort, validEmail, posCustomerHits } from './pos-logic.js';
 import { searchCustomers } from './customer-hits.js';
 import { qrSvgElement } from './qrsvg.js';
+import { cxEnabled, readTerminal, saveTerminal, pickTerminal, savePending, readPending, clearPending, openAppLink, cxStateOf, cxErrorKey, CX_REGISTER_TTL_MS } from './checkoutx-pos.js';
 
 const MOCK = () => new URLSearchParams(location.search).get('mock') === '1';
 
 export async function renderPos({ ctx, rpc, fn }) {
-  void fn;
+  const store = (() => { try { return globalThis.localStorage || null; } catch { return null; } })();
   const lang = 'fi';
   const t = (k) => tx(k, lang);
   const canEdit = ctx.can('pos.use') || ctx.can('catalog.edit') || ctx.can('settings.edit');
@@ -41,6 +42,9 @@ export async function renderPos({ ctx, rpc, fn }) {
   let returnFocus = null;
   let modalWasOpen = false;
   let keyHandler = null;
+  // booking_286: kortti puhelimella (CheckoutX). Näkyy vain, kun palvelin kertoo tilan test.
+  const cx = { terminals: [], terminal: null, state: null, failure: null, reg: null, regTimer: null, regLabel: '', configureLink: null };
+  let visHandler = null;
 
   const root = h('div', { class: 'pos', 'data-testid': 'pos' });
 
@@ -114,7 +118,11 @@ export async function renderPos({ ctx, rpc, fn }) {
     releaseScroll();
     document.getElementById('pos-pay-overlay')?.remove();
     stopPoll();
+    stopRegister();
+    if (visHandler) { document.removeEventListener?.('visibilitychange', visHandler); visHandler = null; }
   }
+
+  function stopRegister() { if (cx.regTimer) clearInterval(cx.regTimer); cx.regTimer = null; }
 
   function focusables(dlg) {
     if (!dlg?.querySelectorAll) return [];
@@ -215,6 +223,13 @@ export async function renderPos({ ctx, rpc, fn }) {
       if (st && st.mode) modes = { ...modes, montonio_mode: st.mode };
     } catch { /* pos.use ilman settings.edit: maksulinkki käyttää vismapay_mode-varaa */ }
     tenders = posSheetTenders(ten?.tenders || []);
+    if (cxEnabled(modes)) {
+      try {
+        const st = await rpc('admin_get_checkoutx_status');
+        cx.terminals = Array.isArray(st?.terminals) ? st.terminals : [];
+      } catch { cx.terminals = []; }
+      cx.terminal = pickTerminal(readTerminal(store), cx.terminals);
+    }
     allProducts = Array.isArray(products) ? products : [];
     editing = tillEditorOpen(catalog.length, editing);
   }
@@ -222,6 +237,15 @@ export async function renderPos({ ctx, rpc, fn }) {
   async function voidOpen() {
     if (!order || phase === 'paid') return;
     const id = order.order_id;
+    if (payInfo?.kind === 'checkoutx' && payInfo.payment_id && cx.state !== 'failed' && cx.state !== 'cancelled') {
+      // Surfboardin tilaus perutaan ensin. Jos asiakas ehti maksaa, kassatilausta ei peruta.
+      try {
+        const r = await fn('checkoutx-pos', { action: 'cancel', payment_id: payInfo.payment_id });
+        if (cxStateOf(r) === 'paid') { toast(t('cx_already_paid')); watch(id); return; }
+      } catch (e) { toast(errMsg(e), 'err'); }
+    }
+    cx.state = null; cx.failure = null;
+    clearPending(store);
     order = null; phase = 'cart'; payInfo = null; mail = null; stopPoll();
     try { await rpc('admin_pos_void', { p_order_id: id }); } catch (e) { toast(errMsg(e)); }
   }
@@ -229,10 +253,22 @@ export async function renderPos({ ctx, rpc, fn }) {
   function watch(orderId) {
     stopPoll();
     const tick = async () => {
+      if (payInfo?.kind === 'checkoutx' && phase === 'paying' && payInfo.payment_id && !cx.state) {
+        try {
+          const r = await fn('checkoutx-pos', { action: 'status', payment_id: payInfo.payment_id });
+          const s = cxStateOf(r);
+          if (s === 'failed' || s === 'cancelled') {
+            cx.state = s; cx.failure = r?.failure_reason || null;
+            stopPoll(); payOpen = true; draw();
+            return;
+          }
+        } catch { /* seuraava kysely */ }
+      }
       try {
         const st = await rpc('admin_pos_status', { p_order_id: orderId });
         if (st?.payment_status === 'paid') {
           stopPoll();
+          clearPending(store);
           phase = 'paid';
           payInfo = { ...(payInfo || {}), receipt: st.receipts?.[0] || null, order_no: st.order_no };
           cart = [];
@@ -250,6 +286,11 @@ export async function renderPos({ ctx, rpc, fn }) {
     };
     pollTimer = setInterval(tick, 2500);
     tick();
+    if (payInfo?.kind === 'checkoutx' && !visHandler && document.addEventListener) {
+      // CheckoutX tuo selaimen takaisin samaan välilehteen: näkyviin tulo = tarkista heti (Surfboardin ohje).
+      visHandler = () => { if (!document.hidden && pollTimer && root.isConnected) tick(); };
+      document.addEventListener('visibilitychange', visHandler);
+    }
   }
 
   function showPayError(e) {
@@ -265,7 +306,8 @@ export async function renderPos({ ctx, rpc, fn }) {
       if (!cart.length) { toast(t('empty')); return; }
       if (!tender || !tenderAvailable(tenders.find((x) => x.code === tender), modes)) { payOpen = true; toast(t('choose_method')); return; }
       const chosen = tenders.find((x) => x.code === tender);
-      if (!chosen || chosen.handler !== 'payment_link') { payOpen = true; toast(t('choose_method')); return; }
+      if (!chosen || (chosen.handler !== 'payment_link' && chosen.handler !== 'checkoutx')) { payOpen = true; toast(t('choose_method')); return; }
+      if (chosen.handler === 'checkoutx' && !cx.terminal) { payError = t('cx_no_terminal'); payOpen = true; toast(payError, 'err'); return; }
       let mailTo = null;
       if (chosen.handler === 'payment_link') {
         mailTo = String(email || '').trim();
@@ -287,9 +329,12 @@ export async function renderPos({ ctx, rpc, fn }) {
           mailError = '';
           if (MOCK()) await rpc('admin_pos_mock_tender', { p_order_id: res.order_id });
           watch(res.order_id);
+        } else if (chosen.handler === 'checkoutx') {
+          await startCheckoutx(res.order_id);
         }
         payOpen = true;
       } catch (e) {
+        if (chosen.handler === 'checkoutx') { cx.configureLink = e?.details?.configure_link || null; if (e?.code) e.message = t(cxErrorKey(e.code)); payInfo = null; }
         await voidOpen();
         phase = 'cart';
         payInfo = null;
@@ -305,7 +350,103 @@ export async function renderPos({ ctx, rpc, fn }) {
     }
   }
 
+  async function startCheckoutx(orderId) {
+    cx.state = null; cx.failure = null;
+    const r = await fn('checkoutx-pos', { action: 'start', order_id: orderId, terminal_id: cx.terminal.terminal_id, return: 'chrome' });
+    payInfo = { kind: 'checkoutx', payment_id: r.payment_id, deep_link: r.deep_link, configure_link: r.configure_link || null, amount: r.amount };
+    cx.configureLink = r.configure_link || null;
+    savePending(store, { order_id: orderId, payment_id: r.payment_id });
+    openAppLink(r.deep_link);
+    watch(orderId);
+  }
+
+  async function retryCheckoutx() {
+    if (busy || !order || phase !== 'paying') return;
+    busy = true; payError = ''; draw();
+    try { await startCheckoutx(order.order_id); }
+    catch (e) { payError = e?.code ? t(cxErrorKey(e.code)) : errMsg(e); cx.configureLink = e?.details?.configure_link || cx.configureLink; toast(payError, 'err'); }
+    finally { busy = false; draw(); }
+  }
+
+  async function registerPhone() {
+    if (busy) return;
+    busy = true; payError = ''; draw();
+    try {
+      const r = await fn('checkoutx-pos', { action: 'register_start', return: 'chrome' });
+      cx.reg = { code: r.registration_code, until: Date.now() + CX_REGISTER_TTL_MS };
+      openAppLink(r.deep_link);
+      stopRegister();
+      const check = async () => {
+        if (!cx.reg || !root.isConnected) { stopRegister(); return; }
+        if (Date.now() > cx.reg.until) { stopRegister(); cx.reg = null; payError = t('cx_register_expired'); draw(); return; }
+        try {
+          const c = await fn('checkoutx-pos', { action: 'register_check', registration_code: cx.reg.code, label: cx.regLabel || t('cx_phone') });
+          if (c?.registered) {
+            stopRegister(); cx.reg = null;
+            cx.terminal = saveTerminal(store, { terminal_id: c.terminal_id, label: c.label || cx.regLabel });
+            try { const st = await rpc('admin_get_checkoutx_status'); cx.terminals = Array.isArray(st?.terminals) ? st.terminals : cx.terminals; } catch { /* lista päivittyy seuraavalla latauksella */ }
+            toast(t('cx_register_done'));
+            draw();
+          }
+        } catch { /* seuraava kysely */ }
+      };
+      cx.regTimer = setInterval(check, 3000);
+    } catch (e) {
+      payError = e?.code ? t(cxErrorKey(e.code)) : errMsg(e);
+      toast(payError, 'err');
+    } finally { busy = false; draw(); }
+  }
+
+  function checkoutxBox() {
+    if (tender !== 'checkoutx' || phase !== 'cart') return null;
+    const box = h('div', { class: 'fld pos-cx', 'data-testid': 'pos-cx' });
+    box.append(h('p', { class: 'muted', 'data-testid': 'pos-cx-test-note', text: t('cx_test_note') }));
+    if (cx.terminals.length) {
+      const sel = h('select', {
+        'data-testid': 'pos-cx-terminal', 'aria-label': t('cx_pick'),
+        onchange: (e) => {
+          const row = cx.terminals.find((x) => x.terminal_id === e.target.value);
+          cx.terminal = row ? saveTerminal(store, row) : null;
+          draw();
+        },
+      }, h('option', { value: '', text: t('cx_pick') }),
+      ...cx.terminals.map((x) => h('option', { value: x.terminal_id, text: x.label || x.terminal_id, selected: cx.terminal?.terminal_id === x.terminal_id || null })));
+      box.append(h('label', { class: 'fld' }, h('span', { text: t('cx_phone') }), sel));
+    }
+    if (!cx.terminal) box.append(h('p', { 'data-testid': 'pos-cx-no-terminal', text: t('cx_no_terminal') }));
+    if (ctx.can('settings.edit')) {
+      if (cx.reg) box.append(h('p', { role: 'status', 'data-testid': 'pos-cx-register-wait', text: t('cx_register_wait') }));
+      const label = h('input', { type: 'text', maxlength: '60', value: cx.regLabel, 'data-testid': 'pos-cx-label' });
+      label.addEventListener('input', () => { cx.regLabel = String(label.value || ''); });
+      box.append(h('label', { class: 'fld' }, h('span', { text: t('cx_register_label') }), label),
+        h('button', { type: 'button', class: 'btn', 'data-testid': 'pos-cx-register', text: t('cx_register'), disabled: busy || null, onclick: () => registerPhone() }));
+    } else if (!cx.terminal) {
+      box.append(h('p', { class: 'muted', text: t('cx_register_admin') }));
+    }
+    if (cx.configureLink) {
+      box.append(h('button', { type: 'button', class: 'btn ghost', 'data-testid': 'pos-cx-configure', text: t('cx_configure'), onclick: () => openAppLink(cx.configureLink) }));
+    }
+    return box;
+  }
+
+  // Selain saattoi pudottaa välilehden CheckoutX:n ollessa edessä: kesken jäänyt maksu jatkuu (Surfboardin ohje).
+  async function restoreCheckoutx() {
+    if (!cxEnabled(modes)) return;
+    const p = readPending(store);
+    if (!p) return;
+    try {
+      const st = await rpc('admin_pos_status', { p_order_id: p.order_id });
+      if (st?.status !== 'pending' || !['unpaid', 'pending'].includes(st?.payment_status)) { clearPending(store); return; }
+      order = { order_id: st.order_id, order_no: st.order_no, total: st.total };
+      phase = 'paying';
+      payInfo = { kind: 'checkoutx', payment_id: p.payment_id, deep_link: null };
+      payOpen = true;
+      watch(st.order_id);
+    } catch { clearPending(store); }
+  }
+
   function nextCustomer() {
+    cx.state = null; cx.failure = null; clearPending(store);
     order = null; phase = 'cart'; payInfo = null; cart = [];
     email = ''; mail = null; mailError = '';
     stopSuggest();
@@ -344,7 +485,7 @@ export async function renderPos({ ctx, rpc, fn }) {
     for (const m of tenders) {
       const available = tenderAvailable(m, modes);
       const on = available && phase === 'cart';
-      const label = m.handler === 'payment_link' ? t('method_link') : m.handler === 'terminal' ? t('method_terminal') : m.code;
+      const label = m.handler === 'payment_link' ? t('method_link') : m.handler === 'terminal' ? t('method_terminal') : m.handler === 'checkoutx' ? t('method_checkoutx') : m.code;
       box.append(h('label', { class: 'pos-method' + (available ? '' : ' is-off') },
         h('input', { type: 'radio', name: 'tender', value: m.code, disabled: !on || null, checked: tender === m.code || null, onchange: () => { tender = m.code; draw(); } }),
         h('span', { text: label }),
@@ -481,6 +622,20 @@ export async function renderPos({ ctx, rpc, fn }) {
       }
       if (payInfo.url) box.append(h('p', { class: 'muted', text: t('link_help') }), h('p', { class: 'pos-url', text: payInfo.url }), qrSvgElement(payInfo.url, { size: 220, label: t('method_link') }));
     }
+    if (phase === 'paying' && payInfo?.kind === 'checkoutx') {
+      if (cx.state === 'failed' || cx.state === 'cancelled') {
+        box.append(h('p', { role: 'alert', class: 'err', 'data-testid': 'pos-cx-failed', text: t(cx.state === 'failed' ? 'cx_failed' : 'cx_cancelled') + (cx.failure ? ` (${cx.failure})` : '') }));
+        if (payError) box.append(h('p', { role: 'alert', class: 'err', 'data-testid': 'pos-pay-error', text: payError }));
+        box.append(
+          h('button', { type: 'button', class: 'btn primary', 'data-testid': 'pos-cx-retry', text: busy ? t('wait') : t('cx_retry'), disabled: busy || null, onclick: () => retryCheckoutx() }),
+          h('button', { type: 'button', class: 'btn ghost', 'data-testid': 'pos-cx-cancel', text: t('cx_cancel'), disabled: busy || null, onclick: () => voidOpen().then(() => { payOpen = true; draw(); }) }));
+        if (cx.configureLink) box.append(h('button', { type: 'button', class: 'btn ghost', 'data-testid': 'pos-cx-configure', text: t('cx_configure'), onclick: () => openAppLink(cx.configureLink) }));
+        return box;
+      }
+      box.append(h('p', { class: 'muted', 'data-testid': 'pos-cx-help', text: t('cx_waiting_help') }),
+        payInfo.deep_link ? h('button', { type: 'button', class: 'btn primary', 'data-testid': 'pos-cx-open', text: t('cx_open'), onclick: () => openAppLink(payInfo.deep_link) }) : null,
+        h('button', { type: 'button', class: 'btn ghost', 'data-testid': 'pos-cx-cancel', text: t('cx_cancel'), disabled: busy || null, onclick: () => voidOpen().then(() => { payOpen = true; draw(); }) }));
+    }
     if (phase === 'paying') box.append(h('p', { text: t('waiting') }));
     if (phase === 'paid') {
       box.append(h('div', { class: 'pos-paid', 'data-testid': 'pos-paid-dialog' },
@@ -513,6 +668,8 @@ export async function renderPos({ ctx, rpc, fn }) {
       dialog.append(methodBox());
       const mailField = emailBox();
       if (mailField) dialog.append(mailField);
+      const cxField = checkoutxBox();
+      if (cxField) dialog.append(cxField);
     }
     if (phase === 'cart') {
       dialog.append(h('p', { class: 'muted pos-legal', text: t('pay_legal') }));
@@ -725,6 +882,7 @@ export async function renderPos({ ctx, rpc, fn }) {
   }
 
   await load();
+  await restoreCheckoutx();
   draw();
   // Tarkkailija vasta kun näkymä on kiinnitetty. load()in aikana root ei ole vielä sivulla,
   // ja irtoaminen silloin purkaisi kuuntelijan ennen kuin näkymä ehtii näkyviin.
