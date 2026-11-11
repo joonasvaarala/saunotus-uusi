@@ -41,6 +41,9 @@ verify_jwt = false   # asiakkaan paluu; order-token varmennetaan funktiossa, ohj
 verify_jwt = false   # palvelinilmoitus (orderToken/refundToken) ja tilaussivun reconcile (order_token)
 [functions.montonio-refund]
 verify_jwt = true    # henkilökunta (payments.refund tarkistetaan funktiossa) tai service role
+# Pikakassan kortti puhelimella (CheckoutX / Surfboard demo, booking_286). Salaisuudet: SURFBOARD_API_URL, SURFBOARD_API_KEY, SURFBOARD_API_SECRET, SURFBOARD_MERCHANT_ID, SURFBOARD_STORE_ID, CHECKOUTX_ENV=demo. Kytkin: integration_config checkoutx (off/test).
+[functions.checkoutx-pos]
+verify_jwt = true    # henkilökunta (pos.use / settings.edit / payments.refund tarkistetaan funktiossa) tai service role
 
 [functions.procountor-sync]
 verify_jwt = false   # pg_cron kutsuu; tunnistus x-sync-secret (booking._cron_secret_ok). Ei JWT:tä.

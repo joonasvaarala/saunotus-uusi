@@ -7,7 +7,7 @@ import { telHref, mailHref, createLatestGate } from '../reservation-dialog-logic
 import { cardActions, cardPaymentStatus, cardSectionSummaries, cardAddonLine, orderBreakdown, vatRateLabel } from '../order-card-logic.js';
 import { loadOrderTexts, orderText as tx } from '../orders-texts.js';
 import { loadRcTexts } from '../refund-cancel-texts.js';
-import { cancelReservationDialog } from './refund-cancel.js';
+import { cancelReservationDialog, CX_KINDS } from './refund-cancel.js';
 import { openAddToOrder, openOrderPaymentLink, openOrderRecordPayment } from './order-add.js';
 import { formDialog } from './talous-ui.js';
 import { t } from '../talous-i18n.js';
@@ -290,6 +290,11 @@ export function openOrderCard({
     toast(t(VP_KINDS[m.result] ? `refund.vp.${m.result}` : 'refund.vp.error'), VP_KINDS[m.result] || 'warn');
     return m;
   }
+  async function processCheckoutxRefund(refundId) {
+    const m = api.checkoutxRefund ? await api.checkoutxRefund(refundId) : { result: 'none' };
+    toast(t(CX_KINDS[m.result] ? `refund.cx.${m.result}` : 'refund.cx.error'), CX_KINDS[m.result] || 'warn');
+    return m;
+  }
   async function processMontonioRefund(refundId) {
     const m = await api.montonioRefund(refundId);
     toast(t(MO_KINDS[m.result] ? `refund.mo.${m.result}` : 'refund.mo.error'), MO_KINDS[m.result] || 'warn');
@@ -298,13 +303,14 @@ export function openOrderCard({
   function openRefunds(p) {
     const rows = (p.refunds || []).filter((x) => ['requested', 'processing', 'failed'].includes(x.status));
     if (!rows.length) return null;
-    const canRetry = (p.provider === 'mobilepay' || p.provider === 'visma_pay' || p.provider === 'montonio') && !api.isMock?.('refund') && can('payments.refund');
+    const canRetry = (p.provider === 'mobilepay' || p.provider === 'visma_pay' || p.provider === 'montonio' || p.provider === 'checkoutx') && !api.isMock?.('refund') && can('payments.refund');
     return h('ul', { class: 'tl-refunds', 'data-testid': 'order-open-refunds' }, rows.map((rf) => h('li', { 'data-testid': 'open-refund', 'data-status': rf.status },
       h('span', { class: `badge ${rf.status === 'failed' ? 'st-cancelled' : 'st-pending'}`, text: t(rf.status === 'failed' ? 'refund.failed' : 'refund.pending') }), ' ',
       h('span', { text: `${money(rf.amount)}${rf.reason ? ' · ' + rf.reason : ''}` }),
       canRetry && rf.status !== 'failed' ? h('button', { type: 'button', class: 'btn sm', 'data-testid': 'btn-refund-retry', text: t('refund.retry'), onclick: () => run(null, async () => {
         if (p.provider === 'visma_pay') await processVismaRefund(rf.id);
         else if (p.provider === 'montonio') await processMontonioRefund(rf.id);
+        else if (p.provider === 'checkoutx') await processCheckoutxRefund(rf.id);
         else await processMobilepayRefund(rf.id);
         await fetchOrder(); onChange?.();
       }) }) : null)));

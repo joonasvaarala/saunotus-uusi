@@ -242,6 +242,68 @@ export const POS_CUSTOM_TEXTS = {
   },
 };
 
+// Kortti puhelimella (CheckoutX / Surfboard demo, booking_286): pending-import-141 (POS_CHECKOUTX_TEXTS). Näkyy vain testitilassa.
+export const POS_CHECKOUTX_TEXTS = {
+  fi: {
+    method_checkoutx: 'Kortti puhelimella (CheckoutX)',
+    cx_test_note: 'Testiympäristö: CheckoutX-maksut mitätöidään, eikä rahaa veloiteta.',
+    cx_simulated: 'Simuloitu maksu: CheckoutX-sovellusta ei avata, eikä rahaa liiku. Maksu hyväksytään muutaman sekunnin kuluttua.',
+    cx_phone: 'Tämä puhelin',
+    cx_pick: 'Valitse puhelin',
+    cx_no_terminal: 'Tätä puhelinta ei ole liitetty CheckoutX:ään.',
+    cx_register: 'Liitä tämä puhelin CheckoutX:ään',
+    cx_register_label: 'Puhelimen nimi',
+    cx_register_wait: 'Vahvista liitos CheckoutX-sovelluksessa ja palaa sitten tähän näkymään.',
+    cx_register_done: 'Puhelin on liitetty CheckoutX:ään.',
+    cx_register_expired: 'Liitoskoodi vanheni. Yritä uudelleen.',
+    cx_register_admin: 'Pyydä ylläpitäjää liittämään tämä puhelin CheckoutX:ään.',
+    cx_open: 'Avaa CheckoutX',
+    cx_configure: 'Valmistele CheckoutX',
+    cx_waiting_help: 'Asiakas koskettaa korttia tai puhelinta tämän puhelimen takaosaan. Palaa sitten tähän näkymään.',
+    cx_failed: 'Korttimaksu ei onnistunut.',
+    cx_cancelled: 'Korttimaksu peruttiin.',
+    cx_retry: 'Yritä uudelleen',
+    cx_cancel: 'Peru maksu',
+    cx_already_paid: 'Asiakas ehti maksaa, joten maksua ei peruttu.',
+    cx_off: 'Kortti puhelimella ei ole käytössä.',
+    cx_not_configured: 'CheckoutX-tunnukset puuttuvat. Maksua ei aloitettu.',
+    cx_not_connected: 'Puhelimen CheckoutX ei ole yhteydessä. Valmistele CheckoutX ja yritä uudelleen.',
+    cx_unavailable: 'CheckoutX ei vastaa juuri nyt. Yritä hetken kuluttua uudelleen.',
+    cx_provider_error: 'CheckoutX ei hyväksynyt maksua. Yritä uudelleen.',
+    cx_in_progress: 'Tilauksella on jo avoin maksu toisella maksutavalla.',
+    cx_forbidden: 'Sinulla ei ole oikeutta tähän toimintoon.',
+  },
+  en: {
+    method_checkoutx: 'Card on phone (CheckoutX)',
+    cx_test_note: 'Test environment: CheckoutX payments are voided and no money is charged.',
+    cx_simulated: 'Simulated payment: the CheckoutX app is not opened and no money moves. The payment is approved after a few seconds.',
+    cx_phone: 'This phone',
+    cx_pick: 'Choose phone',
+    cx_no_terminal: 'This phone is not linked to CheckoutX.',
+    cx_register: 'Link this phone to CheckoutX',
+    cx_register_label: 'Phone name',
+    cx_register_wait: 'Confirm the link in the CheckoutX app, then come back to this view.',
+    cx_register_done: 'The phone is linked to CheckoutX.',
+    cx_register_expired: 'The link code expired. Please try again.',
+    cx_register_admin: 'Ask an administrator to link this phone to CheckoutX.',
+    cx_open: 'Open CheckoutX',
+    cx_configure: 'Prepare CheckoutX',
+    cx_waiting_help: 'The customer taps their card or phone on the back of this phone. Then come back to this view.',
+    cx_failed: 'The card payment did not go through.',
+    cx_cancelled: 'The card payment was cancelled.',
+    cx_retry: 'Try again',
+    cx_cancel: 'Cancel payment',
+    cx_already_paid: 'The customer had already paid, so the payment was not cancelled.',
+    cx_off: 'Card on phone is not in use.',
+    cx_not_configured: 'CheckoutX credentials are missing. The payment was not started.',
+    cx_not_connected: 'CheckoutX on this phone is not connected. Prepare CheckoutX and try again.',
+    cx_unavailable: 'CheckoutX is not responding right now. Please try again shortly.',
+    cx_provider_error: 'CheckoutX did not accept the payment. Please try again.',
+    cx_in_progress: 'The order already has an open payment with another method.',
+    cx_forbidden: 'You do not have permission for this action.',
+  },
+};
+
 const PREFIX = 'ui.pos.';
 let db = new Map();
 let loaded = false;
@@ -276,6 +338,6 @@ export function clearPosTextCache() {
 export function posText(key, lang = getLang()) {
   const live = db.get(`${PREFIX}${key}|${lang}`);
   if (live) return live;
-  return POS_TEXTS[lang]?.[key] || POS_EDIT_TEXTS[lang]?.[key] || POS_PAY_TEXTS[lang]?.[key] || POS_LINK_TEXTS[lang]?.[key] || POS_CUSTOMER_TEXTS[lang]?.[key] || POS_CUSTOM_TEXTS[lang]?.[key]
-    || POS_TEXTS.fi[key] || POS_EDIT_TEXTS.fi[key] || POS_PAY_TEXTS.fi[key] || POS_LINK_TEXTS.fi[key] || POS_CUSTOMER_TEXTS.fi[key] || POS_CUSTOM_TEXTS.fi[key] || key;
+  return POS_TEXTS[lang]?.[key] || POS_EDIT_TEXTS[lang]?.[key] || POS_PAY_TEXTS[lang]?.[key] || POS_LINK_TEXTS[lang]?.[key] || POS_CUSTOMER_TEXTS[lang]?.[key] || POS_CUSTOM_TEXTS[lang]?.[key] || POS_CHECKOUTX_TEXTS[lang]?.[key]
+    || POS_TEXTS.fi[key] || POS_EDIT_TEXTS.fi[key] || POS_PAY_TEXTS.fi[key] || POS_LINK_TEXTS.fi[key] || POS_CUSTOMER_TEXTS.fi[key] || POS_CUSTOM_TEXTS.fi[key] || POS_CHECKOUTX_TEXTS.fi[key] || key;
 }

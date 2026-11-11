@@ -12,7 +12,7 @@ import { countActive, filterDrawer } from '../filter-drawer.js';
 import { effectivePaymentFilters, isDefaultPaymentFilters, isUnpaidRow, normalizePaymentFilters, togglePaymentFilter, DEFAULT_PAYMENT_FILTERS, PAYMENT_FILTERS } from '../orders-filter.js';
 import { orderText } from '../orders-texts.js';
 import { rcText } from '../refund-cancel-texts.js';
-import { yesNo } from './refund-cancel.js';
+import { yesNo, CX_KINDS } from './refund-cancel.js';
 import { annualCardPanel, showAnnualCardDialog } from './annual-card-panel.js';
 import { acText } from '../annual-card-texts.js';
 import { orderVoucherBox } from './voucher-redeem.js';
@@ -186,10 +186,10 @@ export function createOrdersTab({ api, ctx, gift = null, rpc = null, onAfterChan
   function openRefunds(o, p) {
     const rows = (p.refunds || []).filter((r) => ['requested', 'processing', 'failed'].includes(r.status));
     if (!rows.length) return null;
-    const canRetry = (p.provider === 'mobilepay' || p.provider === 'visma_pay' || p.provider === 'montonio') && !api.isMock('refund') && ctx.can('payments.refund');
+    const canRetry = (p.provider === 'mobilepay' || p.provider === 'visma_pay' || p.provider === 'montonio' || p.provider === 'checkoutx') && !api.isMock('refund') && ctx.can('payments.refund');
     return h('ul', { class: 'tl-refunds', 'data-testid': 'order-open-refunds' }, rows.map((r) => h('li', { 'data-testid': 'open-refund', 'data-status': r.status },
       h('span', { class: `badge ${r.status === 'failed' ? 'st-cancelled' : 'st-pending'}`, text: t(r.status === 'failed' ? 'refund.failed' : 'refund.pending') }), ' ', h('span', { text: `${fmt.money(r.amount)}${r.reason ? ' · ' + r.reason : ''}` }),
-      canRetry && r.status !== 'failed' ? actionBtn({ key: 'refund-retry', label: t('refund.retry'), testid: 'btn-refund-retry', onClick: async () => { if (p.provider === 'visma_pay') await processVismaRefund(r.id); else if (p.provider === 'montonio') await processMontonioRefund(r.id); else await processMobilepayRefund(r.id); afterChange(null, o.order_id); } }) : null)));
+      canRetry && r.status !== 'failed' ? actionBtn({ key: 'refund-retry', label: t('refund.retry'), testid: 'btn-refund-retry', onClick: async () => { if (p.provider === 'visma_pay') await processVismaRefund(r.id); else if (p.provider === 'montonio') await processMontonioRefund(r.id); else if (p.provider === 'checkoutx') await processCheckoutxRefund(r.id); else await processMobilepayRefund(r.id); afterChange(null, o.order_id); } }) : null)));
   }
   async function orderDetail(id) {
     // booking_146: vuosikorttitilauksen koodi, voimassaolo ja sähköpostin tila (virhe tai puuttuva RPC → osio jää pois)
@@ -368,6 +368,7 @@ export function createOrdersTab({ api, ctx, gift = null, rpc = null, onAfterChan
       if (res?.status === 'requested' && !res.mock && p.provider === 'mobilepay') await processMobilepayRefund(res.refund_id);
       if (res?.status === 'requested' && !res.mock && p.provider === 'visma_pay') await processVismaRefund(res.refund_id);
       if (res?.status === 'requested' && !res.mock && p.provider === 'montonio') await processMontonioRefund(res.refund_id);
+      if (res?.status === 'requested' && !res.mock && p.provider === 'checkoutx') await processCheckoutxRefund(res.refund_id);
       afterChange(res, o.order_id);
     });
   }
@@ -384,6 +385,11 @@ export function createOrdersTab({ api, ctx, gift = null, rpc = null, onAfterChan
     const m = await api.vismapayRefund(refundId);
     const key = VP_KINDS[m.result] ? `refund.vp.${m.result}` : 'refund.vp.error';
     toast(t(key), VP_KINDS[m.result] || 'warn');
+    return m;
+  }
+  async function processCheckoutxRefund(refundId) {
+    const m = api.checkoutxRefund ? await api.checkoutxRefund(refundId) : { result: 'none' };
+    toast(t(CX_KINDS[m.result] ? `refund.cx.${m.result}` : 'refund.cx.error'), CX_KINDS[m.result] || 'warn');
     return m;
   }
   async function processMontonioRefund(refundId) {
