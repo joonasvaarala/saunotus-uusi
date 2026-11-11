@@ -217,7 +217,7 @@ for (const width of [390, 1280]) {
   await page.goto(`${ORIGIN}/admin/?mock=1#/tilaukset`, { waitUntil: 'load' });
   await page.waitForSelector('[data-testid=orders-list]');
   await page.locator('[data-testid=orders-filters-toggle]').click();
-  await page.selectOption('[data-testid=orders-f-pay]', 'unpaid');
+  await page.evaluate((c) => { const b = document.querySelector('[data-testid=orders-pay-btn-' + c + ']'); if (!b) throw new Error('maksutilanappi puuttuu: ' + c); if (b.getAttribute('aria-pressed') !== 'true') b.click(); for (const x of document.querySelectorAll('[data-testid^=orders-pay-btn-][aria-pressed=true]')) if (x !== b) x.click(); }, 'unpaid');
   await page.waitForTimeout(400);
   await page.locator('[data-testid=orders-list] [data-testid=order] .tl-head').first().click();
   await page.waitForSelector('[data-testid=btn-link]');

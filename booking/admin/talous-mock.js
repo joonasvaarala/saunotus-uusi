@@ -177,7 +177,10 @@ export function createMock({ n = 12000, seed = 20261017, today = new Date().toLo
     if (a.p_payment_status) rows = rows.filter((o) => o.payment_status === a.p_payment_status);
     const pf = normalizePaymentFilter(a.p_payment_filter);
     if (!PAYMENT_FILTERS.includes(pf)) throw fail('invalid_param', 'p_payment_filter: paid|unpaid|all|refunded|cancelled|invoiced');
-    rows = rows.filter((o) => matchesPaymentFilter(o, pf));
+    // booking_277: ei-tyhjä p_payment_filters ohittaa p_payment_filter-arvon (OR, ei tuplia)
+    const pfs = Array.isArray(a.p_payment_filters) && a.p_payment_filters.length ? a.p_payment_filters.map((x) => String(x ?? '').trim()) : null;
+    if (pfs && pfs.some((x) => !PAYMENT_FILTERS.includes(x))) throw fail('invalid_param', 'p_payment_filters: paid|unpaid|all|refunded|cancelled|invoiced');
+    rows = rows.filter((o) => (pfs ? pfs.some((f) => matchesPaymentFilter(o, f)) : matchesPaymentFilter(o, pf)));
     if (a.p_source) rows = rows.filter((o) => o.source_channel === a.p_source);
     if (a.p_native != null) rows = rows.filter((o) => o.is_native === !!a.p_native);
     const dateOf = a.p_date_field === 'start' ? (o) => (o.first_reservation_at ? dayOf(o.first_reservation_at) : null) : (o) => o.created_date;

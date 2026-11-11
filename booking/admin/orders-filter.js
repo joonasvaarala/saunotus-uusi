@@ -71,3 +71,42 @@ export function effectivePaymentFilter({ search, paymentFilter } = {}) {
   if (String(search || '').trim() && selected === DEFAULT_PAYMENT_FILTER) return 'all';
   return selected;
 }
+
+// ---- Monivalinta (maksutilanapit, booking_277 p_payment_filters) ----
+// Valitut tilat yhdistetään OR-ehdolla. Kaikki ('all') on oma nappinsa ja kumoaa muut.
+// Tyhjä valinta tarkoittaa kaikkia tilauksia (näkymä sytyttää silloin Kaikki-napin).
+// Hallinnan Tilaukset-välilehden oletus (Joonas 11.11.2026): Maksetut ja Maksamattomat.
+export const DEFAULT_PAYMENT_FILTERS = Object.freeze(['paid', 'unpaid']);
+
+/** Siistii valinnan: vain tunnetut tilat, ei tuplia, valikon järjestys. 'all' tai tyhjä → ['all']. */
+export function normalizePaymentFilters(list) {
+  const want = new Set([].concat(list ?? []).map((v) => String(v ?? '').trim()).filter(Boolean));
+  if (want.has('all')) return ['all'];
+  const out = PAYMENT_FILTERS.filter((f) => f !== 'all' && want.has(f));
+  return out.length ? out : ['all'];
+}
+
+export const isDefaultPaymentFilters = (list) => normalizePaymentFilters(list).join(',') === DEFAULT_PAYMENT_FILTERS.join(',');
+
+/** Listarivin haalea punainen tausta: sama sääntö kuin Maksamattomat-napissa (unpaid/pending/failed/partially_paid, ei peruttu). */
+export const isUnpaidRow = (order) => matchesPaymentFilter(order, 'unpaid');
+
+/** Napin painallus: Kaikki valitsee vain itsensä; muu tila vaihtaa päälle/pois ja poistaa Kaikki-valinnan. */
+export function togglePaymentFilter(list, code) {
+  const cur = normalizePaymentFilters(list);
+  if (code === 'all') return ['all'];
+  if (!PAYMENT_FILTERS.includes(code)) return cur;
+  const set = new Set(cur.filter((f) => f !== 'all'));
+  if (set.has(code)) set.delete(code); else set.add(code);
+  return normalizePaymentFilters([...set]);
+}
+
+export function matchesPaymentFilters(order, list) {
+  return normalizePaymentFilters(list).some((f) => matchesPaymentFilter(order, f));
+}
+
+/** Haku ohittaa vain oletuksen (Maksetut + Maksamattomat): haku käy kaikista. Muu valinta pysyy haussa. */
+export function effectivePaymentFilters({ search, paymentFilters } = {}) {
+  if (String(search || '').trim() && isDefaultPaymentFilters(paymentFilters ?? DEFAULT_PAYMENT_FILTERS)) return ['all'];
+  return normalizePaymentFilters(paymentFilters ?? DEFAULT_PAYMENT_FILTERS);
+}

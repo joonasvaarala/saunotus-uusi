@@ -494,6 +494,16 @@ input[aria-invalid=true],select[aria-invalid=true],textarea[aria-invalid=true]{b
 .filter-drawer-bar>.tl-search{flex:1 1 100%;min-width:0}
 .filter-chip{flex:0 0 auto;display:inline-flex;align-items:center;min-height:44px;padding:8px 12px;border-radius:999px;background:var(--green);color:#fff;font-weight:700;font-size:14px;line-height:1.2;white-space:nowrap}
 .filter-search-note{flex:1 1 100%;margin:0;font-size:14px}
+/* Tilaukset: maksamattoman tilauksen rivi hyvin haalealla punaisella (var --unpaidbg vaalennettuna), teksti pysyy luettavana */
+.tl-row.is-unpaid{background:#fcf3f4;background:color-mix(in srgb,var(--unpaidbg) 40%,#fff)}
+.tl-row.is-unpaid>.tl-head:hover{background:rgba(123,29,18,.04)}
+.tl-toolbar>.orders-drawer{grid-column:1/-1}
+.pay-chips{flex:1 1 0;min-width:min(100%,260px);display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.pay-chips>.pay-chip{width:auto;margin:0;border:1px solid var(--green);background:#fff;color:var(--green);font-family:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.pay-chips>.pay-chip[aria-pressed=true]{background:var(--green);color:#fff}
+.pay-chips>.pay-chip:focus-visible{outline:2px solid var(--green);outline-offset:2px}
+@media (hover:hover){.pay-chips>.pay-chip[aria-pressed=false]:hover{background:rgba(43,58,48,.06)}}
+@media (max-width:560px){.pay-chips{flex-basis:100%;gap:6px}.pay-chips>.pay-chip{padding:8px 11px}}
 .filter-panel{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;align-items:end}
 .filter-panel .filter-groups{grid-column:1/-1}
 .tl-toolbar input,.tl-toolbar select{min-width:0}
