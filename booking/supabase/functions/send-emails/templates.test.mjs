@@ -454,7 +454,7 @@ test('booking_176: tavallinen maksulinkki ennallaan (ei voucher_difference-lohko
 });
 
 // Gmail iOS zoomaa leveimmän kohdan mukaan. Kortti on width="100%" + max-width:600px, ei width="600".
-const LAYOUT_KINDS = ['order_confirmation', 'payment_link', 'receipt', 'refund_receipt', 'cancel_request_ack', 'order_change', 'gift_card_buyer', 'gift_card_recipient', 'voucher_claim_received', 'voucher_claim_problem', 'business_quote_ack', 'business_quote_notify', 'invoice_pdf', 'product_message', 'waitlist_spot_freed', 'waitlist_joined', 'annual_card_code', 'unpaid_booking_cancelled', 'event_message'];
+const LAYOUT_KINDS = ['order_confirmation', 'payment_link', 'receipt', 'refund_receipt', 'cancel_request_ack', 'order_change', 'gift_card_buyer', 'gift_card_recipient', 'voucher_claim_received', 'voucher_claim_problem', 'business_quote_ack', 'business_quote_notify', 'invoice_pdf', 'product_message', 'waitlist_spot_freed', 'waitlist_joined', 'annual_card_code', 'unpaid_booking_cancelled', 'event_message', 'reservation_cancelled'];
 test('asiakasviestit: viewport ja juokseva kortti (ei width="600")', { skip }, () => {
   for (const kind of LAYOUT_KINDS) for (const locale of ['fi', 'en']) {
     const row = kind === 'refund_receipt' ? refundData(locale) : base(locale);
@@ -494,6 +494,48 @@ test('unpaid_booking_cancelled: maksu ei valmistunut, Yritä uudelleen saman tuo
   for (const m of [fi, en]) assert.doesNotMatch(m.subject + m.text + m.html, /montonio|visma|mobilepay|vipps/i);
   const bad = R('unpaid_booking_cancelled', row('fi', 'javascript:alert(1)', 'Saunahoito'), 'fi');
   assert.ok(!bad.html.includes('javascript:'));
+});
+
+test('reservation_cancelled (booking_281): heti lähtevä peruutusviesti; hyvitysteksti lähetyshetken tilan mukaan; ei hyvitystä → ei mainintaa', { skip }, () => {
+  const RES = [{ product_name: 'Yleinen vuoro', product_name_en: 'Public sauna', starts_at: '2026-11-20T15:00:00Z', ends_at: '2026-11-20T17:00:00Z', persons: 2 }];
+  const row = (locale, c) => ({ ...base(locale), kind: 'reservation_cancelled', cancellation: { reservations: RES, refunds: [], gift_card: [], order_kept: false, ...c } });
+  const doneR = { refund_id: 1, amount: 18, status: 'done', kind: 'money', receipt: { receipt_no: 'H-2026-000045', public_token: 'tok', total: -18 }, receipt_sent_separately: false };
+  // 1) Montonio vahvisti jo → "hyvitetty" + kuitti liitteenä (yksi viesti)
+  const fi = R('reservation_cancelled', row('fi', { refunds: [doneR], gift_card: [{ action: 'returned', amount: 20, valid_to: '2027-05-30', code_last4: '8001' }] }), 'fi');
+  const en = R('reservation_cancelled', row('en', { refunds: [doneR] }), 'en');
+  assert.match(fi.subject, /^Varaus peruttu 15321/);
+  assert.ok(fi.text.includes('Varauksesi on peruttu.') && fi.text.includes('Yleinen vuoro'));
+  assert.ok(fi.text.includes('Hyvitimme 18,00 € alkuperäiselle maksutavalle. Hyvityskuitti on liitteenä PDF-tiedostona.'), fi.text);
+  assert.ok(!fi.text.includes('käsittelyssä'));
+  assert.ok(fi.text.includes('palautettiin lahjakortille (koodi …8001)'));
+  assert.match(fi.text, /Ystävällisin terveisin,\nTapio\nSipoonjoen Perinnesauna\n$/);
+  assert.ok(hrefs(fi.html).includes(ORDER_URL), 'tilauslinkki');
+  assert.match(en.subject, /^Booking cancelled 15321/);
+  assert.ok(en.text.includes('Public sauna') && en.text.includes('We have refunded 18.00 € to the original payment method. The refund receipt is attached as a PDF.'));
+  for (const m of [fi, en]) assert.doesNotMatch(m.subject + m.text + m.html, /montonio|visma|mobilepay|vipps/i, 'ei maksuvälittäjän nimeä');
+  // 2) hyvitys kesken → "käsittelyssä", kuitti erikseen myöhemmin
+  const pend = R('reservation_cancelled', row('fi', { refunds: [{ refund_id: 2, amount: 30, status: 'requested', kind: 'money', receipt: null }] }), 'fi');
+  assert.ok(pend.text.includes('Hyvitys 30,00 € on käsittelyssä. Saat hyvityskuitin erillisenä viestinä, kun hyvitys on valmis.'), pend.text);
+  assert.ok(!pend.text.includes('Hyvitimme') && !pend.text.includes('liitteenä'));
+  const pendEn = R('reservation_cancelled', row('en', { refunds: [{ amount: 30, status: 'processing', kind: 'money' }] }), 'en');
+  assert.ok(pendEn.text.includes('is being processed') && pendEn.text.includes('separate message'));
+  // 2b) valmis, mutta kuitti lähti jo erikseen
+  const sep = R('reservation_cancelled', row('fi', { refunds: [{ ...doneR, receipt: null, receipt_sent_separately: true }] }), 'fi');
+  assert.ok(sep.text.includes('Hyvityskuitti on lähetetty sinulle erillisenä viestinä.') && !sep.text.includes('liitteenä'));
+  // 3) ei hyvitystä → ei hyvitysosiota, ei "käsittelyssä", ei kuittia
+  for (const locale of ['fi', 'en']) {
+    const none = R('reservation_cancelled', row(locale, {}), locale);
+    const visible = none.html.replace(/<[^>]*>/g, ' ');   // näkyvä teksti (logon tiedostonimi logo-kuitti.png ei ole mainta)
+    assert.doesNotMatch(none.subject + none.text + visible, /hyvit|käsittelyssä|kuitti|refund|receipt|being processed/i, `${locale}: ei hyvitysmainintaa`);
+    assert.ok(none.text.includes(locale === 'fi' ? 'Varauksesi on peruttu.' : 'Your booking has been cancelled.'));
+  }
+  const kept = R('reservation_cancelled', row('fi', { order_kept: true }), 'fi');
+  assert.ok(kept.text.includes('tilauksesi on yhä voimassa'));
+  assert.doesNotMatch(kept.text, /hyvit/i);
+  const lost = R('reservation_cancelled', row('fi', { gift_card: [{ action: 'forfeited', amount: 15 }] }), 'fi');
+  assert.ok(lost.text.includes('Lahjakortilla maksettua osuutta (15,00 €) ei palauteta.') && !lost.text.includes('Hyvitimme'));
+  const empty = R('reservation_cancelled', { ...base('fi'), kind: 'reservation_cancelled' }, 'fi');
+  assert.ok(empty.subject && empty.text && empty.html, 'tyhjä peruutusdata ei kaada');
 });
 
 test('event_message: henkilökunnan viesti, ei automaattista allekirjoitusta, ei tilaussummaa eikä välittäjän nimeä', { skip }, () => {

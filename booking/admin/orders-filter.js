@@ -8,7 +8,9 @@
 // partially_paid ei ole oletuksessa: rahaa on tullut, mutta tilaus ei ole kokonaan maksettu.
 // Haku: kun valinta on oletus 'paid' ja hakukentässä on tekstiä, kutsu käyttää 'all' (maksamaton löytyy numerolla).
 
-export const PAYMENT_FILTERS = ['paid', 'unpaid', 'invoiced', 'all', 'refunded', 'cancelled'];
+// booking_279: 'archived' = poistetut maksamattomat. Muut suodattimet piilottavat poistetun, ellei sille ole kirjattu maksua (myöhäinen maksu näkyy)
+// tai haku ole tarkka tilausnumero.
+export const PAYMENT_FILTERS = ['paid', 'unpaid', 'invoiced', 'all', 'refunded', 'cancelled', 'archived'];
 export const DEFAULT_PAYMENT_FILTER = 'paid';
 
 const SETTLED = new Set(['paid', 'partially_refunded', 'refunded']);
@@ -51,9 +53,12 @@ export function orderStatusOf(order) {
   return 'confirmed';
 }
 
-export function matchesPaymentFilter(order, filter) {
+export function matchesPaymentFilter(order, filter, { exactNumber = false } = {}) {
   const f = normalizePaymentFilter(filter);
   if (!PAYMENT_FILTERS.includes(f)) return false;
+  const archived = !!order.archived_at;
+  if (f === 'archived') return archived;
+  if (archived && !exactNumber && !(settledPaymentCount(order) > 0)) return false;
   if (f === 'all') return true;
   const ps = order.payment_status;
   const closed = orderStatusOf(order) === 'cancelled' || orderStatusOf(order) === 'expired';
@@ -101,8 +106,8 @@ export function togglePaymentFilter(list, code) {
   return normalizePaymentFilters([...set]);
 }
 
-export function matchesPaymentFilters(order, list) {
-  return normalizePaymentFilters(list).some((f) => matchesPaymentFilter(order, f));
+export function matchesPaymentFilters(order, list, opts = {}) {
+  return normalizePaymentFilters(list).some((f) => matchesPaymentFilter(order, f, opts));
 }
 
 /** Haku ohittaa vain oletuksen (Maksetut + Maksamattomat): haku käy kaikista. Muu valinta pysyy haussa. */

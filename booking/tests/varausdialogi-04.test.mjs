@@ -152,7 +152,7 @@ test('UI04: järjestys, testidit, suljetut harvinaiset osiot ja null-turvallisuu
   const positions = anchors.map((value) => { const direct = src.indexOf(`'data-testid': '${value}'`); return direct >= 0 ? direct : src.indexOf(`'${value}'`); });
   assert.ok(positions.every((n) => n >= 0), JSON.stringify(anchors.map((value, i) => [value, positions[i]])));
   assert.ok(positions.every((n, i) => i === 0 || n > positions[i - 1]));
-  assert.match(src, /body\.append\(hero, alerts, primary, sections, secondary, more, move, footer\)/);
+  assert.match(src, /body\.append\(hero, alerts, primary, sections, secondary, more, move, footer, delBox\)/);   // booking_279: poisto viimeisenä
   assert.doesNotMatch(src, /Verkkomaksulinkki \(Visma Pay\)|admin_create_payment_link|innerHTML/);
   assert.match(src, /h\('details', \{ class: 'rd-more/ );
   assert.match(src, /h\('details', \{ class: 'rd-more rd-move/ );

@@ -659,7 +659,7 @@ begin
   perform pg_temp.ck((
     select bool_and(not has_function_privilege('anon', fn, 'execute') and has_function_privilege('authenticated', fn, 'execute'))
       from unnest(array[
-        'booking.admin_cancel_reservation(bigint,text,boolean,text)',
+        coalesce(to_regprocedure('booking.admin_cancel_reservation(bigint,text,boolean,text,boolean,boolean)'), to_regprocedure('booking.admin_cancel_reservation(bigint,text,boolean,text,boolean)'), to_regprocedure('booking.admin_cancel_reservation(bigint,text,boolean,text)'))::text, -- booking_280/281 lisäsivät argumentteja
         'booking.admin_record_payment(bigint,text,numeric,text,jsonb)',
         'booking.admin_get_order(bigint)',
         'booking.admin_set_reservation_addons(bigint,jsonb)'

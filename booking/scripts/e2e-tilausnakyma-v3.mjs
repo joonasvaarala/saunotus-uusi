@@ -101,6 +101,9 @@ async function page(width, hash, { mobile = false } = {}) {
       if (fn === 'admin_order_lookup') { if (F.ORDERS[a.p_order_no]) return { order_id: a.p_order_no, order_no: a.p_order_no }; const e = new Error('Tilausta ei löydy'); e.code = 'not_found'; throw e; }
       if (fn === 'admin_order_history') return clone(F.history);
       if (fn === 'admin_get_customer' && Number(a.p_id) === 5) return clone(F.CUSTOMER);
+      // PR 2 (booking_280/281): peruutuksen valinnat vain, kun kuva-ajo kytkee ne päälle (window.__pr2Opts); kutsujen parametrit talteen
+      if (fn === 'admin_reservation_cancel_options' && window.__pr2Opts?.[a.p_reservation_id]) return clone(window.__pr2Opts[a.p_reservation_id]);
+      if (fn === 'admin_cancel_reservation' && window.__pr2Opts) { (window.__pr2Calls ||= []).push(clone(a)); return { ok: true, cancelled: true, refunds: [], refunded_total: 0, notified: a.p_notify === true }; }
       if (fn === 'admin_reservation_refund_preview') return { total: a.p_reservation_id === 82 ? 60 : 174, unallocated: 0, payments: [{ payment_id: 80, provider: 'montonio', amount: 60 }] };
       return fallback(fn, a);
     };
@@ -176,6 +179,53 @@ const shot = (pg, name, full = false) => pg.screenshot({ path: join(SHOT, `${nam
   expect((await pg.locator('[data-testid=ov-cx-submit]').textContent()).includes('60'), 'vahvistus kertoo summan');
   expect(await pg.locator('dialog[open] input[type=number]').count() === 0, 'osasumman kenttä piilossa');
   await shot(pg, 'dialogi-peruutus-monivaraus');
+  await pg.context().close();
+}
+// 4b) PR 2: lahjakorttikysymys (pakollinen) + peruutusviesti yhdelle varaukselle; koko tilaus: lahjakortti kerran, ei viestiä
+{
+  const pg = await page(1440, '#/tilaukset/7008');
+  await pg.evaluate(() => { window.__pr2Opts = {
+    81: { ok: true, reservation_id: 81, gift_cards: [], gift_card_total: 0, gift_card_choice_required: false, partner_share: 0, voucher_redeemed: false, order_stays: false, money_share: 174, customer_email: true },
+    82: { ok: true, reservation_id: 82, gift_cards: [{ payment_id: 90, gift_card_id: 9, amount: 60, code_last4: '4821', valid_to: '2027-06-30', card_status: 'active', keep_allowed: true }], gift_card_total: 60, gift_card_choice_required: true, partner_share: 0, voucher_redeemed: false, order_stays: false, money_share: 0, customer_email: true } }; });
+  await pg.waitForSelector('[data-testid=ov-cancel]', { timeout: 10000 });
+  await pg.locator('[data-testid=ov-cancel]').click();
+  await pg.waitForSelector('[data-testid=ov-cancel-flow]', { timeout: 5000 });
+  await pg.locator('[data-testid=ov-cx-one-82] input').check(); await pg.waitForTimeout(500);
+  expect(await pg.locator('[data-testid=ov-cx-gift]').count() === 1, 'PR 2: lahjakorttikysymys');
+  expect(await pg.locator('[data-testid=ov-cx-gift] input:checked').count() === 0, 'PR 2: lahjakorttikysymyksellä ei oletusta');
+  expect(await pg.locator('[data-testid=ov-cx-refund-full]').count() === 0, 'PR 2: lahjakorttiosuutta ei tarjota rahahyvityksenä');
+  expect(await pg.locator('[data-testid=ov-cx-notify-yes]').count() === 1, 'PR 2: viestikysymys');
+  await pg.locator('[data-testid=ov-cx-submit]').click(); await pg.waitForTimeout(300);
+  expect(await pg.locator('dialog[open] .err:not([hidden])').count() === 1, 'PR 2: vastaamatta → pakollisuusilmoitus');
+  expect(!(await pg.evaluate(() => window.__pr2Calls?.length)), 'PR 2: ei kutsua ennen vastauksia');
+  await shot(pg, 'pr2-peruutus-lahjakortti-pakollinen');
+  await pg.locator('[data-testid=ov-cx-gift-keep] input').check(); await pg.waitForTimeout(400);
+  await pg.locator('[data-testid=ov-cx-notify-yes] input').check(); await pg.waitForTimeout(400);
+  expect(await pg.locator('dialog[open] .err:not([hidden])').count() === 0, 'PR 2: vastaus poistaa pakollisuusilmoituksen');
+  expect(/hyvityskuitti/.test(await pg.locator('[data-testid=ov-cx-notify-hint]').textContent()), 'PR 2: arvo palautuu kortille → vihje mainitsee hyvityksen');
+  await shot(pg, 'pr2-peruutus-lahjakortti-valittu');
+  await pg.locator('[data-testid=ov-cx-submit]').click(); await pg.waitForTimeout(600);
+  const calls = await pg.evaluate(() => window.__pr2Calls || []);
+  expect(calls.length === 1 && calls[0].p_reservation_id === 82 && calls[0].p_gift_card_keep === true && calls[0].p_notify === true, `PR 2: parametrit ${JSON.stringify(calls)}`);
+  await pg.context().close();
+}
+{
+  const pg = await page(1440, '#/tilaukset/7008');
+  await pg.evaluate(() => { window.__pr2Opts = {
+    81: { ok: true, reservation_id: 81, gift_cards: [], gift_card_total: 0, gift_card_choice_required: false, partner_share: 0, money_share: 174, customer_email: true },
+    82: { ok: true, reservation_id: 82, gift_cards: [{ amount: 60, code_last4: '4821', valid_to: '2027-06-30', keep_allowed: true }], gift_card_total: 60, gift_card_choice_required: true, partner_share: 0, money_share: 0, customer_email: true } }; });
+  await pg.waitForSelector('[data-testid=ov-cancel]', { timeout: 10000 });
+  await pg.locator('[data-testid=ov-cancel]').click();
+  await pg.waitForSelector('[data-testid=ov-cancel-flow]', { timeout: 5000 });
+  await pg.locator('[data-testid=ov-cx-one-81] input').check(); await pg.waitForTimeout(500);
+  expect(await pg.locator('[data-testid=ov-cx-gift]').count() === 0, 'PR 2: rahamaksulla ei lahjakorttikysymystä');
+  expect(/ei mainita hyvitystä/.test(await pg.locator('[data-testid=ov-cx-notify-hint]').textContent()), 'PR 2: ei hyvitystä → ei hyvitysmainintaa');
+  await shot(pg, 'pr2-peruutus-ei-hyvitysta-viesti');
+  await pg.locator('[data-testid=ov-cx-all] input').check(); await pg.waitForTimeout(600);
+  expect(await pg.locator('[data-testid=ov-cx-gift]').count() === 1, 'PR 2: koko tilaus → lahjakorttikysymys kerran');
+  expect(await pg.locator('[data-testid=ov-cx-notify-yes]').count() === 0, 'PR 2: koko tilaus → ei viestikysymystä');
+  expect(await pg.locator('[data-testid=ov-cx-refund-full]').count() === 0, 'PR 2: koko tilaus + lahjakortti → ei admin_refund_order-hyvitystä');
+  await shot(pg, 'pr2-peruutus-koko-tilaus');
   await pg.context().close();
 }
 // 5) Mobiili: lista → koko tilaus suoraan (tänään, maksamatta) + alapalkki

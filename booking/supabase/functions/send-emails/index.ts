@@ -76,6 +76,14 @@ Deno.serve(async (req) => {
         if (!pdf.ok) throw new Error(`receipt-pdf ${pdf.status}`);
         attachments.push({ filename: `${r.kind === "refund_receipt" ? "hyvityskuitti" : "kuitti"}-${r.receipt.receipt_no}.pdf`, content: b64(new Uint8Array(await pdf.arrayBuffer())) });
       }
+      if (r.kind === "reservation_cancelled") {
+        // booking_281: lähetyshetkellä valmiiden hyvitysten kuitit liitteiksi (claim ohitti saman kuitin erillisen refund_receipt-viestin)
+        for (const f of (r.cancellation?.refunds || []).filter((x: any) => x?.status === "done" && x?.receipt?.public_token)) {
+          const pdf = await fetch(`${url}/functions/v1/receipt-pdf?t=${f.receipt.public_token}`);
+          if (!pdf.ok) throw new Error(`receipt-pdf ${pdf.status}`);
+          attachments.push({ filename: `hyvityskuitti-${f.receipt.receipt_no}.pdf`, content: b64(new Uint8Array(await pdf.arrayBuffer())) });
+        }
+      }
       if (r.kind === "invoice_pdf" && r.invoice?.public_token) {
         const pdf = await fetch(`${url}/functions/v1/invoice-pdf?t=${r.invoice.public_token}`);
         if (!pdf.ok) throw new Error(`invoice-pdf ${pdf.status}`);
