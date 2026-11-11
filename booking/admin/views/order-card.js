@@ -1,9 +1,9 @@
 // Yhteinen varaus- ja tilauskortti: sama näkymä varaukselle ja tilaukselle.
 import { rpc, fn, select as dbSelect } from '../sb.js';
 import { createTalousApi, normOrder } from '../talous-api.js';
-import { canAddPurchase, isFlowEnabledValue } from '../order-reservation-logic.js';
+import { isFlowEnabledValue } from '../order-reservation-logic.js';
 import { telHref, mailHref, createLatestGate } from '../reservation-dialog-logic.js';
-import { cardActions, cardPaymentStatus, cardSectionSummaries } from '../order-card-logic.js';
+import { cardActions, cardPaymentStatus, cardSectionSummaries, cardAddonLine, orderBreakdown, vatRateLabel } from '../order-card-logic.js';
 import { loadOrderTexts, orderText as tx } from '../orders-texts.js';
 import { loadRcTexts } from '../refund-cancel-texts.js';
 import { cancelReservationDialog } from './refund-cancel.js';
@@ -31,7 +31,6 @@ import { billingMethodText } from '../billing-method-texts.js';
 import { receiptsList } from './talous-receipts.js';
 import { annualCardPanel, showAnnualCardDialog } from './annual-card-panel.js';
 import { acText } from '../annual-card-texts.js';
-import { orderContents } from '../order-lines-logic.js';
 import { methodLabel, pstatBadge, johkuBadge } from './talous-ui.js';
 import { orderInvoiceCaption } from '../order-invoice-label.js';
 
@@ -111,7 +110,7 @@ export function openOrderCard({
     h('h3', { class: 'oc-name', 'data-testid': 'res-customer', text: reservation?.customer_name || reservation?.customer?.name || '' }));
   const alerts = h('div', { class: 'rd-alerts', hidden: true });
   const primary = h('div', { class: 'oc-actions tl-actions rd-actions', 'data-testid': 'res-primary-actions', hidden: true });
-  const addonsSec = section('addons', tx('ui.admin.res.section_addons'), '', 'res-contents');
+  const addonsSec = section('breakdown', tx('ui.admin.res.section_breakdown'), '', 'res-contents');
   const paySec = section('payments', tx('ui.admin.res.section_payments'), '', 'res-payment');
   const msgSec = section('messages', tx('ui.admin.res.section_messages'), tx('ui.admin.res.sum_no_messages'), 'res-messages');
   const histSec = section('history', tx('ui.admin.res.section_history'), '', 'res-history');
@@ -130,9 +129,9 @@ export function openOrderCard({
   body.append(hero, alerts, primary, sections, secondary, more, move, footer);
 
   const optBox = h('div', { class: 'opt-box', 'data-testid': 'option-box', hidden: true });
-  const addonsBox = h('div', { class: 'addons-box' });
-  const itemsBox = h('div', { class: 'oc-items' });
-  addonsSec.body.append(optBox, addonsBox, itemsBox);
+  const addonsBox = h('div', { class: 'addons-box oc-addon-tools' });
+  const itemsBox = h('div', { class: 'oc-items oc-breakdown', 'data-testid': 'order-breakdown' });
+  addonsSec.body.append(itemsBox, optBox, addonsBox);
 
   const sums = h('dl', { class: 'tl-sums' });
   const payList = h('div', { class: 'oc-pays' });
@@ -163,6 +162,7 @@ export function openOrderCard({
     const opt = r ? optionOf(r).name : null;
     const persons = r ? tx(r.mode === 'exclusive' ? 'ui.admin.res.persons_private' : 'ui.admin.res.persons_shared', { n: r.persons }) : tx('ui.admin.res.no_booking');
     const meta = r ? [persons, space, opt].filter(Boolean).join(' · ') : [tx('ui.admin.res.no_booking')].join(' · ');
+    const addonLine = r ? cardAddonLine(rawOrder ? currentExtras : (Array.isArray(r.addons) ? r.addons : [])) : '';
     const stBadge = r
       ? (r.status === 'completed' ? badge('ok', tx('ui.admin.res.arrived')) : statusBadge(r.status))
       : null;
@@ -172,12 +172,13 @@ export function openOrderCard({
     const phoneTxt = r?.customer_phone || order?.customer?.phone;
     const emailTxt = r?.customer_email || order?.customer?.email;
     const company = (rawOrder?.customer_kind === 'company' && rawOrder?.billing?.company) ? rawOrder.billing.company : null;
-    hero.replaceChildren(
+    hero.replaceChildren(...list(
       h('div', { class: 'oc-hero-top' },
         h('h3', { class: 'oc-name', 'data-testid': 'res-customer', text: name }),
         oid ? h('span', { class: 'oc-oid', text: oid }) : null),
       when ? h('p', { class: 'oc-when', text: when }) : null,
       h('p', { class: 'oc-meta', text: meta }),
+      addonLine ? h('p', { class: 'oc-meta oc-addons', 'data-testid': 'res-addons-line', 'aria-label': tx('ui.admin.res.addons_line_label'), text: addonLine }) : null,
       h('div', { class: 'oc-badges rd-badges' }, ...list(
         stBadge, pBadge,
         r?.option_missing ? badge('warn', tx('ui.admin.res.option_missing')) : null,
@@ -193,7 +194,7 @@ export function openOrderCard({
         email ? h('a', { href: email, 'aria-label': tx('ui.admin.res.email', { email: emailTxt }), text: emailTxt }) : (emailTxt ? h('span', { text: emailTxt }) : null),
         (rawOrder?.customer_note || order?.customer_note) ? h('div', {}, h('small', { class: 'muted', text: tx('ui.admin.res.customer_message') }), h('p', { text: rawOrder?.customer_note || order.customer_note })) : null,
       )),
-    );
+    ));
   }
 
   function drawResources() {
@@ -259,10 +260,8 @@ export function openOrderCard({
 
   function drawSections() {
     const sumsData = cardSectionSummaries(order, r);
-    const isShop = !r || !(order?.reservations || []).length && (order?.items || []).length;
-    addonsSec.el.querySelector('summary span').textContent = isShop && !r ? tx('ui.admin.res.section_items') : tx('ui.admin.res.section_addons');
-    if (sumsData.addons.empty) addonsSec.setSum(tx('ui.admin.res.sum_no_addons'));
-    else addonsSec.setSum(tx(isShop && !r ? 'ui.admin.res.sum_items' : 'ui.admin.res.sum_addons', { n: sumsData.addons.count, amount: money(sumsData.addons.amount) }));
+    const bd = order ? orderBreakdown(order) : null;
+    addonsSec.setSum(bd && !bd.empty ? tx('ui.admin.res.sum_breakdown', { amount: money(bd.total) }) : '');
     const payKey = sumsData.payments.kind === 'invoiced' ? 'ui.admin.res.sum_invoiced' : (sumsData.payments.kind === 'unpaid' ? 'ui.admin.res.sum_unpaid' : 'ui.admin.res.sum_paid');
     paySec.setSum(tx(payKey, { amount: money(sumsData.payments.amount) }));
     msgSec.setSum(sumsData.messages.empty ? tx('ui.admin.res.sum_no_messages') : tx('ui.admin.res.sum_messages', { n: sumsData.messages.count }));
@@ -303,6 +302,31 @@ export function openOrderCard({
         else await processMobilepayRefund(rf.id);
         await fetchOrder(); onChange?.();
       }) }) : null)));
+  }
+
+  function breakdownNodes(bd) {
+    if (bd.empty) return [h('p', { class: 'muted', text: tx('ui.admin.res.breakdown_empty') })];
+    const nodes = bd.rows.map((x) => {
+      const qty = x.kind !== 'reservation' || x.quantity !== 1 ? tx('ui.admin.res.breakdown_qty', { n: x.quantity, price: money(x.unit_price) }) : '';
+      const vat = x.vat_rate == null ? tx('ui.admin.res.breakdown_vat_missing') : tx('ui.admin.res.breakdown_vat', { rate: vatRateLabel(x.vat_rate), amount: money(x.vat) });
+      return h('div', { class: `oc-bd-row${x.child ? ' child' : ''}`, 'data-testid': 'breakdown-row', 'data-kind': x.kind },
+        h('div', { class: 'oc-line' },
+          h('span', { class: 'nm', text: `${x.name || '–'}${x.cancelled ? ` (${tx('ui.admin.res.breakdown_cancelled')})` : ''}` }),
+          h('span', { class: 'pr', text: money(x.gross) })),
+        h('div', { class: 'oc-bd-sub' }, ...list(qty ? h('span', { text: qty }) : null, h('span', { 'data-testid': 'breakdown-vat', text: vat }))));
+    });
+    nodes.push(h('div', { class: 'oc-line total', 'data-testid': 'breakdown-total' },
+      h('span', {}, tx('ui.admin.res.breakdown_total'), ' ', h('span', { class: 'vat', text: tx('ui.admin.res.incl_vat') })),
+      h('span', { class: 'pr', text: money(bd.total) })));
+    if (bd.vatByRate.length) {
+      nodes.push(h('div', { class: 'oc-vat-table', 'data-testid': 'breakdown-vat-summary' },
+        h('div', { class: 'oc-vat-head' }, h('span', { text: tx('ui.admin.res.breakdown_vat_rate') }), h('span', { text: tx('ui.admin.res.breakdown_net') }), h('span', { text: tx('ui.admin.res.breakdown_vat_eur') }), h('span', { text: tx('ui.admin.res.breakdown_gross') })),
+        ...bd.vatByRate.map((v) => h('div', { class: 'oc-vat-row', 'data-testid': 'breakdown-vat-rate' },
+          h('span', { text: vatRateLabel(v.rate) }), h('span', { text: money(v.net) }), h('span', { text: money(v.vat) }), h('span', { text: money(v.gross) })))));
+    }
+    if (bd.unknownVat) nodes.push(h('p', { class: 'muted', text: tx('ui.admin.res.breakdown_vat_unknown_note') }));
+    if (Math.abs(bd.rowsTotal - bd.total) > 0.005) nodes.push(h('p', { class: 'muted', 'data-testid': 'breakdown-diff', text: tx('ui.admin.res.breakdown_rows_total', { amount: money(bd.rowsTotal) }) }));
+    return nodes;
   }
 
   function drawOrder(token) {
@@ -346,33 +370,17 @@ export function openOrderCard({
       if (orderReservation.option) r.option = orderReservation.option;
       drawOption(orderReservation);
       const invoiced = orderInvoiceLocked(order);
-      addonsBox.replaceChildren(...list(h('h4', {}, icon('leaf', 20), ' Lisäpalvelut'),
+      // Lisäostot näkyvät otsikkoalueen rivillä ja erittelyssä; tähän jäävät laskutuslukon tila ja muokkaus.
+      addonsBox.replaceChildren(...list(
         invoiced ? h('p', { class: 'muted', role: 'status', 'data-testid': 'invoice-addon-lock', text: alt('invoiced_rows', { no: order.invoice_no || '–' }) }) : null,
-        currentExtras.length ? h('ul', { class: 'reslist' }, currentExtras.map((a) => h('li', { class: 'resrow' },
-          h('span', { text: `${a.quantity} × ${a.name}` }), h('span', { class: 'meta', text: money(a.line_total) })))) : h('p', { class: 'muted', text: 'Ei lisäpalveluita.' }),
-        actions.editAddons ? h('button', { type: 'button', class: 'btn sm', 'data-testid': 'res-edit-addons', text: 'Muokkaa lisäpalveluita', onclick: () => editAddons(currentExtras, rawOrder) }) : null,
-        canAddPurchase(order, { can }).allowed && !invoiced ? h('button', { type: 'button', class: 'btn', 'data-testid': 'order-reservation-add-section', text: tx('ui.admin.res.add_purchase'), onclick: doPurchase }) : null));
+        actions.editAddons ? h('button', { type: 'button', class: 'btn sm', 'data-testid': 'res-edit-addons', text: 'Muokkaa lisäpalveluita', onclick: () => editAddons(currentExtras, rawOrder) }) : null));
+      addonsBox.hidden = !addonsBox.childNodes.length;
     } else {
       optBox.hidden = true;
       addonsBox.replaceChildren();
+      addonsBox.hidden = true;
     }
-    const contents = orderContents(order);
-    const lines = [];
-    for (const res of contents.reservations || []) {
-      lines.push(h('div', { class: 'oc-line' },
-        h('span', { class: 'nm', text: `${res.product_name || '–'}${res.status === 'cancelled' ? ' (peruttu)' : ''}` }),
-        h('span', { class: 'pr', text: money(res.item_total) })));
-      for (const a of res.addons || []) {
-        lines.push(h('div', { class: 'oc-line' }, h('span', { class: 'nm', text: `${a.quantity} × ${a.name}` }), h('span', { class: 'pr', text: money(a.line_total) })));
-      }
-    }
-    for (const l of contents.lines || []) {
-      lines.push(h('div', { class: 'oc-line' }, h('span', { class: 'nm', text: l.name || l.kind }), h('span', { class: 'pr', text: money(l.line_total) })));
-    }
-    if (lines.length) {
-      lines.push(h('div', { class: 'oc-line total' }, h('span', {}, 'Yhteensä ', h('span', { class: 'vat', text: tx('ui.admin.res.incl_vat') })), h('span', { class: 'pr', text: money(b.total) })));
-    }
-    itemsBox.replaceChildren(...lines);
+    itemsBox.replaceChildren(...breakdownNodes(orderBreakdown(order)));
     drawHero();
     if (rawOrder.customer_kind === 'company' && rawOrder.billing) {
       const x = rawOrder.billing;
