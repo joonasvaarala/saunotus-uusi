@@ -30,9 +30,29 @@
     "reason": "booking_286 Pikakassan kortti puhelimella (CheckoutX, Surfboard demo; vain testiympäristö). Joonas t459u 11.11.2026. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
   },
   {
+    "key": "ui.pos.cx_simulated",
+    "lang": "fi",
+    "text": "Simuloitu maksu: CheckoutX-sovellusta ei avata, eikä rahaa liiku. Maksu hyväksytään muutaman sekunnin kuluttua.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_286 Pikakassan kortti puhelimella (CheckoutX, Surfboard demo; vain testiympäristö). Joonas t459u 11.11.2026. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
     "key": "ui.pos.cx_test_note",
     "lang": "en",
     "text": "Test environment: CheckoutX payments are voided and no money is charged.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_286 Pikakassan kortti puhelimella (CheckoutX, Surfboard demo; vain testiympäristö). Joonas t459u 11.11.2026. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.pos.cx_simulated",
+    "lang": "en",
+    "text": "Simulated payment: the CheckoutX app is not opened and no money moves. The payment is approved after a few seconds.",
     "class": "normal",
     "kind": "plain",
     "max_len": 400,

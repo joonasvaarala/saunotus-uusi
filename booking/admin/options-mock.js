@@ -101,7 +101,7 @@ function procountorStatus(cfg) {
 const PERMS = ['bookings.manage', 'bookings.override', 'customers.manage', 'catalog.edit', 'payments.manage', 'payments.refund', 'reports.view', 'settings.edit', 'pos.use', 'invoices.manage', 'giftcards.manage', 'messages.edit'];
 const CODE_RE = /^[a-z0-9_]{1,40}$/;
 
-export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, role = 'manager', latePaymentScenario = false } = {}) {
+export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, role = 'manager', latePaymentScenario = false, checkoutx = false } = {}) {
   const today = todayHel(now);
   const st = {
     calls: [], perms: [...perms],
@@ -196,7 +196,9 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
     posOrders: [],
     posMail: [],
     posCustomers: [],
-    posModes: { mobilepay_mode: 'test', vismapay_mode: 'dry_run' },
+    posModes: { mobilepay_mode: 'test', vismapay_mode: 'dry_run', checkoutx_mode: checkoutx ? 'test' : 'off' },
+    // booking_286: Kortti puhelimella simuloituna (?mock=1): ei Surfboardia, ei CheckoutX-sovellusta, ei rahaa. ?cx=decline → ensimmäinen yritys hylätään.
+    cx: { terminals: [{ terminal_id: 'SIM0001', label: 'Kokeilupuhelin (simuloitu)', active: true, env: 'simulated' }], payments: [], seq: 0 },
     resendMode: 'dry_run',
     productQr: [],
     invCustomers: [],
@@ -716,12 +718,16 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
     },
     admin_pos_tenders: () => {
       need('pos.use');
-      return { mobilepay_mode: st.posModes.mobilepay_mode, vismapay_mode: st.posModes.vismapay_mode, site_base_url: 'https://saunotus.fi', drinks_path: '/juomat/', drinks_path_en: '/en/drinks/', tenders: [
+      return { mobilepay_mode: st.posModes.mobilepay_mode, vismapay_mode: st.posModes.vismapay_mode, checkoutx_mode: st.posModes.checkoutx_mode, site_base_url: 'https://saunotus.fi', drinks_path: '/juomat/', drinks_path_en: '/en/drinks/', tenders: [
         { code: 'payment_link', handler: 'payment_link', channels: ['pos'], active: true, sort_order: 10, unavailable_reason: null },
         { code: 'mobilepay', handler: 'mobilepay', channels: ['pos', 'drinks'], active: true, sort_order: 20, unavailable_reason: null },
         { code: 'visma_pay', handler: 'visma_pay', channels: ['drinks'], active: true, sort_order: 30, unavailable_reason: null },
         { code: 'card_terminal', handler: 'terminal', channels: ['pos'], active: false, sort_order: 40, unavailable_reason: 'not_implemented' },
-      ] };
+      ].concat(st.posModes.checkoutx_mode === 'test' ? [{ code: 'checkoutx', handler: 'checkoutx', channels: ['pos'], active: true, sort_order: 15, unavailable_reason: null }] : []) };
+    },
+    admin_get_checkoutx_status: () => {
+      need('pos.use');
+      return { ok: true, mode: st.posModes.checkoutx_mode, simulated: true, terminals: st.cx.terminals.filter((x) => x.active), secrets: [] };
     },
     admin_pos_checkout: (a) => {
       need('pos.use');
@@ -1135,5 +1141,56 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
     staffOnly();
     return structuredClone(f(args || {}));
   }
-  return { rpc, state: st, today };
+  // Edge-funktioiden kokeilutila: vain checkoutx-pos simuloidaan (muut fn-kutsut eivät kuulu Pikakassaan).
+  // Maksu hyväksytään toisella tilakyselyllä (n. 2,5 s); syvälinkkiä ei ole, joten CheckoutX-sovellusta ei avata.
+  function cxPos(b) {
+    need('pos.use');
+    if (st.posModes.checkoutx_mode !== 'test') throw err('checkoutx_off', 'Kortti puhelimella ei ole käytössä');
+    const decline = new URLSearchParams(globalThis.location?.search || '').get('cx') === 'decline';
+    const pay = () => st.cx.payments.find((x) => x.payment_id === b.payment_id);
+    switch (b.action) {
+      case 'start': {
+        const o = st.posOrders.find((x) => x.order_id === b.order_id);
+        if (!o) throw err('not_found', 'Kassatilausta ei löydy');
+        if (!st.cx.terminals.some((x) => x.active && x.terminal_id === b.terminal_id)) throw err('terminal_not_registered', 'Puhelinta ei ole liitetty');
+        for (const x of st.cx.payments) if (x.order_id === o.order_id && x.state === 'pending') x.state = 'cancelled';
+        const tries = st.cx.payments.filter((x) => x.order_id === o.order_id).length;
+        const row = { payment_id: 9000 + (++st.cx.seq), order_id: o.order_id, state: 'pending', polls: 0, outcome: decline && tries === 0 ? 'failed' : 'paid' };
+        st.cx.payments.push(row);
+        return { ok: true, simulated: true, payment_id: row.payment_id, amount: o.total, deep_link: null, configure_link: null };
+      }
+      case 'status': {
+        const row = pay();
+        if (!row) throw err('not_found', 'Maksua ei löydy');
+        if (row.state === 'pending' && ++row.polls >= 2) {
+          row.state = row.outcome;
+          if (row.state === 'paid') { const o = st.posOrders.find((x) => x.order_id === row.order_id); if (o) o.arm = true; }
+        }
+        return { ok: true, simulated: true, state: row.state, failure_reason: row.state === 'failed' ? 'DECLINED' : null };
+      }
+      case 'cancel': {
+        const row = pay();
+        if (!row) throw err('not_found', 'Maksua ei löydy');
+        if (row.state === 'pending') row.state = 'cancelled';
+        return { ok: true, simulated: true, state: row.state };
+      }
+      case 'configure': return { ok: true, simulated: true, deep_link: null };
+      case 'register_start': need('settings.edit'); return { ok: true, simulated: true, registration_code: `sim${st.cx.seq + 1}`, deep_link: null };
+      case 'register_check': {
+        need('settings.edit');
+        const id = `SIM${String(st.cx.terminals.length + 1).padStart(4, '0')}`;
+        const label = String(b.label || 'Kokeilupuhelin').slice(0, 60);
+        st.cx.terminals.push({ terminal_id: id, label, active: true, env: 'simulated' });
+        return { ok: true, simulated: true, registered: true, terminal_id: id, label };
+      }
+      default: throw err('bad_request', 'Tuntematon toiminto');
+    }
+  }
+  async function fn(name, body = {}) {
+    st.calls.push({ name: `fn:${name}`, args: body });
+    if (delay) await new Promise((r) => setTimeout(r, delay));
+    if (name !== 'checkoutx-pos') throw err('mock_unsupported', `Kokeilutila: Edge-funktiota ${name} ei ole mockattu (ei verkkokutsua).`);
+    return structuredClone(cxPos(body || {}));
+  }
+  return { rpc, fn, state: st, today };
 }

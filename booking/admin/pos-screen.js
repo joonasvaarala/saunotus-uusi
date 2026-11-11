@@ -43,7 +43,7 @@ export async function renderPos({ ctx, rpc, fn }) {
   let modalWasOpen = false;
   let keyHandler = null;
   // booking_286: kortti puhelimella (CheckoutX). Näkyy vain, kun palvelin kertoo tilan test.
-  const cx = { terminals: [], terminal: null, state: null, failure: null, reg: null, regTimer: null, regLabel: '', configureLink: null };
+  const cx = { terminals: [], terminal: null, state: null, failure: null, reg: null, regTimer: null, regLabel: '', configureLink: null, simulated: false };
   let visHandler = null;
 
   const root = h('div', { class: 'pos', 'data-testid': 'pos' });
@@ -227,6 +227,7 @@ export async function renderPos({ ctx, rpc, fn }) {
       try {
         const st = await rpc('admin_get_checkoutx_status');
         cx.terminals = Array.isArray(st?.terminals) ? st.terminals : [];
+        cx.simulated = st?.simulated === true;
       } catch { cx.terminals = []; }
       cx.terminal = pickTerminal(readTerminal(store), cx.terminals);
     }
@@ -353,7 +354,7 @@ export async function renderPos({ ctx, rpc, fn }) {
   async function startCheckoutx(orderId) {
     cx.state = null; cx.failure = null;
     const r = await fn('checkoutx-pos', { action: 'start', order_id: orderId, terminal_id: cx.terminal.terminal_id, return: 'chrome' });
-    payInfo = { kind: 'checkoutx', payment_id: r.payment_id, deep_link: r.deep_link, configure_link: r.configure_link || null, amount: r.amount };
+    payInfo = { kind: 'checkoutx', payment_id: r.payment_id, deep_link: r.deep_link, configure_link: r.configure_link || null, amount: r.amount, simulated: r.simulated === true };
     cx.configureLink = r.configure_link || null;
     savePending(store, { order_id: orderId, payment_id: r.payment_id });
     openAppLink(r.deep_link);
@@ -400,7 +401,7 @@ export async function renderPos({ ctx, rpc, fn }) {
   function checkoutxBox() {
     if (tender !== 'checkoutx' || phase !== 'cart') return null;
     const box = h('div', { class: 'fld pos-cx', 'data-testid': 'pos-cx' });
-    box.append(h('p', { class: 'muted', 'data-testid': 'pos-cx-test-note', text: t('cx_test_note') }));
+    box.append(h('p', { class: 'muted', 'data-testid': 'pos-cx-test-note', text: t(cx.simulated ? 'cx_simulated' : 'cx_test_note') }));
     if (cx.terminals.length) {
       const sel = h('select', {
         'data-testid': 'pos-cx-terminal', 'aria-label': t('cx_pick'),
@@ -632,6 +633,7 @@ export async function renderPos({ ctx, rpc, fn }) {
         if (cx.configureLink) box.append(h('button', { type: 'button', class: 'btn ghost', 'data-testid': 'pos-cx-configure', text: t('cx_configure'), onclick: () => openAppLink(cx.configureLink) }));
         return box;
       }
+      if (payInfo.simulated) box.append(h('p', { class: 'muted', 'data-testid': 'pos-cx-simulated', text: t('cx_simulated') }));
       box.append(h('p', { class: 'muted', 'data-testid': 'pos-cx-help', text: t('cx_waiting_help') }),
         payInfo.deep_link ? h('button', { type: 'button', class: 'btn primary', 'data-testid': 'pos-cx-open', text: t('cx_open'), onclick: () => openAppLink(payInfo.deep_link) }) : null,
         h('button', { type: 'button', class: 'btn ghost', 'data-testid': 'pos-cx-cancel', text: t('cx_cancel'), disabled: busy || null, onclick: () => voidOpen().then(() => { payOpen = true; draw(); }) }));

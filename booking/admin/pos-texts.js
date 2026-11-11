@@ -247,6 +247,7 @@ export const POS_CHECKOUTX_TEXTS = {
   fi: {
     method_checkoutx: 'Kortti puhelimella (CheckoutX)',
     cx_test_note: 'Testiympäristö: CheckoutX-maksut mitätöidään, eikä rahaa veloiteta.',
+    cx_simulated: 'Simuloitu maksu: CheckoutX-sovellusta ei avata, eikä rahaa liiku. Maksu hyväksytään muutaman sekunnin kuluttua.',
     cx_phone: 'Tämä puhelin',
     cx_pick: 'Valitse puhelin',
     cx_no_terminal: 'Tätä puhelinta ei ole liitetty CheckoutX:ään.',
@@ -275,6 +276,7 @@ export const POS_CHECKOUTX_TEXTS = {
   en: {
     method_checkoutx: 'Card on phone (CheckoutX)',
     cx_test_note: 'Test environment: CheckoutX payments are voided and no money is charged.',
+    cx_simulated: 'Simulated payment: the CheckoutX app is not opened and no money moves. The payment is approved after a few seconds.',
     cx_phone: 'This phone',
     cx_pick: 'Choose phone',
     cx_no_terminal: 'This phone is not linked to CheckoutX.',

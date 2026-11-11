@@ -16,13 +16,14 @@ import { getVersionController, startHallintaVersionWatch } from './version-check
 const $ = (id) => document.getElementById(id);
 // Kokeilutila: osoite /hallinta/?mock=1 → keinoistunto + selaimen oma mock-data (options-mock.js). EI verkkokutsuja eikä kirjautumista; mikään ei tallennu. Ilman parametria ennallaan.
 const MOCK = new URLSearchParams(location.search).get('mock') === '1';
+// Kokeilutilassa Pikakassan "Kortti puhelimella (CheckoutX)" on simuloitu (booking_286): ei Surfboardia, ei rahaa; ?cx=decline hylkää ensimmäisen yrityksen.
 if (MOCK) {
   const mockRole = new URLSearchParams(location.search).get('role');
   const role = ['admin', 'manager', 'staff'].includes(mockRole) ? mockRole : 'manager';
   const staffPerms = ['blocks.manage', 'bookings.manage', 'customers.manage', 'giftcards.manage', 'payments.manage', 'pos.use', 'reports.daily', 'shifts.view'];
   // Kokeilutilan mock-data (options-mock.js + sen apumoduulit) ladataan vain tässä tilassa, ei tuotannon ensilataukseen.
   const { createAdminMock } = await import(new URL('./options-mock.js' + new URL(import.meta.url).search, import.meta.url).href);
-  const mock = createAdminMock({ delay: 60, latePaymentScenario: new URLSearchParams(location.search).get('late-paid') === '1', role, perms: role === 'staff' ? staffPerms : undefined });
+  const mock = createAdminMock({ delay: 60, latePaymentScenario: new URLSearchParams(location.search).get('late-paid') === '1', checkoutx: true, role, perms: role === 'staff' ? staffPerms : undefined });
   setRpcOverride((fn, args) => mock.rpc(fn, args));
   setMockSession({ access_token: 'mock', refresh_token: 'mock', expires_at: 4102444800, user: { email: 'kokeilu@example.com' } });
   window.__adminMock = mock;

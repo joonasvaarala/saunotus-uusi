@@ -165,8 +165,8 @@ function cxRpc({ mode = 'test', terminals = [{ terminal_id: 'T0001', label: 'Kas
     st.calls.push(name);
     if (name === 'admin_pos_tenders') {
       const r = await mock.rpc(name, args);
-      const base = { ...r, checkoutx_mode: mode };
-      if (mode === 'test') base.tenders = [...(r.tenders || []), { code: 'checkoutx', handler: 'checkoutx', channels: ['pos'], active: true, sort_order: 15 }];
+      const base = { ...r, checkoutx_mode: mode, tenders: (r.tenders || []).filter((x) => x.handler !== 'checkoutx') };
+      if (mode === 'test') base.tenders = [...base.tenders, { code: 'checkoutx', handler: 'checkoutx', channels: ['pos'], active: true, sort_order: 15 }];
       return base;
     }
     if (name === 'admin_get_checkoutx_status') return { ok: true, mode, terminals };
@@ -295,4 +295,45 @@ test('tila test: puhelinta ei liitetty → ei Surfboard-kutsua; ylläpitäjä vo
   q(document.getElementById('pos-pay-dialog'), 'pos-pay-close').click();
   document.body.replaceChildren();
   await flush();
+});
+
+// ---------- kokeilutila (?mock=1): simuloitu CheckoutX ilman Surfboard-tunnuksia ----------
+test('kokeilutila: simuloitu maksu hylätään (?cx=decline) ja uusi yritys hyväksytään; ei syvälinkkiä, ei verkkoa', async () => {
+  mem.clear();
+  globalThis.location = { search: '?mock=1&cx=decline', hash: '', pathname: '/hallinta/' };
+  try {
+    assert.equal((await createAdminMock({ delay: 0 }).rpc('admin_pos_tenders')).checkoutx_mode, 'off', 'oletuksena pois');
+    const mock = createAdminMock({ delay: 0, checkoutx: true });
+    const ten = await mock.rpc('admin_pos_tenders');
+    assert.equal(ten.checkoutx_mode, 'test');
+    assert.ok(ten.tenders.some((x) => x.code === 'checkoutx'));
+    await assert.rejects(mock.fn('montonio-refund', {}), (e) => e.code === 'mock_unsupported');
+    const root = await mountWith(mock.rpc, mock.fn);
+    q(root, 'pos-product-101').click();
+    q(root, 'pos-pay').click();
+    tenderRadio(document.getElementById('pos-pay-dialog'), 'checkoutx').dispatch('change');
+    let dlg = document.getElementById('pos-pay-dialog');
+    assert.match(q(dlg, 'pos-cx-test-note').textContent, /Simuloitu maksu/);
+    q(dlg, 'pos-confirm').click();
+    await flush();
+    dlg = document.getElementById('pos-pay-dialog');
+    assert.ok(q(dlg, 'pos-cx-simulated'));
+    assert.equal(q(dlg, 'pos-cx-open'), null, 'sovellusta ei avata');
+    await new Promise((r) => setTimeout(r, 2700)); await flush();
+    dlg = document.getElementById('pos-pay-dialog');
+    assert.match(q(dlg, 'pos-cx-failed').textContent, /\(DECLINED\)/);
+    q(dlg, 'pos-cx-retry').click();
+    await flush();
+    await new Promise((r) => setTimeout(r, 2700)); await flush();
+    dlg = document.getElementById('pos-pay-dialog');
+    assert.ok(q(dlg, 'pos-paid-dialog'), 'toinen yritys maksettu');
+    const calls = mock.state.calls.map((c) => c.name);
+    assert.equal(calls.filter((n) => n === 'fn:checkoutx-pos').length >= 4, true);
+    assert.equal(mock.state.cx.payments.length, 2);
+    assert.deepEqual(mock.state.cx.payments.map((x) => x.state), ['failed', 'paid']);
+    q(dlg, 'pos-next-dialog').click();
+  } finally {
+    globalThis.location = { search: '?mock=1', hash: '', pathname: '/hallinta/' };
+    document.body.replaceChildren();
+  }
 });
