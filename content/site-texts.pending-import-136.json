@@ -1,0 +1,162 @@
+[
+  {
+    "key": "admin.training.cal_filter",
+    "lang": "fi",
+    "text": "Koulutukset",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Hallinnan kalenteri: koulutukset ja niiden tilavaraukset (Joonas 11.11.2026)"
+  },
+  {
+    "key": "admin.training.cal_filter",
+    "lang": "en",
+    "text": "Training",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Hallinnan kalenteri: koulutukset ja niiden tilavaraukset (Joonas 11.11.2026)"
+  },
+  {
+    "key": "admin.training.cal_heading",
+    "lang": "fi",
+    "text": "Koulutukset",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Hallinnan kalenteri: koulutukset ja niiden tilavaraukset (Joonas 11.11.2026)"
+  },
+  {
+    "key": "admin.training.cal_heading",
+    "lang": "en",
+    "text": "Training",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Hallinnan kalenteri: koulutukset ja niiden tilavaraukset (Joonas 11.11.2026)"
+  },
+  {
+    "key": "admin.training.cal_none",
+    "lang": "fi",
+    "text": "Ei koulutuksia tänä päivänä.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Hallinnan kalenteri: koulutukset ja niiden tilavaraukset (Joonas 11.11.2026)"
+  },
+  {
+    "key": "admin.training.cal_none",
+    "lang": "en",
+    "text": "No training on this day.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Hallinnan kalenteri: koulutukset ja niiden tilavaraukset (Joonas 11.11.2026)"
+  },
+  {
+    "key": "admin.training.cal_no_space",
+    "lang": "fi",
+    "text": "Ei tilavarausta tälle päivälle.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Hallinnan kalenteri: koulutukset ja niiden tilavaraukset (Joonas 11.11.2026)"
+  },
+  {
+    "key": "admin.training.cal_no_space",
+    "lang": "en",
+    "text": "No space booked for this day.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Hallinnan kalenteri: koulutukset ja niiden tilavaraukset (Joonas 11.11.2026)"
+  },
+  {
+    "key": "admin.training.cal_open",
+    "lang": "fi",
+    "text": "Avaa Koulutukset-työkalussa",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Hallinnan kalenteri: koulutukset ja niiden tilavaraukset (Joonas 11.11.2026)"
+  },
+  {
+    "key": "admin.training.cal_open",
+    "lang": "en",
+    "text": "Open in Training tool",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Hallinnan kalenteri: koulutukset ja niiden tilavaraukset (Joonas 11.11.2026)"
+  },
+  {
+    "key": "admin.training.cal_unavailable",
+    "lang": "fi",
+    "text": "Koulutuksia ei saatu haettua. Muut tiedot näytetään silti.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Hallinnan kalenteri: koulutukset ja niiden tilavaraukset (Joonas 11.11.2026)"
+  },
+  {
+    "key": "admin.training.cal_unavailable",
+    "lang": "en",
+    "text": "Training could not be loaded. Other details are still shown.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Hallinnan kalenteri: koulutukset ja niiden tilavaraukset (Joonas 11.11.2026)"
+  },
+  {
+    "key": "admin.training.cal_session",
+    "lang": "fi",
+    "text": "Jakso",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Hallinnan kalenteri: koulutukset ja niiden tilavaraukset (Joonas 11.11.2026)"
+  },
+  {
+    "key": "admin.training.cal_session",
+    "lang": "en",
+    "text": "Session",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Hallinnan kalenteri: koulutukset ja niiden tilavaraukset (Joonas 11.11.2026)"
+  },
+  {
+    "key": "admin.training.cal_filters",
+    "lang": "fi",
+    "text": "Näytä kalenterissa",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Hallinnan kalenteri: koulutukset ja niiden tilavaraukset (Joonas 11.11.2026)"
+  },
+  {
+    "key": "admin.training.cal_filters",
+    "lang": "en",
+    "text": "Show in calendar",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Hallinnan kalenteri: koulutukset ja niiden tilavaraukset (Joonas 11.11.2026)"
+  }
+]

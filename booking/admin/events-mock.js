@@ -46,7 +46,7 @@ export function createEventsMock({ today, resources = EVENT_MOCK_RESOURCES, prod
       channels: null, max_persons: 12, duration_minutes: 150, image_path: null, price: 59, price_text: null, rules: [] },
     { product_id: 33, slug: 'saunottajakoulutus', name: 'Saunottajakoulutus', name_en: 'Sauna host training', category: 'training', active: true, bookable: true, shop_visible: false, lifecycle: 'current',
       channels: null, max_persons: 8, duration_minutes: 1980, image_path: null, price: 390, price_text: null,
-      rules: [rule(t1, '09:00', 1980, 8, { sold_persons: 2 })] },
+      rules: [rule(t1, '09:00', 1980, 8, { sold_persons: 2, blocks: [{ id: ++st.blockSeq, resource_id: 3, mode: 'exclusive', starts_at: helsinkiIso(`${t1}T16:00`), ends_at: s19(t1), note: 'Koulutus / matka' }, { id: ++st.blockSeq, resource_id: 1, mode: 'exclusive', starts_at: helsinkiIso(`${addDays(t1, 1)}T09:00`), ends_at: helsinkiIso(`${addDays(t1, 1)}T16:00`), note: 'Koulutus / matka' }] })] },
   ];
   const evening = st.events[0].rules[0];
   const full = st.events[0].rules[1];

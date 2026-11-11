@@ -404,6 +404,8 @@ jobs:
       - run: node --test booking/tests/raporttirakenne.test.mjs
       # Hallinnan kalenteri: koko päiväruutu avaa päivän (kuukausi ja viikko), näppäimistö ja varauslinkki erikseen.
       - run: node --test booking/tests/kalenteri-paivasolu.test.mjs
+      # Hallinnan kalenteri: koulutukset ja niiden tilavaraukset (suodatin, päiväruutu, viikko, yksityiskohdat), tekstit pending-import-136.
+      - run: node --test booking/tests/kalenteri-koulutukset.test.mjs
       - uses: actions/upload-pages-artifact@v3
         if: github.event_name != 'pull_request'
         with:
