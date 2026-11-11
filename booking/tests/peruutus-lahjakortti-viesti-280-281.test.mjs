@@ -11,14 +11,10 @@ const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const repo = join(root, '..');
 const read = (rel) => readFileSync(join(repo, rel), 'utf8');
 const mig = (re) => readdirSync(join(root, 'supabase/migrations')).filter((n) => re.test(n));
-// md5-vakiot ovat tiedostoissa 8 merkin paloina ('aaaaaaaa'||'bbbbbbbb'||…, salaisuusskannerin väärä hälytys); tarkistukset tehdään kootulla arvolla.
-const joinMd5 = (s) => s.replace(/\('([0-9a-f]{8})'\|\|'([0-9a-f]{8})'\|\|'([0-9a-f]{8})'\|\|'([0-9a-f]{8})'\)/g, "'$1$2$3$4'");
-const RAW = {};
-const readSql = (rel) => { RAW[rel] = read(rel); return joinMd5(RAW[rel]); };
-const M280 = readSql('booking/supabase/migrations/20261111235902_booking_280_gift_card_voucher_cancel.sql');
-const R280 = readSql('booking/supabase/rollbacks/20261111235902_booking_280_ROLLBACK.sql');
-const M281 = readSql('booking/supabase/migrations/20261111235903_booking_281_reservation_cancelled_mail.sql');
-const R281 = readSql('booking/supabase/rollbacks/20261111235903_booking_281_ROLLBACK.sql');
+const M280 = read('booking/supabase/migrations/20261111235902_booking_280_gift_card_voucher_cancel.sql');
+const R280 = read('booking/supabase/rollbacks/20261111235902_booking_280_ROLLBACK.sql');
+const M281 = read('booking/supabase/migrations/20261111235903_booking_281_reservation_cancelled_mail.sql');
+const R281 = read('booking/supabase/rollbacks/20261111235903_booking_281_ROLLBACK.sql');
 const RC = await import(pathToFileURL(join(root, 'admin/views/refund-cancel.js')));
 const T = await import(pathToFileURL(join(root, 'admin/refund-cancel-texts.js')));
 const { createMock } = await import(pathToFileURL(join(root, 'admin/talous-mock.js')));
@@ -187,9 +183,4 @@ test('PR 1 -tilausnäkymän peruutusdialogi (order-cancel-flow) käyttää 280/2
   const keys = new Set(JSON.parse(read('content/site-texts.pending-import-138.json')).map((r) => `${r.key}|${r.lang}`));
   for (const k of ['gift_card_question', 'gift_card_share', 'gift_card_keep', 'gift_card_forfeit', 'gift_card_expired', 'partner_share', 'partner_order_stays', 'notify_question', 'notify_hint', 'notify_hint_no_refund', 'notify_yes', 'notify_no', 'notify_no_email', 'notify_all_unavailable', 'all_gift_refund_separately', 'choose_required'])
     for (const lang of ['fi', 'en']) assert.ok(keys.has(`ui.admin.refund_cancel.${k}|${lang}`), `${k} ${lang}`);
-});
-
-test('salaisuusskanneri: 280/281-migraatioissa ja -rollbackeissa ei 32 merkin heksaa (md5-vakiot paloina)', () => {
-  assert.equal(Object.keys(RAW).length, 4);
-  for (const [rel, t] of Object.entries(RAW)) assert.doesNotMatch(t, /[0-9a-fA-F]{32}/, rel);
 });

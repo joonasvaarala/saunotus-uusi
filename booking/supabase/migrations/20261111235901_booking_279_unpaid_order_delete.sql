@@ -1,5 +1,4 @@
 -- booking_279: maksamattoman tilauksen poisto hallinnasta (arkistointi, ei fyysistä poistoa). Korvaa ajamattoman booking_264:n (264 EI ajeta koskaan).
--- md5-vakiot on kirjoitettu 8 merkin paloina ('aaaaaaaa'||…): sama arvo, mutta salaisuusskanneri ei tulkitse 32 merkin heksaa avaimeksi.
 -- Joonas 8.11.2026 klo 18.19 (Bottiavustus t1501u): "Tee mahdollisuus poistaa maksamattomat tilaukset".
 -- Joonas 11.11.2026 (t38u, tilausnäkymä v3 §4 B): "menneen maksamattoman saa myös poistaa. poistaminen poistaa tietysti myös varaukset".
 --
@@ -38,7 +37,7 @@ begin
     raise exception 'booking_279: booking_264 (admin_delete_unpaid_order(bigint,text)) on asennettu; 264:ää ei pitänyt ajaa. Ei muutoksia.';
   end if;
   v := md5(pg_get_functiondef('booking.payment_mark_paid(text,text,numeric,jsonb)'::regprocedure));
-  if v is distinct from ('b35618b8'||'cd17fa9e'||'7c590271'||'9d0804a2') then
+  if v is distinct from 'b35618b8cd17fa9e7c5902719d0804a2' then
     raise exception 'booking_279: payment_mark_paid md5 % ei ole booking_263 (b35618b8…). Ei muutoksia.', v;
   end if;
   -- booking_277 poisti 12 argumentin version; vain 13 argumentin (p_payment_filters text[]) versio saa olla.
@@ -46,26 +45,26 @@ begin
     raise exception 'booking_279: admin_list_orders 12 argumentin versio on olemassa (booking_277 puuttuu). Ei muutoksia.';
   end if;
   v := md5(pg_get_functiondef(to_regprocedure('booking.admin_list_orders(text,text,text,text,boolean,text,date,date,text,integer,integer,text,text[])')));
-  if v is null or v not in (('7a546ff2'||'4b41e6ff'||'e7f22e3a'||'43a282fc'), ('a0094085'||'1c8ae79e'||'f8d2d7d9'||'7f0ffacb')) then
+  if v is null or v not in ('7a546ff24b41e6ffe7f22e3a43a282fc', 'a00940851c8ae79ef8d2d7d97f0ffacb') then
     raise exception 'booking_279: admin_list_orders md5 % ei vastaa odotettua (7a546ff2… booking_277 / tämä). Ei muutoksia.', v;
   end if;
   -- claim/archive-sopimus nojaa claimin FOR UPDATE SKIP LOCKED + sending samassa transaktiossa -semantiikkaan
   v := md5(pg_get_functiondef('booking.email_outbox_claim_base_132(integer)'::regprocedure));
-  if v not in (('0b109865'||'33285645'||'d8592449'||'a90a1e0c'), ('23157765'||'d41d2957'||'1f4016f5'||'838ea126')) then
+  if v not in ('0b10986533285645d8592449a90a1e0c', '23157765d41d29571f4016f5838ea126') then
     raise exception 'booking_279: email_outbox_claim_base_132 md5 % ei vastaa odotettua (0b109865…). Ei muutoksia.', v;
   end if;
   v := md5(pg_get_functiondef('booking.email_outbox_claim_base_146(integer)'::regprocedure));
-  if v is distinct from ('5bb547fa'||'6a5f9e71'||'5ebbb39e'||'6b479d3e') then raise exception 'booking_279: base146 vieras versio %',v; end if;
+  if v is distinct from '5bb547fa6a5f9e715ebbb39e6b479d3e' then raise exception 'booking_279: base146 vieras versio %',v; end if;
   v := md5(pg_get_functiondef('booking.email_outbox_claim_base_215(integer)'::regprocedure));
-  if v is distinct from ('2c76d9c3'||'0a28f78e'||'8bb84cce'||'0ff61d77') then raise exception 'booking_279: base215 vieras versio %',v; end if;
+  if v is distinct from '2c76d9c30a28f78e8bb84cce0ff61d77' then raise exception 'booking_279: base215 vieras versio %',v; end if;
   v := md5(pg_get_functiondef('booking.email_outbox_mark(bigint,text,text,text)'::regprocedure));
-  if v is distinct from ('2ba0222f'||'dfee7194'||'2fb09053'||'bd7ea803') then raise exception 'booking_279: outbox mark vieras versio %',v; end if;
+  if v is distinct from '2ba0222fdfee71942fb09053bd7ea803' then raise exception 'booking_279: outbox mark vieras versio %',v; end if;
   v := md5(pg_get_functiondef('booking.email_outbox_claim(integer)'::regprocedure));
-  if v not in (('5e8125c1'||'da473685'||'b7a7adbb'||'40966250'), ('e46ae5eb'||'d9fb813a'||'087b7f05'||'c40949b8')) then raise exception 'booking_279: email_outbox_claim vieras versio %',v; end if;
+  if v not in ('5e8125c1da473685b7a7adbb40966250', 'e46ae5ebd9fb813a087b7f05c40949b8') then raise exception 'booking_279: email_outbox_claim vieras versio %',v; end if;
   v := md5(pg_get_functiondef('booking.admin_review_list()'::regprocedure));
-  if v not in (('8c7ddb15'||'580659e9'||'daa3e72f'||'43718f14'), ('fca45e30'||'5e1036d4'||'62ef28c7'||'473de150')) then raise exception 'booking_279: admin_review_list vieras versio %',v; end if;
+  if v not in ('8c7ddb15580659e9daa3e72f43718f14', 'fca45e305e1036d462ef28c7473de150') then raise exception 'booking_279: admin_review_list vieras versio %',v; end if;
   if exists (select 1 from pg_trigger where tgrelid='booking.email_outbox'::regclass and tgname='email_outbox_archived_bi'
-     and md5(pg_get_triggerdef(oid)||tgenabled::text) <> ('e8a1a324'||'02444a91'||'417fd625'||'c6a79478')) then
+     and md5(pg_get_triggerdef(oid)||tgenabled::text) <> 'e8a1a32402444a91417fd625c6a79478') then
     raise exception 'booking_279: vieras triggerin määrittely/tila';
   end if;
   if to_regprocedure('booking.admin_delete_unpaid_order(bigint,text,boolean)') is not null
@@ -85,13 +84,13 @@ begin
   end if;
   -- uudet funktiot: joko puuttuvat tai täsmälleen tämän migraation versio (uudelleenajo); vieras versio → ei muutoksia
   for v in select format('%s md5 %s', x.sig, md5(pg_get_functiondef(to_regprocedure(x.sig))))
-             from (values ('booking._archived_late_payment_review_rows()', ('035d2f18'||'a860cd62'||'a757187e'||'f3e64a71')),
-                          ('booking.admin_ack_archived_late_payment(bigint,text)', ('f3ad2e3c'||'42ea2178'||'fcf297e5'||'c4bbf2eb')),
-                          ('booking._order_delete_blockers(bigint)', ('4297a1fe'||'430d9363'||'20cd0a77'||'7f7c0ca3')),
-                          ('booking._order_delete_primary_blocker(jsonb)', ('402956e3'||'c8e0a814'||'3236e001'||'3ac3f41c')),
-                          ('booking.admin_order_delete_check(bigint)', ('102ec3b3'||'25202767'||'d7efbb28'||'643d7457')),
-                          ('booking.admin_delete_unpaid_order(bigint,text,boolean)', ('3451b8a7'||'d3c340ba'||'93f0d3f9'||'3c601127')),
-                          ('booking._email_outbox_archived_bi()', ('c8efe598'||'ec100c0b'||'1389fb6a'||'505678db'))) x(sig, ok)
+             from (values ('booking._archived_late_payment_review_rows()', '035d2f18a860cd62a757187ef3e64a71'),
+                          ('booking.admin_ack_archived_late_payment(bigint,text)', 'f3ad2e3c42ea2178fcf297e5c4bbf2eb'),
+                          ('booking._order_delete_blockers(bigint)', '4297a1fe430d936320cd0a777f7c0ca3'),
+                          ('booking._order_delete_primary_blocker(jsonb)', '402956e3c8e0a8143236e0013ac3f41c'),
+                          ('booking.admin_order_delete_check(bigint)', '102ec3b325202767d7efbb28643d7457'),
+                          ('booking.admin_delete_unpaid_order(bigint,text,boolean)', '3451b8a7d3c340ba93f0d3f93c601127'),
+                          ('booking._email_outbox_archived_bi()', 'c8efe598ec100c0b1389fb6a505678db')) x(sig, ok)
             where to_regprocedure(x.sig) is not null and md5(pg_get_functiondef(to_regprocedure(x.sig))) <> x.ok
   loop
     raise exception 'booking_279: vieras aiempi versio (%). Ei muutoksia.', v;

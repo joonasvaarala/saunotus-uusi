@@ -1,5 +1,4 @@
 -- booking_280: lahjakortti ja kumppanikoodi varauksen peruutuksessa (tilausnäkymä v3 §4 C, §3.1, §3.1b). Joonas 11.11.2026 t42u:
--- md5-vakiot on kirjoitettu 8 merkin paloina ('aaaaaaaa'||…): sama arvo, mutta salaisuusskanneri ei tulkitse 32 merkin heksaa avaimeksi.
 --   "Lahjakorttivarauksen voi perua, ja silloin kysytään, jätetäänkö koodi voimaan" (rahaa ei hyvitetä) ja
 --   "Lunastetun kumppanikoodin varauksen voi perua tai siirtää, mutta tilaus jää voimaan".
 --
@@ -32,17 +31,17 @@ declare v text; x record;
 begin
   -- korvattavat funktiot: PROD/DEV-lähtötila (SELECT-varmennettu 11.11.2026) tai tämän migraation versio (uudelleenajo)
   for x in select * from (values
-      ('booking.admin_refund(bigint,numeric,text,jsonb,boolean)', array[('709d5fd5'||'4d877846'||'682571b6'||'0c5d21bd'),('21cdc941'||'bb061856'||'bd368130'||'a08a5704')]),
-      ('booking.admin_set_reservation_status(bigint,text,text)', array[('aed4b0d7'||'e19f7c13'||'d1ac91c2'||'8cc0b642'),('9a637715'||'74d6a03f'||'665078c5'||'895010d5')]),
-      ('booking._reservation_refund_plan(bigint)', array[('a2295290'||'5fc68f11'||'9427f7fd'||'4e6025fa')]),
-      ('booking._gc_apply(bigint,numeric,text,bigint,bigint,text,jsonb,timestamp with time zone)', array[('f1958557'||'dbf3ed5a'||'b36d728e'||'2582088a')]),
-      ('booking.admin_refund_order(bigint,numeric,text,jsonb,boolean)', array[('b77f3c41'||'16f6f1ef'||'64267ce4'||'ebde20a1')])
+      ('booking.admin_refund(bigint,numeric,text,jsonb,boolean)', array['709d5fd54d877846682571b60c5d21bd','21cdc941bb061856bd368130a08a5704']),
+      ('booking.admin_set_reservation_status(bigint,text,text)', array['aed4b0d7e19f7c13d1ac91c28cc0b642','9a63771574d6a03f665078c5895010d5']),
+      ('booking._reservation_refund_plan(bigint)', array['a22952905fc68f119427f7fd4e6025fa']),
+      ('booking._gc_apply(bigint,numeric,text,bigint,bigint,text,jsonb,timestamp with time zone)', array['f1958557dbf3ed5ab36d728e2582088a']),
+      ('booking.admin_refund_order(bigint,numeric,text,jsonb,boolean)', array['b77f3c4116f6f1ef64267ce4ebde20a1'])
     ) t(sig, ok) loop
     v := md5(pg_get_functiondef(to_regprocedure(x.sig)));
     if v is null or not (v = any (x.ok)) then raise exception 'booking_280: % md5 % ei vastaa odotettua (%). Ei muutoksia.', x.sig, v, array_to_string(x.ok, ' / '); end if;
   end loop;
   v := md5(pg_get_functiondef(to_regprocedure('booking.admin_cancel_reservation(bigint,text,boolean,text)')));
-  if v is not null and v <> ('e627951c'||'ee8875cb'||'ab0b8ad8'||'b02d8de1') then
+  if v is not null and v <> 'e627951cee8875cbab0b8ad8b02d8de1' then
     raise exception 'booking_280: admin_cancel_reservation (4 arg) md5 % ei ole lähtötila e627951c…. Ei muutoksia.', v;
   end if;
   if v is null and to_regprocedure('booking.admin_cancel_reservation(bigint,text,boolean,text,boolean)') is null then
@@ -50,12 +49,12 @@ begin
   end if;
   -- uudet funktiot: puuttuvat tai tämän migraation versio
   for x in select * from (values
-      ('booking.admin_cancel_reservation(bigint,text,boolean,text,boolean)', ('5664a3cd'||'e7b36666'||'711c023e'||'8ce9ba5f')),
-      ('booking._order_voucher_redeemed(bigint)', ('6f4edb95'||'f92936ea'||'aa342cf4'||'d7be41ce')),
-      ('booking._gc_keep_allowed(booking.gift_cards)', ('262ac6f9'||'e952e005'||'7f902426'||'fce9845a')),
-      ('booking._gc_return_to_card(bigint,numeric,jsonb,text,bigint)', ('b3c10da3'||'850d5296'||'f3a18736'||'3d6c2e48')),
-      ('booking._gc_forfeit_on_cancel(bigint,numeric,bigint,text)', ('c60d0087'||'f32e7051'||'896e2cba'||'1493c36b')),
-      ('booking.admin_reservation_cancel_options(bigint)', ('d7e42987'||'fc7ae571'||'bd29768e'||'04088960'))
+      ('booking.admin_cancel_reservation(bigint,text,boolean,text,boolean)', '5664a3cde7b36666711c023e8ce9ba5f'),
+      ('booking._order_voucher_redeemed(bigint)', '6f4edb95f92936eaaa342cf4d7be41ce'),
+      ('booking._gc_keep_allowed(booking.gift_cards)', '262ac6f9e952e0057f902426fce9845a'),
+      ('booking._gc_return_to_card(bigint,numeric,jsonb,text,bigint)', 'b3c10da3850d5296f3a187363d6c2e48'),
+      ('booking._gc_forfeit_on_cancel(bigint,numeric,bigint,text)', 'c60d0087f32e7051896e2cba1493c36b'),
+      ('booking.admin_reservation_cancel_options(bigint)', 'd7e42987fc7ae571bd29768e04088960')
     ) t(sig, ok) loop
     if to_regprocedure(x.sig) is not null and md5(pg_get_functiondef(to_regprocedure(x.sig))) <> x.ok then
       raise exception 'booking_280: vieras aiempi versio %. Ei muutoksia.', x.sig;
