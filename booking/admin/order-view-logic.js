@@ -159,6 +159,49 @@ export function reservationBadge(r) {
 /** Lisäoston rivi on lukittu, kun tilaus on laskutettu (booking_185). */
 export const addonsLocked = (m) => !!m?.locked;
 
+/**
+ * Summalaatikon näyttömalli (Joonas t462u, 11.11.2026): yksi iso luku, jonka otsikko kertoo täsmälleen mitä luku on.
+ * Ei laske saldoa uudelleen: käyttää orderModelin palvelinsaldoa (open = balance.unpaid, overpaid, net_paid).
+ *  - paid:        kaikki maksettu → iso "Maksettu <netto>", pieni rivi "Yhteensä · Maksamatta 0,00 €" (+ hyvitetty / lahjakortti)
+ *  - due:         maksamatta → iso "Maksamatta <avoin>" (meripihka), pieni rivi "Yhteensä · Maksettu"
+ *  - invoice:     laskulla avoinna → iso "Laskulla avoinna <avoin>"
+ *  - to_refund:   ylisuoritus / peruttu mutta hyvittämättä → iso "Hyvitettävää <ylisuoritus>"
+ *  - refunded:    kaikki maksettu hyvitetty takaisin → iso "Hyvitetty <hyvitys>"
+ *  - none:        ei maksettavaa eikä maksuja (0 €:n tilaus, peruttu maksamaton) → "Ei maksettavaa" ilman nollaa isona
+ * lines: [{ key, amount? }] = pienet rivit (avain ui.admin.order_view.amt.*).
+ */
+export function amountSummary(m) {
+  if (!m) return null;
+  const b = m.balance || {};
+  const total = num(b.total), paid = num(b.paid), refunded = num(b.refunded);
+  const net = b.net_paid != null ? num(b.net_paid) : round2(paid - refunded);
+  const cancelled = ['cancelled', 'expired'].includes(m.status) || ((m.reservations || []).length > 0 && (m.reservations || []).every((r) => r.status === 'cancelled'));
+  const open = num(m.open), over = num(m.overpaid);
+  const totalLine = cancelled ? { key: 'cancelled_total', amount: total } : { key: 'total', amount: total };
+  const gift = (m.payments || []).filter((p) => isGiftPayment(p) && isPaidStatus(p.status)).reduce((s, p) => s + num(p.amount) - num(p.refunded_amount), 0);
+  const partner = (m.payments || []).filter((p) => isPartnerPayment(p) && isPaidStatus(p.status)).reduce((s, p) => s + num(p.amount) - num(p.refunded_amount), 0);
+  const extras = [refunded > EPS ? { key: 'refunded_line', amount: refunded } : null, gift > EPS ? { key: 'gift_line', amount: round2(gift) } : null, partner > EPS ? { key: 'partner_line', amount: round2(partner) } : null].filter(Boolean);
+  let state, amount, lines;
+  if (over > EPS) {
+    state = 'to_refund'; amount = over;
+    lines = [totalLine, { key: 'paid_line', amount: net }, ...extras.filter((x) => x.key === 'refunded_line')];
+  } else if (open > EPS) {
+    state = m.locked ? 'invoice' : 'due'; amount = open;
+    lines = [totalLine, { key: 'paid_line', amount: net }, ...(m.balance?.pending_link > EPS && !m.locked ? [{ key: 'link_line', amount: num(m.balance.pending_link) }] : []), ...extras];
+  } else if (net > EPS) {
+    state = 'paid'; amount = net;
+    lines = [totalLine, { key: 'unpaid_line', amount: 0 }, ...extras];
+  } else if (refunded > EPS) {
+    state = 'refunded'; amount = refunded;
+    lines = [totalLine, { key: 'paid_line', amount: paid }];
+  } else {
+    state = 'none'; amount = null;
+    lines = total > EPS || cancelled ? [totalLine] : [];
+  }
+  const tone = { paid: 'ok', due: 'due', invoice: 'info', to_refund: 'warn', refunded: 'muted', none: 'muted' }[state];
+  return { state, tone, label: `amt.${state}`, amount, lines, total, paid, refunded, net, cancelled };
+}
+
 /** Maksu-kortti: avoin / ylisuoritus isolla, rivit ja toimintojen piilotus laskulukossa (§2 Laskulukko). */
 export function paymentBox(m, { can = can0 } = {}) {
   const c = canFn(can);
@@ -180,6 +223,7 @@ export function paymentBox(m, { can = can0 } = {}) {
     openLink, linkSentAt: linkEmail?.sent_at || null,
     invoice: m.invoice, locked,
     voucherUnused: 0,
+    display: amountSummary(m),
     actions: {
       sendLink: !locked && native && payments_manage && m.open > EPS,
       takePayment: !locked && native && payments_manage && m.open > EPS,

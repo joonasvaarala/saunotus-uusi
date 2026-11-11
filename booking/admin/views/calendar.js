@@ -6,6 +6,7 @@
 import { rpc } from '../sb.js';
 import { h, fmtTime, todayHel, addDays, dayStartIso, errMsg, statusBadge, badge, empty } from '../ui.js';
 import { reservationDialog } from './shared.js';
+import { openOrderView } from '../order-open.js';
 import { loadTrainingTexts, trainingText as T } from '../training-texts.js';
 import { calendarSpaceDays, calendarTrainingDays, withoutTrainingBlocks } from '../training-logic.js';
 import { getLang } from '../talous-i18n.js';
@@ -73,7 +74,7 @@ export async function render({ ctx, refs, reload }) {
     needsNotice(s) ? badge('warn', NO_ASSIGNEE) : null);
   const bookingItem = (r) => h('li', { class: 'cal-item booking', 'data-kind': 'booking' },
     h('span', { class: 'cal-time', text: fmtTime(r.starts_at) }),
-    h('button', { type: 'button', class: 'link cal-txt', onclick: () => reservationDialog(r, { methods: refs.methods, onChange: () => draw(), refs, can: ctx?.can, role: ctx?.role }) }, h('strong', { text: r.customer_name || '–' }), ` · ${r.persons} hlö`, h('br'), h('small', { text: r.product_name || '' })),
+    h('button', { type: 'button', class: 'link cal-txt', onclick: () => openOrderView(r.order_no) || reservationDialog(r, { methods: refs.methods, onChange: () => draw(), refs, can: ctx?.can, role: ctx?.role }) }, h('strong', { text: r.customer_name || '–' }), ` · ${r.persons} hlö`, h('br'), h('small', { text: r.product_name || '' })),
     statusBadge(r.status));
 
   const spanTxt = (t) => `${fmtTime(t.starts_at)}–${fmtTime(t.ends_at)}`;

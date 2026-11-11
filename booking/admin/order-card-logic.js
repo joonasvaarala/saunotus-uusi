@@ -41,6 +41,8 @@ export function cardPaymentStatus(order = null, reservation = null) {
     if (pending > EPS && paid <= EPS) {
       return { kind: 'pending', amount: pending, paid, refunded, total, pending, badgeClass: 'warn', label: 'pending' };
     }
+    // 0 €:n tilaus (esim. yleinen vuoro vuosikortilla): ei "Maksettu 0,00 €" vaan "Ei maksettavaa" (Joonas 11.11.2026)
+    if (total <= EPS && paid <= EPS) return { kind: 'free', amount: 0, paid, refunded, total, pending, badgeClass: 'muted', label: 'free' };
     return { kind: 'paid', amount: paid || total, paid, refunded, total, pending, badgeClass: 'ok', label: 'paid' };
   }
   const ps = order?.payment_status || reservation?.payment_status || null;
@@ -56,6 +58,7 @@ export function cardPaymentStatus(order = null, reservation = null) {
   };
   const row = map[ps] || { kind: ps || 'unknown', badgeClass: 'pay-unpaid', label: ps || 'unpaid' };
   const amount = reservation?.total_gross != null ? num(reservation.total_gross) : (order?.total != null ? num(order.total) : 0);
+  if (row.kind === 'paid' && amount <= EPS) return { kind: 'free', badgeClass: 'muted', label: 'free', amount: 0, paid: 0, refunded: 0, total: 0, pending: 0 };
   return { ...row, amount, paid: 0, refunded: 0, total: amount, pending: 0 };
 }
 

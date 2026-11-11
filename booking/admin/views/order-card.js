@@ -1,4 +1,5 @@
 // Yhteinen varaus- ja tilauskortti: sama näkymä varaukselle ja tilaukselle.
+import { ov } from '../order-view-texts.js';
 import { rpc, fn, select as dbSelect } from '../sb.js';
 import { createTalousApi, normOrder } from '../talous-api.js';
 import { isFlowEnabledValue } from '../order-reservation-logic.js';
@@ -57,6 +58,7 @@ function cardWhen(starts, ends) {
 }
 
 function payLabel(pay) {
+  if (pay.label === 'free') return ov('order_view.amt.none');
   const amount = money(pay.amount);
   const key = {
     unpaid: 'ui.admin.res.pay_unpaid_amount',
