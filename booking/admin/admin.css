@@ -1036,6 +1036,17 @@ body.shot #shell .nav .lbl{display:inline}
 .oc-line .pr{font-variant-numeric:tabular-nums;color:var(--ink);font-weight:600;white-space:nowrap}
 .oc-line.total{border-top:2px solid var(--green);padding-top:8px;margin-top:4px;font-weight:700;font-size:16px;color:var(--ink)}
 .oc-line .vat{font-weight:500;color:var(--muted);font-size:13px}
+/* Tilauserittely: rivi per tuote, alla määrä ja ALV; loppuun ALV-erittely kannoittain */
+.oc-breakdown{display:grid;gap:8px;min-width:0}
+.oc-bd-row{display:grid;gap:2px;min-width:0}
+.oc-bd-row .oc-line .nm{overflow-wrap:anywhere;min-width:0}
+.oc-bd-row.child{padding-left:14px}
+.oc-bd-sub{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.oc-vat-table{display:grid;gap:2px;font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums;margin-top:2px}
+.oc-vat-head,.oc-vat-row{display:grid;grid-template-columns:minmax(64px,1fr) repeat(3,minmax(0,auto));gap:4px 14px;align-items:baseline}
+.oc-vat-head span:not(:first-child),.oc-vat-row span:not(:first-child){text-align:right;white-space:nowrap}
+.oc-vat-head{font-weight:600}
+.oc-addon-tools{display:grid;gap:8px;justify-items:start}
 .oc-payrow{display:grid;grid-template-columns:1fr auto;gap:2px 12px;font-size:14px;padding:6px 0;border-bottom:1px solid var(--line);align-items:center}
 .oc-payrow:last-of-type{border-bottom:0}
 .oc-payrow .how{grid-column:1;grid-row:1;color:var(--ink);font-weight:600}

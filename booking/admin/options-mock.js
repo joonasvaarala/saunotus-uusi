@@ -246,7 +246,12 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
     r.legs = [{ leg_id: id, role: 'space', resource_code: 'rauni', starts_at: r.starts_at, ends_at: r.ends_at, persons, skill: null }];
     st.reservations.push(r); return r;
   };
-  addRes({ pid: 10, date: today, at: '16:00', persons: 2, cust: 1, optId: 1 });
+  {
+    // Kokeilutila: yhdellä varauksella lisäosto, jotta kortin lisäostorivi ja tilauserittely näkyvät (vain mock).
+    const r1 = addRes({ pid: 10, date: today, at: '16:00', persons: 2, cust: 1, optId: 1 });
+    r1.mock_addons = [{ addon_id: 1, name: 'Saunavihta', quantity: 1, unit_price: 13, line_total: 13, vat_rate: 25.5 }];
+    r1.total_gross = Number(r1.total_gross) + 13;
+  }
   addRes({ pid: 10, date: today, at: '18:00', persons: 1, cust: 2, optId: null, pay: 'unpaid' });   // vanha varaus: valintaa ei ole → "valitsematta"
   addRes({ pid: 8, date: today, at: '17:00', persons: 3, cust: 3, optId: null });
   addRes({ pid: 10, date: addDays(today, 1), at: '16:30', persons: 1, cust: 4, optId: 3 });
@@ -581,17 +586,25 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
       return { date: a.p_date, sessions: [], blocks: [], prep: [], addon_totals: [],
         reservations: rs.map((r) => ({ reservation_id: r.reservation_id, order_id: r.order_id, order_no: r.order_no, status: r.status, payment_status: r.payment_status, product_name: r.product_name, mode: r.mode, starts_at: r.starts_at, ends_at: r.ends_at, persons: r.persons,
           customer_name: r.customer_name, customer_phone: r.customer_phone, source: 'native', external_id: null, customer_kind: 'private', company: null, space_code: r.space_code, lifecycle: r.lifecycle, quota_exempt: false, override_reason: null,
-          therapist_missing: false, therapist_missing_open: false, notes: r.notes, legs: r.legs, addons: [], option: optJson(r.option_id), option_missing: missing(r) })) };
+          therapist_missing: false, therapist_missing_open: false, notes: r.notes, legs: r.legs, addons: (r.mock_addons || []).map((x) => ({ ...x })), option: optJson(r.option_id), option_missing: missing(r) })) };
     },
     admin_get_order: (a) => {
+      // Tilausrivit kuten tuotannossa: varausrivi + lisäostot alle, ALV tuotteen kannasta (line_vat/line_net).
+      const vatRow = (gross, rate) => { const vat = Math.round((gross - gross / (1 + rate / 100)) * 100) / 100; return { line_vat: vat, line_net: Math.round((gross - vat) * 100) / 100 }; };
+      const mockOrderItems = (r) => {
+        const extras = r.mock_addons || [], extra = extras.reduce((n, x) => n + Number(x.line_total || 0), 0);
+        const base = (Number(r.total_gross) || 0) - extra, rate = Number(product(r.product_id)?.vat_rate ?? 25.5), id = r.reservation_id * 10;
+        return [{ id, parent_item_id: null, kind: 'reservation', product_id: r.product_id, name: r.product_name, quantity: 1, unit_price: base, line_total: base, vat_rate: rate, ...vatRow(base, rate) },
+          ...extras.map((x, i) => ({ id: id + i + 1, parent_item_id: id, kind: 'addon', product_id: null, name: x.name, quantity: x.quantity, unit_price: x.unit_price, line_total: x.line_total, vat_rate: x.vat_rate, ...vatRow(x.line_total, x.vat_rate) }))];
+      };
       const r = st.reservations.find((x) => x.order_id === a.p_order_id); if (!r) throw err('not_found', 'Tilausta ei löydy');
       const total = Number(r.total_gross) || 0;
       const paid = r.payment_status === 'paid' ? total : 0;
       const unpaid = r.payment_status === 'paid' ? 0 : total;
       return { order_id: r.order_id, order_no: r.order_no, status: r.order_status, payment_status: r.payment_status, total, source_channel: 'web', created_at: r.created_at, customer_kind: 'private', billing: null, invoice_reference: null,
         customer: { id: r.customer_id, name: r.customer_name, email: r.customer_email, phone: r.customer_phone },
-        reservations: [{ id: r.reservation_id, status: r.status, product_name: r.product_name, mode: r.mode, starts_at: r.starts_at, ends_at: r.ends_at, persons: r.persons, notes: r.notes, item_total: total, product_id: r.product_id,
-          option: optJson(r.option_id), option_choices: choicesJson(r.product_id), option_missing: missing(r), addons: [] }], items: [], payments: [],
+        reservations: [{ id: r.reservation_id, item_id: r.reservation_id * 10, status: r.status, product_name: r.product_name, mode: r.mode, starts_at: r.starts_at, ends_at: r.ends_at, persons: r.persons, notes: r.notes, item_total: total, product_id: r.product_id,
+          option: optJson(r.option_id), option_choices: choicesJson(r.product_id), option_missing: missing(r), addons: (r.mock_addons || []).map((x) => ({ ...x })) }], items: mockOrderItems(r), payments: [],
         balance: { total, paid, refunded: 0, pending_link: 0, unpaid, unpaid_unlinked: unpaid, net_paid: paid },
         is_native: r.source !== 'johku', staff_can_add: r.source !== 'johku' && ['confirmed', 'completed'].includes(r.order_status) };
     },

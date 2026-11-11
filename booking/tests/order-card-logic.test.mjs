@@ -159,3 +159,83 @@ test('osioiden yhteenvedot: lisäostot ja maksu', () => {
   assert.equal(s.messages.count, 1);
   assert.equal(s.notes.empty, false);
 });
+
+// --- Tilauserittely ja lisäostorivi (Joonas t430u) ---
+import { cardAddonLine, orderBreakdown, vatRateLabel } from '../admin/order-card-logic.js';
+import { normOrder } from '../admin/talous-api.js';
+
+const NAISTEN = {
+  order_id: 1, order_no: 15180, balance: { total: 100, paid: 100, unpaid: 0 },
+  reservations: [{ id: 5, item_id: 16651, status: 'confirmed', addons: [{ name: 'Saunavihta', quantity: 1, line_total: 13, vat_rate: 25.5 }] }],
+  items: [
+    { id: 16652, parent_item_id: 16651, kind: 'addon', name: 'Saunavihta', quantity: 1, unit_price: 13, line_total: 13, vat_rate: 25.5, line_vat: 2.64, line_net: 10.36 },
+    { id: 16651, parent_item_id: null, kind: 'reservation', name: 'Naisten sauna', quantity: 1, unit_price: 87, line_total: 87, vat_rate: 25.5, line_vat: 17.68, line_net: 69.32 },
+  ],
+};
+
+test('lisäostorivi: määrä × nimi, useampi erotetaan pisteellä, tyhjä ilman lisäostoja', () => {
+  assert.equal(cardAddonLine([{ name: 'Saunavihta', quantity: 1 }]), '1 × Saunavihta');
+  assert.equal(cardAddonLine([{ name: 'Saunavihta', quantity: 1 }, { name: 'Pyyhe', quantity: 2 }]), '1 × Saunavihta · 2 × Pyyhe');
+  assert.equal(cardAddonLine([]), '');
+  assert.equal(cardAddonLine(undefined), '');
+  assert.equal(cardAddonLine([{ name: 'Pyyhe', quantity: 0 }]), '');
+});
+
+test('tilauserittely: pääpalvelu ensin, lisäosto sen alla, ALV tilausriviltä sellaisenaan', () => {
+  const bd = orderBreakdown(normOrder(NAISTEN));
+  assert.deepEqual(bd.rows.map((x) => [x.name, x.child, x.gross, x.vat_rate, x.vat, x.net]), [
+    ['Naisten sauna', false, 87, 25.5, 17.68, 69.32],
+    ['Saunavihta', true, 13, 25.5, 2.64, 10.36],
+  ]);
+  assert.equal(bd.total, 100);
+  assert.deepEqual(bd.vatByRate, [{ rate: 25.5, gross: 100, vat: 20.32, net: 79.68 }]);
+  assert.equal(bd.unknownVat, 0);
+});
+
+test('tilauserittely: kannat eritellään erikseen, puuttuva kanta ei muutu nollaksi', () => {
+  const o = normOrder({ ...NAISTEN, balance: { total: 150 }, items: [
+    ...NAISTEN.items,
+    { id: 16700, kind: 'gift_card', name: 'Lahjakortti', quantity: 1, unit_price: 40, line_total: 40, vat_rate: 0, line_vat: 0, line_net: 40 },
+    { id: 16701, kind: 'custom', name: 'Tuotu rivi', quantity: 2, unit_price: 5, line_total: 10, vat_rate: null },
+  ] });
+  const bd = orderBreakdown(o);
+  assert.deepEqual(bd.vatByRate.map((v) => [v.rate, v.vat, v.gross]), [[25.5, 20.32, 100], [0, 0, 40]]);
+  assert.equal(bd.rows.find((x) => x.name === 'Tuotu rivi').vat_rate, null);
+  assert.equal(bd.unknownVat, 1);
+});
+
+test('tilauserittely: peruttu varaus merkitään, tyhjä tilaus on tyhjä', () => {
+  const bd = orderBreakdown({ ...NAISTEN, reservations: [{ ...NAISTEN.reservations[0], status: 'cancelled' }] });
+  assert.ok(bd.rows.every((x) => x.cancelled));
+  assert.equal(orderBreakdown({ items: [] }).empty, true);
+  assert.equal(orderBreakdown(null).empty, true);
+});
+
+test('ALV-kanta suomalaisittain', () => {
+  assert.equal(vatRateLabel(25.5), '25,5 %');
+  assert.equal(vatRateLabel(13.5), '13,5 %');
+  assert.equal(vatRateLabel(0), '0 %');
+  assert.equal(vatRateLabel(null), '');
+});
+
+test('tekstit: pending-import-132 FI+EN = koodin oletukset, paikkamerkit täsmäävät', async () => {
+  const { readFileSync } = await import('node:fs');
+  const { ORDER_TEXTS } = await import('../admin/orders-texts.js');
+  const rows = JSON.parse(readFileSync(new URL('../../content/site-texts.pending-import-132.json', import.meta.url), 'utf8'));
+  assert.equal(rows.length, 30);
+  for (const row of rows) {
+    assert.equal(ORDER_TEXTS[row.lang][row.key], row.text, row.key);
+    assert.deepEqual(row.placeholders, row.text.match(/\{\{var:[a-z_]+\}\}/g) || [], row.key);
+    assert.ok(!/[<>]/.test(row.text), row.key);
+  }
+  for (const lang of ['fi', 'en']) assert.equal(rows.filter((x) => x.lang === lang).length, 15);
+});
+
+test('tilauserittely: ilman tilausrivejä varaus ja lisäostot näkyvät, varauksen ALV puuttuu eikä sitä keksitä', () => {
+  const o = normOrder({ order_id: 2, order_no: 2, balance: { total: 60 }, items: [],
+    reservations: [{ id: 9, item_id: null, product_name: 'Tuotu vuoro', item_total: 50, status: 'confirmed', addons: [{ name: 'Pyyhe', quantity: 2, unit_price: 5, line_total: 10, vat_rate: 25.5 }, { name: 'Vanha', quantity: 1, line_total: 0 }] }] });
+  const bd = orderBreakdown(o);
+  assert.deepEqual(bd.rows.map((x) => [x.name, x.child, x.vat_rate]), [['Tuotu vuoro', false, null], ['Pyyhe', true, 25.5], ['Vanha', true, null]]);
+  assert.equal(bd.unknownVat, 2);
+  assert.equal(bd.rows[1].vat, 2.03);
+});

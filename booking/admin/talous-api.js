@@ -71,7 +71,7 @@ export function normOrderPayment(p) {
 export function normOrder(o) {
   const b = o.balance || {}, payments = (o.payments || []).map(normOrderPayment);
   const reservations = (o.reservations || []).map((x) => ({ reservation_id: x.id ?? x.reservation_id, item_id: x.item_id ?? null, product_name: x.product_name, mode: x.mode ?? null, starts_at: x.starts_at, ends_at: x.ends_at, persons: x.persons, status: x.status, item_total: num(x.item_total),
-    addons: (x.addons || []).map((a) => ({ addon_id: a.addon_id ?? null, name: a.name, quantity: num(a.quantity, 1), unit_price: num(a.unit_price), line_total: num(a.line_total), vat_rate: num(a.vat_rate) })) }));
+    addons: (x.addons || []).map((a) => ({ addon_id: a.addon_id ?? null, name: a.name, quantity: num(a.quantity, 1), unit_price: num(a.unit_price), line_total: num(a.line_total), vat_rate: num(a.vat_rate), vat_known: a.vat_rate != null })) }));
   const total = num(o.total ?? b.total);
   return { order_id: o.order_id, order_no: o.order_no, johku_order_no: o.johku_order_no ?? null, status: o.status ?? null, payment_status: o.payment_status ?? 'unpaid', source_channel: o.source_channel ?? '', is_native: o.is_native !== false,
     created_at: o.created_at, customer: o.customer || {}, customer_name: o.customer?.name ?? '', internal_note: o.internal_note ?? null, customer_note: o.customer_note ?? null,
@@ -80,7 +80,8 @@ export function normOrder(o) {
     customer_kind: o.customer?.customer_kind ?? o.customer_kind ?? null, billing_method: o.billing?.invoice_method ?? null,
     balance: { total, paid: num(b.paid), refunded: num(b.refunded), pending_link: num(b.pending_link), unpaid: num(b.unpaid), unpaid_unlinked: num(b.unpaid_unlinked, num(b.unpaid)), net_paid: num(b.net_paid) },
     total_gross: total, paid_amount: num(b.paid), unpaid_amount: num(b.unpaid),
-    items: (o.items || []).map((x) => ({ id: x.id, parent_item_id: x.parent_item_id ?? null, kind: x.kind, name: x.name, quantity: num(x.quantity, 1), unit_price: num(x.unit_price), line_total: num(x.line_total), vat_rate: num(x.vat_rate), covered: num(x.covered), remaining: num(x.remaining) })),
+    items: (o.items || []).map((x) => ({ id: x.id, parent_item_id: x.parent_item_id ?? null, kind: x.kind, name: x.name, quantity: num(x.quantity, 1), unit_price: num(x.unit_price), line_total: num(x.line_total), vat_rate: num(x.vat_rate),
+      vat_known: x.vat_rate != null, line_vat: x.line_vat != null ? num(x.line_vat) : null, line_net: x.line_net != null ? num(x.line_net) : null, covered: num(x.covered), remaining: num(x.remaining) })),
     payments, reservations, receipts: (o.receipts || []).map(normReceiptRef), requests: o.requests || [], first_reservation_at: reservations.map((x) => x.starts_at).filter(Boolean).sort()[0] ?? null };
 }
 const L = (a) => (Array.isArray(a) ? a : []);

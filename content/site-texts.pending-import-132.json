@@ -1,0 +1,322 @@
+[
+  {
+    "key": "ui.admin.res.section_breakdown",
+    "lang": "fi",
+    "text": "Tilauserittely",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Yhteinen kortti: lisäostorivi otsikkoon ja tilauserittely ALV-riveineen (Joonas t430u)"
+  },
+  {
+    "key": "ui.admin.res.section_breakdown",
+    "lang": "en",
+    "text": "Order breakdown",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Yhteinen kortti: lisäostorivi otsikkoon ja tilauserittely ALV-riveineen (Joonas t430u)"
+  },
+  {
+    "key": "ui.admin.res.sum_breakdown",
+    "lang": "fi",
+    "text": "Yhteensä {{var:amount}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:amount}}"
+    ],
+    "reason": "Yhteinen kortti: lisäostorivi otsikkoon ja tilauserittely ALV-riveineen (Joonas t430u)"
+  },
+  {
+    "key": "ui.admin.res.sum_breakdown",
+    "lang": "en",
+    "text": "Total {{var:amount}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:amount}}"
+    ],
+    "reason": "Yhteinen kortti: lisäostorivi otsikkoon ja tilauserittely ALV-riveineen (Joonas t430u)"
+  },
+  {
+    "key": "ui.admin.res.addons_line_label",
+    "lang": "fi",
+    "text": "Lisäostot",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Yhteinen kortti: lisäostorivi otsikkoon ja tilauserittely ALV-riveineen (Joonas t430u)"
+  },
+  {
+    "key": "ui.admin.res.addons_line_label",
+    "lang": "en",
+    "text": "Add-ons",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Yhteinen kortti: lisäostorivi otsikkoon ja tilauserittely ALV-riveineen (Joonas t430u)"
+  },
+  {
+    "key": "ui.admin.res.breakdown_empty",
+    "lang": "fi",
+    "text": "Tilauksella ei ole rivejä.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Yhteinen kortti: lisäostorivi otsikkoon ja tilauserittely ALV-riveineen (Joonas t430u)"
+  },
+  {
+    "key": "ui.admin.res.breakdown_empty",
+    "lang": "en",
+    "text": "The order has no lines.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Yhteinen kortti: lisäostorivi otsikkoon ja tilauserittely ALV-riveineen (Joonas t430u)"
+  },
+  {
+    "key": "ui.admin.res.breakdown_qty",
+    "lang": "fi",
+    "text": "{{var:n}} × {{var:price}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:n}}",
+      "{{var:price}}"
+    ],
+    "reason": "Yhteinen kortti: lisäostorivi otsikkoon ja tilauserittely ALV-riveineen (Joonas t430u)"
+  },
+  {
+    "key": "ui.admin.res.breakdown_qty",
+    "lang": "en",
+    "text": "{{var:n}} × {{var:price}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:n}}",
+      "{{var:price}}"
+    ],
+    "reason": "Yhteinen kortti: lisäostorivi otsikkoon ja tilauserittely ALV-riveineen (Joonas t430u)"
+  },
+  {
+    "key": "ui.admin.res.breakdown_vat",
+    "lang": "fi",
+    "text": "ALV {{var:rate}} · {{var:amount}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:rate}}",
+      "{{var:amount}}"
+    ],
+    "reason": "Yhteinen kortti: lisäostorivi otsikkoon ja tilauserittely ALV-riveineen (Joonas t430u)"
+  },
+  {
+    "key": "ui.admin.res.breakdown_vat",
+    "lang": "en",
+    "text": "VAT {{var:rate}} · {{var:amount}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:rate}}",
+      "{{var:amount}}"
+    ],
+    "reason": "Yhteinen kortti: lisäostorivi otsikkoon ja tilauserittely ALV-riveineen (Joonas t430u)"
+  },
+  {
+    "key": "ui.admin.res.breakdown_vat_missing",
+    "lang": "fi",
+    "text": "ALV-kanta puuttuu",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Yhteinen kortti: lisäostorivi otsikkoon ja tilauserittely ALV-riveineen (Joonas t430u)"
+  },
+  {
+    "key": "ui.admin.res.breakdown_vat_missing",
+    "lang": "en",
+    "text": "VAT rate missing",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Yhteinen kortti: lisäostorivi otsikkoon ja tilauserittely ALV-riveineen (Joonas t430u)"
+  },
+  {
+    "key": "ui.admin.res.breakdown_cancelled",
+    "lang": "fi",
+    "text": "peruttu",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Yhteinen kortti: lisäostorivi otsikkoon ja tilauserittely ALV-riveineen (Joonas t430u)"
+  },
+  {
+    "key": "ui.admin.res.breakdown_cancelled",
+    "lang": "en",
+    "text": "cancelled",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Yhteinen kortti: lisäostorivi otsikkoon ja tilauserittely ALV-riveineen (Joonas t430u)"
+  },
+  {
+    "key": "ui.admin.res.breakdown_total",
+    "lang": "fi",
+    "text": "Yhteensä",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Yhteinen kortti: lisäostorivi otsikkoon ja tilauserittely ALV-riveineen (Joonas t430u)"
+  },
+  {
+    "key": "ui.admin.res.breakdown_total",
+    "lang": "en",
+    "text": "Total",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Yhteinen kortti: lisäostorivi otsikkoon ja tilauserittely ALV-riveineen (Joonas t430u)"
+  },
+  {
+    "key": "ui.admin.res.breakdown_vat_rate",
+    "lang": "fi",
+    "text": "ALV-kanta",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Yhteinen kortti: lisäostorivi otsikkoon ja tilauserittely ALV-riveineen (Joonas t430u)"
+  },
+  {
+    "key": "ui.admin.res.breakdown_vat_rate",
+    "lang": "en",
+    "text": "VAT rate",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Yhteinen kortti: lisäostorivi otsikkoon ja tilauserittely ALV-riveineen (Joonas t430u)"
+  },
+  {
+    "key": "ui.admin.res.breakdown_net",
+    "lang": "fi",
+    "text": "Veroton",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Yhteinen kortti: lisäostorivi otsikkoon ja tilauserittely ALV-riveineen (Joonas t430u)"
+  },
+  {
+    "key": "ui.admin.res.breakdown_net",
+    "lang": "en",
+    "text": "Net",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Yhteinen kortti: lisäostorivi otsikkoon ja tilauserittely ALV-riveineen (Joonas t430u)"
+  },
+  {
+    "key": "ui.admin.res.breakdown_vat_eur",
+    "lang": "fi",
+    "text": "ALV",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Yhteinen kortti: lisäostorivi otsikkoon ja tilauserittely ALV-riveineen (Joonas t430u)"
+  },
+  {
+    "key": "ui.admin.res.breakdown_vat_eur",
+    "lang": "en",
+    "text": "VAT",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Yhteinen kortti: lisäostorivi otsikkoon ja tilauserittely ALV-riveineen (Joonas t430u)"
+  },
+  {
+    "key": "ui.admin.res.breakdown_gross",
+    "lang": "fi",
+    "text": "Verollinen",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Yhteinen kortti: lisäostorivi otsikkoon ja tilauserittely ALV-riveineen (Joonas t430u)"
+  },
+  {
+    "key": "ui.admin.res.breakdown_gross",
+    "lang": "en",
+    "text": "Gross",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Yhteinen kortti: lisäostorivi otsikkoon ja tilauserittely ALV-riveineen (Joonas t430u)"
+  },
+  {
+    "key": "ui.admin.res.breakdown_vat_unknown_note",
+    "lang": "fi",
+    "text": "Osalta riveistä puuttuu ALV-kanta, joten ne eivät näy ALV-erittelyssä.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Yhteinen kortti: lisäostorivi otsikkoon ja tilauserittely ALV-riveineen (Joonas t430u)"
+  },
+  {
+    "key": "ui.admin.res.breakdown_vat_unknown_note",
+    "lang": "en",
+    "text": "Some lines have no VAT rate, so they are not in the VAT summary.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Yhteinen kortti: lisäostorivi otsikkoon ja tilauserittely ALV-riveineen (Joonas t430u)"
+  },
+  {
+    "key": "ui.admin.res.breakdown_rows_total",
+    "lang": "fi",
+    "text": "Rivien summa {{var:amount}} poikkeaa tilauksen summasta.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:amount}}"
+    ],
+    "reason": "Yhteinen kortti: lisäostorivi otsikkoon ja tilauserittely ALV-riveineen (Joonas t430u)"
+  },
+  {
+    "key": "ui.admin.res.breakdown_rows_total",
+    "lang": "en",
+    "text": "Lines add up to {{var:amount}}, which differs from the order total.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:amount}}"
+    ],
+    "reason": "Yhteinen kortti: lisäostorivi otsikkoon ja tilauserittely ALV-riveineen (Joonas t430u)"
+  }
+]

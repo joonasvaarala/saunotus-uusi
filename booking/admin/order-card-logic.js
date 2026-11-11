@@ -167,3 +167,85 @@ export function cardSectionSummaries(order, reservation = null) {
     notes: { text: String(note || '').trim(), empty: !String(note || '').trim() },
   };
 }
+
+const round2 = (v) => Math.round((Number(v) + Number.EPSILON) * 100) / 100;
+
+/**
+ * Kortin yläosan lisäostorivi varausrivin alle, esim. "1 × Saunavihta · 2 × Pyyhe".
+ * Tyhjä merkkijono, jos lisäostoja ei ole (rivi jätetään pois).
+ */
+export function cardAddonLine(addons = []) {
+  return (addons || [])
+    .filter((a) => a && String(a.name || '').trim() && Number(a.quantity) > 0)
+    .map((a) => `${Number(a.quantity)} × ${String(a.name).trim()}`)
+    .join(' · ');
+}
+
+/**
+ * Tilauserittely tilausriveistä (admin_get_order → items[]): rivi jokaiselle tuotteelle
+ * (pääpalvelu ja sen lisäostot heti sen alla, sitten muut rivit), ALV-kanta ja -euromäärä
+ * sekä ALV-erittely kannoittain. Hinnat ja ALV tulevat sellaisinaan tilausriviltä
+ * (unit_price_gross, line_total_gross, vat_rate, line_vat, line_net); mitään ei lasketa uudelleen
+ * paitsi jos rivin line_vat puuttuu, jolloin ALV johdetaan rivin omasta kannasta (sama kaava kuin
+ * maksuriveillä). Rivi, jolta ALV-kanta puuttuu (vat_known === false), jää ALV-erittelyn ulkopuolelle.
+ */
+export function orderBreakdown(order) {
+  let items = (order?.items || []).filter(Boolean);
+  // Varalla: tilaus, jolla on varaus mutta ei tilausrivejä (tuotannossa harvinainen). Varausriviltä ei tule ALV-kantaa.
+  if (!items.length && (order?.reservations || []).length) {
+    items = [];
+    (order.reservations || []).forEach((x, i) => {
+      const pid = x.item_id ?? `r${i}`;
+      items.push({ id: pid, parent_item_id: null, kind: 'reservation', name: x.product_name, quantity: 1, unit_price: num(x.item_total), line_total: num(x.item_total), vat_rate: null, vat_known: false });
+      (x.addons || []).forEach((a, k) => items.push({ id: `${pid}-${k}`, parent_item_id: pid, kind: 'addon', name: a.name, quantity: a.quantity, unit_price: a.unit_price, line_total: a.line_total,
+        vat_rate: a.vat_known === false ? null : (a.vat_rate ?? null), vat_known: a.vat_known !== false && a.vat_rate != null }));
+    });
+  }
+  const cancelled = new Set((order?.reservations || []).filter((x) => x.status === 'cancelled' && x.item_id != null).map((x) => x.item_id));
+  const ids = new Set(items.map((x) => x.id));
+  const byId = (a, b) => (Number(a.id) || 0) - (Number(b.id) || 0);
+  const top = items.filter((x) => x.parent_item_id == null || !ids.has(x.parent_item_id)).sort(byId);
+  const ordered = [];
+  for (const it of top) {
+    ordered.push({ it, child: false });
+    for (const c of items.filter((x) => x.parent_item_id === it.id && x !== it).sort(byId)) ordered.push({ it: c, child: true });
+  }
+  const rows = ordered.map(({ it, child }) => {
+    const gross = num(it.line_total);
+    const known = it.vat_known !== false && it.vat_rate != null;
+    const rate = known ? num(it.vat_rate) : null;
+    const vat = !known ? null : (it.line_vat != null ? num(it.line_vat) : round2(gross - gross / (1 + rate / 100)));
+    const net = !known ? null : (it.line_net != null ? num(it.line_net) : round2(gross - vat));
+    return {
+      id: it.id ?? null, kind: it.kind || 'other', name: it.name || '', child,
+      cancelled: cancelled.has(it.id) || (child && cancelled.has(it.parent_item_id)),
+      quantity: num(it.quantity) || 1, unit_price: num(it.unit_price), gross, vat_rate: rate, vat, net,
+    };
+  });
+  const rates = new Map();
+  let unknownVat = 0;
+  for (const row of rows) {
+    if (row.vat_rate == null) { unknownVat += 1; continue; }
+    const k = row.vat_rate;
+    const cur = rates.get(k) || { rate: k, gross: 0, vat: 0, net: 0 };
+    cur.gross = round2(cur.gross + row.gross); cur.vat = round2(cur.vat + row.vat); cur.net = round2(cur.net + row.net);
+    rates.set(k, cur);
+  }
+  const sum = round2(rows.reduce((s, x) => s + x.gross, 0));
+  const b = order?.balance;
+  const total = b && b.total != null ? num(b.total) : sum;
+  return {
+    rows,
+    total,
+    rowsTotal: sum,
+    vatByRate: [...rates.values()].sort((a, b2) => b2.rate - a.rate),
+    unknownVat,
+    empty: rows.length === 0,
+  };
+}
+
+/** ALV-kanta suomalaisittain: 25.5 → "25,5 %", 0 → "0 %". */
+export function vatRateLabel(rate) {
+  if (rate == null || !Number.isFinite(Number(rate))) return '';
+  return `${String(round2(rate)).replace('.', ',')} %`;
+}
