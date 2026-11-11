@@ -173,6 +173,12 @@ test('peruutussuunnitelma: yksi / koko tilaus, hyvitys vain turvallisella polull
   assert.equal(L.cancelConfirmKey(whole, 'full'), 'confirm.cancel_all_refund');
   const multiPay = L.cancelPlan({ ...two, refundable_by_payment: [{ payment_id: 1, refundable: 100 }, { payment_id: 2, refundable: 134 }] }, { scope: 'all', can: MANAGER });
   assert.equal(multiPay.refund.show, false); assert.equal(multiPay.refund.reason, 'multi_payment');
+  // Koko tilauksen hyvitys = maksun koko jäljellä oleva summa → ei tarjota, jos osa tilauksesta on jo käytetty
+  const used = model({ reservations: [res({ id: 1, status: 'completed', item_total: 174 }), res({ id: 2, item_total: 60 })], balance: { total: 234, paid: 234, refunded: 0, unpaid: 0, net_paid: 234 },
+    refundable_by_payment: [{ payment_id: 8, method: 'montonio', provider: 'montonio', refundable: 234 }] });
+  const usedAll = L.cancelPlan(used, { scope: 'all', can: MANAGER });
+  assert.equal(usedAll.refund.show, false); assert.equal(usedAll.refund.reason, 'partly_used');
+  assert.equal(L.cancelPlan(used, { reservationId: 2, can: MANAGER, preview: { total: 60 } }).refund.show, true, 'yksittäisen varauksen osuus edelleen hyvitettävissä');
   assert.equal(L.cancelPlan(two, { scope: 'all', can: all('bookings.manage') }).refund.reason, 'no_permission');
   const locked = L.cancelPlan({ ...two, locked: true }, { reservationId: 2, can: MANAGER, preview: { total: 60 } });
   assert.equal(locked.refund.reason, 'invoice_locked');
@@ -277,4 +283,14 @@ test('migraatio booking_278: vain lukufunktiot, SECURITY DEFINER, search_path, o
   assert.match(rb, /drop function if exists booking\.admin_order_history\(bigint, integer\)/i);
   assert.match(rb, /drop function if exists booking\.admin_order_lookup\(bigint\)/i);
   assert.ok(existsSync(join(root, 'booking/supabase/tests/t278_admin_order_customer_read.sql')));
+});
+
+test('peruutus: koko tilauksen ei-atominen keskeytys jää näkyviin dialogiin; hyvitysvalinta vain hyvitettävistä maksuista; poistopaikka ilman poistomoduulia', () => {
+  const flow = read('booking/admin/views/order-cancel-flow.js');
+  assert.match(flow, /order_cancel\.partial_fail[\s\S]{0,200}err\.hidden = false[\s\S]{0,120}submit\.hidden = true/, 'keskeytys näkyy dialogissa ja uusi yritys estetään');
+  const view = read('booking/admin/views/order-view.js');
+  assert.match(view, /paymentBox\(m, \{ can: ctx\.can \}\)\.refundable/, 'Hyvitä maksu -dialogi saa vain refundable_by_payment-maksut');
+  assert.match(view, /'data-slot': 'order-delete'/);
+  assert.doesNotMatch(view, /import[^;]*order-card-delete|['"]admin_order_delete/, 'PR 1 ei riipu poistomoduulista eikä poisto-RPC:stä');
+  assert.doesNotMatch(view, /Verkkokauppa|Paikan päällä/, 'kanavan nimet talous-texts.js:stä');
 });

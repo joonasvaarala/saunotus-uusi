@@ -117,7 +117,12 @@ export async function openCancelFlow({ model: m, reservationId = null, ctx, rpc,
         let n = 0;
         for (const r of plan.targets) {
           try { await rpc('admin_cancel_reservation', { p_reservation_id: r.id, p_reason: 'henkilökunta', p_refund: false, p_refund_reason: null }); n += 1; }
-          catch (e) { toast(ov('order_cancel.partial_fail', { done: n, total: plan.targets.length, error: friendly(e) }), 'err'); d.close(); onDone?.(); return; }
+          catch (e) {
+            // Ei atominen (PR 1): tulos jää näkyviin dialogiin (ei vain ohimenevä ilmoitus), uusi yritys estetään ja näkymä päivitetään.
+            const msg = ov('order_cancel.partial_fail', { done: n, total: plan.targets.length, error: friendly(e) });
+            err.textContent = msg; err.hidden = false; err.dataset.testid = 'ov-cx-partial';
+            submit.hidden = true; back.textContent = ov('order_cancel.close'); toast(msg, 'err'); onDone?.(); return;
+          }
         }
         toast(ov('order_cancel.done'));
       }

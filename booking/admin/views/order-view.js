@@ -6,7 +6,7 @@
 import { rpc as sbRpc, fn as sbFn, select as dbSelect, functionUrl, fnBlob } from '../sb.js';
 import { h, dialog, toast, run, errMsg, field } from '../ui.js';
 import { icon } from '../icons.js';
-import { fmt, getLang } from '../talous-i18n.js';
+import { fmt, getLang, t as tt, has as hasText } from '../talous-i18n.js';
 import { createTalousApi, normOrder, absLink } from '../talous-api.js';
 import { telHref, mailHref, createLatestGate, moveTarget } from '../reservation-dialog-logic.js';
 import { orderBreakdown, vatRateLabel } from '../order-card-logic.js';
@@ -48,11 +48,8 @@ export function badgeNodes(badges) {
     text: ov(`order_view.${b.key}`, b.vars ? { ...b.vars, amount: b.vars.amount != null ? money(b.vars.amount) : undefined } : undefined) }));
 }
 
-const channelText = (m) => {
-  const map = { web: 'Verkkokauppa', admin: 'Hallinta', phone: 'Puhelin', email: 'Sähköposti', walk_in: 'Paikan päällä', johku_import: 'Johku', pikakassa: 'Pikakassa', kylmalaite: 'Kylmälaite', other: 'Muu' };
-  const en = { web: 'Web shop', admin: 'Admin', phone: 'Phone', email: 'Email', walk_in: 'Walk-in', johku_import: 'Johku', pikakassa: 'Quick till', kylmalaite: 'Fridge', other: 'Other' };
-  return (getLang() === 'en' ? en : map)[m.source_channel] || m.source_channel || '';
-};
+// Kanavan nimi samoista teksteistä kuin tilauslistassa (talous-texts.js src.*), ei omaa kopiota.
+const channelText = (m) => (m.source_channel && hasText(`src.${m.source_channel}`) ? tt(`src.${m.source_channel}`) : (m.source_channel || ''));
 export { channelText };
 
 const customerTitle = (m) => (m.customer_kind === 'company' || m.customer?.customer_kind === 'company') && m.customer?.company ? m.customer.company : (m.customer?.name || '–');
@@ -72,7 +69,9 @@ export function createActionRunner(env) {
     openBilling(m) { location.hash = m.invoice?.id ? invoiceHref(m.invoice.id) : '#/laskut'; },
     refund(m) {
       const o = order(m);
-      const refundable = (o.payments || []).filter((p) => ['paid', 'partially_refunded'].includes(p.status) && p.amount > (p.refunded_amount || 0));
+      // Vain hyvitettävissä olevat maksut (booking_278 refundable_by_payment: ei lahjakortti-, kumppani-, vuosikortti- eikä laskumaksuja).
+      const ok = new Set(paymentBox(m, { can: ctx.can }).refundable.map((x) => String(x.payment_id)));
+      const refundable = (o.payments || []).filter((p) => ok.has(String(p.id)) && ['paid', 'partially_refunded'].includes(p.status) && p.amount > (p.refunded_amount || 0));
       if (env.dialogs?.refund && refundable.length) env.dialogs.refund(o, refundable);
     },
     addPurchase(m, a = {}) {

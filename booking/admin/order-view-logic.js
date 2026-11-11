@@ -88,7 +88,6 @@ export function orderProblems(m) {
 /** Maksun tila yhdellä sanalla merkkiä varten. */
 export function paymentState(m) {
   if (!m) return 'unknown';
-  if (m.overpaid > EPS && !['cancelled'].includes(m.status)) return 'overpaid';
   if (m.overpaid > EPS) return 'overpaid';
   if (m.open > EPS) {
     if (m.locked) return 'invoiced';
@@ -344,7 +343,11 @@ export function cancelPlan(m, { reservationId = null, scope = null, can = can0, 
       : { show: false, reason: preview ? 'nothing' : 'preview_missing', options: [], amount: 0 };
   } else if (chosen === 'all') {
     const list = box?.refundable || [];
-    if (list.length === 1) refund = { show: true, reason: null, options: ['full', 'none'], amount: round2(num(list[0].refundable)), payment_id: list[0].payment_id, provider: list[0].provider };
+    // admin_refund_order hyvittää maksun koko jäljellä olevan summan: ei tarjota, jos osa tilauksesta on jo käytetty
+    // (saapunut, toteutunut tai ei saapunut), ettei käytetyn varauksen osuutta hyvitetä vahingossa.
+    const used = (m?.reservations || []).some((r) => ['completed', 'no_show'].includes(r.status) || (r.checkin_at && r.status !== 'cancelled'));
+    if (used && list.length) refund = { show: false, reason: 'partly_used', options: [], amount: 0 };
+    else if (list.length === 1) refund = { show: true, reason: null, options: ['full', 'none'], amount: round2(num(list[0].refundable)), payment_id: list[0].payment_id, provider: list[0].provider };
     else if (list.length > 1) refund = { show: false, reason: 'multi_payment', options: [], amount: 0 };
     else refund = { show: false, reason: 'nothing', options: [], amount: 0 };
   }

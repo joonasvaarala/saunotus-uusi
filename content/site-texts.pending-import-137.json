@@ -4280,9 +4280,29 @@
   "reason": "Tilausnäkymä v3 PR 1 (booking_278): tilauksen yhteenveto, koko tilausnäkymä, peruutusdialogi ja asiakasnäkymä (booking/admin/order-view-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
  },
  {
+  "key": "ui.admin.order_cancel.refund_hidden.partly_used",
+  "lang": "fi",
+  "text": "Osa tilauksesta on jo käytetty. Koko tilaus perutaan ilman hyvitystä; hyvitä sen jälkeen Hyvitä maksu -toiminnolla.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 170,
+  "placeholders": [],
+  "reason": "Tilausnäkymä v3 PR 1 (booking_278): tilauksen yhteenveto, koko tilausnäkymä, peruutusdialogi ja asiakasnäkymä (booking/admin/order-view-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
   "key": "ui.admin.order_cancel.refund_hidden.multi_payment",
   "lang": "en",
   "text": "The order has several payments. The cancellation is made without a refund; then refund with Refund payment.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 170,
+  "placeholders": [],
+  "reason": "Tilausnäkymä v3 PR 1 (booking_278): tilauksen yhteenveto, koko tilausnäkymä, peruutusdialogi ja asiakasnäkymä (booking/admin/order-view-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.order_cancel.refund_hidden.partly_used",
+  "lang": "en",
+  "text": "Part of the order has already been used. The whole order is cancelled without a refund; then refund with Refund payment.",
   "class": "normal",
   "kind": "plain",
   "max_len": 170,
@@ -4484,9 +4504,29 @@
   "reason": "Tilausnäkymä v3 PR 1 (booking_278): tilauksen yhteenveto, koko tilausnäkymä, peruutusdialogi ja asiakasnäkymä (booking/admin/order-view-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
  },
  {
+  "key": "ui.admin.order_cancel.close",
+  "lang": "fi",
+  "text": "Sulje",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Tilausnäkymä v3 PR 1 (booking_278): tilauksen yhteenveto, koko tilausnäkymä, peruutusdialogi ja asiakasnäkymä (booking/admin/order-view-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
   "key": "ui.admin.order_cancel.back",
   "lang": "en",
   "text": "Back",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Tilausnäkymä v3 PR 1 (booking_278): tilauksen yhteenveto, koko tilausnäkymä, peruutusdialogi ja asiakasnäkymä (booking/admin/order-view-texts.js); sama kuin koodin oletus, ei vielä tuotannossa"
+ },
+ {
+  "key": "ui.admin.order_cancel.close",
+  "lang": "en",
+  "text": "Close",
   "class": "normal",
   "kind": "plain",
   "max_len": 80,
@@ -4628,10 +4668,10 @@
  {
   "key": "ui.admin.order_cancel.partial_fail",
   "lang": "fi",
-  "text": "Peruttiin {{var:done}}/{{var:total}} varausta. Virhe: {{var:error}}",
+  "text": "Peruutus keskeytyi: {{var:done}}/{{var:total}} varausta peruttiin. Loput ovat yhä voimassa. Virhe: {{var:error}}",
   "class": "normal",
   "kind": "plain",
-  "max_len": 110,
+  "max_len": 200,
   "placeholders": [
    "{{var:done}}",
    "{{var:total}}",
@@ -4642,10 +4682,10 @@
  {
   "key": "ui.admin.order_cancel.partial_fail",
   "lang": "en",
-  "text": "Cancelled {{var:done}}/{{var:total}} bookings. Error: {{var:error}}",
+  "text": "The cancellation stopped: {{var:done}}/{{var:total}} bookings were cancelled. The rest are still valid. Error: {{var:error}}",
   "class": "normal",
   "kind": "plain",
-  "max_len": 110,
+  "max_len": 200,
   "placeholders": [
    "{{var:done}}",
    "{{var:total}}",
