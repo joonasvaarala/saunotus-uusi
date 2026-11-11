@@ -294,3 +294,40 @@ test('peruutus: koko tilauksen ei-atominen keskeytys jää näkyviin dialogiin; 
   assert.doesNotMatch(view, /import[^;]*order-card-delete|['"]admin_order_delete/, 'PR 1 ei riipu poistomoduulista eikä poisto-RPC:stä');
   assert.doesNotMatch(view, /Verkkokauppa|Paikan päällä/, 'kanavan nimet talous-texts.js:stä');
 });
+
+test('placeOverflowMenu: otsikon valikko pysyy ruudulla mobiilissa, työpöydän oikeasuuntaus ennallaan', () => {
+  const menu = { width: 220, height: 220 };
+  const desk = L.placeOverflowMenu({ left: 1212, right: 1252, top: 116, bottom: 154 }, menu, { width: 1280, height: 900 }, { prefer: 'end' });
+  assert.equal(desk.left, 1032, 'työpöytä: oikeareuna nappiin (1252-220)');
+  assert.equal(desk.top, 158);
+  assert.equal(desk.maxWidth, 1264);
+
+  const phone = L.placeOverflowMenu({ left: 58, right: 98, top: 183.5, bottom: 221 }, menu, { width: 465, height: 1000 }, { prefer: 'end' });
+  assert.equal(phone.left, 58, 'mobiili: ei tilaa vasemmalla → vasen reuna nappiin');
+  assert.equal(phone.top, 225);
+  assert.ok(phone.left + phone.width <= 465 - 8, 'oikea reuna ruudun sisällä');
+  assert.ok(phone.left >= 8, 'vasen reuna ruudun sisällä');
+  assert.equal(phone.maxWidth, 449);
+
+  const tight = L.placeOverflowMenu({ left: 10, right: 50, top: 80, bottom: 120 }, { width: 400, height: 200 }, { width: 360, height: 640 }, { prefer: 'end' });
+  assert.equal(tight.width, 344, 'max-width = 100vw - 16');
+  assert.equal(tight.left, 8, 'rajataan 8 px marginaaliin');
+  assert.equal(tight.left + tight.width, 352);
+
+  const up = L.placeOverflowMenu({ left: 58, right: 98, top: 700, bottom: 740 }, menu, { width: 390, height: 844 }, { prefer: 'end' });
+  assert.equal(up.top, 700 - 4 - 220, 'ei tilaa alhaalla → avautuu ylöspäin');
+
+  const row = L.placeOverflowMenu({ left: 70, right: 110, top: 400, bottom: 438 }, menu, { width: 465, height: 1000 }, { prefer: 'start' });
+  assert.equal(row.left, 70, 'rivivalikko: vasen reuna nappiin kun mahtuu oikealle');
+});
+
+test('overflowMenu kiinnittää listan ruutuun ja css rajaa leveyden sekä pinon sivupalkin yläpuolelle', () => {
+  const view = read('booking/admin/views/order-view.js');
+  assert.match(view, /placeOverflowMenu\(/);
+  assert.match(view, /list\.style\.position = 'fixed'/);
+  assert.match(view, /prefer: 'start'/);
+  const css = read('booking/admin/admin.css');
+  const v3 = css.slice(css.indexOf('/* ---- Tilausnäkymä v3 (PR 1)'));
+  assert.match(v3, /max-width:\s*calc\(100vw - 16px\)/);
+  assert.match(v3, /\.ov-menu-list\{[^}]*z-index:60/);
+});

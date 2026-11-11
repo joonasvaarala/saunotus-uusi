@@ -458,3 +458,32 @@ export function customerOrderBadges(o) {
   if (o.upcoming && o.status === 'confirmed') out.unshift({ kind: 'st-confirmed', key: 'status.confirmed' });
   return out;
 }
+
+/**
+ * ⋯-valikon paikka ruudulla. prefer 'end' = oikeareuna nappiin (otsikon valikko),
+ * 'start' = vasen reuna nappiin (varausrivin valikko). Jos suosittu reuna ei mahdu,
+ * kokeillaan toista; lopuksi rajataan 8 px marginaalilla viewportin sisään.
+ */
+export function placeOverflowMenu(anchor, menuSize, viewport, { margin = 8, gap = 4, prefer = 'end' } = {}) {
+  const vw = Number(viewport?.width) || 0;
+  const vh = Number(viewport?.height) || 0;
+  const maxWidth = Math.max(0, vw - margin * 2);
+  const width = Math.min(Math.max(0, Number(menuSize?.width) || 0), maxWidth);
+  const height = Math.max(0, Number(menuSize?.height) || 0);
+  const startLeft = Number(anchor?.left) || 0;
+  const endLeft = (Number(anchor?.right) || 0) - width;
+  const fits = (left) => left >= margin && left + width <= vw - margin;
+  let left = prefer === 'start'
+    ? (fits(startLeft) ? startLeft : (fits(endLeft) ? endLeft : startLeft))
+    : (fits(endLeft) ? endLeft : (fits(startLeft) ? startLeft : endLeft));
+  left = Math.max(margin, Math.min(left, vw - width - margin));
+  if (!Number.isFinite(left)) left = margin;
+  let top = (Number(anchor?.bottom) || 0) + gap;
+  if (top + height > vh - margin) {
+    const up = (Number(anchor?.top) || 0) - gap - height;
+    if (up >= margin) top = up;
+    else top = Math.max(margin, Math.min(top, vh - height - margin));
+  }
+  if (!Number.isFinite(top)) top = margin;
+  return { left, top, width, maxWidth };
+}
