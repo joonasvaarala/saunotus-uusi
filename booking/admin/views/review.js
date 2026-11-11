@@ -9,7 +9,7 @@ import { loadReviewTexts, reviewText as rt } from '../review-texts.js';
 import { unredeemedSection } from './voucher-redeem.js';
 import {
   canAckBlockConflict, conflictReason, nextAckStep, nextUnackStep, ackArgs, unackArgs,
-  reviewAttentionCount, reviewAttentionSections, attentionKeysEmpty, ATTENTION_LABELS_FI,
+  reviewAttentionCount, reviewAttentionSections, attentionKeysEmpty, ATTENTION_LABELS_FI, latePaymentAckNoteOk, latePaymentAckArgs,
 } from '../review-logic.js';
 
 const day = (iso) => new Date(iso).toLocaleDateString('sv-SE', { timeZone: 'Europe/Helsinki' });
@@ -94,7 +94,30 @@ export async function render({ ctx, refs, reload }) {
     return h('div', { class: 'review-ack' }, confirm, h('div', { class: 'row wrap' }, btn, cancel));
   };
   const ackedMeta = (x) => h('small', { text: rt('ui.admin.review.acked_meta', { by: x.acked_by_label ? ` (${x.acked_by_label})` : '', reason: x.ack_reason || '' }) });
+  const lateAckForm = (x) => {
+    if (!ctx?.can?.('payments.manage')) return null;
+    const note = h('textarea', { maxlength: '1000', 'data-testid': 'late-payment-note', 'aria-label': rt('ui.admin.review.late_note_label'), placeholder: rt('ui.admin.review.late_note_placeholder', { min: 3, max: 1000 }) });
+    const error = h('p', { class: 'err', role: 'alert', hidden: true });
+    const confirm = h('p', { hidden: true, text: rt('ui.admin.review.late_confirm') });
+    const btn = h('button', { type: 'button', class: 'btn', 'data-testid': 'late-payment-ack', text: rt('ui.admin.review.late_button') });
+    let ready = false;
+    note.addEventListener('input', () => { ready = false; confirm.hidden = true; error.hidden = true; btn.textContent = rt('ui.admin.review.late_button'); });
+    btn.addEventListener('click', () => {
+      if (!latePaymentAckNoteOk(note.value)) { error.textContent = rt('ui.admin.review.late_note_required', { min: 3, max: 1000 }); error.hidden = false; return; }
+      if (!ready) { ready = true; confirm.hidden = false; btn.textContent = rt('ui.admin.review.late_confirm_button'); return; }
+      run(btn, async () => {
+        await rpc('admin_ack_archived_late_payment', latePaymentAckArgs(x, note.value));
+        toast(rt('ui.admin.review.late_done'));
+        reload();
+      });
+    });
+    return h('div', { class: 'review-ack' }, note, error, confirm, btn);
+  };
   const SECTIONS = [
+    ['archived_late_payments', rt('ui.admin.review.late_title'),
+      rt('ui.admin.review.late_hint'),
+      (x) => [h('a', { class: 'rv-link', href: `#/talous?tab=orders&order=${x.order_no}`, text: rt('ui.admin.review.late_order', { no: x.order_no }) }),
+        ` · maksu #${x.payment_id} · ${Number(x.amount).toFixed(2)} € · ${x.customer_name || ''} · ${when(x.paid_at)}`], { extra: lateAckForm }],
     ['missing_therapist', ATTENTION_LABELS_FI.missing_therapist, 'Varaus on tehty, mutta työvuoroissa ei ole vapaata saunottajaa. Lisää saunottaja työvuoroon tai myönnä poikkeus perustelulla.',
       (x) => [link(x.reservation_id, x.starts_at), ` · ${x.product_name || ''}${x.persons ? ` · ${x.persons} hlö` : ''}${x.order_no ? ` · tilaus #${x.order_no}` : ''}`, sourceBadge(x) ? [' ', sourceBadge(x)] : null,
         x.days_to_start != null ? [' ', badge(x.days_to_start <= 2 ? 'warn' : 'muted', days(x.days_to_start))] : null, ' ',

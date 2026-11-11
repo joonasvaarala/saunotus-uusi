@@ -17,6 +17,7 @@ export const RPC = {
   reportDaily: 'admin_report_daily', reportMonthly: 'admin_report_month', reportRange: 'admin_report_range', reportTransactions: 'admin_report_transactions', reportGiftCards: 'admin_report_gift_cards', reportCsv: 'admin_report_csv', reportAccrual: 'admin_report_accrual', reportAccrualCsv: 'admin_report_accrual_csv', reportInvoices: 'admin_report_invoices', reportProviderFees: 'admin_report_provider_fees', salesChart: 'admin_sales_chart',
   getReceipt: 'admin_get_receipt', resendReceipt: 'admin_resend_receipt',
   annualCardForOrder: 'admin_annual_card_for_order',   // booking_146: tilauksen vuosikortti + koodin sähköpostin tila
+  orderDeleteCheck: 'admin_order_delete_check', deleteUnpaidOrder: 'admin_delete_unpaid_order',   // booking_264: maksamattoman tilauksen poisto (arkistointi)
 };
 export class FeatureNotReady extends Error {
   constructor(rpc) { super(`Ominaisuus ei vielä käytössä (${rpc})`); this.name = 'FeatureNotReady'; this.code = 'feature_not_ready'; this.rpc = rpc; }
@@ -45,6 +46,7 @@ export function normOrderRow(r) {
     source_channel: r.source_channel ?? '', is_native: r.is_native !== false, total_gross: total, paid_amount: paid, refunded_amount: num(r.refunded ?? r.refunded_amount),
     unpaid_amount: r.unpaid != null || r.unpaid_amount != null ? num(r.unpaid ?? r.unpaid_amount) : round2(Math.max(0, total - paid)),
     customer_name: r.customer_name ?? '', customer_company: r.customer_company ?? null, customer_kind: r.customer_kind ?? null,
+    archived_at: r.archived_at ?? null, archived_late_paid: r.archived_late_paid === true,
     first_reservation_at: r.first_start ?? r.first_reservation_at ?? null, last_end: r.last_end ?? null, reservation_count: num(r.reservation_count), payment_count: num(r.payment_count), receipt_count: num(r.receipt_count), last_paid_at: r.last_paid_at ?? null,
     invoice_id: r.invoice_id ?? null, invoice_no: r.invoice_no ?? null, invoice_status: r.invoice_status ?? null, invoice_kind: r.invoice_kind ?? null };
 }
@@ -249,6 +251,8 @@ export function rpcBackend(rpc) {
     getReceipt: (id) => call('getReceipt', { p_receipt_id: id }),
     resendReceipt: (id) => call('resendReceipt', { p_receipt_id: id }),
     annualCardForOrder: (id) => call('annualCardForOrder', { p_order_id: id }),
+    orderDeleteCheck: (id) => call('orderDeleteCheck', { p_order_id: id }),
+    deleteUnpaidOrder: (a) => call('deleteUnpaidOrder', compact({ p_order_id: a.orderId, p_reason: a.reason })),
   };
 }
 
@@ -447,6 +451,19 @@ export function createTalousApi({ rpc, io = {}, mock = wantsMock(), mockFactory 
     addToOrder: (a) => act('addToOrder', a), createPaymentLink: (a) => act('createPaymentLink', a), refund: (a) => act('refund', a), refundOrder: (a) => act('refundOrder', a), recordPayment: (a) => act('recordPayment', a),
     reservationRefundPreview: (id) => act('reservationRefundPreview', id), cancelReservation: (a) => act('cancelReservation', a),
     // booking_146: tilauksen vuosikortti (koodi, voimassaolo, sähköpostin tila). Oikeassa tilassa EI mock-varaa: puuttuva RPC → null (näkymä ei näytä mitään keksittyä koodia).
+    // booking_264: poiston esitarkistus. Oikeassa tilassa EI mock-varaa: puuttuva RPC tai virhe → null (näkymä ei näytä Poista-nappia).
+    orderDeleteCheck: async (id) => {
+      if (!real) return getMock().orderDeleteCheck(id);
+      if (missing.has('orderDeleteCheck')) return null;
+      try { return await real.orderDeleteCheck(id); } catch (e) { if (isMissingRpc(e)) missing.add('orderDeleteCheck'); return null; }
+    },
+    // Poisto: vain oikealle palvelimelle (act). Esto palautuu RpcError-virheenä (details.blockers).
+    deleteUnpaidOrder: (a) => act('deleteUnpaidOrder', a),
+    // Avatun Montonio-maksun tila suoraan Montoniolta (julkinen montonio-notify reconcile, sama kuin tilaussivun tarkistus). Ei heitä.
+    async montonioVerify(orderToken) {
+      if (!real || !io.fn) return { ok: true, mock: true, payment_status: null, results: [] };
+      try { return await io.fn('montonio-notify', { action: 'reconcile', order_token: orderToken }); } catch (e) { return { ok: false, code: e?.code || 'error' }; }
+    },
     annualCardForOrder: async (id) => {
       if (!real) return getMock().annualCardForOrder(id);
       if (missing.has('annualCardForOrder')) return null;

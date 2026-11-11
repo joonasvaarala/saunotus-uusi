@@ -33,6 +33,8 @@ import { annualCardPanel, showAnnualCardDialog } from './annual-card-panel.js';
 import { acText } from '../annual-card-texts.js';
 import { methodLabel, pstatBadge, johkuBadge } from './talous-ui.js';
 import { orderInvoiceCaption } from '../order-invoice-label.js';
+import { orderDeleteBlock } from './order-card-delete.js';
+import { loadDeleteTexts } from '../order-delete-texts.js';
 
 let flowPromise;
 function orderFlowEnabled() {
@@ -126,7 +128,9 @@ export function openOrderCard({
     h('summary', { text: tx('ui.admin.res.move_title') }));
   const moveBody = h('div', { class: 'moverow' }); move.append(moveBody);
   const footer = h('div', { class: 'oc-footer', 'data-testid': 'res-danger', hidden: true });
-  body.append(hero, alerts, primary, sections, secondary, more, move, footer);
+  // booking_264: maksamattoman tilauksen poisto – viimeisenä, erillään muista toiminnoista (palvelin päättää näkyvyyden)
+  const delBox = h('div', { class: 'oc-delete-wrap', 'data-testid': 'order-delete-wrap', hidden: true });
+  body.append(hero, alerts, primary, sections, secondary, more, move, footer, delBox);
 
   const optBox = h('div', { class: 'opt-box', 'data-testid': 'option-box', hidden: true });
   const addonsBox = h('div', { class: 'addons-box oc-addon-tools' });
@@ -509,7 +513,7 @@ export function openOrderCard({
     const dangerBtns = (options.danger || []).map((key) => actions[key]?.()).filter(Boolean);
     footer.replaceChildren(...dangerBtns);
     footer.hidden = !dangerBtns.length;
-    if (options.move?.show) { move.hidden = false; if (!move.isConnected) body.append(move); }
+    if (options.move?.show) { move.hidden = false; if (!move.isConnected) body.insertBefore(move, footer); }
     if (!options.move?.show && move.isConnected) move.remove();
     moveBody.replaceChildren();
     if (options.move?.show) {
@@ -547,6 +551,18 @@ export function openOrderCard({
     }).catch(() => {});
   }
 
+  // booking_264: poiston esitarkistus palvelimelta (admin_order_delete_check). Puuttuva RPC / virhe → ei osiota.
+  async function drawDelete(token) {
+    const id = order?.order_id || orderId || r?.order_id;
+    if (!id || !api.orderDeleteCheck) { delBox.replaceChildren(); delBox.hidden = true; return; }
+    let check = null;
+    try { [check] = await Promise.all([api.orderDeleteCheck(Number(id) || id), loadDeleteTexts(rpc)]); } catch { check = null; }
+    if (!alive || (token != null && !orderGate.isCurrent(token))) return;
+    const node = orderDeleteBlock({ api, order, check, onDeleted: () => after(), onRecheck: () => fetchOrder() });
+    delBox.replaceChildren(...list(node));
+    delBox.hidden = !node;
+  }
+
   async function fetchOrder() {
     const id = orderId || r?.order_id;
     if (!id) { renderActions(); return; }
@@ -576,6 +592,7 @@ export function openOrderCard({
         };
       }
       drawOrder(token);
+      drawDelete(token);
       if (r?.reservation_id && r.space_code == null) {
         rpc('admin_list_reservations', { p_reservation_id: Number(r.reservation_id), p_limit: 1, p_offset: 0 }).then((data) => {
           if (!alive || !orderGate.isCurrent(token)) return;

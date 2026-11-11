@@ -1072,6 +1072,13 @@ body.shot #shell .nav .lbl{display:inline}
 .oc-log .t{color:var(--muted);font-size:13px}
 .oc-footer{display:flex;justify-content:center;padding-top:2px}
 .oc-footer .linkish,.oc-footer button.linkish{background:none;border:0;padding:8px 0;min-height:44px;font:600 14px/1.2 inherit;color:var(--gold);cursor:pointer;text-decoration:underline;text-underline-offset:3px;text-align:center}
+/* booking_264: maksamattoman tilauksen poisto korttiin – toissijainen, punainen reunus, oma alue kortin lopussa */
+.oc-delete-wrap{border-top:1px solid var(--line);padding-top:12px;margin-top:4px}
+.oc-delete{display:grid;gap:6px;justify-items:start}
+.oc-delete .btn.danger{min-height:44px;background:transparent}
+.oc-delete-info h4{margin:0;font-size:15px}
+.oc-delete-info p{margin:0;font-size:14px}
+.oc-delete-note p{margin:0}
 .rd-dialog .oc-sec .rd-card,.rd-dialog .oc-sec .rd-more{border:0;padding:0;margin:0;background:none;border-radius:0}
 @media(max-width:43.6875em){
   .oc-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
@@ -1082,6 +1089,7 @@ body.shot #shell .nav .lbl{display:inline}
   .oc-sec>summary{min-height:48px;padding:8px 0;gap:8px}
   .oc-sec>summary .oc-sum{font-size:13px}
   .oc-hero{padding:12px}
+  .oc-delete .btn.danger{width:100%;justify-content:center}
 }
 
 /* booking_174: lahjakortin arvo käsin vahvistuksessa + erotuksen maksulinkki. Vain teeman muuttujat (vihreä, hiekka, kulta, tumma teksti), ei sinistä; kapealla näytöllä ei vaakavieritystä. */

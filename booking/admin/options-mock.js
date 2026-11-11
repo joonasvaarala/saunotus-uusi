@@ -101,7 +101,7 @@ function procountorStatus(cfg) {
 const PERMS = ['bookings.manage', 'bookings.override', 'customers.manage', 'catalog.edit', 'payments.manage', 'payments.refund', 'reports.view', 'settings.edit', 'pos.use', 'invoices.manage', 'giftcards.manage', 'messages.edit'];
 const CODE_RE = /^[a-z0-9_]{1,40}$/;
 
-export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, role = 'manager' } = {}) {
+export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, role = 'manager', latePaymentScenario = false } = {}) {
   const today = todayHel(now);
   const st = {
     calls: [], perms: [...perms],
@@ -654,6 +654,14 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
       if (o) Object.assign(o, v); else { o = { id: Math.max(0, ...st.options.map((x) => x.id)) + 1, product_id: a.p_product_id, code, ...v }; st.options.push(o); }
       return { ok: true, option: { ...o } };
     },
+    admin_ack_archived_late_payment: (a) => {
+      need('payments.manage');
+      const note = String(a.p_note || '').trim();
+      if (note.length < 3 || note.length > 1000) throw err('invalid_param', 'Kirjoita käsittelyselite');
+      if (!latePaymentScenario || a.p_payment_id !== 264001) throw err('not_found', 'Maksua ei löydy');
+      const already = !!st.latePaymentAcknowledged; st.latePaymentAcknowledged = true;
+      return { ok: true, already, mock: true, payment_id: a.p_payment_id };
+    },
     admin_review_list: () => {
       const ackedIds = new Set(st.blockAcks.map((a) => `${a.reservation_id}:${a.block_id}`));
       const open = st.blockConflicts.filter((b) => !ackedIds.has(`${b.reservation_id}:${b.block_id}`));
@@ -661,7 +669,7 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
         const a = st.blockAcks.find((x) => x.reservation_id === b.reservation_id && x.block_id === b.block_id);
         return { ...b, ack_id: a.id, ack_reason: a.ack_reason, acked_by_label: a.acked_by_label, acked_at: a.acked_at };
       });
-      return { missing_therapist: [], therapist_conflicts: [], block_conflicts: open, acked_block_conflicts: acked, overrides: [], orphan_addons: [] };
+      return { archived_late_payments: st.perms.includes('payments.manage') && latePaymentScenario && !st.latePaymentAcknowledged ? [{ payment_id: 264001, order_id: 1, order_no: 10001, amount: 20, customer_name: 'KOKEILU – ei oikea tilaus', paid_at: now.toISOString() }] : [], missing_therapist: [], therapist_conflicts: [], block_conflicts: open, acked_block_conflicts: acked, overrides: [], orphan_addons: [] };
     },
     admin_ack_block_conflict: (a) => {
       if (!st.perms.includes('blocks.manage') && !st.perms.includes('bookings.override')) throw err('forbidden', 'Ei oikeutta tähän toimintoon (blocks.manage tai bookings.override)');

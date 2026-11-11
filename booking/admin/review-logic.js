@@ -1,9 +1,10 @@
 // Tarkista-näkymän sulkukonfliktit: laskenta, syy, kuittauksen vaiheet. Ei DOM:ia.
 // Saatavuus ei muutu kuittauksesta: tämä moduuli ei koske sulkuihin eikä varauksiin.
 
-export const ATTENTION_KEYS = ['missing_therapist', 'therapist_conflicts', 'block_conflicts', 'overrides', 'orphan_addons'];
+export const ATTENTION_KEYS = ['missing_therapist', 'therapist_conflicts', 'block_conflicts', 'overrides', 'orphan_addons', 'archived_late_payments'];
 
 export const ATTENTION_LABELS_FI = {
+  archived_late_payments: 'Maksu poistetulle tilaukselle',
   missing_therapist: 'Ei saunottajaa',
   therapist_conflicts: 'Saunottajakonfliktit',
   block_conflicts: 'Sulku osuu varaukseen',
@@ -80,3 +81,10 @@ export function ackArgs(row, note, label) {
 export function unackArgs(row) {
   return { p_reservation_id: row?.reservation_id, p_block_id: row?.block_id };
 }
+
+// booking_264: acknowledgment never records/refunds money or sends a message.
+export const latePaymentAckNoteOk = (note) => {
+  const n = String(note ?? '').trim().length;
+  return n >= 3 && n <= 1000;
+};
+export const latePaymentAckArgs = (row, note) => ({ p_payment_id: row?.payment_id, p_note: String(note ?? '').trim() });

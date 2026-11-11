@@ -24,6 +24,8 @@ import { linkDeadlineControl } from './link-deadline.js';
 import { linkValidityText, linkSubmitOnce } from '../payment-link-logic.js';
 import { billingMethodText } from '../billing-method-texts.js';
 import { orderInvoiceCaption } from '../order-invoice-label.js';
+import { archivedBadge } from '../order-delete-logic.js';
+import { deleteText } from '../order-delete-texts.js';
 
 export const ORDER_SORTS = ['created', 'order_no', 'total', 'payment_status', 'first_reservation'];
 const VAT_CHOICES = [25.5, 13.5, 0];
@@ -84,7 +86,7 @@ export function createOrdersTab({ api, ctx, gift = null, rpc = null }) {
       h('span', { class: 'tl-c tl-date' }, h('small', { class: 'tl-lab', text: t('col.created') }), h('span', { text: fmt.dt(o.created_at) })),
       h('span', { class: 'tl-c tl-first' }, h('small', { class: 'tl-lab', text: t('col.first') }), h('span', { text: o.first_reservation_at ? fmt.date(o.first_reservation_at) : '–' })),
       h('span', { class: 'tl-c tl-sum' }, h('strong', { text: fmt.money(o.total_gross) })),
-      h('span', { class: 'tl-c tl-badges' }, payBadge(o.payment_status), sourceBadge(o.source_channel)),
+      h('span', { class: 'tl-c tl-badges' }, payBadge(o.payment_status), sourceBadge(o.source_channel), archivedRowBadge(o)),
     ];
     const btn = h('button', { type: 'button', class: 'tl-head', 'data-testid': 'order-head', onclick: () => openCard(o) }, head, h('span', { class: 'tl-chev', 'aria-hidden': 'true' }, icon('chev', 20)));
     const row = h('li', { class: isUnpaidRow(o) ? 'tl-row is-unpaid' : 'tl-row', 'data-testid': 'order' }, btn);
@@ -115,6 +117,13 @@ export function createOrdersTab({ api, ctx, gift = null, rpc = null }) {
       flow,
       onChange: () => afterChange(null, o.order_id),
     }));
+  }
+  // booking_264: poistettu (arkistoitu) maksamaton tilaus; myöhäinen maksu → varoitusmerkintä
+  function archivedRowBadge(o) {
+    const kind = archivedBadge(o);
+    if (!kind) return null;
+    return h('span', { class: `badge ${kind === 'late_paid' ? 'st-cancelled' : 'st-pending'}`, 'data-testid': 'order-archived-badge', 'data-kind': kind,
+      text: kind === 'late_paid' ? deleteText('archived_late_paid') : deleteText('archived', { date: fmt.date(o.archived_at) }) });
   }
   // Keskeneräiset / epäonnistuneet hyvitykset (requested, processing, failed) maksun alla; MobilePay-hyvityksen voi käsitellä uudelleen (§14.4: retry_later → kutsu uudelleen, Idempotency-Key estää tuplahyvityksen)
   function openRefunds(o, p) {
@@ -169,6 +178,8 @@ export function createOrdersTab({ api, ctx, gift = null, rpc = null }) {
       orderContentsSection(o, sec), actions, sec(t('order.payments'), payments), vbox,
       !o.is_native && !o.receipts.length ? null : receipts);   // Johku-tilaukselle ei synny kuittia (booking_41)
   }
+
+  // booking_264: maksamattoman tilauksen poisto on yhteisessä kortissa (views/order-card-delete.js).
 
   // ---- dialogit ----
   const fld = (label, ...kids) => h('label', { class: 'fld' }, h('span', { text: label }), ...kids);

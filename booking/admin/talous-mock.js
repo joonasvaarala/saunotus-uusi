@@ -162,7 +162,7 @@ export function createMock({ n = 12000, seed = 20261017, today = new Date().toLo
   const dayOf = (s) => String(s).slice(0, 10);
   const fail = (code, message, status = 400) => Object.assign(new Error(message), { name: 'ApiError', code, status });
   const clamp = (v, d, lo, hi) => Math.min(hi, Math.max(lo, Number.isFinite(+v) && v != null ? Math.trunc(+v) : d));
-  const orderStatus = (o) => (o.payment_status === 'refunded' ? 'cancelled' : ['pending', 'failed'].includes(o.payment_status) ? 'pending' : 'confirmed');
+  const orderStatus = (o) => (o.status ? o.status : o.payment_status === 'refunded' ? 'cancelled' : ['pending', 'failed'].includes(o.payment_status) ? 'pending' : 'confirmed');
   const nullLast = (get, dir) => (a, b) => { const x = get(a), y = get(b); if (x == null || x === '') return y == null || y === '' ? 0 : 1; if (y == null || y === '') return -1; return dir * cmp(x, y); };
 
   // ---- admin_list_orders(..., p_payment_filter oletus 'paid') → {total, rows[]} ----
@@ -172,15 +172,16 @@ export function createMock({ n = 12000, seed = 20261017, today = new Date().toLo
     if (!m || (m[1] === 'unpaid' && m[2] === 'asc')) throw fail('invalid_sort', `Virheellinen lajittelu: ${sort}`);
     let rows = orders;
     const q = String(a.p_search || '').trim().toLowerCase();
+    const exactNumber = !!q && /^\d+$/.test(q.replace(/^#/, ''));
     if (q) { const num = q.replace(/^#/, ''); rows = /^\d+$/.test(num) ? rows.filter((o) => String(o.order_no) === num || String(o.johku_order_no) === num) : rows.filter((o) => o.customer_name.toLowerCase().includes(q) || o.email.includes(q) || (o.company || '').toLowerCase().includes(q)); }
     if (a.p_status) rows = rows.filter((o) => orderStatus(o) === a.p_status);
     if (a.p_payment_status) rows = rows.filter((o) => o.payment_status === a.p_payment_status);
     const pf = normalizePaymentFilter(a.p_payment_filter);
-    if (!PAYMENT_FILTERS.includes(pf)) throw fail('invalid_param', 'p_payment_filter: paid|unpaid|all|refunded|cancelled|invoiced');
-    // booking_277: ei-tyhjä p_payment_filters ohittaa p_payment_filter-arvon (OR, ei tuplia)
+    if (!PAYMENT_FILTERS.includes(pf)) throw fail('invalid_param', 'p_payment_filter: paid|unpaid|all|refunded|cancelled|invoiced|archived');
+    // booking_277: ei-tyhjä p_payment_filters ohittaa p_payment_filter-arvon (OR, ei tuplia). booking_264: 'archived' sallittu myös monivalinnassa.
     const pfs = Array.isArray(a.p_payment_filters) && a.p_payment_filters.length ? a.p_payment_filters.map((x) => String(x ?? '').trim()) : null;
-    if (pfs && pfs.some((x) => !PAYMENT_FILTERS.includes(x))) throw fail('invalid_param', 'p_payment_filters: paid|unpaid|all|refunded|cancelled|invoiced');
-    rows = rows.filter((o) => (pfs ? pfs.some((f) => matchesPaymentFilter(o, f)) : matchesPaymentFilter(o, pf)));
+    if (pfs && pfs.some((x) => !PAYMENT_FILTERS.includes(x))) throw fail('invalid_param', 'p_payment_filters: paid|unpaid|all|refunded|cancelled|invoiced|archived');
+    rows = rows.filter((o) => { const oo = { ...o, status: orderStatus(o) }; return pfs ? pfs.some((f) => matchesPaymentFilter(oo, f, { exactNumber })) : matchesPaymentFilter(oo, pf, { exactNumber }); });
     if (a.p_source) rows = rows.filter((o) => o.source_channel === a.p_source);
     if (a.p_native != null) rows = rows.filter((o) => o.is_native === !!a.p_native);
     const dateOf = a.p_date_field === 'start' ? (o) => (o.first_reservation_at ? dayOf(o.first_reservation_at) : null) : (o) => o.created_date;
@@ -194,7 +195,8 @@ export function createMock({ n = 12000, seed = 20261017, today = new Date().toLo
       is_native: o.is_native, total: o.total_gross, paid: o.paid_amount, refunded: o.refunded_amount, unpaid: o.unpaid_amount, customer_id: o.order_id % 5000, customer_name: o.customer_name,
       customer_company: o.company, customer_kind: o.company ? 'company' : 'private', first_start: o.first_reservation_at, last_end: o.reservations.length ? o.reservations[o.reservations.length - 1].ends_at : null,
       reservation_count: o.reservations.length, payment_count: o.payments.length, last_paid_at: o.payments.filter((p) => p.paid_at).map((p) => p.paid_at).sort().pop() || null, receipt_count: o.receipts.length,
-      invoice_id: o.invoice_id ?? null, invoice_no: o.invoice_no ?? null, invoice_status: o.invoice_status ?? null, invoice_kind: o.invoice_kind ?? null })) };
+      invoice_id: o.invoice_id ?? null, invoice_no: o.invoice_no ?? null, invoice_status: o.invoice_status ?? null, invoice_kind: o.invoice_kind ?? null,
+      archived_at: o.archived_at || null, archived_late_paid: !!o.archived_at && o.payments.some((p) => SETTLED_PAY.includes(p.status)) })) };
   }
 
   // ---- admin_get_order(p_order_id) ----
@@ -636,7 +638,44 @@ const PREPAID_ON = '2026-10-15';
     if (a.p_format === 'csv') return { filename: `palkkiot_${a.p_from}_${a.p_to}.csv`, mime: 'text/csv;charset=utf-8', content: feesToCsv(sample) };
     return sample;
   }
-  const HANDLERS = { admin_analytics_summary: (a) => analyticsMock(a.p_from || today, a.p_to || today), admin_list_orders: adminListOrders, admin_get_order: adminGetOrder, admin_list_payments: adminListPayments, admin_list_addons: () => ADDON_LIST, admin_add_to_order: adminAddToOrder, admin_create_payment_link: adminCreatePaymentLink,
+  // ---- booking_264: maksamattoman tilauksen poisto (arkistointi). Mock tarkistaa vain osan palvelimen esteistä; palvelin päättää aina. ----
+  const SETTLED_PAY = ['paid', 'partially_refunded', 'refunded'];
+  function deleteBlockers(o) {
+    const b = [];
+    if (!o.is_native) b.push({ code: 'external_order', message: 'Johkusta tuotu tilaus käsitellään Johkussa' });
+    if (!['unpaid', 'pending', 'failed'].includes(o.payment_status)) b.push({ code: 'payment_status', message: 'Tilauksen maksutila ei ole maksamaton' });
+    if (o.payments.some((p) => SETTLED_PAY.includes(p.status) || p.refunded_amount > 0)) b.push({ code: 'settled_payment', message: 'Tilauksella on maksettu tai hyvitetty maksu' });
+    if (o.receipts.length) b.push({ code: 'receipts', message: 'Tilauksella on kuitti' });
+    if (orderStatus(o) === 'completed') b.push({ code: 'order_completed', message: 'Toteutunutta tilausta ei voi poistaa' });
+    const nowIso = new Date().toISOString();
+    if (o.reservations.some((r) => ['completed', 'no_show'].includes(r.status) || (['pending', 'confirmed', undefined].includes(r.status) && r.starts_at <= nowIso))) b.push({ code: 'reservation_started', message: 'Varaus on jo alkanut tai toteutunut' });
+    const open = o.payments.filter((p) => p.provider_ref && (p.method === 'visma_pay' || (p.method === 'montonio' && p.status === 'pending')));
+    if (open.length) b.push({ code: 'provider_session_unresolved', message: 'Maksupalvelussa on avattu maksu', sessions: open.map((p) => ({ payment_id: p.payment_id, provider: p.method, ref: p.provider_ref, checkable: p.method === 'montonio' })) });
+    return b;
+  }
+  function adminOrderDeleteCheck(a = {}) {
+    const o = byId.get(+a.p_order_id); if (!o) throw fail('not_found', 'Tilausta ei löydy', 404);
+    const late = o.payments.some((p) => SETTLED_PAY.includes(p.status));
+    if (o.archived_at) return { ok: true, order_id: o.order_id, order_no: o.order_no, archived: true, archived_at: o.archived_at, archive_reason: o.archive_reason || null, late_paid: late, deletable: false, blockers: [], can_delete: true };
+    const blockers = deleteBlockers(o);
+    return { ok: true, order_id: o.order_id, order_no: o.order_no, archived: false, late_paid: late, can_delete: true, deletable: blockers.length === 0, blockers,
+      verify_order_token: blockers.some((x) => (x.sessions || []).some((s) => s.checkable)) ? `00000000-0000-4000-a000-${pad(o.order_id, 12)}` : null,
+      effects: { reservations: o.reservations.filter((r) => ['pending', 'confirmed'].includes(r.status || 'confirmed')).length, pending_payments: o.payments.filter((p) => p.status === 'pending').length,
+        open_links: 0, queued_emails: 0, order_status: orderStatus(o) } };
+  }
+  function adminDeleteUnpaidOrder(a = {}) {
+    const o = byId.get(+a.p_order_id); if (!o) throw fail('not_found', 'Tilausta ei löydy', 404);
+    const reason = String(a.p_reason ?? '').trim();
+    if (reason.length > 500) throw fail('invalid_param', 'Syy on liian pitkä (enintään 500 merkkiä)');
+    if (o.archived_at) return { ok: true, mock: true, already: true, order_id: o.order_id, order_no: o.order_no, archived_at: o.archived_at };
+    const blockers = deleteBlockers(o);
+    if (blockers.length) return { ok: false, code: blockers[0].code, message: blockers[0].message, blockers, order_id: o.order_id, order_no: o.order_no };
+    o.archived_at = `${today}T12:00:00Z`; o.archive_reason = reason || null; o.status = 'cancelled';
+    for (const r of o.reservations) if (['pending', 'confirmed', undefined].includes(r.status)) r.status = 'cancelled';
+    for (const p of o.payments) if (p.status === 'pending') p.status = 'cancelled';
+    return { ok: true, mock: true, order_id: o.order_id, order_no: o.order_no, archived_at: o.archived_at };
+  }
+  const HANDLERS = { admin_order_delete_check: adminOrderDeleteCheck, admin_delete_unpaid_order: adminDeleteUnpaidOrder, admin_analytics_summary: (a) => analyticsMock(a.p_from || today, a.p_to || today), admin_list_orders: adminListOrders, admin_get_order: adminGetOrder, admin_list_payments: adminListPayments, admin_list_addons: () => ADDON_LIST, admin_add_to_order: adminAddToOrder, admin_create_payment_link: adminCreatePaymentLink,
     admin_refund: adminRefund, admin_refund_order: adminRefundOrder, admin_reservation_refund_preview: adminReservationRefundPreview, admin_cancel_reservation: adminCancelReservation, admin_record_payment: adminRecordPayment, admin_list_vat_rates: adminListVatRates, admin_report_daily: adminReportDaily, admin_report_month: adminReportMonth, admin_report_range: adminReportRange, admin_report_csv: adminReportCsv, admin_report_accrual: adminReportAccrual, admin_report_accrual_csv: adminReportAccrualCsv, admin_report_gift_cards: adminReportGiftCards, admin_report_transactions: adminReportTransactions, admin_report_invoices: adminReportInvoices, admin_report_provider_fees: adminReportProviderFees, admin_sales_chart: adminSalesChart, admin_get_receipt: adminGetReceipt, admin_resend_receipt: adminResendReceipt, admin_annual_card_for_order: adminAnnualCardForOrder };
   // sama kutsutapa kuin sb.js:n rpc(): rpc(nimi, parametrit) → Promise. Tuntematon nimi = puuttuva RPC (404 / PGRST202) kuten PostgRESTissä.
   async function rpc(name, args = {}) {
