@@ -12,14 +12,15 @@ import { isFlowEnabledValue } from '../order-reservation-logic.js';
 // v3 (PR 1): #/tilaukset/<tilausnro> = koko tilausnäkymä (views/order-view.js). Dialogit (lisäosto, maksulinkki, maksun kirjaus,
 // hyvitys) tulevat samasta createOrdersTab-tehtaasta ilman listaa; onnistunut kirjoitus päivittää näkymän.
 async function renderOrderRoute({ ctx, refs, orderNo }) {
-  const [{ renderOrderView }, { hasOrdersResume }] = await Promise.all([import('./order-view.js'), import('./talous-orders.js'), loadOrderTexts(rpc).catch(() => {})]);
+  const [{ renderOrderView }, { hasOrdersResume }, { orderReturn }] = await Promise.all([import('./order-view.js'), import('./talous-orders.js'), import('../order-open.js'), loadOrderTexts(rpc).catch(() => {})]);
+  const ret = orderReturn(orderNo);   // avattu päivänäkymästä / kalenterista / varauslistasta / asiakkaalta → paluu sinne
   const api = createTalousApi({ rpc, io: { select: dbSelect, functionUrl, fnBlob, fn } });
   const gift = createGiftApi({ rpc, io: { functionUrl } });
   let reloadView = null;
   const tab = createOrdersTab({ api, ctx, gift, rpc, onAfterChange: () => reloadView?.() });
   const dialogs = { ...tab.dialogs, bindReload: (f) => { reloadView = f; } };
-  return renderOrderView({ ctx, refs, rpc, api, orderNo, dialogs,
-    onBack: () => { if (hasOrdersResume()) history.back(); else location.hash = '#/tilaukset'; } });
+  return renderOrderView({ ctx, refs, rpc, api, orderNo, dialogs, back: ret ? { href: ret.from, prev: true } : null,
+    onBack: () => { if (ret || hasOrdersResume()) history.back(); else location.hash = '#/tilaukset'; } });
 }
 
 export async function render({ ctx, refs, reload, query, rest = '', legacyReservations = false }) {

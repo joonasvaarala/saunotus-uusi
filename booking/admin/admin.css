@@ -1322,9 +1322,6 @@ body.shot #shell .nav .lbl{display:inline}
 .ov-sum-name{margin:0;font-size:20px}
 .ov-sum-head p{margin:0}
 .ov-sum-res p{margin:0 0 2px}.ov-sum-when{font-size:16px;color:var(--ink)}
-.ov-sum-pay{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:6px 12px;background:var(--bg);border-radius:10px;padding:10px 12px}
-.ov-sum-open strong{font-size:22px;color:var(--ink)}
-.ov-sum-pay.ov-big-open .ov-sum-open strong,.ov-sum-pay.ov-big-invoice_open .ov-sum-open strong{color:var(--err)}
 .ov-sum-note,.ov-note{background:var(--warnbg);border:1px solid color-mix(in srgb,var(--gold) 30%,transparent);border-radius:8px;padding:8px 10px;margin:0;color:var(--ink);white-space:pre-wrap;font-size:14px}
 .ov-sum-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}.ov-sum-actions .btn:only-child{grid-column:1/-1}
 .ov-sum-contact .ov-contact{display:grid;grid-template-columns:1fr 1fr;gap:8px}
@@ -1374,10 +1371,19 @@ body.shot #shell .nav .lbl{display:inline}
 .ov-res-actions .ov-menu-list{left:0;right:auto}
 .ov-menu-item{all:unset;box-sizing:border-box;display:block;padding:10px 12px;border-radius:8px;cursor:pointer;font-size:14px;color:var(--ink);min-height:40px;overflow-wrap:anywhere}
 .ov-menu-item:hover,.ov-menu-item:focus-visible{background:var(--bg)}
-.ov-big{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
-.ov-big strong{font-size:28px;color:var(--ink)}
-.ov-big-open strong,.ov-big-invoice_open strong{color:var(--err)}.ov-big-invoice_open strong{color:var(--green)}
-.ov-big-overpaid strong{color:var(--gold)}
+/* Summalaatikko (amountBox): yksi iso luku + sitä vastaava otsikko; sävy kertoo tilan (maksettu vihreä, maksamatta meripihka, hyvitettävää kultareunus). */
+.ov-paybox{display:grid;gap:6px;border-radius:10px;padding:12px 14px;background:var(--bg);border:1px solid var(--line);--amt-c:var(--text)}
+.ov-paybox.tone-ok{background:var(--okbg);border-color:color-mix(in srgb,var(--ok) 22%,transparent);--amt-c:var(--ok)}
+.ov-paybox.tone-due{background:var(--warnbg);border-color:color-mix(in srgb,var(--gold) 32%,transparent);--amt-c:var(--gold)}
+.ov-paybox.tone-warn{border-color:color-mix(in srgb,var(--gold) 45%,transparent);--amt-c:var(--gold)}
+.ov-paybox.tone-info{--amt-c:var(--green)}
+.ov-paybox.tone-muted{--amt-c:var(--muted)}
+.ov-paybox-meta{margin:0;font-size:13px;line-height:1.4;color:var(--muted);font-variant-numeric:tabular-nums}.ov-paybox-meta span{display:inline-block}
+.ov-paybox-main{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:2px 12px}
+.ov-paybox-label{display:inline-flex;align-items:center;gap:6px;font-size:15px;font-weight:600;color:var(--amt-c)}
+.ov-paybox-label .icon{width:18px;height:18px}
+.ov-paybox-value{font-size:26px;line-height:1.15;font-weight:700;color:var(--amt-c);font-variant-numeric:tabular-nums;letter-spacing:-.01em;margin-left:auto}
+.ov-paybox.tone-muted .ov-paybox-value{color:var(--ink)}
 .ov-kv{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;margin:0;font-size:14px}.ov-kv dt{color:var(--muted)}.ov-kv dd{margin:0;text-align:right}
 .ov-stack{display:grid;gap:8px}
 .ov-bd{width:100%;border-collapse:collapse;font-size:14px}.ov-bd td,.ov-bd th{padding:4px 0;text-align:left;font-weight:400}.ov-bd .r{text-align:right}
@@ -1406,7 +1412,6 @@ body.shot #shell .nav .lbl{display:inline}
   .ov-mbar{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:10px;position:fixed;left:0;right:0;bottom:0;z-index:19;padding:10px 14px calc(10px + env(safe-area-inset-bottom,0px));background:var(--card);border-top:1px solid var(--line);box-shadow:0 -4px 14px color-mix(in srgb,var(--ink) 6%,transparent)}
   .ov-mbar .btn{min-height:48px;justify-content:center;font-size:16px}
   .ov-title h1{font-size:22px}
-  .ov-big strong{font-size:26px}
 }
 @media(min-width:56.25em) and (max-width:62.4375em){.ov-mbar{left:220px}}
 @media(max-width:56.1875em){.ov-mbar{left:var(--side-narrow,0px)}#shell.nav-expanded .ov-mbar{left:var(--side-wide,0px)}.ov-page.has-bar .ov-next>.row{display:none}}

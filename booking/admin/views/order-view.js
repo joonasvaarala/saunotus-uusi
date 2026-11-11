@@ -270,12 +270,27 @@ function notesCard(m, env) {
 }
 
 // ---- maksu ----
+/**
+ * Summalaatikko (yhteenveto + koko tilaus): yksi iso luku ja sitä vastaava otsikko (order-view-logic.js amountSummary).
+ * meta=false jättää pienet rivit pois (koko näkymässä samat tiedot ovat alla rivilistana).
+ */
+const AMT_ICON = { ok: 'tick', due: 'euro', info: 'receipt', warn: 'undo', muted: null };
+export function amountBox(d, { meta = true, testid = 'ov-paybox', amountTestid = 'ov-paybox-value' } = {}) {
+  if (!d) return null;
+  const ico = d.state === 'refunded' ? 'undo' : AMT_ICON[d.tone];
+  const lines = meta ? d.lines.map((x) => ov(`order_view.amt.${x.key}`, x.amount != null ? { amount: money(x.amount) } : null)) : [];
+  return h('div', { class: `ov-paybox tone-${d.tone}`, 'data-testid': testid, 'data-state': d.state },
+    lines.length ? h('p', { class: 'ov-paybox-meta', 'data-testid': `${testid}-meta` }, lines.flatMap((t, i) => [i ? ' · ' : null, h('span', { text: t })]).filter(Boolean)) : null,
+    h('div', { class: 'ov-paybox-main' },
+      h('span', { class: 'ov-paybox-label', 'data-testid': `${testid}-label` }, ico ? icon(ico, 16) : null, ov(`order_view.${d.label}`)),
+      d.amount != null ? h('strong', { class: 'ov-paybox-value', 'data-testid': amountTestid, text: money(d.amount) }) : null));
+}
+
 function paymentCard(m, env, runner) {
   const box = paymentBox(m, { can: env.ctx.can });
-  const head = { open: 'order_view.pay_open', invoice_open: 'order_view.pay_invoice_open', overpaid: 'order_view.pay_overpaid', settled: 'order_view.pay_settled' }[box.headline];
   const rows = [
     ['order_view.pay_total', money(box.total)],
-    ['order_view.pay_paid', money(box.paid)],
+    box.display?.state === 'none' && box.paid <= 0.004 ? null : ['order_view.pay_paid', money(box.paid)],   // 0 €:n tilaus: ei "Maksettu 0,00 €" -riviä
     box.refunded > 0.004 ? ['order_view.pay_refunded', money(box.refunded)] : null,
     box.giftCard > 0.004 ? ['order_view.pay_gift', money(box.giftCard)] : null,
     box.partner > 0.004 ? ['order_view.pay_partner', money(box.partner)] : null,
@@ -288,7 +303,7 @@ function paymentCard(m, env, runner) {
     !box.locked && box.actions.takePayment ? h('button', { type: 'button', class: 'btn ov-wide', 'data-testid': 'ov-pay-take', text: ov('order_view.act.take_payment'), onclick: () => runner.takePayment(m) }) : null,
     !box.locked && box.actions.refund ? h('button', { type: 'button', class: 'btn ghost ov-wide', 'data-testid': 'ov-pay-refund', text: ov('order_view.more_refund'), onclick: () => runner.refund(m) }) : null);
   return sec(ov('order_view.sec.payment'), 'ov-payment',
-    h('div', { class: `ov-big ov-big-${box.headline}` }, h('span', { text: ov(head) }), h('strong', { 'data-testid': 'ov-pay-amount', text: money(box.amount) })),
+    amountBox(box.display, { meta: false, testid: 'ov-pay-box', amountTestid: 'ov-pay-amount' }),
     h('dl', { class: 'ov-kv' }, rows.map(([k, v]) => [h('dt', { text: ov(k) }), h('dd', { text: v })])),
     btns.length ? h('div', { class: 'ov-stack' }, btns) : null,
     box.locked ? h('p', { class: 'muted ov-small', 'data-testid': 'ov-pay-locked', text: ov('order_view.pay_locked_note') }) : null,
@@ -412,7 +427,7 @@ function headMenu(m, env, runner) {
  * Koko tilausnäkymä. Palauttaa solmun, joka on valmis sivulle. Kytkentä: views/orders.js (rest = tilausnumero).
  * opts: { ctx, refs, rpc?, orderNo?, orderId?, dialogs?, onBack?, now? }
  */
-export async function renderOrderView({ ctx, refs, rpc = sbRpc, orderNo = null, orderId = null, dialogs = null, onBack = null, now = null, api = null }) {
+export async function renderOrderView({ ctx, refs, rpc = sbRpc, orderNo = null, orderId = null, dialogs = null, onBack = null, now = null, api = null, back = null }) {
   await Promise.all([loadOvTexts(rpc), loadOrderTexts(rpc).catch(() => {})]);
   const talousApi = api || createTalousApi({ rpc, io: { select: dbSelect, functionUrl, fnBlob, fn: sbFn } });
   const root = h('div', { class: 'ov-page', 'data-testid': 'order-view' });
@@ -451,7 +466,7 @@ export async function renderOrderView({ ctx, refs, rpc = sbRpc, orderNo = null, 
     }
   }
   const backLink = (m = null) => h('nav', { class: 'ov-crumb', 'aria-label': ov('order_view.back_list') },
-    h('a', { href: '#/tilaukset', 'data-testid': 'ov-back', onclick: (e) => { if (onBack) { e.preventDefault(); onBack(); } } }, '← ', ov('order_view.back_list')),
+    h('a', { href: back?.href || '#/tilaukset', 'data-testid': 'ov-back', onclick: (e) => { if (onBack) { e.preventDefault(); onBack(); } } }, '← ', ov(back?.prev ? 'order_view.back_prev' : 'order_view.back_list')),
     m ? [' / ', h('span', { text: ov('order_view.crumb_order', { no: m.order_no }) })] : null);
   function paint(m) {
     const at = now ? new Date(now) : new Date();

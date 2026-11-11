@@ -1,0 +1,334 @@
+[
+ {
+  "key": "ui.admin.order_view.back_prev",
+  "lang": "fi",
+  "text": "Takaisin",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Tilausnäkymän paluulinkki, kun tilaus avattiin päivänäkymästä, kalenterista, varauslistasta tai asiakkaalta (Joonas 11.11.2026); sama kuin koodin oletus"
+ },
+ {
+  "key": "ui.admin.order_view.back_prev",
+  "lang": "en",
+  "text": "Back",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Tilausnäkymän paluulinkki, kun tilaus avattiin päivänäkymästä, kalenterista, varauslistasta tai asiakkaalta (Joonas 11.11.2026); sama kuin koodin oletus"
+ },
+ {
+  "key": "ui.admin.order_view.amt.paid",
+  "lang": "fi",
+  "text": "Maksettu",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Hallinnan tilauksen summalaatikko (Joonas t462u): iso luku + sitä vastaava otsikko (Maksettu / Maksamatta / Hyvitettävää / Hyvitetty / Ei maksettavaa) ja pienet rivit (booking/admin/order-view-texts.js); sama kuin koodin oletus"
+ },
+ {
+  "key": "ui.admin.order_view.amt.paid",
+  "lang": "en",
+  "text": "Paid",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Hallinnan tilauksen summalaatikko (Joonas t462u): iso luku + sitä vastaava otsikko (Maksettu / Maksamatta / Hyvitettävää / Hyvitetty / Ei maksettavaa) ja pienet rivit (booking/admin/order-view-texts.js); sama kuin koodin oletus"
+ },
+ {
+  "key": "ui.admin.order_view.amt.due",
+  "lang": "fi",
+  "text": "Maksamatta",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Hallinnan tilauksen summalaatikko (Joonas t462u): iso luku + sitä vastaava otsikko (Maksettu / Maksamatta / Hyvitettävää / Hyvitetty / Ei maksettavaa) ja pienet rivit (booking/admin/order-view-texts.js); sama kuin koodin oletus"
+ },
+ {
+  "key": "ui.admin.order_view.amt.due",
+  "lang": "en",
+  "text": "Unpaid",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Hallinnan tilauksen summalaatikko (Joonas t462u): iso luku + sitä vastaava otsikko (Maksettu / Maksamatta / Hyvitettävää / Hyvitetty / Ei maksettavaa) ja pienet rivit (booking/admin/order-view-texts.js); sama kuin koodin oletus"
+ },
+ {
+  "key": "ui.admin.order_view.amt.invoice",
+  "lang": "fi",
+  "text": "Laskulla avoinna",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Hallinnan tilauksen summalaatikko (Joonas t462u): iso luku + sitä vastaava otsikko (Maksettu / Maksamatta / Hyvitettävää / Hyvitetty / Ei maksettavaa) ja pienet rivit (booking/admin/order-view-texts.js); sama kuin koodin oletus"
+ },
+ {
+  "key": "ui.admin.order_view.amt.invoice",
+  "lang": "en",
+  "text": "Open on invoice",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Hallinnan tilauksen summalaatikko (Joonas t462u): iso luku + sitä vastaava otsikko (Maksettu / Maksamatta / Hyvitettävää / Hyvitetty / Ei maksettavaa) ja pienet rivit (booking/admin/order-view-texts.js); sama kuin koodin oletus"
+ },
+ {
+  "key": "ui.admin.order_view.amt.to_refund",
+  "lang": "fi",
+  "text": "Hyvitettävää",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Hallinnan tilauksen summalaatikko (Joonas t462u): iso luku + sitä vastaava otsikko (Maksettu / Maksamatta / Hyvitettävää / Hyvitetty / Ei maksettavaa) ja pienet rivit (booking/admin/order-view-texts.js); sama kuin koodin oletus"
+ },
+ {
+  "key": "ui.admin.order_view.amt.to_refund",
+  "lang": "en",
+  "text": "To refund",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Hallinnan tilauksen summalaatikko (Joonas t462u): iso luku + sitä vastaava otsikko (Maksettu / Maksamatta / Hyvitettävää / Hyvitetty / Ei maksettavaa) ja pienet rivit (booking/admin/order-view-texts.js); sama kuin koodin oletus"
+ },
+ {
+  "key": "ui.admin.order_view.amt.refunded",
+  "lang": "fi",
+  "text": "Hyvitetty",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Hallinnan tilauksen summalaatikko (Joonas t462u): iso luku + sitä vastaava otsikko (Maksettu / Maksamatta / Hyvitettävää / Hyvitetty / Ei maksettavaa) ja pienet rivit (booking/admin/order-view-texts.js); sama kuin koodin oletus"
+ },
+ {
+  "key": "ui.admin.order_view.amt.refunded",
+  "lang": "en",
+  "text": "Refunded",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Hallinnan tilauksen summalaatikko (Joonas t462u): iso luku + sitä vastaava otsikko (Maksettu / Maksamatta / Hyvitettävää / Hyvitetty / Ei maksettavaa) ja pienet rivit (booking/admin/order-view-texts.js); sama kuin koodin oletus"
+ },
+ {
+  "key": "ui.admin.order_view.amt.none",
+  "lang": "fi",
+  "text": "Ei maksettavaa",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Hallinnan tilauksen summalaatikko (Joonas t462u): iso luku + sitä vastaava otsikko (Maksettu / Maksamatta / Hyvitettävää / Hyvitetty / Ei maksettavaa) ja pienet rivit (booking/admin/order-view-texts.js); sama kuin koodin oletus"
+ },
+ {
+  "key": "ui.admin.order_view.amt.none",
+  "lang": "en",
+  "text": "Nothing to pay",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Hallinnan tilauksen summalaatikko (Joonas t462u): iso luku + sitä vastaava otsikko (Maksettu / Maksamatta / Hyvitettävää / Hyvitetty / Ei maksettavaa) ja pienet rivit (booking/admin/order-view-texts.js); sama kuin koodin oletus"
+ },
+ {
+  "key": "ui.admin.order_view.amt.total",
+  "lang": "fi",
+  "text": "Yhteensä {{var:amount}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [
+   "{{var:amount}}"
+  ],
+  "reason": "Hallinnan tilauksen summalaatikko (Joonas t462u): iso luku + sitä vastaava otsikko (Maksettu / Maksamatta / Hyvitettävää / Hyvitetty / Ei maksettavaa) ja pienet rivit (booking/admin/order-view-texts.js); sama kuin koodin oletus"
+ },
+ {
+  "key": "ui.admin.order_view.amt.total",
+  "lang": "en",
+  "text": "Total {{var:amount}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [
+   "{{var:amount}}"
+  ],
+  "reason": "Hallinnan tilauksen summalaatikko (Joonas t462u): iso luku + sitä vastaava otsikko (Maksettu / Maksamatta / Hyvitettävää / Hyvitetty / Ei maksettavaa) ja pienet rivit (booking/admin/order-view-texts.js); sama kuin koodin oletus"
+ },
+ {
+  "key": "ui.admin.order_view.amt.cancelled_total",
+  "lang": "fi",
+  "text": "Peruttu, yhteensä {{var:amount}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [
+   "{{var:amount}}"
+  ],
+  "reason": "Hallinnan tilauksen summalaatikko (Joonas t462u): iso luku + sitä vastaava otsikko (Maksettu / Maksamatta / Hyvitettävää / Hyvitetty / Ei maksettavaa) ja pienet rivit (booking/admin/order-view-texts.js); sama kuin koodin oletus"
+ },
+ {
+  "key": "ui.admin.order_view.amt.cancelled_total",
+  "lang": "en",
+  "text": "Cancelled, total {{var:amount}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [
+   "{{var:amount}}"
+  ],
+  "reason": "Hallinnan tilauksen summalaatikko (Joonas t462u): iso luku + sitä vastaava otsikko (Maksettu / Maksamatta / Hyvitettävää / Hyvitetty / Ei maksettavaa) ja pienet rivit (booking/admin/order-view-texts.js); sama kuin koodin oletus"
+ },
+ {
+  "key": "ui.admin.order_view.amt.paid_line",
+  "lang": "fi",
+  "text": "Maksettu {{var:amount}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [
+   "{{var:amount}}"
+  ],
+  "reason": "Hallinnan tilauksen summalaatikko (Joonas t462u): iso luku + sitä vastaava otsikko (Maksettu / Maksamatta / Hyvitettävää / Hyvitetty / Ei maksettavaa) ja pienet rivit (booking/admin/order-view-texts.js); sama kuin koodin oletus"
+ },
+ {
+  "key": "ui.admin.order_view.amt.paid_line",
+  "lang": "en",
+  "text": "Paid {{var:amount}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [
+   "{{var:amount}}"
+  ],
+  "reason": "Hallinnan tilauksen summalaatikko (Joonas t462u): iso luku + sitä vastaava otsikko (Maksettu / Maksamatta / Hyvitettävää / Hyvitetty / Ei maksettavaa) ja pienet rivit (booking/admin/order-view-texts.js); sama kuin koodin oletus"
+ },
+ {
+  "key": "ui.admin.order_view.amt.unpaid_line",
+  "lang": "fi",
+  "text": "Maksamatta {{var:amount}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [
+   "{{var:amount}}"
+  ],
+  "reason": "Hallinnan tilauksen summalaatikko (Joonas t462u): iso luku + sitä vastaava otsikko (Maksettu / Maksamatta / Hyvitettävää / Hyvitetty / Ei maksettavaa) ja pienet rivit (booking/admin/order-view-texts.js); sama kuin koodin oletus"
+ },
+ {
+  "key": "ui.admin.order_view.amt.unpaid_line",
+  "lang": "en",
+  "text": "Unpaid {{var:amount}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [
+   "{{var:amount}}"
+  ],
+  "reason": "Hallinnan tilauksen summalaatikko (Joonas t462u): iso luku + sitä vastaava otsikko (Maksettu / Maksamatta / Hyvitettävää / Hyvitetty / Ei maksettavaa) ja pienet rivit (booking/admin/order-view-texts.js); sama kuin koodin oletus"
+ },
+ {
+  "key": "ui.admin.order_view.amt.refunded_line",
+  "lang": "fi",
+  "text": "Hyvitetty {{var:amount}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [
+   "{{var:amount}}"
+  ],
+  "reason": "Hallinnan tilauksen summalaatikko (Joonas t462u): iso luku + sitä vastaava otsikko (Maksettu / Maksamatta / Hyvitettävää / Hyvitetty / Ei maksettavaa) ja pienet rivit (booking/admin/order-view-texts.js); sama kuin koodin oletus"
+ },
+ {
+  "key": "ui.admin.order_view.amt.refunded_line",
+  "lang": "en",
+  "text": "Refunded {{var:amount}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [
+   "{{var:amount}}"
+  ],
+  "reason": "Hallinnan tilauksen summalaatikko (Joonas t462u): iso luku + sitä vastaava otsikko (Maksettu / Maksamatta / Hyvitettävää / Hyvitetty / Ei maksettavaa) ja pienet rivit (booking/admin/order-view-texts.js); sama kuin koodin oletus"
+ },
+ {
+  "key": "ui.admin.order_view.amt.gift_line",
+  "lang": "fi",
+  "text": "Lahjakortilla {{var:amount}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [
+   "{{var:amount}}"
+  ],
+  "reason": "Hallinnan tilauksen summalaatikko (Joonas t462u): iso luku + sitä vastaava otsikko (Maksettu / Maksamatta / Hyvitettävää / Hyvitetty / Ei maksettavaa) ja pienet rivit (booking/admin/order-view-texts.js); sama kuin koodin oletus"
+ },
+ {
+  "key": "ui.admin.order_view.amt.gift_line",
+  "lang": "en",
+  "text": "By gift card {{var:amount}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [
+   "{{var:amount}}"
+  ],
+  "reason": "Hallinnan tilauksen summalaatikko (Joonas t462u): iso luku + sitä vastaava otsikko (Maksettu / Maksamatta / Hyvitettävää / Hyvitetty / Ei maksettavaa) ja pienet rivit (booking/admin/order-view-texts.js); sama kuin koodin oletus"
+ },
+ {
+  "key": "ui.admin.order_view.amt.partner_line",
+  "lang": "fi",
+  "text": "Kumppanikoodilla {{var:amount}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [
+   "{{var:amount}}"
+  ],
+  "reason": "Hallinnan tilauksen summalaatikko (Joonas t462u): iso luku + sitä vastaava otsikko (Maksettu / Maksamatta / Hyvitettävää / Hyvitetty / Ei maksettavaa) ja pienet rivit (booking/admin/order-view-texts.js); sama kuin koodin oletus"
+ },
+ {
+  "key": "ui.admin.order_view.amt.partner_line",
+  "lang": "en",
+  "text": "By partner code {{var:amount}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [
+   "{{var:amount}}"
+  ],
+  "reason": "Hallinnan tilauksen summalaatikko (Joonas t462u): iso luku + sitä vastaava otsikko (Maksettu / Maksamatta / Hyvitettävää / Hyvitetty / Ei maksettavaa) ja pienet rivit (booking/admin/order-view-texts.js); sama kuin koodin oletus"
+ },
+ {
+  "key": "ui.admin.order_view.amt.link_line",
+  "lang": "fi",
+  "text": "Maksulinkki avoinna {{var:amount}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [
+   "{{var:amount}}"
+  ],
+  "reason": "Hallinnan tilauksen summalaatikko (Joonas t462u): iso luku + sitä vastaava otsikko (Maksettu / Maksamatta / Hyvitettävää / Hyvitetty / Ei maksettavaa) ja pienet rivit (booking/admin/order-view-texts.js); sama kuin koodin oletus"
+ },
+ {
+  "key": "ui.admin.order_view.amt.link_line",
+  "lang": "en",
+  "text": "Payment link open {{var:amount}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [
+   "{{var:amount}}"
+  ],
+  "reason": "Hallinnan tilauksen summalaatikko (Joonas t462u): iso luku + sitä vastaava otsikko (Maksettu / Maksamatta / Hyvitettävää / Hyvitetty / Ei maksettavaa) ja pienet rivit (booking/admin/order-view-texts.js); sama kuin koodin oletus"
+ }
+]
