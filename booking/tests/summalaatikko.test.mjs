@@ -86,7 +86,7 @@ test('tekstit: jokaiselle tilalle ja riville FI+EN, import 140 = sanakirja', () 
   const states = ['paid', 'due', 'invoice', 'to_refund', 'refunded', 'none'];
   const lines = ['total', 'cancelled_total', 'paid_line', 'unpaid_line', 'refunded_line', 'gift_line', 'partner_line', 'link_line'];
   const rows = JSON.parse(read('content/site-texts.pending-import-140.json'));
-  assert.equal(rows.length, (states.length + lines.length) * 2);
+  assert.equal(rows.length, (states.length + lines.length + 1) * 2, 'amt.* + back_prev');
   for (const lang of ['fi', 'en']) {
     for (const k of [...states, ...lines]) {
       const key = `ui.admin.order_view.amt.${k}`; const text = ORDER_VIEW_TEXTS[lang][key];
@@ -108,4 +108,51 @@ test('näkymät käyttävät samaa amountBoxia (yhteenveto + koko tilaus), vanha
   const css = read('booking/admin/admin.css');
   for (const t of ['ok', 'due', 'warn', 'info', 'muted']) assert.match(css, new RegExp(`\\.ov-paybox\\.tone-${t}\\{`), t);
   assert.doesNotMatch(css, /\.ov-big|\.ov-sum-pay/);
+});
+
+test('order-open: openOrderView vie tilausnäkymään v3, syvälinkki korvaa historian, paluu lähtönäkymään', async () => {
+  const O = await import('../admin/order-open.js');
+  const loc = { hash: '#/paiva?d=2026-11-11', pathname: '/hallinta/', search: '', replace(u) { this.replaced = u; } };
+  assert.equal(O.openOrderView(15186, { loc }), true);
+  assert.equal(loc.hash, '#/tilaukset/15186');
+  assert.deepEqual(O.orderReturn('15186'), { from: '#/paiva?d=2026-11-11' });
+  assert.equal(O.orderReturn('15187'), null, 'eri tilaus → tavallinen paluu listaan');
+  const l2 = { hash: '#/varaukset?r=5', pathname: '/hallinta/', search: '', replace(u) { this.replaced = u; } };
+  assert.equal(O.openOrderView('15188', { loc: l2, replace: true }), true);
+  assert.equal(l2.replaced, '/hallinta/#/tilaukset/15188'); assert.equal(O.orderReturn('15188'), null, 'syvälinkki: ei paluuta väliin');
+  const l3 = { hash: '#/tilaukset?tab=orders' }; O.openOrderView(1, { loc: l3 }); assert.equal(O.orderReturn(1), null, 'tilauslistalta paluu hoidetaan resume-tilalla');
+  for (const bad of [null, undefined, '', '0', 'abc', '12x']) assert.equal(O.openOrderView(bad, { loc: { hash: '#/' } }), false, String(bad));
+  O.clearOrderReturn();
+});
+
+test('päivänäkymä, kalenteri, varauslista, asiakas ja uusi varaus avaavat tilausnäkymän v3 (vanha kortti vain varalla)', () => {
+  const V = (f) => read(`booking/admin/views/${f}`);
+  assert.match(V('day.js'), /const open = \(r\) => openOrderView\(r\.order_no\) \|\| reservationDialog\(/);
+  assert.match(V('calendar.js'), /onclick: \(\) => openOrderView\(r\.order_no\) \|\| reservationDialog\(r,/);
+  assert.match(V('reservations.js'), /onclick: \(\) => openOrderView\(r\.order_no\) \|\| reservationDialog\(r,/);
+  assert.match(V('reservations.js'), /openOrderView\(target\.order_no, \{ replace: true \}\)/);
+  assert.match(V('customers.js'), /if \(o\.order_no && openOrderView\(o\.order_no\)\) d\.close\(\);/);
+  assert.match(V('newbooking.js'), /if \(openOrderView\(r\.order_no\)\) return;/);
+  const orders = V('orders.js');
+  assert.match(orders, /orderReturn\(orderNo\)/); assert.match(orders, /back: ret \? \{ href: ret\.from, prev: true \} : null/);
+  assert.match(V('order-view.js'), /ov\(back\?\.prev \? 'order_view\.back_prev' : 'order_view\.back_list'\)/);
+});
+
+test('vanha kortti (varalla): 0 €:n tilaus ei näytä "Maksettu 0,00 €"', async () => {
+  const { cardPaymentStatus } = await import('../admin/order-card-logic.js');
+  assert.equal(cardPaymentStatus({ balance: { total: 0, paid: 0, refunded: 0, unpaid: 0 } }).label, 'free');
+  assert.equal(cardPaymentStatus(null, { payment_status: 'paid', total_gross: 0 }).label, 'free');
+  assert.equal(cardPaymentStatus({ balance: { total: 270, paid: 270, refunded: 0, unpaid: 0 } }).label, 'paid');
+  assert.match(read('booking/admin/views/order-card.js'), /if \(pay\.label === 'free'\) return ov\('order_view\.amt\.none'\);/);
+  const m = L.orderModel({ order_id: 1, order_no: 15186, status: 'confirmed', reservations: [res({ status: 'completed' })], payments: [], balance: { total: 0, paid: 0, refunded: 0, unpaid: 0, net_paid: 0 } });
+  assert.ok(!L.orderBadges(m).some((b) => String(b.key).startsWith('pay.')), 'v3: ei maksumerkkiä 0 €:n tilaukselle');
+  assert.equal(L.amountSummary(m).state, 'none');
+});
+
+test('order-open: Varaukset-välilehdeltä paluu takaisin välilehdelle', async () => {
+  const O = await import('../admin/order-open.js');
+  const loc = { hash: '#/tilaukset?period=upcoming&tab=reservations' };
+  O.openOrderView(42, { loc });
+  assert.deepEqual(O.orderReturn(42), { from: '#/tilaukset?period=upcoming&tab=reservations' });
+  O.clearOrderReturn();
 });

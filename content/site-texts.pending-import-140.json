@@ -1,5 +1,25 @@
 [
  {
+  "key": "ui.admin.order_view.back_prev",
+  "lang": "fi",
+  "text": "Takaisin",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Tilausnäkymän paluulinkki, kun tilaus avattiin päivänäkymästä, kalenterista, varauslistasta tai asiakkaalta (Joonas 11.11.2026); sama kuin koodin oletus"
+ },
+ {
+  "key": "ui.admin.order_view.back_prev",
+  "lang": "en",
+  "text": "Back",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Tilausnäkymän paluulinkki, kun tilaus avattiin päivänäkymästä, kalenterista, varauslistasta tai asiakkaalta (Joonas 11.11.2026); sama kuin koodin oletus"
+ },
+ {
   "key": "ui.admin.order_view.amt.paid",
   "lang": "fi",
   "text": "Maksettu",

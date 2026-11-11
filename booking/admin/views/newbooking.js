@@ -6,6 +6,7 @@ import { customerForm, customerSearch } from './customerform.js';
 import { warningBox, hasWarning } from './therapist.js';
 import { addonPicker } from './addons.js';
 import { reservationDialog } from './shared.js';
+import { openOrderView } from '../order-open.js';
 import { h, toast, errMsg, fmtTime, fmtDay, money, todayHel, addDays, empty, revealSection, revealIfHidden, helsinkiIso } from '../ui.js';
 import { formatWhenRange, spansDays } from '../when-range.js';
 import { icon } from '../icons.js';
@@ -362,6 +363,7 @@ export async function render({ ctx, refs, query, reload }) {
     const canPay = ctx.can('payments.manage');
     const title = h('h3', { tabindex: '-1', text: T(createdMessageKind(r) === 'link' ? 'nb.createdLink' : 'nb.created', { no: r.order_no }) });
     const openBooking = h('button', { type: 'button', class: `btn ${canPay ? 'ghost' : 'primary'}`, text: T('nb.openBooking'), onclick: async () => {
+      if (openOrderView(r.order_no)) return;   // tilausnäkymä v3; vanha kortti vain ilman tilausnumeroa
       openBooking.disabled = true;
       try {
         const rows = await rpc('admin_list_reservations', { p_search: String(r.order_no), p_limit: 10, p_offset: 0 });

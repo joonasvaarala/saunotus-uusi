@@ -290,7 +290,7 @@ function paymentCard(m, env, runner) {
   const box = paymentBox(m, { can: env.ctx.can });
   const rows = [
     ['order_view.pay_total', money(box.total)],
-    ['order_view.pay_paid', money(box.paid)],
+    box.display?.state === 'none' && box.paid <= 0.004 ? null : ['order_view.pay_paid', money(box.paid)],   // 0 €:n tilaus: ei "Maksettu 0,00 €" -riviä
     box.refunded > 0.004 ? ['order_view.pay_refunded', money(box.refunded)] : null,
     box.giftCard > 0.004 ? ['order_view.pay_gift', money(box.giftCard)] : null,
     box.partner > 0.004 ? ['order_view.pay_partner', money(box.partner)] : null,
@@ -427,7 +427,7 @@ function headMenu(m, env, runner) {
  * Koko tilausnäkymä. Palauttaa solmun, joka on valmis sivulle. Kytkentä: views/orders.js (rest = tilausnumero).
  * opts: { ctx, refs, rpc?, orderNo?, orderId?, dialogs?, onBack?, now? }
  */
-export async function renderOrderView({ ctx, refs, rpc = sbRpc, orderNo = null, orderId = null, dialogs = null, onBack = null, now = null, api = null }) {
+export async function renderOrderView({ ctx, refs, rpc = sbRpc, orderNo = null, orderId = null, dialogs = null, onBack = null, now = null, api = null, back = null }) {
   await Promise.all([loadOvTexts(rpc), loadOrderTexts(rpc).catch(() => {})]);
   const talousApi = api || createTalousApi({ rpc, io: { select: dbSelect, functionUrl, fnBlob, fn: sbFn } });
   const root = h('div', { class: 'ov-page', 'data-testid': 'order-view' });
@@ -466,7 +466,7 @@ export async function renderOrderView({ ctx, refs, rpc = sbRpc, orderNo = null, 
     }
   }
   const backLink = (m = null) => h('nav', { class: 'ov-crumb', 'aria-label': ov('order_view.back_list') },
-    h('a', { href: '#/tilaukset', 'data-testid': 'ov-back', onclick: (e) => { if (onBack) { e.preventDefault(); onBack(); } } }, '← ', ov('order_view.back_list')),
+    h('a', { href: back?.href || '#/tilaukset', 'data-testid': 'ov-back', onclick: (e) => { if (onBack) { e.preventDefault(); onBack(); } } }, '← ', ov(back?.prev ? 'order_view.back_prev' : 'order_view.back_list')),
     m ? [' / ', h('span', { text: ov('order_view.crumb_order', { no: m.order_no }) })] : null);
   function paint(m) {
     const at = now ? new Date(now) : new Date();

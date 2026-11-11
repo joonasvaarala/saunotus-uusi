@@ -187,6 +187,7 @@ export const ORDER_VIEW_TEXTS = {
     'ui.admin.order_view.summary_label': 'Tilauksen yhteenveto',
     'ui.admin.order_view.summary_channel': 'Tilaus #{{var:no}} · {{var:channel}}',
     // Summalaatikko (import 140): iso luku + sitä vastaava otsikko; pienet rivit amt.*_line
+    'ui.admin.order_view.back_prev': 'Takaisin',
     'ui.admin.order_view.amt.paid': 'Maksettu',
     'ui.admin.order_view.amt.due': 'Maksamatta',
     'ui.admin.order_view.amt.invoice': 'Laskulla avoinna',
@@ -471,6 +472,7 @@ export const ORDER_VIEW_TEXTS = {
     'ui.admin.order_view.summary_close': 'Close summary',
     'ui.admin.order_view.summary_label': 'Order summary',
     'ui.admin.order_view.summary_channel': 'Order #{{var:no}} · {{var:channel}}',
+    'ui.admin.order_view.back_prev': 'Back',
     'ui.admin.order_view.amt.paid': 'Paid',
     'ui.admin.order_view.amt.due': 'Unpaid',
     'ui.admin.order_view.amt.invoice': 'Open on invoice',
