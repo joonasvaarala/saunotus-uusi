@@ -1362,9 +1362,9 @@ body.shot #shell .nav .lbl{display:inline}
 .ov-res-actions{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px;margin-top:4px}
 .ov-menu{position:relative;display:inline-block}
 .ov-menu>summary{list-style:none;cursor:pointer;min-width:40px;justify-content:center}.ov-menu>summary::-webkit-details-marker{display:none}
-.ov-menu-list{position:absolute;right:0;top:calc(100% + 4px);z-index:30;min-width:13.75rem;background:var(--card);border:1px solid var(--line);border-radius:10px;box-shadow:0 10px 28px color-mix(in srgb,var(--ink) 14%,transparent);padding:6px;display:grid}
+.ov-menu-list{position:absolute;right:0;top:calc(100% + 4px);z-index:60;box-sizing:border-box;min-width:13.75rem;max-width:calc(100vw - 16px);background:var(--card);border:1px solid var(--line);border-radius:10px;box-shadow:0 10px 28px color-mix(in srgb,var(--ink) 14%,transparent);padding:6px;display:grid}
 .ov-res-actions .ov-menu-list{left:0;right:auto}
-.ov-menu-item{all:unset;box-sizing:border-box;display:block;padding:10px 12px;border-radius:8px;cursor:pointer;font-size:14px;color:var(--ink);min-height:40px}
+.ov-menu-item{all:unset;box-sizing:border-box;display:block;padding:10px 12px;border-radius:8px;cursor:pointer;font-size:14px;color:var(--ink);min-height:40px;overflow-wrap:anywhere}
 .ov-menu-item:hover,.ov-menu-item:focus-visible{background:var(--bg)}
 .ov-big{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
 .ov-big strong{font-size:28px;color:var(--ink)}

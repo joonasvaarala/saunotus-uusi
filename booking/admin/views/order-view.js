@@ -23,7 +23,7 @@ import { ov, loadOvTexts } from '../order-view-texts.js';
 import { loadOrderTexts, orderText } from '../orders-texts.js';
 import {
   orderModel, orderBadges, reservationRowActions, reservationBadge, reservationWhen, paymentBox, nextStep, primaryActions,
-  moreMenu, collectNotes, buildTimeline, helDay, isWide,
+  moreMenu, collectNotes, buildTimeline, helDay, isWide, placeOverflowMenu,
 } from '../order-view-logic.js';
 
 const list = (...n) => n.flat(Infinity).filter((x) => x != null && x !== false);
@@ -142,7 +142,7 @@ function reservationRow(r, m, env, runner, now) {
   if (actions.includes('move')) extra.push(['move', ov('order_view.act.move', { space: resName(refs, moveTarget({ ...r, reservation_id: r.id }, ctx.can)) }), () => openMove(r, env)]);
   if (actions.includes('cancel') && m.reservations.length > 1) extra.push(['cancel', ov('order_view.act.cancel'), () => runner.cancel(m, { reservation_id: r.id })]);
   const fixed = rowBtns.map((x) => (Array.isArray(x) ? btn(x[0], x[1], x[2]) : x));
-  const menu = extra.length ? overflowMenu(extra, ov('order_view.act.row_more'), 'ov-row-more') : null;
+  const menu = extra.length ? overflowMenu(extra, ov('order_view.act.row_more'), 'ov-row-more', { prefer: 'start' }) : null;
   const arrive = actions.includes('arrive') ? (() => {
     const a = h('button', { type: 'button', class: 'btn primary sm', 'data-testid': 'ov-row-arrive' }, icon('check', 16), ' ', ov('order_view.act.arrive'));
     a.addEventListener('click', () => runner.arrive(m, { reservation_id: r.id }, a));
@@ -157,12 +157,38 @@ function reservationRow(r, m, env, runner, now) {
   fixed.length || menu || arrive ? h('div', { class: 'ov-res-actions' }, h('div', { class: 'row wrap' }, ...fixed, menu), arrive) : null);
 }
 
-/** Yksinkertainen ⋯-valikko (details/summary, näppäimistöllä käytettävä). items: [[key, label, onclick]]. */
-export function overflowMenu(items, label, testid) {
+/** Yksinkertainen ⋯-valikko (details/summary, näppäimistöllä käytettävä). items: [[key, label, onclick]].
+ * prefer 'end' = oikeareuna nappiin (otsikko), 'start' = vasen reuna (varausrivi). Avoinna valikko kiinnitetään
+ * ruutuun (position:fixed), jotta se ei jää sivupalkin alle eikä leikkaudu ruudun reunasta. */
+export function overflowMenu(items, label, testid, { prefer = 'end' } = {}) {
+  const list = h('div', { class: 'ov-menu-list', role: 'menu' }, items.map(([key, text, onclick]) => h('button', { type: 'button', role: 'menuitem', class: 'ov-menu-item', 'data-testid': `${testid}-${key}`, text,
+    onclick: (e) => { d.open = false; onclick(e); } })));
   const d = h('details', { class: 'ov-menu', 'data-testid': testid },
     h('summary', { class: 'btn sm ov-menu-btn', 'aria-label': label, title: label }, '⋯'),
-    h('div', { class: 'ov-menu-list', role: 'menu' }, items.map(([key, text, onclick]) => h('button', { type: 'button', role: 'menuitem', class: 'ov-menu-item', 'data-testid': `${testid}-${key}`, text,
-      onclick: (e) => { d.open = false; onclick(e); } }))));
+    list);
+  const clear = () => { for (const p of ['position', 'left', 'right', 'top', 'max-width', 'width', 'z-index']) list.style.removeProperty(p); };
+  const place = () => {
+    if (!d.open) { clear(); return; }
+    const btn = d.querySelector('summary');
+    const placed = placeOverflowMenu(btn.getBoundingClientRect(), { width: list.offsetWidth, height: list.offsetHeight }, { width: window.innerWidth, height: window.innerHeight }, { prefer });
+    list.style.position = 'fixed';
+    list.style.left = `${placed.left}px`;
+    list.style.right = 'auto';
+    list.style.top = `${placed.top}px`;
+    list.style.maxWidth = `${placed.maxWidth}px`;
+    list.style.zIndex = '60';
+  };
+  const onWin = () => { if (d.open) place(); };
+  d.addEventListener('toggle', () => {
+    place();
+    if (d.open) {
+      window.addEventListener('resize', onWin);
+      window.addEventListener('scroll', onWin, true);
+    } else {
+      window.removeEventListener('resize', onWin);
+      window.removeEventListener('scroll', onWin, true);
+    }
+  });
   d.addEventListener('keydown', (e) => { if (e.key === 'Escape' && d.open) { e.stopPropagation(); d.open = false; d.querySelector('summary').focus(); } });
   return d;
 }
