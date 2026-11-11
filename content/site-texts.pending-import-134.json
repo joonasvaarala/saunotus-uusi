@@ -1,0 +1,166 @@
+[
+  {
+    "key": "ui.admin.vcr.st_open",
+    "lang": "fi",
+    "text": "Avoin",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Tarkista: kumppanilahjakortin tila ja ongelman syy riville (Joonas 11.11.2026, tilaus #15184)"
+  },
+  {
+    "key": "ui.admin.vcr.st_open",
+    "lang": "en",
+    "text": "Open",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Tarkista: kumppanilahjakortin tila ja ongelman syy riville (Joonas 11.11.2026, tilaus #15184)"
+  },
+  {
+    "key": "ui.admin.vcr.st_processing",
+    "lang": "fi",
+    "text": "Käsittelyssä",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Tarkista: kumppanilahjakortin tila ja ongelman syy riville (Joonas 11.11.2026, tilaus #15184)"
+  },
+  {
+    "key": "ui.admin.vcr.st_processing",
+    "lang": "en",
+    "text": "Processing",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Tarkista: kumppanilahjakortin tila ja ongelman syy riville (Joonas 11.11.2026, tilaus #15184)"
+  },
+  {
+    "key": "ui.admin.vcr.st_problem",
+    "lang": "fi",
+    "text": "Ongelma",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Tarkista: kumppanilahjakortin tila ja ongelman syy riville (Joonas 11.11.2026, tilaus #15184)"
+  },
+  {
+    "key": "ui.admin.vcr.st_problem",
+    "lang": "en",
+    "text": "Problem",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Tarkista: kumppanilahjakortin tila ja ongelman syy riville (Joonas 11.11.2026, tilaus #15184)"
+  },
+  {
+    "key": "ui.admin.vcr.pc_invalid_code",
+    "lang": "fi",
+    "text": "Koodia ei löytynyt",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Tarkista: kumppanilahjakortin tila ja ongelman syy riville (Joonas 11.11.2026, tilaus #15184)"
+  },
+  {
+    "key": "ui.admin.vcr.pc_invalid_code",
+    "lang": "en",
+    "text": "Code not found",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Tarkista: kumppanilahjakortin tila ja ongelman syy riville (Joonas 11.11.2026, tilaus #15184)"
+  },
+  {
+    "key": "ui.admin.vcr.pc_expired_code",
+    "lang": "fi",
+    "text": "Koodin voimassaolo päättynyt",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Tarkista: kumppanilahjakortin tila ja ongelman syy riville (Joonas 11.11.2026, tilaus #15184)"
+  },
+  {
+    "key": "ui.admin.vcr.pc_expired_code",
+    "lang": "en",
+    "text": "Code expired",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Tarkista: kumppanilahjakortin tila ja ongelman syy riville (Joonas 11.11.2026, tilaus #15184)"
+  },
+  {
+    "key": "ui.admin.vcr.pc_already_used",
+    "lang": "fi",
+    "text": "Koodi jo käytetty",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Tarkista: kumppanilahjakortin tila ja ongelman syy riville (Joonas 11.11.2026, tilaus #15184)"
+  },
+  {
+    "key": "ui.admin.vcr.pc_already_used",
+    "lang": "en",
+    "text": "Code already used",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Tarkista: kumppanilahjakortin tila ja ongelman syy riville (Joonas 11.11.2026, tilaus #15184)"
+  },
+  {
+    "key": "ui.admin.vcr.pc_other",
+    "lang": "fi",
+    "text": "Muu ongelma",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Tarkista: kumppanilahjakortin tila ja ongelman syy riville (Joonas 11.11.2026, tilaus #15184)"
+  },
+  {
+    "key": "ui.admin.vcr.pc_other",
+    "lang": "en",
+    "text": "Other problem",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Tarkista: kumppanilahjakortin tila ja ongelman syy riville (Joonas 11.11.2026, tilaus #15184)"
+  },
+  {
+    "key": "ui.admin.vcr.problem_hint",
+    "lang": "fi",
+    "text": "Lunastus epäonnistui: {{var:reason}}. Tarkista koodi myyjän sivulta ennen kuin merkitset sen lunastetuksi.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:reason}}"
+    ],
+    "reason": "Tarkista: kumppanilahjakortin tila ja ongelman syy riville (Joonas 11.11.2026, tilaus #15184)"
+  },
+  {
+    "key": "ui.admin.vcr.problem_hint",
+    "lang": "en",
+    "text": "Redemption failed: {{var:reason}}. Check the code on the seller’s page before marking it as redeemed.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:reason}}"
+    ],
+    "reason": "Tarkista: kumppanilahjakortin tila ja ongelman syy riville (Joonas 11.11.2026, tilaus #15184)"
+  }
+]
