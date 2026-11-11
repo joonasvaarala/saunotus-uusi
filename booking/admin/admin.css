@@ -997,6 +997,10 @@ body.shot #shell .nav .lbl{display:inline}
 .vcr-sel{min-height:36px;padding:4px 8px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink);font:inherit}
 .vcr-meta{margin:0;font-size:14px}
 .vcr-meta a{color:var(--gold);font-weight:600}
+.vcr-row.is-problem{padding-left:10px;border-left:4px solid var(--err)}
+.vcr-problem{display:grid;gap:4px;padding:6px 10px;border-radius:8px;background:var(--errbg);color:var(--err)}
+.vcr-problem p{margin:0;font-size:14px;color:var(--ink)}
+.vcr-problem .badge.err{font-weight:700}
 .vcr-warn{margin:0;padding:6px 10px;border-left:4px solid var(--gold);background:var(--warnbg);color:var(--ink);font-size:14px}
 .vcr-actions{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
 .vcr-actions .btn{text-decoration:none}

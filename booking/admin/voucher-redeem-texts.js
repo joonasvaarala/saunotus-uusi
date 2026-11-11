@@ -1,6 +1,6 @@
 // booking_173: kumppanilahjakorttien lunastus hallinnassa (FI + EN). Avaimet ui.admin.vcr.* (§18).
 // Sama mekanismi kuin Tarkista-sivu (review-texts.js): public_get_site_texts, kieli talous-i18n. Sanakirja on varalla.
-// Tuonti: content/site-texts.pending-import-68.json (booking_174: arvo käsin + erotuksen maksulinkki → pending-import-69). Arvoissa ei '<'-merkkiä.
+// Tuonti: content/site-texts.pending-import-68.json (booking_174: arvo käsin + erotuksen maksulinkki → pending-import-69; tila ja ongelman syy → pending-import-134). Arvoissa ei '<'-merkkiä.
 import { getLang } from './talous-i18n.js';
 import { getSiteTexts, clearSiteTextsCache } from './site-texts-cache.js';
 
@@ -63,6 +63,14 @@ export const VCR_TEXTS = {
     'ui.admin.vcr.marked_link_nomail': 'Merkitty lunastetuksi: {{var:method}} {{var:amount}}. Erotuksen {{var:difference}} maksulinkki luotiin, mutta sähköpostia ei voitu lähettää. Lähetä linkki tilaukselta.',
     'ui.admin.vcr.err_invalid_amount': 'Anna lahjakortin arvo euroina, yli 0 € (enintään 2 desimaalia).',
     'ui.admin.vcr.err_voucher_exceeds_total': 'Lahjakortin arvo ei voi olla suurempi kuin maksettava summa.',
+    'ui.admin.vcr.st_open': 'Avoin',
+    'ui.admin.vcr.st_processing': 'Käsittelyssä',
+    'ui.admin.vcr.st_problem': 'Ongelma',
+    'ui.admin.vcr.pc_invalid_code': 'Koodia ei löytynyt',
+    'ui.admin.vcr.pc_expired_code': 'Koodin voimassaolo päättynyt',
+    'ui.admin.vcr.pc_already_used': 'Koodi jo käytetty',
+    'ui.admin.vcr.pc_other': 'Muu ongelma',
+    'ui.admin.vcr.problem_hint': 'Lunastus epäonnistui: {{var:reason}}. Tarkista koodi myyjän sivulta ennen kuin merkitset sen lunastetuksi.',
   },
   en: {
     'ui.admin.vcr.box_title': 'Partner gift card',
@@ -122,6 +130,14 @@ export const VCR_TEXTS = {
     'ui.admin.vcr.marked_link_nomail': 'Marked as redeemed: {{var:method}} {{var:amount}}. A payment link for the difference of {{var:difference}} was created, but the email could not be sent. Send the link from the order.',
     'ui.admin.vcr.err_invalid_amount': 'Enter the gift card value in euros, more than 0 € (at most 2 decimals).',
     'ui.admin.vcr.err_voucher_exceeds_total': 'The gift card value cannot be greater than the amount due.',
+    'ui.admin.vcr.st_open': 'Open',
+    'ui.admin.vcr.st_processing': 'Processing',
+    'ui.admin.vcr.st_problem': 'Problem',
+    'ui.admin.vcr.pc_invalid_code': 'Code not found',
+    'ui.admin.vcr.pc_expired_code': 'Code expired',
+    'ui.admin.vcr.pc_already_used': 'Code already used',
+    'ui.admin.vcr.pc_other': 'Other problem',
+    'ui.admin.vcr.problem_hint': 'Redemption failed: {{var:reason}}. Check the code on the seller’s page before marking it as redeemed.',
   },
 };
 
