@@ -22,7 +22,7 @@ if (MOCK) {
   const staffPerms = ['blocks.manage', 'bookings.manage', 'customers.manage', 'giftcards.manage', 'payments.manage', 'pos.use', 'reports.daily', 'shifts.view'];
   // Kokeilutilan mock-data (options-mock.js + sen apumoduulit) ladataan vain tässä tilassa, ei tuotannon ensilataukseen.
   const { createAdminMock } = await import(new URL('./options-mock.js' + new URL(import.meta.url).search, import.meta.url).href);
-  const mock = createAdminMock({ delay: 60, role, perms: role === 'staff' ? staffPerms : undefined });
+  const mock = createAdminMock({ delay: 60, latePaymentScenario: new URLSearchParams(location.search).get('late-paid') === '1', role, perms: role === 'staff' ? staffPerms : undefined });
   setRpcOverride((fn, args) => mock.rpc(fn, args));
   setMockSession({ access_token: 'mock', refresh_token: 'mock', expires_at: 4102444800, user: { email: 'kokeilu@example.com' } });
   window.__adminMock = mock;

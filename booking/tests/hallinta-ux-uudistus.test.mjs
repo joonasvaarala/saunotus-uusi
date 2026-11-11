@@ -45,7 +45,7 @@ test('Tarkista: nollat Kunnossa-riville, vain täydet osiot näkyviin, määrä 
   assert.equal(reviewAttentionSections(list), 1);
   assert.equal(reviewAttentionSections(list, 5), 2);
   assert.deepEqual(attentionKeysWithItems(list), ['block_conflicts']);
-  assert.deepEqual(attentionKeysEmpty(list), ['missing_therapist', 'therapist_conflicts', 'overrides', 'orphan_addons']);
+  assert.deepEqual(attentionKeysEmpty(list), ['missing_therapist', 'therapist_conflicts', 'overrides', 'orphan_addons', 'archived_late_payments']);
   assert.equal(ATTENTION_LABELS_FI.block_conflicts, 'Sulku osuu varaukseen');
   assert.equal(ATTENTION_LABELS_FI.overrides, 'Poikkeukset');
   const review = src('admin/views/review.js');

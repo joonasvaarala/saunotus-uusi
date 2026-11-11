@@ -4,11 +4,18 @@
 //  * koko tilaus + hyvitys: admin_refund_order(p_cancel_reservations=true), kun hyvitettävä maksu on tasan yksi – yksi transaktio.
 //  * koko tilaus ilman hyvitystä: admin_cancel_reservation jokaiselle voimassa olevalle varaukselle peräkkäin (EI atominen;
 //    keskeytyessä kerrotaan montako peruttiin ja näkymä päivitetään).
-// Osasumman kenttä on piilossa (PR 3). Viestivaihe näkyy yliviivattuna: henkilökunnan peruutusviesti tulee PR 2:ssa.
+// Osasumman kenttä on piilossa (PR 3).
+// PR 2 (booking_280/281): admin_reservation_cancel_options → lahjakorttikysymys (pakollinen, ei oletusta), kumppanikoodin huomautukset ja
+// yksittäisen varauksen peruutusviesti (pakollinen kysymys, kun asiakkaalla on sähköposti). Rahahyvityksen osuus = money_share (ilman
+// lahjakortti- ja kumppaniosuutta). Kanta ilman 280:tä (valinnat-RPC puuttuu): toiminta kuten PR 1:ssä, uusia parametreja ei lähetetä.
+// Koko tilauksen peruutuksesta ei lähetetä viestiä tästä dialogista (yksi viesti per kutsu → useita viestejä; avoin kysymys).
 import { h, dialog, toast, money } from '../ui.js';
 import { fmt } from '../talous-i18n.js';
 import { friendly } from './talous-ui.js';
 import { processOnlineRefunds } from './refund-cancel.js';
+import { rcText, loadRcTexts } from '../refund-cancel-texts.js';
+import { isMissingRpc } from '../talous-api.js';
+import { cancelFlowExtras } from '../order-view-logic.js';
 import { ov } from '../order-view-texts.js';
 import { cancelPlan, cancelConfirmKey, paymentBox } from '../order-view-logic.js';
 
@@ -20,7 +27,7 @@ export async function openCancelFlow({ model: m, reservationId = null, ctx, rpc,
   const multi = (m.active || []).length > 1;
   const d = dialog(ov('order_cancel.title'), body, { wide: true });
   d.classList.add('ov-cx-dlg');
-  const st = { scope: multi ? (reservationId ? 'one' : null) : 'one', target: reservationId || (m.active[0]?.id ?? null), refund: 'none', preview: null, previewFor: null };
+  const st = { scope: multi ? (reservationId ? 'one' : null) : 'one', target: reservationId || (m.active[0]?.id ?? null), refund: 'none', preview: null, previewFor: null, opts: new Map(), optsMissing: false, gift: null, notify: null };
   const reason = h('input', { name: 'refund_reason', maxlength: 200, 'data-testid': 'ov-cx-reason' });
   const submit = h('button', { type: 'button', class: 'btn danger', 'data-testid': 'ov-cx-submit' });
   const back = h('button', { type: 'button', class: 'btn ghost', 'data-testid': 'ov-cx-back', text: ov('order_cancel.back'), onclick: () => d.close() });
@@ -30,6 +37,15 @@ export async function openCancelFlow({ model: m, reservationId = null, ctx, rpc,
   const content = h('div', { class: 'ov-cx-body' });
   body.append(sub, steps, content, err, h('div', { class: 'ov-cx-foot' }, back, submit));
 
+  // booking_280: peruutuksen valinnat varauskohtaisesti (välimuisti). Puuttuva RPC → vanha toiminta.
+  async function ensureOptions(ids) {
+    if (st.optsMissing) return;
+    for (const id of ids) {
+      if (st.opts.has(String(id))) continue;
+      try { const o = await rpc('admin_reservation_cancel_options', { p_reservation_id: id }); st.opts.set(String(id), o && o.ok !== false ? o : null); }
+      catch (e) { if (isMissingRpc(e)) { st.optsMissing = true; st.opts.clear(); return; } st.opts.set(String(id), null); }
+    }
+  }
   async function ensurePreview() {
     if (st.scope !== 'one' || !st.target || !can('payments.refund') || m.locked) return;
     if (st.previewFor === st.target) return;
@@ -43,8 +59,17 @@ export async function openCancelFlow({ model: m, reservationId = null, ctx, rpc,
 
   async function paint() {
     await ensurePreview();
+    const planIds = cancelPlan(m, { reservationId: st.target, scope: st.scope, can, preview: st.preview }).targets.map((r) => r.id);
+    await ensureOptions(planIds);
     if (!d.open) return;
-    const plan = cancelPlan(m, { reservationId: st.target, scope: st.scope, can, preview: st.preview });
+    const optsFor = st.optsMissing ? null : planIds.map((id) => st.opts.get(String(id)) ?? null);
+    const ex = cancelFlowExtras({ scope: st.scope, locked: !!m.locked, options: optsFor, gift: st.gift, notify: st.notify, refunding: st.refund === 'full' });
+    // Rahahyvitys yhdelle varaukselle = money_share (lahjakortti- ja kumppaniosuus eivät ole rahahyvitystä, booking_280)
+    const preview = ex.moneyShare != null && st.preview ? { ...st.preview, total: ex.moneyShare } : st.preview;
+    const plan = cancelPlan(m, { reservationId: st.target, scope: st.scope, can, preview });
+    // Koko tilaus + lahjakorttivalinta: admin_refund_order ei tunne lahjakorttivalintaa → peruutus ilman rahahyvitystä, raha erikseen.
+    if (plan.scope === 'all' && ex.gift.show && plan.refund.show) plan.refund = { show: false, reason: null, rcReason: 'all_gift_refund_separately', options: [], amount: 0 };
+    plan.steps = plan.steps.map((s) => (s.key === 'message' ? { ...s, shown: ex.notify.show } : s));
     if (!plan.refund.show) st.refund = 'none';
     const box = paymentBox(m, { can });
     const offline = (st.preview?.payments || []).some((p) => p.online_off);
@@ -71,14 +96,34 @@ export async function openCancelFlow({ model: m, reservationId = null, ctx, rpc,
       if (offline) refundSec.append(h('p', { class: 'muted ov-small', text: ov('order_cancel.refund_online_off') }));
       if (plan.refund.unallocated) refundSec.append(h('p', { class: 'muted ov-small', text: ov('order_cancel.refund_unallocated') }));
       if (st.refund === 'full') refundSec.append(h('label', { class: 'fld' }, h('span', { text: ov('order_cancel.refund_reason') }), reason));
-      if (box.giftCard > 0.004) refundSec.append(h('p', { class: 'muted ov-small', text: ov('order_cancel.gift_note') }));
+      if (box.giftCard > 0.004 && !ex.active) refundSec.append(h('p', { class: 'muted ov-small', text: ov('order_cancel.gift_note') }));
+    } else if (plan.refund.rcReason) {
+      refundSec.append(h('p', { class: 'muted ov-small', 'data-testid': 'ov-cx-refund-why', text: rcText(`ui.admin.refund_cancel.${plan.refund.rcReason}`) }));
     } else if (plan.refund.reason) {
       refundSec.append(h('p', { class: 'muted ov-small', 'data-testid': 'ov-cx-refund-why', text: ov(`order_cancel.refund_hidden.${plan.refund.reason}`) }));
     }
-    if (box.partner > 0.004) refundSec.append(h('p', { class: 'muted ov-small', text: ov('order_cancel.partner_note') }));
+    if (box.partner > 0.004 && !ex.partnerNotes.length) refundSec.append(h('p', { class: 'muted ov-small', text: ov('order_cancel.partner_note') }));
+    // booking_280: lahjakorttikoodi voimaan? (pakollinen, ei oletusta; vanhentuneelle vain "Ei")
+    if (ex.gift.show) {
+      refundSec.append(h('div', { class: 'ov-cx-sub', 'data-testid': 'ov-cx-gift' },
+        h('p', {}, h('strong', { text: rcText('ui.admin.refund_cancel.gift_card_question') })),
+        ...ex.gift.cards.map((g) => h('p', { class: 'muted ov-small', text: rcText('ui.admin.refund_cancel.gift_card_share', { amount: money(g.amount), code: g.code_last4 || '', date: g.valid_to ? fmt.date(g.valid_to) : '–' }) })),
+        ex.gift.expired ? h('p', { class: 'muted ov-small', text: rcText('ui.admin.refund_cancel.gift_card_expired') }) : null,
+        radio('gift', 'keep', st.gift === 'keep', rcText('ui.admin.refund_cancel.gift_card_keep', { amount: money(ex.gift.total) }), null, 'ov-cx-gift-keep', ex.gift.expired),
+        radio('gift', 'forfeit', st.gift === 'forfeit', rcText('ui.admin.refund_cancel.gift_card_forfeit'), null, 'ov-cx-gift-forfeit')));
+    }
+    for (const k of ex.partnerNotes) refundSec.append(h('p', { class: 'tl-note ov-small', 'data-testid': 'ov-cx-partner', text: rcText(`ui.admin.refund_cancel.${k.key}`, k.vars ? { amount: money(k.vars.amount) } : undefined) }));
     parts.push(refundSec);
-    // 3 Viesti (PR 2)
-    parts.push(h('div', { class: 'ov-cx-sec is-off', 'data-testid': 'ov-cx-message' }, num(3, ov('order_cancel.step.message'), true), h('p', { class: 'muted ov-small', text: ov('order_cancel.message_later') })));
+    // 3 Viesti (booking_281): yksi peruutusviesti heti; hyvitysteksti tilan mukaan, ei hyvitystä → ei mainintaa
+    if (ex.notify.show) {
+      parts.push(h('fieldset', { class: 'ov-cx-sec', 'data-testid': 'ov-cx-message' }, h('legend', {}, num(3, rcText('ui.admin.refund_cancel.notify_question'))),
+        h('p', { class: 'muted ov-small', 'data-testid': 'ov-cx-notify-hint', text: rcText(`ui.admin.refund_cancel.${ex.notify.hintKey}`) }),
+        radio('notify', 'yes', st.notify === 'yes', rcText('ui.admin.refund_cancel.notify_yes'), null, 'ov-cx-notify-yes'),
+        radio('notify', 'no', st.notify === 'no', rcText('ui.admin.refund_cancel.notify_no'), null, 'ov-cx-notify-no')));
+    } else {
+      const why = ex.notify.reason ? rcText(`ui.admin.refund_cancel.${ex.notify.reason}`) : ov('order_cancel.message_later');
+      parts.push(h('div', { class: 'ov-cx-sec is-off', 'data-testid': 'ov-cx-message' }, num(3, ov('order_cancel.step.message'), true), h('p', { class: 'muted ov-small', text: why })));
+    }
     // 4 Yhteenveto
     const refunding = plan.refund.show && st.refund === 'full';
     const what = plan.scope === 'all' ? ov('order_cancel.sum_all', { count: ov('order_view.meta_count', { n: plan.targets.length }) })
@@ -91,22 +136,24 @@ export async function openCancelFlow({ model: m, reservationId = null, ctx, rpc,
     content.replaceChildren(...parts);
     submit.textContent = ov(`order_cancel.${cancelConfirmKey(plan, st.refund)}`, { amount: money(plan.refund.amount) });
     submit.disabled = !plan.ready;
-    submit.onclick = () => go(plan);
+    submit.onclick = () => go(plan, ex);
   }
   content.addEventListener('change', (e) => {
     const t = e.target;
     if (t.name === 'what') { if (t.value === 'all') st.scope = 'all'; else { st.scope = 'one'; st.target = Number(t.value.slice(4)); } st.refund = 'none'; paint(); }
     if (t.name === 'refund') { st.refund = t.value; paint(); }
+    if (t.name === 'gift' || t.name === 'notify') { st[t.name] = t.value; err.hidden = true; paint(); }
   });
 
-  async function go(plan) {
+  async function go(plan, ex) {
     err.hidden = true;
+    if (ex.missing.length) { err.textContent = rcText('ui.admin.refund_cancel.choose_required'); err.hidden = false; return; }
     const refunding = plan.refund.show && st.refund === 'full';
     if (refunding && plan.scope === 'all' && reason.value.trim().length < 3) { err.textContent = ov('order_cancel.need_reason'); err.hidden = false; return; }
     submit.disabled = true;
     try {
       if (plan.scope === 'one') {
-        const res = await rpc('admin_cancel_reservation', { p_reservation_id: plan.target.id, p_reason: 'henkilökunta', p_refund: refunding, p_refund_reason: refunding ? (reason.value.trim() || null) : null });
+        const res = await rpc('admin_cancel_reservation', { p_reservation_id: plan.target.id, p_reason: 'henkilökunta', p_refund: refunding, p_refund_reason: refunding ? (reason.value.trim() || null) : null, ...ex.argsFor(plan.target.id) });
         await processOnlineRefunds(api, res?.refunds);
         toast(+res?.refunded_total > 0 ? ov('order_cancel.done_refunded', { amount: money(res.refunded_total) }) : ov('order_cancel.done'));
       } else if (refunding) {
@@ -116,7 +163,7 @@ export async function openCancelFlow({ model: m, reservationId = null, ctx, rpc,
       } else {
         let n = 0;
         for (const r of plan.targets) {
-          try { await rpc('admin_cancel_reservation', { p_reservation_id: r.id, p_reason: 'henkilökunta', p_refund: false, p_refund_reason: null }); n += 1; }
+          try { await rpc('admin_cancel_reservation', { p_reservation_id: r.id, p_reason: 'henkilökunta', p_refund: false, p_refund_reason: null, ...ex.argsFor(r.id) }); n += 1; }
           catch (e) {
             // Ei atominen (PR 1): tulos jää näkyviin dialogiin (ei vain ohimenevä ilmoitus), uusi yritys estetään ja näkymä päivitetään.
             const msg = ov('order_cancel.partial_fail', { done: n, total: plan.targets.length, error: friendly(e) });
@@ -129,6 +176,7 @@ export async function openCancelFlow({ model: m, reservationId = null, ctx, rpc,
       d.close(); onDone?.();
     } catch (e) { err.textContent = friendly(e); err.hidden = false; submit.disabled = false; }
   }
+  await loadRcTexts(rpc).catch(() => false);
   await paint();
   return d;
 }

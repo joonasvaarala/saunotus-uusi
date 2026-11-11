@@ -3,7 +3,7 @@
 // data = booking.email_outbox_claim()-rivi (ks. docs/talous-integraatiot.md): { kind, locale, to_name, order{order_no, order_url, total, items[], reservations[]}, receipt{receipt_no, kind, text_body, total, issued_at}, payment{amount, link_url, link_expires_at} }.
 // FI + EN, HTML (taulukkopohjainen, inline-tyylit, sähköpostiyhteensopiva) + tekstiversio. Ei ulkoisia riippuvuuksia (puhdas funktio, testattu node --test).
 // Tyyli: tumma vihreä + hiekka, ei sinistä. Logo: sivuston /img/logo-kuitti.png (osoite johdetaan tilauslinkistä; muuten LOGO_FALLBACK).
-export type Kind = "order_confirmation" | "payment_link" | "payment_link_reminder" | "receipt" | "refund_receipt" | "cancel_request_ack" | "order_change" | "gift_card_buyer" | "gift_card_recipient" | "voucher_claim_received" | "voucher_claim_problem" | "business_quote_ack" | "business_quote_notify" | "invoice_pdf" | "product_message" | "waitlist_spot_freed" | "waitlist_joined" | "annual_card_code" | "unpaid_booking_cancelled" | "event_message";
+export type Kind = "order_confirmation" | "payment_link" | "payment_link_reminder" | "receipt" | "refund_receipt" | "cancel_request_ack" | "order_change" | "gift_card_buyer" | "gift_card_recipient" | "voucher_claim_received" | "voucher_claim_problem" | "business_quote_ack" | "business_quote_notify" | "invoice_pdf" | "product_message" | "waitlist_spot_freed" | "waitlist_joined" | "annual_card_code" | "unpaid_booking_cancelled" | "event_message" | "reservation_cancelled";
 export interface Rendered { subject: string; text: string; html: string }
 // Asiakasnäkyvät tekstit: texts.ts (repon oletukset = varateksti) tai tietokannasta (email.*-avaimet, _shared/site_texts.ts). render() ottaa valinnaisen tekstihaun (4. parametri).
 import { makeT, type TFn } from "../_shared/site_texts.ts";
@@ -642,6 +642,50 @@ export function render(kind: Kind, d: any, locale?: string, t: TFn = DEFAULT_T):
       const html = mk(title, intro, h1(title) + helloRow + p(esc(intro))
         + (product || time ? box([product, time].filter(Boolean).map((line) => `<span style="font-family:${SANS};font-size:15px;line-height:1.5;color:${INK}">${esc(line)}</span>`).join("<br>")) : "")
         + (retry ? button(retry, again) : "") + cardTail);
+      return { subject, text, html };
+    }
+    case "reservation_cancelled": {
+      // booking_281: peruutusviesti heti. Hyvitys valmis → "hyvitetty" + kuitti liitteenä; kesken → "käsittelyssä" (kuitti erikseen myöhemmin);
+      // ei hyvitystä → ei mainintaa. Lahjakortin / kumppanikoodin tila. Allekirjoitus Tapio.
+      // Ei maksuvälittäjän nimeä eikä maksutapaa. data.cancellation = booking._reservation_cancelled_mail().
+      const c = d?.cancellation || {};
+      const res: any[] = Array.isArray(c.reservations) ? c.reservations : [];
+      const refunds: any[] = Array.isArray(c.refunds) ? c.refunds : [];
+      const gifts: any[] = Array.isArray(c.gift_card) ? c.gift_card : [];
+      const sum = (xs: any[]) => xs.reduce((s, x) => s + (Number(x?.amount) || 0), 0);
+      const subject = X("email.reservation_cancelled.subject", { no });
+      const title = X("email.reservation_cancelled.title");
+      const intro = X(res.length > 1 ? "email.reservation_cancelled.intro_many" : "email.reservation_cancelled.intro");
+      const lines = res.map((r) => {
+        const what = String((en && r?.product_name_en) || r?.product_name || "").trim();
+        const when = r?.starts_at ? whenOrStart(r.starts_at, r.ends_at, en) : "";
+        return [what, when].filter(Boolean).join(", ");
+      }).filter(Boolean);
+      const notes: string[] = [];
+      // Hyvitysteksti lähetyshetken tilan mukaan (booking_281). Ei hyvityksiä → ei mainintaa lainkaan.
+      const money = refunds.filter((f) => (f?.kind ?? "money") === "money");
+      const done = money.filter((f) => f?.status === "done");
+      if (done.length) {
+        const key = done.some((f) => f?.receipt?.public_token) ? "email.reservation_cancelled.refund_done_receipt"
+          : done.some((f) => f?.receipt_sent_separately) ? "email.reservation_cancelled.refund_done_separate" : "email.reservation_cancelled.refund_done";
+        notes.push(X(key, { amount: eur(sum(done), en) }));
+      }
+      const pending = money.filter((f) => f?.status === "requested" || f?.status === "processing");
+      if (pending.length) notes.push(X("email.reservation_cancelled.refund_pending", { amount: eur(sum(pending), en) }));
+      if (money.some((f) => f?.status === "failed" || f?.status === "cancelled")) notes.push(X("email.reservation_cancelled.refund_problem"));
+      const ret = gifts.filter((g) => g?.action === "returned"), lost = gifts.filter((g) => g?.action === "forfeited");
+      for (const g of ret) notes.push(X("email.reservation_cancelled.gift_returned", { amount: eur(g.amount, en), code: String(g.code_last4 || ""), date: g.valid_to ? day(g.valid_to, en) : "–" }));
+      if (lost.length) notes.push(X("email.reservation_cancelled.gift_forfeited", { amount: eur(sum(lost), en) }));
+      if (c.order_kept === true) notes.push(X("email.reservation_cancelled.order_kept"));
+      const orderUrl = safeUrl(d?.order?.order_url);
+      const view = X("email.reservation_cancelled.view_order");
+      const cardSign = `${X("email.common.closing")}\n${X("email.reservation_cancelled.sign_name")}\n${SELLER}`;
+      const cardTail = `${p(esc(contact), `color:${MUTED};font-size:13px`)}${p(esc(cardSign).replace(/\n/g, "<br>"))}`;
+      const text = textBlock(hello, intro, lines.join("\n"), ...notes, orderUrl && `${view}:\n${orderUrl}`, contact, cardSign) + "\n";
+      const html = mk(title, intro, h1(title) + helloRow + p(esc(intro))
+        + (lines.length ? box(lines.map((line) => `<span style="font-family:${SANS};font-size:15px;line-height:1.5;color:${INK}">${esc(line)}</span>`).join("<br>")) : "")
+        + notes.map((n) => p(esc(n))).join("")
+        + (orderUrl ? button(orderUrl, view) : "") + cardTail);
       return { subject, text, html };
     }
     case "event_message": {

@@ -458,3 +458,42 @@ export function customerOrderBadges(o) {
   if (o.upcoming && o.status === 'confirmed') out.unshift({ kind: 'st-confirmed', key: 'status.confirmed' });
   return out;
 }
+
+/**
+ * PR 2 (booking_280/281): peruutusdialogin lisäkysymykset admin_reservation_cancel_options-vastauksista (yksi per peruttava varaus).
+ * options = null (kanta ilman 280:tä / haku epäonnistui) → ei lisäkysymyksiä eikä uusia parametreja (PR 1:n toiminta).
+ *  - lahjakortti: pakollinen valinta (keep/forfeit), ei oletusta; vanhentunut kortti → vain forfeit.
+ *  - kumppanikoodi: huomautukset (osuutta ei hyvitetä; lunastettu tilaus jää voimaan).
+ *  - viesti: vain yhden varauksen peruutuksessa ja kun asiakkaalla on sähköposti; pakollinen kysymys. Vihje ilman hyvitysmainintaa,
+ *    jos rahaa ei hyvitetä eikä lahjakortin arvoa palauteta (Joonas 11.11.2026 18.15).
+ */
+export function cancelFlowExtras({ scope = 'one', locked = false, options = null, gift = null, notify = null, refunding = false } = {}) {
+  const list = Array.isArray(options) ? options : [];
+  const active = list.length > 0 && list.every((o) => o && typeof o === 'object');
+  const opts = active ? list : [];
+  const giftOpts = locked ? [] : opts.filter((o) => o.gift_card_choice_required);
+  const cards = giftOpts.flatMap((o) => o.gift_cards || []);
+  const giftInfo = { show: giftOpts.length > 0, cards, total: round2(giftOpts.reduce((s, o) => s + num(o.gift_card_total), 0)), expired: cards.some((g) => g.keep_allowed === false) };
+  const partnerNotes = [];
+  const partnerSum = round2(opts.reduce((s, o) => s + num(o.partner_share), 0));
+  if (partnerSum > EPS) partnerNotes.push({ key: 'partner_share', vars: { amount: partnerSum } });
+  if (opts.some((o) => o.order_stays || o.voucher_redeemed)) partnerNotes.push({ key: 'partner_order_stays' });
+  const one = scope === 'one' && active ? opts[0] : null;
+  const moneyShare = one && one.money_share !== null && one.money_share !== undefined ? round2(num(one.money_share)) : null;
+  let notifyInfo = { show: false, reason: null, hintKey: null };
+  if (one && one.customer_email) {
+    const refundMentioned = (refunding && (moneyShare ?? 0) > EPS) || (giftInfo.show && gift === 'keep');
+    notifyInfo = { show: true, reason: null, hintKey: refundMentioned ? 'notify_hint' : 'notify_hint_no_refund' };
+  } else if (one) notifyInfo = { show: false, reason: 'notify_no_email', hintKey: null };
+  else if (active && scope === 'all') notifyInfo = { show: false, reason: 'notify_all_unavailable', hintKey: null };
+  const missing = [];
+  if (giftInfo.show && !(gift === 'forfeit' || (gift === 'keep' && !giftInfo.expired))) missing.push('gift');
+  if (notifyInfo.show && !['yes', 'no'].includes(notify)) missing.push('notify');
+  const byId = new Map(opts.map((o) => [String(o.reservation_id), o]));
+  const argsFor = (id) => {
+    if (!active) return {};
+    const o = byId.get(String(id));
+    return { p_gift_card_keep: o?.gift_card_choice_required && !locked ? gift === 'keep' : null, p_notify: notifyInfo.show ? notify === 'yes' : false };
+  };
+  return { active, gift: giftInfo, partnerNotes, moneyShare, notify: notifyInfo, missing, argsFor };
+}

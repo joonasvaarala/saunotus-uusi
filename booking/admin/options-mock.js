@@ -101,7 +101,7 @@ function procountorStatus(cfg) {
 const PERMS = ['bookings.manage', 'bookings.override', 'customers.manage', 'catalog.edit', 'payments.manage', 'payments.refund', 'reports.view', 'settings.edit', 'pos.use', 'invoices.manage', 'giftcards.manage', 'messages.edit'];
 const CODE_RE = /^[a-z0-9_]{1,40}$/;
 
-export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, role = 'manager' } = {}) {
+export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, role = 'manager', latePaymentScenario = false } = {}) {
   const today = todayHel(now);
   const st = {
     calls: [], perms: [...perms],
@@ -374,13 +374,31 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
       return { ok: true, reservation_id: r.reservation_id, order_id: r.order_id, status: r.status, total: amt, unallocated: 0,
         payments: amt > 0 ? [{ payment_id: r.reservation_id + 7000, provider: 'manual', method: 'card_terminal', gift_card: false, online_off: false, amount: amt, lines: [] }] : [] };
     },
+    // booking_280/281: peruutuksen valinnat. Kokeilutila: viimeinen maksettu varaus on maksettu lahjakortilla, joka kolmas (id % 3 = 0) kumppanikoodilla (lunastettu).
+    admin_reservation_cancel_options: (a) => {
+      need('bookings.manage');
+      const r = st.reservations.find((x) => x.reservation_id === +a.p_reservation_id); if (!r) throw err('not_found', 'Varausta ei löydy');
+      const paid = r.payment_status === 'paid' && !r.refunded ? +r.total_gross : 0;
+      const lastPaid = st.reservations.filter((x) => x.payment_status === 'paid').at(-1);
+      const gc = paid > 0 && r === lastPaid && r.reservation_id % 3 !== 0 ? [{ payment_id: r.reservation_id + 7100, gift_card_id: 900 + r.reservation_id, amount: paid, code_last4: '4821', valid_to: '2027-06-30', card_status: 'active', keep_allowed: true }] : [];
+      const partner = paid > 0 && r.reservation_id % 3 === 0 ? paid : 0;
+      const gcTotal = gc.reduce((s, x) => s + x.amount, 0);
+      return { ok: true, reservation_id: r.reservation_id, order_id: r.order_id, status: r.status, future: true, active_in_order: 1,
+        gift_cards: gc, gift_card_total: gcTotal, gift_card_choice_required: gc.length > 0, partner_share: partner, voucher_redeemed: partner > 0, order_stays: partner > 0,
+        money_share: st.perms.includes('payments.refund') ? paid - gcTotal - partner : null, unallocated: 0, invoice_locked: false, customer_email: !!r.customer_email || true };
+    },
     admin_cancel_reservation: (a) => {
       need('bookings.manage'); if (a.p_refund === true) need('payments.refund');
+      { const o = handlers.admin_reservation_cancel_options(a);
+        if (o.gift_card_choice_required && a.p_gift_card_keep == null) throw err('gift_card_keep_required', 'Valitse, jätetäänkö lahjakorttikoodi voimaan'); }
       const r = st.reservations.find((x) => x.reservation_id === +a.p_reservation_id); if (!r) throw err('not_found', 'Varausta ei löydy');
       if (!['pending', 'confirmed'].includes(r.status)) throw err('invalid_status', 'Vain voimassa olevan varauksen voi perua');
-      const pv = a.p_refund === true ? handlers.admin_reservation_refund_preview(a) : { payments: [], total: 0 };
+      const opt = handlers.admin_reservation_cancel_options(a);
+      const pv = a.p_refund === true && opt.money_share > 0 ? handlers.admin_reservation_refund_preview(a) : { payments: [], total: 0 };
       r.status = 'cancelled'; if (pv.total > 0) r.refunded = true;
-      return { ok: true, cancelled: true, order_id: r.order_id, refunds: pv.payments.map((p) => ({ payment_id: p.payment_id, provider: p.provider, amount: p.amount, refund_id: 9e6, status: 'done' })), refunded_total: pv.total };
+      return { ok: true, cancelled: true, order_id: r.order_id, refunds: pv.payments.map((p) => ({ payment_id: p.payment_id, provider: p.provider, amount: p.amount, refund_id: 9e6, status: 'done' })), refunded_total: pv.total,
+        gift_card: opt.gift_cards.map((g) => ({ payment_id: g.payment_id, amount: g.amount, action: a.p_gift_card_keep ? 'returned' : 'forfeited' })),
+        partner_share: opt.partner_share, order_kept: opt.voucher_redeemed, notified: a.p_notify === true, action_id: a.p_notify == null ? null : '00000000-0000-4000-a000-000000000281' };
     },
     admin_my_permissions: () => ({ role, role_label: role === 'staff' ? 'Työntekijä (esimerkki)' : role === 'admin' ? 'Pääkäyttäjä (esimerkki)' : 'Päällikkö (esimerkki)', permissions: st.perms }),
     admin_list_products: () => st.products.map((p) => ({ ...p })),
@@ -654,6 +672,14 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
       if (o) Object.assign(o, v); else { o = { id: Math.max(0, ...st.options.map((x) => x.id)) + 1, product_id: a.p_product_id, code, ...v }; st.options.push(o); }
       return { ok: true, option: { ...o } };
     },
+    admin_ack_archived_late_payment: (a) => {
+      need('payments.manage');
+      const note = String(a.p_note || '').trim();
+      if (note.length < 3 || note.length > 1000) throw err('invalid_param', 'Kirjoita käsittelyselite');
+      if (!latePaymentScenario || a.p_payment_id !== 279001) throw err('not_found', 'Maksua ei löydy');
+      const already = !!st.latePaymentAcknowledged; st.latePaymentAcknowledged = true;
+      return { ok: true, already, mock: true, payment_id: a.p_payment_id };
+    },
     admin_review_list: () => {
       const ackedIds = new Set(st.blockAcks.map((a) => `${a.reservation_id}:${a.block_id}`));
       const open = st.blockConflicts.filter((b) => !ackedIds.has(`${b.reservation_id}:${b.block_id}`));
@@ -661,7 +687,7 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
         const a = st.blockAcks.find((x) => x.reservation_id === b.reservation_id && x.block_id === b.block_id);
         return { ...b, ack_id: a.id, ack_reason: a.ack_reason, acked_by_label: a.acked_by_label, acked_at: a.acked_at };
       });
-      return { missing_therapist: [], therapist_conflicts: [], block_conflicts: open, acked_block_conflicts: acked, overrides: [], orphan_addons: [] };
+      return { archived_late_payments: st.perms.includes('payments.manage') && latePaymentScenario && !st.latePaymentAcknowledged ? [{ payment_id: 279001, order_id: 1, order_no: 10001, amount: 20, customer_name: 'KOKEILU – ei oikea tilaus', paid_at: now.toISOString() }] : [], missing_therapist: [], therapist_conflicts: [], block_conflicts: open, acked_block_conflicts: acked, overrides: [], orphan_addons: [] };
     },
     admin_ack_block_conflict: (a) => {
       if (!st.perms.includes('blocks.manage') && !st.perms.includes('bookings.override')) throw err('forbidden', 'Ei oikeutta tähän toimintoon (blocks.manage tai bookings.override)');
