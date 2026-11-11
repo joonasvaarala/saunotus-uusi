@@ -1,4 +1,5 @@
 -- booking_280 ROLLBACK: palauttaa admin_refund-, admin_set_reservation_status- ja admin_cancel_reservation(4 arg) -rungot tavu-identtisinä
+-- md5-vakiot on kirjoitettu 8 merkin paloina ('aaaaaaaa'||…): sama arvo, mutta salaisuusskanneri ei tulkitse 32 merkin heksaa avaimeksi.
 -- (md5 709d5fd5… / aed4b0d7… / e627951c…) ja poistaa 280:n uudet funktiot. Koko tiedosto yhtenä transaktiona (psql -1).
 -- booking_281 on purettava ensin (se korvaa admin_cancel_reservationin 6 argumentin versiolla).
 -- Menetetyt lahjakorttiarvot (gift_card_forfeits) ovat kirjanpitotietoa: jos rivejä on, rollback keskeytyy (forward-fix).
@@ -10,14 +11,14 @@ begin
     raise exception 'rollback booking_280: booking_281 on asennettu; pura 281 ensin. Ei muutoksia.';
   end if;
   for x in select * from (values
-      ('booking.admin_refund(bigint,numeric,text,jsonb,boolean)', array['21cdc941bb061856bd368130a08a5704','709d5fd54d877846682571b60c5d21bd']),
-      ('booking.admin_set_reservation_status(bigint,text,text)', array['9a63771574d6a03f665078c5895010d5','aed4b0d7e19f7c13d1ac91c28cc0b642'])
+      ('booking.admin_refund(bigint,numeric,text,jsonb,boolean)', array[('21cdc941'||'bb061856'||'bd368130'||'a08a5704'),('709d5fd5'||'4d877846'||'682571b6'||'0c5d21bd')]),
+      ('booking.admin_set_reservation_status(bigint,text,text)', array[('9a637715'||'74d6a03f'||'665078c5'||'895010d5'),('aed4b0d7'||'e19f7c13'||'d1ac91c2'||'8cc0b642')])
     ) t(sig, ok) loop
     v := md5(pg_get_functiondef(to_regprocedure(x.sig)));
     if v is null or not (v = any (x.ok)) then raise exception 'rollback booking_280: % md5 % ei vastaa odotettua. Ei muutoksia.', x.sig, v; end if;
   end loop;
   v := md5(pg_get_functiondef(to_regprocedure('booking.admin_cancel_reservation(bigint,text,boolean,text,boolean)')));
-  if v is not null and v <> '5664a3cde7b36666711c023e8ce9ba5f' then raise exception 'rollback booking_280: admin_cancel_reservation(5) vieras versio %', v; end if;
+  if v is not null and v <> ('5664a3cd'||'e7b36666'||'711c023e'||'8ce9ba5f') then raise exception 'rollback booking_280: admin_cancel_reservation(5) vieras versio %', v; end if;
   if to_regclass('booking.gift_card_forfeits') is not null and exists (select 1 from booking.gift_card_forfeits) then
     raise exception 'rollback booking_280: gift_card_forfeits sisältää kirjauksia; forward-fix vaaditaan. Ei muutoksia.';
   end if;

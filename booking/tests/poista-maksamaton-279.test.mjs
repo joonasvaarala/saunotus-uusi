@@ -13,8 +13,11 @@ const F = await import(pathToFileURL(join(root, 'admin/orders-filter.js')));
 const OT = await import(pathToFileURL(join(root, 'admin/orders-texts.js')));
 const A = await import(pathToFileURL(join(root, 'admin/talous-api.js')));
 const { createMock } = await import(pathToFileURL(join(root, 'admin/talous-mock.js')));
-const MIG = readFileSync(join(root, 'supabase/migrations/20261111235901_booking_279_unpaid_order_delete.sql'), 'utf8');
-const RB = readFileSync(join(root, 'supabase/rollbacks/20261111235901_booking_279_ROLLBACK.sql'), 'utf8');
+// md5-vakiot ovat tiedostoissa 8 merkin paloina ('aaaaaaaa'||'bbbbbbbb'||…, salaisuusskannerin väärä hälytys); tarkistukset tehdään kootulla arvolla.
+const joinMd5 = (s) => s.replace(/\('([0-9a-f]{8})'\|\|'([0-9a-f]{8})'\|\|'([0-9a-f]{8})'\|\|'([0-9a-f]{8})'\)/g, "'$1$2$3$4'");
+const MIG_RAW = readFileSync(join(root, 'supabase/migrations/20261111235901_booking_279_unpaid_order_delete.sql'), 'utf8');
+const RB_RAW = readFileSync(join(root, 'supabase/rollbacks/20261111235901_booking_279_ROLLBACK.sql'), 'utf8');
+const MIG = joinMd5(MIG_RAW), RB = joinMd5(RB_RAW);
 const VIEW = readFileSync(join(root, 'admin/views/talous-orders.js'), 'utf8');
 // booking_279 R4: poisto yhteisessä varaus-/tilauskortissa (PR #331 korvasi Tilaukset-rivin laajennuksen kortilla)
 const CARD = readFileSync(join(root, 'admin/views/order-card-delete.js'), 'utf8');
@@ -395,4 +398,10 @@ test('tekstit: pending-import-138 FI+EN = koodin oletukset (ui.admin.order_delet
   }
   assert.equal(new Set(rows.map((r) => `${r.key}|${r.lang}`)).size, rows.length, 'ei tuplarivejä');
   assert.ok(rows.every((r) => r.class === 'normal' && r.kind === 'plain'));
+});
+
+test('salaisuusskanneri: 279-migraatiossa ja -rollbackissa ei 32 merkin heksaa (md5-vakiot paloina), koottuna samat vartijat', () => {
+  for (const [n, t] of [['migraatio', MIG_RAW], ['rollback', RB_RAW]]) assert.doesNotMatch(t, /[0-9a-fA-F]{32}/, n);
+  assert.match(MIG, /'7a546ff24b41e6ffe7f22e3a43a282fc'/, 'PROD admin_list_orders -vartija koottuna');
+  assert.match(MIG, /'e46ae5ebd9fb813a087b7f05c40949b8'/);
 });

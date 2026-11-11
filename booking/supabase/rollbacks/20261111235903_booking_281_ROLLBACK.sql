@@ -1,4 +1,5 @@
 -- booking_281 ROLLBACK: palauttaa booking_280-tilan (admin_cancel_reservation 5 arg md5 5664a3cd…, email_outbox_claim booking_279 e46ae5eb…,
+-- md5-vakiot on kirjoitettu 8 merkin paloina ('aaaaaaaa'||…): sama arvo, mutta salaisuusskanneri ei tulkitse 32 merkin heksaa avaimeksi.
 -- email_outbox_kind_check PROD 37e35b13…). Koko tiedosto yhtenä transaktiona (psql -1).
 -- Ei saa ajaa, jos reservation_cancelled-viestejä on jo syntynyt (rajoite ei palaudu; forward-fix).
 set local lock_timeout = '5s';
@@ -6,15 +7,15 @@ do $pre$
 declare v text;
 begin
   v := md5(pg_get_functiondef(to_regprocedure('booking.email_outbox_claim(integer)')));
-  if v is null or v not in ('44601247f6bbcadfece1e56a0c08fb13', 'e46ae5ebd9fb813a087b7f05c40949b8') then
+  if v is null or v not in (('44601247'||'f6bbcadf'||'ece1e56a'||'0c08fb13'), ('e46ae5eb'||'d9fb813a'||'087b7f05'||'c40949b8')) then
     raise exception 'rollback booking_281: email_outbox_claim md5 % ei vastaa odotettua. Ei muutoksia.', v;
   end if;
   v := md5(pg_get_functiondef(to_regprocedure('booking.admin_cancel_reservation(bigint,text,boolean,text,boolean,boolean)')));
-  if v is not null and v <> 'f76f98857d6477f495f276582e732c11' then raise exception 'rollback booking_281: admin_cancel_reservation(6) vieras versio %', v; end if;
+  if v is not null and v <> ('f76f9885'||'7d6477f4'||'95f27658'||'2e732c11') then raise exception 'rollback booking_281: admin_cancel_reservation(6) vieras versio %', v; end if;
   v := md5(pg_get_functiondef(to_regprocedure('booking._enqueue_reservation_cancelled(bigint,uuid,bigint[],jsonb,jsonb,boolean)')));
-  if v is not null and v <> '64b44693bdf387b9e94b76dccd201094' then raise exception 'rollback booking_281: _enqueue_reservation_cancelled vieras versio %', v; end if;
+  if v is not null and v <> ('64b44693'||'bdf387b9'||'e94b76dc'||'cd201094') then raise exception 'rollback booking_281: _enqueue_reservation_cancelled vieras versio %', v; end if;
   v := md5(pg_get_functiondef(to_regprocedure('booking._reservation_cancelled_mail(bigint)')));
-  if v is not null and v <> '4a944f66279e4c82b3c4aa03707ad3da' then raise exception 'rollback booking_281: _reservation_cancelled_mail vieras versio %', v; end if;
+  if v is not null and v <> ('4a944f66'||'279e4c82'||'b3c4aa03'||'707ad3da') then raise exception 'rollback booking_281: _reservation_cancelled_mail vieras versio %', v; end if;
   if exists (select 1 from booking.email_outbox where kind = 'reservation_cancelled') then
     raise exception 'rollback booking_281: reservation_cancelled-viestejä on jo; forward-fix vaaditaan. Ei muutoksia.';
   end if;

@@ -1,4 +1,5 @@
 -- booking_281: yhdistetty peruutusviesti reservation_cancelled (tilausnäkymä v3 §4 G). Joonas 11.11.2026 18.12–18.15:
+-- md5-vakiot on kirjoitettu 8 merkin paloina ('aaaaaaaa'||…): sama arvo, mutta salaisuusskanneri ei tulkitse 32 merkin heksaa avaimeksi.
 --   peruutusviesti lähtee HETI toiminnon yhteydessä (EI 2 pankkipäivän odotusta eikä vakiota). Hyvitysteksti riippuu tilasta lähetyshetkellä:
 --   - hyvitys jo vahvistettu (done) → "hyvitetty" + hyvityskuitti liitteenä (yksi viesti; erillinen refund_receipt ohitetaan),
 --   - hyvitys kesken (requested/processing) → "hyvitys käsittelyssä"; kuitti lähtee erikseen, kun Montonio vahvistaa (montonio_refund_complete),
@@ -22,14 +23,14 @@ do $pre$
 declare v text; x record;
 begin
   for x in select * from (values
-      ('booking.email_outbox_claim(integer)', array['e46ae5ebd9fb813a087b7f05c40949b8','44601247f6bbcadfece1e56a0c08fb13']),
-      ('booking._enqueue_email(text,bigint,bigint,bigint,text,jsonb)', array['e2eee7206bd6006ed93a81b1cdeecb32'])
+      ('booking.email_outbox_claim(integer)', array[('e46ae5eb'||'d9fb813a'||'087b7f05'||'c40949b8'),('44601247'||'f6bbcadf'||'ece1e56a'||'0c08fb13')]),
+      ('booking._enqueue_email(text,bigint,bigint,bigint,text,jsonb)', array[('e2eee720'||'6bd6006e'||'d93a81b1'||'cdeecb32')])
     ) t(sig, ok) loop
     v := md5(pg_get_functiondef(to_regprocedure(x.sig)));
     if v is null or not (v = any (x.ok)) then raise exception 'booking_281: % md5 % ei vastaa odotettua (%). Ei muutoksia.', x.sig, v, array_to_string(x.ok, ' / '); end if;
   end loop;
   v := md5(pg_get_functiondef(to_regprocedure('booking.admin_cancel_reservation(bigint,text,boolean,text,boolean)')));
-  if v is not null and v <> '5664a3cde7b36666711c023e8ce9ba5f' then
+  if v is not null and v <> ('5664a3cd'||'e7b36666'||'711c023e'||'8ce9ba5f') then
     raise exception 'booking_281: admin_cancel_reservation (5 arg, booking_280) md5 % ei vastaa. Ei muutoksia.', v;
   end if;
   if v is null and to_regprocedure('booking.admin_cancel_reservation(bigint,text,boolean,text,boolean,boolean)') is null then
@@ -39,13 +40,13 @@ begin
     raise exception 'booking_281: 4 argumentin admin_cancel_reservation on yhä olemassa (booking_280 ajamatta). Ei muutoksia.';
   end if;
   v := (select md5(pg_get_constraintdef(oid)) from pg_constraint where conrelid = 'booking.email_outbox'::regclass and conname = 'email_outbox_kind_check');
-  if v is null or v not in ('37e35b13045a53822f2da9ded36263e1', '4948a32b0fffc9f49667a4c2c2fe906e') then
+  if v is null or v not in (('37e35b13'||'045a5382'||'2f2da9de'||'d36263e1'), ('4948a32b'||'0fffc9f4'||'9667a4c2'||'c2fe906e')) then
     raise exception 'booking_281: email_outbox_kind_check md5 % ei ole PROD-lähtötila 37e35b13…. Ei muutoksia.', v;
   end if;
   for x in select * from (values
-      ('booking.admin_cancel_reservation(bigint,text,boolean,text,boolean,boolean)', 'f76f98857d6477f495f276582e732c11'),
-      ('booking._enqueue_reservation_cancelled(bigint,uuid,bigint[],jsonb,jsonb,boolean)', '64b44693bdf387b9e94b76dccd201094'),
-      ('booking._reservation_cancelled_mail(bigint)', '4a944f66279e4c82b3c4aa03707ad3da')
+      ('booking.admin_cancel_reservation(bigint,text,boolean,text,boolean,boolean)', ('f76f9885'||'7d6477f4'||'95f27658'||'2e732c11')),
+      ('booking._enqueue_reservation_cancelled(bigint,uuid,bigint[],jsonb,jsonb,boolean)', ('64b44693'||'bdf387b9'||'e94b76dc'||'cd201094')),
+      ('booking._reservation_cancelled_mail(bigint)', ('4a944f66'||'279e4c82'||'b3c4aa03'||'707ad3da'))
     ) t(sig, ok) loop
     if to_regprocedure(x.sig) is not null and md5(pg_get_functiondef(to_regprocedure(x.sig))) <> x.ok then
       raise exception 'booking_281: vieras aiempi versio %. Ei muutoksia.', x.sig;

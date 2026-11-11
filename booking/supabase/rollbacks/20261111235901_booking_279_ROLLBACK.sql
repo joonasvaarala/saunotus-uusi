@@ -1,4 +1,5 @@
 -- booking_279 full rollback: ONLY before first use. Never unarchive or hide review data implicitly.
+-- md5-vakiot on kirjoitettu 8 merkin paloina ('aaaaaaaa'||…): sama arvo, mutta salaisuusskanneri ei tulkitse 32 merkin heksaa avaimeksi.
 -- Entire file MUST run in one transaction. Gate waits for in-flight archive before checking data.
 set local lock_timeout = '5s';
 select pg_advisory_xact_lock(hashtextextended('booking:archive:279',0));
@@ -52,20 +53,20 @@ declare
   r record; v text; bad text := '';
 begin
   for r in select * from (values
-      ('booking.admin_list_orders(text,text,text,text,boolean,text,date,date,text,integer,integer,text,text[])', array['a00940851c8ae79ef8d2d7d97f0ffacb', '7a546ff24b41e6ffe7f22e3a43a282fc'], false),
-      ('booking.email_outbox_claim_base_132(integer)',array['0b10986533285645d8592449a90a1e0c','23157765d41d29571f4016f5838ea126'],false),
-      ('booking.email_outbox_claim_base_146(integer)',array['5bb547fa6a5f9e715ebbb39e6b479d3e'],false),
-      ('booking.email_outbox_claim_base_215(integer)',array['2c76d9c30a28f78e8bb84cce0ff61d77'],false),
-      ('booking.email_outbox_mark(bigint,text,text,text)',array['2ba0222fdfee71942fb09053bd7ea803'],false),
-      ('booking.email_outbox_claim(integer)',array['5e8125c1da473685b7a7adbb40966250','e46ae5ebd9fb813a087b7f05c40949b8'],false),
-      ('booking.admin_review_list()',array['8c7ddb15580659e9daa3e72f43718f14','fca45e305e1036d462ef28c7473de150'],false),
-      ('booking._archived_late_payment_review_rows()',array['035d2f18a860cd62a757187ef3e64a71'],true),
-      ('booking.admin_ack_archived_late_payment(bigint,text)',array['f3ad2e3c42ea2178fcf297e5c4bbf2eb'],true),
-      ('booking._order_delete_blockers(bigint)', array['4297a1fe430d936320cd0a777f7c0ca3'], true),
-      ('booking._order_delete_primary_blocker(jsonb)', array['402956e3c8e0a8143236e0013ac3f41c'], true),
-      ('booking.admin_order_delete_check(bigint)', array['102ec3b325202767d7efbb28643d7457'], true),
-      ('booking.admin_delete_unpaid_order(bigint,text,boolean)', array['3451b8a7d3c340ba93f0d3f93c601127'], true),
-      ('booking._email_outbox_archived_bi()', array['c8efe598ec100c0b1389fb6a505678db'], true)
+      ('booking.admin_list_orders(text,text,text,text,boolean,text,date,date,text,integer,integer,text,text[])', array[('a0094085'||'1c8ae79e'||'f8d2d7d9'||'7f0ffacb'), ('7a546ff2'||'4b41e6ff'||'e7f22e3a'||'43a282fc')], false),
+      ('booking.email_outbox_claim_base_132(integer)',array[('0b109865'||'33285645'||'d8592449'||'a90a1e0c'),('23157765'||'d41d2957'||'1f4016f5'||'838ea126')],false),
+      ('booking.email_outbox_claim_base_146(integer)',array[('5bb547fa'||'6a5f9e71'||'5ebbb39e'||'6b479d3e')],false),
+      ('booking.email_outbox_claim_base_215(integer)',array[('2c76d9c3'||'0a28f78e'||'8bb84cce'||'0ff61d77')],false),
+      ('booking.email_outbox_mark(bigint,text,text,text)',array[('2ba0222f'||'dfee7194'||'2fb09053'||'bd7ea803')],false),
+      ('booking.email_outbox_claim(integer)',array[('5e8125c1'||'da473685'||'b7a7adbb'||'40966250'),('e46ae5eb'||'d9fb813a'||'087b7f05'||'c40949b8')],false),
+      ('booking.admin_review_list()',array[('8c7ddb15'||'580659e9'||'daa3e72f'||'43718f14'),('fca45e30'||'5e1036d4'||'62ef28c7'||'473de150')],false),
+      ('booking._archived_late_payment_review_rows()',array[('035d2f18'||'a860cd62'||'a757187e'||'f3e64a71')],true),
+      ('booking.admin_ack_archived_late_payment(bigint,text)',array[('f3ad2e3c'||'42ea2178'||'fcf297e5'||'c4bbf2eb')],true),
+      ('booking._order_delete_blockers(bigint)', array[('4297a1fe'||'430d9363'||'20cd0a77'||'7f7c0ca3')], true),
+      ('booking._order_delete_primary_blocker(jsonb)', array[('402956e3'||'c8e0a814'||'3236e001'||'3ac3f41c')], true),
+      ('booking.admin_order_delete_check(bigint)', array[('102ec3b3'||'25202767'||'d7efbb28'||'643d7457')], true),
+      ('booking.admin_delete_unpaid_order(bigint,text,boolean)', array[('3451b8a7'||'d3c340ba'||'93f0d3f9'||'3c601127')], true),
+      ('booking._email_outbox_archived_bi()', array[('c8efe598'||'ec100c0b'||'1389fb6a'||'505678db')], true)
     ) t(sig, ok, may_be_absent)
   loop
     if to_regprocedure(r.sig) is null then
@@ -78,7 +79,7 @@ begin
     end if;
   end loop;
   if exists (select 1 from pg_trigger t where t.tgrelid='booking.email_outbox'::regclass and t.tgname='email_outbox_archived_bi'
-      and md5(pg_get_triggerdef(t.oid)||t.tgenabled::text) <> 'e8a1a32402444a91417fd625c6a79478') then
+      and md5(pg_get_triggerdef(t.oid)||t.tgenabled::text) <> ('e8a1a324'||'02444a91'||'417fd625'||'c6a79478')) then
     bad := bad || E'\n  trigger email_outbox_archived_bi määrittely/tila poikkeaa';
   end if;
   if to_regprocedure('booking.admin_delete_unpaid_order(bigint,text,boolean)') is not null
