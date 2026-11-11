@@ -124,7 +124,7 @@ async function layoutChecks(page, label, scope = '.tl') {
 async function receiptChecks(page, name, vp, lang, T) {
   const money = /€/;
   await page.click('[data-testid=orders-reset]');
-  await page.selectOption('[data-testid=orders-f-pay]', 'partially_refunded'); await page.selectOption('[data-testid=orders-f-native]', 'native'); await page.waitForTimeout(350);
+  await page.evaluate((c) => { const b = document.querySelector('[data-testid=orders-pay-btn-' + c + ']'); if (!b) throw new Error('maksutilanappi puuttuu: ' + c); if (b.getAttribute('aria-pressed') !== 'true') b.click(); for (const x of document.querySelectorAll('[data-testid^=orders-pay-btn-][aria-pressed=true]')) if (x !== b) x.click(); }, 'partially_refunded'); await page.selectOption('[data-testid=orders-f-native]', 'native'); await page.waitForTimeout(350);
   await page.locator('[data-testid=orders-list] > [data-testid=order]').first().locator('.tl-head').click();
   await page.waitForSelector('[data-testid=order-receipts] [data-testid=receipt-item]');
   const items = page.locator('[data-testid=order-receipts] [data-testid=receipt-item]');
@@ -314,7 +314,7 @@ async function adminSuite() {
     // lajittelu: ensimmäinen varauspäivä, maksutila, tilausnro
     for (const k of ['first_reservation', 'payment_status', 'order_no', 'created']) { await page.selectOption('[data-testid=orders-sort]', k); await page.waitForTimeout(200); expect(await rows().count() === 25, `${name}: lajittelu ${k}`); }
     // suodatin: maksutila + lähde
-    await page.selectOption('[data-testid=orders-f-pay]', 'paid'); await page.selectOption('[data-testid=orders-f-src]', 'web'); await page.waitForTimeout(250);
+    await page.evaluate((c) => { const b = document.querySelector('[data-testid=orders-pay-btn-' + c + ']'); if (!b) throw new Error('maksutilanappi puuttuu: ' + c); if (b.getAttribute('aria-pressed') !== 'true') b.click(); for (const x of document.querySelectorAll('[data-testid^=orders-pay-btn-][aria-pressed=true]')) if (x !== b) x.click(); }, 'paid'); await page.selectOption('[data-testid=orders-f-src]', 'web'); await page.waitForTimeout(250);
     const badges = await rows().locator('.badge[class*="pay-"]').allInnerTexts();
     expect(badges.length === 25 && badges.every((x) => x === T['pay.paid']), `${name}: suodatin maksettu (${[...new Set(badges)]})`);
     // aikaväli
@@ -407,7 +407,7 @@ async function adminSuite() {
     // dialogit (vain 390 fi): lisää tilaukseen, maksulinkki, hyvitys (mock-tilassa toimivat mockina)
     if (vp === 390 && lang === 'fi') {
       await page.click('[data-testid=tab-orders-btn]');
-      const openFirst = async (pay) => { await page.click('[data-testid=orders-reset]'); await page.selectOption('[data-testid=orders-f-pay]', pay); await page.selectOption('[data-testid=orders-f-native]', 'native'); await page.waitForTimeout(300);
+      const openFirst = async (pay) => { await page.click('[data-testid=orders-reset]'); await page.evaluate((c) => { const b = document.querySelector('[data-testid=orders-pay-btn-' + c + ']'); if (!b) throw new Error('maksutilanappi puuttuu: ' + c); if (b.getAttribute('aria-pressed') !== 'true') b.click(); for (const x of document.querySelectorAll('[data-testid^=orders-pay-btn-][aria-pressed=true]')) if (x !== b) x.click(); }, pay); await page.selectOption('[data-testid=orders-f-native]', 'native'); await page.waitForTimeout(300);
         await page.locator('[data-testid=orders-list] > [data-testid=order]').first().locator('.tl-head').click(); await page.waitForSelector('[data-testid=btn-add]'); };
       await openFirst('unpaid');
       expect(!(await page.locator('[data-testid=btn-add]').isDisabled()) && !(await page.locator('[data-testid=btn-link]').isDisabled()), `${name}: lisäys ja maksulinkki käytössä mockissa`);
@@ -456,7 +456,7 @@ async function adminSuite() {
     a = calls('admin_list_orders').at(-1).args; expect(a.p_limit === 50 && a.p_offset === 0, `${name}: sivukoko 50 → palvelin`);
     await page.locator('[data-testid=pg-last]').first().click(); await page.waitForFunction(() => document.querySelector('[data-testid=pager]').dataset.page === '240');
     a = calls('admin_list_orders').at(-1).args; expect(a.p_offset === 11950, `${name}: viimeinen sivu offset ${a.p_offset}`);
-    await page.selectOption('[data-testid=orders-f-pay]', 'unpaid'); await page.selectOption('[data-testid=orders-f-src]', 'admin'); await page.waitForTimeout(250);
+    await page.evaluate((c) => { const b = document.querySelector('[data-testid=orders-pay-btn-' + c + ']'); if (!b) throw new Error('maksutilanappi puuttuu: ' + c); if (b.getAttribute('aria-pressed') !== 'true') b.click(); for (const x of document.querySelectorAll('[data-testid^=orders-pay-btn-][aria-pressed=true]')) if (x !== b) x.click(); }, 'unpaid'); await page.selectOption('[data-testid=orders-f-src]', 'admin'); await page.waitForTimeout(250);
     a = calls('admin_list_orders').at(-1).args; expect(a.p_payment_status === 'unpaid' && a.p_source === 'admin' && a.p_offset === 0, `${name}: suodattimet palvelimelle`);
     await page.selectOption('[data-testid=orders-f-native]', 'imported'); await page.selectOption('[data-testid=orders-f-datefield]', 'start'); await page.waitForTimeout(250);
     a = calls('admin_list_orders').at(-1).args; expect(a.p_native === false && a.p_date_field === 'start', `${name}: native/date_field palvelimelle ${JSON.stringify(a)}`);
@@ -473,7 +473,7 @@ async function adminSuite() {
     a = calls('admin_list_orders').at(-1).args; expect(a.p_from === '2026-01-01' && a.p_search === 'Virtanen', `${name}: aikaväli + haku palvelimelle`);
     await page.click('[data-testid=orders-reset]'); await page.waitForTimeout(250);
     // laajennus: admin_get_order (balance, items, lines) + napit sääntöjen mukaan
-    await page.selectOption('[data-testid=orders-f-pay]', 'paid'); await page.waitForTimeout(250);
+    await page.evaluate((c) => { const b = document.querySelector('[data-testid=orders-pay-btn-' + c + ']'); if (!b) throw new Error('maksutilanappi puuttuu: ' + c); if (b.getAttribute('aria-pressed') !== 'true') b.click(); for (const x of document.querySelectorAll('[data-testid^=orders-pay-btn-][aria-pressed=true]')) if (x !== b) x.click(); }, 'paid'); await page.waitForTimeout(250);
     await page.locator('[data-testid=orders-list] > [data-testid=order]').first().locator('.tl-head').click(); await page.waitForSelector('[data-testid=order-actions]');
     expect(calls('admin_get_order').length === 1 && typeof calls('admin_get_order')[0].args.p_order_id === 'number', `${name}: admin_get_order kutsuttu`);
     // oikeassa tilassa napit ovat käytössä palvelimen sääntöjen mukaan (tässä: maksettu natiivitilaus → lisäys sallittu, linkki ei (ei maksettavaa), hyvitys vaatii payments.refund (PERMS ilman))

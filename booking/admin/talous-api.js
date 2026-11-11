@@ -197,14 +197,32 @@ const lim = (n) => Math.min(200, Math.max(1, Math.trunc(+n) || 50));   // sopimu
 
 // ---- oikea toteutus: nimet ja p_-parametrit sopimuksen mukaan. `rpc(nimi, parametrit)` = sb.js:n rpc tai mockin rpc ----
 export function rpcBackend(rpc) {
+  let multiMissing = false;   // booking_277 (p_payment_filters) puuttuu kannasta → vanha yhden arvon kutsu
   const call = async (key, params = {}) => {
     const res = await rpc(RPC[key], params);
     if (res && res.ok === false) throw new RpcError(res.message || res.code || 'Pyyntö epäonnistui', { code: res.code, status: 400, details: res });
     return res;
   };
   return {
-    listOrders: async (a) => call('listOrders', compact({ p_search: a.search, p_status: a.status, p_payment_status: a.paymentStatus, p_payment_filter: a.paymentFilter, p_source: a.source, p_native: a.native === 'native' ? true : a.native === 'imported' ? false : undefined,
-      p_date_field: a.dateField === 'start' ? 'start' : undefined, p_from: a.from, p_to: a.to, p_sort: orderSortParam(a.sortBy, a.sortDir), p_limit: lim(a.limit), p_offset: Math.max(0, Math.trunc(+a.offset) || 0) })),
+    listOrders: async (a) => {
+      const base = compact({ p_search: a.search, p_status: a.status, p_payment_status: a.paymentStatus, p_payment_filter: a.paymentFilter, p_source: a.source, p_native: a.native === 'native' ? true : a.native === 'imported' ? false : undefined,
+        p_date_field: a.dateField === 'start' ? 'start' : undefined, p_from: a.from, p_to: a.to, p_sort: orderSortParam(a.sortBy, a.sortDir), p_limit: lim(a.limit), p_offset: Math.max(0, Math.trunc(+a.offset) || 0) });
+      // Maksutilanapit (monivalinta). Yksi tila → vanha p_payment_filter (toimii ilman booking_277:ää).
+      // Useampi → p_payment_filters (booking_277). Jos kannassa ei vielä ole parametria (PGRST202), käytetään
+      // vanhaa kutsua: p_payment_filter 'all' (näyttää enemmän, ei piilota mitään) eikä koko listaa siirretä mockiin.
+      if (Array.isArray(a.paymentFilters) && a.paymentFilters.length) {
+        const list = [...new Set(a.paymentFilters.map((v) => String(v || '').trim()).filter(Boolean))];
+        if (list.length === 1 || list.includes('all')) return call('listOrders', { ...base, p_payment_filter: list.includes('all') ? 'all' : list[0] });
+        if (!multiMissing) {
+          try { return await call('listOrders', { ...base, p_payment_filters: list }); } catch (e) {
+            if (!isMissingRpc(e)) throw e;
+            multiMissing = true;
+          }
+        }
+        return call('listOrders', { ...base, p_payment_filter: 'all' });
+      }
+      return call('listOrders', base);
+    },
     listPayments: async (a) => call('listPayments', compact({ p_search: a.search, p_method: a.method, p_status: a.status, p_from: a.from, p_to: a.to, p_sort: paymentSortParam(a.sortDir), p_limit: lim(a.limit), p_offset: Math.max(0, Math.trunc(+a.offset) || 0) })),
     getOrder: (id) => call('getOrder', { p_order_id: id }),
     listAddons: () => call('listAddons'),

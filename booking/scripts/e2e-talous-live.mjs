@@ -132,7 +132,7 @@ async function readSuite() {
     expect(await rows(page).count() === 0, `${name}: haku ilman osumia → tyhjä tila`);
     await page.click('[data-testid=orders-reset]'); await waitList(page);
     // suodattimet: maksutila, natiivi/tuotu, lähde
-    await page.selectOption('[data-testid=orders-f-pay]', 'paid'); await page.waitForTimeout(500);
+    await page.evaluate((c) => { const b = document.querySelector('[data-testid=orders-pay-btn-' + c + ']'); if (!b) throw new Error('maksutilanappi puuttuu: ' + c); if (b.getAttribute('aria-pressed') !== 'true') b.click(); for (const x of document.querySelectorAll('[data-testid^=orders-pay-btn-][aria-pressed=true]')) if (x !== b) x.click(); }, 'paid'); await page.waitForTimeout(500);
     const paidN = (await must('admin_list_orders', { p_payment_status: 'paid', p_limit: 200 })).total;
     expect(await rows(page).count() === Math.min(25, paidN) && (await rows(page).locator('.badge[class*="pay-"]').allInnerTexts()).every((x) => x === T['pay.paid']), `${name}: suodatin maksettu (${paidN})`);
     await page.click('[data-testid=orders-reset]'); await waitList(page);
