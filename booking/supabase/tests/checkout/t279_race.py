@@ -9,7 +9,7 @@ import psycopg
 
 BASE = sys.argv[1]
 HERE = pathlib.Path(__file__).resolve().parent
-MIG = HERE.parent.parent / "migrations" / "20261111235901_booking_279_unpaid_order_delete.sql"
+MIG = HERE.parent.parent / "migrations" / "20261111190214_booking_279_unpaid_order_delete.sql"
 DB = f"t279_race_{os.getpid()}"
 kw = dict(host=os.environ.get("PGHOST", "127.0.0.1"), port=os.environ.get("PGPORT", "54329"), user=os.environ.get("PGUSER", "postgres"))
 adm = psycopg.connect(dbname="postgres", autocommit=True, **kw)
@@ -341,7 +341,7 @@ def reactivation_race():
 
 def rollback_archive():
     f=mk('rb-gate@race.test');A=conn('admin');a=one(A,DEL,(f['oid'],));assert a.get('ok'),a
-    RB=(HERE.parent.parent/'rollbacks'/'20261111235901_booking_279_ROLLBACK.sql').read_text()
+    RB=(HERE.parent.parent/'rollbacks'/'20261111190214_booking_279_ROLLBACK.sql').read_text()
     R=Bg(conn_pg(),RB,None);R.start();w=wait_state(R);A.commit();r=finish(R)
     return dict(wait=w,rollback=r,ok=w=='blocked' and r.get('error') and 'arkistoituja' in str(R.err) and st(f)['archived'] and one(SETUP,"select to_regprocedure('booking.admin_delete_unpaid_order(bigint,text,boolean)') is not null"))
 

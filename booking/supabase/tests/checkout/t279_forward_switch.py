@@ -2,8 +2,8 @@
 """LOCAL ONLY: data-preserving feature-disable/re-enable draft guards, no remote apply."""
 import psycopg,os,sys,pathlib,atexit,json
 SB=pathlib.Path(__file__).resolve().parents[2];BASE=sys.argv[1]
-MIG=(SB/'migrations/20261111235901_booking_279_unpaid_order_delete.sql').read_text()
-RB=(SB/'rollbacks/20261111235901_booking_279_ROLLBACK.sql').read_text()
+MIG=(SB/'migrations/20261111190214_booking_279_unpaid_order_delete.sql').read_text()
+RB=(SB/'rollbacks/20261111190214_booking_279_ROLLBACK.sql').read_text()
 DIS=(SB/'rollbacks/booking_279_FORWARD_DISABLE_DRAFT.sql').read_text()
 ENA=(SB/'rollbacks/booking_279_FORWARD_REENABLE_DRAFT.sql').read_text()
 kw=dict(host='127.0.0.1',port='54329',user='postgres');DB='t279_switch_'+str(os.getpid())

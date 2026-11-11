@@ -5,7 +5,7 @@
 begin;
 set local lock_timeout = '3s';
 set local statement_timeout = '120s';
-\ir ../../migrations/20261111235901_booking_279_unpaid_order_delete.sql
+\ir ../../migrations/20261111190214_booking_279_unpaid_order_delete.sql
 create temp table t279_r(ok boolean, label text) on commit drop;
 -- [279] lisätestit tekevät enemmän julkisia varauksia kuin 264: nostetaan globaali tuntiraja vain tässä transaktiossa
 insert into booking.settings(key, value) values ('public_treatment_global_per_hour', '200'::jsonb) on conflict (key) do update set value = excluded.value;

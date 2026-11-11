@@ -6,8 +6,8 @@ import psycopg
 BASE = sys.argv[1]
 HERE = pathlib.Path(__file__).resolve().parent
 SB = HERE.parent.parent
-MIG = (SB / "migrations" / "20261111235901_booking_279_unpaid_order_delete.sql").read_text()
-RB = (SB / "rollbacks" / "20261111235901_booking_279_ROLLBACK.sql").read_text()
+MIG = (SB / "migrations" / "20261111190214_booking_279_unpaid_order_delete.sql").read_text()
+RB = (SB / "rollbacks" / "20261111190214_booking_279_ROLLBACK.sql").read_text()
 kw = dict(host=os.environ.get("PGHOST", "127.0.0.1"), port=os.environ.get("PGPORT", "54329"), user=os.environ.get("PGUSER", "postgres"))
 adm = psycopg.connect(dbname="postgres", autocommit=True, **kw)
 DB = f"t279_rb_{os.getpid()}"

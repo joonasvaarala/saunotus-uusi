@@ -5,7 +5,7 @@ Usage: PGHOST=127.0.0.1 PGPORT=54329 python t279_claim_keyset.py pm_base [metric
 import os,sys,time,json,threading,pathlib,atexit,hashlib
 import psycopg
 BASE=sys.argv[1];ROOT=pathlib.Path(__file__).resolve().parents[3]
-MIG=ROOT/'supabase/migrations/20261111235901_booking_279_unpaid_order_delete.sql'
+MIG=ROOT/'supabase/migrations/20261111190214_booking_279_unpaid_order_delete.sql'
 kw=dict(host=os.environ.get('PGHOST','127.0.0.1'),port=os.environ.get('PGPORT','54329'),user=os.environ.get('PGUSER','postgres'))
 assert kw['host']=='127.0.0.1' and kw['port']=='54329','LOCAL fixture only'
 DB='t279_keyset_'+str(os.getpid());adm=psycopg.connect(dbname='postgres',autocommit=True,**kw)

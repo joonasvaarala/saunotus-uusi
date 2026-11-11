@@ -13,8 +13,8 @@ const F = await import(pathToFileURL(join(root, 'admin/orders-filter.js')));
 const OT = await import(pathToFileURL(join(root, 'admin/orders-texts.js')));
 const A = await import(pathToFileURL(join(root, 'admin/talous-api.js')));
 const { createMock } = await import(pathToFileURL(join(root, 'admin/talous-mock.js')));
-const MIG = readFileSync(join(root, 'supabase/migrations/20261111235901_booking_279_unpaid_order_delete.sql'), 'utf8');
-const RB = readFileSync(join(root, 'supabase/rollbacks/20261111235901_booking_279_ROLLBACK.sql'), 'utf8');
+const MIG = readFileSync(join(root, 'supabase/migrations/20261111190214_booking_279_unpaid_order_delete.sql'), 'utf8');
+const RB = readFileSync(join(root, 'supabase/rollbacks/20261111190214_booking_279_ROLLBACK.sql'), 'utf8');
 const VIEW = readFileSync(join(root, 'admin/views/talous-orders.js'), 'utf8');
 // booking_279 R4: poisto yhteisessä varaus-/tilauskortissa (PR #331 korvasi Tilaukset-rivin laajennuksen kortilla)
 const CARD = readFileSync(join(root, 'admin/views/order-card-delete.js'), 'utf8');
