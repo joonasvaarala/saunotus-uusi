@@ -433,8 +433,8 @@ test('datakerros: yksi tila vanhalla parametrilla, useampi p_payment_filters, pu
 
 test('migraatio booking_277 ja rollback', () => {
   const dir = join(root, 'supabase');
-  const mig = readFileSync(join(dir, 'migrations/20261111142821_booking_277_admin_list_orders_payment_filters.sql'), 'utf8');
-  const rb = readFileSync(join(dir, 'rollbacks/20261111142821_booking_277_ROLLBACK.sql'), 'utf8');
+  const mig = readFileSync(join(dir, 'migrations/20261111144714_booking_277_admin_list_orders_payment_filters.sql'), 'utf8');
+  const rb = readFileSync(join(dir, 'rollbacks/20261111144714_booking_277_ROLLBACK.sql'), 'utf8');
   const sig12 = 'booking.admin_list_orders(text, text, text, text, boolean, text, date, date, text, integer, integer, text)';
   const sig13 = 'booking.admin_list_orders(text, text, text, text, boolean, text, date, date, text, integer, integer, text, text[])';
   assert.ok(mig.includes(`drop function if exists ${sig12};`));

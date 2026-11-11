@@ -73,6 +73,6 @@ Kanta: `booking_277` lisää `admin_list_orders`-funktioon viimeiseksi parametri
 
 Hallinta lähettää yhden tilan vanhalla `p_payment_filter`-parametrilla. Taulukko lähtee vain, kun tiloja on useampi, eli myös oletusnäkymässä. Jos kannassa ei vielä ole uutta parametria (PGRST202), hallinta käyttää vanhaa kutsua `p_payment_filter` = `all` (näyttää enemmän, ei piilota mitään), eikä lista siirry mockiin.
 
-- Migraatio: `booking/supabase/migrations/20261111142821_booking_277_admin_list_orders_payment_filters.sql`
-- Rollback: `booking/supabase/rollbacks/20261111142821_booking_277_ROLLBACK.sql` (palauttaa booking_270:n funktion, oikeudet ja kommentin)
+- Migraatio: `booking/supabase/migrations/20261111144714_booking_277_admin_list_orders_payment_filters.sql`
+- Rollback: `booking/supabase/rollbacks/20261111144714_booking_277_ROLLBACK.sql` (palauttaa booking_270:n funktion, oikeudet ja kommentin)
 - SQL-testi: `booking/supabase/tests/talous/t277_list_orders_payment_filters.sql`
