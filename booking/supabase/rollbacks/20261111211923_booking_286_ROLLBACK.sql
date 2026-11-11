@@ -1,3 +1,4 @@
+-- booking_286 ajettu: DEV 20261111211855, PROD 20261111211923 (migrations/20261111211923_booking_286_checkoutx_pos.sql, tavu-identtinen ajetun kanssa; sen otsakkeen rollback-viite 20261111203000 on ajoa edeltävä nimi tälle tiedostolle).
 -- booking_286 ROLLBACK: poistaa Pikakassan CheckoutX-maksutavan ja palauttaa admin_pos_tenders()-funktion booking_189-muotoon (md5 443e6462ede3ec9d3118d08be43759fa).
 -- Pysähtyy, jos checkoutx-maksuja tai -hyvityksiä on kirjattu (ne kuuluvat kirjanpitoon; poista/siirrä ensin käsin harkiten).
 set local lock_timeout = '5s';
