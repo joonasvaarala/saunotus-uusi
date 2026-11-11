@@ -28,7 +28,7 @@ begin
   ('booking.email_outbox_mark(bigint,text,text,text)','2ba0222fdfee71942fb09053bd7ea803'),
   ('booking.email_outbox_claim(integer)','e46ae5ebd9fb813a087b7f05c40949b8'),
   ('booking.admin_review_list()','fca45e305e1036d462ef28c7473de150'),
-  ('booking.admin_list_orders(text,text,text,text,boolean,text,date,date,text,integer,integer,text)','cad71198827bd7fd03426f146b43b424'),
+  ('booking.admin_list_orders(text,text,text,text,boolean,text,date,date,text,integer,integer,text,text[])','c50fa63ab94d0046d6a3ccf85a005f0b'),
   ('booking._email_outbox_archived_bi()','63515bcb6f2b85f003fc3e3125c37f73')
  )x(sig,ok) loop
   if md5(pg_get_functiondef(to_regprocedure(r.sig))) is distinct from r.ok then

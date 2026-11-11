@@ -51,6 +51,15 @@ begin
   perform test.logout();
   return v;
 end $$;
+-- booking_277: monivalinta p_payment_filters
+create function pg_temp.mlisted(p_filters text[], p_o bigint) returns boolean language plpgsql as $$
+declare v jsonb;
+begin
+  perform test.login(test.mk_staff('admin@t264.example', 'admin'));
+  v := booking.admin_list_orders(p_limit => 200, p_payment_filters => p_filters);
+  perform test.logout();
+  return exists (select 1 from jsonb_array_elements(v -> 'rows') e where (e ->> 'order_id')::bigint = p_o);
+end $$;
 create function pg_temp.listed(p_filter text, p_o bigint, p_search text default null) returns boolean language sql as $$
   select exists (select 1 from jsonb_array_elements(pg_temp.list(p_filter, p_search) -> 'rows') e where (e ->> 'order_id')::bigint = p_o) $$;
 
@@ -122,8 +131,8 @@ begin
       and not has_function_privilege('anon', 'booking.admin_order_delete_check(bigint)', 'execute')
       and has_function_privilege('authenticated', 'booking.admin_delete_unpaid_order(bigint,text)', 'execute')
       and has_function_privilege('authenticated', 'booking.admin_order_delete_check(bigint)', 'execute')
-      and has_function_privilege('authenticated', 'booking.admin_list_orders(text,text,text,text,boolean,text,date,date,text,integer,integer,text)', 'execute')
-      and not has_function_privilege('anon', 'booking.admin_list_orders(text,text,text,text,boolean,text,date,date,text,integer,integer,text)', 'execute'),
+      and has_function_privilege('authenticated', 'booking.admin_list_orders(text,text,text,text,boolean,text,date,date,text,integer,integer,text,text[])', 'execute')
+      and not has_function_privilege('anon', 'booking.admin_list_orders(text,text,text,text,boolean,text,date,date,text,integer,integer,text,text[])', 'execute'),
       'S2 ACL: sisäinen estefunktio ei kutsuttavissa, admin-RPC:t vain authenticated');
   perform pg_temp.ck((select bool_and(prosecdef and proconfig = array['search_path=""']) from pg_proc
                        where oid in ('booking._order_delete_blockers(bigint)'::regprocedure, 'booking.admin_order_delete_check(bigint)'::regprocedure,
@@ -214,6 +223,15 @@ begin
       and jsonb_typeof(pg_temp.list('invoiced') -> 'rows') = 'array' and not pg_temp.listed('invoiced', o)
       and (select bool_and(e ? 'invoice_status') from jsonb_array_elements(pg_temp.list('archived') -> 'rows') e),
       'A10b booking_270 laskukentät + invoiced-suodatin säilyvät, arkistoitu ei invoiced-listalla');
+  -- booking_277-yhteensopivuus: monivalinta (OR). Arkistoitu piilossa ilman 'archived'-valintaa, näkyy kun se on mukana.
+  perform pg_temp.ck(not pg_temp.mlisted(array['paid','unpaid'], o) and not pg_temp.mlisted(array['unpaid','cancelled','invoiced'], o)
+      and not pg_temp.mlisted(array['all'], o)
+      and pg_temp.mlisted(array['unpaid','archived'], o) and pg_temp.mlisted(array['archived'], o),
+      'A10c p_payment_filters: arkistoitu vain archived-valinnalla');
+  perform test.login(u_admin);
+  st := pg_temp.err($q$ select booking.admin_list_orders(p_payment_filters => array['paid','nope']) $q$);
+  perform test.logout();
+  perform pg_temp.ck(st like '%invalid_param%' or st like '%p_payment_filters%', 'A10d p_payment_filters hylkää tuntemattoman tilan ' || coalesce(st, ''));
   v_snap := pg_temp.snap(o);
   perform test.login(u_admin);
   r := booking.admin_delete_unpaid_order(o, 'toinen');

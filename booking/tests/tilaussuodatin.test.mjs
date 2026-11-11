@@ -280,7 +280,7 @@ test('maksutilanapit hakukentän alla: oletus Maksetut + Maksamattomat, Maksutil
   assert.equal(group.getAttribute('aria-label'), 'Maksutila');
   const btns = PAYMENT_CODES.map((c) => byTest(tab.node, `orders-pay-btn-${c}`));
   assert.ok(btns.every((b) => b && b.tagName === 'BUTTON' && b.getAttribute('type') === 'button'));
-  assert.deepEqual(btns.map((b) => b.textContent), ['Maksetut', 'Maksamattomat', 'Laskutetut', 'Kaikki', 'Hyvitetyt', 'Peruttu']);
+  assert.deepEqual(btns.map((b) => b.textContent), ['Maksetut', 'Maksamattomat', 'Laskutetut', 'Kaikki', 'Hyvitetyt', 'Peruttu', 'Poistetut']);   // booking_264: Poistetut-nappi
   assert.deepEqual(pressed(tab.node), ['paid', 'unpaid']);
   assert.equal(byTest(tab.node, 'orders-pay-btn-paid').getAttribute('aria-label'), 'Maksutila: Maksetut');
   assert.equal(byTest(tab.node, 'orders-filters-count').hidden, true);

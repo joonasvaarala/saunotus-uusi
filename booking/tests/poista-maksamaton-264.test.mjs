@@ -148,6 +148,13 @@ test('mock: esto, poisto, idempotenssi ja listat', async () => {
   const after = await mock.rpc('admin_order_delete_check', { p_order_id: unpaid.order_id });
   assert.equal(L.deletePanelMode(after), 'archived');
   await assert.rejects(() => mock.rpc('admin_list_orders', { p_payment_filter: 'nope' }), (e) => e.code === 'invalid_param');
+  // booking_277 monivalinta: archived mukana OR-ehdolla; ilman sitä poistettu piilossa
+  const multi = await mock.rpc('admin_list_orders', { p_payment_filters: ['unpaid', 'archived'], p_limit: 200 });
+  assert.ok(multi.rows.some((r) => r.order_id === unpaid.order_id), 'archived monivalinnassa näyttää poistetun');
+  const multiNo = await mock.rpc('admin_list_orders', { p_payment_filters: ['paid', 'unpaid', 'cancelled'], p_limit: 200 });
+  assert.ok(!multiNo.rows.some((r) => r.order_id === unpaid.order_id), 'ilman archived-valintaa poistettu piilossa');
+  assert.ok(F.matchesPaymentFilters({ ...unpaid, status: 'cancelled', archived_at: '2026-11-08T12:00:00Z' }, ['cancelled', 'archived']));
+  assert.ok(!F.matchesPaymentFilters({ ...unpaid, status: 'cancelled', archived_at: '2026-11-08T12:00:00Z', payments: [] }, ['cancelled']));
   await assert.rejects(() => mock.rpc('admin_delete_unpaid_order', { p_order_id: unpaid.order_id, p_reason: 'x'.repeat(501) }), (e) => e.code === 'invalid_param');
 });
 
@@ -170,15 +177,32 @@ test('kortti: nappi vain palvelimen tarkistuksesta, vahvistusdialogi, ei poistoa
   assert.ok(iAwait > 0 && iToast > iAwait, 'onnistumisilmoitus vasta onnistuneen kutsun jälkeen');
 });
 
+test('migraatio: admin_list_orders rakennettu booking_277:n päälle (p_payment_filters säilyy, archived monivalinnassa)', () => {
+  const fn = MIG.slice(MIG.indexOf('CREATE OR REPLACE FUNCTION booking.admin_list_orders'));
+  const body = fn.slice(0, fn.indexOf('end $function$;'));
+  assert.match(body, /p_payment_filters text\[\] DEFAULT NULL::text\[\]\)/);
+  assert.match(body, /'archived' = any\(v_pfs\) and o\.archived_at is not null/);
+  assert.match(body, /o\.archived_at is null or 'archived' = any\(v_pfs\) or pp\.pc > 0/);
+  assert.match(body, /p_payment_filters: paid\|unpaid\|all\|refunded\|cancelled\|invoiced\|archived/);
+  assert.doesNotMatch(MIG, /drop function[^;]*admin_list_orders/i, '264 ei pudota funktiota: oikeudet (ei anon) ja kommentti säilyvät');
+  assert.doesNotMatch(MIG, /grant[^;]*admin_list_orders[^;]*anon/i);
+  const rbFn = RB.slice(RB.indexOf('CREATE OR REPLACE FUNCTION booking.admin_list_orders'));
+  const M277 = readFileSync(join(root, 'supabase/migrations/20261111144714_booking_277_admin_list_orders_payment_filters.sql'), 'utf8');
+  const f277 = M277.slice(M277.indexOf('CREATE OR REPLACE FUNCTION booking.admin_list_orders'));
+  assert.equal(rbFn.slice(0, rbFn.indexOf('end $function$;')), f277.slice(0, f277.indexOf('end $function$;')), 'rollback-runko tavu-identtinen booking_277:n kanssa');
+});
+
 test('migraatio: lukot ilman NOWAITia, ei _refresh_order_payment, 263 ennallaan, md5-vartijat, ACL', () => {
-  const del = MIG.slice(MIG.indexOf('create or replace function booking.admin_delete_unpaid_order'), MIG.indexOf('-- admin_list_orders: booking_270-runko'));
+  const del = MIG.slice(MIG.indexOf('create or replace function booking.admin_delete_unpaid_order'), MIG.indexOf('-- admin_list_orders: booking_277-runko'));
   assert.ok(del.length > 1000);
   assert.doesNotMatch(del, /nowait/i);
   assert.doesNotMatch(del, /_refresh_order_payment/);
   assert.doesNotMatch(MIG, /create or replace function booking\.payment_mark_paid/i);
   assert.doesNotMatch(MIG, /create or replace function booking\.montonio_payment_(prepare|apply)/i);
   assert.match(MIG, /'b35618b8cd17fa9e7c5902719d0804a2'/);
-  assert.match(MIG, /'56edffa64fbd99c14f8ea3a4bf126cd3', 'cad71198827bd7fd03426f146b43b424'/);
+  assert.match(MIG, /'7a546ff24b41e6ffe7f22e3a43a282fc', 'c50fa63ab94d0046d6a3ccf85a005f0b'/);
+  assert.match(MIG, /admin_list_orders\(text,text,text,text,boolean,text,date,date,text,integer,integer,text,text\[\]\)/, 'preguard 13 argumentin (booking_277) versiolle');
+  assert.doesNotMatch(MIG, /56edffa64fbd99c14f8ea3a4bf126cd3|cad71198827bd7fd03426f146b43b424/, 'ei vanhoja 270-pohjaisia hasheja');
   assert.match(del, /_require_permission\('bookings\.manage'\);\s+perform booking\._require_permission\('payments\.manage'\)/);
   const iPay = del.indexOf('from booking.payments x where x.id = any(v_expected) order by x.id for update skip locked');
   const iOrd = del.indexOf('from booking.orders where id = p_order_id for update');
@@ -188,7 +212,8 @@ test('migraatio: lukot ilman NOWAITia, ei _refresh_order_payment, 263 ennallaan,
   assert.match(MIG, /check \(archived_at is null or status = 'cancelled'\)/);
   assert.match(MIG, /coalesce\(a\.outcome, ''\) <> 'cancelled'/, 'vain varmennettu päättyminen avaa poiston');
   assert.doesNotMatch(MIG.slice(0, MIG.indexOf('-- Narrow base132 candidate loop')), /interval '\d+ (minutes|hours)'/, 'ei aikarajaan perustuvaa oletusta');
-  assert.match(RB, /'cad71198827bd7fd03426f146b43b424', '56edffa64fbd99c14f8ea3a4bf126cd3'/);
+  assert.match(RB, /'c50fa63ab94d0046d6a3ccf85a005f0b', '7a546ff24b41e6ffe7f22e3a43a282fc'/);
+  assert.doesNotMatch(RB, /56edffa64fbd99c14f8ea3a4bf126cd3|cad71198827bd7fd03426f146b43b424/, 'rollback palauttaa 277:n, ei 270:tä');
   assert.match(RB, /drop function if exists booking\.admin_delete_unpaid_order\(bigint, text\)/);
   assert.match(RB, /if exists \(select 1 from booking\.orders where archived_at is not null\)/, 'rollback ei hävitä arkistotietoa');
 });
@@ -216,7 +241,7 @@ test('korjaus 2 (6edf538-katselmointi): MobilePay-viite estää aina, sending es
 });
 
 test('korjaus 2: claim/send-vs-archive-sopimus SQL:ssä (lukko ennen esteitä, failed skipataan, insert-trigger)', () => {
-  const del = MIG.slice(MIG.indexOf('create or replace function booking.admin_delete_unpaid_order'), MIG.indexOf('-- admin_list_orders: booking_270'));
+  const del = MIG.slice(MIG.indexOf('create or replace function booking.admin_delete_unpaid_order'), MIG.indexOf('-- admin_list_orders: booking_277'));
   const iMail = del.indexOf('from booking.email_outbox x where x.id = any(v_expected) order by x.id for update skip locked');
   const iBlk = del.indexOf('v_b := booking._order_delete_blockers(o.id)');
   assert.ok(iMail > 0 && iBlk > iMail, 'sähköpostirivit lukitaan ennen esteitä');

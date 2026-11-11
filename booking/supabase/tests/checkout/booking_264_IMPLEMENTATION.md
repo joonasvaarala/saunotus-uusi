@@ -66,3 +66,12 @@ Ei uusia selain- tai offlinefile-avaustehtäviä: parentin työkalu esti myös f
 * UI: `views/order-card-delete.js` korttiin viimeiseksi osioksi (sekä Tilaukset että päivänäkymän varauskortti). Palvelimen `admin_order_delete_check` päättää; maksamaton tilaus, jonka poiston estää muu sääntö (esim. alkanut/toteutunut varaus, #15012), näyttää syyn selkokielisenä ilman nappia. Vahvistusdialogi, punainen toissijainen nappi; 42501/forbidden, busy ja esto näkyvät selkokielisinä virheinä ilman onnistumisilmoitusta.
 * Tekstit FI+EN: `content/site-texts.pending-import-133.json` (ui.admin.review.late_* + ui.admin.order_delete.*); koodin sanakirja toimii ilman tuontia.
 * Paikallinen pohja `pm_base276` = `pm_base` + 265, 266, 267, 268, 269, 270, 276 (vain booking-skeema; 271–275 public-skeeman vuorotarjous ei koske tätä).
+
+## R5 — rebase booking_277:n päälle (PR #335, 069466d)
+
+* booking_277 ajettu DEV 20261111144704 ja PROD 20261111144714: `admin_list_orders` on nyt 13 argumentin versio (viimeisenä `p_payment_filters text[]`), md5 `7a546ff2…`, 12 argumentin versio pudotettu, anonilla ei execute-oikeutta.
+* Migraation preguard: 12 argumentin version oltava poissa; 13 argumentin md5 = `7a546ff24b41e6ffe7f22e3a43a282fc` (277) tai asennettu `c50fa63ab94d0046d6a3ccf85a005f0b` (264).
+* 264:n `admin_list_orders` rakennettu 277-rungon päälle: `p_payment_filters` ja OR-käytös säilyvät; `archived` hyväksytään sekä `p_payment_filter`- että `p_payment_filters`-arvona; arkistoitu piilossa ellei `archived` ole valittuna, tilauksella ole kirjattua maksua tai haku ole tarkka tilausnumero; rivikentät `archived_at` / `archived_late_paid`. Ei DROPia: CREATE OR REPLACE säilyttää 277:n oikeudet (ei anon) ja kommentin.
+* Rollback palauttaa 277:n funktiorungon tavu-identtisenä (md5 `7a546ff2…`), ei 270:tä. Readchecks tarkistaa 13 argumentin md5:n, 12 argumentin puuttumisen, ylikuormitusten määrän (1) ja anon-oikeuden puuttumisen. FORWARD_DISABLE/REENABLE-draftit odottavat 13 argumentin `c50fa63a…`.
+* UI: Poistetut on nyt yksi maksutilanapeista (277-monivalinta); mock tukee `archived`-arvoa myös `p_payment_filters`-taulukossa.
+* Paikallinen pohja `pm_base277` = `pm_base276` + 277. Tulokset: node 1406/1406, t264 SQL 87/0, t277 SQL 29/0 (myös 264:n jälkeen), RBGUARD 47/0, RACE 36/0, KEYSET 17/0, SWITCH 16/0.

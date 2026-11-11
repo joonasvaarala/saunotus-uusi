@@ -6,12 +6,12 @@
 --  * booking._order_delete_blockers(bigint): sisäinen estelista (ei kutsuoikeutta rooleille).
 --  * booking.admin_order_delete_check(bigint): hallinnan esikatselu (_require_staff): voiko poistaa, esteet, vaikutukset.
 --  * booking.admin_delete_unpaid_order(bigint, text): poisto = arkistointi (bookings.manage + payments.manage).
---  * booking.admin_list_orders: arkistoidut piiloon tavallisista suodattimista, uusi suodatin 'archived'. POIKKEUS: arkistoitu tilaus,
+--  * booking.admin_list_orders: arkistoidut piiloon tavallisista suodattimista, uusi suodatin 'archived' (myös p_payment_filters-monivalinnassa). POIKKEUS: arkistoitu tilaus,
 --    jolle on kirjattu maksu (myöhäinen maksu booking_263-polun kautta), näkyy edelleen kaikissa suodattimissa joihin se muuten kuuluu
 --    + rivillä archived_late_paid = true. Tarkka tilausnumerohaku löytää arkistoidun.
 --
 -- Rollout: Joonas 11.11.2026 klo 16.10 Europe/Helsinki ("Maksamattomia tilauksia ei pysty edelleenkään poistamaan. Tämä pitää laittaa korjaukseen heti.").
--- Pohjana booking_276-tila (admin_list_orders = booking_270). Ei edge-deploya.
+-- Pohjana booking_277-tila (admin_list_orders = booking_277, 13 argumenttia, p_payment_filters text[]). Ei edge-deploya.
 -- Archive alone uses nonwaiting, complete-set row locks inside a subtransaction.
 -- Contention returns busy and releases acquired locks; normal payment/receipt paths are unchanged.
 -- Waitlist notifications remain NORMAL (Joonas 8.11.2026 19.10 Europe/Helsinki).
@@ -29,9 +29,13 @@ begin
   if v is distinct from 'b35618b8cd17fa9e7c5902719d0804a2' then
     raise exception 'booking_264: payment_mark_paid md5 % ei ole booking_263 (b35618b8…). Ei muutoksia.', v;
   end if;
-  v := md5(pg_get_functiondef('booking.admin_list_orders(text,text,text,text,boolean,text,date,date,text,integer,integer,text)'::regprocedure));
-  if v is null or v not in ('56edffa64fbd99c14f8ea3a4bf126cd3', 'cad71198827bd7fd03426f146b43b424') then
-    raise exception 'booking_264: admin_list_orders md5 % ei vastaa odotettua (56edffa6… booking_270 / tämä). Ei muutoksia.', v;
+  -- booking_277 poisti 12 argumentin version; vain 13 argumentin (p_payment_filters text[]) versio saa olla.
+  if to_regprocedure('booking.admin_list_orders(text,text,text,text,boolean,text,date,date,text,integer,integer,text)') is not null then
+    raise exception 'booking_264: admin_list_orders 12 argumentin versio on olemassa (booking_277 puuttuu). Ei muutoksia.';
+  end if;
+  v := md5(pg_get_functiondef(to_regprocedure('booking.admin_list_orders(text,text,text,text,boolean,text,date,date,text,integer,integer,text,text[])')));
+  if v is null or v not in ('7a546ff24b41e6ffe7f22e3a43a282fc', 'c50fa63ab94d0046d6a3ccf85a005f0b') then
+    raise exception 'booking_264: admin_list_orders md5 % ei vastaa odotettua (7a546ff2… booking_277 / tämä). Ei muutoksia.', v;
   end if;
   -- claim/archive-sopimus nojaa claimin FOR UPDATE SKIP LOCKED + sending samassa transaktiossa -semantiikkaan
   v := md5(pg_get_functiondef('booking.email_outbox_claim_base_132(integer)'::regprocedure));
@@ -374,8 +378,9 @@ begin
   end;
 end $$;
 
--- admin_list_orders: booking_270-runko (laskukentät) + booking_264-suodatus (diff: archived-suodatin, arkistoidun piilotus/poikkeukset, rivikentät archived_at/archived_late_paid)
-CREATE OR REPLACE FUNCTION booking.admin_list_orders(p_search text DEFAULT NULL::text, p_status text DEFAULT NULL::text, p_payment_status text DEFAULT NULL::text, p_source text DEFAULT NULL::text, p_native boolean DEFAULT NULL::boolean, p_date_field text DEFAULT 'created'::text, p_from date DEFAULT NULL::date, p_to date DEFAULT NULL::date, p_sort text DEFAULT 'created_desc'::text, p_limit integer DEFAULT 50, p_offset integer DEFAULT 0, p_payment_filter text DEFAULT 'paid'::text)
+-- admin_list_orders: booking_277-runko (laskukentät + p_payment_filters-monivalinta) + booking_264-suodatus (diff: archived-suodatin myös monivalinnassa, arkistoidun piilotus/poikkeukset, rivikentät archived_at/archived_late_paid)
+-- CREATE OR REPLACE säilyttää booking_277:n oikeudet (ei anon) ja kommentin.
+CREATE OR REPLACE FUNCTION booking.admin_list_orders(p_search text DEFAULT NULL::text, p_status text DEFAULT NULL::text, p_payment_status text DEFAULT NULL::text, p_source text DEFAULT NULL::text, p_native boolean DEFAULT NULL::boolean, p_date_field text DEFAULT 'created'::text, p_from date DEFAULT NULL::date, p_to date DEFAULT NULL::date, p_sort text DEFAULT 'created_desc'::text, p_limit integer DEFAULT 50, p_offset integer DEFAULT 0, p_payment_filter text DEFAULT 'paid'::text, p_payment_filters text[] DEFAULT NULL::text[])
  RETURNS jsonb
  LANGUAGE plpgsql
  STABLE SECURITY DEFINER
@@ -390,6 +395,7 @@ declare
   v_lim int := coalesce(p_limit, 50);
   v_off int := greatest(coalesce(p_offset, 0), 0);
   v_pf text := coalesce(nullif(btrim(p_payment_filter), ''), 'paid');
+  v_pfs text[];
 begin
   perform booking._require_staff();
   if p_sort is null or p_sort not in ('created_desc','created_asc','order_no_desc','order_no_asc','total_desc','total_asc','start_desc','start_asc','paid_desc','paid_asc','unpaid_desc') then
@@ -398,6 +404,15 @@ begin
   if coalesce(p_date_field, 'created') not in ('created','start') then perform booking._err('invalid_param', 'p_date_field: created|start'); end if;
   if v_pf not in ('paid','unpaid','all','refunded','cancelled','invoiced','archived') then
     perform booking._err('invalid_param', 'p_payment_filter: paid|unpaid|all|refunded|cancelled|invoiced|archived'); end if;
+  -- booking_277: monivalinta. Ei-tyhjä p_payment_filters ohittaa p_payment_filter-arvon; tilat yhdistetään OR-ehdolla.
+  -- NULL tai tyhjä taulukko = vanha käytös (yksi p_payment_filter, oletus paid).
+  if p_payment_filters is not null and cardinality(p_payment_filters) > 0 then
+    select array_agg(distinct coalesce(btrim(x), '')) into v_pfs from unnest(p_payment_filters) as u(x);
+    if exists (select 1 from unnest(v_pfs) as u(x) where x not in ('paid','unpaid','all','refunded','cancelled','invoiced','archived')) then
+      perform booking._err('invalid_param', 'p_payment_filters: paid|unpaid|all|refunded|cancelled|invoiced|archived'); end if;
+  else
+    v_pfs := array[v_pf];
+  end if;
   if v_s ~ '^\d{1,12}$' then v_num := v_s::bigint; end if;
   if v_s is not null then v_like := '%' || replace(replace(replace(v_s, '\', '\\'), '%', '\%'), '_', '\_') || '%'; end if;
   with base as (
@@ -434,27 +449,24 @@ begin
        and (p_payment_status is null or o.payment_status = p_payment_status)
        and (p_source is null or o.source_channel = p_source)
        and (p_native is null or (o.external_source is null) = p_native)
-       -- booking_264: arkistoitu (poistettu maksamaton) vain 'archived'-suodattimessa, tarkassa numerohaussa tai jos sille on kirjattu maksu (myöhäinen maksu näkyy)
-       and (o.archived_at is null or v_pf = 'archived' or pp.pc > 0 or (v_num is not null and (o.order_no = v_num or o.johku_order_no = v_num)))
+       -- booking_264: arkistoitu (poistettu maksamaton) vain kun 'archived' on valittuna, tarkassa numerohaussa tai jos sille on kirjattu maksu (myöhäinen maksu näkyy)
+       and (o.archived_at is null or 'archived' = any(v_pfs) or pp.pc > 0 or (v_num is not null and (o.order_no = v_num or o.johku_order_no = v_num)))
        and (v_s is null or (v_num is not null and (o.order_no = v_num or o.johku_order_no = v_num))
             or (v_num is null and (c.name ilike v_like or c.email ilike v_like or c.phone ilike v_like or c.company ilike v_like)))
        and (p_from is null or case when coalesce(p_date_field, 'created') = 'created' then (o.created_at at time zone 'Europe/Helsinki')::date else (rr.fs at time zone 'Europe/Helsinki')::date end >= p_from)
        and (p_to   is null or case when coalesce(p_date_field, 'created') = 'created' then (o.created_at at time zone 'Europe/Helsinki')::date else (rr.fs at time zone 'Europe/Helsinki')::date end <= p_to)
-       and case v_pf
-             when 'all' then true
-             when 'paid' then o.payment_status in ('paid','partially_refunded')
-               and o.status not in ('cancelled','expired')
-               and (case when pp.pc > 0 then pp.paid - pp.refunded
-                         when o.payment_status in ('paid','partially_refunded') then o.total_gross
-                         else 0 end) > 0.004
-             when 'unpaid' then o.payment_status in ('unpaid','pending','failed','partially_paid')
-               and o.status not in ('cancelled','expired')
-             when 'refunded' then o.payment_status in ('refunded','partially_refunded')
-             when 'cancelled' then o.status in ('cancelled','expired')
-             when 'invoiced' then o.payment_status = 'invoiced' and o.status not in ('cancelled','expired')
-             when 'archived' then o.archived_at is not null
-             else false
-           end
+       and ('all' = any(v_pfs)
+            or ('paid' = any(v_pfs) and o.payment_status in ('paid','partially_refunded')
+                and o.status not in ('cancelled','expired')
+                and (case when pp.pc > 0 then pp.paid - pp.refunded
+                          when o.payment_status in ('paid','partially_refunded') then o.total_gross
+                          else 0 end) > 0.004)
+            or ('unpaid' = any(v_pfs) and o.payment_status in ('unpaid','pending','failed','partially_paid')
+                and o.status not in ('cancelled','expired'))
+            or ('refunded' = any(v_pfs) and o.payment_status in ('refunded','partially_refunded'))
+            or ('cancelled' = any(v_pfs) and o.status in ('cancelled','expired'))
+            or ('invoiced' = any(v_pfs) and o.payment_status = 'invoiced' and o.status not in ('cancelled','expired'))
+            or ('archived' = any(v_pfs) and o.archived_at is not null))
   ), page as (
     select b.*, row_number() over (order by
         case when p_sort = 'created_asc' then b.created_at end asc, case when p_sort = 'created_desc' then b.created_at end desc,

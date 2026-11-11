@@ -52,7 +52,7 @@ declare
   r record; v text; bad text := '';
 begin
   for r in select * from (values
-      ('booking.admin_list_orders(text,text,text,text,boolean,text,date,date,text,integer,integer,text)', array['cad71198827bd7fd03426f146b43b424', '56edffa64fbd99c14f8ea3a4bf126cd3'], false),
+      ('booking.admin_list_orders(text,text,text,text,boolean,text,date,date,text,integer,integer,text,text[])', array['c50fa63ab94d0046d6a3ccf85a005f0b', '7a546ff24b41e6ffe7f22e3a43a282fc'], false),
       ('booking.email_outbox_claim_base_132(integer)',array['0b10986533285645d8592449a90a1e0c','c865d1b3d8d6620ff5935c077b7e16a2'],false),
       ('booking.email_outbox_claim_base_146(integer)',array['5bb547fa6a5f9e715ebbb39e6b479d3e'],false),
       ('booking.email_outbox_claim_base_215(integer)',array['2c76d9c30a28f78e8bb84cce0ff61d77'],false),
@@ -83,6 +83,9 @@ begin
   if to_regprocedure('booking.admin_delete_unpaid_order(bigint,text)') is not null
      and not exists (select 1 from pg_trigger where tgrelid='booking.email_outbox'::regclass and tgname='email_outbox_archived_bi') then
     bad := bad || E'\n  trigger email_outbox_archived_bi puuttuu';
+  end if;
+  if to_regprocedure('booking.admin_list_orders(text,text,text,text,boolean,text,date,date,text,integer,integer,text)') is not null then
+    bad := bad || E'\n  admin_list_orders 12 argumentin versio on olemassa (booking_277 puuttuu)';
   end if;
   if bad <> '' then
     raise exception 'rollback booking_264: tuntematon versio, ei muutoksia:%', bad;
@@ -190,8 +193,8 @@ AS $function$
   from jsonb_array_elements(booking.email_outbox_claim_base_215(p_limit)) with ordinality as z(item, ord);
 $function$;
 
--- admin_list_orders: palautus booking_270-määritelmään (tavu-identtinen 20261110024450_booking_270_admin_list_orders_invoice_fields.sql)
-CREATE OR REPLACE FUNCTION booking.admin_list_orders(p_search text DEFAULT NULL::text, p_status text DEFAULT NULL::text, p_payment_status text DEFAULT NULL::text, p_source text DEFAULT NULL::text, p_native boolean DEFAULT NULL::boolean, p_date_field text DEFAULT 'created'::text, p_from date DEFAULT NULL::date, p_to date DEFAULT NULL::date, p_sort text DEFAULT 'created_desc'::text, p_limit integer DEFAULT 50, p_offset integer DEFAULT 0, p_payment_filter text DEFAULT 'paid'::text)
+-- admin_list_orders: palautus booking_277-määritelmään (funktiorunko tavu-identtinen 20261111144714_booking_277_admin_list_orders_payment_filters.sql; oikeudet ja kommentti säilyvät CREATE OR REPLACE -lauseessa)
+CREATE OR REPLACE FUNCTION booking.admin_list_orders(p_search text DEFAULT NULL::text, p_status text DEFAULT NULL::text, p_payment_status text DEFAULT NULL::text, p_source text DEFAULT NULL::text, p_native boolean DEFAULT NULL::boolean, p_date_field text DEFAULT 'created'::text, p_from date DEFAULT NULL::date, p_to date DEFAULT NULL::date, p_sort text DEFAULT 'created_desc'::text, p_limit integer DEFAULT 50, p_offset integer DEFAULT 0, p_payment_filter text DEFAULT 'paid'::text, p_payment_filters text[] DEFAULT NULL::text[])
  RETURNS jsonb
  LANGUAGE plpgsql
  STABLE SECURITY DEFINER
@@ -206,6 +209,7 @@ declare
   v_lim int := coalesce(p_limit, 50);
   v_off int := greatest(coalesce(p_offset, 0), 0);
   v_pf text := coalesce(nullif(btrim(p_payment_filter), ''), 'paid');
+  v_pfs text[];
 begin
   perform booking._require_staff();
   if p_sort is null or p_sort not in ('created_desc','created_asc','order_no_desc','order_no_asc','total_desc','total_asc','start_desc','start_asc','paid_desc','paid_asc','unpaid_desc') then
@@ -214,6 +218,15 @@ begin
   if coalesce(p_date_field, 'created') not in ('created','start') then perform booking._err('invalid_param', 'p_date_field: created|start'); end if;
   if v_pf not in ('paid','unpaid','all','refunded','cancelled','invoiced') then
     perform booking._err('invalid_param', 'p_payment_filter: paid|unpaid|all|refunded|cancelled|invoiced'); end if;
+  -- booking_277: monivalinta. Ei-tyhjä p_payment_filters ohittaa p_payment_filter-arvon; tilat yhdistetään OR-ehdolla.
+  -- NULL tai tyhjä taulukko = vanha käytös (yksi p_payment_filter, oletus paid).
+  if p_payment_filters is not null and cardinality(p_payment_filters) > 0 then
+    select array_agg(distinct coalesce(btrim(x), '')) into v_pfs from unnest(p_payment_filters) as u(x);
+    if exists (select 1 from unnest(v_pfs) as u(x) where x not in ('paid','unpaid','all','refunded','cancelled','invoiced')) then
+      perform booking._err('invalid_param', 'p_payment_filters: paid|unpaid|all|refunded|cancelled|invoiced'); end if;
+  else
+    v_pfs := array[v_pf];
+  end if;
   if v_s ~ '^\d{1,12}$' then v_num := v_s::bigint; end if;
   if v_s is not null then v_like := '%' || replace(replace(replace(v_s, '\', '\\'), '%', '\%'), '_', '\_') || '%'; end if;
   with base as (
@@ -253,20 +266,17 @@ begin
             or (v_num is null and (c.name ilike v_like or c.email ilike v_like or c.phone ilike v_like or c.company ilike v_like)))
        and (p_from is null or case when coalesce(p_date_field, 'created') = 'created' then (o.created_at at time zone 'Europe/Helsinki')::date else (rr.fs at time zone 'Europe/Helsinki')::date end >= p_from)
        and (p_to   is null or case when coalesce(p_date_field, 'created') = 'created' then (o.created_at at time zone 'Europe/Helsinki')::date else (rr.fs at time zone 'Europe/Helsinki')::date end <= p_to)
-       and case v_pf
-             when 'all' then true
-             when 'paid' then o.payment_status in ('paid','partially_refunded')
-               and o.status not in ('cancelled','expired')
-               and (case when pp.pc > 0 then pp.paid - pp.refunded
-                         when o.payment_status in ('paid','partially_refunded') then o.total_gross
-                         else 0 end) > 0.004
-             when 'unpaid' then o.payment_status in ('unpaid','pending','failed','partially_paid')
-               and o.status not in ('cancelled','expired')
-             when 'refunded' then o.payment_status in ('refunded','partially_refunded')
-             when 'cancelled' then o.status in ('cancelled','expired')
-             when 'invoiced' then o.payment_status = 'invoiced' and o.status not in ('cancelled','expired')
-             else false
-           end
+       and ('all' = any(v_pfs)
+            or ('paid' = any(v_pfs) and o.payment_status in ('paid','partially_refunded')
+                and o.status not in ('cancelled','expired')
+                and (case when pp.pc > 0 then pp.paid - pp.refunded
+                          when o.payment_status in ('paid','partially_refunded') then o.total_gross
+                          else 0 end) > 0.004)
+            or ('unpaid' = any(v_pfs) and o.payment_status in ('unpaid','pending','failed','partially_paid')
+                and o.status not in ('cancelled','expired'))
+            or ('refunded' = any(v_pfs) and o.payment_status in ('refunded','partially_refunded'))
+            or ('cancelled' = any(v_pfs) and o.status in ('cancelled','expired'))
+            or ('invoiced' = any(v_pfs) and o.payment_status = 'invoiced' and o.status not in ('cancelled','expired')))
   ), page as (
     select b.*, row_number() over (order by
         case when p_sort = 'created_asc' then b.created_at end asc, case when p_sort = 'created_desc' then b.created_at end desc,

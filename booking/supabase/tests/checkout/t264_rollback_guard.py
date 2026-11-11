@@ -11,7 +11,7 @@ RB = (SB / "rollbacks" / "20261111141559_booking_264_ROLLBACK.sql").read_text()
 kw = dict(host=os.environ.get("PGHOST", "127.0.0.1"), port=os.environ.get("PGPORT", "54329"), user=os.environ.get("PGUSER", "postgres"))
 adm = psycopg.connect(dbname="postgres", autocommit=True, **kw)
 DB = f"t264_rb_{os.getpid()}"
-ALO = "booking.admin_list_orders(text,text,text,text,boolean,text,date,date,text,integer,integer,text)"
+ALO = "booking.admin_list_orders(text,text,text,text,boolean,text,date,date,text,integer,integer,text,text[])"
 DEPS=["booking.email_outbox_claim_base_132(integer)","booking.email_outbox_claim_base_146(integer)","booking.email_outbox_claim_base_215(integer)","booking.email_outbox_mark(bigint,text,text,text)"]
 NEW = ["booking._order_delete_blockers(bigint)", "booking.admin_order_delete_check(bigint)", "booking.admin_delete_unpaid_order(bigint,text)", "booking._email_outbox_archived_bi()", "booking._archived_late_payment_review_rows()", "booking.admin_ack_archived_late_payment(bigint,text)"]
 out = []
@@ -42,10 +42,10 @@ def case(name, ok, **info):
 
 c = fresh(); s0 = state(c)
 e = run(c, MIG); s1 = state(c)
-case("M1 migraatio puhtaaseen", e is None and s1["alo"] == "cad71198827bd7fd03426f146b43b424" and all(s1["new"].values()) and s1["trg"] == 1, err=e)
+case("M1 migraatio puhtaaseen", e is None and s1["alo"] == "c50fa63ab94d0046d6a3ccf85a005f0b" and all(s1["new"].values()) and s1["trg"] == 1, err=e)
 e2 = run(c, MIG); case("M2 migraatio uudelleen (sama versio) sallittu", e2 is None and state(c) == s1, err=e2)
 e = run(c, RB); s2 = state(c)
-case("RB1 rollback palauttaa booking_270:n ja poistaa kaiken", e is None and s2["alo"] == "56edffa64fbd99c14f8ea3a4bf126cd3" and not any(s2["new"].values()) and s2["trg"] == 0 and s2["col"] == 0 and s2 == s0, err=e)
+case("RB1 rollback palauttaa booking_277:n ja poistaa kaiken", e is None and s2["alo"] == "7a546ff24b41e6ffe7f22e3a43a282fc" and not any(s2["new"].values()) and s2["trg"] == 0 and s2["col"] == 0 and s2 == s0, err=e)
 e = run(c, RB); case("RB2 rollback uudelleen (jo palautettu) sallittu", e is None and state(c) == s2, err=e)
 e = run(c, MIG); case("RB3 migraatio rollbackin jälkeen uudelleen", e is None and state(c) == s1, err=e)
 
@@ -115,7 +115,7 @@ for change in ["drop trigger email_outbox_archived_bi on booking.email_outbox",
         c = fresh(); run(c,MIG); c.execute(change); before = state(c)
         e = run(c,script)
         case("trigger full definition/enabled guard " + label, e is not None and state(c) == before, err=e)
-c = fresh(); run(c, MIG); run(c, RB); c.execute("drop function booking.admin_list_orders(text,text,text,text,boolean,text,date,date,text,integer,integer,text)")
+c = fresh(); run(c, MIG); run(c, RB); c.execute("drop function booking.admin_list_orders(text,text,text,text,boolean,text,date,date,text,integer,integer,text,text[])")
 e = run(c, RB); case("RBX rollback hylkää puuttuvan admin_list_orders", e is not None and "puuttuu" in e, err=e)
 
 for sig in NEW:
