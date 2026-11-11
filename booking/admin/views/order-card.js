@@ -609,7 +609,8 @@ export function openOrderCard({
 
 
 // Varauksen muutos hallinnasta: sama voimassa oleva RPC ja samat parametrit kuin ennen.
-function changeDialog(r, onChange, order = null, can = () => false) {
+// v3 (PR 1): myös koko tilausnäkymän rivitoiminto Muuta / siirrä (views/order-view.js).
+export function changeDialog(r, onChange, order = null, can = () => false) {
   const isAdmin = !!can('bookings.override');
   loadBookingTexts(rpc).catch(() => {});
   const day = (iso) => new Date(iso).toLocaleDateString('sv-SE', { timeZone: 'Europe/Helsinki' });

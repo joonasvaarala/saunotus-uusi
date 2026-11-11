@@ -24,18 +24,63 @@ import { linkDeadlineControl } from './link-deadline.js';
 import { linkValidityText, linkSubmitOnce } from '../payment-link-logic.js';
 import { billingMethodText } from '../billing-method-texts.js';
 import { orderInvoiceCaption } from '../order-invoice-label.js';
+import { isWide, stepIndex } from '../order-view-logic.js';
 
 export const ORDER_SORTS = ['created', 'order_no', 'total', 'payment_status', 'first_reservation'];
 const VAT_CHOICES = [25.5, 13.5, 0];
 
 const annualSec = (info, sec) => { const panel = annualCardPanel(info); return panel ? h('div', { 'data-testid': 'order-annual-card' }, sec(acText('ui.admin.annual_card.title'), panel)) : null; };
 
-export function createOrdersTab({ api, ctx, gift = null, rpc = null }) {
-  const st = { search: '', paymentFilters: [...DEFAULT_PAYMENT_FILTERS], source: '', native: '', dateField: '', from: '', to: '', sortBy: 'created', sortDir: 'desc', limit: 25, offset: 0 };
+// Tilausnäkymä v3 (PR 1): listan tila talteen, kun mobiilissa / "Avaa koko tilaus" siirrytään #/tilaukset/<nro>; paluussa palautetaan.
+let resumeState = null;
+export const takeOrdersResume = () => { const r = resumeState; resumeState = null; return r; };
+export const hasOrdersResume = () => resumeState != null;
+
+export function createOrdersTab({ api, ctx, gift = null, rpc = null, onAfterChange = null, orderView = true }) {
+  let resume = onAfterChange ? null : takeOrdersResume();
+  const st = { search: '', paymentFilters: [...DEFAULT_PAYMENT_FILTERS], source: '', native: '', dateField: '', from: '', to: '', sortBy: 'created', sortDir: 'desc', limit: 25, offset: 0, ...(resume?.st || {}) };
   const list = h('ul', { class: 'tl-list', 'data-testid': 'orders-list' }), count = h('p', { class: 'muted tl-count', role: 'status', 'data-testid': 'orders-count' }), pagers = [h('div'), h('div')];
   let seq = 0, reopen = null, autoOpen = false;
+  // Työpöydän yhteenvetopaneeli (≥ 1200 px): rivi avaa yhteenvedon listan viereen; kapealla rivi avaa koko tilauksen.
+  const viewOn = orderView && !onAfterChange && typeof document !== 'undefined' && typeof globalThis.matchMedia === 'function';
+  let summary = null;
+  const ensureSummary = async () => {
+    if (summary) return summary;
+    const { createSummaryPanel } = await import('./order-summary.js');
+    summary = createSummaryPanel({ ctx, rpc: rpc || undefined, api, dialogs, onOpenFull: (m) => gotoFull(m), onClose: () => markRow(null) });
+    listWrap.append(summary.node);
+    return summary;
+  };
+  function markRow(id) {
+    for (const li of list.children) { if (li.dataset) li.classList.toggle('is-selected', id != null && String(li.dataset.orderId) === String(id)); }
+    listWrap.classList.toggle('has-summary', id != null);
+  }
+  function gotoFull(o) {
+    resumeState = { st: { ...st }, scrollY: globalThis.scrollY || 0, orderId: o.order_id };
+    location.hash = `#/tilaukset/${encodeURIComponent(o.order_no)}`;
+  }
+  async function openSummary(o) {
+    const p = await ensureSummary();
+    markRow(o.order_id);
+    rowsNow = rowsNow.length ? rowsNow : [o];
+    return p.show(o);
+  }
+  let rowsNow = [];
+  if (viewOn) document.addEventListener('keydown', (e) => {
+    if (!summary?.isOpen() || !node.isConnected || document.querySelector('dialog[open]')) return;
+    if (/^(INPUT|TEXTAREA|SELECT)$/.test(e.target?.tagName || '') || e.target?.isContentEditable) return;
+    if (e.key === 'Escape') { e.preventDefault(); summary.close(); return; }
+    if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
+    const i = rowsNow.findIndex((x) => String(x.order_id) === String(summary.current?.order_id));
+    const j = stepIndex(i, e.key === 'ArrowDown' ? 1 : -1, rowsNow.length);
+    if (j < 0 || j === i) return;
+    e.preventDefault();
+    openSummary(rowsNow[j]);
+    list.querySelector(`[data-order-id="${rowsNow[j].order_id}"]`)?.scrollIntoView?.({ block: 'nearest' });
+  });
   async function load() {
     const my = ++seq;
+    if (reopen == null && summary?.isOpen()) summary.close();   // suodatin tai sivu vaihtui → yhteenveto kiinni
     list.replaceChildren(loading()); list.setAttribute('aria-busy', 'true');
     try {
       const r = await api.listOrders({ ...st, paymentFilters: effectivePaymentFilters(st) });
@@ -44,6 +89,9 @@ export function createOrdersTab({ api, ctx, gift = null, rpc = null }) {
       if (st.offset >= r.total && r.total > 0) { st.offset = Math.max(0, Math.floor((r.total - 1) / st.limit) * st.limit); return load(); }
       count.textContent = r.total ? t('orders.count', { from: fmt.int(st.offset + 1), to: fmt.int(Math.min(st.offset + st.limit, r.total)), total: fmt.int(r.total) }) : '';
       list.replaceChildren(...(r.rows.length ? r.rows.map(orderRow) : [emptyBox(t('orders.none'))]));
+      rowsNow = r.rows;
+      if (summary?.isOpen()) markRow(summary.current?.order_id);
+      if (resume) { const y = resume.scrollY; const back = resume.orderId; resume = null; if (y != null) globalThis.requestAnimationFrame?.(() => globalThis.scrollTo?.(0, y)); if (back != null) list.querySelector(`[data-order-id="${back}"] .tl-head`)?.focus?.({ preventScroll: true }); }
       if (reopen != null) { const hit = r.rows.find((x) => String(x.order_id) === String(reopen)); if (hit) openCard(hit); reopen = null; }
       if (autoOpen) { autoOpen = false; if (r.rows.length === 1) { const row = list.firstElementChild; if (row) { row.style.scrollMarginTop = '70px'; row.scrollIntoView({ block: 'start' }); } openCard(r.rows[0]); } }   // syvälinkki (#/talous?order=<tilausnro> tai #/tilaukset?order=): ainoa osuma avataan
       const mk = () => (r.total > st.limit ? pager({ total: r.total, offset: st.offset, limit: st.limit, onPage: (o) => { st.offset = o; load(); document.querySelector('[data-testid=orders-count]')?.scrollIntoView({ block: 'nearest' }); } }) : h('span'));
@@ -72,7 +120,11 @@ export function createOrdersTab({ api, ctx, gift = null, rpc = null }) {
   }
   const change = (patch) => { Object.assign(st, patch, { offset: 0 }); paintPay(); load(); };
   // Oikea (ei mock) kirjoitus onnistui → lista + avoin tilaus haetaan uudelleen; Maksut/Raportit-välilehdet merkitään vanhentuneiksi (api.changed)
-  const afterChange = (res, orderId) => { if (res?.mock) return; reopen = orderId; api.changed(); load(); };
+  const afterChange = (res, orderId) => {
+    if (res?.mock) return;
+    if (onAfterChange) { api.changed(); onAfterChange(orderId); return; }   // koko tilausnäkymä (views/order-view.js) päivittää itse
+    reopen = orderId; api.changed(); load();
+  };
 
   // ---- rivi ----
   function orderRow(o) {
@@ -92,6 +144,11 @@ export function createOrdersTab({ api, ctx, gift = null, rpc = null }) {
     return row;
   }
   function openCard(o) {
+    // v3: leveällä näytöllä yhteenveto listan viereen, kapealla koko tilaus suoraan (Joonas t38u/t41u). Vanha kortti varalla.
+    if (viewOn && o?.order_no != null) { if (isWide(globalThis.innerWidth || 0)) { openSummary(o).catch(() => legacyCard(o)); } else gotoFull(o); return; }
+    legacyCard(o);
+  }
+  function legacyCard(o) {
     const canRefund = api.isMock('refund') || ctx.can('payments.refund');
     const canAdd = api.isMock('addToOrder') || ctx.can('bookings.manage');
     const flow = {
@@ -354,6 +411,12 @@ export function createOrdersTab({ api, ctx, gift = null, rpc = null }) {
   }
   sortSel.value = st.sortBy;
   const cols = h('div', { class: 'tl-cols', 'aria-hidden': 'true' }, h('span', { text: t('col.order') }), h('span', { text: t('col.created') }), h('span', { text: t('col.first') }), h('span', { class: 'r', text: t('col.sum') }), h('span', { text: t('col.status') }), h('span'));
-  const node = h('div', { class: 'tl-tab', 'data-testid': 'tab-orders' }, toolbar, count, pagers[0], cols, list, pagers[1]);
-  return { node, load, setSearch(q, { open = false } = {}) { st.search = q; st.offset = 0; autoOpen = open; buildToolbar(); load(); } };
+  const listWrap = h('div', { class: 'ov-listwrap' }, h('div', { class: 'ov-listcol' }, cols, list, pagers[1]));
+  const node = h('div', { class: 'tl-tab', 'data-testid': 'tab-orders' }, toolbar, count, pagers[0], listWrap);
+  // v3: koko tilausnäkymä käyttää samoja dialogeja (lisäosto, maksulinkki, maksun kirjaus lahjakortteineen, hyvitys).
+  const dialogs = {
+    add: (o) => addDialog(o), link: (o) => linkDialog(o), record: (o) => recordDialog(o),
+    refund: (o, refundable) => { if (refundable?.length && (api.isMock('refund') || ctx.can('payments.refund'))) refundDialog(o, refundable); },
+  };
+  return { node, load, dialogs, setSearch(q, { open = false } = {}) { st.search = q; st.offset = 0; autoOpen = open; buildToolbar(); load(); } };
 }
