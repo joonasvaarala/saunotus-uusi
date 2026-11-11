@@ -65,3 +65,49 @@ export function calendarSpaceDays(blocks, from, until) {
   }
   return result;
 }
+
+// Hallinnan Kalenteri: koulutukset ja niiden tilavaraukset päiväruutuihin (admin_event_list('training'), sama data kuin Koulutukset-työkalussa).
+// Peruttu tai pois käytöstä oleva kerta ei näy. Saman tuotteen päällekkäiset kerrat (esim. aloitus + jatkoviikko) yhdistetään päivällä yhdeksi riviksi.
+const SPACE_SHORT = { savusauna: 'Savusauna', rauni: 'Rauni', hoitosauna_rauni: 'Rauni', lovi: 'Lovi', hoitosauna_lovi: 'Lovi' };
+export const trainingSpaceName = b => SPACE_SHORT[String(b?.resource_code || '').toLowerCase()] || b?.resource_name || b?.space_name || '';
+export const isTrainingSpaceBlock = b => b && b.mode === 'exclusive' && (b.resource_kind === 'space' || TRAINING_SPACES.has(String(b.resource_code || '').toLowerCase()));
+export function calendarTrainingDays(products, from, until, { lang = 'fi' } = {}) {
+  const out = new Map();
+  for (const p of products || []) {
+    if (p.category && p.category !== 'training') continue;
+    const name = lang === 'en' && p.name_en ? p.name_en : p.name;
+    for (const r of p.rules || []) {
+      if (r.cancelled_at || r.active === false || !r.starts_at || !r.ends_at) continue;
+      const label = lang === 'en' && r.label_en ? r.label_en : r.label;
+      const spaces = (r.blocks || []).filter(isTrainingSpaceBlock).filter(b => Date.parse(b.ends_at) > Date.parse(b.starts_at));
+      const days = new Set(calendarSpaceDays([{ starts_at: r.starts_at, ends_at: r.ends_at }], from, until).keys());
+      const blockDays = calendarSpaceDays(spaces, from, until);
+      for (const d of blockDays.keys()) days.add(d);
+      for (const day of days) {
+        const list = out.get(day) || out.set(day, []).get(day);
+        const daySpaces = (blockDays.get(day) || []).map(b => ({ id: b.id, resource_id: b.resource_id, code: b.resource_code || null, name: trainingSpaceName(b), starts_at: b.starts_at, ends_at: b.ends_at }));
+        const same = list.find(x => x.product_id === p.product_id);
+        if (same) {
+          for (const s of daySpaces) if (!same.spaces.some(x => x.id === s.id)) same.spaces.push(s);
+          if (!same.labels.includes(label)) same.labels.push(label);
+          if (String(r.starts_at) < String(same.starts_at)) same.starts_at = r.starts_at;
+          if (String(r.ends_at) > String(same.ends_at)) same.ends_at = r.ends_at;
+          continue;
+        }
+        list.push({ product_id: p.product_id, rule_id: r.id, name, labels: label ? [label] : [], starts_at: r.starts_at, ends_at: r.ends_at, spaces: daySpaces,
+          href: `#/koulutukset?${new URLSearchParams({ ...(trainingGroup(p) === 'trip' ? { ryhma: 'matkat' } : {}), tapahtuma: String(p.product_id), kerta: String(r.id) })}` });
+      }
+    }
+  }
+  for (const list of out.values()) {
+    for (const t of list) { t.spaces.sort((a, b) => String(a.starts_at).localeCompare(String(b.starts_at)) || a.name.localeCompare(b.name)); t.space_names = [...new Set(t.spaces.map(s => s.name).filter(Boolean))]; }
+    list.sort((a, b) => String(a.spaces[0]?.starts_at || a.starts_at).localeCompare(String(b.spaces[0]?.starts_at || b.starts_at)) || a.product_id - b.product_id);
+  }
+  return out;
+}
+// Koulutuksen tilavaraus näkyy koulutuksen alla, joten sama sulku (space_blocks.event_block_id) ei toistu Tilat-listassa.
+export function withoutTrainingBlocks(blocks, products) {
+  const keys = new Set();
+  for (const p of products || []) for (const r of p.rules || []) for (const b of r.blocks || []) if (isTrainingSpaceBlock(b)) keys.add(`${b.resource_id}|${Date.parse(b.starts_at)}|${Date.parse(b.ends_at)}`);
+  return (blocks || []).filter(b => !keys.has(`${b.space_id}|${Date.parse(b.starts_at)}|${Date.parse(b.ends_at)}`));
+}

@@ -118,7 +118,15 @@ export const TRAINING_TEXTS = {
     "payment_body": "Hei!\n\nMuistathan tarkistaa kurssimaksusi. Jos olet jo maksanut, tämä viesti ei vaadi toimenpiteitä. Ota yhteyttä, jos tarvitset maksutiedot.",
     "complete_template": "Kirjoita jakson saapumisohje molemmilla kielillä ennen esikatselua.",
     "places_free": "Vapaita paikkoja",
-    "review_balance": "Tilausta on jo muutettu. Avaa tilaus ja tarkista loppumaksu ennen laskutusta."
+    "review_balance": "Tilausta on jo muutettu. Avaa tilaus ja tarkista loppumaksu ennen laskutusta.",
+    "cal_filter": "Koulutukset",
+    "cal_heading": "Koulutukset",
+    "cal_none": "Ei koulutuksia tänä päivänä.",
+    "cal_no_space": "Ei tilavarausta tälle päivälle.",
+    "cal_open": "Avaa Koulutukset-työkalussa",
+    "cal_unavailable": "Koulutuksia ei saatu haettua. Muut tiedot näytetään silti.",
+    "cal_session": "Jakso",
+    "cal_filters": "Näytä kalenterissa"
   },
   "en": {
     "title": "Trainings",
@@ -236,7 +244,15 @@ export const TRAINING_TEXTS = {
     "payment_body": "Hello!\n\nPlease check your course payment. If you have already paid, no action is needed. Contact us if you need payment details.",
     "complete_template": "Write the arrival instructions in both languages before previewing.",
     "places_free": "Places available",
-    "review_balance": "This order has already been changed. Open the order and check the balance before billing."
+    "review_balance": "This order has already been changed. Open the order and check the balance before billing.",
+    "cal_filter": "Training",
+    "cal_heading": "Training",
+    "cal_none": "No training on this day.",
+    "cal_no_space": "No space booked for this day.",
+    "cal_open": "Open in Training tool",
+    "cal_unavailable": "Training could not be loaded. Other details are still shown.",
+    "cal_session": "Session",
+    "cal_filters": "Show in calendar"
   }
 };
 let remote = {};

@@ -223,6 +223,15 @@ function rpc(name) {
       role_type: 'heater', staff_name: 'Aino', calendar_name: 'Lämmitykset', staffing_status: 'assigned',
     }]);
   }
+  if (name === 'admin_event_list') {
+    return Promise.resolve([{ product_id: 120, name: 'Saunottajakoulutus 2027', category: 'training', rules: [{
+      id: 117, label: '1. viikonloppu', starts_at: at(other, '08:00'), ends_at: at(other, '17:00'), active: true, cancelled_at: null,
+      blocks: [{ id: 12, mode: 'exclusive', resource_id: 12, resource_code: 'rauni', resource_kind: 'space', resource_name: 'Hoitosauna Rauni', starts_at: at(other, '09:00'), ends_at: at(other, '16:00') }],
+    }] }]);
+  }
+  if (name === 'admin_calendar_space_blocks') {
+    return Promise.resolve([{ id: 442, space_id: 12, space_name: 'Hoitosauna Rauni', starts_at: at(other, '09:00'), ends_at: at(other, '16:00'), reason: 'Tapahtuma: Saunottajakoulutus 2027' }]);
+  }
   if (name === 'public_get_site_texts') return Promise.resolve({ ok: true, texts: [] });
   if (String(name).startsWith('select:')) return Promise.resolve([]);
   if (name === 'admin_day_view') return Promise.resolve({ reservations: [] });
@@ -335,6 +344,52 @@ test('viikko: otsikko ja tyhjä kohta avaavat päivän, varauslinkki ei', async 
   await flush();
   assert.equal(heading(root), fmtLong(other));
   assert.equal(day(root, other).classList.contains('sel'), true);
+  SB.setRpcOverride(null);
+});
+
+test('koulutukset: suodatin oletuksena päällä, kuukausisiru nimi + tila, yksityiskohdat ja linkki; tila ei toistu Tilat-listassa', async () => {
+  const root = await mount('month');
+  const filter = root.querySelector('.cal-legend button[data-filter="training"]');
+  assert.equal(filter.tagName, 'BUTTON');
+  assert.equal(filter.getAttribute('aria-pressed'), 'true');
+  const cell = day(root, other);
+  const chip = cell.querySelector('.chip.training');
+  assert.ok(chip, 'koulutussiru päiväruudussa');
+  assert.match(chip.textContent, /Saunottajakoulutus 2027/);
+  assert.match(chip.textContent, /Rauni/);
+  assert.equal(cell.querySelector('.chip.training-cal-block'), null, 'koulutuksen tilavaraus ei näy erikseen Tilat-sirussa');
+  assert.match(opener(cell).getAttribute('aria-label'), /Koulutukset: Saunottajakoulutus 2027 – Rauni/);
+  opener(cell).click();
+  await flush();
+  const det = root.querySelector('[data-testid="calendar-trainings"]');
+  assert.ok(det);
+  assert.match(det.textContent, /09:00–16:00 · Rauni/);
+  assert.match(det.textContent, /1\. viikonloppu/);
+  assert.equal(det.querySelector('a').getAttribute('href'), '#/koulutukset?tapahtuma=120&kerta=117');
+  assert.equal(root.querySelector('[data-testid="calendar-space-blocks"]'), null);
+
+  root.querySelector('.cal-legend button[data-filter="training"]').click();
+  await flush();
+  assert.equal(root.querySelector('.cal-legend button[data-filter="training"]').getAttribute('aria-pressed'), 'false');
+  assert.equal(day(root, other).querySelector('.chip.training'), null);
+  assert.ok(day(root, other).querySelector('.chip.training-cal-block'), 'suodatin pois: sulku näkyy taas Tilat-sirussa');
+  assert.equal(root.querySelector('[data-testid="calendar-trainings"]'), null);
+  SB.setRpcOverride(null);
+});
+
+test('koulutukset viikossa ja fallback, jos haku epäonnistuu', async () => {
+  const root = await mount('week');
+  const item = day(root, other).querySelector('.cal-item.training');
+  assert.ok(item);
+  assert.match(item.textContent, /Saunottajakoulutus 2027/);
+  assert.match(item.textContent, /09:00–16:00/);
+  assert.match(item.textContent, /Rauni/);
+  SB.setRpcOverride((name, args) => name === 'admin_event_list' ? Promise.reject(Object.assign(new Error('x'), { code: 'PGRST202' })) : rpc(name, args));
+  document.body.replaceChildren();
+  const r2 = await render({ ctx: { can: () => true }, refs: { methods: [] }, reload() {} });
+  assert.match(r2.textContent, /Koulutuksia ei saatu haettua/);
+  assert.ok(r2.querySelector('.cal-grid'));
+  assert.ok(r2.querySelector(`[data-date="${other}"] .chip.training-cal-block`), 'fallback: sulut näkyvät kuten ennen');
   SB.setRpcOverride(null);
 });
 
