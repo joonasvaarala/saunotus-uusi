@@ -40,6 +40,16 @@
     "reason": "Tilausnäkymä v3 PR 3 (booking_282–284): osahyvitys, ylisuorituksen hyvitys ja atominen peru koko tilaus; dialogien tekstit (booking/admin/partial-refund-texts.js); sama kuin koodin oletus; ominaisuus lipun partial_refunds_enabled takana (oletus pois)"
   },
   {
+    "key": "ui.admin.order_flow.refund.customer_reduce",
+    "lang": "fi",
+    "text": "Asiakkaan muutos",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 3 (booking_282–284): osahyvitys, ylisuorituksen hyvitys ja atominen peru koko tilaus; dialogien tekstit (booking/admin/partial-refund-texts.js); sama kuin koodin oletus; ominaisuus lipun partial_refunds_enabled takana (oletus pois)"
+  },
+  {
     "key": "ui.admin.order_flow.refund.partial",
     "lang": "fi",
     "text": "Hyvitä osa:",
@@ -641,6 +651,16 @@
     "key": "ui.admin.order_flow.refund.question",
     "lang": "en",
     "text": "Refund?",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 3 (booking_282–284): osahyvitys, ylisuorituksen hyvitys ja atominen peru koko tilaus; dialogien tekstit (booking/admin/partial-refund-texts.js); sama kuin koodin oletus; ominaisuus lipun partial_refunds_enabled takana (oletus pois)"
+  },
+  {
+    "key": "ui.admin.order_flow.refund.customer_reduce",
+    "lang": "en",
+    "text": "Customer change",
     "class": "normal",
     "kind": "plain",
     "max_len": 80,
