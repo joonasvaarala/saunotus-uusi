@@ -1,13 +1,15 @@
 // Tilausnäkymä v3 (PR 1): asiakasnäkymä reitillä #/asiakkaat/<id> (luonnos asiakas-desktop / asiakas-mobiili).
 // Data: admin_get_customer (booking_278 H: stats, open_balance, open_orders, gift_cards). Tulevat ja menneet tilaukset, yhteystiedot,
 // markkinointilupa, lahjakortit, vuosikortti ja asiakkaan muistiinpano. Asiakashistoria näkyy VAIN täällä (ei tilauskortissa).
-// EI Yhdistä/poista-osiota (myöhempi PR). Muokkaa avaa nykyisen asiakaskortin (views/customers.js, onEdit).
+// Yhdistä/Anonymisoi (PR 4, booking_285) on omassa moduulissaan (customer-admin-panel.js) ja näkyy vain oikeudella customers.admin + palvelimen kytkimellä.
+// Muokkaa avaa nykyisen asiakaskortin (views/customers.js, onEdit).
 import { rpc as sbRpc } from '../sb.js';
 import { h, errMsg } from '../ui.js';
 import { fmt, getLang } from '../talous-i18n.js';
 import { ov, loadOvTexts } from '../order-view-texts.js';
 import { customerModel, customerOrderBadges } from '../order-view-logic.js';
 import { contactButtons } from './order-view.js';
+import { renderCustomerAdminPanel, loadAdminStatus } from './customer-admin-panel.js';
 
 const c = (k, vars) => ov(`customer_view.${k}`, vars);
 const card = (title, testid, ...kids) => h('section', { class: 'ov-card', 'data-testid': testid }, title ? h('div', { class: 'ov-card-head' }, typeof title === 'string' ? h('h2', { class: 'ov-h', text: title }) : title) : null, ...kids);
@@ -75,7 +77,13 @@ export async function renderCustomerView({ ctx, rpc = sbRpc, id, onEdit = null, 
       (gifts.bought || []).length ? h('ul', { class: 'ov-gifts' }, gifts.bought.slice(0, 5).map((g) => h('li', {}, h('code', { text: g.code_masked }), ` · ${fmt.money(g.balance)} / ${fmt.money(g.initial_amount)}${g.valid_to ? ` · ${fmt.date(g.valid_to)}` : ''}`))) : null) : null,
     annual ? card(c('annual'), 'cv-annual', h('p', { class: 'ov-small', text: [annual.code, c('annual_valid', { to: fmt.date(annual.valid_to) })].filter(Boolean).join(' · ') })) : null,
     card(c('notes'), 'cv-notes', m.notes ? h('p', { class: 'ov-note', 'data-testid': 'cv-note', text: m.notes }) : h('p', { class: 'muted ov-small', text: c('notes_none') }), h('p', { class: 'muted ov-small', text: c('notes_hint') })));
+  // PR 4: Yhdistä/Anonymisoi. Osio ilmestyy vain, jos palvelin sanoo (oikeus + kytkin). Onnistumisen jälkeen avataan säilytetty asiakas tai ladataan näkymä uudelleen.
+  const adminStatus = await loadAdminStatus(rpc);
+  const adminPanel = renderCustomerAdminPanel({ rpc, ctx, customer: m, status: adminStatus,
+    onDone: (keepId) => { if (Number(keepId) === Number(m.id)) renderCustomerView({ ctx, rpc, id, onEdit, now, pastLimit }).then((n) => root.replaceWith(n)); else { globalThis.location.hash = `#/asiakkaat/${keepId}`; } } });
+  if (adminPanel) side.append(adminPanel);
   root.append(...[h('nav', { class: 'ov-crumb' }, h('a', { href: '#/asiakkaat', 'data-testid': 'cv-back', text: `← ${c('crumb')}` }), ' / ', h('span', { text: m.name || '' })),
-    m.anonymized ? h('p', { class: 'muted', text: c('anonymized') }) : null, head, h('div', { class: 'ov-grid' }, main, side)].filter(Boolean));
+    m.anonymized ? h('p', { class: 'muted', text: c('anonymized') }) : null,
+    m.merged_into ? h('p', { class: 'muted', 'data-testid': 'cv-merged' }, c('merged_notice', { id: m.merged_into }), ' ', h('a', { href: `#/asiakkaat/${m.merged_into}`, text: c('merged_open') })) : null, head, h('div', { class: 'ov-grid' }, main, side)].filter(Boolean));
   return root;
 }
