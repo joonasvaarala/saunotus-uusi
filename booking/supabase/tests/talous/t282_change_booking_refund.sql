@@ -86,6 +86,7 @@ begin
   perform pg_temp.ck((select (booking._order_balance(o1) ->> 'net_paid')::numeric) = v_new, 'H4: maksettu netto = uusi summa');
   perform pg_temp.ck((v ->> 'notified')::boolean and exists (select 1 from booking.email_outbox where order_id = o1 and kind = 'order_change'), 'H5: order_change jonossa');
   perform pg_temp.ck(test.audit_n('ADMIN_CHANGE_REFUND') >= 1, 'H6: audit');
+  perform pg_temp.ck((select bool_and(notify_customer) from booking.refunds where order_id = o1) and exists (select 1 from booking.email_outbox where order_id = o1 and kind = 'refund_receipt' and status <> 'skipped'), 'H6b: viesti = kyllä → kuittiviesti jonossa');
   perform pg_temp.ck((select sum((x ->> 'amount')::numeric) from booking.refunds f, jsonb_array_elements(f.lines) x where f.order_id = o1) = v_diff, 'H7: kohdistus maksuriveille = hyvitys');
   -- toisto: ei enää ylisuoritusta
   v := pg_temp.as_(u_adm, format('select booking.admin_change_booking(%s, null, null, 2, false, false, null, null, %s, %L, false)', r1, v_diff, 'toisto'));
@@ -104,10 +105,14 @@ begin
   perform pg_temp.ck((w ->> 'ok')::boolean, 'M4: muutos + Montonio-hyvitys ' || coalesce(w ->> 'err', '') || coalesce(w ->> 'msg', ''));
   perform pg_temp.ck((select count(*) from booking.refunds where order_id = o2 and status = 'requested' and provider = 'montonio') = 1, 'M5: Montonio-hyvitys tilassa requested (Edge käsittelee)');
   perform pg_temp.ck((select balance from booking.gift_cards where code = 'HHGCAAA28201') = 0, 'M6: lahjakorttia ei palautettu');
-  perform pg_temp.ck(not exists (select 1 from booking.refunds where order_id = o2 and payment_id in (select id from booking.payments where gift_card_id is not null)), 'M7: ei hyvitystä lahjakorttimaksulle');
+  perform pg_temp.ck((select notify_customer is false from booking.refunds where order_id = o2 and provider = 'montonio'), 'M5b: viesti = ei → notify_customer=false');
   -- käsittelyssä oleva hyvitys vähentää hyvitettävää (samanaikaisuus/toisto)
   w := pg_temp.as_(u_adm, format('select booking.admin_change_booking_preview(%s, null, null, 2, null)', r2));
   perform pg_temp.ck((w ->> 'refundable_max')::numeric = 0 and (w ->> 'overpaid_after')::numeric = 0, 'M8: pending-hyvitys huomioitu, ei kaksoishyvitystä ' || w::text);
+  perform booking.montonio_refund_complete((select id from booking.refunds where order_id = o2 and provider = 'montonio'), 'prov-1', null);
+  perform pg_temp.ck(exists (select 1 from booking.receipts where order_id = o2 and kind = 'refund') or exists (select 1 from booking.receipts r join booking.refunds f on f.id = r.refund_id where f.order_id = o2), 'M5c: kuitti syntyy kirjanpitoon');
+  perform pg_temp.ck(not exists (select 1 from booking.email_outbox where order_id = o2 and kind = 'refund_receipt' and status <> 'skipped'), 'M5d: viesti = ei → ei kuittiviestiä Montonion valmistuttuakaan');
+  perform pg_temp.ck(not exists (select 1 from booking.refunds where order_id = o2 and payment_id in (select id from booking.payments where gift_card_id is not null)), 'M7: ei hyvitystä lahjakorttimaksulle');
   -- lahjakortti kattaa suurimman osan: raha hyvitetään vain ylimenevältä osalta
   o4 := pg_temp.mk(v_rule, d + 21, 3, 'd@t282.example', 'montonio', 80, 'HHGCAAA28202');
   select id into r4 from booking.reservations where order_id = o4;

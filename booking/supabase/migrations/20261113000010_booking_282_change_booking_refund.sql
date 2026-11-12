@@ -22,11 +22,29 @@ begin
   if v is null then raise exception 'booking_282: admin_change_booking (8 arg) puuttuu. Ei muutoksia.'; end if;
   if to_regprocedure('booking.admin_refund(bigint,numeric,text,jsonb,boolean)') is null then raise exception 'booking_282: admin_refund puuttuu'; end if;
   if to_regprocedure('booking._reservation_refund_plan(bigint)') is null then raise exception 'booking_282: _reservation_refund_plan puuttuu'; end if;
+  v := md5(pg_get_functiondef(to_regprocedure('booking._on_refund_done(bigint)')));
+  if v is distinct from '83f32b69d7d7dbd4da4727215241e994' then raise exception 'booking_282: _on_refund_done md5 % ei vastaa odotettua. Ei muutoksia.', v; end if;
 end $pre$;
 
 insert into booking.settings(key, value, description, is_public)
 values ('partial_refunds_enabled', 'false'::jsonb, 'Hallinnan osahyvitys (muutos, ylisuoritus, peru koko tilaus osasummalla) päällä. Oletus pois.', false)
 on conflict (key) do nothing;
+
+-- Viestivalinta (t42u/G): refunds.notify_customer null = vanha käytös (refund_receipt lähtee), false = ei kuittiviestiä (kuitti näkyy silti tilaussivulla),
+-- true = kuittiviesti lähtee normaalisti. Asetetaan vain uusissa virroissa (D/E/F/K), jotta admin_refund-kutsujien käytös ei muutu.
+alter table booking.refunds add column if not exists notify_customer boolean;
+
+create or replace function booking._on_refund_done(p_refund_id bigint)
+returns void language plpgsql security definer set search_path = '' as $$
+declare v_id bigint; v_order bigint; v_pay bigint;
+begin
+  if exists (select 1 from booking.refunds f join booking.payments p on p.id = f.payment_id where f.id = p_refund_id and p.method = 'invoice') then return; end if;
+  v_id := booking._issue_refund_receipt(p_refund_id);
+  if v_id is not null and coalesce((select f.notify_customer from booking.refunds f where f.id = p_refund_id), true) then
+    select order_id, payment_id into v_order, v_pay from booking.refunds where id = p_refund_id;
+    perform booking._enqueue_email('refund_receipt', v_order, v_id, v_pay, 'receipt:' || v_id);
+  end if;
+end $$;
 
 create or replace function booking._flag_on(p_key text)
 returns boolean language sql stable security definer set search_path = '' as $$
@@ -136,12 +154,19 @@ begin
 end $$;
 
 -- Suorittaa jaon: yksi admin_refund / maksu. Vaatii payments.refund (admin_refund tarkistaa).
-create or replace function booking._do_refunds(p_plan jsonb, p_reason text)
+create or replace function booking._do_refunds(p_plan jsonb, p_reason text, p_notify boolean default null)
 returns jsonb language plpgsql volatile security definer set search_path = '' as $$
 declare x jsonb; v jsonb; v_out jsonb := '[]'::jsonb; v_total numeric := 0;
 begin
   for x in select * from jsonb_array_elements(coalesce(p_plan, '[]'::jsonb)) loop
     v := booking.admin_refund((x ->> 'payment_id')::bigint, (x ->> 'amount')::numeric, p_reason, x -> 'lines', false);
+    if p_notify is not null then
+      update booking.refunds set notify_customer = p_notify where id = (v ->> 'refund_id')::bigint;
+      if not p_notify then   -- käsin kirjattu hyvitys on jo kuitattu: jonossa oleva kuittiviesti ohitetaan
+        update booking.email_outbox e set status = 'skipped', last_error = 'notify=false'
+         where e.kind = 'refund_receipt' and e.status = 'pending' and e.receipt_id in (select r.id from booking.receipts r where r.refund_id = (v ->> 'refund_id')::bigint);
+      end if;
+    end if;
     v_out := v_out || jsonb_build_object('payment_id', (x ->> 'payment_id')::bigint, 'provider', x ->> 'provider', 'amount', (x ->> 'amount')::numeric,
                                         'refund_id', v -> 'refund_id', 'status', v ->> 'status', 'receipt_no', v -> 'receipt_no');
     v_total := v_total + (x ->> 'amount')::numeric;
@@ -226,7 +251,7 @@ begin
     select array_agg(i.id) into v_items from booking.order_items i where i.order_id = v_res.order_id and (i.id = v_res.order_item_id or i.parent_item_id = v_res.order_item_id);
     v_plan := booking._refund_allocate(v_res.order_id, p_refund_amount, null, v_items);   -- virhe amount_exceeds_refundable kumoaa koko muutoksen
     v_reason := coalesce(nullif(btrim(p_refund_reason), ''), 'Varauksen muutos (varaus #' || v_res.id || ')');
-    v_done := booking._do_refunds(v_plan, v_reason);
+    v_done := booking._do_refunds(v_plan, v_reason, coalesce(p_notify, false));
     insert into booking.audit_log(actor, actor_role, table_name, row_pk, action, old_data, new_data)
     values (auth.uid(), booking._jwt_role(), 'reservations', v_res.id::text, 'ADMIN_CHANGE_REFUND', null,
             jsonb_build_object('refund_total', v_done -> 'total', 'refunds', v_done -> 'refunds', 'reason', v_reason));
@@ -242,7 +267,7 @@ begin
 end $$;
 
 revoke all on function booking._flag_on(text), booking._pl_cap(bigint), booking._order_refund_info(bigint, numeric),
-  booking._refund_allocate(bigint, numeric, bigint, bigint[], numeric, boolean), booking._do_refunds(jsonb, text) from public, anon, authenticated;
+  booking._refund_allocate(bigint, numeric, bigint, bigint[], numeric, boolean), booking._do_refunds(jsonb, text, boolean) from public, anon, authenticated;
 revoke all on function booking.admin_change_booking_preview(bigint, bigint, date, integer, timestamptz) from public, anon;
 grant execute on function booking.admin_change_booking_preview(bigint, bigint, date, integer, timestamptz) to authenticated, service_role;
 revoke all on function booking.admin_change_booking(bigint, bigint, date, integer, boolean, boolean, timestamptz, timestamptz, numeric, text, boolean) from public, anon;
