@@ -237,6 +237,25 @@ export function paymentBox(m, { can = can0 } = {}) {
   };
 }
 
+/**
+ * Hyvitä maksu… -dialogin maksut (korjaus 12.11.2026, #15149): normOrder()-maksuilla tunniste on payment_id (ei id),
+ * joten vertailu tehdään payment_id:llä; muuten lista jäi tyhjäksi ja nappi ei tehnyt mitään.
+ * payments = normOrder(m.raw).payments. Palauttaa vain paymentBoxin hyvitettävät, maksetut maksut, joissa on hyvitettävää.
+ */
+export function refundTargets(m, payments, { can = can0 } = {}) {
+  const box = paymentBox(m, { can });
+  if (!box?.actions.refund) return [];
+  const ok = new Set(box.refundable.map((x) => String(x.payment_id)));
+  return (payments || []).filter((p) => ok.has(String(p.payment_id ?? p.id)) && ['paid', 'partially_refunded'].includes(p.status) && num(p.amount) - num(p.refunded_amount) > EPS);
+}
+
+/** Dialogin esitäyttö: ylisuorituksessa vain liikaa maksettu osuus (enintään maksun jäljellä oleva), muuten koko jäljellä oleva. */
+export function refundSuggestion(m, p) {
+  const left = round2(num(p?.amount) - num(p?.refunded_amount));
+  const over = num(m?.overpaid);
+  return over > EPS ? round2(Math.min(over, left)) : left;
+}
+
 /** Ensimmäinen tuleva tai tämän päivän voimassa oleva varaus (seuraava askel, yhteenveto). */
 export function nextReservation(m, now = new Date()) {
   const today = helDay(now);

@@ -332,11 +332,12 @@ export function createOrdersTab({ api, ctx, gift = null, rpc = null, onAfterChan
       if (api.annualCardForOrder) api.annualCardForOrder(o.order_id).then((ac) => showAnnualCardDialog(ac)).catch(() => {});
     });
   }
-  function refundDialog(o, refundable) {
+  function refundDialog(o, refundable, { suggest = null } = {}) {
     const left = (p) => Math.round((p.amount - p.refunded_amount) * 100) / 100;
-    const sel = h('select', { name: 'payment', onchange: () => { amount.value = left(refundable.find((p) => String(p.payment_id) === sel.value)); amount.max = amount.value; } },
+    const initial = (p) => (suggest ? suggest(p) : left(p));   // tilausnäkymä: ylisuorituksessa esitäytetään vain liikaa maksettu osuus
+    const sel = h('select', { name: 'payment', onchange: () => { const p = refundable.find((x) => String(x.payment_id) === sel.value); amount.max = left(p); amount.value = initial(p); } },
       refundable.map((p) => h('option', { value: p.payment_id, text: `${methodLabel(p.method, p.method_label)} · ${fmt.money(left(p))}` })));
-    const amount = h('input', { name: 'amount', type: 'number', step: '0.01', min: '0.01', max: left(refundable[0]), value: left(refundable[0]), inputmode: 'decimal', required: true });
+    const amount = h('input', { name: 'amount', type: 'number', step: '0.01', min: '0.01', max: left(refundable[0]), value: initial(refundable[0]), inputmode: 'decimal', required: true });
     // MobilePay-verkkomaksu (provider 'mobilepay'): hyvitys lähtee MobilePayhin heti (§14.4); vihje näkyy vain sille maksulle
     const mpHint = h('p', { class: 'muted tl-hint', 'data-testid': 'refund-mp-hint', text: t('refund.mobilepay') });
     const vpHint = h('p', { class: 'muted tl-hint', 'data-testid': 'refund-vp-hint', text: t('refund.visma') });
@@ -433,7 +434,7 @@ export function createOrdersTab({ api, ctx, gift = null, rpc = null, onAfterChan
   // v3: koko tilausnäkymä käyttää samoja dialogeja (lisäosto, maksulinkki, maksun kirjaus lahjakortteineen, hyvitys).
   const dialogs = {
     add: (o) => addDialog(o), link: (o) => linkDialog(o), record: (o) => recordDialog(o),
-    refund: (o, refundable) => { if (refundable?.length && (api.isMock('refund') || ctx.can('payments.refund'))) refundDialog(o, refundable); },
+    refund: (o, refundable, opts) => { if (refundable?.length && (api.isMock('refund') || ctx.can('payments.refund'))) refundDialog(o, refundable, opts); },
   };
   return { node, load, dialogs, setSearch(q, { open = false } = {}) { st.search = q; st.offset = 0; autoOpen = open; buildToolbar(); load(); } };
 }
