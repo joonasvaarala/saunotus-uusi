@@ -1,7 +1,7 @@
 // Tilausnäkymä v3 (PR 1): yhteenvetopaneelin, koko tilausnäkymän, peruutusdialogin ja asiakasnäkymän tekstit (FI + EN).
 // Avaimet: ui.admin.order_view.*, ui.admin.order_cancel.*, ui.admin.customer_view.*. Sama mekanismi kuin day-memos-texts.js:
 // public_get_site_texts (admin_ui_texts-välimuisti) peittää sanakirjan; puuttuva rivi tai täyttymätön paikkamerkki → oletus.
-// Tuonti: content/site-texts.pending-import-137.json (vain uudet avaimet); summalaatikon ui.admin.order_view.amt.* pending-import-140.json. Tekstit ovat pelkkää tekstiä, ei HTML:ää.
+// Tuonti: content/site-texts.pending-import-137.json (vain uudet avaimet); summalaatikon ui.admin.order_view.amt.* pending-import-140.json (+ amt.refund_pending* pending-import-144.json). Tekstit ovat pelkkää tekstiä, ei HTML:ää.
 import { getLang } from './talous-i18n.js';
 import { getSiteTexts } from './site-texts-cache.js';
 
@@ -193,6 +193,7 @@ export const ORDER_VIEW_TEXTS = {
     'ui.admin.order_view.amt.invoice': 'Laskulla avoinna',
     'ui.admin.order_view.amt.to_refund': 'Hyvitettävää',
     'ui.admin.order_view.amt.refunded': 'Hyvitetty',
+    'ui.admin.order_view.amt.refund_pending': 'Hyvitys käsittelyssä',
     'ui.admin.order_view.amt.none': 'Ei maksettavaa',
     'ui.admin.order_view.amt.total': 'Yhteensä {{var:amount}}',
     'ui.admin.order_view.amt.cancelled_total': 'Peruttu, yhteensä {{var:amount}}',
@@ -202,6 +203,7 @@ export const ORDER_VIEW_TEXTS = {
     'ui.admin.order_view.amt.gift_line': 'Lahjakortilla {{var:amount}}',
     'ui.admin.order_view.amt.partner_line': 'Kumppanikoodilla {{var:amount}}',
     'ui.admin.order_view.amt.link_line': 'Maksulinkki avoinna {{var:amount}}',
+    'ui.admin.order_view.amt.refund_pending_line': 'Hyvitys käsittelyssä {{var:amount}}',
     'ui.admin.order_view.mobile_bar': 'Tilauksen päätoiminnot',
     'ui.admin.order_cancel.title': 'Peru varaus',
     'ui.admin.order_cancel.sub': 'Tilaus #{{var:no}} · {{var:name}} · {{var:count}}',
@@ -478,6 +480,7 @@ export const ORDER_VIEW_TEXTS = {
     'ui.admin.order_view.amt.invoice': 'Open on invoice',
     'ui.admin.order_view.amt.to_refund': 'To refund',
     'ui.admin.order_view.amt.refunded': 'Refunded',
+    'ui.admin.order_view.amt.refund_pending': 'Refund in progress',
     'ui.admin.order_view.amt.none': 'Nothing to pay',
     'ui.admin.order_view.amt.total': 'Total {{var:amount}}',
     'ui.admin.order_view.amt.cancelled_total': 'Cancelled, total {{var:amount}}',
@@ -487,6 +490,7 @@ export const ORDER_VIEW_TEXTS = {
     'ui.admin.order_view.amt.gift_line': 'By gift card {{var:amount}}',
     'ui.admin.order_view.amt.partner_line': 'By partner code {{var:amount}}',
     'ui.admin.order_view.amt.link_line': 'Payment link open {{var:amount}}',
+    'ui.admin.order_view.amt.refund_pending_line': 'Refund in progress {{var:amount}}',
     'ui.admin.order_view.mobile_bar': 'Main order actions',
     'ui.admin.order_cancel.title': 'Cancel booking',
     'ui.admin.order_cancel.sub': 'Order #{{var:no}} · {{var:name}} · {{var:count}}',

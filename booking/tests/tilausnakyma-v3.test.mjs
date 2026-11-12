@@ -220,7 +220,7 @@ test('asiakasnäkymä: tulevat / menneet, tunnusluvut palvelimelta, ei yhdistä/
 test('tekstit: FI = EN, pending-import-137 täsmää, paikkamerkit, ei HTML:ää, ei päällekkäisyyttä muiden tuontien kanssa', () => {
   assert.deepEqual(Object.keys(ORDER_VIEW_TEXTS.fi).sort(), Object.keys(ORDER_VIEW_TEXTS.en).sort());
   // import 140 (summalaatikko, ui.admin.order_view.amt.*) jatkaa 137:ää samalla etuliitteellä
-  const OWN = ['site-texts.pending-import-137.json', 'site-texts.pending-import-140.json'];
+  const OWN = ['site-texts.pending-import-137.json', 'site-texts.pending-import-140.json', 'site-texts.pending-import-144.json'];
   const rows = OWN.flatMap((f) => JSON.parse(read(`content/${f}`)));
   assert.equal(rows.length, Object.keys(ORDER_VIEW_TEXTS.fi).length * 2);
   const seen = new Set();

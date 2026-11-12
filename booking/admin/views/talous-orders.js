@@ -25,6 +25,7 @@ import { linkValidityText, linkSubmitOnce } from '../payment-link-logic.js';
 import { billingMethodText } from '../billing-method-texts.js';
 import { orderInvoiceCaption } from '../order-invoice-label.js';
 import { isWide, stepIndex } from '../order-view-logic.js';
+import { paymentRefundLeft } from '../refund-pending.js';
 import { archivedBadge } from '../order-delete-logic.js';
 import { deleteText } from '../order-delete-texts.js';
 
@@ -159,7 +160,7 @@ export function createOrdersTab({ api, ctx, gift = null, rpc = null, onAfterChan
       recordPayment: (ord) => recordDialog(ord || o),
       refund: (ord) => {
         const cur = ord || o;
-        const refundable = (cur.payments || []).filter((p) => ['paid', 'partially_refunded'].includes(p.status) && p.amount > (p.refunded_amount || 0));
+        const refundable = (cur.payments || []).filter((p) => ['paid', 'partially_refunded'].includes(p.status) && paymentRefundLeft(p) > 0.004);   // keskeneräiset hyvitykset vähennetty
         if (refundable.length && canRefund) refundDialog(cur, refundable);
       },
     };
@@ -219,7 +220,7 @@ export function createOrdersTab({ api, ctx, gift = null, rpc = null, onAfterChan
 
     const canRefund = api.isMock('refund') || ctx.can('payments.refund');
     const canAdd = api.isMock('addToOrder') || ctx.can('bookings.manage');
-    const refundable = o.payments.filter((p) => ['paid', 'partially_refunded'].includes(p.status) && p.amount > p.refunded_amount);
+    const refundable = o.payments.filter((p) => ['paid', 'partially_refunded'].includes(p.status) && paymentRefundLeft(p) > 0.004);   // keskeneräiset hyvitykset vähennetty
     const visible = visibleOrderActions(o, { canRefund, canAdd });
     const actionFactories = {
       addToOrder: () => actionBtn({ key: 'addToOrder', label: t('btn.addToOrder'), ico: 'plus', testid: 'btn-add', onClick: () => addDialog(o) }),
@@ -333,8 +334,8 @@ export function createOrdersTab({ api, ctx, gift = null, rpc = null, onAfterChan
     });
   }
   function refundDialog(o, refundable, { suggest = null } = {}) {
-    const left = (p) => Math.round((p.amount - p.refunded_amount) * 100) / 100;
-    const initial = (p) => (suggest ? suggest(p) : left(p));   // tilausnäkymä: ylisuorituksessa esitäytetään vain liikaa maksettu osuus
+    const left = (p) => paymentRefundLeft(p);   // maksettu − hyvitetty − keskeneräiset (requested/processing); sama raja kuin admin_refund
+    const initial = (p) => { const v = suggest ? suggest(p) : left(p); return v == null ? '' : v; };   // tilausnäkymä: ylisuorituksessa esitäytetään vain liikaa maksettu osuus
     const sel = h('select', { name: 'payment', onchange: () => { const p = refundable.find((x) => String(x.payment_id) === sel.value); amount.max = left(p); amount.value = initial(p); } },
       refundable.map((p) => h('option', { value: p.payment_id, text: `${methodLabel(p.method, p.method_label)} · ${fmt.money(left(p))}` })));
     const amount = h('input', { name: 'amount', type: 'number', step: '0.01', min: '0.01', max: left(refundable[0]), value: initial(refundable[0]), inputmode: 'decimal', required: true });
