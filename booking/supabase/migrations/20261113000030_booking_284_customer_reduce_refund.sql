@@ -33,7 +33,7 @@ end $pre$;
 
 insert into booking.settings(key, value, description, is_public) values
   ('customer_auto_partial_refund_enabled', 'false'::jsonb, 'Asiakkaan oma pienennys + automaattinen Montonio-osahyvitys päällä. Oletus pois. Vaatii myös partial_refunds_enabled.', false),
-  ('customer_reduce_full_refund_days_private', '14'::jsonb, 'Yksityis-/tapahtumavuoro: automaattinen pienennys sallittu, kun alkuun on vähintään näin monta vuorokautta (ehtoteksti: maksuton 14 vrk).', false),
+  ('customer_reduce_full_refund_days_private', '14'::jsonb, 'Yksityis-/tapahtumavuoro: automaattinen pienennys sallittu, kun alkuun on vähintään näin monta vuorokautta (ehtoteksti: maksuton 14 vrk).', true),
   ('customer_reduce_cooldown_minutes', '60'::jsonb, 'Enintään yksi automaattinen pienennys tilausta kohden tässä ajassa (minuuttia).', false)
 on conflict (key) do nothing;
 

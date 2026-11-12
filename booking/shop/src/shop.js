@@ -10,6 +10,7 @@ import { runOnlineReturn } from './online-pay-ui.js';
 import { loadPayChoices, payChoicesSection, payNotice, onlineAvailable, onlineAtCheckout } from './pay-choices.js';
 import { pt } from './pay-choices-texts.js';
 import { T } from './i18n.js';
+import { rt } from './reduce-texts.js';
 import { createWaitlistView } from './waitlist-ui.js';
 import { visibleWaitlistSlots, fullyBooked, hasWaitlistSlots } from './waitlist-logic.js';
 import { daySlotsAvailableFirst } from './day-slot-order.js';
@@ -1320,7 +1321,7 @@ async function viewChange(token, b) {
   const minStart = Date.now() + hours * 36e5;
   const today = todayHel();
   const curDate = new Date(it.starts_at).toLocaleDateString('sv-SE', { timeZone: TZ });
-  const st = { date: curDate, session: null, rows: [] };
+  const st = { date: curDate, session: null, rows: [], reduce: null };
   let n = it.persons;
   const msg = h('div', { id: 'bk-msg', 'aria-live': 'polite' });
   const sessionsBox = h('div', { class: 'bk-slots', 'aria-live': 'polite' });
@@ -1350,8 +1351,41 @@ async function viewChange(token, b) {
     const changed = !!st.session || (!inv.personsDisabled && n !== it.persons);
     summary.textContent = s ? `${shownWhen(s.starts_at, s.ends_at, `${dayLong(s.starts_at)}, ${hm(s.starts_at)}–${hm(s.ends_at)}`)} · ${n} ${t.person}${inv.showPriceEstimate && newTotal != null ? ` · ${money(newTotal)}` : ''}` : '';
     const priceBlocked = inv.showPriceEstimate && b.payment_status === 'paid' && newTotal != null && Math.abs(newTotal - b.total) > 0.005;
-    msg.replaceChildren(...(priceBlocked ? [h('p', { class: 'bk-note', text: t.changePaidPrice })] : []));
-    submit.disabled = !changed || priceBlocked;
+    // booking_284: maksetun varauksen pienennys + automaattinen hyvitys (vain kun palvelin sallii: liput, ehtoryhmä, Montonio-maksu). Hinnan nousu ja kaikki muu: entinen viesti.
+    const reducing = priceBlocked && newTotal < b.total - 0.005 && changed;
+    const rk = reducing ? JSON.stringify(reduceArgs()) : null;
+    if (reducing && st.reduce?.key !== rk) { st.reduce = { key: rk, status: 'loading' }; reducePreview(rk); }
+    if (!reducing) st.reduce = null;
+    const rd = reducing && st.reduce?.key === rk ? st.reduce : null;
+    const refundOk = !!(rd && rd.status === 'allowed');
+    msg.replaceChildren(...(!priceBlocked ? [] : !reducing ? [h('p', { class: 'bk-note', text: t.changePaidPrice })]
+      : !rd || rd.status === 'loading' ? [h('p', { class: 'bk-note', role: 'status', text: rt(S.lang, 'checking') })]
+      : refundOk ? [h('p', { class: 'bk-note', role: 'status', 'data-testid': 'reduce-preview', text: rt(S.lang, 'preview_refund', { amount: money(rd.amount), total: money(newTotal) }) })]
+      : [h('p', { class: 'bk-note', 'data-testid': 'reduce-blocked', text: reduceBlockedText(rd.reason) })]));
+    submit.textContent = refundOk ? rt(S.lang, 'confirm', { amount: money(rd.amount) }) : t.saveChange;
+    submit.disabled = !changed || (priceBlocked && !refundOk);
+  }
+  function reduceArgs() {
+    const a = { p_token: token };
+    if (st.session) { a.p_rule_id = st.session.rule_id; a.p_date = st.date; }
+    if (!inv.personsDisabled && n !== it.persons) a.p_persons = n;
+    return a;
+  }
+  async function reducePreview(key) {
+    let r = null;
+    try { r = await rpc('public_change_preview', JSON.parse(key)); } catch { r = null; }
+    if (st.reduce?.key !== key) return;   // valinta ehti vaihtua
+    const ar = r?.ok ? r.auto_refund : null;
+    st.reduce = { key, status: ar && ar.allowed ? 'allowed' : 'blocked', amount: ar?.amount ?? null, reason: ar?.reason || 'contact_staff' };
+    upd();
+  }
+  function reduceBlockedText(reason) {
+    const prvDays = state.settings?.customer_reduce_full_refund_days_private || 14;
+    if (reason === 'too_late') return rt(S.lang, 'not_allowed_deadline', { hours });
+    if (reason === 'too_late_private') return rt(S.lang, 'not_allowed_deadline_private', { days: prvDays });
+    if (reason === 'payment_method') return rt(S.lang, 'not_allowed_payment_method');
+    if (reason === 'feature_disabled') return t.changePaidPrice;   // lippu pois: täsmälleen entinen viesti
+    return rt(S.lang, 'contact_staff');
   }
   async function loadSessions() {
     sessionsBox.replaceChildren(h('p', { class: 'bk-loading', role: 'status', text: t.loading }));
@@ -1385,9 +1419,17 @@ async function viewChange(token, b) {
       const args = { p_token: token };
       if (st.session) { args.p_rule_id = st.session.rule_id; args.p_date = st.date; }
       if (!inv.personsDisabled && n !== it.persons) args.p_persons = n;
+      if (st.reduce?.status === 'allowed') args.p_expected_refund = st.reduce.amount;   // hyvityksen summa vahvistetaan palvelimella (esikatselun summa)
       const r = await rpc('public_change_booking', args);
-      if (!r.ok) throw Object.assign(new Error((r.code === 'order_invoiced' ? t.errors.order_invoiced_persons : t.errors[r.code]) || t.errorGeneric), { code: r.code, mapped: true });
+      if (!r.ok) {
+        if (r.code === 'refund_confirmation_required') st.reduce = null;
+        throw Object.assign(new Error((r.code === 'order_invoiced' ? t.errors.order_invoiced_persons : r.code === 'refund_confirmation_required' ? rt(S.lang, 'changed') : t.errors[r.code]) || t.errorGeneric), { code: r.code, mapped: true });
+      }
       state.months.clear();
+      if (r.refund_amount > 0) {   // booking_284: näytetään hyvitysvahvistus (muutoksen jälkeen varaussivu näyttää uuden summan)
+        mount(h('h2', { text: rt(S.lang, 'done_title') }), h('p', { class: 'bk-note', role: 'status', 'data-testid': 'reduce-done', text: rt(S.lang, 'done', { amount: money(r.refund_amount) }) }), h('p', {}, h('a', { class: 'btn gold', href: `#${token}`, text: rt(S.lang, 'back') })));
+        window.scrollTo({ top: 0 }); return;
+      }
       location.hash = token; window.scrollTo({ top: 0 });
     } catch (e) {
       submit.textContent = t.saveChange; upd();
