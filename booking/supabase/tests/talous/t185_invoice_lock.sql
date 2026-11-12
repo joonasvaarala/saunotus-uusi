@@ -667,7 +667,7 @@ begin
   perform pg_temp.ck((
     select bool_and(not has_function_privilege('anon', fn, 'execute') and not has_function_privilege('authenticated', fn, 'execute'))
       from unnest(array[
-        'booking._change_booking_core(bigint,bigint,date,integer,boolean,integer,uuid,text)',
+        coalesce(to_regprocedure('booking._change_booking_core(bigint,bigint,date,integer,boolean,integer,uuid,text,boolean)'), to_regprocedure('booking._change_booking_core(bigint,bigint,date,integer,boolean,integer,uuid,text)'))::oid::regprocedure::text,
         'booking._clamp_addons(bigint,integer)',
         'booking._addon_total_after(bigint,integer)',
         'booking._annual_res_discount_trg()',
