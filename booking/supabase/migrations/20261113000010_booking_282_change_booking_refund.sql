@@ -174,11 +174,35 @@ begin
   return jsonb_build_object('refunds', v_out, 'total', v_total);
 end $$;
 
+-- Muutoksen jälkeinen tilauksen summa (palvelimen hinnoittelu: _rule_price + _addon_total_after). Ei kirjoita mitään.
+-- Laskutettu tilaus tai aikaväli-/legipohjainen varaus (ei sääntöä): hintaa ei lasketa uudelleen.
+create or replace function booking._change_price_preview(p_reservation_id bigint, p_rule_id bigint, p_persons integer)
+returns jsonb language plpgsql stable security definer set search_path = '' as $$
+declare res booking.reservations; o booking.orders; pr record; v_persons integer; v_rule bigint; v_item numeric; v_addons numeric; v_other numeric; v_new numeric;
+begin
+  select * into res from booking.reservations where id = p_reservation_id;
+  if not found then return null; end if;
+  select * into o from booking.orders where id = res.order_id;
+  v_persons := coalesce(p_persons, res.persons);
+  v_rule := coalesce(p_rule_id, res.rule_id);
+  if booking._order_invoice_locked(o.id) or v_rule is null then
+    v_new := o.total_gross;
+  else
+    select coalesce(sum(i.line_total_gross), 0) into v_other from booking.order_items i
+     where i.order_id = o.id and i.id <> res.order_item_id and i.parent_item_id is distinct from res.order_item_id;
+    select * into pr from booking._rule_price(v_rule, v_persons);
+    v_item := case when res.annual_card_id is not null then 0 else pr.total end;
+    v_addons := booking._addon_total_after(res.order_item_id, v_persons);
+    v_new := v_other + v_item + v_addons;
+  end if;
+  return jsonb_build_object('order_id', o.id, 'old_total', o.total_gross, 'new_total', v_new, 'persons_new', v_persons, 'rule_id', v_rule);
+end $$;
+
 -- Esikatselu: uusi hinta palvelimelta (_rule_price + _addon_total_after), erotus, ylisuoritus ja hyvityssuunnitelma. Ei kirjoita mitään.
 create or replace function booking.admin_change_booking_preview(p_reservation_id bigint, p_rule_id bigint default null, p_date date default null,
                                                                 p_persons integer default null, p_start timestamptz default null)
 returns jsonb language plpgsql stable security definer set search_path = '' as $$
-declare res booking.reservations; o booking.orders; pr record; v_persons integer; v_rule bigint; v_item numeric; v_addons numeric; v_other numeric;
+declare res booking.reservations; o booking.orders; v_persons integer; v_pp jsonb;
         v_new numeric; v_old numeric; v_info jsonb; v_plan jsonb := '[]'::jsonb; v_nonref jsonb; v_locked boolean; v_max numeric; v_items bigint[];
 begin
   perform booking._require_permission('bookings.manage');
@@ -189,18 +213,8 @@ begin
   if (p_rule_id is null) <> (p_date is null) then perform booking._err('invalid_change', 'Anna sekä uusi vuoro että päivä, tai kumpikaan'); end if;
   v_locked := booking._order_invoice_locked(o.id);
   v_persons := coalesce(p_persons, res.persons);
-  v_rule := coalesce(p_rule_id, res.rule_id);
-  v_old := o.total_gross;
-  select coalesce(sum(i.line_total_gross), 0) into v_other from booking.order_items i
-   where i.order_id = o.id and i.id <> res.order_item_id and i.parent_item_id is distinct from res.order_item_id;
-  if v_locked or v_rule is null then
-    v_new := v_old;   -- laskutettu tai aikaväli-/legipohjainen varaus: hintaa ei lasketa uudelleen
-  else
-    select * into pr from booking._rule_price(v_rule, v_persons);
-    v_item := case when res.annual_card_id is not null then 0 else pr.total end;
-    v_addons := booking._addon_total_after(res.order_item_id, v_persons);
-    v_new := v_other + v_item + v_addons;
-  end if;
+  v_pp := booking._change_price_preview(res.id, p_rule_id, p_persons);
+  v_old := (v_pp ->> 'old_total')::numeric; v_new := (v_pp ->> 'new_total')::numeric;
   v_info := booking._order_refund_info(o.id, v_new);
   v_max := (v_info ->> 'refundable_max')::numeric;
   select array_agg(i.id) into v_items from booking.order_items i where i.order_id = o.id and (i.id = res.order_item_id or i.parent_item_id = res.order_item_id);
@@ -266,7 +280,7 @@ begin
                                      'balance', booking._order_balance(v_res.order_id));
 end $$;
 
-revoke all on function booking._flag_on(text), booking._pl_cap(bigint), booking._order_refund_info(bigint, numeric),
+revoke all on function booking._flag_on(text), booking._pl_cap(bigint), booking._order_refund_info(bigint, numeric), booking._change_price_preview(bigint, bigint, integer),
   booking._refund_allocate(bigint, numeric, bigint, bigint[], numeric, boolean), booking._do_refunds(jsonb, text, boolean) from public, anon, authenticated;
 revoke all on function booking.admin_change_booking_preview(bigint, bigint, date, integer, timestamptz) from public, anon;
 grant execute on function booking.admin_change_booking_preview(bigint, bigint, date, integer, timestamptz) to authenticated, service_role;
