@@ -22,7 +22,7 @@ import { openCancelFlow } from './order-cancel-flow.js';
 import { ov, loadOvTexts } from '../order-view-texts.js';
 import { loadOrderTexts, orderText } from '../orders-texts.js';
 import {
-  orderModel, orderBadges, reservationRowActions, reservationBadge, reservationWhen, paymentBox, nextStep, primaryActions,
+  orderModel, orderBadges, reservationRowActions, reservationBadge, reservationWhen, paymentBox, nextStep, primaryActions, refundTargets, refundSuggestion,
   moreMenu, collectNotes, buildTimeline, helDay, isWide, placeOverflowMenu,
 } from '../order-view-logic.js';
 
@@ -70,9 +70,9 @@ export function createActionRunner(env) {
     refund(m) {
       const o = order(m);
       // Vain hyvitettävissä olevat maksut (booking_278 refundable_by_payment: ei lahjakortti-, kumppani-, vuosikortti- eikä laskumaksuja).
-      const ok = new Set(paymentBox(m, { can: ctx.can }).refundable.map((x) => String(x.payment_id)));
-      const refundable = (o.payments || []).filter((p) => ok.has(String(p.id)) && ['paid', 'partially_refunded'].includes(p.status) && p.amount > (p.refunded_amount || 0));
-      if (env.dialogs?.refund && refundable.length) env.dialogs.refund(o, refundable);
+      const refundable = refundTargets(m, o.payments, { can: ctx.can });
+      if (env.dialogs?.refund && refundable.length) env.dialogs.refund(o, refundable, { suggest: (p) => refundSuggestion(m, p) });
+      else toast(tt('btn.refundNone'), 'warn');   // ei hiljaista epäonnistumista
     },
     addPurchase(m, a = {}) {
       const o = order(m);

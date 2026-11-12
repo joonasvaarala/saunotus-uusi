@@ -291,7 +291,7 @@ test('peruutus: koko tilauksen ei-atominen keskeytys jää näkyviin dialogiin; 
   const flow = read('booking/admin/views/order-cancel-flow.js');
   assert.match(flow, /order_cancel\.partial_fail[\s\S]{0,200}err\.hidden = false[\s\S]{0,120}submit\.hidden = true/, 'keskeytys näkyy dialogissa ja uusi yritys estetään');
   const view = read('booking/admin/views/order-view.js');
-  assert.match(view, /paymentBox\(m, \{ can: ctx\.can \}\)\.refundable/, 'Hyvitä maksu -dialogi saa vain refundable_by_payment-maksut');
+  assert.match(view, /refundTargets\(m, o\.payments, \{ can: ctx\.can \}\)/, 'Hyvitä maksu -dialogi saa vain refundable_by_payment-maksut (refundTargets → paymentBox.refundable, ks. tilausnakyma-hyvitys-15149)');
   assert.match(view, /'data-slot': 'order-delete'/);
   assert.doesNotMatch(view, /import[^;]*order-card-delete|['"]admin_order_delete/, 'PR 1 ei riipu poistomoduulista eikä poisto-RPC:stä');
   assert.doesNotMatch(view, /Verkkokauppa|Paikan päällä/, 'kanavan nimet talous-texts.js:stä');
