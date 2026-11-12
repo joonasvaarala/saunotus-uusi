@@ -1,0 +1,46 @@
+[
+ {
+  "key": "ui.admin.order_view.amt.refund_pending",
+  "lang": "fi",
+  "text": "Hyvitys käsittelyssä",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Hallinnan tilausnäkymä: keskeneräinen hyvitys (requested/processing) näkyy summalaatikossa eikä ylisuoritusta tarjota uudelleen hyvitettäväksi (#15149, Joonas 12.11.2026); sama kuin koodin oletus"
+ },
+ {
+  "key": "ui.admin.order_view.amt.refund_pending",
+  "lang": "en",
+  "text": "Refund in progress",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "Hallinnan tilausnäkymä: keskeneräinen hyvitys (requested/processing) näkyy summalaatikossa eikä ylisuoritusta tarjota uudelleen hyvitettäväksi (#15149, Joonas 12.11.2026); sama kuin koodin oletus"
+ },
+ {
+  "key": "ui.admin.order_view.amt.refund_pending_line",
+  "lang": "fi",
+  "text": "Hyvitys käsittelyssä {{var:amount}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [
+   "{{var:amount}}"
+  ],
+  "reason": "Hallinnan tilausnäkymä: keskeneräinen hyvitys (requested/processing) näkyy summalaatikossa eikä ylisuoritusta tarjota uudelleen hyvitettäväksi (#15149, Joonas 12.11.2026); sama kuin koodin oletus"
+ },
+ {
+  "key": "ui.admin.order_view.amt.refund_pending_line",
+  "lang": "en",
+  "text": "Refund in progress {{var:amount}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [
+   "{{var:amount}}"
+  ],
+  "reason": "Hallinnan tilausnäkymä: keskeneräinen hyvitys (requested/processing) näkyy summalaatikossa eikä ylisuoritusta tarjota uudelleen hyvitettäväksi (#15149, Joonas 12.11.2026); sama kuin koodin oletus"
+ }
+]

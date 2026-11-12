@@ -1354,6 +1354,7 @@ body.shot #shell .nav .lbl{display:inline}
 .ov-next-today .ov-next-ico{background:var(--okbg);color:var(--ok)}
 .ov-next-invoice{background:color-mix(in srgb,var(--green) 10%,var(--card));border-color:color-mix(in srgb,var(--green) 35%,transparent);color:var(--green)}.ov-next-invoice a{color:var(--green);font-weight:700}
 .ov-next-problem{background:var(--errbg);border-color:color-mix(in srgb,var(--err) 35%,transparent)}.ov-next-problem a{color:var(--err);font-weight:700}
+.ov-next-refund_pending{background:var(--card);border-color:var(--line)}.ov-next-refund_pending .ov-next-ico{background:color-mix(in srgb,var(--green) 10%,var(--card));color:var(--green)}
 .ov-res{border:1px solid var(--line);border-radius:10px;padding:12px 14px;display:grid;gap:6px}
 .ov-res.is-today{border-color:color-mix(in srgb,var(--ok) 45%,transparent);background:var(--okbg)}
 .ov-res.is-off{opacity:.7}

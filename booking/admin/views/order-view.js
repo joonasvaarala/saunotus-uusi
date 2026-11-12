@@ -277,7 +277,7 @@ function notesCard(m, env) {
 const AMT_ICON = { ok: 'tick', due: 'euro', info: 'receipt', warn: 'undo', muted: null };
 export function amountBox(d, { meta = true, testid = 'ov-paybox', amountTestid = 'ov-paybox-value' } = {}) {
   if (!d) return null;
-  const ico = d.state === 'refunded' ? 'undo' : AMT_ICON[d.tone];
+  const ico = d.state === 'refunded' || d.state === 'refund_pending' ? 'undo' : AMT_ICON[d.tone];
   const lines = meta ? d.lines.map((x) => ov(`order_view.amt.${x.key}`, x.amount != null ? { amount: money(x.amount) } : null)) : [];
   return h('div', { class: `ov-paybox tone-${d.tone}`, 'data-testid': testid, 'data-state': d.state },
     lines.length ? h('p', { class: 'ov-paybox-meta', 'data-testid': `${testid}-meta` }, lines.flatMap((t, i) => [i ? ' · ' : null, h('span', { text: t })]).filter(Boolean)) : null,
@@ -292,6 +292,7 @@ function paymentCard(m, env, runner) {
     ['order_view.pay_total', money(box.total)],
     box.display?.state === 'none' && box.paid <= 0.004 ? null : ['order_view.pay_paid', money(box.paid)],   // 0 €:n tilaus: ei "Maksettu 0,00 €" -riviä
     box.refunded > 0.004 ? ['order_view.pay_refunded', money(box.refunded)] : null,
+    box.pendingRefund > 0.004 ? ['order_view.amt.refund_pending', money(box.pendingRefund)] : null,   // keskeneräinen hyvitys (requested/processing)
     box.giftCard > 0.004 ? ['order_view.pay_gift', money(box.giftCard)] : null,
     box.partner > 0.004 ? ['order_view.pay_partner', money(box.partner)] : null,
     !box.locked ? ['order_view.pay_link', box.openLink ? (box.linkSentAt ? ov('order_view.pay_link_sent', { when: fmt.dt(box.linkSentAt) }) : ov('order_view.pay_link_open', { amount: money(box.openLink.amount) })) : (box.linkSentAt ? ov('order_view.pay_link_sent', { when: fmt.dt(box.linkSentAt) }) : ov('order_view.pay_link_none'))] : null,
@@ -301,7 +302,8 @@ function paymentCard(m, env, runner) {
     box.actions.openBilling ? h('a', { class: 'btn ov-wide', href: box.invoice?.id ? invoiceHref(box.invoice.id) : '#/laskut', 'data-testid': 'ov-open-billing', text: ov('order_view.act.open_billing') }) : null,
     !box.locked && box.actions.sendLink ? h('button', { type: 'button', class: 'btn ov-wide', 'data-testid': 'ov-pay-link', text: ov(box.openLink || box.linkSentAt ? 'order_view.act.resend_link' : 'order_view.act.send_link'), onclick: () => runner.sendLink(m) }) : null,
     !box.locked && box.actions.takePayment ? h('button', { type: 'button', class: 'btn ov-wide', 'data-testid': 'ov-pay-take', text: ov('order_view.act.take_payment'), onclick: () => runner.takePayment(m) }) : null,
-    !box.locked && box.actions.refund ? h('button', { type: 'button', class: 'btn ghost ov-wide', 'data-testid': 'ov-pay-refund', text: ov('order_view.more_refund'), onclick: () => runner.refund(m) }) : null);
+    // Ylisuoritus jo kokonaan hyvityksessä: ei Hyvitä maksu -nappia kortilla (⋯-valikossa yleinen hyvitys säilyy).
+    !box.locked && box.actions.refund && !(box.refundCovered > 0.004 && m.overpaid <= 0.004) ? h('button', { type: 'button', class: 'btn ghost ov-wide', 'data-testid': 'ov-pay-refund', text: ov('order_view.more_refund'), onclick: () => runner.refund(m) }) : null);
   return sec(ov('order_view.sec.payment'), 'ov-payment',
     amountBox(box.display, { meta: false, testid: 'ov-pay-box', amountTestid: 'ov-pay-amount' }),
     h('dl', { class: 'ov-kv' }, rows.map(([k, v]) => [h('dt', { text: ov(k) }), h('dd', { text: v })])),
@@ -400,12 +402,14 @@ function nextStepBar(m, env, runner, now) {
     if (step.reservation) sub = box.linkSentAt ? ov('order_view.next.pay_missing_sent', { when: whenText(step.reservation, now), sent: fmt.dt(box.linkSentAt) }) : ov('order_view.next.pay_missing_when', { when: whenText(step.reservation, now) });
   } else if (step.kind === 'overpaid') {
     title = ov('order_view.next.overpaid', { amount: money(step.amount) });
+  } else if (step.kind === 'refund_pending') {
+    title = ov('order_view.tl.refund_pending', { amount: money(step.amount) });   // neutraali tila, ei toimintoa
   }
-  const btns = step.kind === 'overpaid'
+  const btns = step.kind === 'refund_pending' ? [] : step.kind === 'overpaid'
     ? (paymentBox(m, { can: env.ctx.can }).actions.refund ? [h('button', { type: 'button', class: 'btn primary', 'data-testid': 'ov-next-refund', text: ov('order_view.more_refund'), onclick: () => runner.refund(m) })] : [])
     : acts.map((a, i) => actionButton(a, m, runner, { primary: i === 0, testPrefix: 'ov-next' }));
   return h('div', { class: `ov-next ov-next-${step.kind}`, 'data-testid': 'ov-next' },
-    h('span', { class: 'ov-next-ico', 'aria-hidden': 'true', text: step.kind === 'today' ? '●' : '€' }),
+    h('span', { class: 'ov-next-ico', 'aria-hidden': 'true', text: step.kind === 'today' ? '●' : (step.kind === 'refund_pending' ? '↺' : '€') }),
     h('div', { class: 'grow' }, h('strong', { text: title }), sub ? h('p', { class: 'muted ov-small', text: sub }) : null),
     btns.length ? h('div', { class: 'row wrap' }, btns) : null);
 }

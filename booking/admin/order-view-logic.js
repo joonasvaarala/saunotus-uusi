@@ -4,6 +4,7 @@
 // Määrittely: /tilausnakyma-luonnos/v3/toteutusmaarittely.md §1–§3 (Joonas t38u–t42u, 11.11.2026).
 import { orderInvoiceLocked } from './addon-lock-logic.js';
 import { moveTarget, addonsEditable } from './reservation-dialog-logic.js';
+import { pendingRefundTotal, paymentRefundLeft } from './refund-pending.js';
 
 const EPS = 0.005;
 const num = (v) => { const n = Number(v); return Number.isFinite(n) ? n : 0; };
@@ -60,7 +61,11 @@ export function orderModel(raw) {
   const total = num(b.total ?? raw.total);
   const netPaid = b.net_paid != null ? num(b.net_paid) : round2(num(b.paid) - num(b.refunded));
   const cancelledOrder = ['cancelled', 'expired', 'draft'].includes(raw.status);
-  const overpaid = raw.overpaid != null ? num(raw.overpaid) : Math.max(0, round2(netPaid - (cancelledOrder ? 0 : total)));
+  const overpaidGross = raw.overpaid != null ? num(raw.overpaid) : Math.max(0, round2(netPaid - (cancelledOrder ? 0 : total)));
+  // Keskeneräiset hyvitykset (requested/processing) vähennetään ylisuorituksesta: palvelimen overpaid laskee vain valmiit (refunded_amount).
+  const pendingRefund = pendingRefundTotal(Array.isArray(raw.refunds) ? raw.refunds : (raw.payments || []).flatMap((p) => p.refunds || []));
+  const overpaid = Math.max(0, round2(overpaidGross - pendingRefund));
+  const refundCovered = round2(Math.min(pendingRefund, overpaidGross));   // ylisuorituksesta jo hyvitykseen pyydetty osuus
   const invoice = raw.invoice || (raw.invoice_no ? { invoice_no: raw.invoice_no, status: null, due_date: null, sent_at: null } : null);
   return {
     raw,
@@ -74,7 +79,7 @@ export function orderModel(raw) {
     refundable_by_payment: Array.isArray(raw.refundable_by_payment) ? raw.refundable_by_payment : null,
     locked: orderInvoiceLocked(raw), invoice,
     balance: { total, paid: num(b.paid), refunded: num(b.refunded), pending_link: num(b.pending_link), unpaid: num(b.unpaid), net_paid: netPaid },
-    open: num(b.unpaid), overpaid,
+    open: num(b.unpaid), overpaid, overpaid_gross: overpaidGross, pending_refund: pendingRefund, refund_covered: refundCovered,
     staff_can_add: !!raw.staff_can_add, public_token: raw.public_token || null, order_page_path: raw.order_page_path || null,
   };
 }
@@ -166,6 +171,7 @@ export const addonsLocked = (m) => !!m?.locked;
  *  - due:         maksamatta → iso "Maksamatta <avoin>" (meripihka), pieni rivi "Yhteensä · Maksettu"
  *  - invoice:     laskulla avoinna → iso "Laskulla avoinna <avoin>"
  *  - to_refund:   ylisuoritus / peruttu mutta hyvittämättä → iso "Hyvitettävää <ylisuoritus>"
+ *  - refund_pending: ylisuoritus on jo pyydetty hyvitykseen (requested/processing) → "Hyvitys käsittelyssä <summa>", ei uutta hyvitystä
  *  - refunded:    kaikki maksettu hyvitetty takaisin → iso "Hyvitetty <hyvitys>"
  *  - none:        ei maksettavaa eikä maksuja (0 €:n tilaus, peruttu maksamaton) → "Ei maksettavaa" ilman nollaa isona
  * lines: [{ key, amount? }] = pienet rivit (avain ui.admin.order_view.amt.*).
@@ -180,10 +186,15 @@ export function amountSummary(m) {
   const totalLine = cancelled ? { key: 'cancelled_total', amount: total } : { key: 'total', amount: total };
   const gift = (m.payments || []).filter((p) => isGiftPayment(p) && isPaidStatus(p.status)).reduce((s, p) => s + num(p.amount) - num(p.refunded_amount), 0);
   const partner = (m.payments || []).filter((p) => isPartnerPayment(p) && isPaidStatus(p.status)).reduce((s, p) => s + num(p.amount) - num(p.refunded_amount), 0);
-  const extras = [refunded > EPS ? { key: 'refunded_line', amount: refunded } : null, gift > EPS ? { key: 'gift_line', amount: round2(gift) } : null, partner > EPS ? { key: 'partner_line', amount: round2(partner) } : null].filter(Boolean);
+  const pending = num(m.pending_refund), covered = num(m.refund_covered);
+  const pendingLine = pending > EPS ? { key: 'refund_pending_line', amount: pending } : null;
+  const extras = [refunded > EPS ? { key: 'refunded_line', amount: refunded } : null, pendingLine, gift > EPS ? { key: 'gift_line', amount: round2(gift) } : null, partner > EPS ? { key: 'partner_line', amount: round2(partner) } : null].filter(Boolean);
   let state, amount, lines;
   if (over > EPS) {
-    state = 'to_refund'; amount = over;
+    state = 'to_refund'; amount = over;   // vain se osa, jota keskeneräiset hyvitykset eivät jo kata
+    lines = [totalLine, { key: 'paid_line', amount: net }, ...extras.filter((x) => x.key === 'refunded_line' || x.key === 'refund_pending_line')];
+  } else if (covered > EPS) {
+    state = 'refund_pending'; amount = pending;   // ylisuoritus on jo pyydetty takaisin: näytetään käsittelyssä oleva hyvitys
     lines = [totalLine, { key: 'paid_line', amount: net }, ...extras.filter((x) => x.key === 'refunded_line')];
   } else if (open > EPS) {
     state = m.locked ? 'invoice' : 'due'; amount = open;
@@ -198,7 +209,7 @@ export function amountSummary(m) {
     state = 'none'; amount = null;
     lines = total > EPS || cancelled ? [totalLine] : [];
   }
-  const tone = { paid: 'ok', due: 'due', invoice: 'info', to_refund: 'warn', refunded: 'muted', none: 'muted' }[state];
+  const tone = { paid: 'ok', due: 'due', invoice: 'info', to_refund: 'warn', refund_pending: 'info', refunded: 'muted', none: 'muted' }[state];
   return { state, tone, label: `amt.${state}`, amount, lines, total, paid, refunded, net, cancelled };
 }
 
@@ -212,8 +223,8 @@ export function paymentBox(m, { can = can0 } = {}) {
   const payments_manage = !!c('payments.manage'), refund = !!c('payments.refund');
   const refundable = m.refundable_by_payment != null
     ? m.refundable_by_payment.filter((x) => num(x.refundable) > EPS)
-    : payments.filter((p) => ['paid', 'partially_refunded'].includes(p.status) && !['gift_card', 'partner', 'annual_card', 'invoice'].includes(p.kind) && num(p.amount) - num(p.refunded_amount) > EPS)
-      .map((p) => ({ payment_id: p.id, method: p.method, provider: p.provider, refundable: round2(num(p.amount) - num(p.refunded_amount)) }));
+    : payments.filter((p) => ['paid', 'partially_refunded'].includes(p.status) && !['gift_card', 'partner', 'annual_card', 'invoice'].includes(p.kind) && paymentRefundLeft({ ...p, refundable: null }) > EPS)
+      .map((p) => ({ payment_id: p.id, method: p.method, provider: p.provider, refundable: paymentRefundLeft({ ...p, refundable: null }) }));
   const locked = !!m.locked, native = m.is_native !== false;
   return {
     headline: m.overpaid > EPS ? 'overpaid' : (locked && m.open > EPS ? 'invoice_open' : (m.open > EPS ? 'open' : 'settled')),
@@ -232,6 +243,7 @@ export function paymentBox(m, { can = can0 } = {}) {
       openBilling: locked,
     },
     refundable,
+    pendingRefund: num(m.pending_refund), refundCovered: num(m.refund_covered),
     giftCard: payments.filter((p) => p.kind === 'gift_card' && isPaidStatus(p.status)).reduce((s, p) => s + num(p.amount) - num(p.refunded_amount), 0),
     partner: payments.filter((p) => p.kind === 'partner' && isPaidStatus(p.status)).reduce((s, p) => s + num(p.amount) - num(p.refunded_amount), 0),
   };
@@ -245,15 +257,24 @@ export function paymentBox(m, { can = can0 } = {}) {
 export function refundTargets(m, payments, { can = can0 } = {}) {
   const box = paymentBox(m, { can });
   if (!box?.actions.refund) return [];
-  const ok = new Set(box.refundable.map((x) => String(x.payment_id)));
-  return (payments || []).filter((p) => ok.has(String(p.payment_id ?? p.id)) && ['paid', 'partially_refunded'].includes(p.status) && num(p.amount) - num(p.refunded_amount) > EPS);
+  const lim = new Map(box.refundable.map((x) => [String(x.payment_id), round2(num(x.refundable))]));
+  // refundable = palvelimen raja (maksettu − hyvitetty − keskeneräiset); dialogi käyttää sitä enimmäissummana.
+  return (payments || []).filter((p) => lim.has(String(p.payment_id ?? p.id)) && ['paid', 'partially_refunded'].includes(p.status))
+    .map((p) => ({ ...p, refundable: Math.min(lim.get(String(p.payment_id ?? p.id)), paymentRefundLeft({ ...p, refundable: null })) }))
+    .filter((p) => p.refundable > EPS);
 }
 
-/** Dialogin esitäyttö: ylisuorituksessa vain liikaa maksettu osuus (enintään maksun jäljellä oleva), muuten koko jäljellä oleva. */
+/**
+ * Dialogin esitäyttö: ylisuorituksessa vain se liikaa maksettu osuus, jota keskeneräiset hyvitykset eivät vielä kata
+ * (enintään maksun hyvitettävissä oleva). Jos ylisuoritus on jo kokonaan hyvityksessä, ei esitäyttöä (null → tyhjä kenttä),
+ * ettei samaa summaa tarjota uudelleen. Muuten koko hyvitettävissä oleva.
+ */
 export function refundSuggestion(m, p) {
-  const left = round2(num(p?.amount) - num(p?.refunded_amount));
+  const left = paymentRefundLeft(p);
   const over = num(m?.overpaid);
-  return over > EPS ? round2(Math.min(over, left)) : left;
+  if (over > EPS) return round2(Math.min(over, left));
+  if (num(m?.refund_covered) > EPS) return null;
+  return left;
 }
 
 /** Ensimmäinen tuleva tai tämän päivän voimassa oleva varaus (seuraava askel, yhteenveto). */
@@ -264,7 +285,7 @@ export function nextReservation(m, now = new Date()) {
 }
 
 /**
- * "Seuraava askel" -palkki: laskulukko > ongelma > tänään saapuu > maksu puuttuu > ylisuoritus > ei mitään.
+ * "Seuraava askel" -palkki: laskulukko > ongelma > tänään saapuu > maksu puuttuu > ylisuoritus > hyvitys käsittelyssä > ei mitään.
  */
 export function nextStep(m, { now = new Date() } = {}) {
   if (!m) return null;
@@ -276,6 +297,7 @@ export function nextStep(m, { now = new Date() } = {}) {
   if (today) return { kind: 'today', reservation: today, open: m.open };
   if (m.open > EPS && m.is_native) return { kind: 'pay_missing', amount: m.open, reservation: next };
   if (m.overpaid > EPS) return { kind: 'overpaid', amount: m.overpaid };
+  if (m.refund_covered > EPS) return { kind: 'refund_pending', amount: m.pending_refund };   // neutraali: ei uutta hyvitystä
   return null;
 }
 
