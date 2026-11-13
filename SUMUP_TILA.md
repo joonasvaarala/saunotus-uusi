@@ -69,7 +69,7 @@ Juuren `tests/`-testit, jotka koskevat site-texteja (4 tiedostoa): läpi.
 - SumUp-tili (Havuhattu Oy, Suomi), KYC valmiina; varmistus että Solo + Cloud API on käytössä tilillä
 - **Solo-lukija** (tai Virtual Solo kehitykseen) ja sen parituskoodi
 - **Sandbox-kauppiastili** + sandbox-API-avain (testi), myöhemmin live-API-avain
-- **API-avain**, **affiliate key** ja **affiliate app id** (kehittäjäportaali), **merchant code**
+- **API-avain**, **affiliate key** ja **affiliate app id** (`fi.saunotus.kassa`) ovat nyt boxin ympäristössä oikealta tililtä; DEV-maksutesteihin tarvitaan silti **sandbox**-avaimet. Merchant code: `MVVBWM97`
 - **Webhook-salaisuus**: keksitään itse (pitkä satunnaismerkkijono), ei SumUpilta
 - Callback/webhook-domain: `https://<supabase-projekti>.supabase.co/functions/v1/sumup-notify` (jos SumUp vaatii sallittujen domainien listan, lisätään tämä)
 
@@ -94,12 +94,12 @@ Joonas haluaa myöhemmin käyttöön myös **Tap to Pay puhelimella** (esim. mes
 Rakenne on jätetty niin, että maksutavan eli kanavan (`solo` / `tap_to_pay`) voi lisätä myöhemmin ilman isoja muutoksia:
 - Nykyinen Pikakassan tapa on `pos_tenders.handler = 'sumup'` (Solo / Cloud API). Uusi kanava = uusi handler (esim. `sumup_tap_to_pay`) + oma Pikakassan polku + oma Edge-funktio. Nykyisiä Solo-polkuja (`sumup-pos`, `sumup-notify`, `booking.sumup_readers`, `sumup_pos_*`) ei tarvitse rikkoa.
 - Yhteiset osat voidaan käyttää uudelleen: `payment_mark_paid('sumup', …)`, `payments.provider = 'sumup'`, hyvitys, `_shared/sumup.ts` (Transactions API, refund), tilakone (maksetuksi vain rajapintavahvistuksella).
-- Affiliate key tarvitaan myöhemmin Payment Switchiin; sitä ei vielä ole. Sandbox- tai mock-testit riittävät, kun kanava tehdään.
+- Affiliate key ja app id (`fi.saunotus.kassa`) ovat nyt saatavilla oikealta tililtä; Payment Switchiä ei silti toteuteta nyt. DEV-maksutestit vain sandboxilla tai mockeilla.
 
 ## Bottiavustus / DEV (13.11.2026, Europe/Helsinki)
 - Migraatio `booking_295_sumup_pos` ajettu **vain DEViin** (projekti aoejjmfzulhkhxbehphs). `integration_config.sumup.mode = off`, lukijoita 0, `approved_by` tyhjä, maksutapa ei näy. Uusi `admin_pos_tenders`-md5: `babb3ce2a62c15356c90143d03c3a589`.
 - SQL-testi `t295_sumup_pos.sql` ajettiin DEVissä rollback-transaktiossa. Ei mennyt läpi testin omien oletusten takia (ei migraatiovirhe): `kb.products.business_id` on pakollinen; PL/pgSQL-muuttuja `oid` törmää `pg_constraint.oid`:hen; authenticated-rooli ei saa lukea `booking.sumup_readers`-taulua suoraan. Testidata ei jäänyt DEViin (mode pysyi `off`).
-- Oikea SumUp-tili (Havuhattu Oy, merchant_code `MVVBWM97`, FI): vain lukukyselyt. `GET /v0.1/me` → HTTP 200, merchant_code täsmää. `GET /v0.1/merchants/MVVBWM97/readers` → HTTP 200, **0 lukijaa**. Checkoutteja, parituksia tai hyvityksiä ei tehty. Affiliate keytä ei ole. Live-avaimia ei ole laitettu DEV Edge-salaisuuksiksi (maksutestit vain sandboxilla tai mockeilla).
+- Oikea SumUp-tili (Havuhattu Oy, merchant_code `MVVBWM97`, FI): vain lukukyselyt. `GET /v0.1/me` → HTTP 200, merchant_code täsmää. `GET /v0.1/merchants/MVVBWM97/readers` → HTTP 200, **0 lukijaa**. Checkoutteja, parituksia tai hyvityksiä ei tehty. Boxin ympäristössä ovat `SUMUP_API_KEY`, `SUMUP_PUBLIC_KEY` ja `SUMUP_AFFILIATE_KEY` (oikea tili); affiliate app id on `fi.saunotus.kassa`. Avaimia ei ole kirjoitettu tiedostoihin eikä repoon, eikä niitä ole laitettu DEV Edge-salaisuuksiksi (maksutestit vain sandboxilla tai mockeilla).
 - Edge-funktiot `sumup-pos` (verify_jwt = true, versio 1) ja `sumup-notify` (verify_jwt = false, versio 1) on deployattu **vain DEViin**, tila ACTIVE. DEV Edge-salaisuuksia ei asetettu (ei live-avaimia, ei sandbox-avaimia); funktiot palauttavat `not_configured`, kunnes sandbox-salaisuudet lisätään. Tuotantoon ei ole viety mitään.
 
 ## Käyttöönottojärjestys (ehdotus, Koodarille/Bottiavustukselle)
