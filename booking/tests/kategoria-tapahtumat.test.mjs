@@ -76,7 +76,7 @@ test('tekstit: Tapahtumat / Events, pending-import-91, ei vielä varatekstissä 
   }
   assert.deepEqual([...seen].sort(), ['en', 'fi']);
   const fb = JSON.parse(read('content/site-texts.fallback.json'));
-  assert.equal(fb.texts.some((r) => r.key === 'ui.shop.k_tapahtuma'), false);
+  assert.equal(fb.texts.some((r) => r.key === 'ui.shop.k_tapahtuma'), true, 'ui.shop.k_tapahtuma on tuotu varatekstiin');
   for (const f of readdirSync(join(root, 'content')).filter((n) => /^site-texts\.pending-import-\d+\.json$/.test(n) && n !== 'site-texts.pending-import-91.json')) {
     const rows = JSON.parse(read(`content/${f}`));
     assert.equal(rows.some((r) => r.key === 'ui.shop.k_tapahtuma'), false, f);

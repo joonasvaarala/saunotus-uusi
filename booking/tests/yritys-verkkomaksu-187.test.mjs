@@ -208,7 +208,7 @@ test('tekstit: pending-import-83 FI+EN, max_len, ei päällekkäin, sama kuin ko
     }
   }
   for (const k of keys) assert.equal(rows.filter((r) => r.key === k).length, 2, k);
-  const others = readdirSync(join(root, 'content')).filter((f) => /^site-texts\.(pending-import|imported|fallback).*\.json$/.test(f) && f !== 'site-texts.pending-import-83.json');
+  const others = readdirSync(join(root, 'content')).filter((f) => /^site-texts\.(pending-import|imported).*\.json$/.test(f) && f !== 'site-texts.pending-import-83.json');
   for (const f of others) {
     const raw = JSON.parse(rd(`content/${f}`));
     const list = Array.isArray(raw) ? raw : raw.texts || [];

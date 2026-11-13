@@ -152,7 +152,7 @@ test('tekstit: pending-import-54 FI+EN, ei < eikä emojeja, email-rivit = texts.
     assert.ok(r.reason, w);
   }
   assert.doesNotMatch(rd(P54), /</);
-  for (const f of readdirSync(resolve(root, 'content')).filter((x) => /^site-texts\..*\.json$/.test(x) && x !== 'site-texts.pending-import-54.json')) {
+  for (const f of readdirSync(resolve(root, 'content')).filter((x) => /^site-texts\.(pending-import|imported).*\.json$/.test(x) && x !== 'site-texts.pending-import-54.json')) {
     const raw = rd(`content/${f}`); for (const k of keys) assert.ok(!raw.includes(`"${k}"`), `${k} myös tiedostossa ${f}`);
   }
 });

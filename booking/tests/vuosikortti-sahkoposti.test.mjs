@@ -110,7 +110,7 @@ test('tekstit: email.annual_card.* ja ui.admin.annual_card.* FI+EN, pending-impo
     if (r.lang === 'en') assert.doesNotMatch(r.text, /\b(Kiitos|Hei|Vuosikortti|koodi)\b/);
   }
   assert.equal(ET['email.annual_card.sign_name'].fi, 'Tapio');
-  for (const f of readdirSync(resolve(root, 'content')).filter((x) => /^site-texts\..*\.json$/.test(x) && x !== 'site-texts.pending-import-46.json')) {
+  for (const f of readdirSync(resolve(root, 'content')).filter((x) => /^site-texts\.(pending-import|imported).*\.json$/.test(x) && x !== 'site-texts.pending-import-46.json')) {
     const raw = rd(`content/${f}`); for (const k of keys) assert.ok(!raw.includes(`"${k}"`), `${k} myös tiedostossa ${f}`);
   }
 });

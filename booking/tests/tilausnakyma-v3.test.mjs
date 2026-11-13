@@ -233,7 +233,7 @@ test('tekstit: FI = EN, pending-import-137 täsmää, paikkamerkit, ei HTML:ää
     assert.doesNotMatch(r.text, /<|>|https?:/, r.key);
     assert.equal(seen.has(`${r.key}|${r.lang}`), false); seen.add(`${r.key}|${r.lang}`);
   }
-  for (const f of readdirSync(join(root, 'content')).filter((n) => /^site-texts\.(pending-import|imported|fallback).*\.json$/.test(n) && !OWN.includes(n))) {
+  for (const f of readdirSync(join(root, 'content')).filter((n) => /^site-texts\.(pending-import|imported).*\.json$/.test(n) && !OWN.includes(n))) {
     const j = JSON.parse(read(`content/${f}`)); const other = Array.isArray(j) ? j : j.texts || [];
     for (const r of other) assert.ok(!PREFIXES.some((p) => String(r.key).startsWith(p)), `${r.key} myös ${f}`);
   }
