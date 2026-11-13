@@ -1,19 +1,21 @@
 # SumUp Solo -pikakassa: tila (13.11.2026)
 
-Haara: `claude/sumup-pikakassa` (päällä main fb0e543, commit 98d5b39). Ei pusku, PR:ää eikä mergeä. Ei tuotantoajoja. DEV-kannan ja DEV-funktioiden tila on alla kohdassa "Bottiavustus / DEV".
+Haara: `claude/sumup-pikakassa` (päällä main fb0e543). Ei pusku, PR:ää eikä mergeä. Ei tuotantoajoja. DEV-kannan ja DEV-funktioiden tila on alla kohdassa "Bottiavustus / DEV".
 
 ## Lyhyesti
 Pikakassaan on toteutettu maksutapa **Korttipääte (SumUp Solo)** SumUp Cloud API:lla: lukijan paritus, checkout lukijalle, tila webhookilla + rajapintavahvistus, peruutus (terminate), hyvitys. Tila oletuksena `off` (maksutapaa ei näy). CheckoutX on piilotettu Pikakassasta; sen koodi, migraatio, taulut ja data ovat ennallaan.
 
-**Isoin riski:** API-kutsut on tarkistettu virallista dokumentaatiota vastaan (ks. "API-tarkistus" alla), mutta mitään ei ole ajettu sandboxia tai Solo/Virtual Solo -lukijaa vastaan. Ks. "Mitä jäi ajamatta".
+**Sandbox-e2e (13.11.2026, Europe/Helsinki):** Virtual Solo + DEV-ketju on ajettu testikauppiaalla `M49HK09W` (`SUMUP_ENV=sandbox`). Onnistuva 10,00 €, hylätty 11,00 €, keskeytys (terminate) ja testihyvitys v1.0-polulla menivät läpi. Webhook (`sumup-notify` 2× HTTP 200) ja Transactions API -täsmäys (`provider_ref` = `client_transaction_id`, `payment_mark_paid` + `confirmed_by='api'`) varmistettu. DEVin `integration_config.sumup.mode` palautettu `off`.
+
+**Jäljellä ennen PRODia:** oikea Solo-lukija, live-tila + live-salaisuudet, sivutekstien tuonti, Koodarin PR / katselmointi. Webhookin allekirjoitusta SumUp ei dokumentoi; käytössä on `?s=`-salaisuus + pakollinen rajapintavahvistus.
 
 ## Tiedostot
-Migraatio (EI ajettu): 
+Migraatio (ajettu vain DEViin):
 - `booking/supabase/migrations/20261113190000_booking_295_sumup_pos.sql`
 - `booking/supabase/rollbacks/20261113190000_booking_295_ROLLBACK.sql` (pysähtyy, jos sumup-maksuja/-hyvityksiä on; palauttaa `admin_pos_tenders`in booking_286-muotoon, md5 864bc26d…)
 - numero 295: repossa ei ole 290–294; testi varmistaa. Migraation guard vaatii `admin_pos_tenders` md5 = 864bc26d1e42f6cb36eaf06da46dd6e6 (booking_286). Avainrajoitteet (`integration_config_key_check`, `…_test_only_online`) päivitetään lukemalla nykyinen määritys ja lisäämällä `sumup`, jotta muiden migraatioiden (uutiskirje ym.) avaimet eivät katoa.
 
-Edge-funktiot (EI deployattu):
+Edge-funktiot (deployattu vain DEViin; API-tarkistuksen korjaukset mukana):
 - `booking/supabase/functions/_shared/sumup.ts` (asetukset, `SumupApi`, tilamappaus), `_shared/sumup_flow.ts` (täsmäytys: yhteinen status- ja webhook-polulle)
 - `booking/supabase/functions/sumup-pos/{handler,index}.ts`: `reader_pair`, `reader_list`, `start`, `status`, `cancel`, `refund`
 - `booking/supabase/functions/sumup-notify/{handler,index}.ts`: webhook
@@ -26,9 +28,9 @@ Hallinta:
 Tekstit: `content/site-texts.pending-import-150.json` (62 riviä, `ui.pos.method_sumup`, `ui.pos.su_*`; numero 150 oli vapaa kaikissa paikallisissa haaroissa, ylin käytetty oli 146). `site-texts.fallback.json`ia ei muutettu (generoidaan PRODista). Koodin sanakirja toimii varana, kunnes Koodari ajaa tuonnin.
 
 Testit:
-- `booking/supabase/functions/_tests/sumup_test.ts` (Deno, 20 testiä)
+- `booking/supabase/functions/_tests/sumup_test.ts` (Deno, 23 testiä)
 - `booking/tests/sumup-pikakassa.test.mjs` (13 testiä), `booking/tests/checkoutx-pikakassa.test.mjs` päivitetty
-- `booking/supabase/tests/pos/t295_sumup_pos.sql` (SQL, ei ajettu)
+- `booking/supabase/tests/pos/t295_sumup_pos.sql` (SQL, ajettu DEVissä rollback-transaktiossa, läpi)
 
 ## API-tarkistus (13.11.2026)
 Lähteet: `docs/SUMUP_API_LAHDE.txt` (Cloud API -sivu) sekä API-referenssisivut developer.sumup.com/api (Create/List/Retrieve Reader, Create Reader Checkout, Terminate, Retrieve a transaction, Refund a transaction, Get Reader Status), haettu curlilla (WebFetch ei ollut sallittu). Oikealle SumUp-tilille ei tehty yhtään kutsua tässä tarkistuksessa.
@@ -49,11 +51,10 @@ Lähteet: `docs/SUMUP_API_LAHDE.txt` (Cloud API -sivu) sekä API-referenssisivut
 - Uusi mahdollisuus: `GET …/readers/{id}/status` (ONLINE/OFFLINE, IDLE/WAITING_FOR_CARD…) voisi estää checkoutin offline-lukijalle etukäteen. Ei toteutettu.
 - Ei tietokantamuutosta, joten uutta migraatiota (296) ei tarvittu; 295 koskematon.
 
-**⚠ Jäi auki (ei varmistettavissa dokumentaatiosta):**
-- Transactions-haun vastaus `client_transaction_id`:llä Solo-maksulle: ovatko checkoutin palauttama `client_transaction_id` ja transaktion `client_transaction_id` varmasti sama arvo (dokumentaatio: "use this value to match … transaction records") ja mikä on haun vastaus, kun transaktiota ei vielä ole (oletus 404; koodi hoitaa myös tyhjän). Varmistuu vasta Virtual Solo -testissä. Vaihtoehto: `foreign_transaction_id` (`saunotus-pos-<id>`) on jo lähetetty ja kelpaa hakuparametriksi.
+**⚠ Jäi auki (ei varmistettavissa pelkästä dokumentaatiosta; sandbox-e2e täydensi osan):**
+- Transactions-haku `client_transaction_id`:llä: sandbox-e2essä checkoutin palauttama tunnus ja transaktion / kannan `provider_ref` olivat sama arvo; `payment_mark_paid` kirjattiin `confirmed_by='api'`.
 - Refund-virhekoodit 409/422 kirjataan toistaiseksi `provider_error`/failed ilman erittelyä.
-- Webhookin allekirjoitus: ei dokumentoitu; tarkista uudelleen ennen tuotantoa.
-- Sandbox-tilin ja Virtual Solon toimivuus (koko ketju) ajamatta.
+- Webhookin allekirjoitus: ei dokumentoitu; tarkista uudelleen ennen tuotantoa. Sandbox-e2essä `sumup-notify` vastasi HTTP 200 (salaisuus URL:ssä kelpasi); maksu merkittiin silti vasta Transactions API -vahvistuksen jälkeen.
 
 ## Toiminta (lyhyt)
 1. Ylläpitäjä kytkee tilan: `admin_set_sumup_mode('test'|'live', '<nimi>')` (vaatii `approved_by`; live vain admin). Trigger estää tilan ilman `approved_by`.
@@ -73,30 +74,28 @@ Juuren `tests/`-testit, jotka koskevat site-texteja (4 tiedostoa): läpi.
 | JS `sumup-pikakassa.test.mjs` | **13/13 läpi** (uudelleenajo API-tarkistuksen jälkeen: sumup- + checkoutx-pikakassa yhteensä 20/20) |
 | JS `checkoutx-pikakassa.test.mjs` | 7/7 läpi. Päivitetty: UI-testit korvattu "CheckoutX ei näy" -testillä, koska maksutapa on tarkoituksella piilotettu; puhtaat apurit ja staattiset 286-tarkistukset ennallaan |
 | JS koko `booking/tests/*.test.mjs` (174 tiedostoa, ajettu yksitellen rinnakkain, aikaraja 90 s/tiedosto) | **174/174 läpi** (yksi ajo aikakatkesi ensin testin jättämän kyselyajastimen vuoksi; korjattu testissä) |
-| SQL `t295_sumup_pos.sql` | DEV-ajo 1: ei mennyt läpi testin omien oletusten takia. **Korjattu (business_id, `v_order_id`, lukijataulu vain service/omistaja-osiossa); korjattua ei ole ajettu.** Bottiavustus ajaa DEVissä rollback-transaktiossa. |
-| Virtual Solo / sandbox | **EI ajettu** (sandbox-tunnuksia ei ole). Oikealla tilillä tehtiin vain lukukyselyt, ei checkout-/paritus-/hyvityskutsuja. |
+| SQL `t295_sumup_pos.sql` | Ensimmäinen DEV-ajo ei mennyt läpi testin oletusten takia. **Korjattu** (business_id, PL/pgSQL `oid`-nimiväistö, lukijakysely oikealla roolilla) ja ajettu uudelleen DEVissä rollback-transaktiossa: **TESTRESULT pass=78 fail=0**, ei jäämiä, mode oli tuolloin `off`. |
+| Virtual Solo / sandbox (DEV, 13.11.2026 ~23:06–23:09 Europe/Helsinki) | **Läpi.** Paritus integraation `reader_pair`-kautta, sitten: 10,00 € → `paid` (tilaus 2469 / 8802505, maksu 1834, `provider_status=SUCCESSFUL`, `paid_at` asetettu, `confirmed_by=api`); 11,00 € → `failed` (tilaus 2470 / 8802506, maksu 1835); terminate 12,00 € → `cancelled` (tilaus 2471 / 8802507, maksu 1836, `provider_status=CANCELLED`, `by=pos_cancel`). `provider_ref` = `client_transaction_id` kaikissa kolmessa. `sumup-notify` 2× HTTP 200, `sumup-pos` 11× HTTP 200 samalla ikkunalla. Testihyvitys (refund 82) `POST /v1.0/…/refunds` → `processed: done`; maksu 1834 `refunded` 10,00 €, tilaus `payment_status=refunded`. |
 
 ## Mitä jäi ajamatta
-- Migraatio ja SQL-testi t295 (paikallinen Postgres tai DEV; Bottiavustus ajaa DEV:n). md5-arvot uusille funktioille ja uudelle `admin_pos_tenders`ille kirjataan migraation otsikkoon ajon jälkeen.
-- Oikea SumUp-kutsu (sandbox + Virtual Solo): paritus, checkout, webhook, hyvitys.
+- Selainkokeilu oikealla laitteella / oikealla Solo-lukijalla (live).
 - `deno check` indexeille (`npm:@supabase/supabase-js` ei ratkea ilman verkkoa; sama kuin muillakin funktioilla).
-- Selainkokeilu oikealla laitteella.
+- Sivutekstien tuonti (`site-texts.pending-import-150.json`) ja Koodarin PR.
+- Osittaista hyvitystä ei testattu (`partial_refund=false`).
 
 ## Avoimet kysymykset
-1. **API:n tarkkuus** (⚠ `SUMUP_SELVITYS.md`): checkout-body, `affiliate`-kentät, `return_url`, transaktiohaun polku/vastausmuoto, webhookin runko ja mahdollinen allekirjoitus, refund-polku. Korjaukset keskitetty `_shared/sumup.ts`:ään ja `mapTransaction`iin.
-2. **Osittainen hyvitys**: tukeeko SumUp sitä Solo-maksulle? Oletus: ei sallita (`settings.partial_refund=false`, estetään kuten CheckoutX).
-3. **Webhookin todennus**: nyt jaettu salaisuus URL:ssä (`?s=`) + pakollinen rajapintavahvistus. Jos SumUp tarjoaa allekirjoituksen, lisätään.
-4. Pikakassan maksurivi vanhenee 15 min; jos asiakas maksaa vanhenemisen jälkeen, status/webhook kirjaa maksun silti (apply sallii `paid` myös `failed`/`cancelled`-riville) → tilaus voi tarvita käsin tarkistusta.
-5. Lukijan fyysinen tila (offline) tulkitaan checkoutin 404/422-vastauksesta virheeksi `reader_offline`; tarkista oikea virhekoodi.
-6. Lukijalistaus (`reader_list`) on toteutettu Edgessä, mutta UI käyttää kannan listaa (`admin_get_sumup_status`); API-lista on käytettävissä lukijan tilan tarkistukseen myöhemmin.
+1. **Webhookin todennus:** nyt jaettu salaisuus URL:ssä (`?s=`) + pakollinen rajapintavahvistus. Jos SumUp tarjoaa allekirjoituksen, lisätään. Tarkista uudelleen ennen tuotantoa.
+2. **Osittainen hyvitys:** dokumentaation mukaan tuettu; koodissa oletus `settings.partial_refund=false`. Päätös Joonakselle.
+3. Pikakassan maksurivi vanhenee 15 min; jos asiakas maksaa vanhenemisen jälkeen, status/webhook kirjaa maksun silti (apply sallii `paid` myös `failed`/`cancelled`-riville) → tilaus voi tarvita käsin tarkistusta.
+4. Lukijalistaus (`reader_list`) on toteutettu Edgessä, mutta UI käyttää kannan listaa (`admin_get_sumup_status`); API-lista on käytettävissä lukijan tilan tarkistukseen myöhemmin.
+5. Havainto (ei regressiokorjausta tässä): `payments.raw.sumup_status` voi tallentua JSON-merkkijonona eikä objektina, jos Edge välittää `p_raw`:n merkkijonona. Ei vaikuttanut tilakoneeseen.
 
-## Mitä Joonaksen pitää hankkia
-- SumUp-tili (Havuhattu Oy, Suomi), KYC valmiina; varmistus että Solo + Cloud API on käytössä tilillä
-- **Solo-lukija** (tai Virtual Solo kehitykseen) ja sen parituskoodi
-- **Sandbox-kauppiastili** + sandbox-API-avain (testi), myöhemmin live-API-avain
-- **API-avain**, **affiliate key** ja **affiliate app id** (`fi.saunotus.kassa`) ovat nyt boxin ympäristössä oikealta tililtä; DEV-maksutesteihin tarvitaan silti **sandbox**-avaimet. Merchant code: `MVVBWM97`
-- **Webhook-salaisuus**: keksitään itse (pitkä satunnaismerkkijono), ei SumUpilta
-- Callback/webhook-domain: `https://<supabase-projekti>.supabase.co/functions/v1/sumup-notify` (jos SumUp vaatii sallittujen domainien listan, lisätään tämä)
+## Mitä Joonaksen pitää hankkia / PRODiin
+- Oikea **Solo-lukija** (Cloud API, firmware vähintään yllä mainitut) ja parituskoodi
+- Live-tila: `admin_set_sumup_mode('live', approved_by)` Joonaksen hyväksynnällä, ja PRODin Edge-salaisuudet oikealta tililtä (`SUMUP_ENV=live`, merchant `MVVBWM97`, live-API-avain, affiliate key + app id `fi.saunotus.kassa`, webhook-salaisuus, `SUMUP_NOTIFY_URL` PRODin notify-osoitteeseen). Älä kopioi sandbox-avaimia PRODiin.
+- Koodarin katselmointi + PR haarasta `claude/sumup-pikakassa` (ei pusketu tässä työssä)
+- Sivutekstien tuonti (`pending-import-150.json`)
+- SumUp-tili (Havuhattu Oy, Suomi) on jo olemassa; KYC / Cloud API käytössä live-tilillä. Live-lukukysely: `GET /v0.1/me` HTTP 200, merchant `MVVBWM97`; lukijoita 0. Checkoutteja, parituksia tai hyvityksiä ei ole tehty oikealle tilille.
 
 ## Tarvittavat salaisuudet (Edge-salaisuudet; EI kantaan, EI koodiin)
 | Nimi | Käyttö |
@@ -111,7 +110,7 @@ Juuren `tests/`-testit, jotka koskevat site-texteja (4 tiedostoa): läpi.
 | `SUMUP_API_URL` | valinn. (oletus `https://api.sumup.com`); mock-palvelimelle |
 | `SUMUP_ALLOWED_ORIGINS` | valinn. CORS |
 
-**DEV-salaisuudet tarvitaan** `sumup-pos`- ja `sumup-notify`-funktioille (sandbox-arvot, `SUMUP_ENV=sandbox`) ennen DEV-testiä. Ilman niitä funktiot palauttavat `not_configured` ja maksua ei aloiteta.
+**DEV-salaisuudet on asetettu** `sumup-pos`- ja `sumup-notify`-funktioille (vain sandbox: `SUMUP_ENV=sandbox`, testikauppias `M49HK09W`, affiliate app id `fi.saunotus.kassa`, webhook-salaisuus, `SUMUP_NOTIFY_URL` DEVin notify-osoitteeseen). Arvoja ei ole kirjoitettu tiedostoihin, repoon eikä lokeihin. Oikean tilin avaimet ovat vain boxin ympäristössä; niitä ei ole laitettu DEV-maksusalaisuuksiksi eikä käytetty checkouteihin.
 
 ## Jatkokehitys (ei toteuteta nyt)
 Joonas haluaa myöhemmin käyttöön myös **Tap to Pay puhelimella** (esim. messuille), esimerkiksi SumUp-sovelluksen Payment Switchin kautta. **Nyt tehdään vain yksi Solo-lukija** (Cloud API). Payment Switchiä ja puhelimen Tap to Paytä ei toteuteta tässä haarassa.
@@ -119,18 +118,20 @@ Joonas haluaa myöhemmin käyttöön myös **Tap to Pay puhelimella** (esim. mes
 Rakenne on jätetty niin, että maksutavan eli kanavan (`solo` / `tap_to_pay`) voi lisätä myöhemmin ilman isoja muutoksia:
 - Nykyinen Pikakassan tapa on `pos_tenders.handler = 'sumup'` (Solo / Cloud API). Uusi kanava = uusi handler (esim. `sumup_tap_to_pay`) + oma Pikakassan polku + oma Edge-funktio. Nykyisiä Solo-polkuja (`sumup-pos`, `sumup-notify`, `booking.sumup_readers`, `sumup_pos_*`) ei tarvitse rikkoa.
 - Yhteiset osat voidaan käyttää uudelleen: `payment_mark_paid('sumup', …)`, `payments.provider = 'sumup'`, hyvitys, `_shared/sumup.ts` (Transactions API, refund), tilakone (maksetuksi vain rajapintavahvistuksella).
-- Affiliate key ja app id (`fi.saunotus.kassa`) ovat nyt saatavilla oikealta tililtä; Payment Switchiä ei silti toteuteta nyt. DEV-maksutestit vain sandboxilla tai mockeilla.
+- Affiliate key ja app id (`fi.saunotus.kassa`) ovat saatavilla oikealta tililtä; Payment Switchiä ei silti toteuteta nyt.
 
 ## Bottiavustus / DEV (13.11.2026, Europe/Helsinki)
-- Migraatio `booking_295_sumup_pos` ajettu **vain DEViin** (projekti aoejjmfzulhkhxbehphs). `integration_config.sumup.mode = off`, lukijoita 0, `approved_by` tyhjä, maksutapa ei näy. Uusi `admin_pos_tenders`-md5: `babb3ce2a62c15356c90143d03c3a589`.
-- SQL-testi `t295_sumup_pos.sql` ajettiin DEVissä rollback-transaktiossa. Ei mennyt läpi testin omien oletusten takia (ei migraatiovirhe): `kb.products.business_id` on pakollinen; PL/pgSQL-muuttuja `oid` törmää `pg_constraint.oid`:hen; authenticated-rooli ei saa lukea `booking.sumup_readers`-taulua suoraan. Testidata ei jäänyt DEViin (mode pysyi `off`).
-- Oikea SumUp-tili (Havuhattu Oy, merchant_code `MVVBWM97`, FI): vain lukukyselyt. `GET /v0.1/me` → HTTP 200, merchant_code täsmää. `GET /v0.1/merchants/MVVBWM97/readers` → HTTP 200, **0 lukijaa**. Checkoutteja, parituksia tai hyvityksiä ei tehty. Boxin ympäristössä ovat `SUMUP_API_KEY`, `SUMUP_PUBLIC_KEY` ja `SUMUP_AFFILIATE_KEY` (oikea tili); affiliate app id on `fi.saunotus.kassa`. Avaimia ei ole kirjoitettu tiedostoihin eikä repoon, eikä niitä ole laitettu DEV Edge-salaisuuksiksi (maksutestit vain sandboxilla tai mockeilla).
-- Edge-funktiot `sumup-pos` (verify_jwt = true, versio 1) ja `sumup-notify` (verify_jwt = false, versio 1) on deployattu **vain DEViin**, tila ACTIVE. DEV Edge-salaisuuksia ei asetettu (ei live-avaimia, ei sandbox-avaimia); funktiot palauttavat `not_configured`, kunnes sandbox-salaisuudet lisätään. Tuotantoon ei ole viety mitään.
+- Migraatio `booking_295_sumup_pos` ajettu **vain DEViin** (projekti aoejjmfzulhkhxbehphs). Uusi `admin_pos_tenders`-md5: `babb3ce2a62c15356c90143d03c3a589`.
+- SQL-testi `t295_sumup_pos.sql` korjattu ja ajettu DEVissä rollback-transaktiossa: pass=78 fail=0, ei jäämiä.
+- Oikea SumUp-tili (Havuhattu Oy, merchant_code `MVVBWM97`, FI): vain lukukyselyt. Checkoutteja, parituksia tai hyvityksiä ei tehty live-tilille.
+- Edge-funktiot `sumup-pos` (verify_jwt = true) ja `sumup-notify` (verify_jwt = false) on deployattu **vain DEViin**, tila ACTIVE, API-tarkistuksen korjaukset mukana. Sandbox-salaisuudet asetettu (nimet yllä). Tuotantoon ei ole viety mitään.
+- Sandbox-testin ajaksi `integration_config.sumup.mode` kytkettiin `test`-tilaan, `settings.approved_by='Joonas t1716u (DEV-testi)'` (Joonas pyysi t1716u:ta testaamaan DEViin). **Mode palautettu `off` 13.11.2026 ~23:09 Europe/Helsinki.** `approved_by` jäi settings-kenttään historiatiedoksi; maksutapa ei näy Pikakassassa mode=off-tilassa.
+- Virtual Solo -e2e (simulator-edge + Phoenix-WS, ei selain-GUI:ta): ensimmäinen paritus jätti lukijan `processing`/`OFFLINE`-tilaan, koska enroll/WS ei ehtinyt; toinen `reader_pair` palautti 502 `provider_error`, kun vanha lukija oli vielä sandbox-tilillä. Vanha lukija poistettiin SumUpista, OAuth-kutsulle lisättiin User-Agent/iat/exp, ja ketju toimi. Nämä olivat testiympäristön/harnessin ongelmia, eivät tuotekoodin muutoksia tässä ajossa.
+- `admin_refund` RPC service_role-kutsuna palautti HTTP 400 (`_require_permission('payments.refund')` vaatii henkilökunnan JWT:n). Tämä ei ole SumUp-bugi. Testihyvitysrivi (id 82) luotiin suoraan kantaan ja ajettiin `sumup-pos refund`-toiminnolla onnistuneesti.
+- Siivous DEVissä: Virtual Solo -lukijat deaktivoitu kannassa (3 riviä, aktiivisia 0); vastaavat lukijat poistettu sandbox-tililtä (0 jäljellä); tuotteet 261–263 (`t1716u sandbox 10e/11e/12e`) deaktivoitu; staff `t1716u.sandbox@example.test` (user_id `8ac455c6-ddfd-4eed-aed3-169632954513`) deaktivoitu. **Jäljellä (listattu, ei poistettu maksuhistoriasta):** tilaukset 2469 (confirmed / refunded), 2470 ja 2471 (pending / unpaid), maksut 1834–1836, hyvitys 82, kolme inaktiivista `sumup_readers`-riviä, inaktiiviset tuotteet ja auth-käyttäjä testiosoitteella. Tilauksiin lisätty sisäinen merkintä `t1716u sandbox e2e`.
 
-## Käyttöönottojärjestys (ehdotus, Koodarille/Bottiavustukselle)
-1. Katselmointi (migraatio 295 on jo DEVissä). Korjaa t295-testi (business_id, oid-nimi, lukijakysely RPC:n kautta) ja aja se DEVissä rollback-transaktiossa. Kirjaa md5 otsikkoon.
-2. Deploy `sumup-pos`, `sumup-notify` DEViin. DEV-salaisuuksiksi vain **sandbox**-arvot (`SUMUP_ENV=sandbox`). Älä käytä oikean tilin avaimia checkout-testeihin.
-3. Tuo `site-texts.pending-import-150.json`.
-4. `admin_set_sumup_mode('test', …)` DEVissä (vaatii Joonaksen hyväksynnän kytkentään) → Virtual Solo / sandbox-testi koko ketjulle.
-5. PROD vasta kun 1–4 läpi ja Joonas hyväksyy; live vaatii `approved_by` ja `SUMUP_ENV=live`.
-6. Tap to Pay / Payment Switch vasta erillisenä myöhempänä työnä (ks. Jatkokehitys).
+## Käyttöönottojärjestys (ehdotus, Koodarille)
+1. Katselmointi (migraatio 295 ja sandbox-e2e ovat DEVissä). Haara `claude/sumup-pikakassa` ei ole puskettu.
+2. Tuo `site-texts.pending-import-150.json`.
+3. PROD vasta Joonaksen hyväksynnällä: live-salaisuudet, oikea Solo, `admin_set_sumup_mode('live', …)`, `SUMUP_ENV=live`.
+4. Tap to Pay / Payment Switch vasta erillisenä myöhempänä työnä (ks. Jatkokehitys).
