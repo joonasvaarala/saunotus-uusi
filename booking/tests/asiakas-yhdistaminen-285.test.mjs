@@ -11,7 +11,7 @@ import { ORDER_VIEW_TEXTS } from '../admin/order-view-texts.js';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const read = (p) => readFileSync(join(root, p), 'utf8');
-const MIG = 'booking/supabase/migrations/20261113000050_booking_285_customer_merge_anonymize.sql';
+const MIG = 'booking/supabase/migrations/20261113000200_booking_285_customer_merge_anonymize.sql';
 
 test('panelAccess: vain oikeus + kytkin; anonymisoitu/yhdistetty asiakas ei saa toimintoja', () => {
   const on = { can_admin: true, merge_enabled: true, anonymize_enabled: false };
@@ -71,7 +71,7 @@ test('migraatio: kytkimet oletuksena false eikä kytketä päälle missään; oi
   assert.doesNotMatch(sql, /svc_raise_order_price|_close_cancelled_order_links|orders_cancel_close_links|admin_list_payment_link_watch|payment_link_reminders_sweep/);
   for (const f of ['admin_merge_customers(bigint, bigint, boolean, text)', 'admin_anonymize_customer(bigint, text, boolean)', 'admin_merge_customers_preview(bigint, bigint)', 'admin_anonymize_customer_preview(bigint)'])
     assert.match(sql, new RegExp(`revoke all on function booking\\.${f.replace(/[()]/g, '\\$&')} from public, anon`), f);
-  const rb = read('booking/supabase/rollbacks/20261113000050_booking_285_ROLLBACK.sql');
+  const rb = read('booking/supabase/rollbacks/20261113000200_booking_285_ROLLBACK.sql');
   assert.match(rb, /raise exception/); assert.match(rb, /drop function if exists booking\.admin_merge_customers/);
 });
 

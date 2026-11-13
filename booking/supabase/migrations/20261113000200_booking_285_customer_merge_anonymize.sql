@@ -1,5 +1,5 @@
 -- booking_285 (Tilausnäkymä v3, PR 4): asiakkaiden yhdistäminen ja anonymisointi. EI AJETA tästä haarasta: Bottiavustus ajaa DEV → PROD.
--- Määrittely: toteutusmaarittely.md §1.4, §4 rivi I, §5, §6, §7, §8/4. Rollback: booking/supabase/rollbacks/20261113000050_booking_285_ROLLBACK.sql
+-- Määrittely: toteutusmaarittely.md §1.4, §4 rivi I, §5, §6, §7, §8/4. Rollback: booking/supabase/rollbacks/20261113000200_booking_285_ROLLBACK.sql
 --
 -- Sisältö
 --  1. Oikeus customers.admin (admin + manager). Palvelin tarkistaa joka funktiossa (_require_permission).

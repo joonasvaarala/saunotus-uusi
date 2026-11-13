@@ -413,6 +413,9 @@ jobs:
       - run: node --test booking/tests/raporttirakenne.test.mjs
       # Hallinnan kalenteri: koko päiväruutu avaa päivän (kuukausi ja viikko), näppäimistö ja varauslinkki erikseen.
       - run: node --test booking/tests/kalenteri-paivasolu.test.mjs
+      # Tilausnäkymä v3, PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (customers.admin, kytkimet pois); tekstit pending-import-142.
+      # SQL: booking/supabase/tests/t285_customer_merge_anonymize.sql ajetaan paikallisessa PG17:ssä. Työnkulussa ei ole Postgresia.
+      - run: node --test booking/tests/asiakas-yhdistaminen-285.test.mjs
       # Hallinnan kalenteri: koulutukset ja niiden tilavaraukset (suodatin, päiväruutu, viikko, yksityiskohdat), tekstit pending-import-136.
       - run: node --test booking/tests/kalenteri-koulutukset.test.mjs
       # Tilausnäkymä v3, PR 1 (booking_278): yhteenveto, koko tilaus #/tilaukset/<nro>, peruutusdialogi ja asiakasnäkymä #/asiakkaat/<id>; tekstit pending-import-137.
