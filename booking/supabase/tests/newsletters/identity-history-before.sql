@@ -5,6 +5,7 @@ create temp table newsletter_identity_history(uid uuid,customer_id bigint,campai
 do $$declare u uuid:=gen_random_uuid();c bigint;d jsonb;x jsonb;n bigint;v integer;l bigint;e booking.email_outbox;begin
  update booking.customers set marketing_consent=false where marketing_consent;
  update booking.integration_config set mode='dry_run'where key='resend';
+ insert into booking.settings(key,value) values('newsletter_enabled','true'::jsonb) on conflict (key) do update set value='true'::jsonb; -- booking_290: kytkin auki kertakäyttökannassa
  insert into auth.users(id,email)values(u,'n259-identity-'||u||'@example.test');
  insert into booking.staff(user_id,email,name,role)values(u,'n259-identity-'||u||'@example.test','Identity fixture','manager');
  insert into booking.customers(name,email,marketing_consent,marketing_consent_at)

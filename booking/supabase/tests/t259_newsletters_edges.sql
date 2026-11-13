@@ -31,6 +31,7 @@ begin
  perform set_config('request.jwt.claims',jsonb_build_object('sub',uid,'role','authenticated')::text,true);
  update booking.customers set marketing_consent=false where marketing_consent;
  update booking.integration_config set mode='dry_run' where key='resend';
+ insert into booking.settings(key,value) values('newsletter_enabled','true'::jsonb) on conflict (key) do update set value='true'::jsonb; -- booking_290: testit lähettävät, joten kytkin avataan (kertakäyttökanta)
  select id into p_train from kb.products where category='training' order by id limit 1;
  select id into p_treat from kb.products where category='treatment' order by id limit 1;
  select id into p_event from kb.products where category='event' order by id limit 1;

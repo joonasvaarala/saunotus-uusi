@@ -27,6 +27,7 @@ begin
   -- Disposable fixture-wide changes: NEVER run this suite on any hosted database.
   update booking.customers set marketing_consent=false where marketing_consent;
   update booking.integration_config set mode='dry_run' where key='resend';
+  insert into booking.settings(key,value) values('newsletter_enabled','true'::jsonb) on conflict (key) do update set value='true'::jsonb; -- booking_290: testit lähettävät, joten kytkin avataan (kertakäyttökanta)
   select id into sauna from booking.resources order by id limit 1;
   for i in 1..8 loop
     insert into booking.customers(name,email,marketing_consent,marketing_consent_at,language)
