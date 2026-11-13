@@ -173,8 +173,9 @@ test('migraatiot 282–284: tiedostot, aikaleimat, rollbackit, liput oletuksena 
   const code = (sql) => sql.split('\n').filter((l) => !l.trim().startsWith('--')).join('\n');
   for (const sql of [s282, s283, s284]) assert.doesNotMatch(code(sql), /_close_cancelled_order_links|orders_cancel_close_links|create trigger/i, '288:n logiikkaa ei kopioida eikä muuteta');
   assert.match(s283, /booking_288/, 'yhteistoiminta dokumentoitu');
-  // 287/288 -tiedostoja ei lisätä repoon tässä PR:ssä
-  assert.ok(!mig(287) && !mig(288));
+  // 287/288 ovat repossa omana PR:nään (#348, PROD-aikaleimoilla); tämä PR ei muuta niitä
+  assert.equal(mig(287), '20261112172150_booking_287_svc_raise_order_price_to_voucher_value.sql');
+  assert.equal(mig(288), '20261112174809_booking_288_cancelled_order_close_payment_links.sql');
   // admin_refund-polku: ei uutta rajapintakutsua, Montonio käyttää refunds.status = requested
   assert.match(s284, /'requested', 'montonio'/);
 });
