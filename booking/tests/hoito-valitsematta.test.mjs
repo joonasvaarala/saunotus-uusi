@@ -104,7 +104,7 @@ test('ennen migraatiota selain käy sivut läpi ja pitää vain option_missing-r
   );
 });
 
-test('tekstit: FI ja EN, tuontitiedosto vastaa sanakirjaa, fallbackissa ei vielä ole', () => {
+test('tekstit: FI ja EN, tuontitiedosto vastaa sanakirjaa, rivit ovat varatekstissä', () => {
   assert.deepEqual(Object.keys(OPTION_TEXTS.fi).sort(), Object.keys(OPTION_TEXTS.en).sort());
   for (const key of Object.keys(OPTION_TEXTS.fi)) {
     assert.ok(OPTION_TEXTS.fi[key].length > 0 && OPTION_TEXTS.en[key].length > 0, key);
@@ -131,7 +131,8 @@ test('tekstit: FI ja EN, tuontitiedosto vastaa sanakirjaa, fallbackissa ei viel�
     for (const ph of found) assert.match(ph, /^\{\{[a-z_]+:[A-Za-z0-9_]+\}\}$/);
   }
   const fallback = JSON.parse(readFileSync(new URL('../../content/site-texts.fallback.json', import.meta.url), 'utf8'));
-  assert.equal((fallback.texts || []).filter((r) => String(r.key || '').startsWith('ui.admin.options.')).length, 0);
+  const opt = (fallback.texts || []).filter((r) => String(r.key || '').startsWith('ui.admin.options.'));
+  assert.equal(opt.length, pending.length, 'ui.admin.options.* on tuotu varatekstiin');
 });
 
 test('site_texts peittää sanakirjan; täyttymätön paikkamerkki jää varalle', async () => {

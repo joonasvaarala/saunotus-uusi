@@ -65,7 +65,7 @@ test('tekstit FI+EN pending-import-123, sama kuin koodin oletus, ei kulmasuljett
   }
   const content = new URL('../../content/', import.meta.url);
   for (const name of readdirSync(content)) {
-    if (!/^site-texts\.(pending-import|imported|fallback).*\.json$/.test(name) || name === 'site-texts.pending-import-123.json') continue;
+    if (!/^site-texts\.(pending-import|imported).*\.json$/.test(name) || name === 'site-texts.pending-import-123.json') continue;
     const parsed = JSON.parse(readFileSync(new URL(name, content), 'utf8'));
     const other = Array.isArray(parsed) ? parsed : parsed?.texts;
     if (!Array.isArray(other)) continue;

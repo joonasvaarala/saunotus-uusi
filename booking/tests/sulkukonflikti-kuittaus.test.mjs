@@ -44,7 +44,7 @@ test('tuontitiedosto vastaa sanakirjaa, luokka on normal, ei lukittuja eikä van
       assert.equal(row.kind, 'plain');
       assert.equal(row.max_len, 400);
       assert.deepEqual(row.placeholders, placeholders(text));
-      assert.equal(fallbackKeys.has(key), false);
+      assert.equal(fallbackKeys.has(key), true, `${key} on tuotu varatekstiin`);
     }
   }
   assert.equal(importRows.some((r) => r.class === 'locked' || r.class === 'protected'), false);

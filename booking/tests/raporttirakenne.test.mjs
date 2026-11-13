@@ -36,7 +36,7 @@ test('pending-import-108 vastaa sanakirjaa, FI+EN, ei päällekkäin', () => {
   const rows = JSON.parse(readFileSync(join(repo, 'content/site-texts.pending-import-108.json'), 'utf8'));
   const taken = new Set();
   for (const f of readdirSync(join(repo, 'content'))) {
-    if (f === 'site-texts.pending-import-108.json' || !/^site-texts\.(pending-import-|imported|fallback)/.test(f) || !f.endsWith('.json')) continue;
+    if (f === 'site-texts.pending-import-108.json' || !/^site-texts\.(pending-import-|imported)/.test(f) || !f.endsWith('.json')) continue;
     const j = JSON.parse(readFileSync(join(repo, 'content', f), 'utf8'));
     for (const r of Array.isArray(j) ? j : (j.texts || [])) if (r?.key) taken.add(`${r.key}|${r.lang}`);
   }
@@ -266,7 +266,7 @@ test('pending-import-119 on uusi selite, FI+EN, ei päällekkäin', () => {
   const rows = JSON.parse(readFileSync(join(repo, 'content/site-texts.pending-import-119.json'), 'utf8'));
   const taken = new Set();
   for (const f of readdirSync(join(repo, 'content'))) {
-    if (f === 'site-texts.pending-import-119.json' || !/^site-texts\.(pending-import-|imported|fallback)/.test(f) || !f.endsWith('.json')) continue;
+    if (f === 'site-texts.pending-import-119.json' || !/^site-texts\.(pending-import-|imported)/.test(f) || !f.endsWith('.json')) continue;
     const j = JSON.parse(readFileSync(join(repo, 'content', f), 'utf8'));
     for (const r of Array.isArray(j) ? j : (j.texts || [])) if (r?.key) taken.add(`${r.key}|${r.lang}`);
   }

@@ -185,7 +185,7 @@ test('tekstit: ui.admin.nav.* FI+EN sanakirjassa ja pending-import-38/88:ssa, ei
   for (const r of rows38) assert.equal(newKeys.has(r.key), false, r.key);
   const taken = new Set();
   for (const f of readdirSync(join(root, '../content'))) {
-    if (!/^site-texts\.(pending-import-(?!38\.|88\.|102\.|105\.|118\.|126\.)|imported|fallback)/.test(f) || !f.endsWith('.json')) continue;
+    if (!/^site-texts\.(pending-import-(?!38\.|88\.|102\.|105\.|118\.|126\.)|imported)/.test(f) || !f.endsWith('.json')) continue;
     const j = JSON.parse(readFileSync(join(root, '../content', f), 'utf8'));
     for (const r of Array.isArray(j) ? j : j.texts || []) taken.add(`${r.key}|${r.lang}`);
   }

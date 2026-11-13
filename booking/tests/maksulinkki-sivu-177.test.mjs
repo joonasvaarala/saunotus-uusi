@@ -198,5 +198,6 @@ test('tekstit: pending-import-72 = ui.paylink.* FI+EN koodin oletuksista, uudet 
   for (const f of readdirSync(join(root, 'content')).filter((f) => /^site-texts\.(pending-import|imported).*\.json$/.test(f) && f !== 'site-texts.pending-import-72.json' && f !== 'site-texts.pending-import-73.json')) {
     const rs = JSON.parse(rd(`content/${f}`)); if (Array.isArray(rs)) for (const r of rs) assert.ok(!keys.has(r?.key), `${r?.key} jo tiedostossa ${f}`);
   }
-  for (const r of JSON.parse(rd('content/site-texts.fallback.json')).texts) assert.ok(!keys.has(r.key), `${r.key} jo tuotannossa`);
+  const fb = JSON.parse(rd('content/site-texts.fallback.json')).texts;
+  for (const k of keys) assert.ok(fb.some((r) => r.key === k), `${k} on tuotu varatekstiin`);
 });

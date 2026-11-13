@@ -129,7 +129,7 @@ test('pending-import-49 vastaa koodin oletuksia (ui.order.*), FI+EN, paikkamerki
   assert.ok(!rows.some((r) => r.text.includes('{{var:phone}}')));
   for (const k of keys) assert.ok(rows.some((r) => r.key === k && r.lang === 'fi') && rows.some((r) => r.key === k && r.lang === 'en'), k);
   for (const f of readdirSync(join(repo, 'content'))) {
-    if (!/^site-texts\.(pending-import|imported|fallback)/.test(f) || f === 'site-texts.pending-import-49.json' || !f.endsWith('.json')) continue;
+    if (!/^site-texts\.(pending-import|imported)/.test(f) || f === 'site-texts.pending-import-49.json' || !f.endsWith('.json')) continue;
     const j = JSON.parse(read(`content/${f}`)); const list = Array.isArray(j) ? j : j.texts || [];
     for (const r of list) assert.ok(!keys.includes(r.key), `${f}: ${r.key}`);
   }

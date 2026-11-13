@@ -92,7 +92,7 @@ test('tekstit: pending-import-74 = ui.paylink.info.retry FI+EN koodin oletuksist
   for (const f of readdirSync(join(root, 'content')).filter((f) => /^site-texts\.(pending-import|imported).*\.json$/.test(f) && f !== 'site-texts.pending-import-74.json')) {
     const rs = JSON.parse(rd(`content/${f}`)); if (Array.isArray(rs)) for (const r of rs) assert.notEqual(r?.key, 'ui.paylink.info.retry', `jo tiedostossa ${f}`);
   }
-  for (const r of JSON.parse(rd('content/site-texts.fallback.json')).texts) assert.notEqual(r.key, 'ui.paylink.info.retry', 'jo tuotannossa');
+  assert.ok(JSON.parse(rd('content/site-texts.fallback.json')).texts.some((r) => r.key === 'ui.paylink.info.retry'), 'ui.paylink.info.retry on tuotu varatekstiin');
 });
 
 test('migraatio booking_178: vartijat, uudelleenyritys vain linkeille, tuplamaksusuoja, oikeudet; rollback palauttaa täsmälleen; t178 sama md5', () => {

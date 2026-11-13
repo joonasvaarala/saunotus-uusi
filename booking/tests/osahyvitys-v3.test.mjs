@@ -104,7 +104,7 @@ test('tekstit: FI = EN, paikkamerkit, ei HTML:ää, pending-import-139 täsmää
   const pubFi = rows.filter((r) => r.key.startsWith('ui.public.order_change.reduce.') && r.lang === 'fi').map((r) => r.key).sort();
   const pubEn = rows.filter((r) => r.key.startsWith('ui.public.order_change.reduce.') && r.lang === 'en').map((r) => r.key).sort();
   assert.deepEqual(pubFi, pubEn);
-  for (const f of readdirSync(join(root, 'content')).filter((n) => /^site-texts\.(pending-import|imported|fallback).*\.json$/.test(n) && n !== 'site-texts.pending-import-139.json')) {
+  for (const f of readdirSync(join(root, 'content')).filter((n) => /^site-texts\.(pending-import|imported).*\.json$/.test(n) && n !== 'site-texts.pending-import-139.json')) {
     const j = JSON.parse(read(`content/${f}`)); const other = Array.isArray(j) ? j : j.texts || [];
     for (const r of other) assert.ok(!String(r.key).startsWith(PREFIX) && !String(r.key).startsWith('ui.public.order_change.reduce.'), `${r.key} myös ${f}`);
   }
