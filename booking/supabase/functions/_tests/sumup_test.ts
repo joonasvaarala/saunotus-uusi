@@ -1,7 +1,7 @@
 // sumup-pos + sumup-notify (booking_295): SumUp-rajapinta mockattu, ei verkkoa eikä tietokantaa.
 import { assert, assertEquals } from "jsr:@std/assert@1";
 import type { Env } from "../_shared/mobilepay.ts";
-import { envMatchesMode, mapTransaction, readConfig, safeEqual, SumupApi } from "../_shared/sumup.ts";
+import { envMatchesMode, mapTransaction, readConfig, safeEqual, SumupApi, validPairingCode } from "../_shared/sumup.ts";
 import { type Caller, handle as posHandle, type SumupDb } from "../sumup-pos/handler.ts";
 import { handle as notifyHandle } from "../sumup-notify/handler.ts";
 
@@ -83,8 +83,8 @@ Deno.test("checkout-pyyntö: POST readers/{id}/checkout, summa minor-yksikössä
   assert(!/sup_sk|sup_afk|whsec|MTEST123/.test(txt));
 });
 
-Deno.test("start: lukija offline (404) → luonti epäonnistuu, rivi pois, koodi reader_offline", async () => {
-  const { f } = fakeFetch(() => json({ message: "reader not found" }, 404));
+Deno.test("start: lukija offline (422 READER_OFFLINE) → luonti epäonnistuu, rivi pois, koodi reader_offline", async () => {
+  const { f } = fakeFetch(() => json({ errors: { detail: "The device is offline.", type: "READER_OFFLINE" } }, 422));
   const { db, calls } = fakeDb("test", (n) => (n === "sumup_pos_prepare" ? { data: { payment_id: 5, amount: 7, currency: "EUR", superseded: [] } } : { data: { ok: true } }));
   const res = await posHandler({ action: "start", order_id: 9, reader_id: "rdr_0001" }, db, f);
   assertEquals(res.status, 409);
@@ -202,7 +202,7 @@ Deno.test("cancel: ei vielä aloitettu (ei client_transaction_id) → rivi pois 
 
 const notifyReq = (payload: unknown, secret = "whsec-test") =>
   new Request(`https://fn.example/sumup-notify?s=${secret}`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(payload) });
-const hook = (status: string) => ({ id: "evt-1", event_type: "solo.transaction.updated", payload: { client_transaction_id: "ctx-0001", merchant_code: "MTEST123", status, transaction_id: "txn-0001" } });
+const hook = (status: string) => ({ id: "evt-1", event_type: "solo.transaction.updated", payload: { client_transaction_id: "ctx-0001", merchant_code: "MTEST123", status } });
 
 Deno.test("webhook: väärä salaisuus → 401, ei kutsuja", async () => {
   const { f, calls } = fakeFetch(() => json({}));
@@ -252,20 +252,20 @@ Deno.test("webhook: failed ilman transaktiota → failed; tuntematon maksu ja mo
 
 Deno.test("hyvitys: koko maksu refund-rajapinnalla; osittainen estetty ellei sallittu; tyhjä off-tilassa", async () => {
   const claim = (amount: number, partial: boolean) => ({ ok: true, partial_refund: partial, claimed: [{ refund_id: 3, payment_id: 5, amount, payment_amount: 7, refunded_amount: 0, transaction_id: "txn-0001" }] });
-  let { f, calls } = fakeFetch(() => new Response(null, { status: 204 }));
+  let { f, calls } = fakeFetch(() => json({}, 201));
   let { db, calls: dbc } = fakeDb("test", (n) => (n === "sumup_refund_claim" ? { data: claim(7, false) } : { data: { ok: true } }));
   let body = await (await handleAs(staff(["payments.refund"]), { action: "refund", refund_id: 3 }, db, f)).json();
   assertEquals(body.processed, [{ refund_id: 3, result: "done" }]);
-  assertEquals(calls[0].url, "https://sumup.example/v0.1/me/refund/txn-0001");
+  assertEquals(calls[0].url, "https://sumup.example/v1.0/merchants/MTEST123/payments/txn-0001/refunds");
   assertEquals(calls[0].body, {});
   assert(dbc.some((x) => x[0] === "sumup_refund_complete"));
-  ({ f, calls } = fakeFetch(() => new Response(null, { status: 204 })));
+  ({ f, calls } = fakeFetch(() => json({}, 201)));
   ({ db, calls: dbc } = fakeDb("test", (n) => (n === "sumup_refund_claim" ? { data: claim(3, false) } : { data: { ok: true } })));
   body = await (await handleAs(staff(["payments.refund"]), { action: "refund", refund_id: 3 }, db, f)).json();
   assertEquals(body.processed, [{ refund_id: 3, result: "not_supported" }]);
   assertEquals(calls.length, 0);
   assert(dbc.some((x) => x[0] === "sumup_refund_fail"));
-  ({ f, calls } = fakeFetch(() => new Response(null, { status: 204 })));
+  ({ f, calls } = fakeFetch(() => json({}, 201)));
   ({ db } = fakeDb("test", (n) => (n === "sumup_refund_claim" ? { data: claim(3, true) } : { data: { ok: true } })));
   body = await (await handleAs(staff(["payments.refund"]), { action: "refund", refund_id: 3 }, db, f)).json();
   assertEquals(body.processed, [{ refund_id: 3, result: "done" }]);
@@ -290,3 +290,21 @@ function posHandler(body: unknown, db: SumupDb, f: (u: string, i?: RequestInit) 
 function handleAs(c: Caller | null, body: unknown, db: SumupDb, f: (u: string, i?: RequestInit) => Promise<Response>) {
   return posHandle(post(body), { db, env: env(SECRETS), fetch: f, caller: asCaller(c) });
 }
+
+Deno.test("start: 404 (lukijaa ei löydy) → reader_not_paired, ei reader_offline", async () => {
+  const { f } = fakeFetch(() => json({ errors: { detail: "Not Found" } }, 404));
+  const { db } = fakeDb("test", (n) => (n === "sumup_pos_prepare" ? { data: { payment_id: 5, amount: 7, currency: "EUR", superseded: [] } } : { data: { ok: true } }));
+  const res = await posHandler({ action: "start", order_id: 9, reader_id: "rdr_0001" }, db, f);
+  assertEquals((await res.json()).code, "reader_not_paired");
+});
+
+Deno.test("mapTransaction: REFUNDED = onnistunut maksu (paid); id on transaktion id", () => {
+  const t = mapTransaction({ id: "0a1b2c3d-1111-2222-3333-444455556666", transaction_code: "TEENSK4W2K", status: "REFUNDED", amount: 7, currency: "EUR" });
+  assertEquals(t?.state, "paid");
+  assertEquals(t?.transactionId, "0a1b2c3d-1111-2222-3333-444455556666");
+});
+
+Deno.test("parituskoodi: 8–9 merkkiä (dokumentaatio)", () => {
+  assert(validPairingCode("4WLFDSBF") && validPairingCode("4WLFDSBF1"));
+  assert(!validPairingCode("ABC123") && !validPairingCode("ABCDEFGHIJ"));
+});

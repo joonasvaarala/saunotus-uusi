@@ -5,7 +5,7 @@ Haara: `claude/sumup-pikakassa` (päällä main fb0e543, commit 98d5b39). Ei pus
 ## Lyhyesti
 Pikakassaan on toteutettu maksutapa **Korttipääte (SumUp Solo)** SumUp Cloud API:lla: lukijan paritus, checkout lukijalle, tila webhookilla + rajapintavahvistus, peruutus (terminate), hyvitys. Tila oletuksena `off` (maksutapaa ei näy). CheckoutX on piilotettu Pikakassasta; sen koodi, migraatio, taulut ja data ovat ennallaan.
 
-**Isoin riski:** SumUpin API-tiedot (endpointit, kentät, webhook) on kirjoitettu muistista, koska verkkohaku ei ollut sallittu tässä ajossa. Mitään ei ole ajettu oikeaa SumUpia vastaan. Ks. `SUMUP_SELVITYS.md` (⚠-merkityt kohdat) ja "Mitä jäi ajamatta".
+**Isoin riski:** API-kutsut on tarkistettu virallista dokumentaatiota vastaan (ks. "API-tarkistus" alla), mutta mitään ei ole ajettu sandboxia tai Solo/Virtual Solo -lukijaa vastaan. Ks. "Mitä jäi ajamatta".
 
 ## Tiedostot
 Migraatio (EI ajettu): 
@@ -30,25 +30,50 @@ Testit:
 - `booking/tests/sumup-pikakassa.test.mjs` (13 testiä), `booking/tests/checkoutx-pikakassa.test.mjs` päivitetty
 - `booking/supabase/tests/pos/t295_sumup_pos.sql` (SQL, ei ajettu)
 
+## API-tarkistus (13.11.2026)
+Lähteet: `docs/SUMUP_API_LAHDE.txt` (Cloud API -sivu) sekä API-referenssisivut developer.sumup.com/api (Create/List/Retrieve Reader, Create Reader Checkout, Terminate, Retrieve a transaction, Refund a transaction, Get Reader Status), haettu curlilla (WebFetch ei ollut sallittu). Oikealle SumUp-tilille ei tehty yhtään kutsua tässä tarkistuksessa.
+
+**Täsmäsi (ei muutosta):** `POST /v0.1/merchants/{code}/readers` (pairing_code + name, 201); `GET …/readers` (`items`) ja `GET …/readers/{id}`; `POST …/readers/{id}/checkout` (`total_amount {currency, minor_unit, value}`, `return_url` https, `description`, `affiliate {app_id, key, foreign_transaction_id}`, vastaus 201 `data.client_transaction_id`); `POST …/readers/{id}/terminate` (202, ei vahvistusta); `GET /v2.1/merchants/{code}/transactions?client_transaction_id=`; webhook `solo.transaction.updated`, `status` successful|failed, täsmäys `client_transaction_id`:llä, `transaction_id`ä ei käytetä; allekirjoitusta ei dokumentoida → `?s=`-salaisuus + pakollinen rajapintavahvistus säilyy.
+
+**Korjattu (vanha → uusi):**
+1. Hyvitys: `POST /v0.1/me/refund/{txn}` (odotti 204) → `POST /v1.0/merchants/{code}/payments/{transaction_id}/refunds` (201). Tunniste = Transactions API:n `id` (UUID), jota `mapTransaction` jo tallentaa; webhookin vanhentunutta `transaction_id`:tä ei käytetä (`mapTransaction` ei enää lue sitä).
+2. Transaktion tila `REFUNDED` (uusi arvo dokumentaatiossa) tulkittiin `pending` → nyt `paid` (onnistunut maksu, josta on hyvitetty), jotta hyvitetty maksu ei näytä keskeneräiseltä.
+3. Parituskoodi: sallittu 6–12 merkkiä → 8–9 merkkiä (dokumentaatio: minLength 8, maxLength 9).
+4. Lukija offline: aiemmin kaikki checkoutin 404/422 → `reader_offline`. Nyt vain 422 + `errors.type = READER_OFFLINE` (myös problem+json-muoto) → `reader_offline`; 404 (lukijaa ei löydy) → `reader_not_paired`. `SumupError` kantaa nyt `errType`-kentän, ja virheviesti luetaan `errors.detail`/`detail`-kentistä.
+5. Testit: webhook-testin payloadista poistettu vanhentunut `transaction_id`; uudet testit 404-koodille, REFUNDED-mappaukselle ja parituskoodille.
+
+**Ei muutettu, mutta huomioitu:**
+- Osittainen hyvitys on dokumentaation mukaan tuettu (`amount` pääyksikössä, > 0, enintään hyvitettävä). Koodin kytkin `settings.partial_refund` (oletus false) jätettiin ennalleen; päätös Joonakselle.
+- `failure_reason` on vapaatekstiä: ei tallenneta asiakasnäkymään eikä sen arvoihin sidota (koodi ei lue sitä).
+- Cloud API -checkout vaatii Solo-firmwaren ≥ 3.3.24.3 (terminate ≥ 3.3.28.0, status ≥ 3.3.39.0).
+- Uusi mahdollisuus: `GET …/readers/{id}/status` (ONLINE/OFFLINE, IDLE/WAITING_FOR_CARD…) voisi estää checkoutin offline-lukijalle etukäteen. Ei toteutettu.
+- Ei tietokantamuutosta, joten uutta migraatiota (296) ei tarvittu; 295 koskematon.
+
+**⚠ Jäi auki (ei varmistettavissa dokumentaatiosta):**
+- Transactions-haun vastaus `client_transaction_id`:llä Solo-maksulle: ovatko checkoutin palauttama `client_transaction_id` ja transaktion `client_transaction_id` varmasti sama arvo (dokumentaatio: "use this value to match … transaction records") ja mikä on haun vastaus, kun transaktiota ei vielä ole (oletus 404; koodi hoitaa myös tyhjän). Varmistuu vasta Virtual Solo -testissä. Vaihtoehto: `foreign_transaction_id` (`saunotus-pos-<id>`) on jo lähetetty ja kelpaa hakuparametriksi.
+- Refund-virhekoodit 409/422 kirjataan toistaiseksi `provider_error`/failed ilman erittelyä.
+- Webhookin allekirjoitus: ei dokumentoitu; tarkista uudelleen ennen tuotantoa.
+- Sandbox-tilin ja Virtual Solon toimivuus (koko ketju) ajamatta.
+
 ## Toiminta (lyhyt)
 1. Ylläpitäjä kytkee tilan: `admin_set_sumup_mode('test'|'live', '<nimi>')` (vaatii `approved_by`; live vain admin). Trigger estää tilan ilman `approved_by`.
 2. Pikakassa → Maksutapa "Korttipääte (SumUp Solo)" → (admin) parituskoodi + nimi → `sumup-pos reader_pair` → `POST …/readers`; lukija tallentuu `booking.sumup_readers` (vain id, nimi, env, oletus).
 3. Maksa: kassatilaus → `start`: `sumup_pos_prepare` luo `payments`-rivin (`method=provider='sumup'`, `pending`, summa = tilauksen maksamaton osuus, 15 min) → `POST …/readers/{id}/checkout` (affiliate palvelimella) → `provider_ref = client_transaction_id`.
 4. Tila: webhook ja/tai 2,5 s kysely → `reconcilePayment` hakee `GET transactions`; vain SUCCESSFUL + täsmäävä summa → `sumup_pos_apply(..., p_confirmed_by='api')` → `payment_mark_paid('sumup', …)`. DB kieltäytyy `paid`-kirjauksesta ilman `api`-vahvistusta.
 5. UI-tilat: odotus, onnistui, hylätty (Yritä uudelleen / Peru), peruttu. Peru → `terminate` lukijalle, sitten kassatilauksen peruutus; jos asiakas ehti maksaa, tilausta ei peruta.
-6. Hyvitys: `admin_refund` luo `refunds`-rivin `provider='sumup'` → `sumup-pos refund` → `POST /v0.1/me/refund/{txn}`. Koko maksu oletuksena; osittainen estetty ellei `settings.partial_refund = true` (ks. avoimet kysymykset).
+6. Hyvitys: `admin_refund` luo `refunds`-rivin `provider='sumup'` → `sumup-pos refund` → `POST /v1.0/merchants/{code}/payments/{txn}/refunds`. Koko maksu oletuksena; osittainen estetty ellei `settings.partial_refund = true` (ks. avoimet kysymykset).
 
 ## Testitulokset
 Juuren `tests/`-testit, jotka koskevat site-texteja (4 tiedostoa): läpi.
 
 | Testi | Tulos |
 |---|---|
-| Deno `_tests/sumup_test.ts` | **20/20 läpi** (`deno test --no-check`), `deno check` handlerit + testi OK |
-| Deno `_tests/checkoutx_test.ts` (vanha) | 14/14 läpi, koskematta |
-| JS `sumup-pikakassa.test.mjs` | **13/13 läpi** |
+| Deno `_tests/sumup_test.ts` | **23/23 läpi** (`deno test --no-check`; API-tarkistuksen jälkeen +3 testiä) |
+| Deno `_tests/checkoutx_test.ts` (vanha) | 14/14 läpi, koskematta (yhteensä 37/37) |
+| JS `sumup-pikakassa.test.mjs` | **13/13 läpi** (uudelleenajo API-tarkistuksen jälkeen: sumup- + checkoutx-pikakassa yhteensä 20/20) |
 | JS `checkoutx-pikakassa.test.mjs` | 7/7 läpi. Päivitetty: UI-testit korvattu "CheckoutX ei näy" -testillä, koska maksutapa on tarkoituksella piilotettu; puhtaat apurit ja staattiset 286-tarkistukset ennallaan |
 | JS koko `booking/tests/*.test.mjs` (174 tiedostoa, ajettu yksitellen rinnakkain, aikaraja 90 s/tiedosto) | **174/174 läpi** (yksi ajo aikakatkesi ensin testin jättämän kyselyajastimen vuoksi; korjattu testissä) |
-| SQL `t295_sumup_pos.sql` | **DEV: ei mennyt alusta loppuun läpi** (ks. Bottiavustus / DEV). Testitiedostoa ei muutettu haarassa. |
+| SQL `t295_sumup_pos.sql` | DEV-ajo 1: ei mennyt läpi testin omien oletusten takia. **Korjattu (business_id, `v_order_id`, lukijataulu vain service/omistaja-osiossa); korjattua ei ole ajettu.** Bottiavustus ajaa DEVissä rollback-transaktiossa. |
 | Virtual Solo / sandbox | **EI ajettu** (sandbox-tunnuksia ei ole). Oikealla tilillä tehtiin vain lukukyselyt, ei checkout-/paritus-/hyvityskutsuja. |
 
 ## Mitä jäi ajamatta

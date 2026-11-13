@@ -4,7 +4,7 @@
 -- (p_confirmed_by='api', summa täsmää), hylätty/peruttu → uusi yritys, hyvityksen claim/complete/fail, osittainen hyvitys-kytkin.
 -- Ei CI:ssä (Pages-työnkulussa ei ole Postgresia). Ajetaan psql:llä VAIN paikallisessa/DEV-kannassa migraation 295 jälkeen:
 --   psql -v ON_ERROR_STOP=0 -f t295_sumup_pos.sql   (lopputulos: poikkeus "TESTRESULT pass=N fail=M")
--- TÄTÄ EI OLE AJETTU tässä ympäristössä (ei Postgresia, ei DEV-yhteyttä).
+-- Korjattu DEV-ajon jälkeen: business_id, muuttuja v_order_id (ei törmää pg_constraint.oid:iin), lukijataulua ei lueta authenticated-roolilla.
 set local lock_timeout = '3s';
 set local statement_timeout = '120s';
 select set_config('t295.log', '', true);
@@ -27,9 +27,10 @@ declare
   u_mgr uuid := gen_random_uuid();
   u_staff uuid := gen_random_uuid();
   p_prod bigint;
+  v_biz bigint;
   items jsonb;
   res jsonb;
-  oid bigint;
+  v_order_id bigint;
   pid bigint;
   pid2 bigint;
   rid bigint;
@@ -56,7 +57,9 @@ begin
   perform public.t295_ck((select bool_and(prosecdef and proconfig::text like '%search_path=%') from pg_proc where pronamespace = 'booking'::regnamespace and proname like '%sumup%' and proname not like '%_trg'), 'G10 definer + search_path');
   perform public.t295_ck(not has_function_privilege('anon', 'booking.sumup_pos_lookup_ref(text)', 'execute'), 'G11 anon ei lookup_ref');
 
-  insert into kb.products(name, category, price, vat_rate, active) values ('t295 Vichy', 'other', 3.50, 13.5, true) returning id into p_prod;
+  select id into v_biz from kb.businesses where id = 1;
+  perform public.t295_ck(v_biz is not null, 'B0 yritystunnus');
+  insert into kb.products(business_id, name, category, price, vat_rate, active) values (v_biz, 't295 Vichy', 'other', 3.50, 13.5, true) returning id into p_prod;
   insert into booking.product_config(product_id, sale_kind, bookable, pos_enabled, pos_sort, fridge_sale)
   values (p_prod, 'other', false, true, 10, false);
   items := jsonb_build_array(jsonb_build_object('product_id', p_prod, 'quantity', 2));
@@ -76,10 +79,10 @@ begin
   perform public.t295_ck(jsonb_array_length(res->'tenders') = n_other, 'O4 muut maksutavat ennallaan');
   perform public.t295_ck(not exists (select 1 from jsonb_array_elements(res->'tenders') x where x->>'handler' = 'checkoutx'), 'O4b checkoutx piilossa aina');
   res := booking.admin_pos_checkout(items, 'fi', null);
-  oid := (res->>'order_id')::bigint;
+  v_order_id := (res->>'order_id')::bigint;
   perform public.t295_ck(public.t295_try('select booking.admin_set_sumup_mode(''test'', ''t295'')') = 'forbidden', 'O5 staff ei saa kytkeä');
   perform public.t295_logout();
-  perform public.t295_ck(public.t295_try(format('select booking.sumup_pos_prepare(%s, ''rdr_t295'', null)', oid)) = 'sumup_off', 'O6 off: prepare kielletty');
+  perform public.t295_ck(public.t295_try(format('select booking.sumup_pos_prepare(%s, ''rdr_t295'', null)', v_order_id)) = 'sumup_off', 'O6 off: prepare kielletty');
   perform public.t295_ck(public.t295_try('select booking.sumup_reader_save(''rdr_t295'', ''Testi'', null)') = 'sumup_off', 'O7 off: reader_save kielletty');
   perform public.t295_ck((booking.sumup_refund_claim(1)->'claimed') = '[]'::jsonb, 'O8 off: refund_claim tyhjä');
 
@@ -97,7 +100,7 @@ begin
   perform public.t295_login(u_mgr);
   perform public.t295_ck(public.t295_try('select booking.admin_set_sumup_mode(''live'', ''t295'')') = 'forbidden', 'M7 live vain admin');
   perform public.t295_logout();
-  perform public.t295_ck((select count(*) from pg_constraint where conrelid = 'booking.integration_config'::regclass and conname = 'integration_config_key_check' and pg_get_constraintdef(oid) like '%''sumup''%' and pg_get_constraintdef(oid) like '%''checkoutx''%' and pg_get_constraintdef(oid) like '%''montonio''%') = 1, 'M8 key_check sisältää sumup ja säilyttää vanhat');
+  perform public.t295_ck((select count(*) from pg_constraint where conrelid = 'booking.integration_config'::regclass and conname = 'integration_config_key_check' and pg_get_constraintdef(pg_constraint.oid) like '%''sumup''%' and pg_get_constraintdef(pg_constraint.oid) like '%''checkoutx''%' and pg_get_constraintdef(pg_constraint.oid) like '%''montonio''%') = 1, 'M8 key_check sisältää sumup ja säilyttää vanhat');
 
   -- T: lukija
   perform public.t295_ck(public.t295_try('select booking.sumup_reader_save(''bad id!'', ''x'', null)') = 'invalid_param', 'T1 virheellinen tunnus');
@@ -108,8 +111,9 @@ begin
   perform public.t295_ck(not (select is_default from booking.sumup_readers where reader_id = 'rdr_t295b'), 'T2c toinen ei ole oletus');
   perform public.t295_login(u_admin);
   perform booking.admin_sumup_reader_set_default('rdr_t295b');
-  perform public.t295_ck((select count(*) from booking.sumup_readers where is_default and active and env = 'test') = 1 and (select is_default from booking.sumup_readers where reader_id = 'rdr_t295b'), 'T2d oletuksen vaihto');
   perform public.t295_logout();
+  -- lukijataulu on vain service_role: tarkistus oikeudettomassa (omistaja/service) osiossa, ei authenticated-roolilla
+  perform public.t295_ck((select count(*) from booking.sumup_readers where is_default and active and env = 'test') = 1 and (select is_default from booking.sumup_readers where reader_id = 'rdr_t295b'), 'T2d oletuksen vaihto');
   perform public.t295_login(u_staff);
   res := booking.admin_get_sumup_status();
   perform public.t295_ck(jsonb_array_length(res->'readers') = 2 and res->'readers'->0->>'reader_id' = 'rdr_t295b', 'T3 status listaa lukijat (oletus ensin)');
@@ -120,8 +124,8 @@ begin
   perform public.t295_logout();
 
   -- P: valmistelu ja maksettu
-  perform public.t295_ck(public.t295_try(format('select booking.sumup_pos_prepare(%s, ''unknown01'', null)', oid)) = 'reader_not_paired', 'P1 tuntematon lukija');
-  res := booking.sumup_pos_prepare(oid, 'rdr_t295', u_staff);
+  perform public.t295_ck(public.t295_try(format('select booking.sumup_pos_prepare(%s, ''unknown01'', null)', v_order_id)) = 'reader_not_paired', 'P1 tuntematon lukija');
+  res := booking.sumup_pos_prepare(v_order_id, 'rdr_t295', u_staff);
   pid := (res->>'payment_id')::bigint;
   perform public.t295_ck(res->>'amount' = '7.00' and res->>'currency' = 'EUR', 'P2 summa = tilauksen maksamaton osuus (2 x 3,50)');
   perform public.t295_ck((select status = 'pending' and method = 'sumup' and provider = 'sumup' and link_expires_at > now() and provider_ref is null from booking.payments where id = pid), 'P3 avoin maksurivi 15 min');
@@ -140,8 +144,8 @@ begin
   -- F: epäonnistunut → uusi yritys
   res := booking.sumup_pos_apply(pid, 'failed', null, null, null, '{"status":"FAILED"}'::jsonb);
   perform public.t295_ck(res->>'status' = 'failed' and (select status from booking.payments where id = pid) = 'failed', 'F1 epäonnistunut kirjataan');
-  perform public.t295_ck((select status from booking.orders where id = oid) = 'pending', 'F2 tilaus jää avoimeksi');
-  res := booking.sumup_pos_prepare(oid, 'rdr_t295', u_staff);
+  perform public.t295_ck((select status from booking.orders where id = v_order_id) = 'pending', 'F2 tilaus jää avoimeksi');
+  res := booking.sumup_pos_prepare(v_order_id, 'rdr_t295', u_staff);
   pid2 := (res->>'payment_id')::bigint;
   perform public.t295_ck(pid2 <> pid and res->>'amount' = '7.00', 'F3 uusi yritys samalle tilaukselle');
   perform booking.sumup_pos_started(pid2, 'ctx_t295_3');
@@ -149,12 +153,12 @@ begin
   perform public.t295_ck(res->>'ok' = 'true' and res->>'status' = 'paid', 'P8 maksettu');
   perform public.t295_ck((select status = 'paid' and provider_status = 'SUCCESSFUL' and paid_at is not null and provider_ref = 'ctx_t295_3' and raw->>'transaction_id' = 'txn_t295' and raw->>'confirmed_by' = 'api' from booking.payments where id = pid2), 'P9 maksurivi paid + provider_ref + transaktio-id');
   perform public.t295_ck(not ((select raw from booking.payments where id = pid2)::text ~* '(card|pan|name|email)'), 'P9b raw ei sisällä kortti- eikä henkilötietoja');
-  perform public.t295_ck((select payment_status from booking.orders where id = oid) = 'paid', 'P10 tilaus maksettu');
-  perform public.t295_ck(exists (select 1 from booking.receipts where order_id = oid), 'P11 kuitti syntyi');
+  perform public.t295_ck((select payment_status from booking.orders where id = v_order_id) = 'paid', 'P10 tilaus maksettu');
+  perform public.t295_ck(exists (select 1 from booking.receipts where order_id = v_order_id), 'P11 kuitti syntyi');
   res := booking.sumup_pos_apply(pid2, 'paid', 'txn_t295', 'api', 7.00, null);
   perform public.t295_ck(res->>'already' = 'true', 'P12 toisto idempotentti');
   perform public.t295_ck((booking.sumup_pos_apply(pid2, 'cancelled', null, null, null, null))->>'unchanged' = 'true', 'P13 maksettua ei peruta');
-  perform public.t295_ck(public.t295_try(format('select booking.sumup_pos_prepare(%s, ''rdr_t295'', null)', oid)) = 'order_not_payable', 'P14 maksettua tilausta ei voi maksaa uudelleen');
+  perform public.t295_ck(public.t295_try(format('select booking.sumup_pos_prepare(%s, ''rdr_t295'', null)', v_order_id)) = 'order_not_payable', 'P14 maksettua tilausta ei voi maksaa uudelleen');
   perform public.t295_ck(public.t295_try(format('select booking.sumup_pos_apply(%s, ''bogus'', null, null, null, null)', pid2)) = 'invalid_param', 'P15 tuntematon lopputulos');
 
   -- R: hyvitys (admin_refund → requested → claim → complete)
@@ -176,23 +180,23 @@ begin
   perform public.t295_login(u_staff);
   res := booking.admin_pos_checkout(items, 'fi', null);
   perform public.t295_logout();
-  oid := (res->>'order_id')::bigint;
-  pid := ((booking.sumup_pos_prepare(oid, 'rdr_t295', null))->>'payment_id')::bigint;
+  v_order_id := (res->>'order_id')::bigint;
+  pid := ((booking.sumup_pos_prepare(v_order_id, 'rdr_t295', null))->>'payment_id')::bigint;
   res := booking.sumup_pos_create_failed(pid, '{"reason":"t295"}'::jsonb);
   perform public.t295_ck(res->>'status' = 'failed' and (select provider_status from booking.payments where id = pid) = 'create_failed', 'C1 luonti epäonnistui → rivi pois');
-  pid := ((booking.sumup_pos_prepare(oid, 'rdr_t295', null))->>'payment_id')::bigint;
+  pid := ((booking.sumup_pos_prepare(v_order_id, 'rdr_t295', null))->>'payment_id')::bigint;
   perform booking.sumup_pos_started(pid, 'ctx_t295_4');
   -- uusi yritys korvaa avoimen ja palauttaa korvatun checkoutin terminate-tietoineen
-  res := booking.sumup_pos_prepare(oid, 'rdr_t295', null);
+  res := booking.sumup_pos_prepare(v_order_id, 'rdr_t295', null);
   perform public.t295_ck((select status from booking.payments where id = pid) = 'cancelled' and jsonb_array_length(res->'superseded') = 1 and res->'superseded'->0->>'client_transaction_id' = 'ctx_t295_4', 'C1b korvattu yritys palauttaa terminate-tiedot');
   pid := (res->>'payment_id')::bigint;
   perform booking.sumup_pos_started(pid, 'ctx_t295_5');
   perform booking.sumup_pos_apply(pid, 'cancelled', null, null, null, '{"by":"pos_cancel"}'::jsonb);
   perform public.t295_ck((select status from booking.payments where id = pid) = 'cancelled', 'C2 peruttu');
   perform public.t295_login(u_staff);
-  perform booking.admin_pos_void(oid);
+  perform booking.admin_pos_void(v_order_id);
   perform public.t295_logout();
-  perform public.t295_ck((select status from booking.orders where id = oid) = 'cancelled', 'C3 kassan peruutus toimii');
+  perform public.t295_ck((select status from booking.orders where id = v_order_id) = 'cancelled', 'C3 kassan peruutus toimii');
 
   -- Z: pois päältä → piiloon, muut tilat ennallaan
   perform public.t295_login(u_admin);
@@ -202,7 +206,7 @@ begin
   perform public.t295_ck(not exists (select 1 from jsonb_array_elements(res->'tenders') x where x->>'handler' = 'sumup'), 'Z1 off: piilossa taas');
   perform public.t295_ck((select mode from booking.integration_config where key = 'montonio') is not distinct from v_montonio, 'Z2 montonio-tila ennallaan');
   perform public.t295_ck((select mode from booking.integration_config where key = 'checkoutx') is not distinct from v_cx, 'Z3 checkoutx-tila ennallaan');
-  perform public.t295_ck(public.t295_try(format('select booking.sumup_pos_prepare(%s, ''rdr_t295'', null)', oid)) = 'sumup_off', 'Z4 off: prepare kielletty taas');
+  perform public.t295_ck(public.t295_try(format('select booking.sumup_pos_prepare(%s, ''rdr_t295'', null)', v_order_id)) = 'sumup_off', 'Z4 off: prepare kielletty taas');
 
   log := current_setting('t295.log', true);
   select count(*) filter (where l like 'P %'), count(*) filter (where l like 'F %') into npass, nfail from unnest(string_to_array(trim(both E'\n' from log), E'\n')) l;

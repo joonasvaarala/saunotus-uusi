@@ -194,10 +194,11 @@ export async function handle(req: Request, deps: Deps): Promise<Response> {
   }
 }
 
-/** SumUp-virhe → selaimen koodi. Lukijan offline-tila (404/422 checkoutissa) näkyy omana virheenä. */
+/** SumUp-virhe → selaimen koodi. Dokumentaatio: lukija offline = 422 + errors.type READER_OFFLINE; 404 = lukijaa ei löydy (ei paritettu / poistettu). */
 function sumupCode(e: SumupError, checkout: boolean): string {
   if (e.code === "unauthorized") return "not_configured";
-  if (checkout && (e.status === 404 || e.status === 422)) return "reader_offline";
+  if (checkout && e.status === 422 && e.errType === "READER_OFFLINE") return "reader_offline";
+  if (checkout && e.status === 404) return "reader_not_paired";
   return e.transient ? "provider_unavailable" : "provider_error";
 }
 
