@@ -7,7 +7,7 @@ Tiedot on tarkistettu 13.11.2026 aamupäivällä: `origin/main` (b0fc082), PROD-
 ## Tiivistelmä
 
 1. Uutiskirjeen tietokantaosa (booking_259 + booking_262) on ajettu DEViin ja PRODiin 6.11.2026, ja se on mainissa PR #348:n kautta. Kaikki taulut ovat PRODissa tyhjiä.
-2. Käyttöliittymää, lähettäjää (send-emails) ja peruutussivua **ei ole mainissa**. Ne ovat vain Koodari2:n paikallisessa haarassa `feat/newsletter-admin-259`, jota ei ole pushattu GitHubiin.
+2. Käyttöliittymää, lähettäjää (send-emails) ja peruutussivua **ei ole mainissa**. Ne ovat Koodari2:n haarassa, joka on GitHubissa nimellä `arkisto/newsletter-admin-259`. **Claude Code jatkaa siitä** (Joonas 13.11. klo 9.47): rebase tai merge uusimpaan mainiin ja muutokset siihen, ei mergeä mainiin.
 3. Lähetykselle **ei ole omaa kytkintä (lippua)**. PRODissa Resend on `live`, ja `admin_newsletter_dispatch` on `authenticated`-roolin ajettavissa. Ainoa este on käyttöoikeus `messages.edit` ja se, ettei käyttöliittymää ole.
 4. Peruutuksia on nyt kahdessa taulussa: `newsletter_suppressions` (259) ja `marketing_suppressions` (285). Lähetys tarkistaa vain ensimmäisen. Taulut pitää yhdistää ennen käyttöönottoa.
 5. Sivutekstit puuttuvat PRODista kokonaan, eikä haaran tuontinumero 131 ole enää vapaa.
@@ -58,9 +58,10 @@ DEVin rivimäärät ovat samat: kaikki uutiskirjetaulut ovat tyhjiä.
 
 ## 2. Keskeneräinen työ
 
-### Koodari2:n haara `feat/newsletter-admin-259` (vain boxilla, ei GitHubissa)
+### Koodari2:n haara, GitHubissa nimellä `arkisto/newsletter-admin-259`
 - Sijainti: `/workspace/koodari2-newsletter` (oma klooni). Pohjana main `68bb8f9` (6.11.). Uusin commit on `997880e` (7.11. klo 00.28): "install capture atomically in booking259 and verify in262".
-- Haaraa ei ole remotella, eikä siitä ole PR:ää. GitHub-haku `newsletter` ja `uutiskirje` löytää vain PR:t #317, #318, #348 ja #349, eikä mikään niistä ole uutiskirjeen käyttöliittymä. **Claude Code ei näe tätä haaraa, ellei Koodari pushaa sitä** (esim. nimellä `arkisto/newsletter-admin-259`). Pyydä sitä tarvittaessa Joonaksen kautta.
+- **Joonas päätti 13.11.2026 klo 9.47: Claude Code jatkaa tästä haarasta.** Koodari pushasi sen GitHubiin nimellä `arkisto/newsletter-admin-259` (commit `997880e`, alkuperäinen paikallinen nimi `feat/newsletter-admin-259`). Tee omasta haarastasi `claude/uutiskirje` haaran `arkisto/newsletter-admin-259` pohjalta. Tuo uusin main mukaan rebasella tai mergellä ja tee kaikki muutokset siihen. Arkistohaaraa ei muuteta. Älä mergeä mainiin: avaa luonnos-PR, jonka Koodari katselmoi ja mergeää.
+- Haarasta ei ole PR:ää. GitHub-haku `newsletter` ja `uutiskirje` löytää vain PR:t #317, #318, #348 ja #349, eikä mikään niistä ole uutiskirjeen käyttöliittymä.
 - Haaran tila: 108/108 JS-yksikkötestiä läpi (`/workspace/koodari2-newsletter-unit-results.txt`). SQL-testit on ajettu paikallisessa embedded-Postgresissa (`/workspace/koodari2-newsletter-pg/run.mjs`).
 - Muutokset mainin pohjaan nähden (37 tiedostoa, noin 3500 riviä):
   - Käyttöliittymä: `booking/admin/newsletters.html` (erillinen sivu `/hallinta/newsletters.html`, ei muutoksia navigaatioon tai hallinnan runkoon), `newsletter-page.js`, `views/newsletters.js`, `newsletter-logic.js`, `newsletter-texts.js` ja `newsletter.css`.
@@ -72,7 +73,7 @@ DEVin rivimäärät ovat samat: kaikki uutiskirjetaulut ovat tyhjiä.
   - JS-testit: `booking/tests/newsletters.test.mjs` ja `newsletters.browser.mjs`.
   - Tekstit: `content/site-texts.pending-import-131.json` (avaimet `admin.newsletter.*`, 54 avainta FI+EN). **Numero 131 on jo mainissa käytössä muuhun** (booking_277-tekstit), joten tuonti pitää numeroida uudelleen.
   - Dokumentit: `booking/docs/newsletters-259.md` (laaja suunnitelma ja testijärjestys), `newsletter-resubscribe-proposal.md` (uudelleentilaus, EI toteutettu), `newsletter-reenable-proposal.sql` (numeroimaton ehdotus feature-rollbackin jälkeiseen uudelleenkäyttöönottoon) ja `newsletter-review-sha256.txt`.
-- Haara on mainista jäljessä noin 7 päivää ja yli 30 PR:ää. Erityisesti `send-emails/index.ts`, `scripts/build-pages.mjs` ja hallinnan tiedostot ovat muuttuneet (mm. #318 UX, #338 send-emails, #350 build-listat). Tee rebase tai siirrä muutokset käsin uuteen haaraan `claude/uutiskirje` uusimman mainin päälle.
+- Haara on mainista jäljessä noin 7 päivää ja yli 30 PR:ää. Erityisesti `send-emails/index.ts`, `scripts/build-pages.mjs` ja hallinnan tiedostot ovat muuttuneet (mm. #318 UX, #338 send-emails, #350 build-listat). Aloita haarasta `arkisto/newsletter-admin-259` ja tuo siihen uusin main rebasella tai mergellä (haara `claude/uutiskirje`).
 
 ### SQL259-paketin "HOLD" ja katselmointihuomiot
 - Paketti oli HOLD-tilassa korjattua versiota odottamassa. Uusin versio on haaran commit `997880e` (atominen 259 + tarkistava 262). Juuri tämä versio on ajettu DEViin ja PRODiin, ja se on nyt mainissa. Sen jälkeen uutta pakettia ei ole tehty. Kopiot: `/workspace/yoajo-migr/missing/` ja `/workspace/pr4-asiakas-merge/src/`.
