@@ -12,7 +12,7 @@ const root=resolve('dist'), server=createServer((req,res)=>{
 await new Promise(r=>server.listen(0,'127.0.0.1',r));
 const base=`http://127.0.0.1:${server.address().port}`;
 const browser=await chromium.launch({executablePath:process.env.CHROME||'/opt/google/chrome/chrome',args:['--no-sandbox']});
-let sends=0,saves=0,previews=0;
+let sends=0,saves=0,previews=0,enabled=true;
 try{
  for(const viewport of [{width:1280,height:900},{width:390,height:844}]){
   let draft={id:1,version:1,state:'draft',subject_fi:'Testiluonnos',subject_en:'Test draft',body_fi:'Tämä on testiluonnos.',body_en:'This is a test draft.',segment:'all',language:'all',style:{layout:'letter',accent:'#445566'}};
@@ -25,17 +25,19 @@ try{
    if(url.origin===base)return route.continue();
    const name=url.pathname.split('/').at(-1), p=route.request().postDataJSON();
    let out;
-   if(name==='public_get_site_texts')out={texts:[]};
+   if(name==='public_get_site_texts'||name==='admin_ui_texts')out={ok:true,texts:[]};
+   else if(name==='admin_newsletter_enabled')out=enabled;
+   else if(name==='current_staff_role')out='manager';
    else if(name==='admin_my_permissions')out={permissions:['messages.edit']};
    else if(name==='admin_newsletters_list')out=[draft];
    else if(name==='admin_newsletter_save'){saves++;draft={...draft,...p.p_data,version:draft.version+1,state:'draft'};out=draft;}
    else if(name==='admin_newsletter_dispatch'){
     if(p.p_confirm){assert.equal(p.p_preview_token,'synthetic-preview-token');sends++;draft.state='sent';out={sent:true,recipient_count:2,queued_count:2};}
     else{previews++;out={sent:false,version:draft.version,recipient_count:2,fi_count:1,en_count:1,preview_token:'synthetic-preview-token'};}
-   }else throw new Error('Unexpected external request '+name);
+   }else out=(route.request().method()==='GET'||name==='admin_list_products')?[]:{};   // hallinnan runko hakee muita tietoja; ne eivät kuulu tähän testiin
    await route.fulfill({contentType:'application/json',body:JSON.stringify(out),headers:{'access-control-allow-origin':'*'}});
   });
-  await page.goto(base+'/hallinta/newsletters.html');
+  await page.goto(base+'/hallinta/index.html#/viestit?valilehti=uutiskirje');
   await page.getByRole('heading',{name:'Uutiskirjeet',exact:true}).waitFor();
   const send=page.getByRole('button',{name:'Lähetä uutiskirje',exact:true});
   assert.equal(await send.isDisabled(),true);
@@ -62,13 +64,33 @@ try{
   await ctx.close();
  }
  assert.equal(sends,2);assert.equal(previews,4);assert.equal(saves,4);
- // Anonymous page must offer existing admin sign-in, never display author/send controls.
+ // Kytkin false: välilehti näyttää ilmoituksen, esikatselu toimii mutta lähetysnappi pysyy pois päältä.
+ {
+  enabled=false;
+  const ctx=await browser.newContext({viewport:{width:1280,height:900}});
+  await ctx.addInitScript(()=>localStorage.setItem('booking.session',JSON.stringify({access_token:'synthetic-test-session',expires_at:Math.floor(Date.now()/1000)+3600,user:{id:'synthetic-staff'}})));
+  const page=await ctx.newPage();
+  await page.route('**/*',async route=>{
+   const url=new URL(route.request().url());if(url.origin===base)return route.continue();
+   const name=url.pathname.split('/').at(-1);let out=(route.request().method()==='GET'||name==='admin_list_products')?[]:{};
+   if(name==='public_get_site_texts'||name==='admin_ui_texts')out={ok:true,texts:[]};
+   else if(name==='current_staff_role')out='manager';
+   else if(name==='admin_my_permissions')out={permissions:['messages.edit']};
+   else if(name==='admin_newsletter_enabled')out=false;
+   else if(name==='admin_newsletters_list')out=[{id:1,version:1,state:'draft',subject_fi:'Testiluonnos',subject_en:'Test draft',body_fi:'Teksti.',body_en:'Text.',segment:'all',language:'all',style:{layout:'letter'}}];
+   else if(name==='admin_newsletter_dispatch'){out={sent:false,version:1,recipient_count:2,fi_count:1,en_count:1,preview_token:'synthetic-preview-token'};if(route.request().postDataJSON().p_confirm)throw new Error('send attempted while disabled');}
+   await route.fulfill({contentType:'application/json',body:JSON.stringify(out),headers:{'access-control-allow-origin':'*'}});
+  });
+  await page.goto(base+'/hallinta/index.html#/viestit?valilehti=uutiskirje');
+  await page.locator('[data-testid="newsletter-disabled"]').waitFor();
+  await page.getByRole('button',{name:'Tallenna ja esikatsele',exact:true}).click();
+  await page.getByText('Vastaanottajia: 2 (FI 1, EN 1).',{exact:true}).waitFor();
+  assert.equal(await page.getByRole('button',{name:'Lähetä uutiskirje',exact:true}).isDisabled(),true,'send stays disabled while newsletter_enabled is false');
+  console.log('PASS newsletter browser: disabled switch keeps send off');
+  await ctx.close();
+ }
  const ctx=await browser.newContext();const page=await ctx.newPage();
  await page.route('**/rest/v1/rpc/**',r=>r.fulfill({contentType:'application/json',body:'{"texts":[]}'}));
- await page.goto(base+'/hallinta/newsletters.html');
- await page.getByText('Kirjaudu ensin hallintaan ja palaa sitten tälle sivulle.',{exact:true}).waitFor();
- assert.equal(await page.getByRole('button',{name:'Lähetä uutiskirje',exact:true}).count(),0);
- console.log('PASS newsletter browser anonymous session gate');
  const publicErrors=[];page.on('pageerror',e=>publicErrors.push(e.message));
  let optoutCalls=0;
  await page.route('**/rest/v1/rpc/public_newsletter_unsubscribe',async route=>{

@@ -49,12 +49,36 @@ test('sender resolves fresh consent payload before allowlist/render and retains 
  assert.match(code,/r.kind === "newsletter" \? "newsletter_delivery_failed"/);
  assert.match(code,/r.kind === "newsletter" \? "newsletter_dry_run"/);
 });
-test('isolated entry and route integration hook do not require shell/nav edits',()=>{
- const code=read('booking/admin/newsletters.html');
- assert.match(code,/noindex,nofollow/);assert.match(code,/newsletter-page.js/);
+test('newsletter is a tab on the Viestit page (no separate entry), sandboxed preview and two-step send',()=>{
+ assert.equal(existsSync(new URL('../admin/newsletters.html',import.meta.url)),false);
  const view=read('booking/admin/views/newsletters.js');
  assert.match(view,/sandbox:''/);assert.match(view,/default-src/);assert.match(view,/p_confirm:false/);assert.match(view,/p_confirm:true/);
  assert.doesNotMatch(view,/console\.log|innerHTML/);
+ assert.match(view,/admin_newsletter_enabled/);assert.match(view,/enabled&&newsletterCanSend/);
+ const msgs=read('booking/admin/views/messages.js');
+ assert.match(msgs,/currentMessagesTab\(\) === 'uutiskirje'/);assert.match(msgs,/import\('\.\/newsletters\.js'\)/);
+ assert.match(read('booking/admin/views/customer-message-panel.js'),/messages-tab-uutiskirje/);
+ assert.match(read('scripts/build-pages.mjs'),/'views\/newsletters\.js'/);
+});
+test('booking_290: newsletter_enabled defaults to false, migration never sets true, both functions check it',()=>{
+ const m=read('booking/supabase/migrations/20261113120000_booking_290_newsletter_enabled_flag.sql');
+ assert.match(m,/\('newsletter_enabled', 'false'::jsonb/);assert.match(m,/on conflict \(key\) do nothing/);
+ assert.doesNotMatch(m,/newsletter_enabled'[^\n]*'true'|update booking\.settings|set value/i);
+ assert.match(m,/coalesce\(p_confirm,false\) and not booking\._newsletter_flag\('newsletter_enabled'\)/);
+ assert.match(m,/not booking\._newsletter_flag\('newsletter_enabled'\) then return jsonb_build_object\('allowed',false\)/);
+ assert.doesNotMatch(m,/public\./);
+ assert.ok(existsSync(new URL('../supabase/rollbacks/20261113120000_booking_290_ROLLBACK.sql',import.meta.url)));
+ const sql=read('booking/supabase/tests/t290_newsletter_enabled.sql');
+ assert.match(sql,/dispatch\(confirm=true\) antaa virheen kun kytkin on false/);assert.match(sql,/payload allowed:false/);
+});
+test('booking_291: _newsletter_address_blocked checks both suppression tables; rollbacks keep suppression data',()=>{
+ const m=read('booking/supabase/migrations/20261113120100_booking_291_newsletter_suppression_union.sql');
+ assert.match(m,/from booking\.newsletter_suppressions/);assert.match(m,/from booking\.marketing_suppressions/);
+ for(const f of ['20261106223314_booking_259','20261106223319_booking_262','20261113120000_booking_290','20261113120100_booking_291']){
+  const r=read('booking/supabase/rollbacks/'+f+'_ROLLBACK.sql');
+  assert.doesNotMatch(r.replace(/--[^\n]*/g,''),/(drop|delete|truncate)[^;]*(newsletter_suppressions|marketing_suppressions|newsletter_optout_tokens)/i,f);
+ }
+ assert.match(read('booking/supabase/tests/t290_newsletter_enabled.sql'),/osoite vain marketing_suppressions-taulussa: ei vastaanottaja/);
 });
 
 

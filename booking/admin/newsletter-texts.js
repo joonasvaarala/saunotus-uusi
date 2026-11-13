@@ -3,11 +3,11 @@ import { getLang } from './talous-i18n.js';
 import { getSiteTexts } from './site-texts-cache.js';
 export const NEWSLETTER_TEXTS = {
   "fi": {
+    "tab": "Uutiskirje",
+    "disabled": "Uutiskirjeiden lähetys ei ole käytössä. Voit muokata luonnoksia ja esikatsella, mutta lähetys avataan vasta erillisellä luvalla.",
+    "newsletter_disabled": "Uutiskirjeiden lähetys ei ole käytössä.",
     "title": "Uutiskirjeet",
     "lead": "Botin tekemä luonnos. Muokkaa tekstit, valitse kohderyhmä ja esikatsele ennen lähettämistä. Tyyli tulee botilta.",
-    "back": "Takaisin hallintaan",
-    "login": "Kirjaudu ensin hallintaan ja palaa sitten tälle sivulle.",
-    "reload": "Lataa uudelleen",
     "forbidden": "Tarvitset viestien muokkausoikeuden.",
     "empty": "Ei uutiskirjeluonnoksia. Botti luo ne luonnos-RPC:llä.",
     "choose": "Valitse uutiskirje",
@@ -59,11 +59,11 @@ export const NEWSLETTER_TEXTS = {
     "unsubscribe_error": "Peruutusta ei voitu vahvistaa. Yritä uudelleen."
   },
   "en": {
+    "tab": "Newsletter",
+    "disabled": "Sending newsletters is not enabled. You can edit drafts and preview them, but sending is only opened with separate permission.",
+    "newsletter_disabled": "Sending newsletters is not enabled.",
     "title": "Newsletters",
     "lead": "A bot-authored draft. Edit the text, choose an audience and preview before sending. The bot supplies the visual style.",
-    "back": "Back to admin",
-    "login": "Sign in to admin first, then return to this page.",
-    "reload": "Reload",
     "forbidden": "You need permission to edit messages.",
     "empty": "No newsletter drafts. A bot creates them using the draft RPC.",
     "choose": "Choose newsletter",

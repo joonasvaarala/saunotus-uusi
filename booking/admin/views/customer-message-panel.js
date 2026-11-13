@@ -3,6 +3,7 @@
 import { rpc } from '../sb.js';
 import { h, field, toast, run } from '../ui.js';
 import { customerMessageText as T } from '../customer-message-texts.js';
+import { newsletterText } from '../newsletter-texts.js';
 import {
   CUSTOMER_MESSAGE_PLACEHOLDERS,
   fillCustomerMessage,
@@ -28,20 +29,22 @@ function fmtWhen(iso) {
 }
 
 function tabHref(id) {
-  return id === 'asiakkaalle' ? '#/viestit?valilehti=asiakkaalle' : '#/viestit';
+  return id === 'pohjat' ? '#/viestit' : `#/viestit?valilehti=${id}`;
 }
 
 export function messagesTabBar(active) {
   return h('nav', { class: 'tl-tabs', 'aria-label': 'Viestit' },
     h('a', { href: tabHref('pohjat'), class: `tl-tabbtn${active === 'pohjat' ? ' active' : ''}`, 'data-testid': 'messages-tab-pohjat', text: T('ui.admin.customer_message.tab_templates') }),
     h('a', { href: tabHref('asiakkaalle'), class: `tl-tabbtn${active === 'asiakkaalle' ? ' active' : ''}`, 'data-testid': 'messages-tab-asiakkaalle', text: T('ui.admin.customer_message.tab') }),
+    h('a', { href: tabHref('uutiskirje'), class: `tl-tabbtn${active === 'uutiskirje' ? ' active' : ''}`, 'data-testid': 'messages-tab-uutiskirje', text: newsletterText('tab') }),
   );
 }
 
 export function currentMessagesTab() {
   try {
     const q = new URLSearchParams((location.hash.split('?')[1] || '').replace(/#.*$/, ''));
-    return q.get('valilehti') === 'asiakkaalle' ? 'asiakkaalle' : 'pohjat';
+    const t = q.get('valilehti');
+    return t === 'asiakkaalle' || t === 'uutiskirje' ? t : 'pohjat';
   } catch {
     return 'pohjat';
   }

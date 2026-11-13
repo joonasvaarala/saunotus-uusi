@@ -1,4 +1,4 @@
-// booking_259: standalone, reusable view. No nav/shell/Message-page edits.
+// booking_259/290: Viestit-sivun Uutiskirje-välilehti (views/messages.js). Lähetys vaatii kytkimen newsletter_enabled (admin_newsletter_enabled).
 import { rpc } from '../sb.js';
 import { h, field, run, fmtDT } from '../ui.js';
 import { confirmDialog } from '../confirm.js';
@@ -16,8 +16,10 @@ export async function render({ctx}) {
   const root=h('section',{class:'newsletter-work'});
   const title=h('h1',{text:T('title')});
   const status=h('p',{role:'status','aria-live':'polite'});
+  // Virhe tai puuttuva funktio tulkitaan kytkimeksi false: lähetys pysyy pois, esikatselu ja muokkaus toimivat.
+  const enabled=await rpc('admin_newsletter_enabled').then(v=>v===true,()=>false);
   const editor=h('div');
-  root.append(title,h('p',{text:T('lead')}),h('p',{class:'muted',text:T('privacy')}),status,editor);
+  root.append(title,h('p',{text:T('lead')}),h('p',{class:'muted',text:T('privacy')}),...(enabled?[]:[h('p',{class:'err',role:'note','data-testid':'newsletter-disabled',text:T('disabled')})]),status,editor);
   let rows=await rpc('admin_newsletters_list');
   rows=Array.isArray(rows)?rows:[];
   if (!rows.length) { editor.append(h('p',{class:'empty',text:T('empty')})); return [root]; }
@@ -44,7 +46,7 @@ export async function render({ctx}) {
       draft.state='previewed';
       frames.replaceChildren(...['fi','en'].map(lang=>previewFrame(draft,lang)));
       status.textContent=T('count',{count:preview.recipient_count,fi:preview.fi_count,en:preview.en_count});
-      send.disabled=!newsletterCanSend(preview,draft,dirty);
+      send.disabled=!canSend();
     })});
     const send=h('button',{type:'button',class:'btn primary',disabled:true,text:T('send'),onclick:e=>action(e.currentTarget,async()=>{
       if(!newsletterCanSend(preview,draft,dirty)) { invalidate();error.textContent=T('preview_required');return; }
@@ -65,6 +67,7 @@ export async function render({ctx}) {
     if(draft.suggested_send_at) editor.prepend(h('p',{text:T('suggestion',{date:fmtDT(draft.suggested_send_at)})}));
     if(draft.delivery) editor.prepend(h('p',{text:T('history',{count:draft.delivery.recipient_count,...draft.delivery,queued:draft.delivery.queued_count})}));
     if(draft.state==='sent') {group.disabled=true;save.disabled=true;check.disabled=true;frames.append(...['fi','en'].map(lang=>previewFrame(draft,lang)));}
+    function canSend(){return enabled&&newsletterCanSend(preview,draft,dirty);}
     function invalidate(){preview=null;send.disabled=true;frames.replaceChildren();}
     async function persist(){
       if(!form.reportValidity())throw new Error('invalid_form');
@@ -73,8 +76,8 @@ export async function render({ctx}) {
     }
     async function action(button,job){
       if(busy)return;busy=true;select.disabled=true;group.disabled=true;save.disabled=true;check.disabled=true;send.disabled=true;error.textContent='';
-      await run(button,async()=>{try {await job();}catch(e) {invalidate();error.textContent=T(['too_many','email_disabled','no_recipients','newsletter_conflict','newsletter_preview_required'].includes(e?.code)?e.code:'error');}});
-      busy=false;select.disabled=false;group.disabled=draft.state==='sent';save.disabled=draft.state==='sent';check.disabled=draft.state==='sent';send.disabled=!newsletterCanSend(preview,draft,dirty);
+      await run(button,async()=>{try {await job();}catch(e) {invalidate();error.textContent=T(['too_many','email_disabled','no_recipients','newsletter_conflict','newsletter_preview_required','newsletter_disabled'].includes(e?.code)?e.code:'error');}});
+      busy=false;select.disabled=false;group.disabled=draft.state==='sent';save.disabled=draft.state==='sent';check.disabled=draft.state==='sent';send.disabled=!canSend();
     }
   }
 }

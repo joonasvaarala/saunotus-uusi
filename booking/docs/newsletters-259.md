@@ -1,5 +1,11 @@
 # Uutiskirjeet — booking_259
 
+> **Päivitys 13.11.2026 (haara claude/uutiskirje):** Tämä dokumentti on Koodari2:n alkuperäinen suunnitelma. Seuraavat kohdat ovat vanhentuneet:
+> - Erillistä sivua `/hallinta/newsletters.html` ei enää ole. Uutiskirje on **Viestit-sivun välilehti** (`#/viestit?valilehti=uutiskirje`, `views/newsletters.js`), ja nav-kohtaa ei tarvita.
+> - Tuontitiedosto on `content/site-texts.pending-import-146.json` (131 oli varattu). Migraatiot ovat PROD-nimillä `20261106223314_booking_259_…` ja `20261106223319_booking_262_…`, ja rollbackit samoilla aikaleimoilla.
+> - Lähetyksellä on oma kytkin `newsletter_enabled` (booking_290, oletus false) ja peruutuslistat on yhdistetty tarkistuksessa (booking_291). Ks. `YHTEENVETO.md` ja `docs/claude/uutiskirje-tila.md`.
+> - `newsletter-review-sha256.txt` on vanhentunut (tiedostot ovat muuttuneet); älä käytä sitä tarkistuksena.
+
 ## HOLD after real-schema review
 
 The corrected implementation is local only. Do not push, open a PR, merge, deploy,

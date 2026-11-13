@@ -84,7 +84,7 @@ test('lähde: yksikään hallinnan moduuli ei kutsu public_get_site_texts-funkti
 test('lähde: Talous, Tuotteet ja Viestit lataavat tekstit rinnakkain', () => {
   assert.match(src('admin/views/talous.js'), /await Promise\.all\(\[loadOrderTexts\(rpc\), loadReportTexts\(rpc\), loadRcTexts\(rpc\), loadAcTexts\(rpc\)\]\)/);
   assert.match(src('admin/views/products.js'), /await Promise\.all\(\[loadPosTexts\(rpc\), loadProductTexts\(rpc\), loadRichTexts\(rpc\), loadEventsTexts\(rpc\)\]\)/);
-  assert.match(src('admin/views/messages.js'), /await Promise\.all\(\[loadRichTexts\(rpc\), loadCustomerMessageTexts\(rpc\)\]\)/);
+  assert.match(src('admin/views/messages.js'), /await Promise\.all\(\[loadRichTexts\(rpc\), loadCustomerMessageTexts\(rpc\), loadNewsletterTexts\(rpc\)\]\)/);
 });
 
 test('lähde: avaus ei esihae viereisiä päiviä; esihaku vain ‹/›-aikeesta', () => {

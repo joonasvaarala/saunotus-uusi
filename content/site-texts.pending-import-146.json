@@ -1,5 +1,35 @@
 [
   {
+    "key": "admin.newsletter.tab",
+    "lang": "fi",
+    "text": "Uutiskirje",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_290: uutiskirjeen lähetyskytkin ja välilehti Viestit-sivulla"
+  },
+  {
+    "key": "admin.newsletter.disabled",
+    "lang": "fi",
+    "text": "Uutiskirjeiden lähetys ei ole käytössä. Voit muokata luonnoksia ja esikatsella, mutta lähetys avataan vasta erillisellä luvalla.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_290: uutiskirjeen lähetyskytkin ja välilehti Viestit-sivulla"
+  },
+  {
+    "key": "admin.newsletter.newsletter_disabled",
+    "lang": "fi",
+    "text": "Uutiskirjeiden lähetys ei ole käytössä.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_290: uutiskirjeen lähetyskytkin ja välilehti Viestit-sivulla"
+  },
+  {
     "key": "admin.newsletter.title",
     "lang": "fi",
     "text": "Uutiskirjeet",
@@ -13,36 +43,6 @@
     "key": "admin.newsletter.lead",
     "lang": "fi",
     "text": "Botin tekemä luonnos. Muokkaa tekstit, valitse kohderyhmä ja esikatsele ennen lähettämistä. Tyyli tulee botilta.",
-    "class": "normal",
-    "kind": "plain",
-    "max_len": 400,
-    "placeholders": [],
-    "reason": "booking_259: erillinen uutiskirjenäkymä"
-  },
-  {
-    "key": "admin.newsletter.back",
-    "lang": "fi",
-    "text": "Takaisin hallintaan",
-    "class": "normal",
-    "kind": "plain",
-    "max_len": 400,
-    "placeholders": [],
-    "reason": "booking_259: erillinen uutiskirjenäkymä"
-  },
-  {
-    "key": "admin.newsletter.login",
-    "lang": "fi",
-    "text": "Kirjaudu ensin hallintaan ja palaa sitten tälle sivulle.",
-    "class": "normal",
-    "kind": "plain",
-    "max_len": 400,
-    "placeholders": [],
-    "reason": "booking_259: erillinen uutiskirjenäkymä"
-  },
-  {
-    "key": "admin.newsletter.reload",
-    "lang": "fi",
-    "text": "Lataa uudelleen",
     "class": "normal",
     "kind": "plain",
     "max_len": 400,
@@ -444,6 +444,146 @@
     "reason": "booking_259: erillinen uutiskirjenäkymä"
   },
   {
+    "key": "admin.newsletter.too_many",
+    "lang": "fi",
+    "text": "Kohderyhmässä on yli 5000 vastaanottajaa. Rajaa kohderyhmää tai kieltä.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_259: uutiskirjeen turvalliset virhetekstit"
+  },
+  {
+    "key": "admin.newsletter.email_disabled",
+    "lang": "fi",
+    "text": "Sähköpostilähetys on pois käytöstä. Pyydä ylläpitäjää tarkistamaan lähetysasetukset.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_259: uutiskirjeen turvalliset virhetekstit"
+  },
+  {
+    "key": "admin.newsletter.no_recipients",
+    "lang": "fi",
+    "text": "Valitussa kohderyhmässä ei ole vastaanottajia.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_259: uutiskirjeen turvalliset virhetekstit"
+  },
+  {
+    "key": "admin.newsletter.newsletter_conflict",
+    "lang": "fi",
+    "text": "Luonnos muuttui tai on jo lähetetty. Lataa uudelleen.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_259: uutiskirjeen turvalliset virhetekstit"
+  },
+  {
+    "key": "admin.newsletter.newsletter_preview_required",
+    "lang": "fi",
+    "text": "Vastaanottajat tai luonnos muuttuivat. Esikatsele uudelleen.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_259: uutiskirjeen turvalliset virhetekstit"
+  },
+  {
+    "key": "admin.newsletter.unsubscribe_title",
+    "lang": "fi",
+    "text": "Peruuta uutiskirjeet",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 600,
+    "placeholders": [],
+    "reason": "booking_259: uutiskirjeeseen rajattu osoitekohtainen peruutus"
+  },
+  {
+    "key": "admin.newsletter.unsubscribe_lead",
+    "lang": "fi",
+    "text": "Vahvistamalla estät uutiskirjeet tähän sähköpostiosoitteeseen, myös jos osoite on usealla asiakasprofiililla. Tämä ei muuta palveluviestejä tai muita markkinointilupia.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 600,
+    "placeholders": [],
+    "reason": "booking_259: uutiskirjeeseen rajattu osoitekohtainen peruutus"
+  },
+  {
+    "key": "admin.newsletter.unsubscribe_confirm",
+    "lang": "fi",
+    "text": "Vahvista uutiskirjeiden peruutus",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 600,
+    "placeholders": [],
+    "reason": "booking_259: uutiskirjeeseen rajattu osoitekohtainen peruutus"
+  },
+  {
+    "key": "admin.newsletter.unsubscribe_done",
+    "lang": "fi",
+    "text": "Peruutus on käsitelty. Uutiskirjeitä ei enää toimiteta tämän linkin osoitteeseen.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 600,
+    "placeholders": [],
+    "reason": "booking_259: uutiskirjeeseen rajattu osoitekohtainen peruutus"
+  },
+  {
+    "key": "admin.newsletter.unsubscribe_invalid",
+    "lang": "fi",
+    "text": "Peruutuslinkki puuttuu tai on virheellinen. Avaa linkki saamastasi uutiskirjeestä.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 600,
+    "placeholders": [],
+    "reason": "booking_259: uutiskirjeeseen rajattu osoitekohtainen peruutus"
+  },
+  {
+    "key": "admin.newsletter.unsubscribe_error",
+    "lang": "fi",
+    "text": "Peruutusta ei voitu vahvistaa. Yritä uudelleen.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 600,
+    "placeholders": [],
+    "reason": "booking_259: uutiskirjeeseen rajattu osoitekohtainen peruutus"
+  },
+  {
+    "key": "admin.newsletter.tab",
+    "lang": "en",
+    "text": "Newsletter",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_290: uutiskirjeen lähetyskytkin ja välilehti Viestit-sivulla"
+  },
+  {
+    "key": "admin.newsletter.disabled",
+    "lang": "en",
+    "text": "Sending newsletters is not enabled. You can edit drafts and preview them, but sending is only opened with separate permission.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_290: uutiskirjeen lähetyskytkin ja välilehti Viestit-sivulla"
+  },
+  {
+    "key": "admin.newsletter.newsletter_disabled",
+    "lang": "en",
+    "text": "Sending newsletters is not enabled.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_290: uutiskirjeen lähetyskytkin ja välilehti Viestit-sivulla"
+  },
+  {
     "key": "admin.newsletter.title",
     "lang": "en",
     "text": "Newsletters",
@@ -457,36 +597,6 @@
     "key": "admin.newsletter.lead",
     "lang": "en",
     "text": "A bot-authored draft. Edit the text, choose an audience and preview before sending. The bot supplies the visual style.",
-    "class": "normal",
-    "kind": "plain",
-    "max_len": 400,
-    "placeholders": [],
-    "reason": "booking_259: erillinen uutiskirjenäkymä"
-  },
-  {
-    "key": "admin.newsletter.back",
-    "lang": "en",
-    "text": "Back to admin",
-    "class": "normal",
-    "kind": "plain",
-    "max_len": 400,
-    "placeholders": [],
-    "reason": "booking_259: erillinen uutiskirjenäkymä"
-  },
-  {
-    "key": "admin.newsletter.login",
-    "lang": "en",
-    "text": "Sign in to admin first, then return to this page.",
-    "class": "normal",
-    "kind": "plain",
-    "max_len": 400,
-    "placeholders": [],
-    "reason": "booking_259: erillinen uutiskirjenäkymä"
-  },
-  {
-    "key": "admin.newsletter.reload",
-    "lang": "en",
-    "text": "Reload",
     "class": "normal",
     "kind": "plain",
     "max_len": 400,
@@ -889,28 +999,8 @@
   },
   {
     "key": "admin.newsletter.too_many",
-    "lang": "fi",
-    "text": "Kohderyhmässä on yli 5000 vastaanottajaa. Rajaa kohderyhmää tai kieltä.",
-    "class": "normal",
-    "kind": "plain",
-    "max_len": 400,
-    "placeholders": [],
-    "reason": "booking_259: uutiskirjeen turvalliset virhetekstit"
-  },
-  {
-    "key": "admin.newsletter.too_many",
     "lang": "en",
     "text": "More than 5000 recipients. Narrow the audience or language.",
-    "class": "normal",
-    "kind": "plain",
-    "max_len": 400,
-    "placeholders": [],
-    "reason": "booking_259: uutiskirjeen turvalliset virhetekstit"
-  },
-  {
-    "key": "admin.newsletter.email_disabled",
-    "lang": "fi",
-    "text": "Sähköpostilähetys on pois käytöstä. Pyydä ylläpitäjää tarkistamaan lähetysasetukset.",
     "class": "normal",
     "kind": "plain",
     "max_len": 400,
@@ -929,28 +1019,8 @@
   },
   {
     "key": "admin.newsletter.no_recipients",
-    "lang": "fi",
-    "text": "Valitussa kohderyhmässä ei ole vastaanottajia.",
-    "class": "normal",
-    "kind": "plain",
-    "max_len": 400,
-    "placeholders": [],
-    "reason": "booking_259: uutiskirjeen turvalliset virhetekstit"
-  },
-  {
-    "key": "admin.newsletter.no_recipients",
     "lang": "en",
     "text": "No recipients in the selected audience.",
-    "class": "normal",
-    "kind": "plain",
-    "max_len": 400,
-    "placeholders": [],
-    "reason": "booking_259: uutiskirjeen turvalliset virhetekstit"
-  },
-  {
-    "key": "admin.newsletter.newsletter_conflict",
-    "lang": "fi",
-    "text": "Luonnos muuttui tai on jo lähetetty. Lataa uudelleen.",
     "class": "normal",
     "kind": "plain",
     "max_len": 400,
@@ -969,16 +1039,6 @@
   },
   {
     "key": "admin.newsletter.newsletter_preview_required",
-    "lang": "fi",
-    "text": "Vastaanottajat tai luonnos muuttuivat. Esikatsele uudelleen.",
-    "class": "normal",
-    "kind": "plain",
-    "max_len": 400,
-    "placeholders": [],
-    "reason": "booking_259: uutiskirjeen turvalliset virhetekstit"
-  },
-  {
-    "key": "admin.newsletter.newsletter_preview_required",
     "lang": "en",
     "text": "The audience or draft changed. Preview again.",
     "class": "normal",
@@ -989,28 +1049,8 @@
   },
   {
     "key": "admin.newsletter.unsubscribe_title",
-    "lang": "fi",
-    "text": "Peruuta uutiskirjeet",
-    "class": "normal",
-    "kind": "plain",
-    "max_len": 600,
-    "placeholders": [],
-    "reason": "booking_259: uutiskirjeeseen rajattu osoitekohtainen peruutus"
-  },
-  {
-    "key": "admin.newsletter.unsubscribe_title",
     "lang": "en",
     "text": "Unsubscribe from newsletters",
-    "class": "normal",
-    "kind": "plain",
-    "max_len": 600,
-    "placeholders": [],
-    "reason": "booking_259: uutiskirjeeseen rajattu osoitekohtainen peruutus"
-  },
-  {
-    "key": "admin.newsletter.unsubscribe_lead",
-    "lang": "fi",
-    "text": "Vahvistamalla estät uutiskirjeet tähän sähköpostiosoitteeseen, myös jos osoite on usealla asiakasprofiililla. Tämä ei muuta palveluviestejä tai muita markkinointilupia.",
     "class": "normal",
     "kind": "plain",
     "max_len": 600,
@@ -1029,28 +1069,8 @@
   },
   {
     "key": "admin.newsletter.unsubscribe_confirm",
-    "lang": "fi",
-    "text": "Vahvista uutiskirjeiden peruutus",
-    "class": "normal",
-    "kind": "plain",
-    "max_len": 600,
-    "placeholders": [],
-    "reason": "booking_259: uutiskirjeeseen rajattu osoitekohtainen peruutus"
-  },
-  {
-    "key": "admin.newsletter.unsubscribe_confirm",
     "lang": "en",
     "text": "Confirm newsletter unsubscribe",
-    "class": "normal",
-    "kind": "plain",
-    "max_len": 600,
-    "placeholders": [],
-    "reason": "booking_259: uutiskirjeeseen rajattu osoitekohtainen peruutus"
-  },
-  {
-    "key": "admin.newsletter.unsubscribe_done",
-    "lang": "fi",
-    "text": "Peruutus on käsitelty. Uutiskirjeitä ei enää toimiteta tämän linkin osoitteeseen.",
     "class": "normal",
     "kind": "plain",
     "max_len": 600,
@@ -1069,28 +1089,8 @@
   },
   {
     "key": "admin.newsletter.unsubscribe_invalid",
-    "lang": "fi",
-    "text": "Peruutuslinkki puuttuu tai on virheellinen. Avaa linkki saamastasi uutiskirjeestä.",
-    "class": "normal",
-    "kind": "plain",
-    "max_len": 600,
-    "placeholders": [],
-    "reason": "booking_259: uutiskirjeeseen rajattu osoitekohtainen peruutus"
-  },
-  {
-    "key": "admin.newsletter.unsubscribe_invalid",
     "lang": "en",
     "text": "This unsubscribe link is missing or invalid. Open the link from your newsletter.",
-    "class": "normal",
-    "kind": "plain",
-    "max_len": 600,
-    "placeholders": [],
-    "reason": "booking_259: uutiskirjeeseen rajattu osoitekohtainen peruutus"
-  },
-  {
-    "key": "admin.newsletter.unsubscribe_error",
-    "lang": "fi",
-    "text": "Peruutusta ei voitu vahvistaa. Yritä uudelleen.",
     "class": "normal",
     "kind": "plain",
     "max_len": 600,
