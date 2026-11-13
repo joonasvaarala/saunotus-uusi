@@ -33,11 +33,11 @@ select st.s, p.id, r.f, r.t
                      (current_date + 100, current_date + 190), (current_date, current_date + 92)) r(f, t);
 
 -- 1) vanha määritys (booking_269), perustila
-\ir ../rollbacks/20261113000100_booking_289_ROLLBACK.sql
+\ir ../rollbacks/20261113064837_booking_289_ROLLBACK.sql
 select pg_temp.take('old', 'base');
 
 -- 2) uusi määritys, perustila
-\ir ../migrations/20261113000100_booking_289_availability_speedup.sql
+\ir ../migrations/20261113064837_booking_289_availability_speedup.sql
 select pg_temp.take('new', 'base');
 
 -- tilanne "busy": yksityisvaraus, tilasulku, hoitajapula ja koulutusvaihtoehto
@@ -82,10 +82,10 @@ end $$;
 -- 3) uusi määritys, busy
 select pg_temp.take('new', 'busy');
 -- 4) vanha määritys, busy
-\ir ../rollbacks/20261113000100_booking_289_ROLLBACK.sql
+\ir ../rollbacks/20261113064837_booking_289_ROLLBACK.sql
 select pg_temp.take('old', 'busy');
 -- asennetaan uusi takaisin (ei vaikutusta rollbackin jälkeen, mutta pidetään tila selkeänä)
-\ir ../migrations/20261113000100_booking_289_availability_speedup.sql
+\ir ../migrations/20261113064837_booking_289_availability_speedup.sql
 
 insert into r289(ok, label)
 select (select count(*) from snap where version = 'old' and state = st) > 0, 'vanhasta on rivejä tilanteessa ' || st from (values ('base'), ('busy')) x(st);
