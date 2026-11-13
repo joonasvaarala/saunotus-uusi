@@ -7,6 +7,7 @@ import { methodLabel, loading, emptyBox, errorBox } from './talous-ui.js';
 import { TEXTS } from '../talous-texts.js';
 import { reportText as rt } from '../reports-texts.js';
 import { accrualText as at } from '../accrual-texts.js';
+import { methodNet, methodsNetTotal } from '../report-method-net.js';
 
 const REPORTS = ['sales', 'service', 'giftcards', 'invoices', 'methods', 'fees', 'transactions', 'refunds', 'stats'];
 const DAY_ONLY = new Set(['sales', 'methods']);
@@ -110,7 +111,7 @@ export function createReportsTab({ api, canFull = true, ctx = null }) {
     const methods = r.by_method || [];
     const rates = [...(r.by_vat || [])].sort((a, b) => a.rate - b.rate);
     const cell = (m, rate) => (r.by_method_vat || []).find((x) => x.method === m && x.rate === rate);
-    const byMethod = table('r-by-method', t('r.byMethod'), [t('col.method'), t('r.payments'), t('r.gross'), t('r.refunds'), rt('ui.admin.reports.col_net')], methods.map((m) => [methodLabel(m.method, m.label), fmt.int(m.payments), M(m.gross), M(m.refunds), M((m.gross || 0) + (m.refunds || 0))]), [t('line.total'), fmt.int(sum(methods, 'payments')), M(sum(methods, 'gross')), M(sum(methods, 'refunds')), M(sum(methods, 'gross') + sum(methods, 'refunds'))]);
+    const byMethod = table('r-by-method', t('r.byMethod'), [t('col.method'), t('r.payments'), t('r.gross'), t('r.refunds'), rt('ui.admin.reports.col_net')], methods.map((m) => [methodLabel(m.method, m.label), fmt.int(m.payments), M(m.gross), M(m.refunds), M(methodNet(m, r.by_method_vat))]), [t('line.total'), fmt.int(sum(methods, 'payments')), M(sum(methods, 'gross')), M(sum(methods, 'refunds')), M(methodsNetTotal(methods, r.by_method_vat))]);   // HALL-TALOUS-01: veroton, ei brutto
     const matrix = table('r-matrix', t('r.matrix'), [t('col.method'), ...rates.map((x) => `${t('r.vatShort')} ${fmt.pct(x.rate)}`), t('line.total')], methods.map((m) => [methodLabel(m.method, m.label), ...rates.map((v) => { const c = cell(m.method, v.rate); return c ? M(c.gross) : '–'; }), M((r.by_method_vat || []).filter((x) => x.method === m.method).reduce((s, x) => s + x.gross, 0))]), [t('line.total'), ...rates.map((v) => M(v.gross)), M(sum(rates, 'gross'))]);
     const rec = r.reconciliation || {};
     const gcRed = rec.gift_card_redemptions ?? methods.filter((m) => m.method === 'gift_card').reduce((s, m) => s + m.gross + m.refunds, 0);

@@ -1816,7 +1816,7 @@
  {
   "key": "ui.shop.pay_later",
   "lang": "fi",
-  "text": "Maksu paikan päällä. Verkkomaksu (Visma Pay) otetaan käyttöön myöhemmin.",
+  "text": "Maksu paikan päällä.",
   "class": "normal",
   "kind": "plain",
   "max_len": 200,
@@ -1826,7 +1826,7 @@
  {
   "key": "ui.shop.pay_later",
   "lang": "en",
-  "text": "Payment on site. Online payment (Visma Pay) will be introduced later.",
+  "text": "Payment on site.",
   "class": "normal",
   "kind": "plain",
   "max_len": 200,
