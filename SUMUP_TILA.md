@@ -1,6 +1,6 @@
 # SumUp Solo -pikakassa: tila (13.11.2026)
 
-Haara: `claude/sumup-pikakassa` (päällä main fb0e543). Mitään ei ole pushattu, mergetty, deployattu eikä ajettu missään tietokannassa.
+Haara: `claude/sumup-pikakassa` (päällä main fb0e543, commit 98d5b39). Ei pusku, PR:ää eikä mergeä. Ei tuotantoajoja. DEV-kannan ja DEV-funktioiden tila on alla kohdassa "Bottiavustus / DEV".
 
 ## Lyhyesti
 Pikakassaan on toteutettu maksutapa **Korttipääte (SumUp Solo)** SumUp Cloud API:lla: lukijan paritus, checkout lukijalle, tila webhookilla + rajapintavahvistus, peruutus (terminate), hyvitys. Tila oletuksena `off` (maksutapaa ei näy). CheckoutX on piilotettu Pikakassasta; sen koodi, migraatio, taulut ja data ovat ennallaan.
@@ -48,8 +48,8 @@ Juuren `tests/`-testit, jotka koskevat site-texteja (4 tiedostoa): läpi.
 | JS `sumup-pikakassa.test.mjs` | **13/13 läpi** |
 | JS `checkoutx-pikakassa.test.mjs` | 7/7 läpi. Päivitetty: UI-testit korvattu "CheckoutX ei näy" -testillä, koska maksutapa on tarkoituksella piilotettu; puhtaat apurit ja staattiset 286-tarkistukset ennallaan |
 | JS koko `booking/tests/*.test.mjs` (174 tiedostoa, ajettu yksitellen rinnakkain, aikaraja 90 s/tiedosto) | **174/174 läpi** (yksi ajo aikakatkesi ensin testin jättämän kyselyajastimen vuoksi; korjattu testissä) |
-| SQL `t295_sumup_pos.sql` | **EI ajettu** (ympäristössä ei Postgresia, ei DEV-yhteyttä; vain psql-asiakas) |
-| Virtual Solo / sandbox | **EI ajettu**: ympäristössä ei SumUp-tunnuksia (`env | grep -i sumup` tyhjä). Kaikki SumUp-vastaukset ovat mockeja |
+| SQL `t295_sumup_pos.sql` | **DEV: ei mennyt alusta loppuun läpi** (ks. Bottiavustus / DEV). Testitiedostoa ei muutettu haarassa. |
+| Virtual Solo / sandbox | **EI ajettu** (sandbox-tunnuksia ei ole). Oikealla tilillä tehtiin vain lukukyselyt, ei checkout-/paritus-/hyvityskutsuja. |
 
 ## Mitä jäi ajamatta
 - Migraatio ja SQL-testi t295 (paikallinen Postgres tai DEV; Bottiavustus ajaa DEV:n). md5-arvot uusille funktioille ja uudelle `admin_pos_tenders`ille kirjataan migraation otsikkoon ajon jälkeen.
@@ -88,9 +88,24 @@ Juuren `tests/`-testit, jotka koskevat site-texteja (4 tiedostoa): läpi.
 
 **DEV-salaisuudet tarvitaan** `sumup-pos`- ja `sumup-notify`-funktioille (sandbox-arvot, `SUMUP_ENV=sandbox`) ennen DEV-testiä. Ilman niitä funktiot palauttavat `not_configured` ja maksua ei aloiteta.
 
+## Jatkokehitys (ei toteuteta nyt)
+Joonas haluaa myöhemmin käyttöön myös **Tap to Pay puhelimella** (esim. messuille), esimerkiksi SumUp-sovelluksen Payment Switchin kautta. **Nyt tehdään vain yksi Solo-lukija** (Cloud API). Payment Switchiä ja puhelimen Tap to Paytä ei toteuteta tässä haarassa.
+
+Rakenne on jätetty niin, että maksutavan eli kanavan (`solo` / `tap_to_pay`) voi lisätä myöhemmin ilman isoja muutoksia:
+- Nykyinen Pikakassan tapa on `pos_tenders.handler = 'sumup'` (Solo / Cloud API). Uusi kanava = uusi handler (esim. `sumup_tap_to_pay`) + oma Pikakassan polku + oma Edge-funktio. Nykyisiä Solo-polkuja (`sumup-pos`, `sumup-notify`, `booking.sumup_readers`, `sumup_pos_*`) ei tarvitse rikkoa.
+- Yhteiset osat voidaan käyttää uudelleen: `payment_mark_paid('sumup', …)`, `payments.provider = 'sumup'`, hyvitys, `_shared/sumup.ts` (Transactions API, refund), tilakone (maksetuksi vain rajapintavahvistuksella).
+- Affiliate key tarvitaan myöhemmin Payment Switchiin; sitä ei vielä ole. Sandbox- tai mock-testit riittävät, kun kanava tehdään.
+
+## Bottiavustus / DEV (13.11.2026, Europe/Helsinki)
+- Migraatio `booking_295_sumup_pos` ajettu **vain DEViin** (projekti aoejjmfzulhkhxbehphs). `integration_config.sumup.mode = off`, lukijoita 0, `approved_by` tyhjä, maksutapa ei näy. Uusi `admin_pos_tenders`-md5: `babb3ce2a62c15356c90143d03c3a589`.
+- SQL-testi `t295_sumup_pos.sql` ajettiin DEVissä rollback-transaktiossa. Ei mennyt läpi testin omien oletusten takia (ei migraatiovirhe): `kb.products.business_id` on pakollinen; PL/pgSQL-muuttuja `oid` törmää `pg_constraint.oid`:hen; authenticated-rooli ei saa lukea `booking.sumup_readers`-taulua suoraan. Testidata ei jäänyt DEViin (mode pysyi `off`).
+- Oikea SumUp-tili (Havuhattu Oy, merchant_code `MVVBWM97`, FI): vain lukukyselyt. `GET /v0.1/me` → HTTP 200, merchant_code täsmää. `GET /v0.1/merchants/MVVBWM97/readers` → HTTP 200, **0 lukijaa**. Checkoutteja, parituksia tai hyvityksiä ei tehty. Affiliate keytä ei ole. Live-avaimia ei ole laitettu DEV Edge-salaisuuksiksi (maksutestit vain sandboxilla tai mockeilla).
+- Edge-funktiot `sumup-pos` (verify_jwt = true, versio 1) ja `sumup-notify` (verify_jwt = false, versio 1) on deployattu **vain DEViin**, tila ACTIVE. DEV Edge-salaisuuksia ei asetettu (ei live-avaimia, ei sandbox-avaimia); funktiot palauttavat `not_configured`, kunnes sandbox-salaisuudet lisätään. Tuotantoon ei ole viety mitään.
+
 ## Käyttöönottojärjestys (ehdotus, Koodarille/Bottiavustukselle)
-1. Katselmointi → Bottiavustus ajaa migraation 295 DEViin → t295-testi DEViin → md5:t otsikkoon.
-2. Deploy `sumup-pos`, `sumup-notify` DEViin + DEV-salaisuudet.
+1. Katselmointi (migraatio 295 on jo DEVissä). Korjaa t295-testi (business_id, oid-nimi, lukijakysely RPC:n kautta) ja aja se DEVissä rollback-transaktiossa. Kirjaa md5 otsikkoon.
+2. Deploy `sumup-pos`, `sumup-notify` DEViin. DEV-salaisuuksiksi vain **sandbox**-arvot (`SUMUP_ENV=sandbox`). Älä käytä oikean tilin avaimia checkout-testeihin.
 3. Tuo `site-texts.pending-import-150.json`.
-4. `admin_set_sumup_mode('test', …)` DEVissä → Virtual Solo/sandbox-testi koko ketjulle.
+4. `admin_set_sumup_mode('test', …)` DEVissä (vaatii Joonaksen hyväksynnän kytkentään) → Virtual Solo / sandbox-testi koko ketjulle.
 5. PROD vasta kun 1–4 läpi ja Joonas hyväksyy; live vaatii `approved_by` ja `SUMUP_ENV=live`.
+6. Tap to Pay / Payment Switch vasta erillisenä myöhempänä työnä (ks. Jatkokehitys).

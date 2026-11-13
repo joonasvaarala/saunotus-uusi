@@ -1,6 +1,6 @@
 # SumUp-selvitys: Pikakassan korttipääte (13.11.2026)
 
-**Valinta (päätetty, ei avata uudelleen): SumUp Solo -lukija + Cloud API.** Payment Switch jää pois.
+**Valinta (päätetty, ei avata uudelleen tässä työssä): SumUp Solo -lukija + Cloud API.** Payment Switch / Tap to Pay jätetään myöhemmäksi kanavaksi (messut ym.); sitä ei toteuteta nyt.
 
 > **Tärkeä rajoitus:** tämän työn aikana verkkohaku ja sivujen haku (WebFetch/WebSearch) eivät olleet sallittuja, eikä SumUpin dokumentaatiota päässyt lukemaan. Kaikki alla olevat endpointit, kentät ja webhook-tiedot ovat **muistinvaraisia ja varmistamattomia**. Koodi on kirjoitettu niin, että ne ovat yhdessä paikassa (`booking/supabase/functions/_shared/sumup.ts`, luokka `SumupApi`) ja korjattavissa. **Ennen DEV-testiä pitää tarkistaa jokainen kohta merkinnällä ⚠ oikeaa dokumentaatiota vastaan** (https://developer.sumup.com/terminal-payments/cloud-api/ ja API-referenssi).
 
@@ -9,7 +9,7 @@
 | Vaihtoehto | Toimiiko meillä | Päätös |
 |---|---|---|
 | **Cloud API + Solo** | Palvelin ohjaa lukijaa HTTP-kutsuilla; ei natiivisovellusta, ei selaimen avaimia. Sopii Edge-funktioihin. | **Valittu** |
-| Payment Switch | URL-skeema / sovelluksen avaus affiliate keyllä. Vaatii SumUp-sovelluksen puhelimessa ja paluulinkin. Ei palvelinpuolen tilaa. | Pois (päätetty) |
+| Payment Switch | URL-skeema / sovelluksen avaus affiliate keyllä. Vaatii SumUp-sovelluksen puhelimessa ja paluulinkin. Sopii myöhemmin puhelimen Tap to Payhin (esim. messut). | Ei nyt; myöhempi kanava `tap_to_pay` |
 | Tap to Pay SDK / selainpolku | Natiivit SDK:t (iOS/Android); meillä ei natiivisovellusta. | Ei sovi |
 | Checkouts / Transactions / Refunds API | Verkkokaupan korttimaksu ja raportointi. **Käytetään sivutuotteena**: Transactions API vahvistaa maksun tilan, Refunds API hyvittää. Checkouts API ei käynnistä lukijaa. | Osittain (tilan haku, hyvitys) |
 | Virtual Solo | SumUpin ohjelmallinen lukijasimulaattori (parituskoodi kuten oikealla lukijalla) kehitystä varten. ⚠ varmista saatavuus ja käyttö sandbox-tilillä. | Käytetään testissä, jos tili sen sallii |
@@ -54,7 +54,7 @@ Base: `https://api.sumup.com` (ylikirjoitettavissa `SUMUP_API_URL`:lla testimock
 
 ## 6. Rakenne ja perustelut
 
-- **Yksi kanava kerrallaan, laajennettava**: Pikakassan maksutapa on `pos_tenders.handler = 'sumup'`. Uusi kanava (esim. myöhempi lisälaite) = uusi handler + oma Edge-funktio + oma `integration_config`-avain; Cloud API -polku (`sumup-pos`, `sumup-notify`, `booking.sumup_*`) ei muutu.
+- **Yksi kanava kerrallaan, laajennettava**: Nyt vain Solo (`pos_tenders.handler = 'sumup'`). Myöhempi kanava (Tap to Pay / Payment Switch, `tap_to_pay`) = uusi handler + oma Pikakassan polku + oma Edge-funktio; Cloud API -polku (`sumup-pos`, `sumup-notify`, `booking.sumup_*`) ei muutu. Yhteiset osat (`payment_mark_paid('sumup')`, Transactions/Refunds, tilakone) voidaan käyttää uudelleen.
 - **Tilakone**: `payments.status`: `pending` → `paid` (vain `sumup_pos_apply(…, p_confirmed_by='api', p_amount)`) / `failed` / `cancelled`. Tietokantafunktio kieltäytyy `paid`-merkinnästä ilman `api`-vahvistusta, joten virheellinen Edge-koodikaan ei voi merkitä maksua maksetuksi pelkän webhookin perusteella.
 - **provider_ref = `client_transaction_id`** (checkoutin tunniste, tiedossa heti checkoutin jälkeen ja webhookin avain). SumUpin transaktio-id tallennetaan `raw.transaction_id`:hen maksun vahvistuessa ja sitä käytetään hyvityksessä.
 - **Ristiriitatilanne**: jos asiakas ehtii maksaa lukijalla samalla hetkellä kun kassa perutaan, `cancel` tarkistaa ensin rajapinnasta; maksettu voittaa (kassatilausta ei peruta). Jos maksu vahvistuu vasta perutun rivin jälkeen (webhook), `apply paid` sallitaan myös `cancelled`/`failed`-riville, jotta maksettu raha ei jää kirjaamatta.
