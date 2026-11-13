@@ -22,6 +22,8 @@
   .slots { display: flex; gap: var(--sp-2); flex-wrap: wrap; }
   .slot { min-height: 44px; padding: 6px 12px; border-radius: var(--r-md); border: 1px solid var(--c-line); background: #fff; font-size: var(--fs-sm); color: var(--c-ink); text-align: left; }
   .slot small { display: block; color: var(--c-muted); }
+  .slot.freetime { border-style: dashed; }
+  .slot .ft { width: 56px; min-height: 28px; padding: 2px 6px; border: 1px solid var(--c-field); border-radius: 6px; font: inherit; color: var(--c-ink); }
   .slot[aria-pressed="true"] { border: 2px solid var(--c-brand); background: var(--c-info-bg); }
   .price-diff { display: flex; justify-content: space-between; align-items: center; padding: var(--sp-3); border-radius: var(--r-md); background: #fff; border: 1px solid var(--c-line); }
   .timeline { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; }
@@ -38,7 +40,7 @@
 </style>
 </head>
 <body>
-<div class="mock-bar"><b>Luonnos 02/10</b> Hallinta · Tilausnäkymä (1280 px) · <a href="index.html">kaikki luonnokset</a><span class="ids">HALL-TILAUS-01–08 · HALL-ASIAKKAAT-03</span></div>
+<div class="mock-bar"><b>Luonnos 02/10</b> Hallinta · Tilausnäkymä (1280 px) · <a href="index.html">kaikki luonnokset</a><span class="ids">HALL-TILAUS-01–08 · HALL-ASIAKKAAT-03 · päivitetty 13.11.</span></div>
 <div class="app">
   <header class="app-top">
     <a class="brand" href="#"><img src="../../../booking/admin/logo-haalea.svg" alt="Hallinta" width="26" height="36"></a>
@@ -56,6 +58,7 @@
     <a href="#"><span data-icon="users"></span>Asiakkaat</a>
     <a href="#"><span data-icon="gift"></span>Lahjakortit ja koodit</a>
     <a href="#"><span data-icon="tag"></span>Tarjonta</a>
+    <a href="#"><span data-icon="school"></span>Koulutukset</a>
     <a href="#"><span data-icon="chart"></span>Talous</a>
     <a href="#"><span data-icon="mail"></span>Sisältö</a>
     <a href="#"><span data-icon="sliders"></span>Asetukset</a>
@@ -109,7 +112,9 @@
               <button class="slot">14.00–16.00<small>Nykyinen · 2 vapaana</small></button>
               <button class="slot" aria-pressed="true">16.00–18.00<small>4 vapaana</small></button>
               <button class="slot">17.00–19.00<small>1 vapaana</small></button>
+              <label class="slot freetime">Vapaa ajankohta<small>alkaa <input class="ft" value="15.30" aria-label="Vapaa alkamisaika"> · kesto 2 h</small></label>
             </div>
+            <p class="xs muted" style="margin-top:-4px">Vapaa ajankohta ohittaa vuoroaikataulun (oikeus "Ylitys"); kapasiteetti ja tilan päällekkäisyys tarkistetaan esikatselussa.</p>
             <div class="price-diff"><span>Uusi hinta <b class="num" style="color:var(--c-ink)">92,00 €</b> <span class="muted">(oli 63,00 €)</span></span><span class="badge badge--warn">Maksettavaa +29,00 €</span></div>
             <label class="check"><input type="checkbox" checked><span>Lähetä asiakkaalle muutosvahvistus ja maksulinkki erotuksesta</span></label>
             <div class="row"><button class="btn btn--primary">Tallenna muutos</button><button class="btn btn--ghost">Peruuta</button></div>
@@ -176,7 +181,7 @@
     <li><span class="pin">1</span><div><b>Paluu lähtönäkymään toimii</b> ("Takaisin päivään 14.11."). <span class="before">Nyt paluulinkki on aina "← Tilaukset", koska julkaisu lataa moduulin kahdesti.</span> <code>HALL-TILAUS-02</code></div></li>
     <li><span class="pin">2</span><div><b>Kaikki tilauksen toiminnot yhdessä valikossa:</b> vahvistuksen uudelleenlähetys, maksulinkki, lasku, lisäys, Ei saapunut ja maksamattoman poisto. <span class="before">Nyt Ei saapunut, poisto ja laajempi lisäys ovat vain vanhassa kortissa; vahvistusta ei voi lähettää uudelleen.</span> <code>HALL-TILAUS-01</code> <code>HALL-TILAUS-04</code> <code>HALL-TILAUS-06</code></div></li>
     <li><span class="pin">3</span><div><b>Asiakkaan peruutuspyyntö "Seuraava askel" -palkissa</b> toimintoineen. <span class="before">Nyt pyyntö ei näy uudessa näkymässä lainkaan.</span> <code>HALL-TILAUS-01</code></div></li>
-    <li><span class="pin">4</span><div><b>Siirto näyttää uuden hinnan ja erotuksen ennen tallennusta</b> ja tarjoaa muutosvahvistuksen asiakkaalle. <span class="before">Nyt hinnan muutos selviää vasta tallennuksen jälkeen, eikä asiakkaalle lähde ilmoitusta.</span> <code>HALL-TILAUS-05</code></div></li>
+    <li><span class="pin">4</span><div><b>Siirto näyttää uuden hinnan ja erotuksen ennen tallennusta, tarjoaa ilmoituksen asiakkaalle, ja siirron voi tehdä myös vapaasti valittavaan ajankohtaan.</b> <span class="before">Tila 13.11.: hinnan esikatselu, osahyvitys ja asiakasilmoitus tulivat PR:ssä #347 (booking_282, lippu <code>partial_refunds_enabled</code>), ja vapaa ajankohta on jo nykyisessä siirtodialogissa. Luonnos näyttää ne yhdessä paneelissa tilausnäkymän sisällä.</span> <code>HALL-TILAUS-05</code></div></li>
     <li><span class="pin">5</span><div><b>Selkokielinen aikajana</b> (mitä tapahtui, kenelle lähti viesti). <span class="before">Nyt historia näyttää esim. "Tila confirmed → cancelled (reservations)".</span> <code>HALL-TILAUS-07</code></div></li>
     <li><span class="pin">6</span><div><b>Asiakkaan kieli, tagit ja käyntitilasto</b> tilauksella; yksi asiakaslinkki kolmen sijaan. <code>HALL-ASIAKKAAT-01</code> <code>HALL-ASIAKKAAT-03</code> <code>HALL-TILAUS-08</code></div></li>
     <li><span class="pin">7</span><div><b>Poisto täyttää nyt tyhjänä olevan paikan</b> "Peruutus ja poisto" -kortissa ja kertoo, milloin se on mahdollinen. <code>HALL-TILAUS-01</code></div></li>

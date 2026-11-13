@@ -1,6 +1,6 @@
 # UX- ja laatuanalyysi: julkinen sivusto, varauskauppa ja hallinta
 
-Päivämäärä: 12.11.2026 · Haara: `claude/ux-analyysi-0atsd7` · Tekijä: Claude (tutkija, ei toteuttaja; koodia ei muutettu)
+Päivämäärä: 12.11.2026, päivitetty 13.11.2026 (Joonaksen palaute, PR:t #346–#354, työmääräarvio) · Haara: `claude/ux-analyysi-0atsd7` · Tekijä: Claude (tutkija, ei toteuttaja; koodia ei muutettu)
 
 **Lukuohje.** Luku 1 kertoo tärkeimmät havainnot ja suositellun järjestyksen. Luku 2 ehdottaa yhteistä ulkoasujärjestelmää. Luku 3 käy läpi jokaisen sivun ja hallinnan näkymän: ensin nykytila lyhyesti, sitten numeroidut parannusehdotukset. Luku 4 on koontitaulukko kaikista kohdista koon mukaan. Jokaisessa havainnossa on merkintä **VARMA** (nähty koodista tai ruudulta) tai **OLETUS** (päättely, tarkistettava). Tietokantaa koskevat johtopäätökset on tarkistettu vain repon migraatioista; tuotanto voi olla repoa edellä (esim. booking_287 ja booking_288).
 
@@ -23,7 +23,7 @@ Päivämäärä: 12.11.2026 · Haara: `claude/ux-analyysi-0atsd7` · Tekijä: Cl
 
 ### 1.1 Tärkeimmät 10 havaintoa
 
-1. **Viisi pientä virhettä, jotka asiakas tai kirjanpitäjä huomaa (VARMA).**
+1. **Viisi pientä virhettä, jotka asiakas tai kirjanpitäjä huomaa (VARMA).** Korjattu PR:ssä #350 13.11.2026 (ks. luku 1.7).
    - Juomien QR-maksusivu `/juomat/` jää paikallisessa koonnissa tyhjäksi, koska julkaisu ei kopioi kahta tarvittavaa moduulia; tuotannon tila on OLETUS, mutta sama julkaisuskripti tekee myös tuotannon (SIVU-JUOMAT-01).
    - Julkaisu jättää hallinnan dynaamiset importit versioimatta, jolloin "← Takaisin" ei palaa lähtönäkymään ja vanhat moduulit voivat jäädä välimuistiin (HALL-TILAUS-02).
    - Maksutaparaportin sarake "Veroton" näyttää bruttosumman (HALL-TALOUS-01).
@@ -37,11 +37,11 @@ Päivämäärä: 12.11.2026 · Haara: `claude/ux-analyysi-0atsd7` · Tekijä: Cl
 7. **Mobiilikassa piilottaa kokonaishinnan ja 15 minuutin ehdon lähetysnapin alle, ja lomakevirheet ovat geneerisiä (VARMA).** Virheilmoitus jää mobiilissa ruudun ulkopuolelle (KAUPPA-KASSA-01, KAUPPA-KASSA-02).
 8. **Asiakkaalle näkyy vanhentuneita ja ristiriitaisia maksutekstejä (VARMA).** "Verkkomaksu (Visma Pay) otetaan käyttöön myöhemmin", laskutetulla yritystilauksella maksunappi ja "maksu paikan päällä", vahvistussivulla toistuvat otsikot ja kaksi kilpailevaa toimintoa (KAUPPA-MAKSU-01, KAUPPA-TILAUS-01, KAUPPA-VAHVISTUS-01).
 9. **Tuote-editori hävittää työtä (VARMA).** 3 200 px:n dialogi, 4–5 erillistä tallennusta, tallennus sulkee dialogin ja hävittää muut muutokset; neljä päällekkäistä asetusta päättää, näkyykö tuote kaupassa (HALL-TUOTTEET-01, HALL-TUOTTEET-02).
-10. **Vastaanoton työkalut eivät ole vielä valmiita (VARMA).** Päivänäkymän Saapunut on näkymätön ympyrä, näkymä ei päivity itsestään, tabletilla valikossa on pelkät ikonit, asiakkaan siirto vaatii kaksi näkymänvaihtoa, eikä pikakassalla voi myydä tavallisella korttipäätteellä (HALL-PAIVA-02–04, HALL-KUORI-02, HALL-KASSA-02).
+10. **Vastaanoton työkalut eivät ole vielä valmiita (VARMA).** Päivän Valmistelu (henkilöt ja lisäpalvelut) on näkymän alaosassa, näkymä ei päivity itsestään, tabletilla valikossa on pelkät ikonit, asiakkaan siirto vaatii kaksi näkymänvaihtoa, eikä pikakassalla voi myydä tavallisella korttipäätteellä (HALL-PAIVA-01, -03, -04, HALL-KUORI-02, HALL-KASSA-02).
 
 ### 1.2 Suositeltu toteutusjärjestys
 
-**Vaihe 0: heti (kaikki PIENI, ei tietokantamuutoksia).** SIVU-JUOMAT-01, HALL-TILAUS-02, HALL-TALOUS-01, HALL-LASKUT-01, KAUPPA-JONO-01, KAUPPA-MAKSU-01, KAUPPA-TILAUS-01, HALL-TILAUS-03, KAUPPA-SELAUS-01. Yhteensä noin päivän työ, ja kaikki näkyvät suoraan asiakkaalle tai kirjanpitoon.
+**Vaihe 0: heti (kaikki PIENI, ei tietokantamuutoksia).** SIVU-JUOMAT-01, HALL-TILAUS-02, HALL-LASKUT-01 ja KAUPPA-JONO-01 ovat valmiita (PR #350), HALL-TALOUS-01 ja KAUPPA-MAKSU-01 osittain. Jäljellä: HALL-TALOUS-01:n ja KAUPPA-MAKSU-01:n loput, KAUPPA-TILAUS-01, HALL-TILAUS-03 ja KAUPPA-SELAUS-01, yhteensä noin puolen päivän työ.
 
 **Vaihe 1: perusta (ei tietokantamuutoksia).** YHT-08 (kokeilutila kattamaan kaikki näkymät, jotta seuraavat muutokset voi testata), YHT-01 (tokenit), YHT-04 ja YHT-05 (sanasto ja muodot), YHT-06 (dialogit), YHT-02 ja YHT-03 (komponentit ja välilehdet), HALL-KUORI-01 (navigaatio) ja HALL-KUORI-02 (tabletti). Tämän jälkeen jokainen näkymä siirretään yhteisiin komponentteihin samalla, kun sitä muutetaan muutenkin.
 
@@ -59,7 +59,7 @@ Päivämäärä: 12.11.2026 · Haara: `claude/ux-analyysi-0atsd7` · Tekijä: Cl
 | Sivuston, kaupan ja sähköpostien tekstit, artikkelit | tuontitiedosto ja Koodari; tuotanto julkaistaan käsin | SIVU-YHT-03 |
 | Merkitä "Ei saapunut", poistaa virheellinen maksamaton tilaus, nähdä asiakkaan peruutuspyyntö | vain vanhassa kortissa | HALL-TILAUS-01 |
 | Lähettää vahvistus uudelleen tai kirjoittaa yksittäiselle asiakkaalle | oma sähköposti, ei näy historiassa | HALL-TILAUS-06 |
-| Yhdistää asiakkaan kaksoiskappaleet, anonymisoida asiakas (GDPR) | ei mahdollista | HALL-ASIAKKAAT-02 |
+| Yhdistää asiakkaan kaksoiskappaleet, anonymisoida asiakas (GDPR) | toteutettu kytkimien takana PR:ssä #349, ei vielä päällä | HALL-ASIAKKAAT-02 |
 | Avata tapahtumien myynti | ei kytkintä | HALL-TAPAHTUMAT-01 |
 | Luoda tapahtuma, koulutus tai hoito-/vuorotuote tyhjästä myyntikuntoon | vain kopiointi, luonti jättää tuotteen pois myynnistä | HALL-TUOTTEET-03 |
 | Lisätä hintavariantti (kausihinta), muuttaa tuotteen kestoa | ei käyttöliittymää | HALL-TUOTTEET-04 |
@@ -80,7 +80,7 @@ Päivämäärä: 12.11.2026 · Haara: `claude/ux-analyysi-0atsd7` · Tekijä: Cl
 | Hyvitysten seuranta sekä välilehtenä että raporttivalintana; Seurattavat maksut ja Hyvitysten seuranta erillisinä | yksi "Avoimet maksut" -jono Tilauksissa | HALL-AVOIMET-01, HALL-TALOUS-01 |
 | Kumppanikoodeilla kolme käyttöliittymää ja kolme nimeä | yksi rivikomponentti, nimi "Kumppanikoodit" | HALL-LAHJAKORTIT-03 |
 | Lahjakorttien kytkimet sekä Asetuksissa että Lahjakortit-näkymässä (jossa ne ovat vain luku -merkkejä) | yksi paikka | HALL-LAHJAKORTIT-02 |
-| Koulutukset sekä päävalikossa että Tuotteet › Tapahtumat ("Tapahtumat ja koulutukset") | Tarjonta › Tapahtumat ja koulutukset | HALL-KUORI-01 |
+| Koulutukset sekä päävalikossa että Tuotteet › Tapahtumat ("Tapahtumat ja koulutukset") | Koulutukset jää omaksi päävalikon kohdakseen (Joonas 13.11.); Tapahtumat-välilehdeltä koulutukset pois | HALL-KUORI-01 |
 | Vuosikortit alennuskoodien sivulla | Lahjakortit ja koodit › Vuosikortit | HALL-KUORI-01 |
 | Neljä näkyvyysasetusta tuotteella | yksi kolmiportainen valinta | HALL-TUOTTEET-02 |
 | Kaksi lisäosto-, maksulinkki-, maksunkirjaus- ja peruutusdialogia | yksi kustakin | HALL-TILAUS-04, HALL-TILAUS-09 |
@@ -100,7 +100,7 @@ Verrokkien sarakkeet ovat yleistietoa (OLETUS, ei testattu tätä raporttia vart
 | Aukiolot, kertavuorot ja päiväkohtainen kapasiteetti henkilökunnan muokattavissa | ✔ | ✔ | ✔ | ✔ | – (migraatio) | HALL-TILAT-01 |
 | Resurssisarakkeinen päiväkalenteri, siirto vetämällä | ✔ | ✔ | ◐ | ◐ | – (lista) | HALL-KALENTERI-02 |
 | Kalenterin täyttöaste | ✔ | ✔ | ✔ | ✔ | – | HALL-KALENTERI-01 |
-| Näkyvä check-in ja no-show | ✔ | ✔ | ✔ | ✔ | ◐ (Saapunut näkymätön, no-show vain vanhassa kortissa) | HALL-PAIVA-02 |
+| Näkyvä check-in ja no-show | ✔ | ✔ | ✔ | ✔ | ◐ (sisäänkirjausympyrä toimii, no-show vain vanhassa kortissa) | HALL-PAIVA-02 |
 | Tulostettava päivälista / manifesti | ◐ | ◐ | ✔ | ✔ | – | HALL-PAIVA-04 |
 | Vahvistuksen uudelleenlähetys, viesti yksittäiselle asiakkaalle | ✔ | ✔ | ✔ | ✔ | – | HALL-TILAUS-06 |
 | Muokattavat viestipohjat ja testilähetys | ✔ | ✔ | ✔ | ✔ | ◐ | HALL-VIESTIT-01, SIVU-YHT-03 |
@@ -131,6 +131,58 @@ Kymmenestä eniten muuttuvasta ja tärkeimmästä näkymästä on klikattavat HT
 | 08 | Varauslomake puhelimella | 390 px | KAUPPA-KASSA-01–03, KAUPPA-YHT-01 |
 | 09 | Vahvistussivu, kaksi tilaa | 390 px | KAUPPA-VAHVISTUS-01, KAUPPA-MAKSU-01 |
 | 10 | Sivuston etusivu ja yleisilme | 390 ja 1280 px | SIVU-YHT-01–05, SIVU-ETUSIVU-01–02, SIVU-SAUNAVUOROT-01 |
+
+### 1.7 Tilanne 13.11.2026: mainiin tulleet muutokset ja päällekkäisyydet
+
+Raportti tehtiin mainin tilasta `2120304` (12.11.). Sen jälkeen mainiin yhdistettiin PR:t #346–#354 (main `fb0e543`). Ne on käyty läpi ja huomioitu raportin kohdissa ("Tila 13.11.2026" -rivit ja luvun 4 Tila-sarake). Ristiriitoja luonnosten kanssa ei ole; kolmessa kohdassa ehdotus on jo toteutettu tai sen tietokantaosa on tarpeeton.
+
+| PR | Mitä toi | Vaikutus raporttiin |
+|---|---|---|
+| #350 | Raportin vaihe 0: juomasivun moduulit, lasku tilausnumerolla, dynaamisten importtien versio, Veroton-sarake, Visma Pay -lause, jonotuslinkki | SIVU-JUOMAT-01, HALL-TILAUS-02, HALL-LASKUT-01 ja KAUPPA-JONO-01 valmiita; HALL-TALOUS-01 ja KAUPPA-MAKSU-01 osittain |
+| #347 | Osahyvitys, ylisuorituksen hyvitys, atominen koko tilauksen peruutus, muutoksen hinnan esikatselu ja asiakasilmoitus (booking_282–283), asiakkaan oma henkilömäärän pienennys (booking_284); kaikki lippujen takana | HALL-TILAUS-05 pääosin valmis (migraatioluonnos poistettu), HALL-TILAUS-01 osittain; KAUPPA-VAHVISTUS-01:een lisätty huomio asiakkaan omasta pienennyksestä |
+| #349 | Asiakkaiden yhdistäminen ja anonymisointi (booking_285), kytkimien takana | HALL-ASIAKKAAT-02 valmis (migraatioluonnos poistettu); jäljellä testaus ja kytkentä |
+| #346 | Saatavuushakujen nopeutus (booking_289, `product-months.js`) | KAUPPA-SELAUS-02 rakennetaan uuden hakukerroksen päälle |
+| #348 | booking_287 ja booking_288 sekä vanhat PROD-migraatiot repoon | Ei vaikutusta ehdotuksiin |
+| #351–#354 | Uutiskirjeen tilanne, sivutekstien varatekstit | Ei vaikutusta ehdotuksiin |
+
+Joonaksen palaute 13.11. on huomioitu raportissa ja luonnoksissa:
+
+- **Valmistelu (henkilöt ja lisäpalvelut lajeittain) näkyy päivänäkymässä kerralla ylimpänä** (HALL-PAIVA-01, luonnos 01).
+- **Varauksen siirto onnistuu myös vapaasti valittavaan ajankohtaan.** Toiminto on jo nykyisessä dialogissa, ja se säilyy ja tuodaan päivän pikatoimintoihin (HALL-PAIVA-03, HALL-TILAUS-05, luonnos 02).
+- **Erillistä Saapui-painiketta ei tehdä.** Vihreäreunainen sisäänkirjausympyrä säilyy (HALL-PAIVA-02, luonnos 01).
+- **Koulutukset on oma päävalikon kohtansa ja oma työtilansa** (HALL-KUORI-01, HALL-KOULUTUKSET-01, kaikkien hallintaluonnosten valikko).
+
+### 1.8 Työmääräarvio: muutokset testisivulle
+
+**Mitä "testisivulle" tarkoittaa tässä repossa.** Testisivu (GitHub Pages, Supabase DEV) julkaistaan automaattisesti `main`-haarasta (`.github/workflows/pages.yml`). Muutos näkyy testisivulla, kun Koodari on yhdistänyt sen mainiin, ja tietokantamuutokset ajaa Bottiavustus ensin DEViin. Tuotanto julkaistaan erikseen SFTP:llä. Koska main on myös tuotannon lähde, ulkoasu- ja navigaatiomuutokset kannattaa tehdä kytkimen taakse, kuten #347 ja #349 tekivät. Esimerkiksi hallinnan "Kokeile uutta ulkoasua" -valinta käyttäjävalikossa: silloin testisivulla voi kokeilla uutta, ja tuotanto pysyy ennallaan, kunnes uusi hyväksytään.
+
+**A. Luonnosten 10 näkymää ja niiden pohjana oleva yhteinen ulkoasu** (arvio kehittäjäpäivinä sisältäen testit ja kokeilutilan datan; ±50 %):
+
+| Kokonaisuus | Kohdat | Tietokanta | Kehittäjäpäiviä | PR:iä |
+|---|---|---|---|---|
+| Perusta: tokenit, komponentit, välilehdet, sanasto, muodot, dialogit, kokeilutila | YHT-01–08 | ei | 5–7 | 3–4 |
+| 01 Päivänäkymä ja uusi valikko | HALL-KUORI-01–02, HALL-PAIVA-01–05 | ei (asiakastagit erikseen, pieni) | 5–7 | 2–3 |
+| 02 Tilausnäkymä | HALL-TILAUS-01, -03, -04, -05 (loput), -06, -07, -08 | pieni (vahvistuksen uudelleenlähetys, viesti asiakkaalle) | 6–8 | 3 |
+| 03 Aukiolot ja poikkeuspäivät | HALL-TILAT-01–02 | suuri (vuorosäännöt, poikkeukset, saatavuuslaskenta) | 8–12 | 2–3 |
+| 04 Tuote-editori | HALL-TUOTTEET-01, -02, -04, -06 | pieni (hintavariantin luonti) | 4–6 | 2 |
+| 05 Pikakassa | HALL-KASSA-01–02 | pieni (päätemaksun kuittaus) + liiketoimintapäätös | 2–4 | 1–2 |
+| 06 Asetukset | HALL-ASETUKSET-01–02, HALL-TAPAHTUMAT-01 | pieni (tapahtumien myyntikytkin, logo) | 3–4 | 2 |
+| 07 Tekstit | SIVU-YHT-03 (a) | ei (RPC:t valmiina) | 4–6 | 2 |
+| 08 Varauslomake | KAUPPA-KASSA-01–03, KAUPPA-YHT-01, KAUPPA-TUOTE-01 | ei | 3–5 | 2 |
+| 09 Vahvistussivu | KAUPPA-VAHVISTUS-01, KAUPPA-MAKSU-01 (loput), KAUPPA-TILAUS-01 | ei | 1–2 | 1 |
+| 10 Etusivu ja yleisilme | SIVU-YHT-01, -02, -05, SIVU-ETUSIVU-01–02, SIVU-SAUNAVUOROT-01 | ei | 2–3 | 1–2 |
+| **Yhteensä** | | 6 kohdassa tietokantamuutos | **43–64** | **21–28** |
+
+Yhdelle kehittäjälle tämä on noin 9–13 viikkoa. Jos koodin tekee Claude Code ja Koodari katselmoi (repon nykyinen tapa: esimerkiksi #347 toi kolme migraatiota ja käyttöliittymän yhdessä PR:ssä), pullonkaula on katselmointi, testisivulla kokeilu ja DEV-migraatiot, ei koodaus. Arvio on silloin noin 4–6 viikkoa kalenteriaikaa, jos 1–2 PR:ää ehditään katselmoida päivässä. Suurin epävarmuus on Aukiolot, koska se muuttaa saatavuuslaskentaa, jota kauppa, hallinta ja varausmoottori käyttävät.
+
+**B. Koko raportti.** Avoimia kohtia on 97 (PIENI 56, KESKI 37, SUURI 4). Karkea arvio on 65–130 kehittäjäpäivää, kun PIENI on 1–2 tuntia testeineen, KESKI 1–2 päivää ja SUURI 5–10 päivää. Luonnosten kattama osuus A on noin puolet tästä, ja se sisältää näkyvimmät ja arjen kannalta tärkeimmät muutokset.
+
+**Suositeltu järjestys testisivulle:**
+1. Vaiheen 0 loput (puoli päivää).
+2. Perusta, 01 Päivä ja 10 Etusivu: näkyvin muutos, ei tietokantaa.
+3. 02 Tilaus, 04 Tuote, 06 Asetukset, 08 Varauslomake ja 09 Vahvistus.
+4. 07 Tekstit.
+5. 03 Aukiolot ja 05 Pikakassa, joihin tarvitaan tietokantamuutokset ja päätökset.
 
 ## 2. Yhteinen ulkoasujärjestelmä
 
@@ -415,6 +467,7 @@ Nykytila: listaus, tagisuodattimet, artikkelikortit, "Muut aiheet" -tagipilvi. T
 Nykytila: QR-koodilla avattava itsepalvelusivu juomien maksuun.
 
 1. **SIVU-JUOMAT-01 · PIENI · Sivu jää tyhjäksi: koonnista puuttuu kaksi moduulia**
+   - **Tila 13.11.2026:** Valmis, PR #350. Puuttuvat moduulit lisätty, ja `scripts/module-imports.mjs` tarkistaa importit buildissa.
    - Ongelma (VARMA paikallisessa koonnissa): `/juomat/` ja `/en/drinks/` lataavat `gift-texts.js`:n, joka tuo `plural.js`:n ja `hold-texts.js`:n (`booking/shop/src/gift-texts.js:1–2`, lisätty muutoksessa #293). `scripts/build-pages.mjs:108` (`DRINK_PAY_UI`) ei kopioi niitä sivun viereen, joten selain saa 404:n ja koko moduulipuu kaatuu: sivulla näkyy vain testibanneri. OLETUS: sama vika on tuotannossa, jos saunotus.fi on rakennettu muutoksen #293 jälkeen. Linkkitarkistus (`scripts/check.mjs`) ei seuraa ES-moduulien importteja, joten vika ei näy buildissa.
    - Ratkaisu: lisää `plural.js` ja `hold-texts.js` listaan `DRINK_PAY_UI` (tai kopioi koko importtipuu automaattisesti); lisää `scripts/smoke-pages.mjs`:ään juomasivun lataus ilman 404:ää; näytä sivulla virheteksti, jos moduuli tai verkko ei vastaa.
    - Hyväksymiskriteerit: `node scripts/smoke-pages.mjs` lataa `/juomat/?mock=1` ja `/en/drinks/?mock=1` ilman 404:ää ja näyttää tuotteen; tuotannon QR-koodi avaa toimivan sivun.
@@ -463,6 +516,7 @@ Nykytila: hero, valinta "Selaa kategorioittain / Selaa päivän mukaan", kategor
    - Riippuvuudet: –
 
 2. **KAUPPA-SELAUS-02 · KESKI · Listakorteista puuttuu "seuraava vapaa aika"**
+   - **Tila 13.11.2026:** Huomioitava PR #346 (booking_289): saatavuushaut on yhdistetty tiedostoon `booking/shop/src/product-months.js`, joten seuraava vapaa aika rakennetaan sen päälle eikä uusilla kutsuilla.
    - Ongelma (VARMA): kategorianäkymän kortit eivät kerro, milloin tuotteelle on seuraavaksi tilaa; asiakas avaa tuotteen ja selaa kalenteria. Fresha ja Timma näyttävät seuraavan vapaan ajan listassa (OLETUS, yleistieto).
    - Ratkaisu: korttiin "Seuraava vapaa: la 14.11. klo 14.00" olemassa olevalla `public_availability_all`-kutsulla (`availability-months.js`), haettuna listan piirron jälkeen.
    - Hyväksymiskriteerit: tieto ei viivästytä listan ensipiirtoa; virhetilanteessa kortti näkyy kuten nyt.
@@ -513,6 +567,7 @@ Nykytila: yhteenvetopalkki ja "Vaihda päivää tai aikaa", henkilömäärä, yk
 Nykytila: vahvistussivulla tilausnumero, palvelu, aika, henkilöt, summa, maksun tila, pitolaskuri, maksutavat (verkkopankki, kortti, Apple Pay, Google Pay, MobilePay, lahjakortti), uima-asuohje, "Lisää kalenteriin", muutos- ja reittiohje.
 
 1. **KAUPPA-MAKSU-01 · PIENI · Vanhentuneet ja ristiriitaiset maksutekstit**
+   - **Tila 13.11.2026:** Osittain, PR #350. Visma Pay -lause on poistettu (FI ja EN, tuonti 145). Jäljellä: maksun tila laskulla ja vanhentuneella varauksella sekä tilaussivun "Verkkomaksu ei ole vielä käytössä" ja himmennetty maksunappi.
    - Ongelma (VARMA): asiakkaalle näkyy "Maksu paikan päällä. Verkkomaksu (Visma Pay) otetaan käyttöön myöhemmin." (`booking/shop/src/i18n.js:47, 126`; tietokannan varateksti `content/site-texts.fallback.json:20641`, EN `:20634`) aina, kun pitotila tai verkkomaksu ei ole päällä tai maksutapojen haku epäonnistuu (`shop.js:1165, 1278`). Montonio on nykyinen maksunvälittäjä. Maksun tila "Maksamatta (maksu paikan päällä)" näkyy myös yrityslaskulla ja vanhentuneella verkkomaksuvarauksella (`shop.js:1221, 1257`). Tilaussivulla "Verkkomaksu ei ole vielä käytössä" ja himmennetty "Maksa maksamaton osa" (`order.js:286–288`, `order-texts.js:15`).
    - Ratkaisu: `payLater` → "Maksu paikan päällä."; "ei vielä käytössä" -tekstit pois; maksun tila valitaan tilan mukaan (lasku → "Laskutetaan", vanhentunut → "Ei veloitettu").
    - Hyväksymiskriteerit: sanoja "Visma Pay" tai "ei vielä käytössä" ei näy missään asiakasnäkymässä FI/EN; yksikkötestit tiloille.
@@ -521,6 +576,7 @@ Nykytila: vahvistussivulla tilausnumero, palvelu, aika, henkilöt, summa, maksun
    - Riippuvuudet: – (kiireellinen).
 
 2. **KAUPPA-VAHVISTUS-01 · KESKI · Vahvistussivu toistaa itseään eikä johda tilaussivulle**
+   - **Tila 13.11.2026:** Huomioitava PR #347 (booking_284): asiakas voi pienentää henkilömäärää itse tilaussivulla ja saada automaattisen osahyvityksen (lippu `customer_auto_partial_refund_enabled`). "Hallitse varausta" -tekstin pitää mainita tämä, kun lippu on päällä.
    - Ongelma (VARMA): pitotilassa H1 "Viimeistele varaus", H2 "Varauksesi odottaa maksua" ja merkki "Varaus odottaa maksua"; vanhentuneessa tilassa H1 ja H2 "Varaus on vanhentunut", merkki, H3 "Paikkavaraus vanheni", sama lause tekstinä ja kaksi kilpailevaa toimintoa "Tee uusi varaus" (kulta) ja "Yritä uudelleen" (vihreä) (`shop.js:1275, 1281–1282`, `hold-ui.js:36`). Sivulta ei ole linkkiä tilaussivulle (`/tilaus/?t=`), jossa ovat kuitit, lisäykset ja peruutuspyyntö (`shop.js:1200–1331`), eikä siinä kerrota, että vahvistus on lähetetty sähköpostiin. Vahvistussivu ohjaa peruuttamaan sähköpostilla (`i18n.js` `changeInfo`/`changeLocked`), vaikka tilaussivulla on peruutuspyyntölomake (`order.js:386–420`).
    - Ratkaisu: jokaisessa tilassa (odottaa maksua, vanhentunut, vahvistettu, peruttu) yksi otsikko, yksi tilamerkki ja yksi päätoiminto; vahvistetussa "Vahvistus on lähetetty osoitteeseen …" ja painike "Hallitse varausta"; peruutusohje sama kuin tilaussivulla; vahvistussivun peruutus omaan vahvistusdialogiin `confirm()`-ikkunan sijaan, virheenkäsittelyineen (`shop.js:1268–1273`, `order.js:412`).
    - Hyväksymiskriteerit: jokaisessa tilassa yksi H1 ja yksi ensisijainen painike; vahvistetusta tilasta yksi klikkaus tilaussivulle.
@@ -551,6 +607,7 @@ Nykytila: erittäin kattava (varaukset, rivit, maksutila, maksu, lahjakortti, ku
 #### KAUPPA-JONO, KAUPPA-LAHJAKORTTI ja muut kulut
 
 1. **KAUPPA-JONO-01 · PIENI · Täyden tapahtuman jonotuslinkki rikkoutuu sivun päivityksessä**
+   - **Tila 13.11.2026:** Valmis, PR #350.
    - Ongelma (VARMA): jonotussivu toimii listalta tultaessa, mutta päivitys tai suora linkki (esim. sähköpostista) antaa "Vuoroa ei löytynyt" (`waitlist-ui.js:11–17`), koska tapahtumatuote lisätään `state.catalog`iin vain listanäkymässä (`shop.js:313`).
    - Ratkaisu: reitti `jono` hakee tapahtumat ja puuttuvat tapahtumatuotteet ennen `viewWaitlist`-kutsua.
    - Hyväksymiskriteerit: `#/jono/<sääntö>/<pvm>/<tuote>` toimii sivun päivityksen jälkeen; e2e-testi.
@@ -622,16 +679,17 @@ Nykytila: kirjautumiskortti (sähköposti + salasana). Kirjautuneena tummanvihre
 
 1. **HALL-KUORI-01 · KESKI · Päävalikko on ryhmitelty teknisesti, ei työn mukaan**
    - Ongelma (VARMA): 11 pääkohtaa + 4 ryhmää, joissa yhteensä 15 välilehteä; "Kassa ja talous" sisältää vielä Talous-välilehden neljä alavälilehteä (kolme tasoa). Samat asiat löytyvät kahdesta paikasta: tilauslista (Tilaukset ja Talous › Tilaukset), hyvitysten seuranta (oma välilehti ja raporttivalinta), koulutukset (päävalikko ja Tuotteet › Tapahtumat, jonka otsikko on "Tapahtumat ja koulutukset"), vuosikortit (Tuotteet › Alennuskoodit). Verrokeissa (Fresha, Timma) päävalikossa on 6–8 kohtaa: Kalenteri, Myynti, Asiakkaat, Palvelut, Raportit, Markkinointi, Asetukset.
-   - Ratkaisu, ehdotettu rakenne (9 pääkohtaa, enintään kaksi tasoa):
+   - Ratkaisu, ehdotettu rakenne (10 pääkohtaa, enintään kaksi tasoa; Koulutukset omana kohtanaan Joonaksen palautteen 13.11. mukaan, koska sinne tulee jatkossa paljon lisää):
      1. **Päivä**
      2. **Kalenteri** (myös tapahtumien ja koulutusten kerrat)
      3. **Tilaukset** · välilehdet Tilaukset, Varaukset, Avoimet maksut (nykyiset Seurattavat maksut ja Hyvitysten seuranta yhtenä jonona)
      4. **Asiakkaat**
      5. **Lahjakortit ja koodit** · Lahjakortit, Kumppanikoodit, Alennuskoodit, Vuosikortit
-     6. **Tarjonta** · Tuotteet, Tapahtumat ja koulutukset, Hiljaiset ajat, Aukiolot (uusi, HALL-TILAT-01), Tilat ja sulut
-     7. **Talous** · Raportit (ensimmäisenä Päivän tilitys), Maksut, Laskut, Kävijät
-     8. **Sisältö** · Viestipohjat, Viesti asiakkaille, Tekstit (uusi, SIVU-YHT-03), Saunatietoa (uusi)
-     9. **Asetukset** · Yleiset, Varaukset, Maksut ja laskutus, Järjestelmä (vain admin), Käyttäjät
+     6. **Tarjonta** · Tuotteet, Tapahtumat, Hiljaiset ajat, Aukiolot (uusi, HALL-TILAT-01), Tilat ja sulut
+     7. **Koulutukset** · oma päävalikon kohta ja oma työtila (Koulutukset, Matkat ja tulevat koulutustoiminnot); koulutukset poistetaan Tapahtumat-välilehdeltä
+     8. **Talous** · Raportit (ensimmäisenä Päivän tilitys), Maksut, Laskut, Kävijät
+     9. **Sisältö** · Viestipohjat, Viesti asiakkaille, Tekstit (uusi, SIVU-YHT-03), Saunatietoa (uusi)
+     10. **Asetukset** · Yleiset, Varaukset, Maksut ja laskutus, Järjestelmä (vain admin), Käyttäjät
      Yläpalkkiin pikatoiminnoiksi: Haku · Uusi varaus · **Kassa** (Pikakassa) · Tarkista. Pikakassa on tiskityökalu, ei hallinnan osio, joten sen kuuluu olla yhden napautuksen päässä joka näkymästä.
    - Hyväksymiskriteerit: jokainen toiminto löytyy yhdestä paikasta; enintään kaksi navigointitasoa; ryhmä aukeaa sen tärkeimpään välilehteen (nyt Kassa ja talous aukeaa Pikakassaan, `admin-navigation.js:52–55`); vanhat osoitteet (`#/talous`, `#/pikakassa`, `#/alennuskoodit` jne.) ohjautuvat uusiin (`resolveAdminPath` tukee jo tätä); jokaisella sivulla yksi H1; henkilökunnan testitehtävät ("myy juoma", "etsi tilaus 15123", "lisää sulku", "jatka lahjakorttia", "tee eilisen raportti") onnistuvat ilman harhailua.
    - Tiedostot: `booking/admin/admin-navigation.js`, `booking/admin/admin.js` (`ROUTES`), `booking/admin/nav-texts.js`, `booking/admin/views/nav-group.js`, uudet tekstiavaimet tuontitiedostoon.
@@ -684,23 +742,23 @@ Nykytila: yhden sarakkeen aikajana: päivän tuotto (vain admin ja manager), ty�
 
 1. **HALL-PAIVA-01 · PIENI · Järjestys ja leveydet: päivän vaihto on tuoton ja muistutusten alla**
    - Ongelma (VARMA): päivätyökalut ovat tuoton, työvuorojen ja muistutuksen alapuolella (`day.js:203–205`); varaus- ja valmistelukortit ovat 760 px leveitä (`admin.css`: `.dayrev`, `.prepcard`, `.day-notes` `max-width:760px`), mutta muistutus ja Sulut-kortti koko leveydeltä; "3 aktiivista varausta, 6 henkilöä yhteensä" toistaa Valmistelun henkilöluvun (`day.js:209`, `dayparts.js:61`); vuoron tyyppi (yleinen/yksityinen) näkyy vain reunan värinä (`day.js:158`); kapasiteetista näkyy "Vapaana: N", ei "6/10" (`dayparts.js:14`); aika ja henkilömäärä toistuvat kortin otsikossa ja rivillä; "+ Uusi varaus" on sekä yläpalkissa että päivätyökaluissa.
-   - Ratkaisu: päivätyökalut heti otsikon alle (tabletilla kiinteänä); tuotto pieneksi tunnuslukuriviksi; kaikki kortit samaan leveyteen; yhteenvetorivi pois; vuorokortin otsikkoon tekstimerkki "Yleinen"/"Yksityinen" ja täyttöaste "6/10"; Sulut-osio työkalurivin painikkeeksi; toinen "Uusi varaus" pois.
-   - Hyväksymiskriteerit: päivän vaihto onnistuu ilman vieritystä 390, 820 ja 1280 px:llä; vuoron tyyppi luettavissa tekstinä; kaikki päivänäkymän kortit samalla leveydellä.
+   - Ratkaisu: päivätyökalut heti otsikon alle (tabletilla kiinteänä); niiden alle Valmistelu-kortti, joka näyttää kerralla henkilömäärän ja jokaisen tilatun lisäpalvelun määrän lajeittain (pyyhkeet, saunavihdat, turvenaamiot, jalkakylvyt) ja aloitusajoittaisen erittelyn (Joonaksen palaute 13.11.: tämä on päivänäkymän tärkein tieto; nykyinen `prepCard` tekee tämän jo, se vain siirretään ylös); tuotto samalle riville pienenä lukuna; kaikki kortit samaan leveyteen; yhteenvetorivi pois; vuorokortin otsikkoon tekstimerkki "Yleinen"/"Yksityinen" ja täyttöaste "6/10"; Sulut-osio työkalurivin painikkeeksi; toinen "Uusi varaus" pois.
+   - Hyväksymiskriteerit: päivän vaihto ja Valmistelu (henkilöt ja jokainen lisäpalvelu määrineen) näkyvät ilman vieritystä 390, 820 ja 1280 px:llä; vuoron tyyppi luettavissa tekstinä; kaikki päivänäkymän kortit samalla leveydellä.
    - Tiedostot: `booking/admin/views/day.js`, `booking/admin/views/dayparts.js`, `booking/admin/admin.css`.
    - Tietokanta: ei (OLETUS: `admin_day_view` palauttaa jo vuoron kapasiteetin; tarkista).
    - Riippuvuudet: YHT-03.
 
-2. **HALL-PAIVA-02 · PIENI · Saapunut-painike on näkymätön ympyrä, "Ei saapunut" puuttuu**
-   - Ongelma (VARMA): painikkeessa ei ole näkyvää tekstiä, rasti on läpinäkyvä (`admin.css:433`, `.arrive{color:transparent}`), selitys on vain `title`-vihjeenä, joka ei näy kosketusnäytöllä (`dayparts.js:25–41`). Painettuna tilamerkiksi tulee "Toteutunut" (`ui.js:35`), vaikka painike tarkoittaa "Saapunut". "Ei saapunut" ei ole päivänäkymässä eikä uudessa tilausnäkymässä (HALL-TILAUS-01). Verrokeissa (Fresha, FareHarbor) check-in on näkyvä, yhden napautuksen toiminto.
-   - Ratkaisu: näkyvä painike "Saapui" (ja rasti, kun painettu), kiinteä `aria-label` + `aria-pressed`; tilamerkki "Saapunut"; rivin ⋯-valikkoon "Ei saapunut" (`admin_set_reservation_status`, tila `no_show`).
-   - Hyväksymiskriteerit: uusi työntekijä ymmärtää painikkeen ilman ohjetta; ruudunlukija lukee "Saapunut, <nimi>, ei painettu".
-   - Tiedostot: `booking/admin/views/dayparts.js`, `booking/admin/ui.js`, `booking/admin/admin.css`.
+2. **HALL-PAIVA-02 · PIENI · Sisäänkirjausympyrä säilyy; tilan nimi ja "Ei saapunut" kuntoon**
+   - Ongelma (VARMA): vihreäreunainen ympyrä, joka täyttyy vihreäksi sisäänkirjauksessa, on hyvä ja tilaa säästävä ratkaisu (Joonaksen palaute 13.11.: erillinen Saapui-painike olisi turha), mutta painettuna tilamerkiksi tulee "Toteutunut" (`ui.js:35`), vaikka toiminto tarkoittaa "Saapunut"; selitys on vain `title`-vihjeenä, joka ei näy kosketusnäytöllä (`dayparts.js:25–41`); "Ei saapunut" puuttuu päivänäkymästä ja uudesta tilausnäkymästä (HALL-TILAUS-01).
+   - Ratkaisu: ympyrä säilyy ennallaan; tilamerkiksi "Saapunut"; ruudunlukijalle kiinteä nimi ("Saapunut: <nimi>") ja `aria-pressed`; "Ei saapunut" rivin ⋯-valikkoon (`admin_set_reservation_status`, tila `no_show`, HALL-PAIVA-03).
+   - Hyväksymiskriteerit: ympyrän ulkoasu ja koko eivät muutu; tilamerkki on "Saapunut" kaikissa näkymissä; ruudunlukija lukee nimen ja tilan.
+   - Tiedostot: `booking/admin/views/dayparts.js`, `booking/admin/ui.js`.
    - Tietokanta: ei.
-   - Riippuvuudet: –
+   - Riippuvuudet: YHT-04.
 
 3. **HALL-PAIVA-03 · KESKI · Rivin pikatoiminnot: siirto, soitto ja peruutus poistumatta päivästä**
    - Ongelma (VARMA): asiakkaan siirto toiseen vuoroon vaatii 5–6 askelta ja kaksi näkymänvaihtoa (Päivä → nimi → tilausnäkymä → Muuta/siirrä → päivä → vuoro → tallenna). Puhelinnumero ei näy rivillä (`day.js:148–152`), joten soittaminen vaatii tilauksen avaamisen. Siirto rajoittuu saman tuotteen vuoroihin (`order-card.js:672`).
-   - Ratkaisu: rivin ⋯-valikko: Siirrä (avaa nykyisen siirtodialogin päivänäkymän päälle), Soita (`tel:`), Peru, Ei saapunut; puhelinnumero riville.
+   - Ratkaisu: rivin ⋯-valikko: Siirrä (avaa nykyisen siirtodialogin päivänäkymän päälle; siirto sekä toiseen vuoroon että vapaasti valittavaan ajankohtaan, kuten nykyisessä dialogissa `order-card.js` kellonaikakentällä ja `p_start`/`p_end`), Soita (`tel:`), Peru, Ei saapunut; puhelinnumero riville.
    - Hyväksymiskriteerit: siirto enintään 4 klikkausta poistumatta päivänäkymästä; näkymä päivittyy heti.
    - Tiedostot: `booking/admin/views/day.js`, `booking/admin/views/dayparts.js`, `booking/admin/views/order-card.js` (siirtodialogi omaksi moduuliksi).
    - Tietokanta: ei saman tuotteen siirrolle. Tuotteen vaihto (yleinen → yksityinen) vaatii `admin_change_booking`-laajennuksen (`p_product_id`), joka luonnostellaan erikseen.
@@ -895,6 +953,7 @@ Nykytila: palvelinpuolen sivutus (25 / sivu), haku, maksutilasirut ja "Näytä s
 Nykytila: kaksi saraketta: "Seuraava askel" -palkki, varausrivit toimintoineen, erittely, aikajana, maksukortti, asiakas, muistiinpanot sekä "Peruutus ja poisto" (`booking/admin/views/order-view.js`). Hallinnan selkein ja ammattimaisin näkymä. Kaikki sisäänkäynnit (päivä, kalenteri, varauslista, asiakas, uusi varaus) avaavat tämän (`booking/admin/order-open.js:1–3`); vanha tilauskorttimodaali (`views/order-card.js`, 731 riviä) jää vain varapoluksi.
 
 1. **HALL-TILAUS-01 · KESKI · Uusi tilausnäkymä vei henkilökunnalta toimintoja**
+   - **Tila 13.11.2026:** Osittain, PR #347 (booking_282–284, lippu `partial_refunds_enabled`): atominen koko tilauksen peruutus (`admin_cancel_order`), osahyvitys ja ylisuorituksen hyvitys ovat nyt tilausnäkymässä. Jäljellä: Ei saapunut, maksamattoman tilauksen poisto, peruutuspyynnön näkyminen, yrityksen laskutustiedot, vuosikorttikoodi, kumppanikoodi, hyvityksen uudelleenyritys ja saunottajapoikkeus.
    - Ongelma (VARMA): seuraavat ovat vain vanhassa kortissa, johon ei käytännössä enää pääse:
      - "Ei saapunut" -merkintä (`order-card.js:499`; v3:n rivitoiminnot `order-view-logic.js:141–157` eivät sisällä sitä, vaikka asiakasnäkymä laskee no-show-tilastoa `customer-view.js:160`);
      - maksamattoman tilauksen poisto (booking_279): v3:n "Peruutus ja poisto" -kortissa on tyhjä paikka `[data-slot=order-delete]` (`order-view.js:372`), jota mikään koodi ei täytä;
@@ -908,6 +967,7 @@ Nykytila: kaksi saraketta: "Seuraava askel" -palkki, varausrivit toimintoineen, 
    - Riippuvuudet: YHT-08 (kokeilutila testejä varten).
 
 2. **HALL-TILAUS-02 · PIENI · Julkaisu jättää dynaamiset importit versioimatta: "← Takaisin" ei palaa lähtönäkymään**
+   - **Tila 13.11.2026:** Valmis, PR #350.
    - Ongelma (VARMA, paikallinen koonti): `scripts/build-pages.mjs:72` lisää versiotunnuksen vain muotoihin `import '…'` ja `from '…'`. Muodot `import('./order-view.js')` jäävät ilman sitä (tarkistettu `dist/hallinta/views/orders.js`). Selain lataa saman moduulin kahdesti (versioituna ja ilman), jolloin `order-open.js`:n paluutila katoaa: päivänäkymästä, kalenterista tai varauslistasta avatun tilauksen paluulinkki on aina "← Tilaukset". Lisäksi dynaamisesti ladatut näkymät voivat jäädä selaimen välimuistiin vanhoina uuden julkaisun jälkeen.
    - Ratkaisu: sama korvaus myös muodolle `import('…')`; build epäonnistuu, jos distiin jää versioimaton suhteellinen `.js`-import.
    - Hyväksymiskriteerit: jokainen moduuli latautuu distissä kerran (Playwrightin verkkoloki); "← Takaisin" palaa päivänäkymään, kalenteriin ja varauslistaan.
@@ -931,19 +991,13 @@ Nykytila: kaksi saraketta: "Seuraava askel" -palkki, varausrivit toimintoineen, 
    - Tietokanta: ei.
    - Riippuvuudet: HALL-TILAUS-01.
 
-5. **HALL-TILAUS-05 · KESKI · Siirto ja henkilömäärän muutos eivät kerro uutta hintaa eivätkä ilmoita asiakkaalle**
+5. **HALL-TILAUS-05 · PIENI · Siirto ja henkilömäärän muutos eivät kerro uutta hintaa eivätkä ilmoita asiakkaalle**
+   - **Tila 13.11.2026:** Pääosin valmis, PR #347 (booking_282): `admin_change_booking_preview` näyttää uuden hinnan ennen tallennusta, ja `admin_change_booking` sai parametrit `p_refund_amount`, `p_refund_reason` ja `p_notify` (lippu `partial_refunds_enabled`). Vapaa ajankohta oli jo dialogissa (`p_start`, `p_end`). Jäljellä: testaus DEVissä, lipun kytkentä ja paneelin tuonti tilausnäkymän sisään (luonnos 02).
    - Ongelma (VARMA): "Muuta / siirrä" -dialogi (`order-card.js:638–731`) ei näytä uutta hintaa, vaikka palvelin laskee sen uudelleen (`_change_booking_core`, booking_192); hinnan ero selviää vasta tallennuksen jälkeen. Asiakkaalle ei voi lähettää muutosvahvistusta (`admin_change_booking` ilman `p_notify`, booking_192:847–857). Päivä ilman vuoroja näyttää saman tekstin kahdesti (`order-card.js:651–658, 682`).
    - Ratkaisu: ensin pelkkä käyttöliittymä (alle tunnin työ): "Uusi hinta 98,00 € (ero +13,00 €)" ennen tallennusta ja maksulinkkiehdotus, jos syntyy maksettavaa; tuplateksti pois. Sitten tietokantamuutoksen vaativa valinta "Lähetä asiakkaalle muutosvahvistus".
    - Hyväksymiskriteerit: henkilökunta näkee hinnan muutoksen ennen tallennusta; asiakas saa halutessa vahvistuksen uudesta ajasta.
    - Tiedostot: `booking/admin/views/order-card.js` (siirto omaksi `order-change.js`-moduuliksi), `booking/admin/nb-logic.js`, tekstit.
-   - Tietokanta: kyllä, ilmoitusvalinnalle. Luonnos:
-     ```sql
-     -- LUONNOS: admin_change_booking saa ilmoitusvalinnan (ei ajettu)
-     -- create or replace function booking.admin_change_booking(<nykyiset parametrit>, p_notify boolean default false)
-     --   ... nykyinen logiikka ...
-     --   if p_notify then insert into booking.email_outbox(kind, order_id, ...) values ('order_change', v_order_id, ...); end if;
-     ```
-     Viestipohja `email.order_change.*` on jo olemassa (`docs/SIVUTEKSTIT.md`, PR 3); allekirjoitus "Tapio".
+   - Tietokanta: ei enää tarvita: booking_282 (PR #347) toi `admin_change_booking_preview`-funktion ja `admin_change_booking`-funktion parametrit `p_notify`, `p_refund_amount` ja `p_refund_reason`. Viestipohja `email.order_change.*` on olemassa.
    - Riippuvuudet: –
 
 6. **HALL-TILAUS-06 · KESKI · Vahvistusta ei voi lähettää uudelleen eikä yksittäiselle asiakkaalle voi kirjoittaa**
@@ -997,31 +1051,13 @@ Nykytila: lista hakukentällä ja "Näytä lisää" -painikkeella, rivillä merk
    - Tietokanta: ei.
    - Riippuvuudet: –
 
-2. **HALL-ASIAKKAAT-02 · SUURI · Kaksoiskappaleiden yhdistäminen ja asiakkaan anonymisointi**
+2. **HALL-ASIAKKAAT-02 · PIENI · Kaksoiskappaleiden yhdistäminen ja asiakkaan anonymisointi**
+   - **Tila 13.11.2026:** Valmis kytkimien takana, PR #349 (booking_285, oikeus `customers.admin`). Jäljellä: testaus DEVissä ja kytkimien päälle laitto. Aiempi migraatioluonnos on poistettu tarpeettomana.
    - Ongelma (VARMA): kumpaakaan ei ole; koodissa kommentti "EI Yhdistä/poista-osiota (myöhempi PR)" (`customer-view.js:109`). Johku-tuonti ja verkkovaraukset tuottavat väistämättä kaksoiskappaleita (sama henkilö eri sähköpostilla tai puhelinnumerolla), ja GDPR-poistopyyntö vaatii nyt kehittäjän.
    - Ratkaisu: asiakasnäkymään "Yhdistä…" (haku ehdokkaille samalla nimellä, sähköpostilla tai puhelimella; esikatselu siitä, mitä siirtyy; vahvistus) ja vain adminille "Poista asiakas (anonymisoi)", estettynä jos avoimia tilauksia tai saldoa.
    - Hyväksymiskriteerit: yhdistämisen jälkeen kaikki tilaukset, vuosikortit ja lahjakortit näkyvät yhdellä asiakkaalla, ja audit-rivi syntyy; anonymisoitu asiakas ei näy haussa.
    - Tiedostot: `booking/admin/views/customer-view.js`, uusi `booking/admin/views/customer-merge.js`, tekstit.
-   - Tietokanta: kyllä, luonnos:
-     ```sql
-     -- LUONNOS booking_xxx_customer_merge (ei ajettu; ensin DEV, sitten PROD; rollback ja SQL-testit tests/customers/)
-     alter table booking.customers add column if not exists merged_into bigint references booking.customers(id);
-     create or replace function booking.admin_merge_customers(p_keep bigint, p_merge bigint, p_reason text)
-     returns jsonb language plpgsql security definer set search_path = booking, public as $$
-     begin
-       if not booking.has_permission('customers.manage') then raise exception 'forbidden' using errcode = '42501'; end if;
-       if p_keep = p_merge then raise exception 'same_customer'; end if;
-       update booking.orders        set customer_id = p_keep where customer_id = p_merge;
-       update booking.annual_cards  set customer_id = p_keep where customer_id = p_merge;
-       -- gift_cards (ostaja), jonot, laskut: tarkista sarakkeet tuotannosta
-       -- markkinointilupa: uusin aikaleima voittaa; notes yhdistetään
-       update booking.customers set merged_into = p_keep, anonymized_at = now() where id = p_merge;
-       insert into booking.audit_log(...) values (...);   -- kuka, milloin, syy
-       return jsonb_build_object('ok', true);
-     end $$;
-     create or replace function booking.admin_anonymize_customer(p_id bigint, p_reason text) returns jsonb ...
-       -- käyttää booking_157:n säilytysajon anonymisointilogiikkaa yhdelle asiakkaalle; vain admin
-     ```
+   - Tietokanta: toteutettu, booking_285 (PR #349): yhdistäminen ja anonymisointi esikatseluineen, rollback ja SQL-testit (`booking/supabase/tests/t285_customer_merge_anonymize.sql`).
    - Riippuvuudet: HALL-ASIAKKAAT-01.
 
 3. **HALL-ASIAKKAAT-03 · KESKI · Asiakaskortista puuttuvat tagit, no-show-varoitus ja viestihistoria**
@@ -1065,6 +1101,7 @@ Nykytila: tuotepainikkeet (2 saraketta mobiilissa, 3 ≥ 700 px), Yhteensä ja M
 Nykytila: sivun yläosassa ALV-huomautus ja "Myynti ja ALV" -kaavio, jonka alla neljä alavälilehteä: Tilaukset (sama lista kuin päävalikon Tilaukset), Maksut (kuitit ja PDF:t), Raportit (9 raporttia täysleveinä pystynappeina, jakso, PDF, CSV, tulostus) ja Kävijät (verkkokaupan analytiikka). Raporttiin pääsee neljän tason kautta: sivupalkki › Kassa ja talous › Talous › Raportit › raportti (`admin-navigation.js:7–13`, `views/talous.js:19`, `views/talous-reports.js:312`). Ensimmäinen tilausrivi alkaa 1280 px:n näytöllä noin 1 250 px:n kohdalta.
 
 1. **HALL-TALOUS-01 · PIENI · Raporttien virheet ja käytettävyys**
+   - **Tila 13.11.2026:** Osittain, PR #350. "Veroton"-sarake on korjattu aidosti verottomaksi (`booking/admin/report-method-net.js`). Jäljellä: Avoimet maksut -taulukon rajaus, raporttivalitsin näppäimistölle, vuosivalitsimen leveys ja Hyvitysten seuranta pois raporttilistasta.
    - Ongelma (VARMA): maksutaparaportin "Maksutavoittain"-taulukon sarake "Veroton" näyttää bruttosumman hyvitysten jälkeen (`views/talous-reports.js:113`: `gross + refunds`; otsikko `ui.admin.reports.col_net` = "Veroton", `reports-texts.js:29`). Kirjanpitäjä voi lukea luvun väärin. "Avoimet maksut" -taulukko piirtää kaikki rivit ilman rajaa (`talous-reports.js:131–132`; kokeilutilassa 1 466 riviä yhdelle päivälle; tuotannon määrä OLETUS). Raporttivalitsimen `role=radio`-napit eivät tue nuolinäppäimiä (`talous-reports.js:319`). Kaavion vuosivalitsin on täysleveä, koska `select{width:100%}` (`admin.css:44`) ohittaa `.tl-sales-year`-säännön (`admin.css:554`), joten ‹ ja › ovat eri riveillä. "Hyvitysten seuranta" on sekä raporttivalinta että oma välilehti.
    - Ratkaisu: sarakkeen nimeksi "Yhteensä hyvitysten jälkeen (sis. ALV)"; "Avoimet maksut" 20 riviä + "Näytä kaikki"; raporttivalinta pudotusvalikoksi tai segmentiksi, joka toimii näppäimistöllä; `.tl-sales-year{width:auto}`; Hyvitysten seuranta pois raporttilistasta.
    - Hyväksymiskriteerit: sarakeotsikot vastaavat laskukaavaa; päiväraportti mahtuu alle kolmen näytön korkeuden; nuolinäppäintesti.
@@ -1120,6 +1157,7 @@ Nykytila: Seurattavat maksut näyttää avoimet maksulinkit kortteina (summa, p�
 Nykytila: "Uusi lasku" (pitkä dialogi YTJ-haulla) ja "Tilauksesta", haku ja suodattimet; esikatselu aukeaa listan alle.
 
 1. **HALL-LASKUT-01 · PIENI · "Lasku tilauksesta" kysyy tilausnumeroa mutta hakee sisäisellä tunnisteella**
+   - **Tila 13.11.2026:** Valmis, PR #350 (`booking/admin/invoice-from-order.js`).
    - Ongelma (VARMA): dialogin kenttä on "Tilausnumero" (`booking/admin/invoices-texts.js:62`), ja arvo lähetetään parametrina `p_order_id` (`views/invoices.js:123`), jota funktio vertaa sisäiseen tunnisteeseen `o.id = p_order_id` (`booking/supabase/migrations/20261019011600_booking_92_invoice_checkout.sql:167`; funktio on md5-vartioitu myöhemmissä migraatioissa 175 ja 187, joten se ei ole muuttunut). Henkilökunnan syöttämä tilausnumero (esim. 15123) ei löydä tilausta tai, pahimmillaan, löytää väärän.
    - Ratkaisu: dialogi hakee tilauksen tilausnumerolla (`admin_order_lookup` tai `admin_list_orders`) ja näyttää asiakkaan ja summan ennen luontia ("Luo lasku tilauksesta 15123 · Yritys Oy · 256,00 €"); parempi vielä: "Luo lasku" -toiminto tilausnäkymään.
    - Hyväksymiskriteerit: tilausnumero 15123 luo laskun oikealle tilaukselle; väärä numero antaa selvän virheen.
@@ -1276,7 +1314,7 @@ Nykytila: uusi työtila: korttilista, jakson yhteenveto, "Onko valmis?" -tarkist
 
 1. **HALL-KOULUTUKSET-01 · PIENI · Ulkoasu poikkeaa muista ja pieniä tekstivirheitä**
    - Ongelma (VARMA): H1 on selvästi muita suurempi ja välilehdet ovat täytettyjä tummia laattoja (`.training-tabs`), kun muualla on alleviivatut välilehdet; välilehdissä pelkkä `active`-luokka ilman `aria-current`/`aria-selected` (`koulutukset.js:41–42, 71`); yhteenvedossa "Tilat Tilat varattu" (`koulutukset.js:69`); "Muut tiedot" -laatikossa linkki, jonka nimi on myös "Muut tiedot" ja joka vie vanhaan Kerrat-editoriin (`:84–86`); kortissa "Paikat 2 / 8" mutta "Vapaita paikkoja –".
-   - Ratkaisu: yhteinen otsikko- ja välilehtikomponentti; tekstikorjaukset; linkin nimeksi "Muokkaa kertoja ja tekstejä"; vapaat paikat lasketaan.
+   - Ratkaisu: Koulutukset pysyy omana päävalikon kohtanaan ja omana työtilanaan, koska sinne tulee jatkossa paljon lisää (Joonaksen päätös 13.11.); siksi sen pohjaksi yhteiset komponentit nyt, ennen kuin osio kasvaa: yhteinen otsikko- ja välilehtikomponentti; tekstikorjaukset; linkin nimeksi "Muokkaa kertoja ja tekstejä"; vapaat paikat lasketaan.
    - Hyväksymiskriteerit: Koulutukset näyttää samalta kuin muut näkymät; ei toistuvia sanoja.
    - Tiedostot: `booking/admin/views/koulutukset.js`, `booking/admin/training-texts.js`, `booking/admin/admin.css`.
    - Tietokanta: ei.
@@ -1345,121 +1383,121 @@ Nykytila (arvioitu koodista; kokeilutila ei avaa näkymää, koska `admin_list_s
 
 Kaikki parannusehdotukset koon mukaan ryhmiteltynä, luvun 2 ja 3 esiintymisjärjestyksessä.
 
-### PIENI (59 kohtaa)
+### PIENI (61 kohtaa)
 
-| Tunniste | Otsikko | Osio |
-|---|---|---|
-| YHT-04 | Yksi tilasanasto ja monikot | Yhteinen ulkoasu (luku 2.5) |
-| YHT-05 | Kellonajat, päivämäärät, rahat ja ALV yhdellä tavalla | Yhteinen ulkoasu (luku 2.5) |
-| YHT-06 | Selaimen `confirm()` pois, dialogit kuntoon | Yhteinen ulkoasu (luku 2.5) |
-| YHT-07 | Lomakekentät, virheet ja fokus yhdenmukaisiksi | Yhteinen ulkoasu (luku 2.5) |
-| YHT-08 | Kokeilutila kattamaan kaikki näkymät | Yhteinen ulkoasu (luku 2.5) |
-| SIVU-YHT-04 | "Koulutukset" päävalikossa avautuu ulkoiselle sivustolle uuteen välilehteen | Sivusto · yhteiset osat |
-| SIVU-YHT-05 | Pikkuvirheet teksteissä ja muodoissa | Sivusto · yhteiset osat |
-| SIVU-ETUSIVU-01 | "Valitse elämys" -kortit ovat epätasaisia | Sivusto · etusivu |
-| SIVU-ETUSIVU-02 | Hero ja ensimmäinen näkymä mobiilissa | Sivusto · etusivu |
-| SIVU-SAUNAVUOROT-01 | Viikko-ohjelman painikkeet ja vapaat paikat | Sivusto · saunavuorot |
-| SIVU-YRITYKSET-01 | Sama valinta kolmeen kertaan | Sivusto · yrityksille |
-| SIVU-INFO-01 | Peruutusohje ei kerro, miten peruutetaan | Sivusto · käytännön info |
-| SIVU-SAUNATIETOA-01 | Tagisivuja on enemmän kuin sisältöä | Sivusto · saunatietoa |
-| SIVU-JUOMAT-01 | Sivu jää tyhjäksi: koonnista puuttuu kaksi moduulia | Sivusto · juomasivu |
-| SIVU-404-01 | 404-sivu kahdella kielellä päällekkäin | Sivusto · 404-sivu |
-| KAUPPA-SELAUS-01 | Päivänäkymän korteissa tuotteen nimi toistuu kuvauksessa | Kauppa · etusivu ja selaus |
-| KAUPPA-TUOTE-01 | Työpöydällä vuorolista jää kapeaan sarakkeeseen, mobiilissa hero vie ensimmäisen näytön | Kauppa · tuotesivu |
-| KAUPPA-KASSA-01 | Mobiilissa kokonaishinta ja 15 minuutin ehto ovat lähetysnapin alapuolella | Kauppa · varauslomake |
-| KAUPPA-KASSA-03 | Luottamuselementit ja lahjakorttiohje näkyviin kassalle | Kauppa · varauslomake |
-| KAUPPA-MAKSU-01 | Vanhentuneet ja ristiriitaiset maksutekstit | Kauppa · maksu ja vahvistus |
-| KAUPPA-TILAUS-01 | Laskutetulla yritystilauksella näkyvät maksutoiminnot | Kauppa · asiakkaan tilaussivu |
-| KAUPPA-TILAUS-02 | Englanninkielisellä tilaussivulla tuotenimet suomeksi | Kauppa · asiakkaan tilaussivu |
-| KAUPPA-JONO-01 | Täyden tapahtuman jonotuslinkki rikkoutuu sivun päivityksessä | Kauppa · jonotus |
-| KAUPPA-LAHJAKORTTI-01 | Lahjakorttisivun kori on sivun lopussa | Kauppa · lahjakorttisivu |
-| KAUPPA-YHT-02 | Saavutettavuuden pikakorjaukset | Kauppa · kaikki kulut |
-| HALL-KUORI-02 | Tabletilla ja puhelimella valikossa vain ikonit, yläpalkin painikkeet alle 44 px | Hallinta · kuori ja navigaatio |
-| HALL-KUORI-03 | Kirjautumisesta puuttuu "Unohtuiko salasana?" | Hallinta · kuori ja navigaatio |
-| HALL-KUORI-04 | Kielivalinta (FI/EN) näkyy vain osassa näkymiä | Hallinta · kuori ja navigaatio |
-| HALL-KUORI-05 | Tarkista-määrä ei vastaa Tarkista-sivun sanoja | Hallinta · kuori ja navigaatio |
-| HALL-KUORI-06 | Virheet ja puuttuvat oikeudet näkyvät harhaanjohtavasti | Hallinta · kuori ja navigaatio |
-| HALL-PAIVA-01 | Järjestys ja leveydet: päivän vaihto on tuoton ja muistutusten alla | Hallinta · päivänäkymä |
-| HALL-PAIVA-02 | Saapunut-painike on näkymätön ympyrä, "Ei saapunut" puuttuu | Hallinta · päivänäkymä |
-| HALL-PAIVA-05 | Valmis päivän muistiinpano -toiminto on piilotettu | Hallinta · päivänäkymä |
-| HALL-PAIVA-06 | Saavutettavuus päivänäkymässä | Hallinta · päivänäkymä |
-| HALL-UUSI-02 | Natiivit päivä- ja aikakentät näyttävät laitteen kielen mukaan | Hallinta · uusi varaus |
-| HALL-TARKISTA-01 | Luvut, tunnukset ja linkit eivät täsmää | Hallinta · tarkista |
-| HALL-TILAT-02 | Resurssit-sivu on kirjoitettu kehittäjälle | Hallinta · resurssit ja aukiolot |
-| HALL-SULUT-02 | Kalenterisulut-näkymä on tekninen | Hallinta · sulut |
-| HALL-TILAUKSET-01 | Suodatinsirut sekoittavat kolme eri asiaa | Hallinta · tilauslista |
-| HALL-TILAUKSET-02 | Sama lista kahdessa paikassa ja kaksi H1-otsikkoa | Hallinta · tilauslista |
-| HALL-TILAUKSET-03 | Listarivi on epäselvä ja mobiilissa ensimmäinen tilaus alkaa vasta 660 px:n kohdalla | Hallinta · tilauslista |
-| HALL-TILAUS-02 | Julkaisu jättää dynaamiset importit versioimatta: "← Takaisin" ei palaa lähtönäkymään | Hallinta · tilausnäkymä |
-| HALL-TILAUS-03 | "Lähetä maksulinkki" ei oletuksena lähetä mitään | Hallinta · tilausnäkymä |
-| HALL-TILAUS-04 | Kaksi lisäostodialogia, v3 käyttää suppeampaa | Hallinta · tilausnäkymä |
-| HALL-TILAUS-07 | Aikajanassa ja dialogeissa näkyy teknisiä koodeja | Hallinta · tilausnäkymä |
-| HALL-TILAUS-08 | Kosketuskohteet ja saavutettavuus tilausnäkymässä | Hallinta · tilausnäkymä |
-| HALL-ASIAKKAAT-04 | Asiakaslista: kohinaa ja puuttuvat monikot | Hallinta · asiakkaat |
-| HALL-KASSA-01 | Kassanäkymä tabletille: kori näkyviin ja otsikot pois tieltä | Hallinta · pikakassa |
-| HALL-TALOUS-01 | Raporttien virheet ja käytettävyys | Hallinta · talous ja raportit |
-| HALL-TALOUS-03 | Teknisiä koodeja ilmoituksissa ja listoissa | Hallinta · talous ja raportit |
-| HALL-LASKUT-01 | "Lasku tilauksesta" kysyy tilausnumeroa mutta hakee sisäisellä tunnisteella | Hallinta · laskut |
-| HALL-LAHJAKORTIT-02 | Myyntikytkimet ja haku | Hallinta · lahjakortit |
-| HALL-ALENNUS-01 | Koodin tuote näkyy numerona, vahvistukset selaimen ikkunoilla | Hallinta · alennuskoodit ja vuosikortit |
-| HALL-TUOTTEET-05 | Lista sarakkeiksi ja valinnat sekä lisäpalvelut omille välilehdilleen | Hallinta · tuotteet |
-| HALL-TUOTTEET-06 | Pikakorjaukset: ALV-muoto, kehittäjäkieli, koodit ja käännösten puutteet | Hallinta · tuotteet |
-| HALL-TAPAHTUMAT-02 | Pikakorjaukset Tapahtumat-näkymään | Hallinta · tapahtumat |
-| HALL-HILJAISET-01 | Päälle/pois-ohjain ja vahvistukset muiden kaltaisiksi | Hallinta · hiljaiset ajat |
-| HALL-KOULUTUKSET-01 | Ulkoasu poikkeaa muista ja pieniä tekstivirheitä | Hallinta · koulutukset |
-| HALL-VIESTIT-02 | Viestit-sivun ulkoasu ja kehittäjäkieli | Hallinta · viestit |
+| Tunniste | Otsikko | Osio | Tila 13.11. |
+|---|---|---|---|
+| YHT-04 | Yksi tilasanasto ja monikot | Yhteinen ulkoasu (luku 2.5) | avoin |
+| YHT-05 | Kellonajat, päivämäärät, rahat ja ALV yhdellä tavalla | Yhteinen ulkoasu (luku 2.5) | avoin |
+| YHT-06 | Selaimen `confirm()` pois, dialogit kuntoon | Yhteinen ulkoasu (luku 2.5) | avoin |
+| YHT-07 | Lomakekentät, virheet ja fokus yhdenmukaisiksi | Yhteinen ulkoasu (luku 2.5) | avoin |
+| YHT-08 | Kokeilutila kattamaan kaikki näkymät | Yhteinen ulkoasu (luku 2.5) | avoin |
+| SIVU-YHT-04 | "Koulutukset" päävalikossa avautuu ulkoiselle sivustolle uuteen välilehteen | Sivusto · yhteiset osat | avoin |
+| SIVU-YHT-05 | Pikkuvirheet teksteissä ja muodoissa | Sivusto · yhteiset osat | avoin |
+| SIVU-ETUSIVU-01 | "Valitse elämys" -kortit ovat epätasaisia | Sivusto · etusivu | avoin |
+| SIVU-ETUSIVU-02 | Hero ja ensimmäinen näkymä mobiilissa | Sivusto · etusivu | avoin |
+| SIVU-SAUNAVUOROT-01 | Viikko-ohjelman painikkeet ja vapaat paikat | Sivusto · saunavuorot | avoin |
+| SIVU-YRITYKSET-01 | Sama valinta kolmeen kertaan | Sivusto · yrityksille | avoin |
+| SIVU-INFO-01 | Peruutusohje ei kerro, miten peruutetaan | Sivusto · käytännön info | avoin |
+| SIVU-SAUNATIETOA-01 | Tagisivuja on enemmän kuin sisältöä | Sivusto · saunatietoa | avoin |
+| SIVU-JUOMAT-01 | Sivu jää tyhjäksi: koonnista puuttuu kaksi moduulia | Sivusto · juomasivu | Valmis, PR #350 |
+| SIVU-404-01 | 404-sivu kahdella kielellä päällekkäin | Sivusto · 404-sivu | avoin |
+| KAUPPA-SELAUS-01 | Päivänäkymän korteissa tuotteen nimi toistuu kuvauksessa | Kauppa · etusivu ja selaus | avoin |
+| KAUPPA-TUOTE-01 | Työpöydällä vuorolista jää kapeaan sarakkeeseen, mobiilissa hero vie ensimmäisen näytön | Kauppa · tuotesivu | avoin |
+| KAUPPA-KASSA-01 | Mobiilissa kokonaishinta ja 15 minuutin ehto ovat lähetysnapin alapuolella | Kauppa · varauslomake | avoin |
+| KAUPPA-KASSA-03 | Luottamuselementit ja lahjakorttiohje näkyviin kassalle | Kauppa · varauslomake | avoin |
+| KAUPPA-MAKSU-01 | Vanhentuneet ja ristiriitaiset maksutekstit | Kauppa · maksu ja vahvistus | Osittain, PR #350 |
+| KAUPPA-TILAUS-01 | Laskutetulla yritystilauksella näkyvät maksutoiminnot | Kauppa · asiakkaan tilaussivu | avoin |
+| KAUPPA-TILAUS-02 | Englanninkielisellä tilaussivulla tuotenimet suomeksi | Kauppa · asiakkaan tilaussivu | avoin |
+| KAUPPA-JONO-01 | Täyden tapahtuman jonotuslinkki rikkoutuu sivun päivityksessä | Kauppa · jonotus | Valmis, PR #350 |
+| KAUPPA-LAHJAKORTTI-01 | Lahjakorttisivun kori on sivun lopussa | Kauppa · lahjakorttisivu | avoin |
+| KAUPPA-YHT-02 | Saavutettavuuden pikakorjaukset | Kauppa · kaikki kulut | avoin |
+| HALL-KUORI-02 | Tabletilla ja puhelimella valikossa vain ikonit, yläpalkin painikkeet alle 44 px | Hallinta · kuori ja navigaatio | avoin |
+| HALL-KUORI-03 | Kirjautumisesta puuttuu "Unohtuiko salasana?" | Hallinta · kuori ja navigaatio | avoin |
+| HALL-KUORI-04 | Kielivalinta (FI/EN) näkyy vain osassa näkymiä | Hallinta · kuori ja navigaatio | avoin |
+| HALL-KUORI-05 | Tarkista-määrä ei vastaa Tarkista-sivun sanoja | Hallinta · kuori ja navigaatio | avoin |
+| HALL-KUORI-06 | Virheet ja puuttuvat oikeudet näkyvät harhaanjohtavasti | Hallinta · kuori ja navigaatio | avoin |
+| HALL-PAIVA-01 | Järjestys ja leveydet: päivän vaihto on tuoton ja muistutusten alla | Hallinta · päivänäkymä | avoin |
+| HALL-PAIVA-02 | Sisäänkirjausympyrä säilyy; tilan nimi ja "Ei saapunut" kuntoon | Hallinta · päivänäkymä | avoin |
+| HALL-PAIVA-05 | Valmis päivän muistiinpano -toiminto on piilotettu | Hallinta · päivänäkymä | avoin |
+| HALL-PAIVA-06 | Saavutettavuus päivänäkymässä | Hallinta · päivänäkymä | avoin |
+| HALL-UUSI-02 | Natiivit päivä- ja aikakentät näyttävät laitteen kielen mukaan | Hallinta · uusi varaus | avoin |
+| HALL-TARKISTA-01 | Luvut, tunnukset ja linkit eivät täsmää | Hallinta · tarkista | avoin |
+| HALL-TILAT-02 | Resurssit-sivu on kirjoitettu kehittäjälle | Hallinta · resurssit ja aukiolot | avoin |
+| HALL-SULUT-02 | Kalenterisulut-näkymä on tekninen | Hallinta · sulut | avoin |
+| HALL-TILAUKSET-01 | Suodatinsirut sekoittavat kolme eri asiaa | Hallinta · tilauslista | avoin |
+| HALL-TILAUKSET-02 | Sama lista kahdessa paikassa ja kaksi H1-otsikkoa | Hallinta · tilauslista | avoin |
+| HALL-TILAUKSET-03 | Listarivi on epäselvä ja mobiilissa ensimmäinen tilaus alkaa vasta 660 px:n kohdalla | Hallinta · tilauslista | avoin |
+| HALL-TILAUS-02 | Julkaisu jättää dynaamiset importit versioimatta: "← Takaisin" ei palaa lähtönäkymään | Hallinta · tilausnäkymä | Valmis, PR #350 |
+| HALL-TILAUS-03 | "Lähetä maksulinkki" ei oletuksena lähetä mitään | Hallinta · tilausnäkymä | avoin |
+| HALL-TILAUS-04 | Kaksi lisäostodialogia, v3 käyttää suppeampaa | Hallinta · tilausnäkymä | avoin |
+| HALL-TILAUS-05 | Siirto ja henkilömäärän muutos eivät kerro uutta hintaa eivätkä ilmoita asiakkaalle | Hallinta · tilausnäkymä | Pääosin valmis, PR #347 (booking_282) |
+| HALL-TILAUS-07 | Aikajanassa ja dialogeissa näkyy teknisiä koodeja | Hallinta · tilausnäkymä | avoin |
+| HALL-TILAUS-08 | Kosketuskohteet ja saavutettavuus tilausnäkymässä | Hallinta · tilausnäkymä | avoin |
+| HALL-ASIAKKAAT-02 | Kaksoiskappaleiden yhdistäminen ja asiakkaan anonymisointi | Hallinta · asiakkaat | Valmis kytkimien takana, PR #349 (booking_285, oikeus `customers.admin`) |
+| HALL-ASIAKKAAT-04 | Asiakaslista: kohinaa ja puuttuvat monikot | Hallinta · asiakkaat | avoin |
+| HALL-KASSA-01 | Kassanäkymä tabletille: kori näkyviin ja otsikot pois tieltä | Hallinta · pikakassa | avoin |
+| HALL-TALOUS-01 | Raporttien virheet ja käytettävyys | Hallinta · talous ja raportit | Osittain, PR #350 |
+| HALL-TALOUS-03 | Teknisiä koodeja ilmoituksissa ja listoissa | Hallinta · talous ja raportit | avoin |
+| HALL-LASKUT-01 | "Lasku tilauksesta" kysyy tilausnumeroa mutta hakee sisäisellä tunnisteella | Hallinta · laskut | Valmis, PR #350 (`booking/admin/invoice-from-order.js`) |
+| HALL-LAHJAKORTIT-02 | Myyntikytkimet ja haku | Hallinta · lahjakortit | avoin |
+| HALL-ALENNUS-01 | Koodin tuote näkyy numerona, vahvistukset selaimen ikkunoilla | Hallinta · alennuskoodit ja vuosikortit | avoin |
+| HALL-TUOTTEET-05 | Lista sarakkeiksi ja valinnat sekä lisäpalvelut omille välilehdilleen | Hallinta · tuotteet | avoin |
+| HALL-TUOTTEET-06 | Pikakorjaukset: ALV-muoto, kehittäjäkieli, koodit ja käännösten puutteet | Hallinta · tuotteet | avoin |
+| HALL-TAPAHTUMAT-02 | Pikakorjaukset Tapahtumat-näkymään | Hallinta · tapahtumat | avoin |
+| HALL-HILJAISET-01 | Päälle/pois-ohjain ja vahvistukset muiden kaltaisiksi | Hallinta · hiljaiset ajat | avoin |
+| HALL-KOULUTUKSET-01 | Ulkoasu poikkeaa muista ja pieniä tekstivirheitä | Hallinta · koulutukset | avoin |
+| HALL-VIESTIT-02 | Viestit-sivun ulkoasu ja kehittäjäkieli | Hallinta · viestit | avoin |
 
-### KESKI (38 kohtaa)
+### KESKI (37 kohtaa)
 
-| Tunniste | Otsikko | Osio |
-|---|---|---|
-| YHT-01 | Yhteinen tokenitiedosto | Yhteinen ulkoasu (luku 2.5) |
-| YHT-02 | Hallinnan komponenttikirjasto | Yhteinen ulkoasu (luku 2.5) |
-| YHT-03 | Yksi välilehtikomponentti ja yksi H1 sivulla | Yhteinen ulkoasu (luku 2.5) |
-| SIVU-YHT-01 | Varaa-painike puuttuu mobiilin ylätunnisteesta | Sivusto · yhteiset osat |
-| SIVU-YHT-02 | Kaksi serif-otsikkokirjasinta ja kolme painiketyyliä | Sivusto · yhteiset osat |
-| SIVU-HOIDOT-01 | Sivu on liian pitkä ilman sisäistä navigaatiota | Sivusto · hoidot ja rituaalit |
-| SIVU-EN-01 | Englanninkielinen sisältö on koneellisesti käännetty ja osin eri kuin suomeksi | Sivusto · englanninkieliset sivut |
-| KAUPPA-SELAUS-02 | Listakorteista puuttuu "seuraava vapaa aika" | Kauppa · etusivu ja selaus |
-| KAUPPA-KASSA-02 | Lomakevirheet ovat geneerisiä eivätkä näy mobiilissa | Kauppa · varauslomake |
-| KAUPPA-VAHVISTUS-01 | Vahvistussivu toistaa itseään eikä johda tilaussivulle | Kauppa · maksu ja vahvistus |
-| KAUPPA-YHT-01 | Vuoro- ja hoitokulku tuntuvat eri tuotteilta | Kauppa · kaikki kulut |
-| HALL-KUORI-01 | Päävalikko on ryhmitelty teknisesti, ei työn mukaan | Hallinta · kuori ja navigaatio |
-| HALL-PAIVA-03 | Rivin pikatoiminnot: siirto, soitto ja peruutus poistumatta päivästä | Hallinta · päivänäkymä |
-| HALL-PAIVA-04 | Vastaanoton tablettitila: automaattinen päivitys ja tulostettava päivälista | Hallinta · päivänäkymä |
-| HALL-KALENTERI-01 | Kalenterista ei näe käyttöastetta eikä pääse päivään | Hallinta · kalenteri |
-| HALL-UUSI-01 | Kolme varaustyyppiä, kaksi eri lomaketta | Hallinta · uusi varaus |
-| HALL-SULUT-01 | Sulkua ei voi muokata, ja konfliktissa ei näe mitkä varaukset estävät | Hallinta · sulut |
-| HALL-TILAUS-01 | Uusi tilausnäkymä vei henkilökunnalta toimintoja | Hallinta · tilausnäkymä |
-| HALL-TILAUS-05 | Siirto ja henkilömäärän muutos eivät kerro uutta hintaa eivätkä ilmoita asiakkaalle | Hallinta · tilausnäkymä |
-| HALL-TILAUS-06 | Vahvistusta ei voi lähettää uudelleen eikä yksittäiselle asiakkaalle voi kirjoittaa | Hallinta · tilausnäkymä |
-| HALL-TILAUS-09 | Vanhan koodin siivous | Hallinta · tilausnäkymä |
-| HALL-ASIAKKAAT-01 | Asiakasnäkymä muokattavaksi ilman vanhaa modaalia | Hallinta · asiakkaat |
-| HALL-ASIAKKAAT-03 | Asiakaskortista puuttuvat tagit, no-show-varoitus ja viestihistoria | Hallinta · asiakkaat |
-| HALL-KASSA-02 | Pikakassalla ei voi myydä tiskillä tavallisella korttipäätteellä | Hallinta · pikakassa |
-| HALL-AVOIMET-01 | Kaksi työjonoa yhdeksi "Avoimet maksut" -näkymäksi ja Tarkista-merkkiin | Hallinta · seurattavat maksut ja hyvitykset |
-| HALL-LASKUT-02 | Laskuluonnosta ei voi muokata, vaaralliset toiminnot ilman vahvistusta | Hallinta · laskut |
-| HALL-LAHJAKORTIT-01 | Lahjakortin puhelinmyynti vie 12+ vaihetta kahdessa näkymässä, eikä englanniksi voi myydä | Hallinta · lahjakortit |
-| HALL-LAHJAKORTIT-03 | Kumppanikoodeilla kolme eri käyttöliittymää | Hallinta · lahjakortit |
-| HALL-ALENNUS-02 | Koodin käyttöä ei voi seurata | Hallinta · alennuskoodit ja vuosikortit |
-| HALL-TUOTTEET-01 | Tuote-editori on 3 200 px:n dialogi, jossa 4–5 tallennusta ja muutokset katoavat | Hallinta · tuotteet |
-| HALL-TUOTTEET-02 | Neljä päällekkäistä näkyvyysasetusta: henkilökunta ei voi ennustaa, näkyykö tuote kaupassa | Hallinta · tuotteet |
-| HALL-TUOTTEET-03 | Uuden tuotteen luonti lupaa liikoja, eikä tapahtumaa tai koulutusta voi luoda tyhjästä | Hallinta · tuotteet |
-| HALL-TUOTTEET-04 | Hintavariantit ja kesto eivät ole henkilökunnan muokattavissa | Hallinta · tuotteet |
-| HALL-TAPAHTUMAT-01 | Tapahtumien myyntiä ei voi avata hallinnasta | Hallinta · tapahtumat |
-| HALL-VIESTIT-01 | Kolme erilaista viestityökalua ja puuttuvat perustoiminnot | Hallinta · viestit |
-| HALL-ASETUKSET-01 | 10 välilehteä → 5, yksi tallennuspalkki | Hallinta · asetukset |
-| HALL-ASETUKSET-02 | Kuittilogoa ei voi vaihtaa eikä provisiosääntöä muokata | Hallinta · asetukset |
-| HALL-KAYTTAJAT-01 | Roolit, kutsut ja nimet hallittaviksi selkokielellä | Hallinta · käyttäjät |
+| Tunniste | Otsikko | Osio | Tila 13.11. |
+|---|---|---|---|
+| YHT-01 | Yhteinen tokenitiedosto | Yhteinen ulkoasu (luku 2.5) | avoin |
+| YHT-02 | Hallinnan komponenttikirjasto | Yhteinen ulkoasu (luku 2.5) | avoin |
+| YHT-03 | Yksi välilehtikomponentti ja yksi H1 sivulla | Yhteinen ulkoasu (luku 2.5) | avoin |
+| SIVU-YHT-01 | Varaa-painike puuttuu mobiilin ylätunnisteesta | Sivusto · yhteiset osat | avoin |
+| SIVU-YHT-02 | Kaksi serif-otsikkokirjasinta ja kolme painiketyyliä | Sivusto · yhteiset osat | avoin |
+| SIVU-HOIDOT-01 | Sivu on liian pitkä ilman sisäistä navigaatiota | Sivusto · hoidot ja rituaalit | avoin |
+| SIVU-EN-01 | Englanninkielinen sisältö on koneellisesti käännetty ja osin eri kuin suomeksi | Sivusto · englanninkieliset sivut | avoin |
+| KAUPPA-SELAUS-02 | Listakorteista puuttuu "seuraava vapaa aika" | Kauppa · etusivu ja selaus | Huomioitava PR #346 (booking_289) |
+| KAUPPA-KASSA-02 | Lomakevirheet ovat geneerisiä eivätkä näy mobiilissa | Kauppa · varauslomake | avoin |
+| KAUPPA-VAHVISTUS-01 | Vahvistussivu toistaa itseään eikä johda tilaussivulle | Kauppa · maksu ja vahvistus | Huomioitava PR #347 (booking_284) |
+| KAUPPA-YHT-01 | Vuoro- ja hoitokulku tuntuvat eri tuotteilta | Kauppa · kaikki kulut | avoin |
+| HALL-KUORI-01 | Päävalikko on ryhmitelty teknisesti, ei työn mukaan | Hallinta · kuori ja navigaatio | avoin |
+| HALL-PAIVA-03 | Rivin pikatoiminnot: siirto, soitto ja peruutus poistumatta päivästä | Hallinta · päivänäkymä | avoin |
+| HALL-PAIVA-04 | Vastaanoton tablettitila: automaattinen päivitys ja tulostettava päivälista | Hallinta · päivänäkymä | avoin |
+| HALL-KALENTERI-01 | Kalenterista ei näe käyttöastetta eikä pääse päivään | Hallinta · kalenteri | avoin |
+| HALL-UUSI-01 | Kolme varaustyyppiä, kaksi eri lomaketta | Hallinta · uusi varaus | avoin |
+| HALL-SULUT-01 | Sulkua ei voi muokata, ja konfliktissa ei näe mitkä varaukset estävät | Hallinta · sulut | avoin |
+| HALL-TILAUS-01 | Uusi tilausnäkymä vei henkilökunnalta toimintoja | Hallinta · tilausnäkymä | Osittain, PR #347 (booking_282–284, lippu `partial_refunds_enabled`) |
+| HALL-TILAUS-06 | Vahvistusta ei voi lähettää uudelleen eikä yksittäiselle asiakkaalle voi kirjoittaa | Hallinta · tilausnäkymä | avoin |
+| HALL-TILAUS-09 | Vanhan koodin siivous | Hallinta · tilausnäkymä | avoin |
+| HALL-ASIAKKAAT-01 | Asiakasnäkymä muokattavaksi ilman vanhaa modaalia | Hallinta · asiakkaat | avoin |
+| HALL-ASIAKKAAT-03 | Asiakaskortista puuttuvat tagit, no-show-varoitus ja viestihistoria | Hallinta · asiakkaat | avoin |
+| HALL-KASSA-02 | Pikakassalla ei voi myydä tiskillä tavallisella korttipäätteellä | Hallinta · pikakassa | avoin |
+| HALL-AVOIMET-01 | Kaksi työjonoa yhdeksi "Avoimet maksut" -näkymäksi ja Tarkista-merkkiin | Hallinta · seurattavat maksut ja hyvitykset | avoin |
+| HALL-LASKUT-02 | Laskuluonnosta ei voi muokata, vaaralliset toiminnot ilman vahvistusta | Hallinta · laskut | avoin |
+| HALL-LAHJAKORTIT-01 | Lahjakortin puhelinmyynti vie 12+ vaihetta kahdessa näkymässä, eikä englanniksi voi myydä | Hallinta · lahjakortit | avoin |
+| HALL-LAHJAKORTIT-03 | Kumppanikoodeilla kolme eri käyttöliittymää | Hallinta · lahjakortit | avoin |
+| HALL-ALENNUS-02 | Koodin käyttöä ei voi seurata | Hallinta · alennuskoodit ja vuosikortit | avoin |
+| HALL-TUOTTEET-01 | Tuote-editori on 3 200 px:n dialogi, jossa 4–5 tallennusta ja muutokset katoavat | Hallinta · tuotteet | avoin |
+| HALL-TUOTTEET-02 | Neljä päällekkäistä näkyvyysasetusta: henkilökunta ei voi ennustaa, näkyykö tuote kaupassa | Hallinta · tuotteet | avoin |
+| HALL-TUOTTEET-03 | Uuden tuotteen luonti lupaa liikoja, eikä tapahtumaa tai koulutusta voi luoda tyhjästä | Hallinta · tuotteet | avoin |
+| HALL-TUOTTEET-04 | Hintavariantit ja kesto eivät ole henkilökunnan muokattavissa | Hallinta · tuotteet | avoin |
+| HALL-TAPAHTUMAT-01 | Tapahtumien myyntiä ei voi avata hallinnasta | Hallinta · tapahtumat | avoin |
+| HALL-VIESTIT-01 | Kolme erilaista viestityökalua ja puuttuvat perustoiminnot | Hallinta · viestit | avoin |
+| HALL-ASETUKSET-01 | 10 välilehteä → 5, yksi tallennuspalkki | Hallinta · asetukset | avoin |
+| HALL-ASETUKSET-02 | Kuittilogoa ei voi vaihtaa eikä provisiosääntöä muokata | Hallinta · asetukset | avoin |
+| HALL-KAYTTAJAT-01 | Roolit, kutsut ja nimet hallittaviksi selkokielellä | Hallinta · käyttäjät | avoin |
 
-### SUURI (5 kohtaa)
+### SUURI (4 kohtaa)
 
-| Tunniste | Otsikko | Osio |
-|---|---|---|
-| SIVU-YHT-03 | Henkilökunta ei voi muuttaa sivuston tekstejä eikä julkaista muutosta itse | Sivusto · yhteiset osat |
-| HALL-KALENTERI-02 | Resurssiaikajana ja siirto vetämällä (myöhempi vaihe) | Hallinta · kalenteri |
-| HALL-TILAT-01 | Aukioloja, vuoroja ja poikkeuspäiviä ei voi hallita ilman kehittäjää | Hallinta · resurssit ja aukiolot |
-| HALL-ASIAKKAAT-02 | Kaksoiskappaleiden yhdistäminen ja asiakkaan anonymisointi | Hallinta · asiakkaat |
-| HALL-TALOUS-02 | Päivän tilitys (kassan sulkeminen) puuttuu | Hallinta · talous ja raportit |
+| Tunniste | Otsikko | Osio | Tila 13.11. |
+|---|---|---|---|
+| SIVU-YHT-03 | Henkilökunta ei voi muuttaa sivuston tekstejä eikä julkaista muutosta itse | Sivusto · yhteiset osat | avoin |
+| HALL-KALENTERI-02 | Resurssiaikajana ja siirto vetämällä (myöhempi vaihe) | Hallinta · kalenteri | avoin |
+| HALL-TILAT-01 | Aukioloja, vuoroja ja poikkeuspäiviä ei voi hallita ilman kehittäjää | Hallinta · resurssit ja aukiolot | avoin |
+| HALL-TALOUS-02 | Päivän tilitys (kassan sulkeminen) puuttuu | Hallinta · talous ja raportit | avoin |
 
-Yhteensä 102 kohtaa: PIENI 59, KESKI 38, SUURI 5.
+Yhteensä 102 kohtaa: PIENI 61, KESKI 37, SUURI 4. Valmiita 13.11.2026: 5 (SIVU-JUOMAT-01, KAUPPA-JONO-01, HALL-TILAUS-02, HALL-ASIAKKAAT-02, HALL-LASKUT-01). Avoimia 97: PIENI 56, KESKI 37, SUURI 4.
