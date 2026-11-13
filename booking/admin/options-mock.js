@@ -608,6 +608,10 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
           customer_name: r.customer_name, customer_phone: r.customer_phone, source: 'native', external_id: null, customer_kind: 'private', company: null, space_code: r.space_code, lifecycle: r.lifecycle, quota_exempt: false, override_reason: null,
           therapist_missing: false, therapist_missing_open: false, notes: r.notes, legs: r.legs, addons: (r.mock_addons || []).map((x) => ({ ...x })), option: optJson(r.option_id), option_missing: missing(r) })) };
     },
+    admin_order_lookup: (a) => {   // booking_278: tilausnumero → order_id
+      const r = st.reservations.find((x) => x.order_no === Number(a.p_order_no)); if (!r) throw err('not_found', 'Tilausta ei löydy');
+      return { order_id: r.order_id, order_no: r.order_no };
+    },
     admin_get_order: (a) => {
       // Tilausrivit kuten tuotannossa: varausrivi + lisäostot alle, ALV tuotteen kannasta (line_vat/line_net).
       const vatRow = (gross, rate) => { const vat = Math.round((gross - gross / (1 + rate / 100)) * 100) / 100; return { line_vat: vat, line_net: Math.round((gross - vat) * 100) / 100 }; };
@@ -1107,7 +1111,7 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
     },
     admin_create_invoice_from_order: (a) => {
       need('invoices.manage');
-      const res = st.reservations.find((r) => r.order_id === a.p_order_id || r.order_no === a.p_order_id);
+      const res = st.reservations.find((r) => r.order_id === a.p_order_id);   // HALL-LASKUT-01: vain sisäinen id, kuten tuotannossa
       if (!res) throw err('not_found', 'Tilausta ei löydy');
       const customer = st.invCustomers[0] || { id: 1, company_name: res.customer_name, name: res.customer_name, email: res.customer_email, business_id: null, einvoice_address: null, einvoice_operator: null };
       if (!st.invCustomers.length) st.invCustomers.push(customer);

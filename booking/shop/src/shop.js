@@ -14,7 +14,7 @@ import { rt } from './reduce-texts.js';
 import { createWaitlistView } from './waitlist-ui.js';
 import { visibleWaitlistSlots, fullyBooked, hasWaitlistSlots } from './waitlist-logic.js';
 import { daySlotsAvailableFirst } from './day-slot-order.js';
-import { indexShopEvents, missingEventProducts, eventIsFull, eventWaitlistPath, byEventStart } from './event-full.js';
+import { indexShopEvents, missingEventProducts, ensureEventProduct, eventIsFull, eventWaitlistPath, byEventStart } from './event-full.js';
 import { loadProducts as loadTreatmentProducts, splitCatalog, isListed as treatmentListed, isTreatmentBooking, loadAvailability as loadTreatmentSlots, horizonDays as treatmentHorizon, timeToken as treatmentTimeToken, isRetryable as treatmentRetryable } from './treatments.js';
 import { pickCatalog } from './catalog-audience.js';
 import { heroShort, cardShort, fallbackDesc, leadShort } from './short-desc.js';
@@ -1484,7 +1484,11 @@ async function route(keep = false) {
     else if (parts[0] === 'tuote' && parts[1]) await viewProduct(parts[1], /^\d{4}-\d\d-\d\d$/.test(parts[2] || '') ? parts[2] : null, q);
     else if (parts[0] === 'hoito' && parts[1]) { const tp = state.treatments.find((x) => x.slug === parts[1]); if (tp) await tv.viewCheckout(tp, parts[2], parts[3], q); else await viewProduct(parts[1], null, q); }
     else if (parts[0] === 'varaa' && parts[1] && parts[2]) await viewCheckout(parts[1], parts[2], parts[3], q.get('via'));
-    else if (parts[0] === 'jono' && parts[1] && parts[2] && parts[3]) await wv.viewWaitlist(parts[1], parts[2], parts[3], q.get('via'));
+    else if (parts[0] === 'jono' && parts[1] && parts[2] && parts[3]) {
+      // KAUPPA-JONO-01: täyden tapahtuman tuote ei ole public_catalogissa → haetaan public_eventsistä myös suoralla linkillä/päivityksellä
+      await ensureEventProduct(state.catalog, parts[3], publicEvents, { business: S.audience === 'business' });
+      await wv.viewWaitlist(parts[1], parts[2], parts[3], q.get('via'));
+    }
     else { await viewList(q); focusTop(); }
   } catch (e) {
     console.warn('booking route error', e);

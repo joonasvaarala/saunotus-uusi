@@ -36,6 +36,20 @@ export function missingEventProducts(catalog, events, now = Date.now()) {
   return out;
 }
 
+/**
+ * KAUPPA-JONO-01 (UX-analyysi #345): #/jono/<sääntö>/<pvm>/<tuote> suoraan (päivitys, sähköpostin linkki) antoi "Vuoroa ei löytynyt",
+ * koska public_catalogista puuttuva tapahtumatuote lisättiin state.catalogiin vain listanäkymässä (viewList). Sama lisäys tehdään
+ * nyt ennen jonotusnäkymää. Yrityskalenteri ei hae julkisia tapahtumia (kuten viewList). Palauttaa true, jos tuote on katalogissa.
+ */
+export async function ensureEventProduct(catalog, productId, loadEvents, { business = false, now = Date.now() } = {}) {
+  if (!Array.isArray(catalog)) return false;
+  if (catalog.some((p) => +p.id === +productId)) return true;
+  if (business || typeof loadEvents !== 'function') return false;
+  const events = await Promise.resolve().then(loadEvents).catch(() => []);
+  for (const p of missingEventProducts(catalog, Array.isArray(events) ? events : [], now)) catalog.push(p);
+  return catalog.some((p) => +p.id === +productId);
+}
+
 export function byEventStart(index) {
   return (a, b) => String(index.get(+a.id)?.occurrences?.[0]?.starts_at || '9999').localeCompare(String(index.get(+b.id)?.occurrences?.[0]?.starts_at || '9999'))
     || (+a.id - +b.id);
