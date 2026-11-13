@@ -856,9 +856,9 @@ body.shot .nav{position:static;order:3;height:auto;width:auto;flex-direction:row
 .quick-search-results .quick-result{display:block;color:var(--ink);text-decoration:none;min-height:44px;padding:11px 10px;border-radius:5px;font-size:13px}
 .quick-result:hover,.quick-result:focus-visible{background:var(--bg)}
 .quick-search-results p{padding:9px;margin:0}
-.top .quick-action{white-space:nowrap;display:inline-flex;align-items:center;gap:5px;text-decoration:none;min-height:38px;padding:6px 9px;font-size:13px;font-weight:600}
+.top .quick-action{white-space:nowrap;display:inline-flex;align-items:center;gap:5px;text-decoration:none;min-height:44px;padding:6px 9px;font-size:13px;font-weight:600}
 .user-menu{position:relative;display:flex;align-items:center;margin-left:auto;gap:8px;min-width:0}
-.top .user-toggle{display:flex;align-items:center;gap:6px;max-width:220px;min-height:38px;padding:5px 9px;font-size:13px}
+.top .user-toggle{display:flex;align-items:center;gap:6px;max-width:220px;min-height:44px;padding:5px 9px;font-size:13px}
 .user-toggle #user-short{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .user-toggle #user-role{font-size:11px;color:#EDE3D0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .user-toggle #user-initial{display:none}
@@ -893,22 +893,31 @@ body.shot .nav{position:static;order:3;height:auto;width:auto;flex-direction:row
   #shell.nav-expanded .nav-toggle [data-icon]{display:inline-flex;transform:rotate(180deg);transform-origin:center}
   .top{height:56px;min-height:56px;padding:5px 8px;gap:5px;flex-wrap:nowrap}
   .brand{min-height:40px}.brand img{height:32px}
-  .top .quick-action{width:38px;min-width:38px;padding:4px;justify-content:center;font-size:20px}
+  .top .quick-action{width:44px;min-width:44px;padding:4px;justify-content:center;font-size:20px}
   .top .quick-action .action-label{display:none}
-  .quick-search{position:static;flex:0 0 38px;max-width:38px}
-  .quick-search-toggle{display:flex!important;align-items:center;justify-content:center;font-size:23px;min-width:38px;min-height:38px;padding:0}
+  .quick-search{position:static;flex:0 0 44px;max-width:44px}
+  .quick-search-toggle{display:flex!important;align-items:center;justify-content:center;font-size:23px;min-width:44px;min-height:44px;padding:0}
   .quick-search-box{display:none;position:absolute;top:54px;left:calc(var(--side-narrow) + 6px);right:6px;z-index:35;padding:8px;background:var(--green);border-radius:0 0 10px 10px;box-shadow:0 8px 20px rgba(0,0,0,.2)}
   .quick-search-box.mobile-open{display:block}
   .quick-search-box input{width:100%}
   .quick-search-results{top:calc(100% + 2px)}
   .user-menu{margin-left:auto;gap:3px;flex:0 1 auto}
-  .top .user-toggle{min-width:42px;max-width:76px;padding:3px 5px;gap:2px}
+  .top .user-toggle{min-width:44px;max-width:76px;padding:3px 5px;gap:2px}
   .user-toggle #user-short{display:none}
   .user-toggle #user-initial{display:inline}
   .user-toggle #user-role{max-width:36px;font-size:10px}
   .top .who.is-mock{position:absolute;top:56px;right:4px;max-width:260px;background:var(--green);padding:3px 6px;z-index:15}
 }
-@media(max-width:360px){.top{padding-left:4px;padding-right:4px;gap:2px}.brand img{height:29px}.top .quick-action{min-width:33px;width:33px}.quick-search{flex-basis:33px}.quick-search-toggle{min-width:33px}}
+@media(max-width:360px){.top{padding-left:4px;padding-right:4px;gap:0}.brand img{height:26px}.top .quick-action{min-width:44px;width:44px}.quick-search{flex-basis:44px}.quick-search-toggle{min-width:44px}}
+/* UX-uudistus vaihe 1 (HALL-KUORI-02): tabletilla (600–899 px) sivuvalikko on aina auki nimineen (196 px), ikonit yksin ovat monitulkintaisia.
+   Muuttujat --side-narrow ja --side-wide ovat samat, joten päänäkymän marginaali ja sivupalkin leveys seuraavat; avauspainike piilotetaan. */
+@media(min-width:600px) and (max-width:899px){
+  :root{--side-narrow:196px}
+  #shell .nav .lbl{display:inline}
+  #shell .nav-toggle{display:none}
+  #shell main{padding:16px 16px 28px}
+  #shell .nav a{font-size:14px;padding:8px 14px}
+}
 @media print{#shell .nav-toggle{display:none!important}}
 body.shot #shell .nav-rail{display:contents}
 body.shot #shell .nav-toggle{display:none!important}

@@ -1,0 +1,99 @@
+/* Yhteiset peruskomponentit (UX-uudistus, YHT-02). Vaatii tokens.css:n. Lähde: docs/mockups/uudistus/ui.css.
+   Kaikki luokat alkavat etuliitteellä ux-, jotta ne eivät osu nykyisiin .btn/.card/.badge-tyyleihin: näkymät siirretään
+   yhteisiin komponentteihin yksi kerrallaan (vaihe 2), ja vanha tyyli poistetaan vasta kun näkymä on siirretty.
+   Värit, koot ja välit tulevat vain tokeneista. Hallinnassa ladataan index.html:ssä ennen admin.css:ää. */
+
+/* ---------- Painikkeet: yksi ensisijainen per näkymä tai kortti ---------- */
+.ux-btn{display:inline-flex;align-items:center;justify-content:center;gap:var(--sp-2);min-height:var(--tap);padding:0 var(--sp-4);border-radius:var(--r-md);border:1px solid var(--c-brand);background:var(--c-surface);color:var(--c-brand);font:600 var(--fs-sm)/1 var(--f-ui);text-decoration:none;cursor:pointer;white-space:nowrap}
+.ux-btn:hover{background:var(--c-info-bg)}
+.ux-btn--primary{background:var(--c-brand);color:#fff}
+.ux-btn--primary:hover{background:var(--c-brand-2)}
+.ux-btn--ghost{border-color:transparent;background:transparent}
+.ux-btn--danger{border-color:var(--c-danger);color:var(--c-danger);background:var(--c-surface)}
+.ux-btn--danger:hover{background:var(--c-danger-bg)}
+.ux-btn--sm{min-height:36px;padding:0 var(--sp-3)}
+.ux-btn--block{width:100%}
+.ux-btn[disabled],.ux-btn[aria-disabled="true"]{opacity:.45;cursor:not-allowed}
+.ux-icon-btn{display:inline-grid;place-items:center;width:var(--tap);height:var(--tap);border-radius:var(--r-md);border:1px solid var(--c-line);background:var(--c-surface);color:var(--c-ink);cursor:pointer}
+.ux-linkbtn{background:none;border:0;padding:0;min-height:var(--tap);color:var(--c-accent);font:600 var(--fs-sm)/1.2 var(--f-ui);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+
+/* ---------- Tilamerkit: sama sanasto ja väri kaikkialla ---------- */
+.ux-badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:var(--r-sm);font:600 var(--fs-xs)/1.5 var(--f-ui);white-space:nowrap}
+.ux-badge--ok{background:var(--c-ok-bg);color:var(--c-ok)}
+.ux-badge--warn{background:var(--c-warn-bg);color:var(--c-warn)}
+.ux-badge--danger{background:var(--c-danger-bg);color:var(--c-danger)}
+.ux-badge--info{background:var(--c-info-bg);color:var(--c-info)}
+.ux-badge--neutral{background:var(--c-neutral-bg);color:var(--c-neutral)}
+.ux-badge--outline{background:transparent;border:1px solid var(--c-line);color:var(--c-muted)}
+
+/* ---------- Suodatinsiru ja segmentti ---------- */
+.ux-chips{display:flex;gap:var(--sp-2);overflow-x:auto;padding-bottom:2px;scrollbar-width:none}
+.ux-chip{display:inline-flex;align-items:center;gap:6px;min-height:36px;padding:0 var(--sp-3);border-radius:var(--r-pill);border:1px solid var(--c-line);background:var(--c-surface);color:var(--c-text);font:500 var(--fs-sm)/1 var(--f-ui);white-space:nowrap;cursor:pointer}
+.ux-chip[aria-pressed="true"]{background:var(--c-info-bg);border-color:var(--c-brand);color:var(--c-brand);font-weight:700}
+.ux-chip[aria-pressed="true"]::before{content:"✓"}
+.ux-seg{display:inline-flex;padding:3px;border-radius:var(--r-md);background:var(--c-neutral-bg);gap:2px}
+.ux-seg button{min-height:38px;padding:0 var(--sp-4);border:0;border-radius:8px;background:transparent;color:var(--c-text);font:600 var(--fs-sm)/1 var(--f-ui);cursor:pointer}
+.ux-seg button[aria-pressed="true"]{background:var(--c-surface);color:var(--c-ink);box-shadow:var(--shadow-card)}
+
+/* ---------- Välilehdet: yksi tyyli (YHT-03), vaakavieritys kapealla näytöllä ---------- */
+.ux-tabs{display:flex;gap:var(--sp-1);border-bottom:1px solid var(--c-line);overflow-x:auto;scrollbar-width:none;margin-bottom:var(--sp-5)}
+.ux-tabs::-webkit-scrollbar{display:none}
+.ux-tabs a,.ux-tabs button{flex:none;display:inline-flex;align-items:center;gap:6px;min-height:var(--tap);padding:0 var(--sp-3);border:0;background:none;border-bottom:3px solid transparent;margin-bottom:-1px;color:var(--c-muted);font:600 var(--fs-sm)/1 var(--f-ui);text-decoration:none;white-space:nowrap;cursor:pointer}
+.ux-tabs [aria-selected="true"],.ux-tabs [aria-current]{color:var(--c-ink);border-bottom-color:var(--c-brand)}
+
+/* ---------- Sivun otsikko: yksi H1, kuvaus ja yksi ensisijainen toiminto ---------- */
+.ux-page-head{display:flex;align-items:flex-start;justify-content:space-between;gap:var(--sp-4);margin-bottom:var(--sp-4);flex-wrap:wrap}
+.ux-page-head p{margin:var(--sp-1) 0 0;color:var(--c-muted)}
+
+/* ---------- Kortti, avain–arvo, taulukko ---------- */
+.ux-card{background:var(--c-surface);border:1px solid var(--c-line);border-radius:var(--r-lg);padding:var(--sp-4);box-shadow:var(--shadow-card)}
+.ux-card-head{display:flex;align-items:center;justify-content:space-between;gap:var(--sp-3);margin-bottom:var(--sp-3)}
+.ux-kv{display:grid;grid-template-columns:auto 1fr;gap:6px var(--sp-4);margin:0}
+.ux-kv dt{color:var(--c-muted);font-size:var(--fs-sm)}
+.ux-kv dd{margin:0;color:var(--c-ink);text-align:right}
+.ux-table{width:100%;border-collapse:collapse;font-size:var(--fs-sm)}
+.ux-table th{text-align:left;font-weight:600;color:var(--c-muted);font-size:var(--fs-xs);text-transform:uppercase;letter-spacing:.04em;padding:var(--sp-2);border-bottom:1px solid var(--c-line)}
+.ux-table td{padding:var(--sp-2);border-bottom:1px solid var(--c-line);color:var(--c-ink)}
+.ux-table .r{text-align:right;font-variant-numeric:tabular-nums}
+@media(max-width:599px){
+  .ux-table--cards thead{display:none}
+  .ux-table--cards,.ux-table--cards tbody,.ux-table--cards tr,.ux-table--cards td{display:block}
+  .ux-table--cards tr{padding:var(--sp-2) 0;border-bottom:1px solid var(--c-line)}
+  .ux-table--cards td{border:0;padding:2px var(--sp-2)}
+  .ux-table--cards td[data-label]::before{content:attr(data-label) ": ";color:var(--c-muted)}
+  .ux-table--cards .r{text-align:left}
+}
+
+/* ---------- Lomakekentät: reunus ≥ 3:1, ohjeteksti 14 px, virhe kentän alla (YHT-07) ---------- */
+.ux-field{display:grid;gap:6px}
+.ux-field>span:first-child,.ux-field>label{font-weight:600;font-size:var(--fs-sm);color:var(--c-ink)}
+.ux-input,.ux-select,.ux-textarea{width:100%;min-height:var(--tap);padding:10px 12px;border:1px solid var(--c-field);border-radius:var(--r-md);background:#fff;color:var(--c-ink);font:inherit}
+.ux-textarea{min-height:96px;resize:vertical;line-height:1.45}
+.ux-input[aria-invalid="true"],.ux-select[aria-invalid="true"],.ux-textarea[aria-invalid="true"]{border:2px solid var(--c-danger);background:#fffafa}
+.ux-hint{font-size:var(--fs-sm);color:var(--c-muted)}
+.ux-error{font-size:var(--fs-sm);color:var(--c-danger);font-weight:600}
+.ux-check{display:flex;gap:var(--sp-2);align-items:flex-start;min-height:var(--tap);font-size:var(--fs-sm);color:var(--c-ink)}
+.ux-check input{width:22px;height:22px;margin:1px 0 0;accent-color:var(--c-brand);flex:none}
+
+/* ---------- Kytkin: ainoa päälle/pois-ohjain (role=switch, aria-checked) ---------- */
+.ux-switch{flex:none;position:relative;width:52px;height:32px;padding:0;border-radius:var(--r-pill);background:#cfc6bb;border:1px solid var(--c-field);cursor:pointer}
+.ux-switch::after{content:"";position:absolute;top:2px;left:2px;width:26px;height:26px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.2)}
+.ux-switch[aria-checked="true"]{background:var(--c-brand);border-color:var(--c-brand)}
+.ux-switch[aria-checked="true"]::after{left:22px}
+
+/* ---------- Huomautukset, tyhjä tila, lataus ---------- */
+.ux-alert{display:flex;gap:var(--sp-3);align-items:flex-start;padding:var(--sp-3) var(--sp-4);border-radius:var(--r-lg);border:1px solid;font-size:var(--fs-sm);color:var(--c-ink)}
+.ux-alert--warn{background:var(--c-warn-bg);border-color:rgba(107,75,0,.3)}
+.ux-alert--danger{background:var(--c-danger-bg);border-color:rgba(123,29,18,.3)}
+.ux-alert--ok{background:var(--c-ok-bg);border-color:rgba(29,77,43,.25)}
+.ux-alert--info{background:var(--c-info-bg);border-color:rgba(43,58,48,.2)}
+.ux-empty{display:grid;justify-items:center;gap:var(--sp-2);padding:var(--sp-7) var(--sp-4);text-align:center;color:var(--c-muted)}
+.ux-skeleton{height:14px;border-radius:7px;background:linear-gradient(90deg,#ece6dd,#f6f2ec,#ece6dd);background-size:200% 100%;animation:ux-shimmer 1.4s linear infinite}
+@keyframes ux-shimmer{to{background-position:-200% 0}}
+@media(prefers-reduced-motion:reduce){.ux-skeleton{animation:none}}
+
+/* ---------- Tallennuspalkki ja dialogi ---------- */
+.ux-savebar{position:sticky;bottom:0;z-index:5;display:flex;align-items:center;gap:var(--sp-3);padding:var(--sp-3) var(--sp-4);background:var(--c-surface);border:1px solid var(--c-line);border-radius:var(--r-lg);box-shadow:var(--shadow-pop);margin-top:var(--sp-5)}
+dialog.ux-dialog{width:min(520px,calc(100% - 24px));padding:var(--sp-5);border:1px solid var(--c-line);border-radius:var(--r-lg);background:var(--c-surface);color:var(--c-text);box-shadow:var(--shadow-pop)}
+dialog.ux-dialog::backdrop{background:rgba(47,41,35,.45)}
+.ux-dialog-actions{display:flex;gap:var(--sp-2);justify-content:flex-end;flex-wrap:wrap;margin-top:var(--sp-4)}
