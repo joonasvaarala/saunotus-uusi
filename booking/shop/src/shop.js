@@ -4,6 +4,7 @@
 import { rpc, storageUrl, setRpcOverride } from './sb.js';
 import { withAttribution } from './attribution.js';
 import { ensureAllMonths } from './availability-months.js';
+import { MonthCache, createProductMonthLoader } from './product-months.js';
 import { runReturn } from './mobilepay-ui.js';
 import { runOnlineReturn } from './online-pay-ui.js';
 import { loadPayChoices, payChoicesSection, payNotice, onlineAvailable, onlineAtCheckout } from './pay-choices.js';
@@ -166,7 +167,7 @@ const stopHold = () => { if (holdCtl) { holdCtl.stop(); holdCtl = null; } };
 
 // Sivutekstit tietokannasta (§18; build → booking/site-texts.json, paikkamerkit täytetään tässä ajoajan katalogista). tx(key) → teksti tai null (kutsuja päättää varatekstin).
 const texts = createTexts({ lang: S.lang, format: { price: (n) => money(n), duration: (m) => fmtMinutes(m) } });
-const state = { catalog: null, settings: null, images: new Map(), treatments: [], months: new Map(), busy: false, annualOffer: null };
+const state = { catalog: null, settings: null, images: new Map(), treatments: [], months: new MonthCache(), busy: false, annualOffer: null };
 // tyhjät (null/false) lapset ohitetaan: replaceChildren(null) kirjoittaisi sivulle tekstin "null" (esim. tuotesivu ilman hoitovalitsinta)
 const mount = (...nodes) => { root.replaceChildren(...nodes.flat().filter((n) => n != null && n !== false)); root.setAttribute('aria-busy', 'false'); };
 const focusQuiet = (el, extra = {}) => { if (el) el.focus({ preventScroll: true, focusVisible: false, ...extra }); };
@@ -217,34 +218,8 @@ const pimg = (p, cls, { alt = true, eager = false, w = 600, hgt = 400 } = {}) =>
   im.addEventListener('error', () => box.remove(), { once: true });
   return box;
 };
-async function loadMonth(productId, year, month) {   // month: 0–11
-  const key = `${productId}:${year}-${month}`;
-  if (state.months.has(key)) return state.months.get(key);
-  const from = new Date(year, month, 1), to = new Date(year, month + 1, 0);
-  const rows = await rpc('public_availability', { p_product_id: productId, p_from: ymd(from), p_to: ymd(to) });
-  const byDay = {};
-  for (const r of rows || []) (byDay[r.session_date] ||= []).push(r);
-  for (const k in byDay) byDay[k].sort((a, b) => a.starts_at.localeCompare(b.starts_at));
-  state.months.set(key, byDay);
-  return byDay;
-}
-// Tapahtuman tulevat kerrat voivat olla eri kuukausissa. public_availability sallii enintään 92 päivää / kutsu, joten haetaan kuukausi kerrallaan (sama välimuisti).
-async function loadSpan(productId, fromDs, toDs) {
-  const months = [];
-  let [y, m] = fromDs.split('-').map(Number);
-  m -= 1;
-  const end = toDs.slice(0, 7);
-  for (let i = 0; i < 16; i++) {
-    months.push([y, m]);
-    if (`${y}-${pad2(m + 1)}` >= end) break;
-    m += 1;
-    if (m > 11) { m = 0; y += 1; }
-  }
-  const parts = await Promise.all(months.map(([yy, mm]) => loadMonth(productId, yy, mm)));
-  const byDay = {};
-  for (const part of parts) for (const [d, rows] of Object.entries(part || {})) if (d >= fromDs && d <= toDs) byDay[d] = rows;
-  return byDay;
-}
+// Tuotteen kuukausihaku ja tapahtuman kerrat usealta kuukaudelta: product-months.js (rinnakkaiset haut jakavat kutsun; peräkkäiset kuukaudet yhdellä kutsulla, ≤ 92 pv).
+const { loadMonth, loadSpan } = createProductMonthLoader({ months: state.months, rpc });
 const dayState = (rows) => (!rows?.length ? 'none' : rows.some((r) => r.status === 'available') ? 'free' : rows.some((r) => r.status === 'full') ? 'full' : 'unavail');
 
 // ---- sivun yläbanneri (hero): tuotesivulla ja varauslomakkeella tuotteen kuva taustana + otsikko = tuotteen nimi + tiivis kuvaus ----
