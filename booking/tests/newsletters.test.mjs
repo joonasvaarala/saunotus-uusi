@@ -39,7 +39,7 @@ test('confirmation gate invalidates on edits, expiry, version or state change',(
  for(const [p,d,dirty,t] of [[preview,draft,true,now],[preview,{...draft,version:5},false,now],[preview,{...draft,state:'sent'},false,now],[preview,draft,false,now+1800000],[{...preview,recipient_count:0},draft,false,now],[{...preview,recipient_count:5001},draft,false,now]])assert.equal(newsletterCanSend(p,d,dirty,t),false);
 });
 test('pending-import FI/EN texts exactly match all fallbacks',()=>{
- const rows=JSON.parse(read('content/site-texts.pending-import-131.json'));
+ const rows=JSON.parse(read('content/site-texts.pending-import-146.json'));
  for(const lang of ['fi','en'])for(const [key,text]of Object.entries(NEWSLETTER_TEXTS[lang]))assert.equal(rows.find(r=>r.key==='admin.newsletter.'+key&&r.lang===lang)?.text,text);
 });
 test('sender resolves fresh consent payload before allowlist/render and retains privacy-safe failure messages',()=>{
@@ -60,7 +60,7 @@ test('isolated entry and route integration hook do not require shell/nav edits',
 
 test('scoped opt-out is explicit, clears its opaque fragment and has no admin session requirement',async()=>{
  const js=readFileSync(new URL('../admin/newsletter-unsubscribe.js',import.meta.url),'utf8');
- const sql=readFileSync(new URL('../supabase/migrations/20261106220300_booking_259_newsletters.sql',import.meta.url),'utf8');
+ const sql=readFileSync(new URL('../supabase/migrations/20261106223314_booking_259_newsletters.sql',import.meta.url),'utf8');
  assert.match(js,/history\.replaceState/);assert.match(js,/onclick:async/);
  assert.match(js,/rpc\('public_newsletter_unsubscribe'/);assert.doesNotMatch(js,/getSession|console\./);
  assert.doesNotMatch(sql,/create (?:or replace )?function booking\.public_marketing_unsubscribe/i);
@@ -71,9 +71,9 @@ test('scoped opt-out is explicit, clears its opaque fragment and has no admin se
 
 
 test('permanent suppression lifecycle is independent of feature rollback and re-enable',()=>{
- const core=read('booking/supabase/migrations/20261106220300_booking_259_newsletters.sql');
- const rollback=read('booking/supabase/rollbacks/20261106220300_booking_259_ROLLBACK.sql');
- const hook=read('booking/supabase/migrations/20261106221404_booking_262_newsletter_capture.sql');
+ const core=read('booking/supabase/migrations/20261106223314_booking_259_newsletters.sql');
+ const rollback=read('booking/supabase/rollbacks/20261106223314_booking_259_ROLLBACK.sql');
+ const hook=read('booking/supabase/migrations/20261106223319_booking_262_newsletter_capture.sql');
  const enable=read('booking/docs/newsletter-reenable-proposal.sql');
  const fixture=read('booking/supabase/tests/newsletters/local-fixture.sql');
  const shared=read('booking/supabase/migrations/20261021145208_booking_121_messages.sql');
@@ -110,6 +110,6 @@ test('reservation scenarios cannot be mistaken for the sole hosted capture candi
  assert.equal(existsSync(new URL('t259_newsletters_attendance_hosted_safe.sql',tests)),false);
  assert.match(read('booking/supabase/tests/t259_newsletters_attendance_local_only.sql'),/NEVER DEV\/PROD/);
  assert.doesNotMatch(read('booking/supabase/tests/t259_newsletters_capture_hosted_safe.sql'),/insert into booking\.(?:reservations|orders|schedule_rules)/i);
- const captureRollback=read('booking/supabase/rollbacks/20261106221404_booking_262_ROLLBACK.sql');
+ const captureRollback=read('booking/supabase/rollbacks/20261106223319_booking_262_ROLLBACK.sql');
  assert.match(captureRollback,/raise exception/i);assert.doesNotMatch(captureRollback,/^(?:drop|alter|delete|truncate) /mi);
 });

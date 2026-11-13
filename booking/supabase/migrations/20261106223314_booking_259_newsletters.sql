@@ -3,7 +3,7 @@
 -- Generated with supabase migration new; timestamp ordered after reserved booking_257.
 -- HOLD: capture implementation moved into atomic259;262 verifies/provides provenance only.
 -- Bottiavustus: review first; no DEV/production execution from this work.
--- Rollback: ../rollbacks/20261106220300_booking_259_ROLLBACK.sql
+-- Rollback: ../rollbacks/20261106223314_booking_259_ROLLBACK.sql
 set local lock_timeout = '5s';
 -- First operational statement after timeout: hold customer writes BEFORE ANY newsletter DDL.
 -- Official apply_migration owns this transaction, including this lock and capture/backfill.

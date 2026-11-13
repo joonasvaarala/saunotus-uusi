@@ -1,5 +1,6 @@
 // booking_259: site texts + identical FI/EN fallbacks.
 import { getLang } from './talous-i18n.js';
+import { getSiteTexts } from './site-texts-cache.js';
 export const NEWSLETTER_TEXTS = {
   "fi": {
     "title": "Uutiskirjeet",
@@ -116,7 +117,7 @@ export const NEWSLETTER_TEXTS = {
 };
 let remote = {};
 export async function loadNewsletterTexts(rpc) {
-  try { const out = await rpc('public_get_site_texts', { p_lang: null });
+  try { const out = await getSiteTexts(rpc);
     remote = Object.fromEntries((out?.texts || []).filter(x=>x.key.startsWith('admin.newsletter.')).map(x=>[x.key.replace('admin.newsletter.','')+'|'+x.lang,x.text]));
   } catch { remote = {}; }
 }

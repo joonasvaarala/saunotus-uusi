@@ -13,7 +13,7 @@ is not execution approval. Nothing has been run on either hosted project.
 
 Local checkout `/workspace/koodari2-newsletter`, branch `feat/newsletter-admin-259`.
 Built on main `68bb8f9`. Main had booking_256 at checkout; fetched origin/main now includes booking_257 from PR #315
-(`20261106220000_booking_257_customer_message.sql`). Bottiavustus subsequently confirmed booking_259 / pending-import-131 for this feature.
+(`20261106220000_booking_257_customer_message.sql`). Bottiavustus subsequently confirmed booking_259 / pending-import-146 for this feature.
 booking_258 / pending-import-130 belong to Koodari’s product-list fix; booking_260 /
 pending-import-132 are reserved for admin UX. This feature does NOT depend on 258
 and does not read or modify any objects introduced by that correction.
@@ -178,7 +178,7 @@ existence. The token stays bound to the approved address, never a profile's futu
 FI/EN copy accurately says newsletter-only; service messages/other marketing flags unchanged.
 
 **Official two-migration chain, HOLD:**
-`booking/supabase/migrations/20261106221404_booking_262_newsletter_capture.sql`.
+`booking/supabase/migrations/20261106223319_booking_262_newsletter_capture.sql`.
 Bottiavustus reserved262; no text import number. Capture installation/backfill originally
 packaged as262 was moved unchanged into259 at the explicit packaging review request.
 259 acquires the customer-write lock BEFORE any newsletter DDL and installs EVERYTHING
@@ -213,7 +213,7 @@ no claim is made to recover data no longer present before capture starts.
 
 ## Rollback and forward-only re-enable
 
-Rollback: `booking/supabase/rollbacks/20261106220300_booking_259_ROLLBACK.sql`.
+Rollback: `booking/supabase/rollbacks/20261106223314_booking_259_ROLLBACK.sql`.
 Stop feature dispatch/sender and back up drafts/logs before any approved rollback. This is a
 FEATURE rollback: it skips pending/failed/sending newsletter rows, removes draft/log tables,
 feature-only indexes and draft/dispatch/render RPCs. Other mail rows/settings and retained
@@ -245,7 +245,7 @@ the same recipient, retries confirmation, and checks new IDs, no collision/dupli
 old-history/metrics alias. Sequence gaps from rolled-back tests are expected and safe.
 
 262 verification intentionally has no destructive rollback SQL;259 owns retained capture. Its matching rollback guard
-`booking/supabase/rollbacks/20261106221404_booking_262_ROLLBACK.sql` raises an exception,
+`booking/supabase/rollbacks/20261106223319_booking_262_ROLLBACK.sql` raises an exception,
 changes nothing and prevents falsely removing262 from applied history. Keep262 applied;
 use reviewed259 feature rollback to disable newsletter UI/dispatch, never capture.
 
