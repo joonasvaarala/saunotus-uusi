@@ -1,6 +1,7 @@
 // booking_173: kumppanilahjakortin lunastus hallinnassa. Sama rivi tilauksen/varauksen ikkunassa (orderVoucherBox) ja Tarkista-sivulla (unredeemedSection).
 // Rivi: asiakkaan antama koodi + Kopioi, järjestelmän arvaus ja asiakkaan valinta erikseen nimettyinä, myyjän vaihto (audit; maksutapa ja Procountor-tili seuraavat),
 // Lunasta (myyjän sivu uuteen välilehteen, osoite asetuksista) ja Merkitse lunastetuksi (kaksivaiheinen vahvistus, idempotentti palvelimella).
+// booking_voucher_problem_alert (Joonas 11.11.2026): rivillä tila (Avoin / Käsittelyssä / Ongelma); ongelmassa punainen merkintä ja syy selkokielellä (problem_code).
 // booking_174: vahvistuksessa lahjakortin arvo käsin; pienempi arvo kuin maksettava → erotus asiakkaalle maksulinkkinä (palvelin), kuittia ei lähetetä sähköpostilla.
 import { h, toast, run, badge, money, fmtDT, errMsg } from '../ui.js';
 import { icon } from '../icons.js';
@@ -10,6 +11,19 @@ import { VCR_CHOICES, VCR_RPC, sellerLabel, safeRedeemUrl, guessDiffers, groupBy
 const errText = (e) => (e?.code && ['invalid_state', 'forbidden', 'unchanged', 'invalid_amount', 'voucher_exceeds_total'].includes(e.code) ? vt(`ui.admin.vcr.err_${e.code}`) : errMsg(e));
 const conf = (c) => (['high', 'medium', 'low'].includes(c) ? vt(`ui.admin.vcr.conf_${c}`) : null);
 const methodOf = (row) => String(row.payment_method_label || '').trim() || vt('ui.admin.vcr.method');
+const PROBLEM_CODES = ['invalid_code', 'expired_code', 'already_used', 'other'];   // booking.voucher_claims.problem_code (_vc_resolve)
+const STATUS_BADGE = { open: 'warn', processing: 'muted', problem: 'err' };
+/** Tila ja ongelman syy riville. null jos tila ei ole avoin/käsittelyssä/ongelma. */
+export function claimStatusLine(row) {
+  const s = row?.status;
+  if (!Object.hasOwn(STATUS_BADGE, s)) return null;
+  const st = h('span', { class: `badge ${STATUS_BADGE[s]}`, 'data-testid': 'vcr-status', text: vt(`ui.admin.vcr.st_${s}`) });
+  if (s !== 'problem') return h('div', { class: 'vcr-line' }, st);
+  const reason = vt(`ui.admin.vcr.pc_${PROBLEM_CODES.includes(row.problem_code) ? row.problem_code : 'other'}`);
+  return h('div', { class: 'vcr-problem', role: 'alert', 'data-testid': 'vcr-problem' },
+    h('div', { class: 'vcr-line' }, st, h('span', { class: 'badge err', 'data-testid': 'vcr-problem-code', text: reason })),
+    h('p', { text: vt('ui.admin.vcr.problem_hint', { reason }) }));
+}
 const amountOf = (row) => (row.unpaid != null && Number(row.unpaid) > 0 ? row.unpaid : row.voucher_value ?? row.amount ?? null);
 
 async function copyCode(code, el) {
@@ -122,8 +136,9 @@ export function claimRow(row, { rpc, canManage = false, showOrder = true, onChan
     const by = row.redeemed_via || row.resolved_by;
     actions.append(badge('pay-paid', [vt('ui.admin.vcr.redeemed', { when: row.resolved_at ? fmtDT(row.resolved_at) : '' }).trim(), ['staff', 'bot'].includes(by) ? `(${vt(`ui.admin.vcr.by_${by}`)})` : null].filter(Boolean).join(' ')));
   }
-  return h('div', { class: 'vcr-row', 'data-testid': 'vcr-row', 'data-claim-id': String(row.id), 'data-source': String(row.source || ''), 'data-status': String(row.status || '') },
+  return h('div', { class: `vcr-row${row.status === 'problem' ? ' is-problem' : ''}`, 'data-testid': 'vcr-row', 'data-claim-id': String(row.id), 'data-source': String(row.source || ''), 'data-status': String(row.status || '') },
     h('div', { class: 'vcr-line' }, codeEl, copy),
+    claimStatusLine(row),
     h('div', { class: 'vcr-line vcr-src' }, guess, choice),
     differs, meta, actions, confirmBox);
 }
@@ -143,7 +158,7 @@ export async function orderVoucherBox({ rpc, orderId, onChanged = () => {} }) {
 }
 
 /** Tarkista-sivun osio: lunastamattomat, suodatus myyjän mukaan, ryhmittely myyjittäin. */
-export async function unredeemedSection({ rpc }) {
+export async function unredeemedSection({ rpc, hideEmpty = false } = {}) {
   await loadVcrTexts(rpc);
   const st = { source: null };
   const body = h('div', { class: 'vcr-body', 'aria-live': 'polite' });
@@ -159,8 +174,10 @@ export async function unredeemedSection({ rpc }) {
     }
     const claims = Array.isArray(v?.claims) ? v.claims : [];
     const total = Number(v?.total) || Object.values(v?.counts || {}).reduce((s, n) => s + (Number(n) || 0), 0);
-    countBadge.textContent = String(total); countBadge.className = `badge ${total ? 'warn' : 'ok'}`;
+    countBadge.textContent = total ? `${total} kpl` : '0'; countBadge.className = `badge ${total ? 'warn' : 'ok'}`;
     sec.dataset.count = String(total); sec.classList.toggle('has', total > 0);
+    if (hideEmpty && !total && !st.source) { sec.hidden = true; return; }
+    sec.hidden = false;
     chipsEl.replaceChildren(...filterChips(v?.counts, st.source).map((c) => h('button', {
       type: 'button', class: `btn sm vcr-chip${c.active ? ' on' : ''}`, 'aria-pressed': c.active ? 'true' : 'false', 'data-testid': `vcr-chip-${c.source || 'all'}`,
       onclick: () => { st.source = c.source; load(); },

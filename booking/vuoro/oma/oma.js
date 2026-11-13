@@ -150,7 +150,8 @@ export function render(doc, lang, page, result) {
   if (open) open.textContent = "";
   if (done) done.textContent = "";
   if (!page || page.ok !== true) {
-    set("intro", tr(lang, page && page.error === "load_error" ? "load_error" : "bad_token"));
+    // Vain oikeasti kelvoton poletti on "Linkki ei kelpaa"; palvelinvirhe → "Sivua ei saatu ladattua".
+    set("intro", tr(lang, page && page.error === "bad_token" ? "bad_token" : page && page.error ? "load_error" : "bad_token"));
     if (banner) banner.className = "banner bad";
     return;
   }
@@ -193,7 +194,8 @@ function boot() {
         body: JSON.stringify({ token, offer_id: offerId, response }),
       });
       const body = await res.json();
-      render(document, lang, body && body.page ? body.page : { ok: false, error: "bad_token" }, body && body.result ? body.result : "error");
+      const bad = body && (body.error === "bad_token" || body.result === "bad_token");
+      render(document, lang, body && body.page ? body.page : { ok: false, error: bad ? "bad_token" : "load_error" }, body && body.result ? body.result : "error");
     } catch {
       render(document, lang, { ok: false, error: "load_error" }, null);
     }

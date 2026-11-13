@@ -75,7 +75,7 @@ async function session({ lang, provider, perms, fnReplies }) {
   await ctx.addInitScript((s) => { try { localStorage.setItem('booking.session', JSON.stringify(s)); } catch { /* */ } }, { access_token: JWT, refresh_token: 'r', expires_at: 4102444800, user: { id: 'u1', email: 'manager@test.local' } });
   await page.goto(`${ORIGIN}/admin/#/talous?lang=${lang}`);
   await page.waitForSelector('[data-testid=orders-list] > [data-testid=order]');
-  await page.selectOption('[data-testid=orders-f-pay]', 'paid'); await page.waitForTimeout(250);
+  await page.evaluate((c) => { const b = document.querySelector('[data-testid=orders-pay-btn-' + c + ']'); if (!b) throw new Error('maksutilanappi puuttuu: ' + c); if (b.getAttribute('aria-pressed') !== 'true') b.click(); for (const x of document.querySelectorAll('[data-testid^=orders-pay-btn-][aria-pressed=true]')) if (x !== b) x.click(); }, 'paid'); await page.waitForTimeout(250);
   await page.locator('[data-testid=orders-list] > [data-testid=order]').first().locator('.tl-head').click(); await page.waitForSelector('[data-testid=order-actions]');
   return page;
 }

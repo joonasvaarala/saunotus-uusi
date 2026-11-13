@@ -68,6 +68,7 @@ test('haku ohittaa vain oletuksen paid', () => {
   assert.equal(F.effectivePaymentFilter({ search: '15001', paymentFilter: 'unpaid' }), 'unpaid');
   assert.equal(F.effectivePaymentFilter({ search: '15001', paymentFilter: 'refunded' }), 'refunded');
   assert.equal(F.effectivePaymentFilter({ search: '15001', paymentFilter: 'cancelled' }), 'cancelled');
+  assert.equal(F.effectivePaymentFilter({ search: '15001', paymentFilter: 'invoiced' }), 'invoiced');
   assert.equal(F.effectivePaymentFilter({ search: '15001', paymentFilter: 'all' }), 'all');
 });
 
@@ -117,6 +118,8 @@ test('migraatio booking_76, rollback ja tuontitekstit', () => {
   assert.match(doc, /partially_refunded/);
   assert.match(doc, /Johku/);
   assert.match(doc, /booking_76/);
+  assert.match(doc, /Laskutetut/);
+  assert.match(doc, /`invoiced`/);
 
   const rows = JSON.parse(readFileSync(join(repo, 'content/site-texts.pending-import-8.json'), 'utf8'));
   assert.equal(rows.length, 16);
@@ -253,7 +256,11 @@ test('tuontitiedoston tekstit täsmäävät varatekstiin', async () => {
   assert.equal(orderText('ui.admin.orders.pay_paid', null, 'fi'), 'Maksetut');
 });
 
-test('siru näyttää Maksetut kun suodattimet on kiinni, Kaikki vaihtaa sen, haku katsoo kaikki', async () => {
+const pressed = (root) => PAYMENT_CODES.filter((c) => byTest(root, `orders-pay-btn-${c}`).getAttribute('aria-pressed') === 'true');
+const PAYMENT_CODES = F.PAYMENT_FILTERS;
+const tick = () => new Promise((r) => setTimeout(r, 0));
+
+test('maksutilanapit hakukentän alla: oletus Maksetut + Maksamattomat, Maksutila-valikkoa ei ole, haku katsoo kaikki', async () => {
   setLang('fi');
   clearOrderTextCache();
   const calls = [];
@@ -263,57 +270,230 @@ test('siru näyttää Maksetut kun suodattimet on kiinni, Kaikki vaihtaa sen, ha
     isMock() { return true; },
   };
   const tab = createOrdersTab({ api, ctx: { can: () => false } });
-  const chip = byTest(tab.node, 'orders-pay-chip');
+  const group = byTest(tab.node, 'orders-pay-chips');
   const toggle = byTest(tab.node, 'orders-filters-toggle');
   const panel = byTest(tab.node, 'orders-filters-panel');
-  assert.equal(toggle.getAttribute('aria-expanded'), 'false');
-  assert.equal(panel.hidden, true);
-  assert.equal(panel.contains(chip), false);
-  assert.equal(chip.textContent, 'Maksetut');
-  assert.equal(chip.getAttribute('data-filter'), 'paid');
-  assert.equal(chip.getAttribute('aria-label'), 'Maksutila: Maksetut');
+  assert.equal(byTest(tab.node, 'orders-f-pay'), undefined, 'Maksutila-pudotusvalikko poistettu');
+  assert.equal(byTest(tab.node, 'orders-pay-chip'), undefined);
+  assert.equal(panel.contains(group), false, 'napit näkyvät myös kun suodattimet on kiinni');
+  assert.equal(group.getAttribute('role'), 'group');
+  assert.equal(group.getAttribute('aria-label'), 'Maksutila');
+  const btns = PAYMENT_CODES.map((c) => byTest(tab.node, `orders-pay-btn-${c}`));
+  assert.ok(btns.every((b) => b && b.tagName === 'BUTTON' && b.getAttribute('type') === 'button'));
+  assert.deepEqual(btns.map((b) => b.textContent), ['Maksetut', 'Maksamattomat', 'Laskutetut', 'Kaikki', 'Hyvitetyt', 'Peruttu', 'Poistetut']);   // booking_279: Poistetut-nappi
+  assert.deepEqual(pressed(tab.node), ['paid', 'unpaid']);
+  assert.equal(byTest(tab.node, 'orders-pay-btn-paid').getAttribute('aria-label'), 'Maksutila: Maksetut');
   assert.equal(byTest(tab.node, 'orders-filters-count').hidden, true);
 
   await tab.load();
-  assert.equal(calls.at(-1).paymentFilter, 'paid');
+  assert.deepEqual(calls.at(-1).paymentFilters, ['paid', 'unpaid']);
   assert.equal(calls.at(-1).search, '');
 
   toggle.dispatch('click');
-  const sel = byTest(tab.node, 'orders-f-pay');
   assert.equal(panel.hidden, false);
-  assert.equal(panel.contains(sel), true);
-  assert.equal(sel.value, 'paid');
-  sel.value = 'all';
-  sel.dispatch('change');
-  await new Promise((r) => setTimeout(r, 0));
-  assert.equal(chip.textContent, 'Kaikki');
-  assert.equal(chip.getAttribute('data-filter'), 'all');
-  assert.equal(byTest(tab.node, 'orders-filters-count').hidden, false);
-  assert.equal(calls.at(-1).paymentFilter, 'all');
   toggle.dispatch('click');
-  assert.equal(panel.hidden, true);
-  assert.equal(chip.textContent, 'Kaikki');
 
   tab.setSearch('15042');
-  await new Promise((r) => setTimeout(r, 0));
+  await tick();
   assert.equal(calls.at(-1).search, '15042');
-  assert.equal(calls.at(-1).paymentFilter, 'all');
-  assert.equal(byTest(tab.node, 'orders-search-scope').hidden, true);
-
-  const reset = byTest(tab.node, 'orders-reset');
-  reset.dispatch('click');
-  await new Promise((r) => setTimeout(r, 0));
-  assert.equal(byTest(tab.node, 'orders-pay-chip').textContent, 'Maksetut');
-  tab.setSearch('99');
-  await new Promise((r) => setTimeout(r, 0));
-  assert.equal(calls.at(-1).paymentFilter, 'all');
+  assert.deepEqual(calls.at(-1).paymentFilters, ['all']);
   assert.equal(byTest(tab.node, 'orders-search-scope').hidden, false);
   assert.match(byTest(tab.node, 'orders-search-scope').textContent, /Haku kaikista tilauksista/);
-  assert.equal(byTest(tab.node, 'orders-pay-chip').getAttribute('data-filter'), 'paid');
+  assert.deepEqual(pressed(tab.node), ['paid', 'unpaid'], 'valinta ei muutu haun aikana');
+
+  byTest(tab.node, 'orders-pay-btn-unpaid').dispatch('click');
+  await tick();
+  assert.deepEqual(pressed(tab.node), ['paid']);
+  assert.deepEqual(calls.at(-1).paymentFilters, ['paid'], 'muu kuin oletus pysyy haussa');
+  assert.equal(byTest(tab.node, 'orders-search-scope').hidden, true);
+
+  byTest(tab.node, 'orders-reset').dispatch('click');
+  await tick();
+  assert.deepEqual(pressed(tab.node), ['paid', 'unpaid']);
+  assert.equal(calls.at(-1).search, '');
+  assert.deepEqual(calls.at(-1).paymentFilters, ['paid', 'unpaid']);
 
   setLang('en');
   byTest(tab.node, 'orders-reset').dispatch('click');
-  await new Promise((r) => setTimeout(r, 0));
-  assert.equal(byTest(tab.node, 'orders-pay-chip').textContent, 'Paid');
+  await tick();
+  assert.equal(byTest(tab.node, 'orders-pay-btn-paid').textContent, 'Paid');
+  assert.equal(byTest(tab.node, 'orders-pay-btn-invoiced').textContent, 'Invoiced');
   setLang('fi');
+});
+
+test('maksutilanapit: monivalinta, Kaikki kumoaa muut, kaikki pois → Kaikki', async () => {
+  setLang('fi');
+  clearOrderTextCache();
+  const calls = [];
+  const api = {
+    listOrders: async (a) => { calls.push({ ...a }); return { total: 0, rows: [] }; },
+    changed() {},
+    isMock() { return true; },
+  };
+  const tab = createOrdersTab({ api, ctx: { can: () => false } });
+  const click = async (c) => { byTest(tab.node, `orders-pay-btn-${c}`).dispatch('click'); await tick(); };
+  await click('unpaid');
+  assert.deepEqual(pressed(tab.node), ['paid']);
+  await click('invoiced');
+  assert.deepEqual(pressed(tab.node), ['paid', 'invoiced']);
+  assert.deepEqual(calls.at(-1).paymentFilters, ['paid', 'invoiced']);
+  assert.equal(calls.at(-1).offset, 0);
+  await click('cancelled');
+  assert.deepEqual(calls.at(-1).paymentFilters, ['paid', 'invoiced', 'cancelled']);
+  await click('paid');
+  assert.deepEqual(pressed(tab.node), ['invoiced', 'cancelled']);
+  assert.equal(byTest(tab.node, 'orders-filters-count').hidden, true, 'napit eivät kasvata suodatinlaskuria');
+  await click('all');
+  assert.deepEqual(pressed(tab.node), ['all']);
+  assert.deepEqual(calls.at(-1).paymentFilters, ['all']);
+  await click('all');
+  assert.deepEqual(pressed(tab.node), ['all'], 'Kaikki ei sammu itsestään');
+  await click('refunded');
+  assert.deepEqual(pressed(tab.node), ['refunded']);
+  await click('refunded');
+  assert.deepEqual(pressed(tab.node), ['all'], 'viimeisen pois → kaikki tilaukset');
+  assert.deepEqual(calls.at(-1).paymentFilters, ['all']);
+  assert.equal(byTest(tab.node, 'orders-sort').value, 'created', 'lajittelu ennallaan');
+});
+
+test('apufunktiot: normalisointi, vaihto, OR-osuma ja haku', () => {
+  assert.deepEqual(F.DEFAULT_PAYMENT_FILTERS, ['paid', 'unpaid']);
+  assert.deepEqual(F.normalizePaymentFilters(['unpaid', 'paid', 'paid', ' nope ', '']), ['paid', 'unpaid']);
+  assert.deepEqual(F.normalizePaymentFilters([]), ['all']);
+  assert.deepEqual(F.normalizePaymentFilters(['paid', 'all']), ['all']);
+  assert.deepEqual(F.togglePaymentFilter(['paid'], 'unpaid'), ['paid', 'unpaid']);
+  assert.deepEqual(F.togglePaymentFilter(['paid', 'unpaid'], 'paid'), ['unpaid']);
+  assert.deepEqual(F.togglePaymentFilter(['unpaid'], 'unpaid'), ['all']);
+  assert.deepEqual(F.togglePaymentFilter(['all'], 'invoiced'), ['invoiced']);
+  assert.deepEqual(F.togglePaymentFilter(['paid', 'unpaid'], 'all'), ['all']);
+  assert.deepEqual(F.togglePaymentFilter(['paid'], 'bogus'), ['paid']);
+  assert.equal(F.isDefaultPaymentFilters(['unpaid', 'paid']), true);
+  assert.equal(F.isDefaultPaymentFilters(['paid']), false);
+  assert.deepEqual(F.effectivePaymentFilters({ search: '', paymentFilters: ['paid', 'unpaid'] }), ['paid', 'unpaid']);
+  assert.deepEqual(F.effectivePaymentFilters({ search: '15001', paymentFilters: ['paid', 'unpaid'] }), ['all']);
+  assert.deepEqual(F.effectivePaymentFilters({ search: '15001', paymentFilters: ['paid'] }), ['paid']);
+  assert.equal(F.isUnpaidRow(order({ payment_status: 'unpaid', paid_amount: 0, payments: [] })), true);
+  assert.equal(F.isUnpaidRow(order({ payment_status: 'partially_paid', paid_amount: 40, payments: [{ status: 'paid' }] })), true);
+  assert.equal(F.isUnpaidRow(order({})), false);
+  assert.equal(F.isUnpaidRow(order({ status: 'cancelled', payment_status: 'unpaid', payments: [] })), false);
+  assert.equal(F.isUnpaidRow(order({ payment_status: 'invoiced', payments: [] })), false);
+  assert.deepEqual(F.effectivePaymentFilters({ search: '15001' }), ['all']);
+  const unpaid = order({ payment_status: 'unpaid', paid_amount: 0, payments: [] });
+  assert.equal(F.matchesPaymentFilters(unpaid, ['paid']), false);
+  assert.equal(F.matchesPaymentFilters(unpaid, ['paid', 'unpaid']), true);
+  assert.equal(F.matchesPaymentFilters(order({}), ['refunded', 'cancelled']), false);
+});
+
+test('mock: p_payment_filters yhdistää tilat ilman tuplia', async () => {
+  const mock = createMock({ n: 400, today: '2026-10-18', delay: 0 });
+  const ids = async (pf) => new Set((await mock.rpc('admin_list_orders', { p_payment_filter: pf, p_limit: 200 })).rows.map((r) => r.order_id));
+  const both = await mock.rpc('admin_list_orders', { p_payment_filters: ['paid', 'refunded'], p_limit: 200 });
+  const expect = mock.orders.filter((o) => F.matchesPaymentFilters(o, ['paid', 'refunded'])).length;
+  assert.equal(both.total, expect);
+  const union = new Set([...(await ids('paid')), ...(await ids('refunded'))]);
+  assert.ok(both.total <= 200 ? both.rows.length === union.size : true);
+  assert.equal(new Set(both.rows.map((r) => r.order_id)).size, both.rows.length, 'ei tuplia');
+  assert.equal((await mock.rpc('admin_list_orders', { p_payment_filters: [], p_payment_filter: 'unpaid', p_limit: 5 })).total, (await mock.rpc('admin_list_orders', { p_payment_filter: 'unpaid', p_limit: 5 })).total);
+  await assert.rejects(() => mock.rpc('admin_list_orders', { p_payment_filters: ['paid', 'nope'] }), (e) => e.code === 'invalid_param');
+});
+
+test('datakerros: yksi tila vanhalla parametrilla, useampi p_payment_filters, puuttuva parametri → vanha kutsu', async () => {
+  const calls = [];
+  let multi = true;
+  const rpc = async (n, a) => {
+    calls.push([n, a]);
+    if (a.p_payment_filters && !multi) throw Object.assign(new Error('Could not find the function booking.admin_list_orders(p_limit, p_offset, p_payment_filters, p_sort) in the schema cache'), { status: 404, code: 'PGRST202' });
+    return { total: 0, rows: [] };
+  };
+  const api = A.createTalousApi({ rpc, mock: false });
+  const base = { sortBy: 'created', sortDir: 'desc', limit: 25, offset: 0 };
+  await api.listOrders({ ...base, paymentFilters: ['paid'] });
+  assert.equal(calls.at(-1)[1].p_payment_filter, 'paid');
+  assert.equal('p_payment_filters' in calls.at(-1)[1], false);
+  await api.listOrders({ ...base, paymentFilters: ['all'] });
+  assert.equal(calls.at(-1)[1].p_payment_filter, 'all');
+  await api.listOrders({ ...base, paymentFilters: ['paid', 'unpaid'] });
+  assert.deepEqual(calls.at(-1)[1].p_payment_filters, ['paid', 'unpaid']);
+  assert.equal(calls.at(-1)[1].p_payment_filter, undefined);
+  assert.equal(calls.at(-1)[1].p_sort, 'created_desc');
+
+  multi = false;
+  const api2 = A.createTalousApi({ rpc, mock: false });
+  const n0 = calls.length;
+  const r = await api2.listOrders({ ...base, paymentFilters: ['paid', 'invoiced'] });
+  assert.equal(r.total, 0);
+  assert.equal(calls.length, n0 + 2);
+  assert.equal(calls.at(-1)[1].p_payment_filter, 'all');
+  assert.equal(api2.mode, 'real', 'puuttuva parametri ei siirrä listaa mockiin');
+  await api2.listOrders({ ...base, paymentFilters: ['paid', 'invoiced'] });
+  assert.equal(calls.length, n0 + 3, 'puuttuminen muistetaan');
+  await api2.listOrders({ ...base, paymentFilters: ['invoiced'] });
+  assert.equal(calls.at(-1)[1].p_payment_filter, 'invoiced');
+});
+
+test('migraatio booking_277 ja rollback', () => {
+  const dir = join(root, 'supabase');
+  const mig = readFileSync(join(dir, 'migrations/20261111144714_booking_277_admin_list_orders_payment_filters.sql'), 'utf8');
+  const rb = readFileSync(join(dir, 'rollbacks/20261111144714_booking_277_ROLLBACK.sql'), 'utf8');
+  const sig12 = 'booking.admin_list_orders(text, text, text, text, boolean, text, date, date, text, integer, integer, text)';
+  const sig13 = 'booking.admin_list_orders(text, text, text, text, boolean, text, date, date, text, integer, integer, text, text[])';
+  assert.ok(mig.includes(`drop function if exists ${sig12};`));
+  assert.match(mig, /p_payment_filter text DEFAULT 'paid'::text, p_payment_filters text\[\] DEFAULT NULL::text\[\]\)/);
+  assert.ok(mig.includes(`grant execute on function ${sig13} to authenticated;`));
+  assert.ok(mig.includes(`revoke all on function ${sig13} from public, anon, authenticated;`));
+  assert.match(mig, /'all' = any\(v_pfs\)/);
+  assert.doesNotMatch(mig, /\bpublic\./);
+  assert.ok(rb.includes(`drop function if exists ${sig13};`));
+  assert.ok(rb.includes(`grant execute on function ${sig12} to authenticated;`));
+  assert.doesNotMatch(rb.slice(rb.indexOf('CREATE OR REPLACE')), /p_payment_filters/);
+});
+
+test('tilausrivi näyttää laskunumeron ja tilan, ilman kenttiä ei roskaa', async () => {
+  setLang('fi');
+  clearOrderTextCache();
+  const rows = [
+    { order_id: 1, order_no: 15051, customer_name: 'A', payment_status: 'invoiced', total_gross: 10, created_at: '2026-11-01T10:00:00Z', invoice_no: 'L000001', invoice_status: 'sent', invoice_kind: 'debit' },
+    { order_id: 2, order_no: 15046, customer_name: 'B', payment_status: 'invoiced', total_gross: 10, created_at: '2026-11-01T10:00:00Z', invoice_status: 'draft' },
+    { order_id: 3, order_no: 15000, customer_name: 'C', payment_status: 'paid', total_gross: 10, created_at: '2026-11-01T10:00:00Z' },
+    { order_id: 4, order_no: 15154, customer_name: 'D', payment_status: 'paid', total_gross: 10, created_at: '2026-11-01T10:00:00Z', invoice_no: 'L000010', invoice_status: 'paid' },
+    { order_id: 5, order_no: 15100, customer_name: 'E', payment_status: 'invoiced', total_gross: 10, created_at: '2026-11-01T10:00:00Z', invoice_no: 'L000020', invoice_status: 'sent', invoice_kind: 'credit' },
+  ];
+  const api = {
+    listOrders: async () => ({ total: rows.length, rows }),
+    changed() {},
+    isMock() { return true; },
+  };
+  const tab = createOrdersTab({ api, ctx: { can: () => false } });
+  await tab.load();
+  const list = byTest(tab.node, 'orders-list');
+  const orderLis = walk(list).filter((n) => n.getAttribute && n.getAttribute('data-testid') === 'order');
+  assert.equal(orderLis.length, 5);
+  const cap = (li) => {
+    const el = walk(li).find((n) => n.getAttribute && n.getAttribute('data-testid') === 'order-invoice');
+    return el ? el.textContent.trim() : null;
+  };
+  assert.equal(cap(orderLis[0]), 'L000001 / Lähetetty');
+  assert.equal(cap(orderLis[1]), 'Luonnos');
+  assert.equal(cap(orderLis[2]), null);
+  assert.equal(cap(orderLis[3]), 'L000010 / Maksettu');
+  assert.equal(cap(orderLis[4]), 'L000020 / Hyvitys · Lähetetty');
+  const paidRowText = orderLis[2].textContent;
+  assert.equal(/L0|Luonnos|Lähetetty|undefined|null|ui\.admin\.invoices/.test(paidRowText), false);
+});
+
+test('maksamattoman tilauksen rivillä on haalea punainen tausta, maksetulla ei', async () => {
+  setLang('fi');
+  clearOrderTextCache();
+  const rows = [
+    { order_id: 1, order_no: 15001, customer_name: 'A', status: 'confirmed', payment_status: 'unpaid', total_gross: 29, created_at: '2026-11-01T10:00:00Z' },
+    { order_id: 2, order_no: 15002, customer_name: 'B', status: 'confirmed', payment_status: 'paid', total_gross: 29, paid: 29, payment_count: 1, created_at: '2026-11-01T10:00:00Z' },
+    { order_id: 3, order_no: 15003, customer_name: 'C', status: 'cancelled', payment_status: 'unpaid', total_gross: 29, created_at: '2026-11-01T10:00:00Z' },
+  ];
+  const api = { listOrders: async () => ({ total: rows.length, rows }), changed() {}, isMock() { return true; } };
+  const tab = createOrdersTab({ api, ctx: { can: () => false } });
+  await tab.load();
+  const items = walk(tab.node).filter((n) => n.getAttribute && n.getAttribute('data-testid') === 'order');
+  assert.deepEqual(items.map((n) => n.className), ['tl-row is-unpaid', 'tl-row', 'tl-row']);
+  const css = readFileSync(join(root, 'admin/admin.css'), 'utf8');
+  assert.match(css, /\.tl-row\.is-unpaid\{background:#fcf3f4;background:color-mix\(in srgb,var\(--unpaidbg\) 40%,#fff\)\}/);
 });

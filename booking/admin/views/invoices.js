@@ -9,9 +9,10 @@ import { fetchYtj } from '../ytj.js';
 import { mountInvoiceLines } from '../invoice-line-form.js';
 import { serverErrorField, validateInvoiceHeader } from '../invoice-header-validate.js';
 import { invoiceIdFromQuery } from '../invoice-link.js';
+import { orderSummaryLine, resolveOrderForInvoice } from '../invoice-from-order.js';
 
 const STATUSES = ['draft', 'sent', 'paid', 'overdue', 'credited', 'voided'];
-const tx = (k) => invoiceText(k);
+const tx = (k, vars) => invoiceText(k, vars);
 
 function input(attrs) {
   return h('input', { class: 'inp', ...attrs });
@@ -113,16 +114,44 @@ export async function render({ query } = {}) {
   if (linked) { try { await open(linked); } catch (e) { toast(errMsg(e)); } }
   return h('section', { class: 'pad' }, h('h1', { text: tx('ui.admin.invoices.title') }), bar, drawer.node, list, detail);
 
+  // HALL-LASKUT-01: kenttä on tilausnumero (order_no). Haetaan tilaus numerolla ja näytetään asiakas + summa ennen luontia;
+  // admin_create_invoice_from_order saa sisäisen order_id:n vasta vahvistuksen jälkeen.
   async function fromOrder() {
-    const orderId = input({ type: 'number', min: 1, required: true });
-    const body = h('form', { class: 'form' }, field(tx('ui.admin.invoices.order'), orderId), h('button', { class: 'btn primary', type: 'submit' }, tx('ui.admin.invoices.from_order')));
+    const orderNo = input({ type: 'text', inputmode: 'numeric', autocomplete: 'off', required: true, 'data-testid': 'inv-order-no' });
+    const summary = h('div', { class: 'stack', 'data-testid': 'inv-order-summary', 'aria-live': 'polite' });
+    const findBtn = h('button', { class: 'btn', type: 'submit', 'data-testid': 'inv-order-find' }, tx('ui.admin.invoices.order_find'));
+    const createBtn = h('button', { class: 'btn primary', type: 'button', disabled: true, 'data-testid': 'inv-order-create' }, tx('ui.admin.invoices.order_create'));
+    let found = null;
+    const reset = () => { found = null; createBtn.disabled = true; summary.replaceChildren(); };
+    orderNo.addEventListener('input', reset);
+    const body = h('form', { class: 'form' }, field(tx('ui.admin.invoices.order'), orderNo), summary, h('div', { class: 'row' }, findBtn, createBtn));
     const dlg = dialog(tx('ui.admin.invoices.from_order'), body);
     body.onsubmit = async (ev) => {
       ev.preventDefault();
+      reset();
+      findBtn.disabled = true;
       try {
-        const inv = await rpc('admin_create_invoice_from_order', { p_order_id: Number(orderId.value) });
+        const o = await resolveOrderForInvoice(rpc, orderNo.value);
+        if (String(orderNo.value).trim().replace(/^#/, '') !== String(o.orderNo)) return;   // numero muuttui haun aikana
+        found = o;
+        summary.replaceChildren(...[
+          h('p', {}, h('strong', { text: tx('ui.admin.invoices.order_confirm', { order: orderSummaryLine(o, money) }) })),
+          o.invoice ? h('p', { class: 'muted', text: tx('ui.admin.invoices.order_has_invoice', { invoice: o.invoice.invoice_no || o.invoice.id }) }) : null,
+        ].filter(Boolean));
+        createBtn.disabled = false;
+        createBtn.focus();
+      } catch (e) {
+        const code = e?.code;
+        summary.replaceChildren(h('p', { class: 'err', role: 'alert', text: code === 'invalid_order_no' ? tx('ui.admin.invoices.order_invalid') : (code === 'not_found' || code === 'mismatch') ? tx('ui.admin.invoices.order_not_found') : (e.message || String(e)) }));
+      } finally { findBtn.disabled = false; }
+    };
+    createBtn.onclick = async () => {
+      if (!found) return;
+      createBtn.disabled = true;
+      try {
+        const inv = await rpc('admin_create_invoice_from_order', { p_order_id: found.orderId });
         dlg.close(); toast(tx('ui.admin.invoices.saved')); await draw(); detail.replaceChildren(preview(inv));
-      } catch (e) { toast(e.message || String(e)); }
+      } catch (e) { createBtn.disabled = false; toast(e.message || String(e)); }
     };
   }
 

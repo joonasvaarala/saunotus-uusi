@@ -2,6 +2,7 @@
 // Avaimet ui.admin.booking.*. public_get_site_texts peittää sanakirjan.
 // Tuonti: content/site-texts.pending-import-89.json ja booking_194: pending-import-90.json.
 import { getLang } from './talous-i18n.js';
+import { getSiteTexts, clearSiteTextsCache } from './site-texts-cache.js';
 
 export const PREFIX = 'ui.admin.booking.';
 
@@ -122,7 +123,7 @@ export async function loadBookingTexts(rpcFn) {
   if (loaded) return true;
   if (typeof rpcFn !== 'function') return false;
   try {
-    const t = await rpcFn('public_get_site_texts', { p_lang: null });
+    const t = await getSiteTexts(rpcFn);
     if (!t || t.ok !== true || !Array.isArray(t.texts)) return false;
     const next = new Map();
     for (const r of t.texts) {
@@ -139,7 +140,7 @@ export async function loadBookingTexts(rpcFn) {
   }
 }
 
-export function clearBookingTextCache() { db = new Map(); loaded = false; }
+export function clearBookingTextCache() { clearSiteTextsCache(); db = new Map(); loaded = false; }
 
 export function bookingText(key, vars, lang = getLang()) {
   const full = key.startsWith(PREFIX) ? key : PREFIX + key;

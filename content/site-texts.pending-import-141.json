@@ -1,0 +1,542 @@
+[
+  {
+    "key": "ui.pos.method_checkoutx",
+    "lang": "fi",
+    "text": "Kortti puhelimella (CheckoutX)",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_286 Pikakassan kortti puhelimella (CheckoutX, Surfboard demo; vain testiympäristö). Joonas t459u 11.11.2026. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.pos.method_checkoutx",
+    "lang": "en",
+    "text": "Card on phone (CheckoutX)",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_286 Pikakassan kortti puhelimella (CheckoutX, Surfboard demo; vain testiympäristö). Joonas t459u 11.11.2026. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.pos.cx_test_note",
+    "lang": "fi",
+    "text": "Testiympäristö: CheckoutX-maksut mitätöidään, eikä rahaa veloiteta.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_286 Pikakassan kortti puhelimella (CheckoutX, Surfboard demo; vain testiympäristö). Joonas t459u 11.11.2026. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.pos.cx_simulated",
+    "lang": "fi",
+    "text": "Simuloitu maksu: CheckoutX-sovellusta ei avata, eikä rahaa liiku. Maksu hyväksytään muutaman sekunnin kuluttua.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_286 Pikakassan kortti puhelimella (CheckoutX, Surfboard demo; vain testiympäristö). Joonas t459u 11.11.2026. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.pos.cx_test_note",
+    "lang": "en",
+    "text": "Test environment: CheckoutX payments are voided and no money is charged.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_286 Pikakassan kortti puhelimella (CheckoutX, Surfboard demo; vain testiympäristö). Joonas t459u 11.11.2026. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.pos.cx_simulated",
+    "lang": "en",
+    "text": "Simulated payment: the CheckoutX app is not opened and no money moves. The payment is approved after a few seconds.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_286 Pikakassan kortti puhelimella (CheckoutX, Surfboard demo; vain testiympäristö). Joonas t459u 11.11.2026. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.pos.cx_phone",
+    "lang": "fi",
+    "text": "Tämä puhelin",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_286 Pikakassan kortti puhelimella (CheckoutX, Surfboard demo; vain testiympäristö). Joonas t459u 11.11.2026. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.pos.cx_phone",
+    "lang": "en",
+    "text": "This phone",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_286 Pikakassan kortti puhelimella (CheckoutX, Surfboard demo; vain testiympäristö). Joonas t459u 11.11.2026. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.pos.cx_pick",
+    "lang": "fi",
+    "text": "Valitse puhelin",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_286 Pikakassan kortti puhelimella (CheckoutX, Surfboard demo; vain testiympäristö). Joonas t459u 11.11.2026. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.pos.cx_pick",
+    "lang": "en",
+    "text": "Choose phone",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_286 Pikakassan kortti puhelimella (CheckoutX, Surfboard demo; vain testiympäristö). Joonas t459u 11.11.2026. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.pos.cx_no_terminal",
+    "lang": "fi",
+    "text": "Tätä puhelinta ei ole liitetty CheckoutX:ään.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_286 Pikakassan kortti puhelimella (CheckoutX, Surfboard demo; vain testiympäristö). Joonas t459u 11.11.2026. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.pos.cx_no_terminal",
+    "lang": "en",
+    "text": "This phone is not linked to CheckoutX.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_286 Pikakassan kortti puhelimella (CheckoutX, Surfboard demo; vain testiympäristö). Joonas t459u 11.11.2026. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.pos.cx_register",
+    "lang": "fi",
+    "text": "Liitä tämä puhelin CheckoutX:ään",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_286 Pikakassan kortti puhelimella (CheckoutX, Surfboard demo; vain testiympäristö). Joonas t459u 11.11.2026. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.pos.cx_register",
+    "lang": "en",
+    "text": "Link this phone to CheckoutX",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_286 Pikakassan kortti puhelimella (CheckoutX, Surfboard demo; vain testiympäristö). Joonas t459u 11.11.2026. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.pos.cx_register_label",
+    "lang": "fi",
+    "text": "Puhelimen nimi",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_286 Pikakassan kortti puhelimella (CheckoutX, Surfboard demo; vain testiympäristö). Joonas t459u 11.11.2026. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.pos.cx_register_label",
+    "lang": "en",
+    "text": "Phone name",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_286 Pikakassan kortti puhelimella (CheckoutX, Surfboard demo; vain testiympäristö). Joonas t459u 11.11.2026. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.pos.cx_register_wait",
+    "lang": "fi",
+    "text": "Vahvista liitos CheckoutX-sovelluksessa ja palaa sitten tähän näkymään.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_286 Pikakassan kortti puhelimella (CheckoutX, Surfboard demo; vain testiympäristö). Joonas t459u 11.11.2026. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.pos.cx_register_wait",
+    "lang": "en",
+    "text": "Confirm the link in the CheckoutX app, then come back to this view.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_286 Pikakassan kortti puhelimella (CheckoutX, Surfboard demo; vain testiympäristö). Joonas t459u 11.11.2026. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.pos.cx_register_done",
+    "lang": "fi",
+    "text": "Puhelin on liitetty CheckoutX:ään.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_286 Pikakassan kortti puhelimella (CheckoutX, Surfboard demo; vain testiympäristö). Joonas t459u 11.11.2026. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.pos.cx_register_done",
+    "lang": "en",
+    "text": "The phone is linked to CheckoutX.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_286 Pikakassan kortti puhelimella (CheckoutX, Surfboard demo; vain testiympäristö). Joonas t459u 11.11.2026. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.pos.cx_register_expired",
+    "lang": "fi",
+    "text": "Liitoskoodi vanheni. Yritä uudelleen.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_286 Pikakassan kortti puhelimella (CheckoutX, Surfboard demo; vain testiympäristö). Joonas t459u 11.11.2026. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.pos.cx_register_expired",
+    "lang": "en",
+    "text": "The link code expired. Please try again.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_286 Pikakassan kortti puhelimella (CheckoutX, Surfboard demo; vain testiympäristö). Joonas t459u 11.11.2026. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.pos.cx_register_admin",
+    "lang": "fi",
+    "text": "Pyydä ylläpitäjää liittämään tämä puhelin CheckoutX:ään.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_286 Pikakassan kortti puhelimella (CheckoutX, Surfboard demo; vain testiympäristö). Joonas t459u 11.11.2026. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.pos.cx_register_admin",
+    "lang": "en",
+    "text": "Ask an administrator to link this phone to CheckoutX.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_286 Pikakassan kortti puhelimella (CheckoutX, Surfboard demo; vain testiympäristö). Joonas t459u 11.11.2026. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.pos.cx_open",
+    "lang": "fi",
+    "text": "Avaa CheckoutX",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_286 Pikakassan kortti puhelimella (CheckoutX, Surfboard demo; vain testiympäristö). Joonas t459u 11.11.2026. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.pos.cx_open",
+    "lang": "en",
+    "text": "Open CheckoutX",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_286 Pikakassan kortti puhelimella (CheckoutX, Surfboard demo; vain testiympäristö). Joonas t459u 11.11.2026. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.pos.cx_configure",
+    "lang": "fi",
+    "text": "Valmistele CheckoutX",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_286 Pikakassan kortti puhelimella (CheckoutX, Surfboard demo; vain testiympäristö). Joonas t459u 11.11.2026. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.pos.cx_configure",
+    "lang": "en",
+    "text": "Prepare CheckoutX",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_286 Pikakassan kortti puhelimella (CheckoutX, Surfboard demo; vain testiympäristö). Joonas t459u 11.11.2026. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.pos.cx_waiting_help",
+    "lang": "fi",
+    "text": "Asiakas koskettaa korttia tai puhelinta tämän puhelimen takaosaan. Palaa sitten tähän näkymään.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_286 Pikakassan kortti puhelimella (CheckoutX, Surfboard demo; vain testiympäristö). Joonas t459u 11.11.2026. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.pos.cx_waiting_help",
+    "lang": "en",
+    "text": "The customer taps their card or phone on the back of this phone. Then come back to this view.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_286 Pikakassan kortti puhelimella (CheckoutX, Surfboard demo; vain testiympäristö). Joonas t459u 11.11.2026. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.pos.cx_failed",
+    "lang": "fi",
+    "text": "Korttimaksu ei onnistunut.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_286 Pikakassan kortti puhelimella (CheckoutX, Surfboard demo; vain testiympäristö). Joonas t459u 11.11.2026. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.pos.cx_failed",
+    "lang": "en",
+    "text": "The card payment did not go through.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_286 Pikakassan kortti puhelimella (CheckoutX, Surfboard demo; vain testiympäristö). Joonas t459u 11.11.2026. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.pos.cx_cancelled",
+    "lang": "fi",
+    "text": "Korttimaksu peruttiin.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_286 Pikakassan kortti puhelimella (CheckoutX, Surfboard demo; vain testiympäristö). Joonas t459u 11.11.2026. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.pos.cx_cancelled",
+    "lang": "en",
+    "text": "The card payment was cancelled.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_286 Pikakassan kortti puhelimella (CheckoutX, Surfboard demo; vain testiympäristö). Joonas t459u 11.11.2026. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.pos.cx_retry",
+    "lang": "fi",
+    "text": "Yritä uudelleen",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_286 Pikakassan kortti puhelimella (CheckoutX, Surfboard demo; vain testiympäristö). Joonas t459u 11.11.2026. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.pos.cx_retry",
+    "lang": "en",
+    "text": "Try again",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_286 Pikakassan kortti puhelimella (CheckoutX, Surfboard demo; vain testiympäristö). Joonas t459u 11.11.2026. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.pos.cx_cancel",
+    "lang": "fi",
+    "text": "Peru maksu",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_286 Pikakassan kortti puhelimella (CheckoutX, Surfboard demo; vain testiympäristö). Joonas t459u 11.11.2026. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.pos.cx_cancel",
+    "lang": "en",
+    "text": "Cancel payment",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_286 Pikakassan kortti puhelimella (CheckoutX, Surfboard demo; vain testiympäristö). Joonas t459u 11.11.2026. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.pos.cx_already_paid",
+    "lang": "fi",
+    "text": "Asiakas ehti maksaa, joten maksua ei peruttu.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_286 Pikakassan kortti puhelimella (CheckoutX, Surfboard demo; vain testiympäristö). Joonas t459u 11.11.2026. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.pos.cx_already_paid",
+    "lang": "en",
+    "text": "The customer had already paid, so the payment was not cancelled.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_286 Pikakassan kortti puhelimella (CheckoutX, Surfboard demo; vain testiympäristö). Joonas t459u 11.11.2026. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.pos.cx_off",
+    "lang": "fi",
+    "text": "Kortti puhelimella ei ole käytössä.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_286 Pikakassan kortti puhelimella (CheckoutX, Surfboard demo; vain testiympäristö). Joonas t459u 11.11.2026. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.pos.cx_off",
+    "lang": "en",
+    "text": "Card on phone is not in use.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_286 Pikakassan kortti puhelimella (CheckoutX, Surfboard demo; vain testiympäristö). Joonas t459u 11.11.2026. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.pos.cx_not_configured",
+    "lang": "fi",
+    "text": "CheckoutX-tunnukset puuttuvat. Maksua ei aloitettu.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_286 Pikakassan kortti puhelimella (CheckoutX, Surfboard demo; vain testiympäristö). Joonas t459u 11.11.2026. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.pos.cx_not_configured",
+    "lang": "en",
+    "text": "CheckoutX credentials are missing. The payment was not started.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_286 Pikakassan kortti puhelimella (CheckoutX, Surfboard demo; vain testiympäristö). Joonas t459u 11.11.2026. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.pos.cx_not_connected",
+    "lang": "fi",
+    "text": "Puhelimen CheckoutX ei ole yhteydessä. Valmistele CheckoutX ja yritä uudelleen.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_286 Pikakassan kortti puhelimella (CheckoutX, Surfboard demo; vain testiympäristö). Joonas t459u 11.11.2026. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.pos.cx_not_connected",
+    "lang": "en",
+    "text": "CheckoutX on this phone is not connected. Prepare CheckoutX and try again.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_286 Pikakassan kortti puhelimella (CheckoutX, Surfboard demo; vain testiympäristö). Joonas t459u 11.11.2026. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.pos.cx_unavailable",
+    "lang": "fi",
+    "text": "CheckoutX ei vastaa juuri nyt. Yritä hetken kuluttua uudelleen.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_286 Pikakassan kortti puhelimella (CheckoutX, Surfboard demo; vain testiympäristö). Joonas t459u 11.11.2026. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.pos.cx_unavailable",
+    "lang": "en",
+    "text": "CheckoutX is not responding right now. Please try again shortly.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_286 Pikakassan kortti puhelimella (CheckoutX, Surfboard demo; vain testiympäristö). Joonas t459u 11.11.2026. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.pos.cx_provider_error",
+    "lang": "fi",
+    "text": "CheckoutX ei hyväksynyt maksua. Yritä uudelleen.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_286 Pikakassan kortti puhelimella (CheckoutX, Surfboard demo; vain testiympäristö). Joonas t459u 11.11.2026. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.pos.cx_provider_error",
+    "lang": "en",
+    "text": "CheckoutX did not accept the payment. Please try again.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_286 Pikakassan kortti puhelimella (CheckoutX, Surfboard demo; vain testiympäristö). Joonas t459u 11.11.2026. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.pos.cx_in_progress",
+    "lang": "fi",
+    "text": "Tilauksella on jo avoin maksu toisella maksutavalla.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_286 Pikakassan kortti puhelimella (CheckoutX, Surfboard demo; vain testiympäristö). Joonas t459u 11.11.2026. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.pos.cx_in_progress",
+    "lang": "en",
+    "text": "The order already has an open payment with another method.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_286 Pikakassan kortti puhelimella (CheckoutX, Surfboard demo; vain testiympäristö). Joonas t459u 11.11.2026. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.pos.cx_forbidden",
+    "lang": "fi",
+    "text": "Sinulla ei ole oikeutta tähän toimintoon.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_286 Pikakassan kortti puhelimella (CheckoutX, Surfboard demo; vain testiympäristö). Joonas t459u 11.11.2026. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.pos.cx_forbidden",
+    "lang": "en",
+    "text": "You do not have permission for this action.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_286 Pikakassan kortti puhelimella (CheckoutX, Surfboard demo; vain testiympäristö). Joonas t459u 11.11.2026. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  }
+]

@@ -75,7 +75,7 @@ test('Lue lisää / Read more ja Näytä vähemmän / Show less: pending-import-
     assert.equal(r.class, 'normal'); assert.equal(r.kind, 'plain');
     assert.ok(r.max_len >= r.text.length);
     assert.deepEqual(r.placeholders, []);
-    assert.equal(have.has(`${r.key}|${r.lang}`), false, `${r.key} on jo varatekstissä`);
+    assert.ok(have.has(`${r.key}|${r.lang}`), `${r.key} on tuotu varatekstiin`);
   }
 });
 

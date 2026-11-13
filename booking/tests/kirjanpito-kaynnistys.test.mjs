@@ -34,7 +34,7 @@ test('tuontitiedosto 105: FI+EN, ei päällekkäin, vastaa sanakirjoja', () => {
   const rows = JSON.parse(src('../content/site-texts.pending-import-105.json'));
   const taken = new Set();
   for (const f of readdirSync(join(root, '../content'))) {
-    if (f === 'site-texts.pending-import-105.json' || !/^site-texts\.(pending-import-|imported|fallback)/.test(f) || !f.endsWith('.json')) continue;
+    if (f === 'site-texts.pending-import-105.json' || !/^site-texts\.(pending-import-|imported)/.test(f) || !f.endsWith('.json')) continue;
     const j = JSON.parse(readFileSync(join(root, '../content', f), 'utf8'));
     const list = Array.isArray(j) ? j : j.texts || [];
     for (const r of list) if (r?.key) taken.add(`${r.key}|${r.lang}`);

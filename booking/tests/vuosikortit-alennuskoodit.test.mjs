@@ -135,7 +135,7 @@ test('sivutekstien tuontitiedosto 42: FI+EN, sama kuin koodin oletus, vain uudet
   const keys = new Set(rows.map((r) => r.key));
   for (const k of keys) assert.ok(rows.some((r) => r.key === k && r.lang === 'fi') && rows.some((r) => r.key === k && r.lang === 'en'), k);
   const fb = JSON.parse(rd('content/site-texts.fallback.json')).texts;
-  assert.ok(!fb.some((r) => keys.has(r.key)), 'avaimet eivät ole vielä tuotannossa');
+  assert.ok(fb.some((r) => keys.has(r.key)), 'avaimet ovat varatekstissä (tuotu tuotantoon)');
 });
 
 test('sivutekstien tuontitiedosto 122: lahjakorttivihje FI+EN, sama kuin koodin oletus, ei vielä tuotannossa', async () => {
@@ -151,7 +151,7 @@ test('sivutekstien tuontitiedosto 122: lahjakorttivihje FI+EN, sama kuin koodin 
     assert.equal(r.class, classFor(r.key, def.get(`${r.key}|fi`)));
     assert.equal(r.kind, 'plain');
     assert.ok(!r.text.includes('<') && r.text.length <= r.max_len && r.placeholders.length === 0, r.key);
-    assert.ok(!fb.some((x) => x.key === r.key && x.lang === r.lang), r.key);
+    assert.equal(fb.find((x) => x.key === r.key && x.lang === r.lang)?.text, r.text, r.key);
   }
   for (const k of want) assert.ok(rows.some((r) => r.key === k && r.lang === 'fi') && rows.some((r) => r.key === k && r.lang === 'en'), k);
   assert.equal(def.get('ui.shop.code_gift_hint|fi'), DISCOUNT_TEXTS.fi.codeGiftHint);

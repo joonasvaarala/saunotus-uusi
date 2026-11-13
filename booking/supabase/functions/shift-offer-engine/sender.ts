@@ -6,6 +6,7 @@ import { processInboundMessage, type ActResult, type Intent, type StoreResult } 
 import {
   buildSessionPayload,
   classifyHttp,
+  cleanMessagingAccountId,
   handleClaimedMessage,
   handleWebhookRequest,
   messagesUrl,
@@ -28,6 +29,8 @@ export function readWhatsappEnv(env: { get(name: string): string | undefined }):
     phoneNumberId: env.get("WHATSAPP_PHONE_NUMBER_ID") ?? "",
     appSecret: env.get("WHATSAPP_APP_SECRET") ?? "",
     verifyToken: env.get("WHATSAPP_VERIFY_TOKEN") ?? "",
+    // 132001-korjaus: WABA id jokaiseen /messages-kutsuun; tyhjä → kenttä jätetään pois.
+    messagingAccountId: cleanMessagingAccountId(env.get("WHATSAPP_MESSAGING_ACCOUNT_ID")) ?? undefined,
   };
 }
 
@@ -239,7 +242,7 @@ export async function deliverInbound(
       return asAct(data);
     },
     async send(to, body, buttons) {
-      const payload = buildSessionPayload(to, body, buttons);
+      const payload = buildSessionPayload(to, body, buttons, env.messagingAccountId);
       if (!payload || !env.token || !messagesUrl(env.phoneNumberId)) {
         log("whatsapp_inbound_missing_credentials", {});
         return { ok: false, wamid: null };
@@ -293,6 +296,18 @@ export async function deliverInbound(
     async welcomeRelease(staffId) {
       const { error } = await supa.schema("booking").rpc("shift_staff_welcome_release", { p_staff: staffId });
       if (error) log("whatsapp_inbound_failed", { step: "welcome_release" });
+    },
+    // booking_274: pelkkä "ei" on abort vain, jos vahvistamaton ylläpitomuutos odottaa (sama ehto kuin whatsapp_inbound_act).
+    async hasPendingAction(staffId) {
+      const { data, error } = await supa
+        .from("whatsapp_pending_actions")
+        .select("id")
+        .eq("staff_id", staffId)
+        .is("consumed_at", null)
+        .gt("expires_at", new Date().toISOString())
+        .limit(1);
+      if (error) throw new Error("pending_lookup_failed");
+      return Array.isArray(data) && data.length > 0;
     },
     async storeOutbound(record) {
       const { error } = await supa.rpc("whatsapp_store_outbound", {

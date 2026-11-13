@@ -85,7 +85,7 @@ test('pending-import-101: FI+EN, sama kuin koodin oletus, ei vielä varatekstiss
     assert.equal(r.kind, 'plain');
     assert.ok(r.max_len >= r.text.length && r.max_len <= 100000);
     assert.deepEqual(r.placeholders, []);
-    assert.equal(have.has(`${r.key}|${r.lang}`), false);
+    assert.ok(have.has(`${r.key}|${r.lang}`), `${r.key} on tuotu varatekstiin`);
     assert.doesNotMatch(r.text, /[<>]|https?:\/\/|www\./);
     assert.ok(!seen.has(`${r.key}|${r.lang}`));
     seen.add(`${r.key}|${r.lang}`);

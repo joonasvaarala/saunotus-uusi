@@ -150,6 +150,8 @@ export function tenderAvailable(tender, modes) {
   if (!tender) return false;
   if (tender.handler === 'terminal' || tender.code === 'card_terminal') return false;
   if (!tender.active) return false;
+  // booking_286: kortti puhelimella (CheckoutX) vain, kun palvelin kertoo tilan test. Tuotannossa tila on off.
+  if (tender.handler === 'checkoutx' || tender.code === 'checkoutx') return !!modes && modes.checkoutx_mode === 'test';
   if (tender.handler === 'mobilepay' || tender.code === 'mobilepay') return false;
   if (tender.handler === 'visma_pay' || tender.code === 'visma_pay') return false;
   if (tender.handler === 'payment_link' || tender.code === 'payment_link') {

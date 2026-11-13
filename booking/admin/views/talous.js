@@ -20,10 +20,8 @@ const ALL_TABS = [['orders', 'tab.orders'], ['payments', 'tab.payments'], ['repo
 
 export async function render({ ctx, reload, query }) {
   const api = createTalousApi({ rpc, io: { select: dbSelect, functionUrl, fnBlob, fn } });
-  await loadOrderTexts(rpc);
-  await loadReportTexts(rpc);
-  await loadRcTexts(rpc);
-  await loadAcTexts(rpc);
+  // Tekstit jaetusta site_texts-välimuistista rinnakkain (yksi haku istunnossa).
+  await Promise.all([loadOrderTexts(rpc), loadReportTexts(rpc), loadRcTexts(rpc), loadAcTexts(rpc)]);
   // Raportit (sopimus §11): välilehti ja päiväraportti = reports.daily TAI reports.view; kuukausi + CSV = vain reports.view (muuten selkeä ilmoitus). Oikeudet luetaan aina oikealta käyttäjältä (myös ?mock=1).
   const canFull = !!ctx.can('reports.view'), canDaily = canFull || !!ctx.can('reports.daily');
   // Tilaukset/Maksut: payments.manage. Pelkkä giftcards.manage ei näe näitä (lahjakortit ovat omassa valikossa).

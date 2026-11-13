@@ -1,0 +1,150 @@
+[
+ {
+  "key": "ui.shop.pay_later",
+  "lang": "fi",
+  "text": "Maksu paikan päällä.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "KAUPPA-MAKSU-01 (UX-analyysi #345): vanhentunut maininta Visma Paysta pois, maksunvälittäjä on Montonio; sama kuin koodin oletus (booking/shop/src/i18n.js payLater)"
+ },
+ {
+  "key": "ui.shop.pay_later",
+  "lang": "en",
+  "text": "Payment on site.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "KAUPPA-MAKSU-01 (UX-analyysi #345): vanhentunut maininta Visma Paysta pois, maksunvälittäjä on Montonio; sama kuin koodin oletus (booking/shop/src/i18n.js payLater)"
+ },
+ {
+  "key": "ui.admin.invoices.order_find",
+  "lang": "fi",
+  "text": "Hae tilaus",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "HALL-LASKUT-01 (UX-analyysi #345): Lasku tilauksesta hakee tilauksen tilausnumerolla ja näyttää asiakkaan ja summan ennen luontia; sama kuin koodin oletus (booking/admin/invoices-texts.js)"
+ },
+ {
+  "key": "ui.admin.invoices.order_find",
+  "lang": "en",
+  "text": "Find order",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "HALL-LASKUT-01 (UX-analyysi #345): Lasku tilauksesta hakee tilauksen tilausnumerolla ja näyttää asiakkaan ja summan ennen luontia; sama kuin koodin oletus (booking/admin/invoices-texts.js)"
+ },
+ {
+  "key": "ui.admin.invoices.order_create",
+  "lang": "fi",
+  "text": "Luo lasku",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "HALL-LASKUT-01 (UX-analyysi #345): Lasku tilauksesta hakee tilauksen tilausnumerolla ja näyttää asiakkaan ja summan ennen luontia; sama kuin koodin oletus (booking/admin/invoices-texts.js)"
+ },
+ {
+  "key": "ui.admin.invoices.order_create",
+  "lang": "en",
+  "text": "Create invoice",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "HALL-LASKUT-01 (UX-analyysi #345): Lasku tilauksesta hakee tilauksen tilausnumerolla ja näyttää asiakkaan ja summan ennen luontia; sama kuin koodin oletus (booking/admin/invoices-texts.js)"
+ },
+ {
+  "key": "ui.admin.invoices.order_confirm",
+  "lang": "fi",
+  "text": "Luodaanko lasku tilauksesta {{var:order}}?",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:order}}"
+  ],
+  "reason": "HALL-LASKUT-01 (UX-analyysi #345): Lasku tilauksesta hakee tilauksen tilausnumerolla ja näyttää asiakkaan ja summan ennen luontia; sama kuin koodin oletus (booking/admin/invoices-texts.js)"
+ },
+ {
+  "key": "ui.admin.invoices.order_confirm",
+  "lang": "en",
+  "text": "Create an invoice from order {{var:order}}?",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:order}}"
+  ],
+  "reason": "HALL-LASKUT-01 (UX-analyysi #345): Lasku tilauksesta hakee tilauksen tilausnumerolla ja näyttää asiakkaan ja summan ennen luontia; sama kuin koodin oletus (booking/admin/invoices-texts.js)"
+ },
+ {
+  "key": "ui.admin.invoices.order_has_invoice",
+  "lang": "fi",
+  "text": "Tilauksella on jo lasku {{var:invoice}}. Luonti avaa sen eikä tee uutta.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:invoice}}"
+  ],
+  "reason": "HALL-LASKUT-01 (UX-analyysi #345): Lasku tilauksesta hakee tilauksen tilausnumerolla ja näyttää asiakkaan ja summan ennen luontia; sama kuin koodin oletus (booking/admin/invoices-texts.js)"
+ },
+ {
+  "key": "ui.admin.invoices.order_has_invoice",
+  "lang": "en",
+  "text": "The order already has invoice {{var:invoice}}. Creating opens it instead of making a new one.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:invoice}}"
+  ],
+  "reason": "HALL-LASKUT-01 (UX-analyysi #345): Lasku tilauksesta hakee tilauksen tilausnumerolla ja näyttää asiakkaan ja summan ennen luontia; sama kuin koodin oletus (booking/admin/invoices-texts.js)"
+ },
+ {
+  "key": "ui.admin.invoices.order_not_found",
+  "lang": "fi",
+  "text": "Tilausta ei löytynyt tällä tilausnumerolla.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "HALL-LASKUT-01 (UX-analyysi #345): Lasku tilauksesta hakee tilauksen tilausnumerolla ja näyttää asiakkaan ja summan ennen luontia; sama kuin koodin oletus (booking/admin/invoices-texts.js)"
+ },
+ {
+  "key": "ui.admin.invoices.order_not_found",
+  "lang": "en",
+  "text": "No order found with this order number.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "HALL-LASKUT-01 (UX-analyysi #345): Lasku tilauksesta hakee tilauksen tilausnumerolla ja näyttää asiakkaan ja summan ennen luontia; sama kuin koodin oletus (booking/admin/invoices-texts.js)"
+ },
+ {
+  "key": "ui.admin.invoices.order_invalid",
+  "lang": "fi",
+  "text": "Kirjoita tilausnumero numeroina.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "HALL-LASKUT-01 (UX-analyysi #345): Lasku tilauksesta hakee tilauksen tilausnumerolla ja näyttää asiakkaan ja summan ennen luontia; sama kuin koodin oletus (booking/admin/invoices-texts.js)"
+ },
+ {
+  "key": "ui.admin.invoices.order_invalid",
+  "lang": "en",
+  "text": "Enter the order number in digits.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 80,
+  "placeholders": [],
+  "reason": "HALL-LASKUT-01 (UX-analyysi #345): Lasku tilauksesta hakee tilauksen tilausnumerolla ja näyttää asiakkaan ja summan ennen luontia; sama kuin koodin oletus (booking/admin/invoices-texts.js)"
+ }
+]

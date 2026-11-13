@@ -1,0 +1,1110 @@
+[
+  {
+    "key": "admin.newsletter.title",
+    "lang": "fi",
+    "text": "Uutiskirjeet",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_259: erillinen uutiskirjenäkymä"
+  },
+  {
+    "key": "admin.newsletter.lead",
+    "lang": "fi",
+    "text": "Botin tekemä luonnos. Muokkaa tekstit, valitse kohderyhmä ja esikatsele ennen lähettämistä. Tyyli tulee botilta.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_259: erillinen uutiskirjenäkymä"
+  },
+  {
+    "key": "admin.newsletter.back",
+    "lang": "fi",
+    "text": "Takaisin hallintaan",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_259: erillinen uutiskirjenäkymä"
+  },
+  {
+    "key": "admin.newsletter.login",
+    "lang": "fi",
+    "text": "Kirjaudu ensin hallintaan ja palaa sitten tälle sivulle.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_259: erillinen uutiskirjenäkymä"
+  },
+  {
+    "key": "admin.newsletter.reload",
+    "lang": "fi",
+    "text": "Lataa uudelleen",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_259: erillinen uutiskirjenäkymä"
+  },
+  {
+    "key": "admin.newsletter.forbidden",
+    "lang": "fi",
+    "text": "Tarvitset viestien muokkausoikeuden.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_259: erillinen uutiskirjenäkymä"
+  },
+  {
+    "key": "admin.newsletter.empty",
+    "lang": "fi",
+    "text": "Ei uutiskirjeluonnoksia. Botti luo ne luonnos-RPC:llä.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_259: erillinen uutiskirjenäkymä"
+  },
+  {
+    "key": "admin.newsletter.choose",
+    "lang": "fi",
+    "text": "Valitse uutiskirje",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_259: erillinen uutiskirjenäkymä"
+  },
+  {
+    "key": "admin.newsletter.subject_fi",
+    "lang": "fi",
+    "text": "Aihe suomeksi",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_259: erillinen uutiskirjenäkymä"
+  },
+  {
+    "key": "admin.newsletter.subject_en",
+    "lang": "fi",
+    "text": "Aihe englanniksi",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_259: erillinen uutiskirjenäkymä"
+  },
+  {
+    "key": "admin.newsletter.body_fi",
+    "lang": "fi",
+    "text": "Teksti suomeksi",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_259: erillinen uutiskirjenäkymä"
+  },
+  {
+    "key": "admin.newsletter.body_en",
+    "lang": "fi",
+    "text": "Teksti englanniksi",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_259: erillinen uutiskirjenäkymä"
+  },
+  {
+    "key": "admin.newsletter.segment",
+    "lang": "fi",
+    "text": "Kohderyhmä",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_259: erillinen uutiskirjenäkymä"
+  },
+  {
+    "key": "admin.newsletter.language",
+    "lang": "fi",
+    "text": "Vastaanottajan kieli",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_259: erillinen uutiskirjenäkymä"
+  },
+  {
+    "key": "admin.newsletter.all",
+    "lang": "fi",
+    "text": "Kaikki markkinointiluvan antaneet",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_259: erillinen uutiskirjenäkymä"
+  },
+  {
+    "key": "admin.newsletter.training",
+    "lang": "fi",
+    "text": "Koulutuksen käyneet",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_259: erillinen uutiskirjenäkymä"
+  },
+  {
+    "key": "admin.newsletter.treatment",
+    "lang": "fi",
+    "text": "Hoidoissa käyneet",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_259: erillinen uutiskirjenäkymä"
+  },
+  {
+    "key": "admin.newsletter.event",
+    "lang": "fi",
+    "text": "Tapahtumissa käyneet",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_259: erillinen uutiskirjenäkymä"
+  },
+  {
+    "key": "admin.newsletter.session_only",
+    "lang": "fi",
+    "text": "Pelkissä saunavuoroissa käyneet",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_259: erillinen uutiskirjenäkymä"
+  },
+  {
+    "key": "admin.newsletter.gift_buyers",
+    "lang": "fi",
+    "text": "Lahjakortin ostajat",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_259: erillinen uutiskirjenäkymä"
+  },
+  {
+    "key": "admin.newsletter.christmas_gift_buyers",
+    "lang": "fi",
+    "text": "Aiempien vuosien marras–joulukuun lahjakorttiostajat",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_259: erillinen uutiskirjenäkymä"
+  },
+  {
+    "key": "admin.newsletter.all_languages",
+    "lang": "fi",
+    "text": "Suomi ja englanti",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_259: erillinen uutiskirjenäkymä"
+  },
+  {
+    "key": "admin.newsletter.save",
+    "lang": "fi",
+    "text": "Tallenna",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_259: erillinen uutiskirjenäkymä"
+  },
+  {
+    "key": "admin.newsletter.preview",
+    "lang": "fi",
+    "text": "Tallenna ja esikatsele",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_259: erillinen uutiskirjenäkymä"
+  },
+  {
+    "key": "admin.newsletter.send",
+    "lang": "fi",
+    "text": "Lähetä uutiskirje",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_259: erillinen uutiskirjenäkymä"
+  },
+  {
+    "key": "admin.newsletter.confirm_title",
+    "lang": "fi",
+    "text": "Vahvista uutiskirjeen lähetys",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_259: erillinen uutiskirjenäkymä"
+  },
+  {
+    "key": "admin.newsletter.confirm_body",
+    "lang": "fi",
+    "text": "Uutiskirje lisätään sähköpostijonoon {count} vastaanottajalle. Lähetetäänkö?",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [
+      "count"
+    ],
+    "reason": "booking_259: erillinen uutiskirjenäkymä"
+  },
+  {
+    "key": "admin.newsletter.cancel",
+    "lang": "fi",
+    "text": "Peruuta",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_259: erillinen uutiskirjenäkymä"
+  },
+  {
+    "key": "admin.newsletter.saved",
+    "lang": "fi",
+    "text": "Luonnos tallennettu.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_259: erillinen uutiskirjenäkymä"
+  },
+  {
+    "key": "admin.newsletter.queued",
+    "lang": "fi",
+    "text": "Uutiskirje lisätty lähetysjonoon. Tämä ei vielä vahvista toimitusta.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_259: erillinen uutiskirjenäkymä"
+  },
+  {
+    "key": "admin.newsletter.count",
+    "lang": "fi",
+    "text": "Vastaanottajia: {count} (FI {fi}, EN {en}).",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [
+      "count",
+      "fi",
+      "en"
+    ],
+    "reason": "booking_259: erillinen uutiskirjenäkymä"
+  },
+  {
+    "key": "admin.newsletter.privacy",
+    "lang": "fi",
+    "text": "Vain markkinointiluvan antaneet, ei anonymisoituja. Yksi viesti per asiakas ja sähköpostiosoite. Vastaanottajia ei listata. Suostumus tarkistetaan uudelleen lähetyshetkellä.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_259: erillinen uutiskirjenäkymä"
+  },
+  {
+    "key": "admin.newsletter.style",
+    "lang": "fi",
+    "text": "Ulkoasu on botin toimittama. Esikatselun peruutuslinkki on esimerkki.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_259: erillinen uutiskirjenäkymä"
+  },
+  {
+    "key": "admin.newsletter.suggestion",
+    "lang": "fi",
+    "text": "Botin ehdottama lähetysaika (Europe/Helsinki): {date}. Ei automaattista ajastusta.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [
+      "date"
+    ],
+    "reason": "booking_259: erillinen uutiskirjenäkymä"
+  },
+  {
+    "key": "admin.newsletter.draft",
+    "lang": "fi",
+    "text": "Luonnos",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_259: erillinen uutiskirjenäkymä"
+  },
+  {
+    "key": "admin.newsletter.previewed",
+    "lang": "fi",
+    "text": "Esikatseltu",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_259: erillinen uutiskirjenäkymä"
+  },
+  {
+    "key": "admin.newsletter.sent",
+    "lang": "fi",
+    "text": "Lähetysjonossa / lähetetty",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_259: erillinen uutiskirjenäkymä"
+  },
+  {
+    "key": "admin.newsletter.history",
+    "lang": "fi",
+    "text": "Vastaanottajia {count} · jonoon {queued} · toimitettu {sent} · virhe {failed} · ohitettu / koelähetys {skipped}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [
+      "count",
+      "queued",
+      "sent",
+      "failed",
+      "skipped"
+    ],
+    "reason": "booking_259: erillinen uutiskirjenäkymä"
+  },
+  {
+    "key": "admin.newsletter.preview_required",
+    "lang": "fi",
+    "text": "Esikatsele uudelleen. Muutos tai yli 30 minuuttia vanha esikatselu estää lähettämisen.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_259: erillinen uutiskirjenäkymä"
+  },
+  {
+    "key": "admin.newsletter.error",
+    "lang": "fi",
+    "text": "Toiminto epäonnistui. Lataa luonnos uudelleen ja esikatsele.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_259: erillinen uutiskirjenäkymä"
+  },
+  {
+    "key": "admin.newsletter.loading",
+    "lang": "fi",
+    "text": "Ladataan…",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_259: erillinen uutiskirjenäkymä"
+  },
+  {
+    "key": "admin.newsletter.fi_preview",
+    "lang": "fi",
+    "text": "Suomenkielinen esikatselu",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_259: erillinen uutiskirjenäkymä"
+  },
+  {
+    "key": "admin.newsletter.en_preview",
+    "lang": "fi",
+    "text": "Englanninkielinen esikatselu",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_259: erillinen uutiskirjenäkymä"
+  },
+  {
+    "key": "admin.newsletter.title",
+    "lang": "en",
+    "text": "Newsletters",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_259: erillinen uutiskirjenäkymä"
+  },
+  {
+    "key": "admin.newsletter.lead",
+    "lang": "en",
+    "text": "A bot-authored draft. Edit the text, choose an audience and preview before sending. The bot supplies the visual style.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_259: erillinen uutiskirjenäkymä"
+  },
+  {
+    "key": "admin.newsletter.back",
+    "lang": "en",
+    "text": "Back to admin",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_259: erillinen uutiskirjenäkymä"
+  },
+  {
+    "key": "admin.newsletter.login",
+    "lang": "en",
+    "text": "Sign in to admin first, then return to this page.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_259: erillinen uutiskirjenäkymä"
+  },
+  {
+    "key": "admin.newsletter.reload",
+    "lang": "en",
+    "text": "Reload",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_259: erillinen uutiskirjenäkymä"
+  },
+  {
+    "key": "admin.newsletter.forbidden",
+    "lang": "en",
+    "text": "You need permission to edit messages.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_259: erillinen uutiskirjenäkymä"
+  },
+  {
+    "key": "admin.newsletter.empty",
+    "lang": "en",
+    "text": "No newsletter drafts. A bot creates them using the draft RPC.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_259: erillinen uutiskirjenäkymä"
+  },
+  {
+    "key": "admin.newsletter.choose",
+    "lang": "en",
+    "text": "Choose newsletter",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_259: erillinen uutiskirjenäkymä"
+  },
+  {
+    "key": "admin.newsletter.subject_fi",
+    "lang": "en",
+    "text": "Subject in Finnish",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_259: erillinen uutiskirjenäkymä"
+  },
+  {
+    "key": "admin.newsletter.subject_en",
+    "lang": "en",
+    "text": "Subject in English",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_259: erillinen uutiskirjenäkymä"
+  },
+  {
+    "key": "admin.newsletter.body_fi",
+    "lang": "en",
+    "text": "Body in Finnish",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_259: erillinen uutiskirjenäkymä"
+  },
+  {
+    "key": "admin.newsletter.body_en",
+    "lang": "en",
+    "text": "Body in English",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_259: erillinen uutiskirjenäkymä"
+  },
+  {
+    "key": "admin.newsletter.segment",
+    "lang": "en",
+    "text": "Audience",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_259: erillinen uutiskirjenäkymä"
+  },
+  {
+    "key": "admin.newsletter.language",
+    "lang": "en",
+    "text": "Recipient language",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_259: erillinen uutiskirjenäkymä"
+  },
+  {
+    "key": "admin.newsletter.all",
+    "lang": "en",
+    "text": "All marketing-consented customers",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_259: erillinen uutiskirjenäkymä"
+  },
+  {
+    "key": "admin.newsletter.training",
+    "lang": "en",
+    "text": "Completed training",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_259: erillinen uutiskirjenäkymä"
+  },
+  {
+    "key": "admin.newsletter.treatment",
+    "lang": "en",
+    "text": "Visited treatments",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_259: erillinen uutiskirjenäkymä"
+  },
+  {
+    "key": "admin.newsletter.event",
+    "lang": "en",
+    "text": "Visited events",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_259: erillinen uutiskirjenäkymä"
+  },
+  {
+    "key": "admin.newsletter.session_only",
+    "lang": "en",
+    "text": "Sauna sessions only",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_259: erillinen uutiskirjenäkymä"
+  },
+  {
+    "key": "admin.newsletter.gift_buyers",
+    "lang": "en",
+    "text": "Gift card buyers",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_259: erillinen uutiskirjenäkymä"
+  },
+  {
+    "key": "admin.newsletter.christmas_gift_buyers",
+    "lang": "en",
+    "text": "November–December gift card buyers in previous years",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_259: erillinen uutiskirjenäkymä"
+  },
+  {
+    "key": "admin.newsletter.all_languages",
+    "lang": "en",
+    "text": "Finnish and English",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_259: erillinen uutiskirjenäkymä"
+  },
+  {
+    "key": "admin.newsletter.save",
+    "lang": "en",
+    "text": "Save",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_259: erillinen uutiskirjenäkymä"
+  },
+  {
+    "key": "admin.newsletter.preview",
+    "lang": "en",
+    "text": "Save and preview",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_259: erillinen uutiskirjenäkymä"
+  },
+  {
+    "key": "admin.newsletter.send",
+    "lang": "en",
+    "text": "Send newsletter",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_259: erillinen uutiskirjenäkymä"
+  },
+  {
+    "key": "admin.newsletter.confirm_title",
+    "lang": "en",
+    "text": "Confirm newsletter delivery",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_259: erillinen uutiskirjenäkymä"
+  },
+  {
+    "key": "admin.newsletter.confirm_body",
+    "lang": "en",
+    "text": "The newsletter will be queued for {count} recipients. Send?",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [
+      "count"
+    ],
+    "reason": "booking_259: erillinen uutiskirjenäkymä"
+  },
+  {
+    "key": "admin.newsletter.cancel",
+    "lang": "en",
+    "text": "Cancel",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_259: erillinen uutiskirjenäkymä"
+  },
+  {
+    "key": "admin.newsletter.saved",
+    "lang": "en",
+    "text": "Draft saved.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_259: erillinen uutiskirjenäkymä"
+  },
+  {
+    "key": "admin.newsletter.queued",
+    "lang": "en",
+    "text": "Newsletter queued. This is not a delivery confirmation.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_259: erillinen uutiskirjenäkymä"
+  },
+  {
+    "key": "admin.newsletter.count",
+    "lang": "en",
+    "text": "Recipients: {count} (FI {fi}, EN {en}).",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [
+      "count",
+      "fi",
+      "en"
+    ],
+    "reason": "booking_259: erillinen uutiskirjenäkymä"
+  },
+  {
+    "key": "admin.newsletter.privacy",
+    "lang": "en",
+    "text": "Only marketing-consented customers; no anonymised contacts. One message per customer and email address. No recipient list. Consent is checked again before delivery.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_259: erillinen uutiskirjenäkymä"
+  },
+  {
+    "key": "admin.newsletter.style",
+    "lang": "en",
+    "text": "The bot supplies the visual style. The preview unsubscribe link is an example.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_259: erillinen uutiskirjenäkymä"
+  },
+  {
+    "key": "admin.newsletter.suggestion",
+    "lang": "en",
+    "text": "Bot-suggested delivery time (Europe/Helsinki): {date}. No automatic scheduling.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [
+      "date"
+    ],
+    "reason": "booking_259: erillinen uutiskirjenäkymä"
+  },
+  {
+    "key": "admin.newsletter.draft",
+    "lang": "en",
+    "text": "Draft",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_259: erillinen uutiskirjenäkymä"
+  },
+  {
+    "key": "admin.newsletter.previewed",
+    "lang": "en",
+    "text": "Previewed",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_259: erillinen uutiskirjenäkymä"
+  },
+  {
+    "key": "admin.newsletter.sent",
+    "lang": "en",
+    "text": "Queued / sent",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_259: erillinen uutiskirjenäkymä"
+  },
+  {
+    "key": "admin.newsletter.history",
+    "lang": "en",
+    "text": "Recipients {count} · queued {queued} · delivered {sent} · failed {failed} · skipped / dry run {skipped}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [
+      "count",
+      "queued",
+      "sent",
+      "failed",
+      "skipped"
+    ],
+    "reason": "booking_259: erillinen uutiskirjenäkymä"
+  },
+  {
+    "key": "admin.newsletter.preview_required",
+    "lang": "en",
+    "text": "Preview again. Changes or a preview older than 30 minutes prevent delivery.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_259: erillinen uutiskirjenäkymä"
+  },
+  {
+    "key": "admin.newsletter.error",
+    "lang": "en",
+    "text": "The action failed. Reload the draft and preview again.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_259: erillinen uutiskirjenäkymä"
+  },
+  {
+    "key": "admin.newsletter.loading",
+    "lang": "en",
+    "text": "Loading…",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_259: erillinen uutiskirjenäkymä"
+  },
+  {
+    "key": "admin.newsletter.fi_preview",
+    "lang": "en",
+    "text": "Finnish preview",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_259: erillinen uutiskirjenäkymä"
+  },
+  {
+    "key": "admin.newsletter.en_preview",
+    "lang": "en",
+    "text": "English preview",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_259: erillinen uutiskirjenäkymä"
+  },
+  {
+    "key": "admin.newsletter.too_many",
+    "lang": "fi",
+    "text": "Kohderyhmässä on yli 5000 vastaanottajaa. Rajaa kohderyhmää tai kieltä.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_259: uutiskirjeen turvalliset virhetekstit"
+  },
+  {
+    "key": "admin.newsletter.too_many",
+    "lang": "en",
+    "text": "More than 5000 recipients. Narrow the audience or language.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_259: uutiskirjeen turvalliset virhetekstit"
+  },
+  {
+    "key": "admin.newsletter.email_disabled",
+    "lang": "fi",
+    "text": "Sähköpostilähetys on pois käytöstä. Pyydä ylläpitäjää tarkistamaan lähetysasetukset.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_259: uutiskirjeen turvalliset virhetekstit"
+  },
+  {
+    "key": "admin.newsletter.email_disabled",
+    "lang": "en",
+    "text": "Email delivery is disabled. Ask an administrator to check delivery settings.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_259: uutiskirjeen turvalliset virhetekstit"
+  },
+  {
+    "key": "admin.newsletter.no_recipients",
+    "lang": "fi",
+    "text": "Valitussa kohderyhmässä ei ole vastaanottajia.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_259: uutiskirjeen turvalliset virhetekstit"
+  },
+  {
+    "key": "admin.newsletter.no_recipients",
+    "lang": "en",
+    "text": "No recipients in the selected audience.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_259: uutiskirjeen turvalliset virhetekstit"
+  },
+  {
+    "key": "admin.newsletter.newsletter_conflict",
+    "lang": "fi",
+    "text": "Luonnos muuttui tai on jo lähetetty. Lataa uudelleen.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_259: uutiskirjeen turvalliset virhetekstit"
+  },
+  {
+    "key": "admin.newsletter.newsletter_conflict",
+    "lang": "en",
+    "text": "The draft changed or was already sent. Reload it.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_259: uutiskirjeen turvalliset virhetekstit"
+  },
+  {
+    "key": "admin.newsletter.newsletter_preview_required",
+    "lang": "fi",
+    "text": "Vastaanottajat tai luonnos muuttuivat. Esikatsele uudelleen.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_259: uutiskirjeen turvalliset virhetekstit"
+  },
+  {
+    "key": "admin.newsletter.newsletter_preview_required",
+    "lang": "en",
+    "text": "The audience or draft changed. Preview again.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_259: uutiskirjeen turvalliset virhetekstit"
+  },
+  {
+    "key": "admin.newsletter.unsubscribe_title",
+    "lang": "fi",
+    "text": "Peruuta uutiskirjeet",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 600,
+    "placeholders": [],
+    "reason": "booking_259: uutiskirjeeseen rajattu osoitekohtainen peruutus"
+  },
+  {
+    "key": "admin.newsletter.unsubscribe_title",
+    "lang": "en",
+    "text": "Unsubscribe from newsletters",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 600,
+    "placeholders": [],
+    "reason": "booking_259: uutiskirjeeseen rajattu osoitekohtainen peruutus"
+  },
+  {
+    "key": "admin.newsletter.unsubscribe_lead",
+    "lang": "fi",
+    "text": "Vahvistamalla estät uutiskirjeet tähän sähköpostiosoitteeseen, myös jos osoite on usealla asiakasprofiililla. Tämä ei muuta palveluviestejä tai muita markkinointilupia.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 600,
+    "placeholders": [],
+    "reason": "booking_259: uutiskirjeeseen rajattu osoitekohtainen peruutus"
+  },
+  {
+    "key": "admin.newsletter.unsubscribe_lead",
+    "lang": "en",
+    "text": "Confirm to stop newsletters to this email address, including duplicate customer profiles. This does not change service messages or other marketing permissions.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 600,
+    "placeholders": [],
+    "reason": "booking_259: uutiskirjeeseen rajattu osoitekohtainen peruutus"
+  },
+  {
+    "key": "admin.newsletter.unsubscribe_confirm",
+    "lang": "fi",
+    "text": "Vahvista uutiskirjeiden peruutus",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 600,
+    "placeholders": [],
+    "reason": "booking_259: uutiskirjeeseen rajattu osoitekohtainen peruutus"
+  },
+  {
+    "key": "admin.newsletter.unsubscribe_confirm",
+    "lang": "en",
+    "text": "Confirm newsletter unsubscribe",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 600,
+    "placeholders": [],
+    "reason": "booking_259: uutiskirjeeseen rajattu osoitekohtainen peruutus"
+  },
+  {
+    "key": "admin.newsletter.unsubscribe_done",
+    "lang": "fi",
+    "text": "Peruutus on käsitelty. Uutiskirjeitä ei enää toimiteta tämän linkin osoitteeseen.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 600,
+    "placeholders": [],
+    "reason": "booking_259: uutiskirjeeseen rajattu osoitekohtainen peruutus"
+  },
+  {
+    "key": "admin.newsletter.unsubscribe_done",
+    "lang": "en",
+    "text": "Unsubscribe processed. Newsletters will no longer be delivered to the address linked to this token.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 600,
+    "placeholders": [],
+    "reason": "booking_259: uutiskirjeeseen rajattu osoitekohtainen peruutus"
+  },
+  {
+    "key": "admin.newsletter.unsubscribe_invalid",
+    "lang": "fi",
+    "text": "Peruutuslinkki puuttuu tai on virheellinen. Avaa linkki saamastasi uutiskirjeestä.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 600,
+    "placeholders": [],
+    "reason": "booking_259: uutiskirjeeseen rajattu osoitekohtainen peruutus"
+  },
+  {
+    "key": "admin.newsletter.unsubscribe_invalid",
+    "lang": "en",
+    "text": "This unsubscribe link is missing or invalid. Open the link from your newsletter.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 600,
+    "placeholders": [],
+    "reason": "booking_259: uutiskirjeeseen rajattu osoitekohtainen peruutus"
+  },
+  {
+    "key": "admin.newsletter.unsubscribe_error",
+    "lang": "fi",
+    "text": "Peruutusta ei voitu vahvistaa. Yritä uudelleen.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 600,
+    "placeholders": [],
+    "reason": "booking_259: uutiskirjeeseen rajattu osoitekohtainen peruutus"
+  },
+  {
+    "key": "admin.newsletter.unsubscribe_error",
+    "lang": "en",
+    "text": "The unsubscribe could not be confirmed. Please try again.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 600,
+    "placeholders": [],
+    "reason": "booking_259: uutiskirjeeseen rajattu osoitekohtainen peruutus"
+  }
+]

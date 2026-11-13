@@ -146,16 +146,16 @@ const root = join(admin, '..', '..');
 const readAdmin = (rel) => readFileSync(join(admin, rel), 'utf8');
 
 test('UI04: järjestys, testidit, suljetut harvinaiset osiot ja null-turvallisuus', () => {
-  const src = readAdmin('views/shared.js');
-  const anchors = ['res-summary', 'res-customer', 'res-primary-actions', 'res-payment', 'res-contents',
+  const src = readAdmin('views/order-card.js');
+  const anchors = ['res-summary', 'res-customer', 'res-primary-actions', 'res-contents', 'res-payment',
     'res-note-editor', 'res-secondary-actions', 'res-more', 'res-move'];
-  const positions = anchors.map((value) => src.indexOf(`'data-testid': '${value}'`));
+  const positions = anchors.map((value) => { const direct = src.indexOf(`'data-testid': '${value}'`); return direct >= 0 ? direct : src.indexOf(`'${value}'`); });
   assert.ok(positions.every((n) => n >= 0), JSON.stringify(anchors.map((value, i) => [value, positions[i]])));
   assert.ok(positions.every((n, i) => i === 0 || n > positions[i - 1]));
-  assert.match(src, /body\.append\(\.\.\.list\(/);
+  assert.match(src, /body\.append\(hero, alerts, primary, sections, secondary, more, move, footer, delBox\)/);   // booking_279: poisto viimeisenä
   assert.doesNotMatch(src, /Verkkomaksulinkki \(Visma Pay\)|admin_create_payment_link|innerHTML/);
-  assert.match(src, /h\('details', \{ class: 'rd-more'/);
-  assert.match(src, /h\('details', \{ class: 'rd-more rd-move'/);
+  assert.match(src, /h\('details', \{ class: 'rd-more/ );
+  assert.match(src, /h\('details', \{ class: 'rd-more rd-move/ );
   assert.match(src, /data-testid': 'res-no-show'/);
   assert.match(src, /formDialog\(tx\('ui\.admin\.res\.no_show_title'/);
 });
@@ -182,7 +182,7 @@ test('UI04: takarajaohjaimen alkuvalinta on pois ja kentän päiväraja 60', () 
   assert.match(orders, /deadline\.read\(fd\)/);
   assert.match(orders, /linkSubmitOnce/);
   assert.doesNotMatch(src, /max:\s*90|value:\s*14,\s*required:\s*true|\|\| 14\)/);
-  assert.doesNotMatch(readAdmin('views/shared.js'), /payment-link-04|reservation-texts-04/);
+  assert.doesNotMatch(readAdmin('views/order-card.js'), /payment-link-04|reservation-texts-04/);
   assert.doesNotMatch(src, /p_expires_days:\s*null|expiresDays:\s*null/);
 });
 

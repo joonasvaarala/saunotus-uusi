@@ -1,1110 +1,758 @@
 [
   {
-    "key": "admin.newsletter.title",
+    "key": "ui.admin.res.pay_unpaid_amount",
     "lang": "fi",
-    "text": "Uutiskirjeet",
+    "text": "Maksamatta {{var:amount}}",
     "class": "normal",
     "kind": "plain",
-    "max_len": 400,
-    "placeholders": [],
-    "reason": "booking_259: erillinen uutiskirjenäkymä"
-  },
-  {
-    "key": "admin.newsletter.lead",
-    "lang": "fi",
-    "text": "Botin tekemä luonnos. Muokkaa tekstit, valitse kohderyhmä ja esikatsele ennen lähettämistä. Tyyli tulee botilta.",
-    "class": "normal",
-    "kind": "plain",
-    "max_len": 400,
-    "placeholders": [],
-    "reason": "booking_259: erillinen uutiskirjenäkymä"
-  },
-  {
-    "key": "admin.newsletter.back",
-    "lang": "fi",
-    "text": "Takaisin hallintaan",
-    "class": "normal",
-    "kind": "plain",
-    "max_len": 400,
-    "placeholders": [],
-    "reason": "booking_259: erillinen uutiskirjenäkymä"
-  },
-  {
-    "key": "admin.newsletter.login",
-    "lang": "fi",
-    "text": "Kirjaudu ensin hallintaan ja palaa sitten tälle sivulle.",
-    "class": "normal",
-    "kind": "plain",
-    "max_len": 400,
-    "placeholders": [],
-    "reason": "booking_259: erillinen uutiskirjenäkymä"
-  },
-  {
-    "key": "admin.newsletter.reload",
-    "lang": "fi",
-    "text": "Lataa uudelleen",
-    "class": "normal",
-    "kind": "plain",
-    "max_len": 400,
-    "placeholders": [],
-    "reason": "booking_259: erillinen uutiskirjenäkymä"
-  },
-  {
-    "key": "admin.newsletter.forbidden",
-    "lang": "fi",
-    "text": "Tarvitset viestien muokkausoikeuden.",
-    "class": "normal",
-    "kind": "plain",
-    "max_len": 400,
-    "placeholders": [],
-    "reason": "booking_259: erillinen uutiskirjenäkymä"
-  },
-  {
-    "key": "admin.newsletter.empty",
-    "lang": "fi",
-    "text": "Ei uutiskirjeluonnoksia. Botti luo ne luonnos-RPC:llä.",
-    "class": "normal",
-    "kind": "plain",
-    "max_len": 400,
-    "placeholders": [],
-    "reason": "booking_259: erillinen uutiskirjenäkymä"
-  },
-  {
-    "key": "admin.newsletter.choose",
-    "lang": "fi",
-    "text": "Valitse uutiskirje",
-    "class": "normal",
-    "kind": "plain",
-    "max_len": 400,
-    "placeholders": [],
-    "reason": "booking_259: erillinen uutiskirjenäkymä"
-  },
-  {
-    "key": "admin.newsletter.subject_fi",
-    "lang": "fi",
-    "text": "Aihe suomeksi",
-    "class": "normal",
-    "kind": "plain",
-    "max_len": 400,
-    "placeholders": [],
-    "reason": "booking_259: erillinen uutiskirjenäkymä"
-  },
-  {
-    "key": "admin.newsletter.subject_en",
-    "lang": "fi",
-    "text": "Aihe englanniksi",
-    "class": "normal",
-    "kind": "plain",
-    "max_len": 400,
-    "placeholders": [],
-    "reason": "booking_259: erillinen uutiskirjenäkymä"
-  },
-  {
-    "key": "admin.newsletter.body_fi",
-    "lang": "fi",
-    "text": "Teksti suomeksi",
-    "class": "normal",
-    "kind": "plain",
-    "max_len": 400,
-    "placeholders": [],
-    "reason": "booking_259: erillinen uutiskirjenäkymä"
-  },
-  {
-    "key": "admin.newsletter.body_en",
-    "lang": "fi",
-    "text": "Teksti englanniksi",
-    "class": "normal",
-    "kind": "plain",
-    "max_len": 400,
-    "placeholders": [],
-    "reason": "booking_259: erillinen uutiskirjenäkymä"
-  },
-  {
-    "key": "admin.newsletter.segment",
-    "lang": "fi",
-    "text": "Kohderyhmä",
-    "class": "normal",
-    "kind": "plain",
-    "max_len": 400,
-    "placeholders": [],
-    "reason": "booking_259: erillinen uutiskirjenäkymä"
-  },
-  {
-    "key": "admin.newsletter.language",
-    "lang": "fi",
-    "text": "Vastaanottajan kieli",
-    "class": "normal",
-    "kind": "plain",
-    "max_len": 400,
-    "placeholders": [],
-    "reason": "booking_259: erillinen uutiskirjenäkymä"
-  },
-  {
-    "key": "admin.newsletter.all",
-    "lang": "fi",
-    "text": "Kaikki markkinointiluvan antaneet",
-    "class": "normal",
-    "kind": "plain",
-    "max_len": 400,
-    "placeholders": [],
-    "reason": "booking_259: erillinen uutiskirjenäkymä"
-  },
-  {
-    "key": "admin.newsletter.training",
-    "lang": "fi",
-    "text": "Koulutuksen käyneet",
-    "class": "normal",
-    "kind": "plain",
-    "max_len": 400,
-    "placeholders": [],
-    "reason": "booking_259: erillinen uutiskirjenäkymä"
-  },
-  {
-    "key": "admin.newsletter.treatment",
-    "lang": "fi",
-    "text": "Hoidoissa käyneet",
-    "class": "normal",
-    "kind": "plain",
-    "max_len": 400,
-    "placeholders": [],
-    "reason": "booking_259: erillinen uutiskirjenäkymä"
-  },
-  {
-    "key": "admin.newsletter.event",
-    "lang": "fi",
-    "text": "Tapahtumissa käyneet",
-    "class": "normal",
-    "kind": "plain",
-    "max_len": 400,
-    "placeholders": [],
-    "reason": "booking_259: erillinen uutiskirjenäkymä"
-  },
-  {
-    "key": "admin.newsletter.session_only",
-    "lang": "fi",
-    "text": "Pelkissä saunavuoroissa käyneet",
-    "class": "normal",
-    "kind": "plain",
-    "max_len": 400,
-    "placeholders": [],
-    "reason": "booking_259: erillinen uutiskirjenäkymä"
-  },
-  {
-    "key": "admin.newsletter.gift_buyers",
-    "lang": "fi",
-    "text": "Lahjakortin ostajat",
-    "class": "normal",
-    "kind": "plain",
-    "max_len": 400,
-    "placeholders": [],
-    "reason": "booking_259: erillinen uutiskirjenäkymä"
-  },
-  {
-    "key": "admin.newsletter.christmas_gift_buyers",
-    "lang": "fi",
-    "text": "Aiempien vuosien marras–joulukuun lahjakorttiostajat",
-    "class": "normal",
-    "kind": "plain",
-    "max_len": 400,
-    "placeholders": [],
-    "reason": "booking_259: erillinen uutiskirjenäkymä"
-  },
-  {
-    "key": "admin.newsletter.all_languages",
-    "lang": "fi",
-    "text": "Suomi ja englanti",
-    "class": "normal",
-    "kind": "plain",
-    "max_len": 400,
-    "placeholders": [],
-    "reason": "booking_259: erillinen uutiskirjenäkymä"
-  },
-  {
-    "key": "admin.newsletter.save",
-    "lang": "fi",
-    "text": "Tallenna",
-    "class": "normal",
-    "kind": "plain",
-    "max_len": 400,
-    "placeholders": [],
-    "reason": "booking_259: erillinen uutiskirjenäkymä"
-  },
-  {
-    "key": "admin.newsletter.preview",
-    "lang": "fi",
-    "text": "Tallenna ja esikatsele",
-    "class": "normal",
-    "kind": "plain",
-    "max_len": 400,
-    "placeholders": [],
-    "reason": "booking_259: erillinen uutiskirjenäkymä"
-  },
-  {
-    "key": "admin.newsletter.send",
-    "lang": "fi",
-    "text": "Lähetä uutiskirje",
-    "class": "normal",
-    "kind": "plain",
-    "max_len": 400,
-    "placeholders": [],
-    "reason": "booking_259: erillinen uutiskirjenäkymä"
-  },
-  {
-    "key": "admin.newsletter.confirm_title",
-    "lang": "fi",
-    "text": "Vahvista uutiskirjeen lähetys",
-    "class": "normal",
-    "kind": "plain",
-    "max_len": 400,
-    "placeholders": [],
-    "reason": "booking_259: erillinen uutiskirjenäkymä"
-  },
-  {
-    "key": "admin.newsletter.confirm_body",
-    "lang": "fi",
-    "text": "Uutiskirje lisätään sähköpostijonoon {count} vastaanottajalle. Lähetetäänkö?",
-    "class": "normal",
-    "kind": "plain",
-    "max_len": 400,
+    "max_len": 200,
     "placeholders": [
-      "count"
+      "{{var:amount}}"
     ],
-    "reason": "booking_259: erillinen uutiskirjenäkymä"
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
   },
   {
-    "key": "admin.newsletter.cancel",
-    "lang": "fi",
-    "text": "Peruuta",
+    "key": "ui.admin.res.pay_unpaid_amount",
+    "lang": "en",
+    "text": "Unpaid {{var:amount}}",
     "class": "normal",
     "kind": "plain",
-    "max_len": 400,
-    "placeholders": [],
-    "reason": "booking_259: erillinen uutiskirjenäkymä"
-  },
-  {
-    "key": "admin.newsletter.saved",
-    "lang": "fi",
-    "text": "Luonnos tallennettu.",
-    "class": "normal",
-    "kind": "plain",
-    "max_len": 400,
-    "placeholders": [],
-    "reason": "booking_259: erillinen uutiskirjenäkymä"
-  },
-  {
-    "key": "admin.newsletter.queued",
-    "lang": "fi",
-    "text": "Uutiskirje lisätty lähetysjonoon. Tämä ei vielä vahvista toimitusta.",
-    "class": "normal",
-    "kind": "plain",
-    "max_len": 400,
-    "placeholders": [],
-    "reason": "booking_259: erillinen uutiskirjenäkymä"
-  },
-  {
-    "key": "admin.newsletter.count",
-    "lang": "fi",
-    "text": "Vastaanottajia: {count} (FI {fi}, EN {en}).",
-    "class": "normal",
-    "kind": "plain",
-    "max_len": 400,
+    "max_len": 200,
     "placeholders": [
-      "count",
-      "fi",
-      "en"
+      "{{var:amount}}"
     ],
-    "reason": "booking_259: erillinen uutiskirjenäkymä"
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
   },
   {
-    "key": "admin.newsletter.privacy",
+    "key": "ui.admin.res.pay_paid_amount",
     "lang": "fi",
-    "text": "Vain markkinointiluvan antaneet, ei anonymisoituja. Yksi viesti per asiakas ja sähköpostiosoite. Vastaanottajia ei listata. Suostumus tarkistetaan uudelleen lähetyshetkellä.",
+    "text": "Maksettu {{var:amount}}",
     "class": "normal",
     "kind": "plain",
-    "max_len": 400,
-    "placeholders": [],
-    "reason": "booking_259: erillinen uutiskirjenäkymä"
-  },
-  {
-    "key": "admin.newsletter.style",
-    "lang": "fi",
-    "text": "Ulkoasu on botin toimittama. Esikatselun peruutuslinkki on esimerkki.",
-    "class": "normal",
-    "kind": "plain",
-    "max_len": 400,
-    "placeholders": [],
-    "reason": "booking_259: erillinen uutiskirjenäkymä"
-  },
-  {
-    "key": "admin.newsletter.suggestion",
-    "lang": "fi",
-    "text": "Botin ehdottama lähetysaika (Europe/Helsinki): {date}. Ei automaattista ajastusta.",
-    "class": "normal",
-    "kind": "plain",
-    "max_len": 400,
+    "max_len": 200,
     "placeholders": [
-      "date"
+      "{{var:amount}}"
     ],
-    "reason": "booking_259: erillinen uutiskirjenäkymä"
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
   },
   {
-    "key": "admin.newsletter.draft",
-    "lang": "fi",
-    "text": "Luonnos",
+    "key": "ui.admin.res.pay_paid_amount",
+    "lang": "en",
+    "text": "Paid {{var:amount}}",
     "class": "normal",
     "kind": "plain",
-    "max_len": 400,
-    "placeholders": [],
-    "reason": "booking_259: erillinen uutiskirjenäkymä"
-  },
-  {
-    "key": "admin.newsletter.previewed",
-    "lang": "fi",
-    "text": "Esikatseltu",
-    "class": "normal",
-    "kind": "plain",
-    "max_len": 400,
-    "placeholders": [],
-    "reason": "booking_259: erillinen uutiskirjenäkymä"
-  },
-  {
-    "key": "admin.newsletter.sent",
-    "lang": "fi",
-    "text": "Lähetysjonossa / lähetetty",
-    "class": "normal",
-    "kind": "plain",
-    "max_len": 400,
-    "placeholders": [],
-    "reason": "booking_259: erillinen uutiskirjenäkymä"
-  },
-  {
-    "key": "admin.newsletter.history",
-    "lang": "fi",
-    "text": "Vastaanottajia {count} · jonoon {queued} · toimitettu {sent} · virhe {failed} · ohitettu / koelähetys {skipped}",
-    "class": "normal",
-    "kind": "plain",
-    "max_len": 400,
+    "max_len": 200,
     "placeholders": [
-      "count",
-      "queued",
-      "sent",
-      "failed",
-      "skipped"
+      "{{var:amount}}"
     ],
-    "reason": "booking_259: erillinen uutiskirjenäkymä"
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
   },
   {
-    "key": "admin.newsletter.preview_required",
+    "key": "ui.admin.res.pay_invoiced_amount",
     "lang": "fi",
-    "text": "Esikatsele uudelleen. Muutos tai yli 30 minuuttia vanha esikatselu estää lähettämisen.",
+    "text": "Laskutettu {{var:amount}}",
     "class": "normal",
     "kind": "plain",
-    "max_len": 400,
-    "placeholders": [],
-    "reason": "booking_259: erillinen uutiskirjenäkymä"
-  },
-  {
-    "key": "admin.newsletter.error",
-    "lang": "fi",
-    "text": "Toiminto epäonnistui. Lataa luonnos uudelleen ja esikatsele.",
-    "class": "normal",
-    "kind": "plain",
-    "max_len": 400,
-    "placeholders": [],
-    "reason": "booking_259: erillinen uutiskirjenäkymä"
-  },
-  {
-    "key": "admin.newsletter.loading",
-    "lang": "fi",
-    "text": "Ladataan…",
-    "class": "normal",
-    "kind": "plain",
-    "max_len": 400,
-    "placeholders": [],
-    "reason": "booking_259: erillinen uutiskirjenäkymä"
-  },
-  {
-    "key": "admin.newsletter.fi_preview",
-    "lang": "fi",
-    "text": "Suomenkielinen esikatselu",
-    "class": "normal",
-    "kind": "plain",
-    "max_len": 400,
-    "placeholders": [],
-    "reason": "booking_259: erillinen uutiskirjenäkymä"
-  },
-  {
-    "key": "admin.newsletter.en_preview",
-    "lang": "fi",
-    "text": "Englanninkielinen esikatselu",
-    "class": "normal",
-    "kind": "plain",
-    "max_len": 400,
-    "placeholders": [],
-    "reason": "booking_259: erillinen uutiskirjenäkymä"
-  },
-  {
-    "key": "admin.newsletter.title",
-    "lang": "en",
-    "text": "Newsletters",
-    "class": "normal",
-    "kind": "plain",
-    "max_len": 400,
-    "placeholders": [],
-    "reason": "booking_259: erillinen uutiskirjenäkymä"
-  },
-  {
-    "key": "admin.newsletter.lead",
-    "lang": "en",
-    "text": "A bot-authored draft. Edit the text, choose an audience and preview before sending. The bot supplies the visual style.",
-    "class": "normal",
-    "kind": "plain",
-    "max_len": 400,
-    "placeholders": [],
-    "reason": "booking_259: erillinen uutiskirjenäkymä"
-  },
-  {
-    "key": "admin.newsletter.back",
-    "lang": "en",
-    "text": "Back to admin",
-    "class": "normal",
-    "kind": "plain",
-    "max_len": 400,
-    "placeholders": [],
-    "reason": "booking_259: erillinen uutiskirjenäkymä"
-  },
-  {
-    "key": "admin.newsletter.login",
-    "lang": "en",
-    "text": "Sign in to admin first, then return to this page.",
-    "class": "normal",
-    "kind": "plain",
-    "max_len": 400,
-    "placeholders": [],
-    "reason": "booking_259: erillinen uutiskirjenäkymä"
-  },
-  {
-    "key": "admin.newsletter.reload",
-    "lang": "en",
-    "text": "Reload",
-    "class": "normal",
-    "kind": "plain",
-    "max_len": 400,
-    "placeholders": [],
-    "reason": "booking_259: erillinen uutiskirjenäkymä"
-  },
-  {
-    "key": "admin.newsletter.forbidden",
-    "lang": "en",
-    "text": "You need permission to edit messages.",
-    "class": "normal",
-    "kind": "plain",
-    "max_len": 400,
-    "placeholders": [],
-    "reason": "booking_259: erillinen uutiskirjenäkymä"
-  },
-  {
-    "key": "admin.newsletter.empty",
-    "lang": "en",
-    "text": "No newsletter drafts. A bot creates them using the draft RPC.",
-    "class": "normal",
-    "kind": "plain",
-    "max_len": 400,
-    "placeholders": [],
-    "reason": "booking_259: erillinen uutiskirjenäkymä"
-  },
-  {
-    "key": "admin.newsletter.choose",
-    "lang": "en",
-    "text": "Choose newsletter",
-    "class": "normal",
-    "kind": "plain",
-    "max_len": 400,
-    "placeholders": [],
-    "reason": "booking_259: erillinen uutiskirjenäkymä"
-  },
-  {
-    "key": "admin.newsletter.subject_fi",
-    "lang": "en",
-    "text": "Subject in Finnish",
-    "class": "normal",
-    "kind": "plain",
-    "max_len": 400,
-    "placeholders": [],
-    "reason": "booking_259: erillinen uutiskirjenäkymä"
-  },
-  {
-    "key": "admin.newsletter.subject_en",
-    "lang": "en",
-    "text": "Subject in English",
-    "class": "normal",
-    "kind": "plain",
-    "max_len": 400,
-    "placeholders": [],
-    "reason": "booking_259: erillinen uutiskirjenäkymä"
-  },
-  {
-    "key": "admin.newsletter.body_fi",
-    "lang": "en",
-    "text": "Body in Finnish",
-    "class": "normal",
-    "kind": "plain",
-    "max_len": 400,
-    "placeholders": [],
-    "reason": "booking_259: erillinen uutiskirjenäkymä"
-  },
-  {
-    "key": "admin.newsletter.body_en",
-    "lang": "en",
-    "text": "Body in English",
-    "class": "normal",
-    "kind": "plain",
-    "max_len": 400,
-    "placeholders": [],
-    "reason": "booking_259: erillinen uutiskirjenäkymä"
-  },
-  {
-    "key": "admin.newsletter.segment",
-    "lang": "en",
-    "text": "Audience",
-    "class": "normal",
-    "kind": "plain",
-    "max_len": 400,
-    "placeholders": [],
-    "reason": "booking_259: erillinen uutiskirjenäkymä"
-  },
-  {
-    "key": "admin.newsletter.language",
-    "lang": "en",
-    "text": "Recipient language",
-    "class": "normal",
-    "kind": "plain",
-    "max_len": 400,
-    "placeholders": [],
-    "reason": "booking_259: erillinen uutiskirjenäkymä"
-  },
-  {
-    "key": "admin.newsletter.all",
-    "lang": "en",
-    "text": "All marketing-consented customers",
-    "class": "normal",
-    "kind": "plain",
-    "max_len": 400,
-    "placeholders": [],
-    "reason": "booking_259: erillinen uutiskirjenäkymä"
-  },
-  {
-    "key": "admin.newsletter.training",
-    "lang": "en",
-    "text": "Completed training",
-    "class": "normal",
-    "kind": "plain",
-    "max_len": 400,
-    "placeholders": [],
-    "reason": "booking_259: erillinen uutiskirjenäkymä"
-  },
-  {
-    "key": "admin.newsletter.treatment",
-    "lang": "en",
-    "text": "Visited treatments",
-    "class": "normal",
-    "kind": "plain",
-    "max_len": 400,
-    "placeholders": [],
-    "reason": "booking_259: erillinen uutiskirjenäkymä"
-  },
-  {
-    "key": "admin.newsletter.event",
-    "lang": "en",
-    "text": "Visited events",
-    "class": "normal",
-    "kind": "plain",
-    "max_len": 400,
-    "placeholders": [],
-    "reason": "booking_259: erillinen uutiskirjenäkymä"
-  },
-  {
-    "key": "admin.newsletter.session_only",
-    "lang": "en",
-    "text": "Sauna sessions only",
-    "class": "normal",
-    "kind": "plain",
-    "max_len": 400,
-    "placeholders": [],
-    "reason": "booking_259: erillinen uutiskirjenäkymä"
-  },
-  {
-    "key": "admin.newsletter.gift_buyers",
-    "lang": "en",
-    "text": "Gift card buyers",
-    "class": "normal",
-    "kind": "plain",
-    "max_len": 400,
-    "placeholders": [],
-    "reason": "booking_259: erillinen uutiskirjenäkymä"
-  },
-  {
-    "key": "admin.newsletter.christmas_gift_buyers",
-    "lang": "en",
-    "text": "November–December gift card buyers in previous years",
-    "class": "normal",
-    "kind": "plain",
-    "max_len": 400,
-    "placeholders": [],
-    "reason": "booking_259: erillinen uutiskirjenäkymä"
-  },
-  {
-    "key": "admin.newsletter.all_languages",
-    "lang": "en",
-    "text": "Finnish and English",
-    "class": "normal",
-    "kind": "plain",
-    "max_len": 400,
-    "placeholders": [],
-    "reason": "booking_259: erillinen uutiskirjenäkymä"
-  },
-  {
-    "key": "admin.newsletter.save",
-    "lang": "en",
-    "text": "Save",
-    "class": "normal",
-    "kind": "plain",
-    "max_len": 400,
-    "placeholders": [],
-    "reason": "booking_259: erillinen uutiskirjenäkymä"
-  },
-  {
-    "key": "admin.newsletter.preview",
-    "lang": "en",
-    "text": "Save and preview",
-    "class": "normal",
-    "kind": "plain",
-    "max_len": 400,
-    "placeholders": [],
-    "reason": "booking_259: erillinen uutiskirjenäkymä"
-  },
-  {
-    "key": "admin.newsletter.send",
-    "lang": "en",
-    "text": "Send newsletter",
-    "class": "normal",
-    "kind": "plain",
-    "max_len": 400,
-    "placeholders": [],
-    "reason": "booking_259: erillinen uutiskirjenäkymä"
-  },
-  {
-    "key": "admin.newsletter.confirm_title",
-    "lang": "en",
-    "text": "Confirm newsletter delivery",
-    "class": "normal",
-    "kind": "plain",
-    "max_len": 400,
-    "placeholders": [],
-    "reason": "booking_259: erillinen uutiskirjenäkymä"
-  },
-  {
-    "key": "admin.newsletter.confirm_body",
-    "lang": "en",
-    "text": "The newsletter will be queued for {count} recipients. Send?",
-    "class": "normal",
-    "kind": "plain",
-    "max_len": 400,
+    "max_len": 200,
     "placeholders": [
-      "count"
+      "{{var:amount}}"
     ],
-    "reason": "booking_259: erillinen uutiskirjenäkymä"
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
   },
   {
-    "key": "admin.newsletter.cancel",
+    "key": "ui.admin.res.pay_invoiced_amount",
     "lang": "en",
-    "text": "Cancel",
+    "text": "Invoiced {{var:amount}}",
     "class": "normal",
     "kind": "plain",
-    "max_len": 400,
-    "placeholders": [],
-    "reason": "booking_259: erillinen uutiskirjenäkymä"
-  },
-  {
-    "key": "admin.newsletter.saved",
-    "lang": "en",
-    "text": "Draft saved.",
-    "class": "normal",
-    "kind": "plain",
-    "max_len": 400,
-    "placeholders": [],
-    "reason": "booking_259: erillinen uutiskirjenäkymä"
-  },
-  {
-    "key": "admin.newsletter.queued",
-    "lang": "en",
-    "text": "Newsletter queued. This is not a delivery confirmation.",
-    "class": "normal",
-    "kind": "plain",
-    "max_len": 400,
-    "placeholders": [],
-    "reason": "booking_259: erillinen uutiskirjenäkymä"
-  },
-  {
-    "key": "admin.newsletter.count",
-    "lang": "en",
-    "text": "Recipients: {count} (FI {fi}, EN {en}).",
-    "class": "normal",
-    "kind": "plain",
-    "max_len": 400,
+    "max_len": 200,
     "placeholders": [
-      "count",
-      "fi",
-      "en"
+      "{{var:amount}}"
     ],
-    "reason": "booking_259: erillinen uutiskirjenäkymä"
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
   },
   {
-    "key": "admin.newsletter.privacy",
-    "lang": "en",
-    "text": "Only marketing-consented customers; no anonymised contacts. One message per customer and email address. No recipient list. Consent is checked again before delivery.",
+    "key": "ui.admin.res.pay_refunded_amount",
+    "lang": "fi",
+    "text": "Palautettu {{var:amount}}",
     "class": "normal",
     "kind": "plain",
-    "max_len": 400,
-    "placeholders": [],
-    "reason": "booking_259: erillinen uutiskirjenäkymä"
-  },
-  {
-    "key": "admin.newsletter.style",
-    "lang": "en",
-    "text": "The bot supplies the visual style. The preview unsubscribe link is an example.",
-    "class": "normal",
-    "kind": "plain",
-    "max_len": 400,
-    "placeholders": [],
-    "reason": "booking_259: erillinen uutiskirjenäkymä"
-  },
-  {
-    "key": "admin.newsletter.suggestion",
-    "lang": "en",
-    "text": "Bot-suggested delivery time (Europe/Helsinki): {date}. No automatic scheduling.",
-    "class": "normal",
-    "kind": "plain",
-    "max_len": 400,
+    "max_len": 200,
     "placeholders": [
-      "date"
+      "{{var:amount}}"
     ],
-    "reason": "booking_259: erillinen uutiskirjenäkymä"
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
   },
   {
-    "key": "admin.newsletter.draft",
+    "key": "ui.admin.res.pay_refunded_amount",
     "lang": "en",
-    "text": "Draft",
+    "text": "Refunded {{var:amount}}",
     "class": "normal",
     "kind": "plain",
-    "max_len": 400,
-    "placeholders": [],
-    "reason": "booking_259: erillinen uutiskirjenäkymä"
-  },
-  {
-    "key": "admin.newsletter.previewed",
-    "lang": "en",
-    "text": "Previewed",
-    "class": "normal",
-    "kind": "plain",
-    "max_len": 400,
-    "placeholders": [],
-    "reason": "booking_259: erillinen uutiskirjenäkymä"
-  },
-  {
-    "key": "admin.newsletter.sent",
-    "lang": "en",
-    "text": "Queued / sent",
-    "class": "normal",
-    "kind": "plain",
-    "max_len": 400,
-    "placeholders": [],
-    "reason": "booking_259: erillinen uutiskirjenäkymä"
-  },
-  {
-    "key": "admin.newsletter.history",
-    "lang": "en",
-    "text": "Recipients {count} · queued {queued} · delivered {sent} · failed {failed} · skipped / dry run {skipped}",
-    "class": "normal",
-    "kind": "plain",
-    "max_len": 400,
+    "max_len": 200,
     "placeholders": [
-      "count",
-      "queued",
-      "sent",
-      "failed",
-      "skipped"
+      "{{var:amount}}"
     ],
-    "reason": "booking_259: erillinen uutiskirjenäkymä"
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
   },
   {
-    "key": "admin.newsletter.preview_required",
-    "lang": "en",
-    "text": "Preview again. Changes or a preview older than 30 minutes prevent delivery.",
-    "class": "normal",
-    "kind": "plain",
-    "max_len": 400,
-    "placeholders": [],
-    "reason": "booking_259: erillinen uutiskirjenäkymä"
-  },
-  {
-    "key": "admin.newsletter.error",
-    "lang": "en",
-    "text": "The action failed. Reload the draft and preview again.",
-    "class": "normal",
-    "kind": "plain",
-    "max_len": 400,
-    "placeholders": [],
-    "reason": "booking_259: erillinen uutiskirjenäkymä"
-  },
-  {
-    "key": "admin.newsletter.loading",
-    "lang": "en",
-    "text": "Loading…",
-    "class": "normal",
-    "kind": "plain",
-    "max_len": 400,
-    "placeholders": [],
-    "reason": "booking_259: erillinen uutiskirjenäkymä"
-  },
-  {
-    "key": "admin.newsletter.fi_preview",
-    "lang": "en",
-    "text": "Finnish preview",
-    "class": "normal",
-    "kind": "plain",
-    "max_len": 400,
-    "placeholders": [],
-    "reason": "booking_259: erillinen uutiskirjenäkymä"
-  },
-  {
-    "key": "admin.newsletter.en_preview",
-    "lang": "en",
-    "text": "English preview",
-    "class": "normal",
-    "kind": "plain",
-    "max_len": 400,
-    "placeholders": [],
-    "reason": "booking_259: erillinen uutiskirjenäkymä"
-  },
-  {
-    "key": "admin.newsletter.too_many",
+    "key": "ui.admin.res.pay_pending_amount",
     "lang": "fi",
-    "text": "Kohderyhmässä on yli 5000 vastaanottajaa. Rajaa kohderyhmää tai kieltä.",
+    "text": "Maksu kesken {{var:amount}}",
     "class": "normal",
     "kind": "plain",
-    "max_len": 400,
-    "placeholders": [],
-    "reason": "booking_259: uutiskirjeen turvalliset virhetekstit"
+    "max_len": 200,
+    "placeholders": [
+      "{{var:amount}}"
+    ],
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
   },
   {
-    "key": "admin.newsletter.too_many",
+    "key": "ui.admin.res.pay_pending_amount",
     "lang": "en",
-    "text": "More than 5000 recipients. Narrow the audience or language.",
+    "text": "Payment pending {{var:amount}}",
     "class": "normal",
     "kind": "plain",
-    "max_len": 400,
-    "placeholders": [],
-    "reason": "booking_259: uutiskirjeen turvalliset virhetekstit"
+    "max_len": 200,
+    "placeholders": [
+      "{{var:amount}}"
+    ],
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
   },
   {
-    "key": "admin.newsletter.email_disabled",
+    "key": "ui.admin.res.arrived",
     "lang": "fi",
-    "text": "Sähköpostilähetys on pois käytöstä. Pyydä ylläpitäjää tarkistamaan lähetysasetukset.",
+    "text": "Saapunut",
     "class": "normal",
     "kind": "plain",
-    "max_len": 400,
+    "max_len": 200,
     "placeholders": [],
-    "reason": "booking_259: uutiskirjeen turvalliset virhetekstit"
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
   },
   {
-    "key": "admin.newsletter.email_disabled",
+    "key": "ui.admin.res.arrived",
     "lang": "en",
-    "text": "Email delivery is disabled. Ask an administrator to check delivery settings.",
+    "text": "Arrived",
     "class": "normal",
     "kind": "plain",
-    "max_len": 400,
+    "max_len": 200,
     "placeholders": [],
-    "reason": "booking_259: uutiskirjeen turvalliset virhetekstit"
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
   },
   {
-    "key": "admin.newsletter.no_recipients",
+    "key": "ui.admin.res.take_payment",
     "lang": "fi",
-    "text": "Valitussa kohderyhmässä ei ole vastaanottajia.",
+    "text": "Ota maksu",
     "class": "normal",
     "kind": "plain",
-    "max_len": 400,
+    "max_len": 200,
     "placeholders": [],
-    "reason": "booking_259: uutiskirjeen turvalliset virhetekstit"
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
   },
   {
-    "key": "admin.newsletter.no_recipients",
+    "key": "ui.admin.res.take_payment",
     "lang": "en",
-    "text": "No recipients in the selected audience.",
+    "text": "Take payment",
     "class": "normal",
     "kind": "plain",
-    "max_len": 400,
+    "max_len": 200,
     "placeholders": [],
-    "reason": "booking_259: uutiskirjeen turvalliset virhetekstit"
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
   },
   {
-    "key": "admin.newsletter.newsletter_conflict",
+    "key": "ui.admin.res.send_pay_link",
     "lang": "fi",
-    "text": "Luonnos muuttui tai on jo lähetetty. Lataa uudelleen.",
+    "text": "Lähetä maksulinkki",
     "class": "normal",
     "kind": "plain",
-    "max_len": 400,
+    "max_len": 200,
     "placeholders": [],
-    "reason": "booking_259: uutiskirjeen turvalliset virhetekstit"
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
   },
   {
-    "key": "admin.newsletter.newsletter_conflict",
+    "key": "ui.admin.res.send_pay_link",
     "lang": "en",
-    "text": "The draft changed or was already sent. Reload it.",
+    "text": "Send payment link",
     "class": "normal",
     "kind": "plain",
-    "max_len": 400,
+    "max_len": 200,
     "placeholders": [],
-    "reason": "booking_259: uutiskirjeen turvalliset virhetekstit"
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
   },
   {
-    "key": "admin.newsletter.newsletter_preview_required",
+    "key": "ui.admin.res.section_addons",
     "lang": "fi",
-    "text": "Vastaanottajat tai luonnos muuttuivat. Esikatsele uudelleen.",
+    "text": "Lisäostot",
     "class": "normal",
     "kind": "plain",
-    "max_len": 400,
+    "max_len": 200,
     "placeholders": [],
-    "reason": "booking_259: uutiskirjeen turvalliset virhetekstit"
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
   },
   {
-    "key": "admin.newsletter.newsletter_preview_required",
+    "key": "ui.admin.res.section_addons",
     "lang": "en",
-    "text": "The audience or draft changed. Preview again.",
+    "text": "Add-ons",
     "class": "normal",
     "kind": "plain",
-    "max_len": 400,
+    "max_len": 200,
     "placeholders": [],
-    "reason": "booking_259: uutiskirjeen turvalliset virhetekstit"
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
   },
   {
-    "key": "admin.newsletter.unsubscribe_title",
+    "key": "ui.admin.res.section_items",
     "lang": "fi",
-    "text": "Peruuta uutiskirjeet",
+    "text": "Ostokset",
     "class": "normal",
     "kind": "plain",
-    "max_len": 600,
+    "max_len": 200,
     "placeholders": [],
-    "reason": "booking_259: uutiskirjeeseen rajattu osoitekohtainen peruutus"
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
   },
   {
-    "key": "admin.newsletter.unsubscribe_title",
+    "key": "ui.admin.res.section_items",
     "lang": "en",
-    "text": "Unsubscribe from newsletters",
+    "text": "Items",
     "class": "normal",
     "kind": "plain",
-    "max_len": 600,
+    "max_len": 200,
     "placeholders": [],
-    "reason": "booking_259: uutiskirjeeseen rajattu osoitekohtainen peruutus"
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
   },
   {
-    "key": "admin.newsletter.unsubscribe_lead",
+    "key": "ui.admin.res.section_payments",
     "lang": "fi",
-    "text": "Vahvistamalla estät uutiskirjeet tähän sähköpostiosoitteeseen, myös jos osoite on usealla asiakasprofiililla. Tämä ei muuta palveluviestejä tai muita markkinointilupia.",
+    "text": "Maksut ja laskut",
     "class": "normal",
     "kind": "plain",
-    "max_len": 600,
+    "max_len": 200,
     "placeholders": [],
-    "reason": "booking_259: uutiskirjeeseen rajattu osoitekohtainen peruutus"
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
   },
   {
-    "key": "admin.newsletter.unsubscribe_lead",
+    "key": "ui.admin.res.section_payments",
     "lang": "en",
-    "text": "Confirm to stop newsletters to this email address, including duplicate customer profiles. This does not change service messages or other marketing permissions.",
+    "text": "Payments and invoices",
     "class": "normal",
     "kind": "plain",
-    "max_len": 600,
+    "max_len": 200,
     "placeholders": [],
-    "reason": "booking_259: uutiskirjeeseen rajattu osoitekohtainen peruutus"
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
   },
   {
-    "key": "admin.newsletter.unsubscribe_confirm",
+    "key": "ui.admin.res.section_messages",
     "lang": "fi",
-    "text": "Vahvista uutiskirjeiden peruutus",
+    "text": "Viestit",
     "class": "normal",
     "kind": "plain",
-    "max_len": 600,
+    "max_len": 200,
     "placeholders": [],
-    "reason": "booking_259: uutiskirjeeseen rajattu osoitekohtainen peruutus"
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
   },
   {
-    "key": "admin.newsletter.unsubscribe_confirm",
+    "key": "ui.admin.res.section_messages",
     "lang": "en",
-    "text": "Confirm newsletter unsubscribe",
+    "text": "Messages",
     "class": "normal",
     "kind": "plain",
-    "max_len": 600,
+    "max_len": 200,
     "placeholders": [],
-    "reason": "booking_259: uutiskirjeeseen rajattu osoitekohtainen peruutus"
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
   },
   {
-    "key": "admin.newsletter.unsubscribe_done",
+    "key": "ui.admin.res.section_history",
     "lang": "fi",
-    "text": "Peruutus on käsitelty. Uutiskirjeitä ei enää toimiteta tämän linkin osoitteeseen.",
+    "text": "Historia",
     "class": "normal",
     "kind": "plain",
-    "max_len": 600,
+    "max_len": 200,
     "placeholders": [],
-    "reason": "booking_259: uutiskirjeeseen rajattu osoitekohtainen peruutus"
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
   },
   {
-    "key": "admin.newsletter.unsubscribe_done",
+    "key": "ui.admin.res.section_history",
     "lang": "en",
-    "text": "Unsubscribe processed. Newsletters will no longer be delivered to the address linked to this token.",
+    "text": "History",
     "class": "normal",
     "kind": "plain",
-    "max_len": 600,
+    "max_len": 200,
     "placeholders": [],
-    "reason": "booking_259: uutiskirjeeseen rajattu osoitekohtainen peruutus"
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
   },
   {
-    "key": "admin.newsletter.unsubscribe_invalid",
+    "key": "ui.admin.res.section_notes",
     "lang": "fi",
-    "text": "Peruutuslinkki puuttuu tai on virheellinen. Avaa linkki saamastasi uutiskirjeestä.",
+    "text": "Muistiinpanot",
     "class": "normal",
     "kind": "plain",
-    "max_len": 600,
+    "max_len": 200,
     "placeholders": [],
-    "reason": "booking_259: uutiskirjeeseen rajattu osoitekohtainen peruutus"
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
   },
   {
-    "key": "admin.newsletter.unsubscribe_invalid",
+    "key": "ui.admin.res.section_notes",
     "lang": "en",
-    "text": "This unsubscribe link is missing or invalid. Open the link from your newsletter.",
+    "text": "Notes",
     "class": "normal",
     "kind": "plain",
-    "max_len": 600,
+    "max_len": 200,
     "placeholders": [],
-    "reason": "booking_259: uutiskirjeeseen rajattu osoitekohtainen peruutus"
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
   },
   {
-    "key": "admin.newsletter.unsubscribe_error",
+    "key": "ui.admin.res.sum_no_addons",
     "lang": "fi",
-    "text": "Peruutusta ei voitu vahvistaa. Yritä uudelleen.",
+    "text": "ei lisäostoksia",
     "class": "normal",
     "kind": "plain",
-    "max_len": 600,
+    "max_len": 200,
     "placeholders": [],
-    "reason": "booking_259: uutiskirjeeseen rajattu osoitekohtainen peruutus"
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
   },
   {
-    "key": "admin.newsletter.unsubscribe_error",
+    "key": "ui.admin.res.sum_no_addons",
     "lang": "en",
-    "text": "The unsubscribe could not be confirmed. Please try again.",
+    "text": "no add-ons",
     "class": "normal",
     "kind": "plain",
-    "max_len": 600,
+    "max_len": 200,
     "placeholders": [],
-    "reason": "booking_259: uutiskirjeeseen rajattu osoitekohtainen peruutus"
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
+  },
+  {
+    "key": "ui.admin.res.sum_addons",
+    "lang": "fi",
+    "text": "{{var:n}} tuotetta, {{var:amount}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:n}}",
+      "{{var:amount}}"
+    ],
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
+  },
+  {
+    "key": "ui.admin.res.sum_addons",
+    "lang": "en",
+    "text": "{{var:n}} items, {{var:amount}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:n}}",
+      "{{var:amount}}"
+    ],
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
+  },
+  {
+    "key": "ui.admin.res.sum_items",
+    "lang": "fi",
+    "text": "{{var:n}} riviä, {{var:amount}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:n}}",
+      "{{var:amount}}"
+    ],
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
+  },
+  {
+    "key": "ui.admin.res.sum_items",
+    "lang": "en",
+    "text": "{{var:n}} lines, {{var:amount}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:n}}",
+      "{{var:amount}}"
+    ],
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
+  },
+  {
+    "key": "ui.admin.res.sum_unpaid",
+    "lang": "fi",
+    "text": "maksamatta {{var:amount}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:amount}}"
+    ],
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
+  },
+  {
+    "key": "ui.admin.res.sum_unpaid",
+    "lang": "en",
+    "text": "unpaid {{var:amount}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:amount}}"
+    ],
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
+  },
+  {
+    "key": "ui.admin.res.sum_paid",
+    "lang": "fi",
+    "text": "maksettu {{var:amount}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:amount}}"
+    ],
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
+  },
+  {
+    "key": "ui.admin.res.sum_paid",
+    "lang": "en",
+    "text": "paid {{var:amount}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:amount}}"
+    ],
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
+  },
+  {
+    "key": "ui.admin.res.sum_invoiced",
+    "lang": "fi",
+    "text": "laskutettu {{var:amount}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:amount}}"
+    ],
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
+  },
+  {
+    "key": "ui.admin.res.sum_invoiced",
+    "lang": "en",
+    "text": "invoiced {{var:amount}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:amount}}"
+    ],
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
+  },
+  {
+    "key": "ui.admin.res.sum_no_messages",
+    "lang": "fi",
+    "text": "ei viestejä",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
+  },
+  {
+    "key": "ui.admin.res.sum_no_messages",
+    "lang": "en",
+    "text": "no messages",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
+  },
+  {
+    "key": "ui.admin.res.sum_messages",
+    "lang": "fi",
+    "text": "{{var:n}} viestiä",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:n}}"
+    ],
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
+  },
+  {
+    "key": "ui.admin.res.sum_messages",
+    "lang": "en",
+    "text": "{{var:n}} messages",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:n}}"
+    ],
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
+  },
+  {
+    "key": "ui.admin.res.sum_add_note",
+    "lang": "fi",
+    "text": "lisää muistiinpano",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
+  },
+  {
+    "key": "ui.admin.res.sum_add_note",
+    "lang": "en",
+    "text": "add a note",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
+  },
+  {
+    "key": "ui.admin.res.no_booking",
+    "lang": "fi",
+    "text": "ei ajanvarausta",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
+  },
+  {
+    "key": "ui.admin.res.no_booking",
+    "lang": "en",
+    "text": "no booking time",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
+  },
+  {
+    "key": "ui.admin.res.ordered_at",
+    "lang": "fi",
+    "text": "Tilattu {{var:when}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:when}}"
+    ],
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
+  },
+  {
+    "key": "ui.admin.res.ordered_at",
+    "lang": "en",
+    "text": "Ordered {{var:when}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:when}}"
+    ],
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
+  },
+  {
+    "key": "ui.admin.res.gift_title",
+    "lang": "fi",
+    "text": "Lahjakortti",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
+  },
+  {
+    "key": "ui.admin.res.gift_title",
+    "lang": "en",
+    "text": "Gift card",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
+  },
+  {
+    "key": "ui.admin.res.order_title",
+    "lang": "fi",
+    "text": "Tilaus",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
+  },
+  {
+    "key": "ui.admin.res.order_title",
+    "lang": "en",
+    "text": "Order",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
+  },
+  {
+    "key": "ui.admin.res.webshop",
+    "lang": "fi",
+    "text": "Verkkokauppa",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
+  },
+  {
+    "key": "ui.admin.res.webshop",
+    "lang": "en",
+    "text": "Web shop",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
+  },
+  {
+    "key": "ui.admin.res.option_missing",
+    "lang": "fi",
+    "text": "Hoito valitsematta",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
+  },
+  {
+    "key": "ui.admin.res.option_missing",
+    "lang": "en",
+    "text": "Treatment not selected",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
+  },
+  {
+    "key": "ui.admin.res.no_open_invoices",
+    "lang": "fi",
+    "text": "Ei avoimia laskuja.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
+  },
+  {
+    "key": "ui.admin.res.no_open_invoices",
+    "lang": "en",
+    "text": "No open invoices.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
+  },
+  {
+    "key": "ui.admin.res.refund_order",
+    "lang": "fi",
+    "text": "Hyvitä tilaus",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
+  },
+  {
+    "key": "ui.admin.res.refund_order",
+    "lang": "en",
+    "text": "Refund order",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
+  },
+  {
+    "key": "ui.admin.res.incl_vat",
+    "lang": "fi",
+    "text": "sis. alv",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
+  },
+  {
+    "key": "ui.admin.res.incl_vat",
+    "lang": "en",
+    "text": "incl. VAT",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
+  },
+  {
+    "key": "ui.admin.res.history_created",
+    "lang": "fi",
+    "text": "Luotu {{var:when}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:when}}"
+    ],
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
+  },
+  {
+    "key": "ui.admin.res.history_created",
+    "lang": "en",
+    "text": "Created {{var:when}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:when}}"
+    ],
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
+  },
+  {
+    "key": "ui.admin.res.resend_card",
+    "lang": "fi",
+    "text": "Lähetä lahjakortti uudelleen",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
+  },
+  {
+    "key": "ui.admin.res.resend_card",
+    "lang": "en",
+    "text": "Resend gift card",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
+  },
+  {
+    "key": "ui.admin.res.copy_code",
+    "lang": "fi",
+    "text": "Kopioi koodi",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
+  },
+  {
+    "key": "ui.admin.res.copy_code",
+    "lang": "en",
+    "text": "Copy code",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_277: yhteinen varaus- ja tilauskortti hallintaan"
   }
 ]

@@ -9,10 +9,10 @@ import { RPC, absLink } from '../talous-api.js';
 import { redeemFields, redeemSubmit } from './talous-giftcards.js';
 import { johkuBadge, SOURCES, sourceLabel, payBadge, sourceBadge, loading, emptyBox, errorBox, pager, pageSizeSelect, selectFld, dateFld, searchFld, expandRow, actionBtn, doneToast, formDialog, methodLabel, pstatBadge } from './talous-ui.js';
 import { countActive, filterDrawer } from '../filter-drawer.js';
-import { effectivePaymentFilter, PAYMENT_FILTERS } from '../orders-filter.js';
+import { effectivePaymentFilters, isDefaultPaymentFilters, isUnpaidRow, normalizePaymentFilters, togglePaymentFilter, DEFAULT_PAYMENT_FILTERS, PAYMENT_FILTERS } from '../orders-filter.js';
 import { orderText } from '../orders-texts.js';
 import { rcText } from '../refund-cancel-texts.js';
-import { yesNo } from './refund-cancel.js';
+import { yesNo, CX_KINDS } from './refund-cancel.js';
 import { annualCardPanel, showAnnualCardDialog } from './annual-card-panel.js';
 import { acText } from '../annual-card-texts.js';
 import { orderVoucherBox } from './voucher-redeem.js';
@@ -23,69 +23,174 @@ import { alt } from '../addon-lock-texts.js';
 import { linkDeadlineControl } from './link-deadline.js';
 import { linkValidityText, linkSubmitOnce } from '../payment-link-logic.js';
 import { billingMethodText } from '../billing-method-texts.js';
+import { orderInvoiceCaption } from '../order-invoice-label.js';
+import { isWide, stepIndex } from '../order-view-logic.js';
+import { paymentRefundLeft } from '../refund-pending.js';
+import { archivedBadge } from '../order-delete-logic.js';
+import { deleteText } from '../order-delete-texts.js';
 
 export const ORDER_SORTS = ['created', 'order_no', 'total', 'payment_status', 'first_reservation'];
 const VAT_CHOICES = [25.5, 13.5, 0];
 
 const annualSec = (info, sec) => { const panel = annualCardPanel(info); return panel ? h('div', { 'data-testid': 'order-annual-card' }, sec(acText('ui.admin.annual_card.title'), panel)) : null; };
 
-export function createOrdersTab({ api, ctx, gift = null, rpc = null }) {
-  const st = { search: '', paymentFilter: 'paid', source: '', native: '', dateField: '', from: '', to: '', sortBy: 'created', sortDir: 'desc', limit: 25, offset: 0 };
+// Tilausnäkymä v3 (PR 1): listan tila talteen, kun mobiilissa / "Avaa koko tilaus" siirrytään #/tilaukset/<nro>; paluussa palautetaan.
+let resumeState = null;
+export const takeOrdersResume = () => { const r = resumeState; resumeState = null; return r; };
+export const hasOrdersResume = () => resumeState != null;
+
+export function createOrdersTab({ api, ctx, gift = null, rpc = null, onAfterChange = null, orderView = true }) {
+  let resume = onAfterChange ? null : takeOrdersResume();
+  const st = { search: '', paymentFilters: [...DEFAULT_PAYMENT_FILTERS], source: '', native: '', dateField: '', from: '', to: '', sortBy: 'created', sortDir: 'desc', limit: 25, offset: 0, ...(resume?.st || {}) };
   const list = h('ul', { class: 'tl-list', 'data-testid': 'orders-list' }), count = h('p', { class: 'muted tl-count', role: 'status', 'data-testid': 'orders-count' }), pagers = [h('div'), h('div')];
   let seq = 0, reopen = null, autoOpen = false;
+  // Työpöydän yhteenvetopaneeli (≥ 1200 px): rivi avaa yhteenvedon listan viereen; kapealla rivi avaa koko tilauksen.
+  const viewOn = orderView && !onAfterChange && typeof document !== 'undefined' && typeof globalThis.matchMedia === 'function';
+  let summary = null;
+  const ensureSummary = async () => {
+    if (summary) return summary;
+    const { createSummaryPanel } = await import('./order-summary.js');
+    summary = createSummaryPanel({ ctx, rpc: rpc || undefined, api, dialogs, onOpenFull: (m) => gotoFull(m), onClose: () => markRow(null) });
+    listWrap.append(summary.node);
+    return summary;
+  };
+  function markRow(id) {
+    for (const li of list.children) { if (li.dataset) li.classList.toggle('is-selected', id != null && String(li.dataset.orderId) === String(id)); }
+    listWrap.classList.toggle('has-summary', id != null);
+  }
+  function gotoFull(o) {
+    resumeState = { st: { ...st }, scrollY: globalThis.scrollY || 0, orderId: o.order_id };
+    location.hash = `#/tilaukset/${encodeURIComponent(o.order_no)}`;
+  }
+  async function openSummary(o) {
+    const p = await ensureSummary();
+    markRow(o.order_id);
+    rowsNow = rowsNow.length ? rowsNow : [o];
+    return p.show(o);
+  }
+  let rowsNow = [];
+  if (viewOn) document.addEventListener('keydown', (e) => {
+    if (!summary?.isOpen() || !node.isConnected || document.querySelector('dialog[open]')) return;
+    if (/^(INPUT|TEXTAREA|SELECT)$/.test(e.target?.tagName || '') || e.target?.isContentEditable) return;
+    if (e.key === 'Escape') { e.preventDefault(); summary.close(); return; }
+    if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
+    const i = rowsNow.findIndex((x) => String(x.order_id) === String(summary.current?.order_id));
+    const j = stepIndex(i, e.key === 'ArrowDown' ? 1 : -1, rowsNow.length);
+    if (j < 0 || j === i) return;
+    e.preventDefault();
+    openSummary(rowsNow[j]);
+    list.querySelector(`[data-order-id="${rowsNow[j].order_id}"]`)?.scrollIntoView?.({ block: 'nearest' });
+  });
   async function load() {
     const my = ++seq;
+    if (reopen == null && summary?.isOpen()) summary.close();   // suodatin tai sivu vaihtui → yhteenveto kiinni
     list.replaceChildren(loading()); list.setAttribute('aria-busy', 'true');
     try {
-      const r = await api.listOrders({ ...st, paymentFilter: effectivePaymentFilter(st) });
+      const r = await api.listOrders({ ...st, paymentFilters: effectivePaymentFilters(st) });
       if (my !== seq) return;
       list.setAttribute('aria-busy', 'false');
       if (st.offset >= r.total && r.total > 0) { st.offset = Math.max(0, Math.floor((r.total - 1) / st.limit) * st.limit); return load(); }
       count.textContent = r.total ? t('orders.count', { from: fmt.int(st.offset + 1), to: fmt.int(Math.min(st.offset + st.limit, r.total)), total: fmt.int(r.total) }) : '';
       list.replaceChildren(...(r.rows.length ? r.rows.map(orderRow) : [emptyBox(t('orders.none'))]));
-      if (reopen != null) { list.querySelector(`[data-order-id="${reopen}"] .tl-head`)?.click(); reopen = null; }
-      if (autoOpen) { autoOpen = false; if (r.rows.length === 1) { const row = list.firstElementChild; row.style.scrollMarginTop = '70px'; row.querySelector('.tl-head')?.click(); row.scrollIntoView({ block: 'start' }); } }   // syvälinkki (#/talous?order=<tilausnro>): ainoa osuma avataan
+      rowsNow = r.rows;
+      if (summary?.isOpen()) markRow(summary.current?.order_id);
+      if (resume) { const y = resume.scrollY; const back = resume.orderId; resume = null; if (y != null) globalThis.requestAnimationFrame?.(() => globalThis.scrollTo?.(0, y)); if (back != null) list.querySelector(`[data-order-id="${back}"] .tl-head`)?.focus?.({ preventScroll: true }); }
+      if (reopen != null) { const hit = r.rows.find((x) => String(x.order_id) === String(reopen)); if (hit) openCard(hit); reopen = null; }
+      if (autoOpen) { autoOpen = false; if (r.rows.length === 1) { const row = list.firstElementChild; if (row) { row.style.scrollMarginTop = '70px'; row.scrollIntoView({ block: 'start' }); } openCard(r.rows[0]); } }   // syvälinkki (#/talous?order=<tilausnro> tai #/tilaukset?order=): ainoa osuma avataan
       const mk = () => (r.total > st.limit ? pager({ total: r.total, offset: st.offset, limit: st.limit, onPage: (o) => { st.offset = o; load(); document.querySelector('[data-testid=orders-count]')?.scrollIntoView({ block: 'nearest' }); } }) : h('span'));
       pagers[0].replaceChildren(mk()); pagers[1].replaceChildren(mk());
     } catch (e) { if (my === seq) { list.replaceChildren(errorBox(e, load)); count.textContent = ''; pagers.forEach((p) => p.replaceChildren()); } }
   }
-  const payChip = h('span', { class: 'filter-chip', 'data-testid': 'orders-pay-chip', role: 'status' });
+  // Maksutilanapit hakukentän alla (monivalinta, OR). Valittu = täysvihreä, valitsematon = valkoinen vihreällä reunuksella.
+  // Kaikki valitsee vain itsensä. Kun viimeisenkin tilan ottaa pois, näytetään kaikki tilaukset ja Kaikki syttyy.
+  const payBtns = PAYMENT_FILTERS.map((code) => h('button', { type: 'button', class: 'filter-chip pay-chip', 'data-testid': `orders-pay-btn-${code}`, 'data-filter': code, 'aria-pressed': 'false',
+    onclick: () => change({ paymentFilters: togglePaymentFilter(st.paymentFilters, code) }) }));
+  const payChips = h('div', { class: 'pay-chips', role: 'group', 'data-testid': 'orders-pay-chips' }, ...payBtns);
   const searchNote = h('p', { class: 'muted filter-search-note', 'data-testid': 'orders-search-scope', hidden: true });
   function paintPay() {
-    const label = orderText(`ui.admin.orders.pay_${st.paymentFilter}`);
-    payChip.textContent = label;
-    payChip.setAttribute('data-filter', st.paymentFilter);
-    payChip.setAttribute('aria-label', orderText('ui.admin.orders.pay_showing', { label }));
-    const widened = !!String(st.search || '').trim() && st.paymentFilter === 'paid';
+    const sel = new Set(normalizePaymentFilters(st.paymentFilters));
+    payChips.setAttribute('aria-label', orderText('ui.admin.orders.pay_filter'));
+    payChips.setAttribute('data-filters', [...sel].join(','));
+    for (const b of payBtns) {
+      const code = b.getAttribute('data-filter'), label = orderText(`ui.admin.orders.pay_${code}`);
+      b.textContent = label;
+      b.setAttribute('aria-pressed', sel.has(code) ? 'true' : 'false');
+      b.setAttribute('aria-label', orderText('ui.admin.orders.pay_showing', { label }));
+    }
+    const widened = !!String(st.search || '').trim() && isDefaultPaymentFilters(st.paymentFilters);
     searchNote.hidden = !widened;
     searchNote.textContent = widened ? orderText('ui.admin.orders.search_all') : '';
   }
   const change = (patch) => { Object.assign(st, patch, { offset: 0 }); paintPay(); load(); };
   // Oikea (ei mock) kirjoitus onnistui → lista + avoin tilaus haetaan uudelleen; Maksut/Raportit-välilehdet merkitään vanhentuneiksi (api.changed)
-  const afterChange = (res, orderId) => { if (res?.mock) return; reopen = orderId; api.changed(); load(); };
+  const afterChange = (res, orderId) => {
+    if (res?.mock) return;
+    if (onAfterChange) { api.changed(); onAfterChange(orderId); return; }   // koko tilausnäkymä (views/order-view.js) päivittää itse
+    reopen = orderId; api.changed(); load();
+  };
 
   // ---- rivi ----
   function orderRow(o) {
+    const inv = orderInvoiceCaption(o);
     const head = [
       h('span', { class: 'tl-c tl-main' }, h('strong', { text: `#${o.order_no}` }), ' ', h('span', { class: 'tl-name', text: [o.customer_name || '–', o.customer_company].filter(Boolean).join(' · ') }),
-        o.johku_order_no ? h('small', { class: 'tl-johku', text: ` Johku #${o.johku_order_no}` }) : null),
+        o.johku_order_no ? h('small', { class: 'tl-johku', text: ` Johku #${o.johku_order_no}` }) : null,
+        inv ? h('small', { class: 'tl-invoice', 'data-testid': 'order-invoice', text: ` ${inv}` }) : null),
       h('span', { class: 'tl-c tl-date' }, h('small', { class: 'tl-lab', text: t('col.created') }), h('span', { text: fmt.dt(o.created_at) })),
       h('span', { class: 'tl-c tl-first' }, h('small', { class: 'tl-lab', text: t('col.first') }), h('span', { text: o.first_reservation_at ? fmt.date(o.first_reservation_at) : '–' })),
       h('span', { class: 'tl-c tl-sum' }, h('strong', { text: fmt.money(o.total_gross) })),
-      h('span', { class: 'tl-c tl-badges' }, payBadge(o.payment_status), sourceBadge(o.source_channel)),
+      h('span', { class: 'tl-c tl-badges' }, payBadge(o.payment_status), sourceBadge(o.source_channel), archivedRowBadge(o)),
     ];
-    const row = expandRow({ id: `o${o.order_id}`, head, testid: 'order', build: () => orderDetail(o.order_id) });
+    const btn = h('button', { type: 'button', class: 'tl-head', 'data-testid': 'order-head', onclick: () => openCard(o) }, head, h('span', { class: 'tl-chev', 'aria-hidden': 'true' }, icon('chev', 20)));
+    const row = h('li', { class: isUnpaidRow(o) ? 'tl-row is-unpaid' : 'tl-row', 'data-testid': 'order' }, btn);
     row.dataset.orderId = o.order_id;
     return row;
+  }
+  function openCard(o) {
+    // v3: leveällä näytöllä yhteenveto listan viereen, kapealla koko tilaus suoraan (Joonas t38u/t41u). Vanha kortti varalla.
+    if (viewOn && o?.order_no != null) { if (isWide(globalThis.innerWidth || 0)) { openSummary(o).catch(() => legacyCard(o)); } else gotoFull(o); return; }
+    legacyCard(o);
+  }
+  function legacyCard(o) {
+    const canRefund = api.isMock('refund') || ctx.can('payments.refund');
+    const canAdd = api.isMock('addToOrder') || ctx.can('bookings.manage');
+    const flow = {
+      addPurchase: (ord) => addDialog(ord || o),
+      createLink: (ord) => linkDialog(ord || o),
+      recordPayment: (ord) => recordDialog(ord || o),
+      refund: (ord) => {
+        const cur = ord || o;
+        const refundable = (cur.payments || []).filter((p) => ['paid', 'partially_refunded'].includes(p.status) && paymentRefundLeft(p) > 0.004);   // keskeneräiset hyvitykset vähennetty
+        if (refundable.length && canRefund) refundDialog(cur, refundable);
+      },
+    };
+    void canAdd;
+    import('./order-card.js').then(({ openOrderCard }) => openOrderCard({
+      reservation: null,
+      orderId: o.order_id,
+      methods: ctx.refs?.methods || [],
+      refs: ctx.refs,
+      can: ctx.can,
+      role: ctx.role,
+      flow,
+      onChange: () => afterChange(null, o.order_id),
+    }));
+  }
+  // booking_279: poistettu (arkistoitu) maksamaton tilaus; myöhäinen maksu → varoitusmerkintä
+  function archivedRowBadge(o) {
+    const kind = archivedBadge(o);
+    if (!kind) return null;
+    return h('span', { class: `badge ${kind === 'late_paid' ? 'st-cancelled' : 'st-pending'}`, 'data-testid': 'order-archived-badge', 'data-kind': kind,
+      text: kind === 'late_paid' ? deleteText('archived_late_paid') : deleteText('archived', { date: fmt.date(o.archived_at) }) });
   }
   // Keskeneräiset / epäonnistuneet hyvitykset (requested, processing, failed) maksun alla; MobilePay-hyvityksen voi käsitellä uudelleen (§14.4: retry_later → kutsu uudelleen, Idempotency-Key estää tuplahyvityksen)
   function openRefunds(o, p) {
     const rows = (p.refunds || []).filter((r) => ['requested', 'processing', 'failed'].includes(r.status));
     if (!rows.length) return null;
-    const canRetry = (p.provider === 'mobilepay' || p.provider === 'visma_pay' || p.provider === 'montonio') && !api.isMock('refund') && ctx.can('payments.refund');
+    const canRetry = (p.provider === 'mobilepay' || p.provider === 'visma_pay' || p.provider === 'montonio' || p.provider === 'checkoutx') && !api.isMock('refund') && ctx.can('payments.refund');
     return h('ul', { class: 'tl-refunds', 'data-testid': 'order-open-refunds' }, rows.map((r) => h('li', { 'data-testid': 'open-refund', 'data-status': r.status },
       h('span', { class: `badge ${r.status === 'failed' ? 'st-cancelled' : 'st-pending'}`, text: t(r.status === 'failed' ? 'refund.failed' : 'refund.pending') }), ' ', h('span', { text: `${fmt.money(r.amount)}${r.reason ? ' · ' + r.reason : ''}` }),
-      canRetry && r.status !== 'failed' ? actionBtn({ key: 'refund-retry', label: t('refund.retry'), testid: 'btn-refund-retry', onClick: async () => { if (p.provider === 'visma_pay') await processVismaRefund(r.id); else if (p.provider === 'montonio') await processMontonioRefund(r.id); else await processMobilepayRefund(r.id); afterChange(null, o.order_id); } }) : null)));
+      canRetry && r.status !== 'failed' ? actionBtn({ key: 'refund-retry', label: t('refund.retry'), testid: 'btn-refund-retry', onClick: async () => { if (p.provider === 'visma_pay') await processVismaRefund(r.id); else if (p.provider === 'montonio') await processMontonioRefund(r.id); else if (p.provider === 'checkoutx') await processCheckoutxRefund(r.id); else await processMobilepayRefund(r.id); afterChange(null, o.order_id); } }) : null)));
   }
   async function orderDetail(id) {
     // booking_146: vuosikorttitilauksen koodi, voimassaolo ja sähköpostin tila (virhe tai puuttuva RPC → osio jää pois)
@@ -115,7 +220,7 @@ export function createOrdersTab({ api, ctx, gift = null, rpc = null }) {
 
     const canRefund = api.isMock('refund') || ctx.can('payments.refund');
     const canAdd = api.isMock('addToOrder') || ctx.can('bookings.manage');
-    const refundable = o.payments.filter((p) => ['paid', 'partially_refunded'].includes(p.status) && p.amount > p.refunded_amount);
+    const refundable = o.payments.filter((p) => ['paid', 'partially_refunded'].includes(p.status) && paymentRefundLeft(p) > 0.004);   // keskeneräiset hyvitykset vähennetty
     const visible = visibleOrderActions(o, { canRefund, canAdd });
     const actionFactories = {
       addToOrder: () => actionBtn({ key: 'addToOrder', label: t('btn.addToOrder'), ico: 'plus', testid: 'btn-add', onClick: () => addDialog(o) }),
@@ -131,6 +236,8 @@ export function createOrdersTab({ api, ctx, gift = null, rpc = null }) {
       orderContentsSection(o, sec), actions, sec(t('order.payments'), payments), vbox,
       !o.is_native && !o.receipts.length ? null : receipts);   // Johku-tilaukselle ei synny kuittia (booking_41)
   }
+
+  // booking_279: maksamattoman tilauksen poisto on yhteisessä kortissa (views/order-card-delete.js).
 
   // ---- dialogit ----
   const fld = (label, ...kids) => h('label', { class: 'fld' }, h('span', { text: label }), ...kids);
@@ -226,11 +333,12 @@ export function createOrdersTab({ api, ctx, gift = null, rpc = null }) {
       if (api.annualCardForOrder) api.annualCardForOrder(o.order_id).then((ac) => showAnnualCardDialog(ac)).catch(() => {});
     });
   }
-  function refundDialog(o, refundable) {
-    const left = (p) => Math.round((p.amount - p.refunded_amount) * 100) / 100;
-    const sel = h('select', { name: 'payment', onchange: () => { amount.value = left(refundable.find((p) => String(p.payment_id) === sel.value)); amount.max = amount.value; } },
+  function refundDialog(o, refundable, { suggest = null } = {}) {
+    const left = (p) => paymentRefundLeft(p);   // maksettu − hyvitetty − keskeneräiset (requested/processing); sama raja kuin admin_refund
+    const initial = (p) => { const v = suggest ? suggest(p) : left(p); return v == null ? '' : v; };   // tilausnäkymä: ylisuorituksessa esitäytetään vain liikaa maksettu osuus
+    const sel = h('select', { name: 'payment', onchange: () => { const p = refundable.find((x) => String(x.payment_id) === sel.value); amount.max = left(p); amount.value = initial(p); } },
       refundable.map((p) => h('option', { value: p.payment_id, text: `${methodLabel(p.method, p.method_label)} · ${fmt.money(left(p))}` })));
-    const amount = h('input', { name: 'amount', type: 'number', step: '0.01', min: '0.01', max: left(refundable[0]), value: left(refundable[0]), inputmode: 'decimal', required: true });
+    const amount = h('input', { name: 'amount', type: 'number', step: '0.01', min: '0.01', max: left(refundable[0]), value: initial(refundable[0]), inputmode: 'decimal', required: true });
     // MobilePay-verkkomaksu (provider 'mobilepay'): hyvitys lähtee MobilePayhin heti (§14.4); vihje näkyy vain sille maksulle
     const mpHint = h('p', { class: 'muted tl-hint', 'data-testid': 'refund-mp-hint', text: t('refund.mobilepay') });
     const vpHint = h('p', { class: 'muted tl-hint', 'data-testid': 'refund-vp-hint', text: t('refund.visma') });
@@ -262,6 +370,7 @@ export function createOrdersTab({ api, ctx, gift = null, rpc = null }) {
       if (res?.status === 'requested' && !res.mock && p.provider === 'mobilepay') await processMobilepayRefund(res.refund_id);
       if (res?.status === 'requested' && !res.mock && p.provider === 'visma_pay') await processVismaRefund(res.refund_id);
       if (res?.status === 'requested' && !res.mock && p.provider === 'montonio') await processMontonioRefund(res.refund_id);
+      if (res?.status === 'requested' && !res.mock && p.provider === 'checkoutx') await processCheckoutxRefund(res.refund_id);
       afterChange(res, o.order_id);
     });
   }
@@ -280,6 +389,11 @@ export function createOrdersTab({ api, ctx, gift = null, rpc = null }) {
     toast(t(key), VP_KINDS[m.result] || 'warn');
     return m;
   }
+  async function processCheckoutxRefund(refundId) {
+    const m = api.checkoutxRefund ? await api.checkoutxRefund(refundId) : { result: 'none' };
+    toast(t(CX_KINDS[m.result] ? `refund.cx.${m.result}` : 'refund.cx.error'), CX_KINDS[m.result] || 'warn');
+    return m;
+  }
   async function processMontonioRefund(refundId) {
     const m = await api.montonioRefund(refundId);
     const key = MO_KINDS[m.result] ? `refund.mo.${m.result}` : 'refund.mo.error';
@@ -293,20 +407,17 @@ export function createOrdersTab({ api, ctx, gift = null, rpc = null }) {
   const syncDir = () => { dirBtn.replaceChildren(h('span', { class: st.sortDir === 'desc' ? 'tl-down' : 'tl-up', 'aria-hidden': 'true' }, icon('chev', 20)), h('span', { class: 'tl-dirtxt', text: t(`dir.${st.sortDir}`) })); dirBtn.setAttribute('aria-label', `${t('sort.dir')}: ${t(`dir.${st.sortDir}`)}`); dirBtn.dataset.dir = st.sortDir; dirBtn.disabled = st.sortBy === 'payment_status'; };
   syncDir();
   const sortFld = h('div', { class: 'fld tl-sort' }, h('span', { text: t('sort.label') }), h('div', { class: 'tl-sortrow' }, sortSel, dirBtn));
-  const reset = h('button', { type: 'button', class: 'btn ghost', 'data-testid': 'orders-reset', onclick: () => { Object.assign(st, { search: '', paymentFilter: 'paid', source: '', native: '', dateField: '', from: '', to: '' }); paintPay(); buildToolbar(); load(); } }, t('filters.reset'));
+  const reset = h('button', { type: 'button', class: 'btn ghost', 'data-testid': 'orders-reset', onclick: () => { Object.assign(st, { search: '', paymentFilters: [...DEFAULT_PAYMENT_FILTERS], source: '', native: '', dateField: '', from: '', to: '' }); paintPay(); buildToolbar(); load(); } }, t('filters.reset'));
   let toolbar; buildToolbar();
   function buildToolbar() {
     const ss = searchFld(t('orders.searchPh'), 'orders-search', (v) => change({ search: v })); ss.input.value = st.search;
-    const paySel = h('select', { 'data-testid': 'orders-f-pay', 'aria-label': orderText('ui.admin.orders.pay_filter'), onchange: (e) => change({ paymentFilter: e.target.value }) },
-      PAYMENT_FILTERS.map((c) => h('option', { value: c, text: orderText(`ui.admin.orders.pay_${c}`) })));
-    paySel.value = st.paymentFilter;
     const drawer = filterDrawer({
       search: ss.node,
-      status: [payChip, searchNote],
+      status: [payChips, searchNote],
       testid: 'orders-filters',
-      activeCount: () => countActive(st, { paymentFilter: 'paid', source: '', native: '', dateField: '', from: '', to: '', sortBy: 'created', sortDir: 'desc', limit: 25 }),
+      className: 'orders-drawer',
+      activeCount: () => countActive(st, { source: '', native: '', dateField: '', from: '', to: '', sortBy: 'created', sortDir: 'desc', limit: 25 }),
       filters: [sortFld,
-        h('label', { class: 'fld' }, h('span', { text: orderText('ui.admin.orders.pay_filter') }), paySel),
         selectFld(t('filters.source'), 'orders-f-src', SOURCES, sourceLabel, st.source, (v) => change({ source: v })),
         selectFld(t('filters.native'), 'orders-f-native', ['native', 'imported'], (c) => t(`nat.${c}`), st.native, (v) => change({ native: v })),
         selectFld(t('filters.dateField'), 'orders-f-datefield', ['start'], (c) => t(`df.${c}`), st.dateField, (v) => change({ dateField: v }), t('df.created')),
@@ -319,6 +430,12 @@ export function createOrdersTab({ api, ctx, gift = null, rpc = null }) {
   }
   sortSel.value = st.sortBy;
   const cols = h('div', { class: 'tl-cols', 'aria-hidden': 'true' }, h('span', { text: t('col.order') }), h('span', { text: t('col.created') }), h('span', { text: t('col.first') }), h('span', { class: 'r', text: t('col.sum') }), h('span', { text: t('col.status') }), h('span'));
-  const node = h('div', { class: 'tl-tab', 'data-testid': 'tab-orders' }, toolbar, count, pagers[0], cols, list, pagers[1]);
-  return { node, load, setSearch(q, { open = false } = {}) { st.search = q; st.offset = 0; autoOpen = open; buildToolbar(); load(); } };
+  const listWrap = h('div', { class: 'ov-listwrap' }, h('div', { class: 'ov-listcol' }, cols, list, pagers[1]));
+  const node = h('div', { class: 'tl-tab', 'data-testid': 'tab-orders' }, toolbar, count, pagers[0], listWrap);
+  // v3: koko tilausnäkymä käyttää samoja dialogeja (lisäosto, maksulinkki, maksun kirjaus lahjakortteineen, hyvitys).
+  const dialogs = {
+    add: (o) => addDialog(o), link: (o) => linkDialog(o), record: (o) => recordDialog(o),
+    refund: (o, refundable, opts) => { if (refundable?.length && (api.isMock('refund') || ctx.can('payments.refund'))) refundDialog(o, refundable, opts); },
+  };
+  return { node, load, dialogs, setSearch(q, { open = false } = {}) { st.search = q; st.offset = 0; autoOpen = open; buildToolbar(); load(); } };
 }

@@ -14,6 +14,7 @@ import { assertBuildTarget } from '../src/site-target.mjs';
 import { assertTestBannerFlag, injectTestBanner, testBannerProblems } from '../src/test-env-banner.mjs';
 import { imageTransformsOn } from '../booking/shop/src/product-image.js';
 import { assertNoRenderImageUrls } from './check-image-urls.mjs';
+import { missingImportTargets, unversionedImports, versionImports } from './module-imports.mjs';
 
 const need = (k) => { const v = (process.env[k] || '').trim(); if (!v) { console.error(`build-pages: ympäristömuuttuja ${k} puuttuu`); process.exit(2); } return v; };
 const SITE_URL = need('SITE_URL').replace(/\/$/, '');
@@ -71,7 +72,7 @@ let nImports = 0;
     if (statSync(p).isDirectory()) { ver(p); continue; }
     if (!n.endsWith('.js') || n === 'config.js') continue;
     let t = readFileSync(p, 'utf8');
-    t = t.replace(/(\b(?:from|import)\s*)(['"])(\.{1,2}\/[^'"?]+\.js)\2/g, (_, a, q, u) => { nImports++; return `${a}${q}${u}${VER}${q}`; });
+    { const r = versionImports(t, VER); t = r.text; nImports += r.count; }   // myös dynaaminen import('./x.js') (HALL-TILAUS-02)
     if (n === 'admin.js') { if (!t.includes("const ASSET_VER = '';")) { console.error('build-pages: VIRHE: admin.js:stä puuttuu ASSET_VER-rivi'); process.exit(1); } t = t.replace("const ASSET_VER = '';", `const ASSET_VER = '${VER}';`); }
     if (n === 'pwa.js') { if (!t.includes("const SW_VER = '';")) { console.error('build-pages: VIRHE: pwa.js:stä puuttuu SW_VER-rivi'); process.exit(1); } t = t.replace("const SW_VER = '';", `const SW_VER = '${VER}';`); }
     if (n === 'sw.js') { if (!t.includes("const CACHE = 'hallinta-__VER__';")) { console.error('build-pages: VIRHE: sw.js:stä puuttuu välimuistin versio'); process.exit(1); } t = t.replaceAll('hallinta-__VER__', 'hallinta-' + VER.slice(3)); }
@@ -85,7 +86,7 @@ let nImports = 0;
     const p = join(d, n);
     if (!n.endsWith('.js')) continue;
     const t = readFileSync(p, 'utf8');
-    const next = t.replace(/(\b(?:from|import)\s*)(['"])(\.{1,2}\/[^'"?]+\.js)\2/g, (_, a, q, u) => `${a}${q}${u}${VER}${q}`);
+    const next = t.replace(/(\b(?:from|import)\s*\(?\s*)(['"])(\.{1,2}\/[^'"?]+\.js)\2/g, (_, a, q, u) => `${a}${q}${u}${VER}${q}`);   // myös import('./x.js') (HALL-TILAUS-02)
     if (next !== t) writeFileSync(p, next);
   }
 })(join(OUT, 'shop', 'src'));
@@ -121,7 +122,9 @@ writeFileSync(join(A, 'version.json'), JSON.stringify({ assetVer: VER }) + '\n')
 // 3c) kylmälaite-sivu → /juomat/ ja /en/drinks/ (polut ovat koodissa, eivät site.jsonissa)
 const DRINK_JS = ['drinks.js', 'drinks-texts.js', 'drinks-logic.js', 'drinks-mock.js', 'phone-fi.js', 'qrsvg.js'];
 // Juomasivu käyttää kaupan maksutapariviä. Kopioidaan moduuligraafi sivun viereen (dist/juomat ei näe booking/shop/src:tä).
-const DRINK_PAY_UI = ['online-pay-ui.js', 'online-pay-logic.js', 'pay-choices-texts.js', 'gift-ui.js', 'gift-texts.js'];
+// SIVU-JUOMAT-01: gift-texts.js tuo plural.js:n ja hold-texts.js:n (#293). Puuttuva tiedosto = 404 → koko moduulipuu kaatuu
+// ja QR-maksusivu jää tyhjäksi. booking/tests/juomat-moduulit.test.mjs vertaa listaa lähdekoodin importteihin; build tarkistaa distin alla.
+const DRINK_PAY_UI = ['online-pay-ui.js', 'online-pay-logic.js', 'pay-choices-texts.js', 'gift-ui.js', 'gift-texts.js', 'plural.js', 'hold-texts.js'];
 function publishDrinks(srcName, destRel) {
   const dir = join(OUT, destRel);
   rmSync(dir, { recursive: true, force: true });
@@ -132,9 +135,11 @@ function publishDrinks(srcName, destRel) {
     const p = join(dir, f);
     let t = readFileSync(p, 'utf8');
     t = t.replace(/(\b(?:from|import)\s*)(['"])\.\.\/shop\/src\/([^'"?]+\.js)\2/g, (_, a, q, u) => `${a}${q}./${u}${q}`);
-    t = t.replace(/(\b(?:from|import)\s*)(['"])(\.{1,2}\/[^'"?]+\.js)\2/g, (_, a, q, u) => `${a}${q}${u}${VER}${q}`);
+    t = versionImports(t, VER).text;
     writeFileSync(p, t);
   }
+  const missing = missingImportTargets(dir, { recursive: false });
+  if (missing.length) { console.error(`build-pages: VIRHE: ${destRel}: tuotu moduuli puuttuu dististä (lisää DRINK_JS/DRINK_PAY_UI-listaan): ${missing.join('; ')}`); process.exit(1); }
   let html = readFileSync(join('booking/drinks', srcName), 'utf8');
   if (BASE) html = html.replace(/href="(\/(?:juomat|en\/drinks)\/)"/g, `href="${BASE}$1"`);
   html = html.replace(/(href|src)="(\.\/[^"?]+\.(?:css|js))"/g, `$1="$2${VER}"`);
@@ -213,12 +218,15 @@ function chkUnversioned(d) {
   for (const n of readdirSync(d)) {
     const p = join(d, n);
     if (statSync(p).isDirectory()) { chkUnversioned(p); continue; }
-    if (n.endsWith('.js') && /(?:from|import)\s*['"]\.{1,2}\/[^'"?]+\.js['"]/.test(readFileSync(p, 'utf8'))) fail(`${p}: versioimaton relatiivinen import`);
+    if (!n.endsWith('.js') || n === 'config.js') continue;
+    const bad = unversionedImports(readFileSync(p, 'utf8'));   // HALL-TILAUS-02: myös dynaaminen import('./x.js'); ilman tunnusta sama moduuli latautuu kahdesti
+    if (bad.length) fail(`${p}: versioimaton relatiivinen import: ${bad.join(', ')}`);
   }
 }
 chkUnversioned(A);
 chkUnversioned(join(OUT, 'shop', 'src'));
-for (const f of ['admin.js', 'ui.js', 'icons.js', 'sb.js', 'config.js', 'admin.css', 'calendar.css', 'views/users.js', 'views/calendar.js', 'views/customerform.js', 'views/addons.js', 'views/productimage.js', 'views/talous.js', 'views/talous-orders.js', 'views/order-contents.js', 'order-lines-logic.js', 'voucher-redeem-logic.js', 'voucher-redeem-texts.js', 'voucher-redeem-mock.js', 'views/voucher-redeem.js', 'views/talous-payments.js', 'views/talous-reports.js', 'views/talous-analytics.js', 'analytics-mock.js', 'views/talous-ui.js', 'views/talous-receipts.js', 'views/talous-giftcards.js', 'views/pos.js', 'pos-screen.js', 'pos-logic.js', 'pos-texts.js', 'phone-fi.js', 'qrsvg.js', 'qrcode-generator.js', 'settings-tabs.js', 'settings-texts.js', 'qr-print.js', 'qr-panel.js', 'options.js', 'options-logic.js', 'options-mock.js', 'talous-api.js', 'talous-mock.js', 'giftcards-api.js', 'giftcards-mock.js', 'giftcards-texts.js', 'talous-i18n.js', 'talous-texts.js', 'csv.js', 'day-texts.js', 'refund-cancel-texts.js', 'views/refund-cancel.js', 'annual-card-texts.js', 'annual-card-logic.js', 'views/annual-card-panel.js', 'annual-manage-texts.js', 'filter-texts.js', 'nav-texts.js', 'admin-navigation.js', 'quick-search.js', 'views/orders.js', 'views/nav-group.js', 'views/lahjakortit.js', 'day-bundle-cache.js', 'site-texts-cache.js', 'views/day.js', 'day-memos-texts.js', 'day-memos-logic.js', 'views/day-memos.js', 'views/events.js', 'views/koulutukset.js', 'events-logic.js', 'events-texts.js', 'events-mock.js', 'training-logic.js', 'training-texts.js', 'training-mock.js', 'logo-haalea.svg', 'manifest.json', 'sw.js', 'offline.html', 'pwa.js', 'version-check.js', 'version.json', 'icon-192.png', 'icon-512.png', 'icon-maskable-512.png', 'apple-touch-icon.png', 'rich-editor.js', 'vendor/quill/quill.js', 'vendor/quill/quill.snow.css', 'vendor/quill/LICENSE']) if (!statSync(join(A, f), { throwIfNoEntry: false })) fail(`hallinnasta puuttuu ${f}`);
+for (const d of ['juomat', 'en/drinks']) chkUnversioned(join(OUT, d));
+for (const f of ['admin.js', 'ui.js', 'icons.js', 'sb.js', 'config.js', 'admin.css', 'calendar.css', 'views/users.js', 'views/calendar.js', 'views/customerform.js', 'views/addons.js', 'views/productimage.js', 'views/talous.js', 'views/talous-orders.js', 'views/order-card.js', 'order-card-logic.js', 'views/order-contents.js', 'order-lines-logic.js', 'voucher-redeem-logic.js', 'voucher-redeem-texts.js', 'voucher-redeem-mock.js', 'views/voucher-redeem.js', 'views/talous-payments.js', 'views/talous-reports.js', 'views/talous-analytics.js', 'analytics-mock.js', 'views/talous-ui.js', 'views/talous-receipts.js', 'views/talous-giftcards.js', 'views/pos.js', 'pos-screen.js', 'pos-logic.js', 'pos-texts.js', 'phone-fi.js', 'qrsvg.js', 'qrcode-generator.js', 'settings-tabs.js', 'settings-texts.js', 'qr-print.js', 'qr-panel.js', 'options.js', 'options-logic.js', 'options-mock.js', 'talous-api.js', 'talous-mock.js', 'giftcards-api.js', 'giftcards-mock.js', 'giftcards-texts.js', 'talous-i18n.js', 'talous-texts.js', 'csv.js', 'day-texts.js', 'refund-cancel-texts.js', 'views/refund-cancel.js', 'annual-card-texts.js', 'annual-card-logic.js', 'views/annual-card-panel.js', 'annual-manage-texts.js', 'filter-texts.js', 'nav-texts.js', 'admin-navigation.js', 'quick-search.js', 'views/orders.js', 'views/nav-group.js', 'views/lahjakortit.js', 'day-bundle-cache.js', 'site-texts-cache.js', 'views/day.js', 'day-memos-texts.js', 'day-memos-logic.js', 'views/day-memos.js', 'views/events.js', 'views/koulutukset.js', 'events-logic.js', 'events-texts.js', 'events-mock.js', 'training-logic.js', 'training-texts.js', 'training-mock.js', 'logo-haalea.svg', 'manifest.json', 'sw.js', 'offline.html', 'pwa.js', 'version-check.js', 'version.json', 'icon-192.png', 'icon-512.png', 'icon-maskable-512.png', 'apple-touch-icon.png', 'rich-editor.js', 'vendor/quill/quill.js', 'vendor/quill/quill.snow.css', 'vendor/quill/LICENSE']) if (!statSync(join(A, f), { throwIfNoEntry: false })) fail(`hallinnasta puuttuu ${f}`);
 (function chkImports(d) { for (const n of readdirSync(d)) { const p = join(d, n); if (statSync(p).isDirectory()) { chkImports(p); continue; } if (!n.endsWith('.js')) continue; for (const m of readFileSync(p, 'utf8').matchAll(/(?:from|import)\s*\(?\s*(['"])(\.{1,2}\/[^'"?]+\.js)(?:\?[^'"]*)?\1/g)) { if (!statSync(resolve(d, m[2]), { throwIfNoEntry: false })) fail(`${p}: tuotu moduuli puuttuu dististä: ${m[2]}`); } } })(A);
 if (process.env.SITE_ENV === 'test') {
   const noindex = (p) => /<meta name="robots" content="noindex/.test(readFileSync(p, 'utf8'));

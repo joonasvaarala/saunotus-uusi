@@ -164,7 +164,8 @@ test('generaattori ei lisää riviä jos avain on jo tuotannossa (vain uudet ava
   const partyPriceUi = J('content/site-texts.pending-import-106.json');   // hoitosivun henkilömäärän hinta
   const trainingOrderUi = J('content/site-texts.pending-import-114.json').filter((r) => r.key.startsWith('ui.order.'));   // booking_226
   const giftCodeHintUi = J('content/site-texts.pending-import-122.json').filter((r) => r.key.startsWith('ui.shop.'));   // lahjakorttivihje alennuskoodikentässä
-  assert.equal(rows.length, PENDING.length - have.length + vismaRows.length + msgOrder.length + payUi.length + waitUi.length + waitParty.length + waitOffer.length + codeUi.length + partyType.length + cancelUi.length + quietUi.length + ritualUi.length + ritualCard.length + oneUi.length + sellersUi.length + invoiceUi.length + payLinkUi.length + payLinkInfoUi.length + payLinkRetryUi.length + invoiceLockUi.length + companyPayUi.length + onlinePayUi.length + additionHoldUi.length + uxShopUi.length + eventChipUi.length + giftPersonsUi.length + audit94Ui.length + eventQueueUi.length + readMoreUi.length + eventPickUi.length + partyPriceUi.length + trainingOrderUi.length + giftCodeHintUi.length);
+  // Myöhemmät tuonnit (33–122 ym.) ovat jo tuotannon varatekstissä, joten generaattori ei lisää niitä.
+  assert.equal(rows.length, PENDING.length - have.length);
   assert.ok(!rows.some((x) => haveKeys.has(x.key)));
   for (const e of extraRows) assert.ok(!rows.some((x) => x.key === e.key), `${e.key}: jo tuotannossa, generaattori ei lisää`);
   const bad = spawnSync('node', [join(root, 'scripts/site-texts-extract-shop.mjs'), '--prod', join(work, 'ei-ole.json')], { encoding: 'utf8' });
@@ -211,7 +212,7 @@ test('pending-import-33: tilaussivun maksutilan uudet tekstit FI+EN, sama teksti
     assert.equal(r.kind, 'plain', w);
     assert.equal(r.text, defaults.get(`${r.key}|${r.lang}`), w);
     assert.equal(r.class, R.classFor(r.key, defaults.get(`${r.key}|fi`)), w);
-    assert.equal(have.has(`${r.key}|${r.lang}`), false, `${w}: ei vielä tuotannossa`);
+    assert.equal(have.get(`${r.key}|${r.lang}`), r.text, `${w}: tuotu tuotantoon, varateksti täsmää`);
     assert.ok(r.max_len >= r.text.length && r.max_len <= 100000, w);
     assert.deepEqual(r.placeholders, [], w);
     assert.doesNotMatch(r.text, /[<>]|https?:\/\/|www\./, w);
@@ -379,7 +380,7 @@ test('pending-import-34: jonotuslistan tekstit (kauppa ui.shop.waitlist_* + säh
   const rows = J('content/site-texts.pending-import-34.json');
   const { EMAIL_TEXTS } = await import(new URL('../supabase/functions/send-emails/texts.ts', import.meta.url).href).catch(() => ({ EMAIL_TEXTS: null }));
   const defaults = new Map(R.collectDefaults().map((r) => [`${r.key}|${r.lang}`, r.text]));
-  const have = new Set(FALLBACK.texts.map((r) => `${r.key}|${r.lang}`));
+  const have = new Map(FALLBACK.texts.map((r) => [`${r.key}|${r.lang}`, r.text]));
   const seen = new Set();
   for (const r of rows) {
     const w = `${r.key} [${r.lang}]`;
@@ -388,7 +389,7 @@ test('pending-import-34: jonotuslistan tekstit (kauppa ui.shop.waitlist_* + säh
     assert.equal(r.kind, 'plain', w);
     if (r.key.startsWith('ui.shop.')) assert.equal(r.text, defaults.get(`${r.key}|${r.lang}`), w);
     else if (EMAIL_TEXTS) assert.equal(r.text, EMAIL_TEXTS[r.key][r.lang], w);
-    assert.equal(have.has(`${r.key}|${r.lang}`), false, `${w}: ei vielä tuotannossa`);
+    assert.equal(have.get(`${r.key}|${r.lang}`), r.text, `${w}: tuotu tuotantoon, varateksti täsmää`);
     assert.ok(r.max_len >= r.text.length, w);
     assert.doesNotMatch(r.text, /[<>]|https?:\/\/|www\./, w);
     assert.doesNotMatch(r.text, /Sipoonjoen Perinnesauna/, `${w}: yritysnimi paikkamerkillä`);
@@ -402,7 +403,7 @@ test('pending-import-34: jonotuslistan tekstit (kauppa ui.shop.waitlist_* + säh
 test('pending-import-36: jonotuslistan henkilömäärä (booking_134) FI+EN, sama kuin koodin oletus, ei vielä tuotannossa, ei <-merkkiä', () => {
   const rows = J('content/site-texts.pending-import-36.json');
   const defaults = new Map(R.collectDefaults().map((r) => [`${r.key}|${r.lang}`, r.text]));
-  const have = new Set(FALLBACK.texts.map((r) => `${r.key}|${r.lang}`));
+  const have = new Map(FALLBACK.texts.map((r) => [`${r.key}|${r.lang}`, r.text]));
   const seen = new Set();
   for (const r of rows) {
     const w = `${r.key} [${r.lang}]`;
@@ -411,7 +412,7 @@ test('pending-import-36: jonotuslistan henkilömäärä (booking_134) FI+EN, sam
     assert.equal(r.kind, 'plain', w);
     assert.equal(r.class, 'normal', w);
     assert.equal(r.text, defaults.get(`${r.key}|${r.lang}`), w);
-    assert.equal(have.has(`${r.key}|${r.lang}`), false, `${w}: ei vielä tuotannossa`);
+    assert.equal(have.get(`${r.key}|${r.lang}`), r.text, `${w}: tuotu tuotantoon, varateksti täsmää`);
     assert.ok(r.max_len >= r.text.length, w);
     assert.doesNotMatch(r.text, /[<>]|https?:\/\/|www\./, w);
     assert.ok(!seen.has(`${r.key}|${r.lang}`), w); seen.add(`${r.key}|${r.lang}`);
@@ -426,14 +427,14 @@ test('pending-import-36: jonotuslistan henkilömäärä (booking_134) FI+EN, sam
 test('pending-import-48: jonotuslistan henkilömäärä palvelutyypin mukaan (booking_148) FI+EN, sama kuin koodin oletus, ei vielä tuotannossa, ei <-merkkiä', () => {
   const rows = J('content/site-texts.pending-import-48.json');
   const defaults = new Map(R.collectDefaults().map((r) => [`${r.key}|${r.lang}`, r.text]));
-  const have = new Set(FALLBACK.texts.map((r) => `${r.key}|${r.lang}`));
+  const have = new Map(FALLBACK.texts.map((r) => [`${r.key}|${r.lang}`, r.text]));
   const seen = new Set();
   for (const r of rows) {
     const w = `${r.key} [${r.lang}]`;
     assert.ok(['fi', 'en'].includes(r.lang), w);
     assert.equal(r.kind, 'plain', w);
     assert.equal(r.class, 'normal', w);
-    assert.equal(have.has(`${r.key}|${r.lang}`), false, `${w}: ei vielä tuotannossa`);
+    assert.equal(have.get(`${r.key}|${r.lang}`), r.text, `${w}: tuotu tuotantoon, varateksti täsmää`);
     assert.ok(r.max_len >= r.text.length, w);
     assert.doesNotMatch(r.text, /[<>]|https?:\/\/|www\./, w);
     assert.ok(!seen.has(`${r.key}|${r.lang}`), w); seen.add(`${r.key}|${r.lang}`);
@@ -454,7 +455,7 @@ test('pending-import-48: jonotuslistan henkilömäärä palvelutyypin mukaan (bo
 test('pending-import-39: jonotusilmoituksen tarjousaika päättyi (booking_137) FI+EN, sama kuin koodin oletus, ei vielä tuotannossa, ei <-merkkiä', () => {
   const rows = J('content/site-texts.pending-import-39.json');
   const defaults = new Map(R.collectDefaults().map((r) => [`${r.key}|${r.lang}`, r.text]));
-  const have = new Set(FALLBACK.texts.map((r) => `${r.key}|${r.lang}`));
+  const have = new Map(FALLBACK.texts.map((r) => [`${r.key}|${r.lang}`, r.text]));
   const seen = new Set();
   for (const r of rows) {
     const w = `${r.key} [${r.lang}]`;
@@ -462,7 +463,7 @@ test('pending-import-39: jonotusilmoituksen tarjousaika päättyi (booking_137) 
     assert.equal(r.kind, 'plain', w);
     assert.equal(r.class, 'normal', w);
     assert.equal(r.text, defaults.get(`${r.key}|${r.lang}`), w);
-    assert.equal(have.has(`${r.key}|${r.lang}`), false, `${w}: ei vielä tuotannossa`);
+    assert.equal(have.get(`${r.key}|${r.lang}`), r.text, `${w}: tuotu tuotantoon, varateksti täsmää`);
     assert.ok(r.max_len >= r.text.length, w);
     assert.deepEqual(r.placeholders, [], w);
     assert.doesNotMatch(r.text, /[<>]|https?:\/\/|www\./, w);

@@ -154,7 +154,7 @@ test('tekstit: pending-import-70 FI+EN = koodin oletukset (text-registry), uudet
   const others = readdirSync(join(here, '../../content')).filter((f) => /^site-texts\.(pending-import|imported).*\.json$/.test(f) && f !== 'site-texts.pending-import-70.json');
   for (const f of others) { const rs = JSON.parse(rd(`../content/${f}`)); if (!Array.isArray(rs)) continue; for (const r of rs) assert.ok(!keys.includes(r?.key), `${r?.key} on jo tiedostossa ${f}`); }
   const fb = JSON.parse(rd('../content/site-texts.fallback.json'));
-  for (const r of fb.texts || []) assert.ok(!keys.includes(r.key), `${r.key} on jo tuotannossa`);
+  for (const k of keys) assert.ok((fb.texts || []).some((r) => r.key === k), `${k} on tuotu varatekstiin`);
 });
 
 test('CSS: Laskutettu-merkki teeman väreillä (#F4EFE7 / #7A5530, kontrasti ≥ 4.5:1), ei sinistä; laskutustapa ei vieritä sivuttain', () => {

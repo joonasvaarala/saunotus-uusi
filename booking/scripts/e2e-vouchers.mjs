@@ -251,7 +251,7 @@ async function adminSuite() {
   for (const lang of ['fi', 'en']) {
     const T = TEXTS[lang], name = `maksulomake yksi kenttä ${lang}`, page = await newPage(name, { vp: 390, lang, allow: /status of 400/ });
     await page.goto(`${ORIGIN}/admin/#/talous?tab=orders&lang=${lang}`); await page.waitForSelector('[data-testid=orders-list] [data-testid=order]');
-    await page.selectOption('[data-testid=orders-f-pay]', 'unpaid'); await page.waitForTimeout(250);
+    await page.evaluate((c) => { const b = document.querySelector('[data-testid=orders-pay-btn-' + c + ']'); if (!b) throw new Error('maksutilanappi puuttuu: ' + c); if (b.getAttribute('aria-pressed') !== 'true') b.click(); for (const x of document.querySelectorAll('[data-testid^=orders-pay-btn-][aria-pressed=true]')) if (x !== b) x.click(); }, 'unpaid'); await page.waitForTimeout(250);
     await page.locator('[data-testid=orders-list] > [data-testid=order]').first().locator('.tl-head').click(); await page.waitForSelector('[data-testid=btn-record]');
     await page.click('[data-testid=btn-record]'); await page.waitForSelector('dialog[open] [data-testid=record-method]');
     await page.selectOption('dialog[open] [data-testid=record-method]', 'gift_card');
@@ -271,7 +271,7 @@ async function adminSuite() {
   {   // oma kortti toimii edelleen samasta kentästä; liian lyhyt koodi hylätään
     const name = 'maksulomake oma kortti', page = await newPage(name, { vp: 390, allow: /status of 400/ });
     await page.goto(`${ORIGIN}/admin/#/talous?tab=orders`); await page.waitForSelector('[data-testid=orders-list] [data-testid=order]');
-    await page.selectOption('[data-testid=orders-f-pay]', 'unpaid'); await page.waitForTimeout(250);
+    await page.evaluate((c) => { const b = document.querySelector('[data-testid=orders-pay-btn-' + c + ']'); if (!b) throw new Error('maksutilanappi puuttuu: ' + c); if (b.getAttribute('aria-pressed') !== 'true') b.click(); for (const x of document.querySelectorAll('[data-testid^=orders-pay-btn-][aria-pressed=true]')) if (x !== b) x.click(); }, 'unpaid'); await page.waitForTimeout(250);
     await page.locator('[data-testid=orders-list] > [data-testid=order]').first().locator('.tl-head').click(); await page.waitForSelector('[data-testid=btn-record]');
     await page.click('[data-testid=btn-record]'); await page.waitForSelector('dialog[open] [data-testid=record-method]');
     await page.selectOption('dialog[open] [data-testid=record-method]', 'gift_card');

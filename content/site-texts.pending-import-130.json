@@ -1,0 +1,102 @@
+[
+  {
+    "key": "ui.admin.customer_message.lead_date_products",
+    "lang": "en",
+    "text": "Choose one day or a date range. The product list shows only products reserved (reservation start date in Helsinki) or sold (order payment date in Helsinki) on that day or range. The message goes to people who booked or bought a selected product. Each customer receives one message. Cancelled reservations, expired holds and the waitlist are left out. Marketing consent is not required. Preview before sending. Each person receives the message in their order language.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 507,
+    "placeholders": [],
+    "reason": "booking_258: Viesti asiakkaalle päivämäärän tuotteet"
+  },
+  {
+    "key": "ui.admin.customer_message.lead_date_products",
+    "lang": "fi",
+    "text": "Valitse yksi päivä tai aikaväli. Tuotevalintaan tulevat vain tuotteet, joita tuona päivänä tai välillä on varattu (varauksen alkupäivä Helsingissä) tai myyty (tilauksen maksupäivä Helsingissä). Viesti lähtee niille, jotka ovat varanneet tai ostaneet valitun tuotteen. Sama asiakas saa yhden viestin. Peruutetut varaukset, vanhentuneet pidot ja jonotuslista jäävät pois. Markkinointilupaa ei tarvita. Esikatsele ennen lähetystä. Jokainen saa viestin tilauksen kielellä.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 508,
+    "placeholders": [],
+    "reason": "booking_258: Viesti asiakkaalle päivämäärän tuotteet"
+  },
+  {
+    "key": "ui.admin.customer_message.products_empty",
+    "lang": "en",
+    "text": "No reserved or sold products for the selected day or date range.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "booking_258: Viesti asiakkaalle päivämäärän tuotteet"
+  },
+  {
+    "key": "ui.admin.customer_message.products_empty",
+    "lang": "fi",
+    "text": "Ei varattuja tai myytyjä tuotteita valitulla päivällä tai aikavälillä.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "booking_258: Viesti asiakkaalle päivämäärän tuotteet"
+  },
+  {
+    "key": "ui.admin.customer_message.products_error",
+    "lang": "en",
+    "text": "Could not load products.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "booking_258: Viesti asiakkaalle päivämäärän tuotteet"
+  },
+  {
+    "key": "ui.admin.customer_message.products_error",
+    "lang": "fi",
+    "text": "Tuotteiden haku epäonnistui.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "booking_258: Viesti asiakkaalle päivämäärän tuotteet"
+  },
+  {
+    "key": "ui.admin.customer_message.products_loading",
+    "lang": "en",
+    "text": "Loading products…",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "booking_258: Viesti asiakkaalle päivämäärän tuotteet"
+  },
+  {
+    "key": "ui.admin.customer_message.products_loading",
+    "lang": "fi",
+    "text": "Ladataan tuotteita…",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "booking_258: Viesti asiakkaalle päivämäärän tuotteet"
+  },
+  {
+    "key": "ui.admin.customer_message.products_need_dates",
+    "lang": "en",
+    "text": "Choose a day or date range first. Only products reserved or sold on that day or range appear here.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 138,
+    "placeholders": [],
+    "reason": "booking_258: Viesti asiakkaalle päivämäärän tuotteet"
+  },
+  {
+    "key": "ui.admin.customer_message.products_need_dates",
+    "lang": "fi",
+    "text": "Valitse ensin päivä tai aikaväli. Tuotevalintaan tulevat vain kyseisenä päivänä tai välillä varatut tai myydyt tuotteet.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 160,
+    "placeholders": [],
+    "reason": "booking_258: Viesti asiakkaalle päivämäärän tuotteet"
+  }
+]

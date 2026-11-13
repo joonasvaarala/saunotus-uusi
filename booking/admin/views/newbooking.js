@@ -6,6 +6,7 @@ import { customerForm, customerSearch } from './customerform.js';
 import { warningBox, hasWarning } from './therapist.js';
 import { addonPicker } from './addons.js';
 import { reservationDialog } from './shared.js';
+import { openOrderView } from '../order-open.js';
 import { h, toast, errMsg, fmtTime, fmtDay, money, todayHel, addDays, empty, revealSection, revealIfHidden, helsinkiIso } from '../ui.js';
 import { formatWhenRange, spansDays } from '../when-range.js';
 import { icon } from '../icons.js';
@@ -20,7 +21,7 @@ import { invoiceHref, openInvoiceAfterBooking } from '../invoice-link.js';
 const clockSpan = (start, end) => (spansDays(start, end) ? formatWhenRange(start, end, getLang() === 'en' ? 'en' : 'fi') : `${fmtTime(start)}–${fmtTime(end)}`);
 
 export async function render({ ctx, refs, query, reload }) {
-  const isAdmin = ctx.role === 'admin';
+  const isAdmin = ctx.can('bookings.override');
   const kind = query.get('tyyppi');   // migraatio 17: resurssivaraus / vanha varaus omalla lomakkeellaan
   if (kind === 'resurssi' || kind === 'vanha') return renderResource({ ctx, refs, query, kind });
   const [addons, rules] = await Promise.all([
@@ -31,7 +32,19 @@ export async function render({ ctx, refs, query, reload }) {
   const st = { date: /^\d{4}-\d\d-\d\d$/.test(query.get('d') || '') ? query.get('d') : todayHel(), session: null, customer: null, pre: query.get('r') && query.get('t') ? { r: query.get('r'), t: query.get('t') } : null };
   const root = h('div', { class: 'stack nb' });
   const sessionsBox = h('div', { class: 'stack' }); const formBox = h('div', {}); const result = h('div', { class: 'nb-result' });
-  const loadDay = () => { st.session = null; loadSessions(); drawForm(); };
+  const summaryBox = h('aside', { class: 'card nb-summary', 'data-testid': 'nb-summary', hidden: true });
+  const paintSummary = () => {
+    const s = st.session;
+    if (!s) { summaryBox.hidden = true; summaryBox.replaceChildren(); return; }
+    const listPrice = money(priceFor(s, personsRange(s).min));
+    summaryBox.hidden = false;
+    summaryBox.replaceChildren(
+      h('h3', { text: T('nb.summary') }),
+      h('p', { class: 'nb-summary-line', text: `${slotName(s)}, ${fmtDay(s.starts_at)} ${clockSpan(s.starts_at, s.ends_at)}` }),
+      h('p', { class: 'nb-summary-price', title: T('nb.sumLocked') }, h('span', { 'aria-hidden': 'true', text: '🔒 ' }), h('span', { text: T('nb.sumPriceList', { price: listPrice }) })),
+    );
+  };
+  const loadDay = () => { st.session = null; paintSummary(); loadSessions(); drawForm(); };
   const dateIn = h('input', { type: 'date', id: 'nb-date', value: st.date, onchange: (e) => { if (!/^\d{4}-\d\d-\d\d$/.test(e.target.value)) return; st.date = e.target.value; loadDay(); } });
   const shiftDay = (n) => { st.date = addDays(st.date, n); dateIn.value = st.date; loadDay(); };
   const dayCtl = h('div', { class: 'nb-dayctl' },
@@ -51,17 +64,33 @@ export async function render({ ctx, refs, query, reload }) {
     // booking_148: yksityisvuoron pito koskee koko vuoroa → ei henkilömäärää.
     const holdPrivTxt = (s) => (s.wlHold ? ` · ${T('nb.holdPriv', { time: fmtTime(s.wlHold.until) })}` : '');
     if (st.pre) { const m = list.find((s) => String(s.rule_id) === st.pre.r && s.starts_at === st.pre.t && s.status === 'available'); st.pre = null; if (m) st.session = m; }   // Vapaana-napista (päivänäkymä): esivalittu vuoro
-    sessionsBox.replaceChildren(list.length ? h('div', { class: 'slotpick', role: 'radiogroup', 'aria-label': T('nb.slots') }, list.map((s) => {
+    const slotBtns = list.length ? h('div', { class: 'slotpick', role: 'radiogroup', 'aria-label': T('nb.slots') }, list.map((s) => {
       const ok = s.status === 'available' && !isPrivateConflict(s);
       const bookable = slotBookable(s);
       const caption = isPrivateConflict(s) ? bookingText('slot_taken')
         : ok ? (s.mode === 'exclusive' ? T('nb.privFree') + holdPrivTxt(s) : T('nb.free', { n: s.remaining }) + holdTxt(s))
         : s.status === 'full' ? bookingText(isAdmin ? 'slot_full' : 'slot_full_staff')
         : s.status === 'unavailable' ? bookingText('slot_closed') : T('nb.na');
-      const b = h('button', { type: 'button', role: 'radio', 'aria-checked': st.session?.rule_id === s.rule_id && st.session?.starts_at === s.starts_at ? 'true' : 'false', class: `slotbtn ${s.status}${isPrivateConflict(s) ? ' private' : ''}`, 'data-state': isPrivateConflict(s) ? 'private' : (s.status || ''), disabled: !bookable || null, onclick: () => { st.session = s; st.discount = null; sessionsBox.querySelectorAll('.slotbtn').forEach((x) => x.setAttribute('aria-checked', 'false')); b.setAttribute('aria-checked', 'true'); drawForm(true); } },
+      const b = h('button', { type: 'button', role: 'radio', 'aria-checked': st.session?.rule_id === s.rule_id && st.session?.starts_at === s.starts_at ? 'true' : 'false', class: `slotbtn ${s.status}${isPrivateConflict(s) ? ' private' : ''}`, 'data-state': isPrivateConflict(s) ? 'private' : (s.status || ''), disabled: !bookable || null, onclick: () => { st.session = s; st.discount = null; sessionsBox.querySelectorAll('.slotbtn').forEach((x) => x.setAttribute('aria-checked', 'false')); b.setAttribute('aria-checked', 'true'); paintSummary(); drawForm(true); } },
         h('strong', { text: clockSpan(s.starts_at, s.ends_at) }), h('span', { text: slotName(s) }), h('small', { text: caption }));
       return b;
-    })) : empty(T('nb.noSlots')));
+    })) : null;
+    if (slotBtns) { sessionsBox.replaceChildren(slotBtns); return; }
+    const nextBtn = h('button', { type: 'button', class: 'btn ghost', 'data-testid': 'nb-next-slots', text: T('nb.nextWithSlots') });
+    nextBtn.addEventListener('click', async () => {
+      nextBtn.disabled = true; nextBtn.textContent = T('nb.nextWithSlotsLooking');
+      try {
+        for (let i = 1; i <= 14; i++) {
+          const d = addDays(st.date, i);
+          const vv = await rpc('admin_day_view', { p_date: d });
+          const has = (vv.sessions || []).some((s) => s.status && s.status !== 'closed');
+          if (has) { st.date = d; dateIn.value = d; loadDay(); return; }
+        }
+        nextBtn.textContent = T('nb.nextWithSlotsNone');
+      } catch (e) { nextBtn.textContent = errMsg(e); }
+      finally { nextBtn.disabled = false; }
+    });
+    sessionsBox.replaceChildren(empty(T('nb.noSlots')), nextBtn);
   }
   // Esivalittu vuoro voi piirtyä ennen kuin sivu on liitetty DOMiin.
   function revealForm(f, tries = 0) {
@@ -76,7 +105,8 @@ export async function render({ ctx, refs, query, reload }) {
 
   function drawForm(reveal = false) {
     const s = st.session;
-    if (!s) { formBox.replaceChildren(h('p', { class: 'muted nb-hint', text: T('nb.pickSlot') })); return; }
+    if (!s) { formBox.replaceChildren(h('p', { class: 'muted nb-hint', text: T('nb.pickSlot') })); paintSummary(); return; }
+    paintSummary();
     const rng = personsRange(s);
     const capMax = staffPersonsMax(s);
     const pers = stepper({ label: T('nb.persons'), value: rng.min, min: rng.min, max: capMax, inputName: 'n', size: 'lg', onChange: () => upd() });
@@ -333,6 +363,7 @@ export async function render({ ctx, refs, query, reload }) {
     const canPay = ctx.can('payments.manage');
     const title = h('h3', { tabindex: '-1', text: T(createdMessageKind(r) === 'link' ? 'nb.createdLink' : 'nb.created', { no: r.order_no }) });
     const openBooking = h('button', { type: 'button', class: `btn ${canPay ? 'ghost' : 'primary'}`, text: T('nb.openBooking'), onclick: async () => {
+      if (openOrderView(r.order_no)) return;   // tilausnäkymä v3; vanha kortti vain ilman tilausnumeroa
       openBooking.disabled = true;
       try {
         const rows = await rpc('admin_list_reservations', { p_search: String(r.order_no), p_limit: 10, p_offset: 0 });
@@ -383,7 +414,7 @@ export async function render({ ctx, refs, query, reload }) {
       };
       drawForm(true);
     } }));
-  root.append(result, h('section', { class: 'card nb-sec nb-slots' }, h('h3', { class: 'nb-h', text: T('nb.s1') }), h('div', { class: 'fld' }, h('label', { class: 'fld-lab', for: 'nb-date', text: T('nb.day') }), dayCtl), sessionsBox, (rules || []).length ? offPanel : null), formBox);
+  root.append(result, h('div', { class: 'nb-layout' }, h('div', { class: 'nb-main' }, h('section', { class: 'card nb-sec nb-slots' }, h('h3', { class: 'nb-h', text: T('nb.s1') }), h('div', { class: 'fld' }, h('label', { class: 'fld-lab', for: 'nb-date', text: T('nb.day') }), dayCtl), sessionsBox, (rules || []).length ? offPanel : null), formBox), summaryBox));
   await loadSessions(); drawForm(!!st.session);
   return [h('div', { class: 'row between wrap nb-top' }, h('h1', { text: T('nb.title') }), langs), typeSwitch('', st.date), root];
 }

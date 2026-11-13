@@ -46,10 +46,8 @@ const VIS_URL = { online: 'verkossa', offline: 'ei-verkossa' };
 const norm = (x) => String(x ?? '').toLocaleLowerCase('fi');   // kirjainkoolla ei ole merkitystä
 
 export async function render({ ctx, refs, reload, query }) {
-  await loadPosTexts(rpc);
-  await loadProductTexts(rpc);
-  await loadRichTexts(rpc);
-  await loadEventsTexts(rpc);   // booking_158: Kopioi-tekstit (ui.admin.product.copy*)
+  // booking_158: Kopioi-tekstit (ui.admin.product.copy*) tulevat events-teksteistä. Kaikki jaetusta välimuistista rinnakkain.
+  await Promise.all([loadPosTexts(rpc), loadProductTexts(rpc), loadRichTexts(rpc), loadEventsTexts(rpc)]);
   const isAdmin = ctx.can('catalog.edit');  // manager + admin
   const fresh = () => { ctx.refs = null; reload(); };   // tuotelista haetaan uudelleen (refs on välimuistissa; muuten uusi kuva/tiedot eivät näy listassa)
   const list = h('div', { class: 'list' });
@@ -241,7 +239,7 @@ export async function render({ ctx, refs, reload, query }) {
   const addonsSection = await addonsAdmin({ ctx });
   const optionsSection = await productOptionsAdmin({ ctx });   // tuotevalinnat (booking_50)
   const addBtn = isAdmin ? h('button', { type: 'button', class: 'btn primary prod-add', 'data-testid': 'product-add', text: productText('add'), onclick: () => createProduct() }) : null;
-  return [h('div', { class: 'row between wrap prod-head' }, h('h1', { text: 'Tuotteet' }), addBtn), h('p', { class: 'muted', text: isAdmin ? 'Tuotetiedot tallentuvat kb-tauluihin (sivusto ja botti käyttävät samaa totuutta). Muutokset kirjataan audit-lokiin ja kb.change_logiin.' : 'Näet tuotteet; hintojen ja tuotteiden muokkaus vaatii ylläpitäjän (manager/admin) oikeudet.' }), filters, count, list, optionsSection, addonsSection];
+  return [h('div', { class: 'row between wrap prod-head' }, h('h1', { text: 'Tuotteet' }), addBtn), h('p', { class: 'muted', text: isAdmin ? 'Tuotetiedot tallentuvat yhteiseen luetteloon (sivusto ja botti käyttävät samaa totuutta). Muutokset kirjataan lokiin.' : 'Näet tuotteet; hintojen ja tuotteiden muokkaus vaatii ylläpitäjän (manager/admin) oikeudet.' }), filters, count, list, optionsSection, addonsSection];
 }
 
 // ---- tuotekuva: esikatselu, lataus, alt-teksti, poisto ----

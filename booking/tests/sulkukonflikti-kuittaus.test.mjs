@@ -7,7 +7,7 @@ import { REVIEW_TEXTS, fillReviewText, reviewText, clearReviewTextCache } from '
 import { reviewAttentionCount, canAckBlockConflict, conflictReason, nextAckStep, nextUnackStep, ackArgs, ackNoteOk } from '../admin/review-logic.js';
 import { createAdminMock } from '../admin/options-mock.js';
 
-const importRows = JSON.parse(readFileSync(new URL('../../content/site-texts.pending-import-6.json', import.meta.url), 'utf8'));
+const importRows = [...JSON.parse(readFileSync(new URL('../../content/site-texts.pending-import-6.json', import.meta.url), 'utf8')), ...JSON.parse(readFileSync(new URL('../../content/site-texts.pending-import-138.json', import.meta.url), 'utf8')).filter((r) => r.key.startsWith('ui.admin.review.'))];
 const fallback = JSON.parse(readFileSync(new URL('../../content/site-texts.fallback.json', import.meta.url), 'utf8'));
 const reviewSrc = readFileSync(new URL('../admin/views/review.js', import.meta.url), 'utf8');
 
@@ -18,7 +18,7 @@ test('FI ja EN sisältävät samat ui.admin.review-avaimet, ilman numeroita', ()
   const en = Object.keys(REVIEW_TEXTS.en).sort();
   assert.deepEqual(fi, en);
   assert.ok(fi.every((k) => k.startsWith('ui.admin.review.')));
-  assert.equal(fi.length, 21);
+  assert.equal(fi.length, 31);
   for (const lang of ['fi', 'en']) {
     for (const [key, text] of Object.entries(REVIEW_TEXTS[lang])) {
       assert.equal(/\d/.test(text), false, `${key} ${lang}`);
@@ -33,7 +33,7 @@ test('FI ja EN sisältävät samat ui.admin.review-avaimet, ilman numeroita', ()
 });
 
 test('tuontitiedosto vastaa sanakirjaa, luokka on normal, ei lukittuja eikä vanhoja avaimia', () => {
-  assert.equal(importRows.length, 42);
+  assert.equal(importRows.length, 62);
   const fallbackKeys = new Set((fallback.texts || []).map((r) => r.key));
   for (const lang of ['fi', 'en']) {
     for (const [key, text] of Object.entries(REVIEW_TEXTS[lang])) {
@@ -44,7 +44,7 @@ test('tuontitiedosto vastaa sanakirjaa, luokka on normal, ei lukittuja eikä van
       assert.equal(row.kind, 'plain');
       assert.equal(row.max_len, 400);
       assert.deepEqual(row.placeholders, placeholders(text));
-      assert.equal(fallbackKeys.has(key), false);
+      assert.equal(fallbackKeys.has(key), true, `${key} on tuotu varatekstiin`);
     }
   }
   assert.equal(importRows.some((r) => r.class === 'locked' || r.class === 'protected'), false);

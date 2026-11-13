@@ -2,9 +2,21 @@
 // Sama mekanismi kuin päivänäkymä: public_get_site_texts, kieli talous-i18n.
 // Sanakirja on vain varalla. Tuonti: content/site-texts.pending-import-6.json.
 import { getLang } from './talous-i18n.js';
+import { getSiteTexts, clearSiteTextsCache } from './site-texts-cache.js';
 
 export const REVIEW_TEXTS = {
   fi: {
+    "ui.admin.review.late_title": "Maksu poistetulle tilaukselle",
+    "ui.admin.review.late_hint": "Tilaus poistettiin maksamattomana, mutta maksu saapui sen jälkeen. Tarkista maksu ja tarvittaessa hyvitä tilauksen maksutyökalulla. Kuittaa vasta käsittelyn jälkeen.",
+    "ui.admin.review.late_note_label": "Käsittelyselite",
+    "ui.admin.review.late_note_placeholder": "Miten maksu käsiteltiin? ({{var:min}}–{{var:max}} merkkiä)",
+    "ui.admin.review.late_confirm": "Vahvista käsittelykuittaus. Tämä ei palauta rahaa, muuta varausta tai lähetä viestiä.",
+    "ui.admin.review.late_button": "Merkitse käsitellyksi",
+    "ui.admin.review.late_confirm_button": "Vahvista käsittelykuittaus",
+    "ui.admin.review.late_note_required": "Kirjoita käsittelyselite ({{var:min}}–{{var:max}} merkkiä).",
+    "ui.admin.review.late_done": "Maksun käsittely kuitattu.",
+    "ui.admin.review.late_order": "tilaus #{{var:no}}",
+
     'ui.admin.review.block_hint': 'Varaus osuu myöhemmin lisättyyn sulkuun. Siirrä tai peru varaus, tai kuittaa konflikti, jos sulku ei ole todellinen (esimerkiksi käsin tehty sulku Johkussa). Kuittaus ei muuta saatavuutta.',
     'ui.admin.review.block_reason': 'Sulku: {{var:reason}}',
     'ui.admin.review.ack_button': 'Kuittaa (ei todellinen)',
@@ -28,6 +40,17 @@ export const REVIEW_TEXTS = {
     'ui.admin.review.unack_done': 'Kuittaus purettu.',
   },
   en: {
+    "ui.admin.review.late_title": "Payment for a deleted order",
+    "ui.admin.review.late_hint": "The order was deleted as unpaid, but payment arrived afterwards. Check the payment and refund it with the order payment tools if necessary. Acknowledge only after handling it.",
+    "ui.admin.review.late_note_label": "Handling note",
+    "ui.admin.review.late_note_placeholder": "How was the payment handled? ({{var:min}}–{{var:max}} characters)",
+    "ui.admin.review.late_confirm": "Confirm the handling acknowledgement. This does not refund money, change the booking or send a message.",
+    "ui.admin.review.late_button": "Mark as handled",
+    "ui.admin.review.late_confirm_button": "Confirm handling acknowledgement",
+    "ui.admin.review.late_note_required": "Enter a handling note ({{var:min}}–{{var:max}} characters).",
+    "ui.admin.review.late_done": "Payment handling acknowledged.",
+    "ui.admin.review.late_order": "order #{{var:no}}",
+
     'ui.admin.review.block_hint': 'The booking overlaps a closure added later. Move or cancel the booking, or acknowledge the conflict if the closure is not real (for example a block added manually in Johku). Acknowledging does not change availability.',
     'ui.admin.review.block_reason': 'Closure: {{var:reason}}',
     'ui.admin.review.ack_button': 'Acknowledge (not real)',
@@ -75,7 +98,7 @@ export async function loadReviewTexts(rpcFn) {
   if (loaded) return true;
   if (typeof rpcFn !== 'function') return false;
   try {
-    const t = await rpcFn('public_get_site_texts', { p_lang: null });
+    const t = await getSiteTexts(rpcFn);
     if (!t || t.ok !== true || !Array.isArray(t.texts)) return false;
     const next = new Map();
     for (const r of t.texts) {
@@ -93,6 +116,7 @@ export async function loadReviewTexts(rpcFn) {
 }
 
 export function clearReviewTextCache() {
+  clearSiteTextsCache();
   db = new Map();
   loaded = false;
 }

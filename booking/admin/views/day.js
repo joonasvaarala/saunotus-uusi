@@ -3,6 +3,7 @@ import { rpc } from '../sb.js';
 import { h, fmtDay, fmtTime, todayHel, addDays, dayStartIso, statusBadge, payBadge, sourceBadge, badge, toast, run, dialog, field, fmtDT, empty, money } from '../ui.js';
 import { formatWhenRange, spansDays } from '../when-range.js';
 import { reservationDialog } from './shared.js';
+import { openOrderView } from '../order-open.js';
 import { icon } from '../icons.js';
 import { capacityButton, arrivalButton, addonItems, shiftsBar, prepCard } from './dayparts.js';
 import { legsList, resourceBadges, spaceBadge } from './legs.js';
@@ -26,10 +27,20 @@ function rpcMissing(e) {
   const msg = `${e?.status || ''} ${e?.code || ''} ${e?.message || ''}`;
   return e?.status === 404 || /42883|PGRST202|could not find the function|function .* does not exist|schema cache/i.test(msg);
 }
+// booking_276: päivänvaihto, paluu Päivään ja esihaku käyttävät kevyttä admin_day_data-nippua (ei roolia, oikeuksia,
+// tuotteita, maksutapoja, resursseja eikä tekstejä: ne ovat jo muistissa avauksen admin_day_bundlesta). Avauksen nippu
+// tulee admin.js:stä primeDayBundle-kutsulla. Vanha kanta / rollback: admin_day_data puuttuu → admin_day_bundle kuten ennen.
+let dataMissing = 0;
+async function fetchDay(d) {
+  if (Date.now() - dataMissing >= 60000) {
+    try { return await rpc('admin_day_data', { p_date: d }); } catch (e) { if (!rpcMissing(e)) throw e; dataMissing = Date.now(); }
+  }
+  return rpc('admin_day_bundle', { p_date: d });
+}
 async function loadBundle(date) {
   if (Date.now() - bundleMissing < 60000) return null;
   try {
-    const bundle = await cachedDayBundle(date, (d) => rpc('admin_day_bundle', { p_date: d }));
+    const bundle = await cachedDayBundle(date, fetchDay);
     return bundle && typeof bundle === 'object' ? bundle : null;
   } catch (e) {
     if (rpcMissing(e)) bundleMissing = Date.now();
@@ -39,12 +50,14 @@ async function loadBundle(date) {
 export const primeDayBundle = (date, bundle) => seedDayBundle(date, bundle);
 export const rememberDayBundleError = (e) => { if (rpcMissing(e)) bundleMissing = Date.now(); };
 export const clearDayBundleCache = () => { clearDayBundles(); bundleMissing = 0; };
-export const prefetchAdjacentDay = (date) => {
+// Yhden päivän esihaku käyttäjän aikeesta (‹/›-painikkeen hover, kosketus tai fokus). Sama nippu jaetaan
+// day-bundle-cache.js:n kautta, joten painalluksen jälkeinen render käyttää jo käynnissä olevaa pyyntöä.
+export const prefetchDay = (date) => {
   if (Date.now() - bundleMissing < 60000) return;
-  for (const d of [addDays(date, -1), addDays(date, 1)]) {
-    void loadBundle(d);  // errors swallowed by loadBundle; no forced redraw
-  }
+  void loadBundle(date);  // errors swallowed by loadBundle; no forced redraw
 };
+// Vanha nimi (kumpikin viereinen päivä). Hallinnan kuori ei kutsu tätä enää avauksessa.
+export const prefetchAdjacentDay = (date) => { prefetchDay(addDays(date, -1)); prefetchDay(addDays(date, 1)); };
 // admin_day_extras puuttuu kunnes migraatio booking_68 on ajettu: näytä selite, älä kaada päivänäkymää. 404:ää ei toisteta minuuttiin.
 let extrasMissing = 0;
 async function loadExtras(date) {
@@ -73,7 +86,7 @@ export async function render({ ctx, refs, reload, query }) {
     view = bundle.view || { sessions: [], reservations: [], blocks: [], addon_totals: [], prep: [] };
     resv = bundle.reservations || [];
     addonList = bundle.addons || [];   // lisäpalvelun koodi addon_id:llä (ikonin tunnistus, jos admin_day_view ei anna code-kenttää)
-    optNote = await optionReminder(Array.isArray(bundle.options) ? bundle.options : null, bundle.site_texts?.texts || []);
+    optNote = await optionReminder(Array.isArray(bundle.options) ? bundle.options : null, Array.isArray(bundle.site_texts?.texts) ? bundle.site_texts.texts : null);   // kevyt nippu: tekstit jaetusta välimuistista
     extras = bundle.extras;   // tapahtumat + tuotto (admin/manager; muilla revenue = null)
     revenueRpc = undefined;   // extras sisältää tuoton; erillistä admin_day_revenue-kutsua ei tarvita
     await loadDayTexts(rpc, Array.isArray(bundle.site_texts?.texts) ? bundle.site_texts.texts : null);
@@ -100,10 +113,11 @@ export async function render({ ctx, refs, reload, query }) {
     : null;
   const codes = new Map((addonList || []).map((a) => [a.id, a.code]));
   const go = (d) => { location.hash = `#/?d=${d}`; };
+  const intent = (d) => { let done = false; const f = () => { if (!done) { done = true; prefetchDay(d); } }; return { onpointerenter: f, onfocus: f, ontouchstart: f }; };
   const toolbar = h('div', { class: 'toolbar' },
-    h('button', { class: 'btn ghost', type: 'button', 'aria-label': 'Edellinen päivä', onclick: () => go(addDays(date, -1)) }, '‹'),
+    h('button', { class: 'btn ghost', type: 'button', 'aria-label': 'Edellinen päivä', onclick: () => go(addDays(date, -1)), ...intent(addDays(date, -1)) }, '‹'),
     h('input', { type: 'date', value: date, 'aria-label': 'Päivä', onchange: (e) => e.target.value && go(e.target.value) }),
-    h('button', { class: 'btn ghost', type: 'button', 'aria-label': 'Seuraava päivä', onclick: () => go(addDays(date, 1)) }, '›'),
+    h('button', { class: 'btn ghost', type: 'button', 'aria-label': 'Seuraava päivä', onclick: () => go(addDays(date, 1)), ...intent(addDays(date, 1)) }, '›'),
     h('button', { class: 'btn ghost sm', type: 'button', onclick: () => go(todayHel()) }, 'Tänään'),
     h('button', { class: 'btn ghost sm', type: 'button', 'data-testid': 'next-own-shift', text: memoText('ui.admin.day_memos.next_own_shift'), onclick: async (ev) => {
       const b = ev.currentTarget; b.disabled = true;
@@ -123,7 +137,8 @@ export async function render({ ctx, refs, reload, query }) {
   const merged = (r) => { const x = dv.get(r.reservation_id) || {}; const m = { ...r, source: r.source ?? x.source, external_id: r.external_id ?? x.external_id }; for (const k of RES_KEYS) if (x[k] !== undefined) m[k] = x[k]; return m; };
   // Lahjakorttivaraus listataan tavallisen vuoron alle; pieni "Lahjakortti"-merkki (ui.admin.day.gift_card_badge, §18). Johku-merkki ennallaan.
   const giftBadge = (r, x) => (isGiftCardReservation(r) || isGiftCardReservation(x) ? h('span', { class: 'badge gift', 'data-testid': 'gift-badge', text: dayText('ui.admin.day.gift_card_badge') }) : null);
-  const open = (r) => reservationDialog(merged(r), { methods: refs.methods, onChange: reload, refs, can: ctx.can, role: ctx.role });
+  // Tilausnäkymä v3 (#/tilaukset/<nro>); vanha tilauskortti vain, jos tilausnumeroa ei ole
+  const open = (r) => openOrderView(r.order_no) || reservationDialog(merged(r), { methods: refs.methods, onChange: reload, refs, can: ctx.can, role: ctx.role });
   const resRow = (r) => { const x = dv.get(r.reservation_id) || {}; const ad = (x.addons && x.addons.length) ? x.addons : (r.addons || []); const src = { source: r.source ?? x.source, external_id: r.external_id ?? x.external_id };
     const kind = x.customer_kind || r.customer_kind; const company = x.company || r.company; const legs = (x.legs && x.legs.length) ? x.legs : (r.legs || []); const space = x.space_code || r.space_code;
     let stBadge = statusBadge(r.status);

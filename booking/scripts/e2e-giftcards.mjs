@@ -375,7 +375,7 @@ async function adminSuite() {
     const name = `lisää maksu lahjakortti ${lang} ${vp}`, T = TEXTS[lang], page = await newPage(name, { vp, lang });
     await page.goto(`${ORIGIN}/admin/#/talous?tab=orders&lang=${lang}`);
     await page.waitForSelector('[data-testid=orders-list] [data-testid=order]');
-    await page.selectOption('[data-testid=orders-f-pay]', 'unpaid'); await page.waitForTimeout(250);
+    await page.evaluate((c) => { const b = document.querySelector('[data-testid=orders-pay-btn-' + c + ']'); if (!b) throw new Error('maksutilanappi puuttuu: ' + c); if (b.getAttribute('aria-pressed') !== 'true') b.click(); for (const x of document.querySelectorAll('[data-testid^=orders-pay-btn-][aria-pressed=true]')) if (x !== b) x.click(); }, 'unpaid'); await page.waitForTimeout(250);
     const first = page.locator('[data-testid=orders-list] > [data-testid=order]').first();
     await first.locator('.tl-head').click(); await page.waitForSelector('[data-testid=btn-record]');
     await page.click('[data-testid=btn-record]'); await page.waitForSelector('dialog[open] [data-testid=record-method]');
@@ -408,7 +408,7 @@ async function adminSuite() {
     const name = 'lisää maksu lahjakortti (lunastus pois)', page = await newPage(name, { vp: 390, gkSettings: { redeem_enabled: false } });
     await page.goto(`${ORIGIN}/admin/#/talous?tab=orders`);
     await page.waitForSelector('[data-testid=orders-list] [data-testid=order]');
-    await page.selectOption('[data-testid=orders-f-pay]', 'unpaid'); await page.waitForTimeout(250);
+    await page.evaluate((c) => { const b = document.querySelector('[data-testid=orders-pay-btn-' + c + ']'); if (!b) throw new Error('maksutilanappi puuttuu: ' + c); if (b.getAttribute('aria-pressed') !== 'true') b.click(); for (const x of document.querySelectorAll('[data-testid^=orders-pay-btn-][aria-pressed=true]')) if (x !== b) x.click(); }, 'unpaid'); await page.waitForTimeout(250);
     await page.locator('[data-testid=orders-list] > [data-testid=order]').first().locator('.tl-head').click(); await page.waitForSelector('[data-testid=btn-record]');
     await page.click('[data-testid=btn-record]'); await page.waitForSelector('dialog[open] [data-testid=record-method]');
     await page.selectOption('dialog[open] [data-testid=record-method]', 'gift_card');

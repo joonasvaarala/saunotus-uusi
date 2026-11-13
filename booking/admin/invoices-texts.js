@@ -1,6 +1,7 @@
 // Hallinnan Laskut-näkymän tekstit (FI + EN). Avaimet ui.admin.invoices.* .
 // Tuonti: content/site-texts.pending-import-13.json. Maksuehto ja tietosuoja ovat protected.
 import { getLang } from './talous-i18n.js';
+import { getSiteTexts, clearSiteTextsCache } from './site-texts-cache.js';
 
 export const PREFIX = 'ui.admin.invoices.';
 
@@ -59,6 +60,12 @@ export const INVOICE_TEXTS = {
     'ui.admin.invoices.kind_credit': 'Hyvitys',
     'ui.admin.invoices.all': 'Kaikki',
     'ui.admin.invoices.order': 'Tilausnumero',
+    'ui.admin.invoices.order_find': 'Hae tilaus',
+    'ui.admin.invoices.order_create': 'Luo lasku',
+    'ui.admin.invoices.order_confirm': 'Luodaanko lasku tilauksesta {{var:order}}?',
+    'ui.admin.invoices.order_has_invoice': 'Tilauksella on jo lasku {{var:invoice}}. Luonti avaa sen eikä tee uutta.',
+    'ui.admin.invoices.order_not_found': 'Tilausta ei löytynyt tällä tilausnumerolla.',
+    'ui.admin.invoices.order_invalid': 'Kirjoita tilausnumero numeroina.',
     'ui.admin.invoices.terms': 'Maksuehto 14 päivää netto. Viivästyskorko korkolain mukaan.',
     'ui.admin.invoices.privacy': 'Laskun henkilötietoja käsitellään vain laskutusta varten.',
     'ui.admin.invoices.locked': 'Rivit on lukittu lähetyksen jälkeen. Korjaus tehdään hyvityslaskulla.',
@@ -184,6 +191,12 @@ export const INVOICE_TEXTS = {
     'ui.admin.invoices.kind_credit': 'Credit',
     'ui.admin.invoices.all': 'All',
     'ui.admin.invoices.order': 'Order number',
+    'ui.admin.invoices.order_find': 'Find order',
+    'ui.admin.invoices.order_create': 'Create invoice',
+    'ui.admin.invoices.order_confirm': 'Create an invoice from order {{var:order}}?',
+    'ui.admin.invoices.order_has_invoice': 'The order already has invoice {{var:invoice}}. Creating opens it instead of making a new one.',
+    'ui.admin.invoices.order_not_found': 'No order found with this order number.',
+    'ui.admin.invoices.order_invalid': 'Enter the order number in digits.',
     'ui.admin.invoices.terms': 'Payment terms: 14 days net. Late interest according to the Interest Act.',
     'ui.admin.invoices.privacy': 'Personal data on the invoice is used only for invoicing.',
     'ui.admin.invoices.locked': 'Lines are locked after sending. Corrections are made with a credit invoice.',
@@ -268,7 +281,7 @@ export async function loadInvoiceTexts(rpcFn) {
   if (loaded) return true;
   if (typeof rpcFn !== 'function') return false;
   try {
-    const t = await rpcFn('public_get_site_texts', { p_lang: null });
+    const t = await getSiteTexts(rpcFn);
     if (!t || t.ok !== true || !Array.isArray(t.texts)) return false;
     const next = new Map();
     for (const r of t.texts) {
@@ -286,6 +299,7 @@ export async function loadInvoiceTexts(rpcFn) {
 }
 
 export function clearInvoiceTextCache() {
+  clearSiteTextsCache();
   db = new Map();
   loaded = false;
 }

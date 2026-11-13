@@ -3,7 +3,8 @@
 .cal{--shift:#5b524a;--shiftbg:#ece8e1;--shiftbar:#8b7f73;--book:#1d4d2b;--bookbg:#e8f3ea;
   --heater:#6b4a2b;--heaterbg:#efe4d6;--heaterbar:#8a6a4a;
   --therapist:#1d4d2b;--therapistbg:#e3eadf;--therapistbar:#2b3a30;
-  --reception:#5e4a12;--receptionbg:#f1ead2;--receptionbar:#b08d3c}
+  --reception:#5e4a12;--receptionbg:#f1ead2;--receptionbar:#b08d3c;
+  --train:#5a3559;--trainbg:#f3e9f2;--trainbar:#8c5a8a}
 .cal-bar{justify-content:space-between}
 .cal-title{flex:1;min-width:150px;text-align:center;font-size:17px;color:var(--ink);}.cal-title::first-letter,.cal-detail h2::first-letter{text-transform:uppercase}
 .cal-mode{display:inline-flex;gap:4px}.cal-mode .btn[aria-pressed=true]{background:var(--green);color:#fff}
@@ -50,11 +51,32 @@
 .cal-detail{margin-top:12px}.cal-detail h2{margin-top:0}
 .cal-detail .shift-h{color:var(--green)}.cal-detail .booking-h{color:var(--book)}
 .notice{background:var(--warnbg);color:#6b4b00;padding:10px 12px;border-radius:8px;margin:0 0 10px}
+/* Koulutukset: vaimea luumu (ei sinistä); suodatinnapit: pois päältä haalea ja yliviivaamaton, aria-pressed kertoo tilan */
+.chip.training{background:var(--trainbg);color:var(--train);border:1px solid var(--trainbar)}
+.cal-legend .cal-filter{cursor:pointer;font:inherit;font-size:12px;font-weight:600;padding:4px 10px;min-height:30px;margin:0 2px 4px 0}
+.cal-legend .cal-filter[aria-pressed=false]{background:#fff;color:var(--muted,#6b625a);border-style:dashed;opacity:.8}
+.cal-legend .cal-filter[aria-pressed=true]::before{content:'✓ '}
+.cal-chips .chip.training{display:flex;flex-direction:column;align-items:flex-start;white-space:nowrap;overflow:hidden;width:100%;box-sizing:border-box;border-radius:6px;border-left:3px solid var(--trainbar)}
+.cal-chips .chip.training .tn,.cal-chips .chip.training .ts{display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis}
+.cal-chips .chip.training .ts{font-weight:500;opacity:.9}
+.cal-chips .chip.training{padding:1px 2px;font-size:10px;border-left-width:2px}
+.cal-chips .chip.training .ts,.cal-chips .chip.training .tn.has-space{display:none}
+.cal-chips .chip.training .tsm{display:block;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:clip;font-weight:600;letter-spacing:-.2px}
+.cal-item.training .cal-txt{min-width:0;overflow-wrap:anywhere}
+.cal-item.training{background:var(--trainbg);border-color:var(--trainbar)}
+.cal-item.training .cal-txt strong{color:var(--train)}
+.cal-train-spaces{list-style:none;margin:4px 0 0;padding:0;font-size:13px}
+.cal-train-spaces li{padding:1px 0}
+.cal-train-link{margin-top:6px;display:inline-block}
+.cal-detail .training-h{color:var(--train)}
 @media (max-width:520px){.cal-item{grid-template-columns:auto 1fr}.cal-item .badge{grid-column:2;justify-self:start}}
 @media (min-width:900px){
   .cal-day{min-height:96px;padding:4px}
   .cal-chips .chip{font-size:12px}
   .cal-chips .lbl{display:inline}
+  .cal-chips .chip.training{padding:2px 6px;font-size:12px;border-left-width:3px}
+  .cal-chips .chip.training .ts,.cal-chips .chip.training .tn.has-space{display:block}
+  .cal-chips .chip.training .tsm{display:none}
   .cal-grid.week{grid-template-columns:repeat(7,minmax(0,1fr))}
   .cal-grid.week .cal-num .wd{display:inline}
   .cal-grid.week .cal-item{grid-template-columns:1fr;gap:2px}

@@ -1,0 +1,1846 @@
+[
+  {
+    "key": "ui.admin.customer_view.admin_title",
+    "lang": "fi",
+    "text": "Yhdistä ja anonymisoi",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.admin_title",
+    "lang": "en",
+    "text": "Merge and anonymise",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.permission_hint",
+    "lang": "fi",
+    "text": "Asiakkaiden yhdistäminen ja anonymisointi on vain adminille ja managerille.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.permission_hint",
+    "lang": "en",
+    "text": "Merging and anonymising customers is only available to admins and managers.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.merged_notice",
+    "lang": "fi",
+    "text": "Tämä asiakas on yhdistetty asiakkaaseen #{{var:id}}. Tilaukset ja muut tiedot ovat siellä.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 160,
+    "placeholders": [
+      "{{var:id}}"
+    ],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.merged_notice",
+    "lang": "en",
+    "text": "This customer has been merged into customer #{{var:id}}. Orders and other data are there.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 160,
+    "placeholders": [
+      "{{var:id}}"
+    ],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.merged_open",
+    "lang": "fi",
+    "text": "Avaa asiakas →",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.merged_open",
+    "lang": "en",
+    "text": "Open customer →",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.merge.title",
+    "lang": "fi",
+    "text": "Yhdistä asiakas",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.merge.title",
+    "lang": "en",
+    "text": "Merge customer",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.merge.intro",
+    "lang": "fi",
+    "text": "Siirtää toisen asiakkaan tilaukset, lahjakortit, vuosikortit ja suostumushistorian tähän asiakkaaseen. Toista asiakasta ei poisteta, mutta hänen henkilötietonsa poistuvat. Toimintoa ei voi kumota.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 240,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.merge.intro",
+    "lang": "en",
+    "text": "Moves another customer's orders, gift cards, annual cards and consent history to this customer. The other customer is not deleted, but their personal details are removed. This cannot be undone.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 240,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.merge.search_label",
+    "lang": "fi",
+    "text": "Hae yhdistettävä asiakas (nimi, sähköposti tai puhelin)",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.merge.search_label",
+    "lang": "en",
+    "text": "Find the customer to merge (name, email or phone)",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.merge.search_btn",
+    "lang": "fi",
+    "text": "Hae",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.merge.search_btn",
+    "lang": "en",
+    "text": "Search",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.merge.no_results",
+    "lang": "fi",
+    "text": "Ei hakutuloksia.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.merge.no_results",
+    "lang": "en",
+    "text": "No results.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.merge.pick",
+    "lang": "fi",
+    "text": "Valitse",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.merge.pick",
+    "lang": "en",
+    "text": "Select",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.merge.search_failed",
+    "lang": "fi",
+    "text": "Haku epäonnistui: {{var:error}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [
+      "{{var:error}}"
+    ],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.merge.search_failed",
+    "lang": "en",
+    "text": "Search failed: {{var:error}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [
+      "{{var:error}}"
+    ],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.merge.direction",
+    "lang": "fi",
+    "text": "Säilytetään {{var:keep}}. Yhdistetään {{var:merge}}.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [
+      "{{var:keep}}",
+      "{{var:merge}}"
+    ],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.merge.direction",
+    "lang": "en",
+    "text": "Keeping {{var:keep}}. Merging {{var:merge}}.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [
+      "{{var:keep}}",
+      "{{var:merge}}"
+    ],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.merge.swap",
+    "lang": "fi",
+    "text": "Vaihda suunta",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.merge.swap",
+    "lang": "en",
+    "text": "Swap direction",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.merge.preview_btn",
+    "lang": "fi",
+    "text": "Esikatsele yhdistäminen",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.merge.preview_btn",
+    "lang": "en",
+    "text": "Preview the merge",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.merge.preview_title",
+    "lang": "fi",
+    "text": "Esikatselu",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.merge.preview_title",
+    "lang": "en",
+    "text": "Preview",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.merge.keep_label",
+    "lang": "fi",
+    "text": "Säilytetään",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.merge.keep_label",
+    "lang": "en",
+    "text": "Kept",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.merge.merge_label",
+    "lang": "fi",
+    "text": "Yhdistetään",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.merge.merge_label",
+    "lang": "en",
+    "text": "Merged",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.merge.orders_n",
+    "lang": "fi",
+    "text": "{{var:n}} tilausta",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [
+      "{{var:n}}"
+    ],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.merge.orders_n",
+    "lang": "en",
+    "text": "{{var:n}} orders",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [
+      "{{var:n}}"
+    ],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.merge.counts_title",
+    "lang": "fi",
+    "text": "Siirretään säilytettävälle asiakkaalle",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.merge.counts_title",
+    "lang": "en",
+    "text": "Moved to the kept customer",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.merge.count.orders",
+    "lang": "fi",
+    "text": "Tilaukset: {{var:n}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [
+      "{{var:n}}"
+    ],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.merge.count.orders",
+    "lang": "en",
+    "text": "Orders: {{var:n}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [
+      "{{var:n}}"
+    ],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.merge.count.gift_cards",
+    "lang": "fi",
+    "text": "Lahjakortit (ostaja): {{var:n}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [
+      "{{var:n}}"
+    ],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.merge.count.gift_cards",
+    "lang": "en",
+    "text": "Gift cards (buyer): {{var:n}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [
+      "{{var:n}}"
+    ],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.merge.count.annual_cards",
+    "lang": "fi",
+    "text": "Vuosikortit: {{var:n}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [
+      "{{var:n}}"
+    ],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.merge.count.annual_cards",
+    "lang": "en",
+    "text": "Annual cards: {{var:n}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [
+      "{{var:n}}"
+    ],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.merge.count.marketing_consent_events",
+    "lang": "fi",
+    "text": "Suostumushistoria: {{var:n}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [
+      "{{var:n}}"
+    ],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.merge.count.marketing_consent_events",
+    "lang": "en",
+    "text": "Consent history: {{var:n}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [
+      "{{var:n}}"
+    ],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.merge.count.marketing_segment_members",
+    "lang": "fi",
+    "text": "Markkinointisegmentit: {{var:n}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [
+      "{{var:n}}"
+    ],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.merge.count.marketing_segment_members",
+    "lang": "en",
+    "text": "Marketing segments: {{var:n}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [
+      "{{var:n}}"
+    ],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.merge.count.campaign_sends",
+    "lang": "fi",
+    "text": "Kampanjalähetykset: {{var:n}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [
+      "{{var:n}}"
+    ],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.merge.count.campaign_sends",
+    "lang": "en",
+    "text": "Campaign sends: {{var:n}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [
+      "{{var:n}}"
+    ],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.merge.count.invoice_customers",
+    "lang": "fi",
+    "text": "Laskutusasiakkaat: {{var:n}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [
+      "{{var:n}}"
+    ],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.merge.count.invoice_customers",
+    "lang": "en",
+    "text": "Invoicing customers: {{var:n}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [
+      "{{var:n}}"
+    ],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.merge.count.other",
+    "lang": "fi",
+    "text": "Muut tiedot ({{var:table}}): {{var:n}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [
+      "{{var:table}}",
+      "{{var:n}}"
+    ],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.merge.count.other",
+    "lang": "en",
+    "text": "Other data ({{var:table}}): {{var:n}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [
+      "{{var:table}}",
+      "{{var:n}}"
+    ],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.merge.count.none",
+    "lang": "fi",
+    "text": "Ei siirrettäviä tietoja.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.merge.count.none",
+    "lang": "en",
+    "text": "Nothing to move.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.merge.consent.unsubscribe_wins",
+    "lang": "fi",
+    "text": "Markkinointikielto voittaa: säilytettävän asiakkaan markkinointilupa poistuu, ja peruutettu osoite pysyy poissa listalta.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 160,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.merge.consent.unsubscribe_wins",
+    "lang": "en",
+    "text": "The opt-out wins: the kept customer's marketing consent is removed, and the opted-out address stays off the list.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 160,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.merge.consent.inherit_consent",
+    "lang": "fi",
+    "text": "Markkinointilupa siirtyy, koska sähköpostiosoite on sama.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.merge.consent.inherit_consent",
+    "lang": "en",
+    "text": "Marketing consent carries over because the email address is the same.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.merge.consent.unchanged",
+    "lang": "fi",
+    "text": "Markkinointilupa ja uutiskirjeen tila pysyvät ennallaan.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.merge.consent.unchanged",
+    "lang": "en",
+    "text": "Marketing consent and newsletter status stay as they are.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.merge.johku.move_to_keep",
+    "lang": "fi",
+    "text": "Johku-tunniste siirtyy säilytettävälle asiakkaalle.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.merge.johku.move_to_keep",
+    "lang": "en",
+    "text": "The Johku identifier moves to the kept customer.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.merge.johku.both_keep_alias_on_merged",
+    "lang": "fi",
+    "text": "Molemmilla on Johku-tunniste. Yhdistetyn asiakkaan tunniste jää hänen vanhalle riville, eikä Johku-synkka päivitä sitä.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 160,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.merge.johku.both_keep_alias_on_merged",
+    "lang": "en",
+    "text": "Both have a Johku identifier. The merged customer's identifier stays on their old row, and the Johku sync does not update it.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 160,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.merge.blocker.merged_into_other",
+    "lang": "fi",
+    "text": "Tämä asiakas on jo yhdistetty toiseen asiakkaaseen.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.merge.blocker.merged_into_other",
+    "lang": "en",
+    "text": "This customer has already been merged into another customer.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.merge.blocker.merge_anonymized",
+    "lang": "fi",
+    "text": "Yhdistettävä asiakas on anonymisoitu.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.merge.blocker.merge_anonymized",
+    "lang": "en",
+    "text": "The customer to merge has been anonymised.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.merge.blocker.keep_anonymized",
+    "lang": "fi",
+    "text": "Säilytettävä asiakas on anonymisoitu tai yhdistetty.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.merge.blocker.keep_anonymized",
+    "lang": "en",
+    "text": "The customer to keep has been anonymised or merged.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.merge.blocker.kind_mismatch",
+    "lang": "fi",
+    "text": "Yritys- ja yksityisasiakasta ei voi yhdistää keskenään.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.merge.blocker.kind_mismatch",
+    "lang": "en",
+    "text": "A business customer and a private customer cannot be merged.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.merge.blocker.both_have_login",
+    "lang": "fi",
+    "text": "Molemmilla on oma kirjautumistili. Poista toinen tili ensin.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.merge.blocker.both_have_login",
+    "lang": "en",
+    "text": "Both have their own login account. Remove one account first.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.merge.blocker.annual_card_overlap",
+    "lang": "fi",
+    "text": "Aktiivisten vuosikorttien voimassaolot menevät päällekkäin. Peru toinen kortti ensin.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 160,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.merge.blocker.annual_card_overlap",
+    "lang": "en",
+    "text": "The active annual cards overlap in time. Revoke one card first.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.merge.warning.consent_removed_unsubscribed",
+    "lang": "fi",
+    "text": "Säilytettävän asiakkaan markkinointilupa poistuu, koska yhdistettävä on peruuttanut sen.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 160,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.merge.warning.consent_removed_unsubscribed",
+    "lang": "en",
+    "text": "The kept customer's marketing consent is removed because the merged customer opted out.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 160,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.merge.warning.consent_not_inherited_other_email",
+    "lang": "fi",
+    "text": "Yhdistettävällä on markkinointilupa, mutta se ei siirry, koska sähköpostiosoite on eri.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 160,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.merge.warning.consent_not_inherited_other_email",
+    "lang": "en",
+    "text": "The merged customer has marketing consent, but it does not carry over because the email address is different.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 160,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.merge.warning.different_email",
+    "lang": "fi",
+    "text": "Sähköpostiosoitteet ovat eri. Säilytettävän osoite jää käyttöön.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.merge.warning.different_email",
+    "lang": "en",
+    "text": "The email addresses differ. The kept customer's address stays in use.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.merge.warning.johku_ids_both",
+    "lang": "fi",
+    "text": "Molemmilla on Johku-tunniste.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.merge.warning.johku_ids_both",
+    "lang": "en",
+    "text": "Both have a Johku identifier.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.merge.warning.login_moves_to_keep",
+    "lang": "fi",
+    "text": "Yhdistettävän kirjautumistili siirtyy säilytettävälle.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.merge.warning.login_moves_to_keep",
+    "lang": "en",
+    "text": "The merged customer's login account moves to the kept customer.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.merge.warning.unknown_customer_triggers",
+    "lang": "fi",
+    "text": "Asiakastaulussa on muita automaatioita ({{var:names}}). Tarkista, että ne eivät lähetä turhia ilmoituksia.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 160,
+    "placeholders": [
+      "{{var:names}}"
+    ],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.merge.warning.unknown_customer_triggers",
+    "lang": "en",
+    "text": "The customer table has other automations ({{var:names}}). Check that they do not send unwanted notifications.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 160,
+    "placeholders": [
+      "{{var:names}}"
+    ],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.merge.reason_label",
+    "lang": "fi",
+    "text": "Syy (valinnainen)",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.merge.reason_label",
+    "lang": "en",
+    "text": "Reason (optional)",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.merge.confirm_check",
+    "lang": "fi",
+    "text": "Ymmärrän, että yhdistämistä ei voi kumota.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.merge.confirm_check",
+    "lang": "en",
+    "text": "I understand that merging cannot be undone.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.merge.confirm_btn",
+    "lang": "fi",
+    "text": "Yhdistä asiakkaat",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.merge.confirm_btn",
+    "lang": "en",
+    "text": "Merge customers",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.merge.working",
+    "lang": "fi",
+    "text": "Yhdistetään…",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.merge.working",
+    "lang": "en",
+    "text": "Merging…",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.merge.done",
+    "lang": "fi",
+    "text": "Asiakkaat yhdistetty.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.merge.done",
+    "lang": "en",
+    "text": "Customers merged.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.merge.already",
+    "lang": "fi",
+    "text": "Asiakkaat oli jo yhdistetty.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.merge.already",
+    "lang": "en",
+    "text": "The customers were already merged.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.merge.failed",
+    "lang": "fi",
+    "text": "Yhdistäminen epäonnistui: {{var:error}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [
+      "{{var:error}}"
+    ],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.merge.failed",
+    "lang": "en",
+    "text": "The merge failed: {{var:error}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [
+      "{{var:error}}"
+    ],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.merge.preview_failed",
+    "lang": "fi",
+    "text": "Esikatselu epäonnistui: {{var:error}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [
+      "{{var:error}}"
+    ],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.merge.preview_failed",
+    "lang": "en",
+    "text": "The preview failed: {{var:error}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [
+      "{{var:error}}"
+    ],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.anonymize.title",
+    "lang": "fi",
+    "text": "Anonymisoi asiakas",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.anonymize.title",
+    "lang": "en",
+    "text": "Anonymise customer",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.anonymize.intro",
+    "lang": "fi",
+    "text": "Poistaa asiakkaan nimen, yhteystiedot ja vapaat tekstit. Tilaukset, maksut, kuitit ja laskut säilyvät kirjanpitoa varten. Toimintoa ei voi kumota.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 160,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.anonymize.intro",
+    "lang": "en",
+    "text": "Removes the customer's name, contact details and free-text notes. Orders, payments, receipts and invoices are kept for bookkeeping. This cannot be undone.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 160,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.anonymize.preview_btn",
+    "lang": "fi",
+    "text": "Esikatsele anonymisointi",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.anonymize.preview_btn",
+    "lang": "en",
+    "text": "Preview the anonymisation",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.anonymize.preview_title",
+    "lang": "fi",
+    "text": "Esikatselu",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.anonymize.preview_title",
+    "lang": "en",
+    "text": "Preview",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.anonymize.keeps",
+    "lang": "fi",
+    "text": "Säilyy: tilaukset, varaukset, maksut, kuitit, laskut ja lahjakorttien kirjanpito.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 160,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.anonymize.keeps",
+    "lang": "en",
+    "text": "Kept: orders, bookings, payments, receipts, invoices and gift card accounting.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.anonymize.removes",
+    "lang": "fi",
+    "text": "Poistuu: nimi, sähköposti, puhelin, osoite, muistiinpanot, tilausten ja varausten vapaat tekstit sekä lahjakortin ostajan tiedot.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 160,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.anonymize.removes",
+    "lang": "en",
+    "text": "Removed: name, email, phone, address, notes, free texts of orders and bookings, and gift card buyer details.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 160,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.anonymize.suppression",
+    "lang": "fi",
+    "text": "Uutiskirjeen suppression säilyy: osoite ei palaa markkinointilistalle.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.anonymize.suppression",
+    "lang": "en",
+    "text": "The newsletter suppression is kept: the address will not return to the marketing list.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 160,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.anonymize.counts_title",
+    "lang": "fi",
+    "text": "Asiakkaaseen liittyy",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.anonymize.counts_title",
+    "lang": "en",
+    "text": "Linked to this customer",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.anonymize.count.orders",
+    "lang": "fi",
+    "text": "Tilaukset: {{var:n}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [
+      "{{var:n}}"
+    ],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.anonymize.count.orders",
+    "lang": "en",
+    "text": "Orders: {{var:n}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [
+      "{{var:n}}"
+    ],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.anonymize.count.reservations",
+    "lang": "fi",
+    "text": "Varaukset: {{var:n}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [
+      "{{var:n}}"
+    ],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.anonymize.count.reservations",
+    "lang": "en",
+    "text": "Bookings: {{var:n}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [
+      "{{var:n}}"
+    ],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.anonymize.count.payments",
+    "lang": "fi",
+    "text": "Maksut: {{var:n}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [
+      "{{var:n}}"
+    ],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.anonymize.count.payments",
+    "lang": "en",
+    "text": "Payments: {{var:n}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [
+      "{{var:n}}"
+    ],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.anonymize.count.receipts",
+    "lang": "fi",
+    "text": "Kuitit: {{var:n}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [
+      "{{var:n}}"
+    ],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.anonymize.count.receipts",
+    "lang": "en",
+    "text": "Receipts: {{var:n}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [
+      "{{var:n}}"
+    ],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.anonymize.count.gift_cards_bought",
+    "lang": "fi",
+    "text": "Ostetut lahjakortit: {{var:n}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [
+      "{{var:n}}"
+    ],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.anonymize.count.gift_cards_bought",
+    "lang": "en",
+    "text": "Gift cards bought: {{var:n}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [
+      "{{var:n}}"
+    ],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.anonymize.count.voucher_claims",
+    "lang": "fi",
+    "text": "Kumppanikoodit: {{var:n}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [
+      "{{var:n}}"
+    ],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.anonymize.count.voucher_claims",
+    "lang": "en",
+    "text": "Partner codes: {{var:n}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [
+      "{{var:n}}"
+    ],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.anonymize.count.campaign_sends",
+    "lang": "fi",
+    "text": "Kampanjalähetykset: {{var:n}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [
+      "{{var:n}}"
+    ],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.anonymize.count.campaign_sends",
+    "lang": "en",
+    "text": "Campaign sends: {{var:n}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [
+      "{{var:n}}"
+    ],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.anonymize.count.consent_events",
+    "lang": "fi",
+    "text": "Suostumushistoria: {{var:n}} (säilyy ilman henkilötietoja)",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [
+      "{{var:n}}"
+    ],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.anonymize.count.consent_events",
+    "lang": "en",
+    "text": "Consent history: {{var:n}} (kept without personal data)",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [
+      "{{var:n}}"
+    ],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.anonymize.blocker.future_reservations",
+    "lang": "fi",
+    "text": "Asiakkaalla on tulevia varauksia. Peru tai siirrä ne ensin.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.anonymize.blocker.future_reservations",
+    "lang": "en",
+    "text": "The customer has upcoming bookings. Cancel or move them first.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.anonymize.blocker.unpaid_orders",
+    "lang": "fi",
+    "text": "Asiakkaalla on maksamattomia tilauksia.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.anonymize.blocker.unpaid_orders",
+    "lang": "en",
+    "text": "The customer has unpaid orders.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.anonymize.blocker.active_annual_card",
+    "lang": "fi",
+    "text": "Asiakkaalla on voimassa oleva vuosikortti.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.anonymize.blocker.active_annual_card",
+    "lang": "en",
+    "text": "The customer has a valid annual card.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.anonymize.blocker.pending_emails",
+    "lang": "fi",
+    "text": "Asiakkaan tilauksilla on lähettämättömiä sähköposteja.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.anonymize.blocker.pending_emails",
+    "lang": "en",
+    "text": "The customer's orders have unsent emails.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.anonymize.blocker.open_voucher_claims",
+    "lang": "fi",
+    "text": "Asiakkaalla on käsittelemätön kumppanikoodi.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.anonymize.blocker.open_voucher_claims",
+    "lang": "en",
+    "text": "The customer has an unprocessed partner code.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.anonymize.blocker.active_waitlist",
+    "lang": "fi",
+    "text": "Asiakas on aktiivisella jonotuslistalla.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.anonymize.blocker.active_waitlist",
+    "lang": "en",
+    "text": "The customer is on an active waiting list.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.anonymize.warning.login_account_kept",
+    "lang": "fi",
+    "text": "Kirjautumistiliä ei poisteta (suojattu tili).",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.anonymize.warning.login_account_kept",
+    "lang": "en",
+    "text": "The login account is not deleted (protected account).",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.anonymize.warning.active_gift_cards_remain_valid",
+    "lang": "fi",
+    "text": "Asiakkaan ostamat lahjakortit pysyvät voimassa.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.anonymize.warning.active_gift_cards_remain_valid",
+    "lang": "en",
+    "text": "Gift cards bought by the customer remain valid.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.anonymize.warning.johku_customer_sync_skips_anonymized",
+    "lang": "fi",
+    "text": "Johku-synkka ohittaa anonymisoidun asiakkaan.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.anonymize.warning.johku_customer_sync_skips_anonymized",
+    "lang": "en",
+    "text": "The Johku sync skips an anonymised customer.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.anonymize.reason_label",
+    "lang": "fi",
+    "text": "Syy (pakollinen, älä kirjoita henkilötietoja)",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.anonymize.reason_label",
+    "lang": "en",
+    "text": "Reason (required, do not enter personal data)",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.anonymize.reason_short",
+    "lang": "fi",
+    "text": "Kirjoita syy (vähintään 3 merkkiä).",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.anonymize.reason_short",
+    "lang": "en",
+    "text": "Enter a reason (at least 3 characters).",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.anonymize.confirm_check",
+    "lang": "fi",
+    "text": "Ymmärrän, että anonymisointia ei voi kumota.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.anonymize.confirm_check",
+    "lang": "en",
+    "text": "I understand that anonymisation cannot be undone.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.anonymize.confirm_btn",
+    "lang": "fi",
+    "text": "Anonymisoi asiakas",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.anonymize.confirm_btn",
+    "lang": "en",
+    "text": "Anonymise customer",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.anonymize.working",
+    "lang": "fi",
+    "text": "Anonymisoidaan…",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.anonymize.working",
+    "lang": "en",
+    "text": "Anonymising…",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.anonymize.done",
+    "lang": "fi",
+    "text": "Asiakas anonymisoitu.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.anonymize.done",
+    "lang": "en",
+    "text": "Customer anonymised.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.anonymize.already",
+    "lang": "fi",
+    "text": "Asiakas oli jo anonymisoitu.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.anonymize.already",
+    "lang": "en",
+    "text": "The customer was already anonymised.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.anonymize.failed",
+    "lang": "fi",
+    "text": "Anonymisointi epäonnistui: {{var:error}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [
+      "{{var:error}}"
+    ],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.anonymize.failed",
+    "lang": "en",
+    "text": "The anonymisation failed: {{var:error}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [
+      "{{var:error}}"
+    ],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.anonymize.preview_failed",
+    "lang": "fi",
+    "text": "Esikatselu epäonnistui: {{var:error}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [
+      "{{var:error}}"
+    ],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.customer_view.anonymize.preview_failed",
+    "lang": "en",
+    "text": "The preview failed: {{var:error}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [
+      "{{var:error}}"
+    ],
+    "reason": "Tilausnäkymä v3 PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (booking/admin/customer-admin-texts.js); sama kuin koodin oletus. Näkyy vasta, kun kytkimet customer_merge_enabled / customer_anonymize_enabled on kytketty päälle (oletus pois). Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  }
+]

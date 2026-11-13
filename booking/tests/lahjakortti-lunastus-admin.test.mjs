@@ -135,12 +135,19 @@ test('rivi: koodi + Kopioi, arvaus ja valinta nimettyinä, Lunasta uuteen välil
   assert.equal(d.q('vcr-mark'), null); assert.equal(d.q('vcr-redeem'), null); assert.match(d.textContent, /Lunastettu .*\(botti\)/);
 });
 
-test('tekstit: FI = EN avaimet, pending-import-68 (+ 69, booking_174) täsmää, ei <-merkkiä, ei emojeja, ei sinistä', () => {
+test('tekstit: FI = EN avaimet, pending-import-68 (+ 69, booking_174; + 134 tila/ongelma) täsmää, ei <-merkkiä, ei emojeja, ei sinistä', () => {
   assert.deepEqual(Object.keys(VCR_TEXTS.fi).sort(), Object.keys(VCR_TEXTS.en).sort());
-  const rows = [...JSON.parse(rd('../content/site-texts.pending-import-68.json')), ...JSON.parse(rd('../content/site-texts.pending-import-69.json')).filter((r) => r.key.startsWith('ui.admin.vcr.'))];   // booking_174: arvo käsin
+  const rows = [...JSON.parse(rd('../content/site-texts.pending-import-68.json')), ...JSON.parse(rd('../content/site-texts.pending-import-69.json')).filter((r) => r.key.startsWith('ui.admin.vcr.')),   // booking_174: arvo käsin
+    ...JSON.parse(rd('../content/site-texts.pending-import-134.json'))];   // tila + ongelman syy (11.11.2026)
   assert.equal(new Set(rows.map((r) => `${r.key}|${r.lang}`)).size, rows.length);
   for (const lang of ['fi', 'en']) for (const [k, v] of Object.entries(VCR_TEXTS[lang])) {
-    const r = rows.find((x) => x.key === k && x.lang === lang); assert.ok(r, `${k} ${lang}`); assert.equal(r.text, v);
+    const r = rows.find((x) => x.key === k && x.lang === lang); assert.ok(r, `${k} ${lang}`);
+    // PR #318 changed only this heading; imports 68/69 are immutable history,
+    // not a snapshot of every subsequent UI copy change.
+    if (k === 'ui.admin.vcr.section_title') {
+      assert.equal(r.text, lang === 'fi' ? 'Lunastamattomat kumppanilahjakortit' : 'Unredeemed partner gift cards');
+      assert.equal(v, lang === 'fi' ? 'Kumppanilahjakortit lunastamatta' : 'Partner gift cards unredeemed');
+    } else assert.equal(r.text, v);
     assert.deepEqual(r.placeholders.sort(), [...new Set(v.match(/\{\{[^{}]+\}\}/g) || [])].sort(), k);
   }
   for (const r of rows) { assert.ok(!r.text.includes('<'), r.key); assert.doesNotMatch(r.text, /\p{Extended_Pictographic}|https?:\/\//u, r.key); assert.ok(r.max_len >= r.text.length); assert.equal(r.class, 'normal'); }
@@ -152,8 +159,8 @@ test('tekstit: FI = EN avaimet, pending-import-68 (+ 69, booking_174) täsmää,
 });
 
 test('kytkennät: Tarkista-osio, tilauksen ikkuna, Talous-tilaus, Procountor-tilit myyjittäin, Lunastussivut-asetus, build-lista', () => {
-  assert.match(rd('admin/views/review.js'), /unredeemedSection\(\{ rpc \}\)/);
-  assert.match(rd('admin/views/shared.js'), /orderVoucherBox\(\{ rpc, orderId: r\.order_id/);
+  assert.match(rd('admin/views/review.js'), /unredeemedSection\(\{ rpc, hideEmpty: true \}\)/);
+  assert.match(rd('admin/views/order-card.js'), /orderVoucherBox\(\{ rpc, orderId: order\.order_id \|\| r\?\.order_id/);
   assert.match(rd('admin/views/talous-orders.js'), /orderVoucherBox\(\{ rpc, orderId: id/);
   assert.match(rd('admin/views/orders.js'), /createOrdersTab\(\{ api, ctx, gift, rpc \}\)/, 'Tilaukset-näkymä antaa rpc:n');
   const s = rd('admin/views/settings.js');
@@ -162,4 +169,32 @@ test('kytkennät: Tarkista-osio, tilauksen ikkuna, Talous-tilaus, Procountor-til
   assert.match(s, /redeemUrlsCard\(\)/); assert.match(s, /VCR_RPC\.setUrls/);
   assert.match(rd('../scripts/build-pages.mjs'), /'voucher-redeem-logic\.js', 'voucher-redeem-texts\.js', 'voucher-redeem-mock\.js', 'views\/voucher-redeem\.js'/);
   assert.match(rd('admin/views/talous-ui.js'), /'partner_voucher_kokemuskauppa', 'partner_voucher_offerilla', 'partner_voucher_elamyslahjat'/);
+});
+
+test('ongelmatila (tilaus #15184): rivillä punainen Ongelma-merkki ja syy selkokielellä; avoimella vain tila; tuntematon koodi → Muu ongelma', async () => {
+  const { claimStatusLine } = await import('../admin/views/voucher-redeem.js');
+  const rpc = async () => ({ ok: true });
+  const p = claimRow(row({ id: 181, status: 'problem', problem_code: 'already_used', source: 'elamyslahjat', source_label: 'Elämyslahjat', order_no: 15184, resolved_at: null }), { rpc, canManage: true });
+  assert.match(p.className || p.attrs.class || '', /is-problem/);
+  assert.equal(p.q('vcr-status').textContent, 'Ongelma');
+  assert.match(p.q('vcr-status').className || p.q('vcr-status').attrs.class, /\bbadge err\b/);
+  assert.equal(p.q('vcr-problem-code').textContent, 'Koodi jo käytetty');
+  assert.match(p.q('vcr-problem-code').className || p.q('vcr-problem-code').attrs.class, /\bbadge err\b/);
+  assert.equal(p.q('vcr-problem').attrs.role, 'alert');
+  assert.match(p.q('vcr-problem').textContent, /Lunastus epäonnistui: Koodi jo käytetty\./);
+  assert.match(p.textContent, /Tilaus #15184/);
+  assert.ok(p.q('vcr-mark'), 'ongelmapyynnön voi yhä merkitä lunastetuksi (palvelin sallii)');
+  assert.doesNotMatch(p.textContent, /null|undefined|ui\.admin\.vcr\./);
+  const o = claimRow(row(), { rpc, canManage: true });
+  assert.equal(o.q('vcr-status').textContent, 'Avoin'); assert.equal(o.q('vcr-problem'), null); assert.equal(o.q('vcr-problem-code'), null);
+  assert.equal(claimRow(row({ status: 'processing' }), { rpc }).q('vcr-status').textContent, 'Käsittelyssä');
+  const x = claimRow(row({ status: 'problem', problem_code: 'zzz' }), { rpc });
+  assert.equal(x.q('vcr-problem-code').textContent, 'Muu ongelma');
+  for (const c of ['invalid_code', 'expired_code', 'already_used', 'other']) assert.ok(claimStatusLine(row({ status: 'problem', problem_code: c })).textContent.length > 10, c);
+  assert.equal(claimStatusLine(row({ status: 'redeemed' })), null);
+  const r = claimRow(row({ status: 'redeemed', resolved_at: '2026-10-25T10:00:00Z' }), { rpc }); assert.equal(r.q('vcr-status'), null);
+  const m = createAdminMock();
+  const u = await m.rpc('admin_unredeemed_voucher_claims', {});
+  const pr = u.claims.find((c) => c.status === 'problem');
+  assert.ok(pr, 'kokeilutilassa yksi ongelmarivi'); assert.equal(pr.problem_code, 'already_used');
 });

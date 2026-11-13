@@ -27,7 +27,7 @@ test('julkaistu valikoima on kaupan mockin valikoima', () => {
   ]);
 });
 
-test('metakuvaus ja varateksti kuvaavat saman valikoiman eivätkä lupaa vuosikorttia', () => {
+test('metakuvaus ja koodin oletus kuvaavat saman valikoiman eivätkä lupaa vuosikorttia; varateksti on kannan julkaistu teksti', () => {
   for (const lang of ['fi', 'en']) {
     const text = giftMetaDescription(lang);
     assert.equal(pageDoc('gift')[lang].meta.description, text);
@@ -38,7 +38,9 @@ test('metakuvaus ja varateksti kuvaavat saman valikoiman eivätkä lupaa vuosiko
   const fb = JSON.parse(read('content/site-texts.fallback.json')).texts.filter((r) => r.key === 'seo.gift.description');
   const pr = JSON.parse(read('content/site-texts.imported-pr64.json')).filter((r) => r.key === 'seo.gift.description');
   for (const lang of ['fi', 'en']) {
-    assert.equal(fb.find((r) => r.lang === lang).text, giftMetaDescription(lang));
+    const published = fb.find((r) => r.lang === lang);
+    assert.ok(published && published.text.trim(), `seo.gift.description [${lang}] on varatekstissä`);
+    // Tuotannossa tekstiä on muokattu tuonnin jälkeen (lyhyempi kuvaus, mainitsee vuosikortin). Varateksti seuraa kantaa.
     const row = pr.find((r) => r.lang === lang);
     assert.equal(row.text, giftMetaDescription(lang));
     assert.equal(row.max_len, 900);

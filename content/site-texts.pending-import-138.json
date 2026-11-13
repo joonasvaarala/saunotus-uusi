@@ -1,0 +1,2148 @@
+[
+  {
+    "key": "ui.admin.review.late_title",
+    "lang": "fi",
+    "text": "Maksu poistetulle tilaukselle",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.review.late_hint",
+    "lang": "fi",
+    "text": "Tilaus poistettiin maksamattomana, mutta maksu saapui sen jälkeen. Tarkista maksu ja tarvittaessa hyvitä tilauksen maksutyökalulla. Kuittaa vasta käsittelyn jälkeen.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.review.late_note_label",
+    "lang": "fi",
+    "text": "Käsittelyselite",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.review.late_note_placeholder",
+    "lang": "fi",
+    "text": "Miten maksu käsiteltiin? ({{var:min}}–{{var:max}} merkkiä)",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [
+      "{{var:max}}",
+      "{{var:min}}"
+    ],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.review.late_confirm",
+    "lang": "fi",
+    "text": "Vahvista käsittelykuittaus. Tämä ei palauta rahaa, muuta varausta tai lähetä viestiä.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.review.late_button",
+    "lang": "fi",
+    "text": "Merkitse käsitellyksi",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.review.late_confirm_button",
+    "lang": "fi",
+    "text": "Vahvista käsittelykuittaus",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.review.late_note_required",
+    "lang": "fi",
+    "text": "Kirjoita käsittelyselite ({{var:min}}–{{var:max}} merkkiä).",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [
+      "{{var:max}}",
+      "{{var:min}}"
+    ],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.review.late_done",
+    "lang": "fi",
+    "text": "Maksun käsittely kuitattu.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.review.late_order",
+    "lang": "fi",
+    "text": "tilaus #{{var:no}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [
+      "{{var:no}}"
+    ],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.review.late_title",
+    "lang": "en",
+    "text": "Payment for a deleted order",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.review.late_hint",
+    "lang": "en",
+    "text": "The order was deleted as unpaid, but payment arrived afterwards. Check the payment and refund it with the order payment tools if necessary. Acknowledge only after handling it.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.review.late_note_label",
+    "lang": "en",
+    "text": "Handling note",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.review.late_note_placeholder",
+    "lang": "en",
+    "text": "How was the payment handled? ({{var:min}}–{{var:max}} characters)",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [
+      "{{var:max}}",
+      "{{var:min}}"
+    ],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.review.late_confirm",
+    "lang": "en",
+    "text": "Confirm the handling acknowledgement. This does not refund money, change the booking or send a message.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.review.late_button",
+    "lang": "en",
+    "text": "Mark as handled",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.review.late_confirm_button",
+    "lang": "en",
+    "text": "Confirm handling acknowledgement",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.review.late_note_required",
+    "lang": "en",
+    "text": "Enter a handling note ({{var:min}}–{{var:max}} characters).",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [
+      "{{var:max}}",
+      "{{var:min}}"
+    ],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.review.late_done",
+    "lang": "en",
+    "text": "Payment handling acknowledged.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.review.late_order",
+    "lang": "en",
+    "text": "order #{{var:no}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [
+      "{{var:no}}"
+    ],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.order_delete.button",
+    "lang": "fi",
+    "text": "Poista maksamaton tilaus",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.order_delete.title",
+    "lang": "fi",
+    "text": "Poistetaanko maksamaton tilaus #{{var:no}}?",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [
+      "{{var:no}}"
+    ],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.order_delete.intro",
+    "lang": "fi",
+    "text": "Tilaus siirtyy poistettuihin. Sitä ei näytetä tavallisilla tilauslistoilla, mutta tiedot ja muutoshistoria säilyvät. Asiakkaalle ei lähetetä viestiä.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.order_delete.intro_notify",
+    "lang": "fi",
+    "text": "Tilaus siirtyy poistettuihin. Sitä ei näytetä tavallisilla tilauslistoilla, mutta tiedot ja muutoshistoria säilyvät.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.order_delete.notify_question",
+    "lang": "fi",
+    "text": "Lähetetäänkö asiakkaalle peruutusviesti?",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.order_delete.notify_hint",
+    "lang": "fi",
+    "text": "Viesti kertoo, että maksamaton varaus on peruttu, ja siinä on linkki uuden ajan varaamiseen. Viesti koskee vain tulevia varauksia.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.order_delete.notify_yes",
+    "lang": "fi",
+    "text": "Kyllä, lähetä viesti",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.order_delete.notify_no",
+    "lang": "fi",
+    "text": "Ei viestiä",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.order_delete.notify_required",
+    "lang": "fi",
+    "text": "Valitse, lähetetäänkö asiakkaalle peruutusviesti.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.order_delete.done_notified",
+    "lang": "fi",
+    "text": "Asiakkaalle lähtee peruutusviesti.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.order_delete.effect_reservations",
+    "lang": "fi",
+    "text": "Perutaan {{var:n}} tulevaa varausta: aika vapautuu muille ja varaus poistuu kalenterista seuraavassa synkronoinnissa.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [
+      "{{var:n}}"
+    ],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.order_delete.effect_past_reservations",
+    "lang": "fi",
+    "text": "{{var:n}} mennyttä varausta merkitään perutuksi ja piilotetaan. Niistä ei lähetetä viestiä.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [
+      "{{var:n}}"
+    ],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.order_delete.effect_payments",
+    "lang": "fi",
+    "text": "Suljetaan {{var:n}} avointa maksuriviä. Maksulinkki ei enää avaa maksua ja muistutukset loppuvat.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [
+      "{{var:n}}"
+    ],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.order_delete.effect_emails",
+    "lang": "fi",
+    "text": "Jonossa olevat {{var:n}} sähköpostia jätetään lähettämättä.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [
+      "{{var:n}}"
+    ],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.order_delete.effect_cancelled",
+    "lang": "fi",
+    "text": "Tilaus on jo peruttu. Poisto vain piilottaa sen listoilta.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.order_delete.waitlist",
+    "lang": "fi",
+    "text": "Varattu aika vapautuu muille. Jos aikaan on jonottajia, he saavat tavallisen ilmoituksen vapautuneesta paikasta.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.order_delete.late_payment",
+    "lang": "fi",
+    "text": "Jos asiakas silti maksaa myöhemmin, maksu kirjataan, tilaus pysyy perutuksi ja se palaa näkyviin merkinnällä \"maksu saapui\". Rahat palautetaan käsin.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.order_delete.reason",
+    "lang": "fi",
+    "text": "Syy (valinnainen)",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.order_delete.confirm",
+    "lang": "fi",
+    "text": "Poista tilaus",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.order_delete.done",
+    "lang": "fi",
+    "text": "Tilaus #{{var:no}} poistettu.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [
+      "{{var:no}}"
+    ],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.order_delete.already",
+    "lang": "fi",
+    "text": "Tilaus oli jo poistettu.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.order_delete.blocked_title",
+    "lang": "fi",
+    "text": "Tilausta ei voi poistaa",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.order_delete.session_title",
+    "lang": "fi",
+    "text": "Verkkomaksu on kesken",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.order_delete.session_text",
+    "lang": "fi",
+    "text": "Asiakas on avannut verkkomaksun, eikä maksupalvelu ole vielä vahvistanut sen päättyneen. Avattua maksua ei voi sulkea meidän päästämme, joten tilausta ei voi poistaa ennen vahvistusta. Pelkkä ajan kuluminen ei riitä.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.order_delete.session_check_help",
+    "lang": "fi",
+    "text": "Tarkista tila hakee maksun tilan suoraan Montoniolta. Kun Montonio kertoo maksun vanhentuneen tai mitätöidyn, poisto avautuu.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.order_delete.session_wait_help",
+    "lang": "fi",
+    "text": "Tämän maksun tilaa ei voi hakea täältä. Odota maksupalvelun ilmoitusta tai tarkista maksu maksupalvelun hallinnasta.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.order_delete.check",
+    "lang": "fi",
+    "text": "Tarkista tila",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.order_delete.check_paid",
+    "lang": "fi",
+    "text": "Maksu on maksettu. Tilausta ei poisteta.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.order_delete.check_closed",
+    "lang": "fi",
+    "text": "Maksupalvelu vahvisti maksun päättyneen.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.order_delete.check_pending",
+    "lang": "fi",
+    "text": "Maksu on yhä kesken maksupalvelussa.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.order_delete.check_failed",
+    "lang": "fi",
+    "text": "Tilan haku ei onnistunut. Yritä myöhemmin uudelleen.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.order_delete.archived",
+    "lang": "fi",
+    "text": "Poistettu {{var:date}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [
+      "{{var:date}}"
+    ],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.order_delete.archived_reason",
+    "lang": "fi",
+    "text": "Syy: {{var:reason}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [
+      "{{var:reason}}"
+    ],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.order_delete.archived_late_paid",
+    "lang": "fi",
+    "text": "Poistettu – maksu saapui, tarkista",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.order_delete.archived_late_paid_help",
+    "lang": "fi",
+    "text": "Tilaus poistettiin maksamattomana, mutta maksu saapui sen jälkeen. Tilaus pysyy perutuksi. Palauta rahat tai sovi asiakkaan kanssa.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.order_delete.blocker.provider_session_unresolved",
+    "lang": "fi",
+    "text": "Verkkomaksu on kesken eikä maksupalvelu ole vahvistanut sen päättyneen.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.order_delete.blocker.payment_status",
+    "lang": "fi",
+    "text": "Tilaus ei ole maksamaton.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.order_delete.blocker.settled_payment",
+    "lang": "fi",
+    "text": "Tilauksella on maksettu tai hyvitetty maksu.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.order_delete.blocker.receipts",
+    "lang": "fi",
+    "text": "Tilauksella on kuitti.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.order_delete.blocker.refunds",
+    "lang": "fi",
+    "text": "Tilauksella on hyvitys.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.order_delete.blocker.accounting",
+    "lang": "fi",
+    "text": "Tilaus on kirjanpidossa.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.order_delete.blocker.invoice",
+    "lang": "fi",
+    "text": "Tilauksella on lasku. Korjaa laskutuksen kautta.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.order_delete.blocker.gift_card",
+    "lang": "fi",
+    "text": "Tilaukseen liittyy lahjakortti.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.order_delete.blocker.annual_card",
+    "lang": "fi",
+    "text": "Tilaukseen liittyy vuosikortti.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.order_delete.blocker.voucher_claim",
+    "lang": "fi",
+    "text": "Tilaukseen liittyy kumppanilahjakortin lunastus.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.order_delete.blocker.training",
+    "lang": "fi",
+    "text": "Koulutuksen osallistuja: käsittele koulutustyökalussa.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.order_delete.blocker.linked_reservations",
+    "lang": "fi",
+    "text": "Toisen tilauksen lisäpalvelu on kiinni tämän tilauksen varauksessa.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.order_delete.blocker.external_order",
+    "lang": "fi",
+    "text": "Johkusta tuotu tilaus käsitellään Johkussa.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.order_delete.blocker.external_payment",
+    "lang": "fi",
+    "text": "Tilauksella on ulkoisesta järjestelmästä tuotu maksu.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.order_delete.blocker.email_claim_uncertain",
+    "lang": "fi",
+    "text": "Aiemman sähköpostiyrityksen päättymistä ei voida todistaa. Poisto estetään; vanhaa lähetystä ei voi perua.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.order_delete.blocker.email_sending",
+    "lang": "fi",
+    "text": "Tilauksen sähköpostia lähetetään juuri nyt. Yritä hetken kuluttua uudelleen.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.order_delete.blocker.unknown",
+    "lang": "fi",
+    "text": "Tilausta ei voi poistaa.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.order_delete.blocked_help",
+    "lang": "fi",
+    "text": "Poisto on mahdollinen vain maksamattomalle tilaukselle. Myös mennyt maksamaton tilaus voidaan poistaa.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.order_delete.forbidden",
+    "lang": "fi",
+    "text": "Sinulla ei ole oikeutta poistaa tilauksia. Poistoon tarvitaan varausten ja maksujen hallintaoikeus. Tilaus on ennallaan.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.order_delete.busy",
+    "lang": "fi",
+    "text": "Tilausta käsitellään juuri nyt. Tilaus on ennallaan. Yritä hetken kuluttua uudelleen.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.order_delete.failed",
+    "lang": "fi",
+    "text": "Poisto ei onnistunut. Tilaus on ennallaan.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.order_delete.danger_label",
+    "lang": "fi",
+    "text": "Vaarallinen toiminto",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.order_delete.button",
+    "lang": "en",
+    "text": "Delete unpaid order",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.order_delete.title",
+    "lang": "en",
+    "text": "Delete unpaid order #{{var:no}}?",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [
+      "{{var:no}}"
+    ],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.order_delete.intro",
+    "lang": "en",
+    "text": "The order moves to deleted orders. It no longer shows in the normal order lists, but its data and history are kept. The customer gets no message.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.order_delete.intro_notify",
+    "lang": "en",
+    "text": "The order moves to deleted orders. It no longer shows in the normal order lists, but its data and history are kept.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.order_delete.notify_question",
+    "lang": "en",
+    "text": "Send the customer a cancellation message?",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.order_delete.notify_hint",
+    "lang": "en",
+    "text": "The message says the unpaid booking was cancelled and links to booking a new time. It covers upcoming bookings only.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.order_delete.notify_yes",
+    "lang": "en",
+    "text": "Yes, send the message",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.order_delete.notify_no",
+    "lang": "en",
+    "text": "No message",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.order_delete.notify_required",
+    "lang": "en",
+    "text": "Choose whether to send the customer a cancellation message.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.order_delete.done_notified",
+    "lang": "en",
+    "text": "A cancellation message will be sent to the customer.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.order_delete.effect_reservations",
+    "lang": "en",
+    "text": "{{var:n}} upcoming bookings will be cancelled: the time becomes free and the booking leaves the calendar at the next sync.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [
+      "{{var:n}}"
+    ],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.order_delete.effect_past_reservations",
+    "lang": "en",
+    "text": "{{var:n}} past bookings will be marked cancelled and hidden. No message is sent about them.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [
+      "{{var:n}}"
+    ],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.order_delete.effect_payments",
+    "lang": "en",
+    "text": "{{var:n}} open payment rows will be closed. The payment link stops working and reminders stop.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [
+      "{{var:n}}"
+    ],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.order_delete.effect_emails",
+    "lang": "en",
+    "text": "{{var:n}} queued emails will not be sent.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [
+      "{{var:n}}"
+    ],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.order_delete.effect_cancelled",
+    "lang": "en",
+    "text": "The order is already cancelled. Deleting only hides it from the lists.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.order_delete.waitlist",
+    "lang": "en",
+    "text": "The booked time becomes available to others. If people are on the waiting list for it, they get the usual spot-freed notice.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.order_delete.late_payment",
+    "lang": "en",
+    "text": "If the customer still pays later, the payment is recorded, the order stays cancelled and comes back into view marked \"payment arrived\". Refund manually.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.order_delete.reason",
+    "lang": "en",
+    "text": "Reason (optional)",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.order_delete.confirm",
+    "lang": "en",
+    "text": "Delete order",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.order_delete.done",
+    "lang": "en",
+    "text": "Order #{{var:no}} deleted.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [
+      "{{var:no}}"
+    ],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.order_delete.already",
+    "lang": "en",
+    "text": "The order was already deleted.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.order_delete.blocked_title",
+    "lang": "en",
+    "text": "The order cannot be deleted",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.order_delete.session_title",
+    "lang": "en",
+    "text": "Online payment in progress",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.order_delete.session_text",
+    "lang": "en",
+    "text": "The customer has opened an online payment and the payment provider has not yet confirmed that it ended. We cannot close an opened payment from our side, so the order cannot be deleted until it is confirmed. Waiting alone is not enough.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.order_delete.session_check_help",
+    "lang": "en",
+    "text": "Check status asks Montonio for the payment status. When Montonio reports the payment abandoned or voided, deleting becomes possible.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.order_delete.session_wait_help",
+    "lang": "en",
+    "text": "The status of this payment cannot be checked from here. Wait for the provider notice or check the payment in the provider dashboard.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.order_delete.check",
+    "lang": "en",
+    "text": "Check status",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.order_delete.check_paid",
+    "lang": "en",
+    "text": "The payment is paid. The order will not be deleted.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.order_delete.check_closed",
+    "lang": "en",
+    "text": "The provider confirmed the payment ended.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.order_delete.check_pending",
+    "lang": "en",
+    "text": "The payment is still open at the provider.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.order_delete.check_failed",
+    "lang": "en",
+    "text": "The status check failed. Try again later.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.order_delete.archived",
+    "lang": "en",
+    "text": "Deleted {{var:date}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [
+      "{{var:date}}"
+    ],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.order_delete.archived_reason",
+    "lang": "en",
+    "text": "Reason: {{var:reason}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [
+      "{{var:reason}}"
+    ],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.order_delete.archived_late_paid",
+    "lang": "en",
+    "text": "Deleted – payment arrived, check",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.order_delete.archived_late_paid_help",
+    "lang": "en",
+    "text": "The order was deleted as unpaid, but a payment arrived afterwards. The order stays cancelled. Refund the money or agree with the customer.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.order_delete.blocker.provider_session_unresolved",
+    "lang": "en",
+    "text": "An online payment is open and the provider has not confirmed that it ended.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.order_delete.blocker.payment_status",
+    "lang": "en",
+    "text": "The order is not unpaid.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.order_delete.blocker.settled_payment",
+    "lang": "en",
+    "text": "The order has a paid or refunded payment.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.order_delete.blocker.receipts",
+    "lang": "en",
+    "text": "The order has a receipt.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.order_delete.blocker.refunds",
+    "lang": "en",
+    "text": "The order has a refund.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.order_delete.blocker.accounting",
+    "lang": "en",
+    "text": "The order is in accounting.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.order_delete.blocker.invoice",
+    "lang": "en",
+    "text": "The order has an invoice. Correct it through invoicing.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.order_delete.blocker.gift_card",
+    "lang": "en",
+    "text": "The order involves a gift card.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.order_delete.blocker.annual_card",
+    "lang": "en",
+    "text": "The order involves an annual card.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.order_delete.blocker.voucher_claim",
+    "lang": "en",
+    "text": "The order involves a partner gift card claim.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.order_delete.blocker.training",
+    "lang": "en",
+    "text": "Training participant: handle it in the training tool.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.order_delete.blocker.linked_reservations",
+    "lang": "en",
+    "text": "An add-on of another order is linked to a booking in this order.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.order_delete.blocker.external_order",
+    "lang": "en",
+    "text": "Orders imported from Johku are handled in Johku.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.order_delete.blocker.external_payment",
+    "lang": "en",
+    "text": "The order has a payment imported from another system.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.order_delete.blocker.email_claim_uncertain",
+    "lang": "en",
+    "text": "An earlier email attempt may still be active. Deleting is blocked; an old external sender cannot be stopped here.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.order_delete.blocker.email_sending",
+    "lang": "en",
+    "text": "An email for this order is being sent right now. Try again in a moment.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.order_delete.blocker.unknown",
+    "lang": "en",
+    "text": "The order cannot be deleted.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.order_delete.blocked_help",
+    "lang": "en",
+    "text": "Only an unpaid order can be deleted. A past unpaid order can be deleted too.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.order_delete.forbidden",
+    "lang": "en",
+    "text": "You do not have permission to delete orders. Deleting requires booking and payment management rights. The order is unchanged.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.order_delete.busy",
+    "lang": "en",
+    "text": "The order is being processed right now. The order is unchanged. Try again in a moment.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.order_delete.failed",
+    "lang": "en",
+    "text": "Deleting failed. The order is unchanged.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.order_delete.danger_label",
+    "lang": "en",
+    "text": "Dangerous action",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_279 maksamattoman tilauksen poisto yhteisessä kortissa (Joonas 11.11.2026 16.10)"
+  },
+  {
+    "key": "ui.admin.refund_cancel.options_unavailable",
+    "lang": "fi",
+    "text": "Lahjakortti- ja viestivalintoja ei saatu. Yritä hetken päästä uudelleen.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_280/281 varauksen peruutus: lahjakortti, kumppanikoodi ja yhdistetty peruutusviesti (tilausnäkymä v3 §4 C ja G)"
+  },
+  {
+    "key": "ui.admin.refund_cancel.gift_card_question",
+    "lang": "fi",
+    "text": "Jätetäänkö lahjakorttikoodi voimaan?",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_280/281 varauksen peruutus: lahjakortti, kumppanikoodi ja yhdistetty peruutusviesti (tilausnäkymä v3 §4 C ja G)"
+  },
+  {
+    "key": "ui.admin.refund_cancel.gift_card_share",
+    "lang": "fi",
+    "text": "Varaus on maksettu lahjakortilla {{var:amount}} (koodi …{{var:code}}, voimassa {{var:date}}).",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [
+      "{{var:amount}}",
+      "{{var:code}}",
+      "{{var:date}}"
+    ],
+    "reason": "booking_280/281 varauksen peruutus: lahjakortti, kumppanikoodi ja yhdistetty peruutusviesti (tilausnäkymä v3 §4 C ja G)"
+  },
+  {
+    "key": "ui.admin.refund_cancel.gift_card_keep",
+    "lang": "fi",
+    "text": "Kyllä, koodi jää voimaan ja {{var:amount}} palautuu kortille",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [
+      "{{var:amount}}"
+    ],
+    "reason": "booking_280/281 varauksen peruutus: lahjakortti, kumppanikoodi ja yhdistetty peruutusviesti (tilausnäkymä v3 §4 C ja G)"
+  },
+  {
+    "key": "ui.admin.refund_cancel.gift_card_forfeit",
+    "lang": "fi",
+    "text": "Ei, lahjakortin arvo menetetään",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_280/281 varauksen peruutus: lahjakortti, kumppanikoodi ja yhdistetty peruutusviesti (tilausnäkymä v3 §4 C ja G)"
+  },
+  {
+    "key": "ui.admin.refund_cancel.gift_card_expired",
+    "lang": "fi",
+    "text": "Lahjakortti ei ole enää voimassa, joten arvoa ei voi palauttaa kortille.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_280/281 varauksen peruutus: lahjakortti, kumppanikoodi ja yhdistetty peruutusviesti (tilausnäkymä v3 §4 C ja G)"
+  },
+  {
+    "key": "ui.admin.refund_cancel.partner_share",
+    "lang": "fi",
+    "text": "Varaus on maksettu kumppanikoodilla ({{var:amount}}). Kumppanin maksua ei hyvitetä.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [
+      "{{var:amount}}"
+    ],
+    "reason": "booking_280/281 varauksen peruutus: lahjakortti, kumppanikoodi ja yhdistetty peruutusviesti (tilausnäkymä v3 §4 C ja G)"
+  },
+  {
+    "key": "ui.admin.refund_cancel.partner_order_stays",
+    "lang": "fi",
+    "text": "Kumppanikoodi on jo lunastettu, joten tilaus jää voimaan. Asiakkaalle voi varata uuden ajan samaan tilaukseen.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_280/281 varauksen peruutus: lahjakortti, kumppanikoodi ja yhdistetty peruutusviesti (tilausnäkymä v3 §4 C ja G)"
+  },
+  {
+    "key": "ui.admin.refund_cancel.notify_question",
+    "lang": "fi",
+    "text": "Lähetetäänkö asiakkaalle peruutusviesti?",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_280/281 varauksen peruutus: lahjakortti, kumppanikoodi ja yhdistetty peruutusviesti (tilausnäkymä v3 §4 C ja G)"
+  },
+  {
+    "key": "ui.admin.refund_cancel.notify_hint",
+    "lang": "fi",
+    "text": "Viesti lähtee heti. Jos hyvitys on jo valmis, hyvityskuitti on viestin liitteenä. Jos verkkomaksun hyvitys on vielä kesken, viestissä lukee \"hyvitys käsittelyssä\" ja kuitti lähtee erikseen, kun hyvitys on vahvistettu.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_280/281 varauksen peruutus: lahjakortti, kumppanikoodi ja yhdistetty peruutusviesti (tilausnäkymä v3 §4 C ja G)"
+  },
+  {
+    "key": "ui.admin.refund_cancel.notify_hint_no_refund",
+    "lang": "fi",
+    "text": "Viesti lähtee heti. Varaukselle ei tehdä hyvitystä, joten viestissä ei mainita hyvitystä.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_280/281 varauksen peruutus: lahjakortti, kumppanikoodi ja yhdistetty peruutusviesti (tilausnäkymä v3 §4 C ja G)"
+  },
+  {
+    "key": "ui.admin.refund_cancel.notify_yes",
+    "lang": "fi",
+    "text": "Kyllä, lähetä viesti",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_280/281 varauksen peruutus: lahjakortti, kumppanikoodi ja yhdistetty peruutusviesti (tilausnäkymä v3 §4 C ja G)"
+  },
+  {
+    "key": "ui.admin.refund_cancel.notify_no",
+    "lang": "fi",
+    "text": "Ei viestiä",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_280/281 varauksen peruutus: lahjakortti, kumppanikoodi ja yhdistetty peruutusviesti (tilausnäkymä v3 §4 C ja G)"
+  },
+  {
+    "key": "ui.admin.refund_cancel.notify_no_email",
+    "lang": "fi",
+    "text": "Asiakkaalla ei ole sähköpostiosoitetta, joten peruutusviestiä ei lähetetä.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_280/281 varauksen peruutus: lahjakortti, kumppanikoodi ja yhdistetty peruutusviesti (tilausnäkymä v3 §4 C ja G)"
+  },
+  {
+    "key": "ui.admin.refund_cancel.notify_all_unavailable",
+    "lang": "fi",
+    "text": "Koko tilauksen peruutuksesta ei lähetetä peruutusviestiä tästä dialogista. Jos asiakkaalle lähetetään viesti, peru varaukset yksitellen.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_280/281 varauksen peruutus: lahjakortti, kumppanikoodi ja yhdistetty peruutusviesti (tilausnäkymä v3 §4 C ja G)"
+  },
+  {
+    "key": "ui.admin.refund_cancel.all_gift_refund_separately",
+    "lang": "fi",
+    "text": "Tilauksessa on lahjakorttimaksu, joten koko tilaus perutaan ilman rahahyvitystä. Hyvitä rahamaksu tarvittaessa erikseen Hyvitä maksu -toiminnolla.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_280/281 varauksen peruutus: lahjakortti, kumppanikoodi ja yhdistetty peruutusviesti (tilausnäkymä v3 §4 C ja G)"
+  },
+  {
+    "key": "ui.admin.refund_cancel.choose_required",
+    "lang": "fi",
+    "text": "Valitse vastaus jokaiseen kysymykseen.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_280/281 varauksen peruutus: lahjakortti, kumppanikoodi ja yhdistetty peruutusviesti (tilausnäkymä v3 §4 C ja G)"
+  },
+  {
+    "key": "ui.admin.refund_cancel.done_gift_returned",
+    "lang": "fi",
+    "text": "Lahjakortille palautettiin {{var:amount}}.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [
+      "{{var:amount}}"
+    ],
+    "reason": "booking_280/281 varauksen peruutus: lahjakortti, kumppanikoodi ja yhdistetty peruutusviesti (tilausnäkymä v3 §4 C ja G)"
+  },
+  {
+    "key": "ui.admin.refund_cancel.done_gift_forfeited",
+    "lang": "fi",
+    "text": "Lahjakortin arvo {{var:amount}} menetettiin.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [
+      "{{var:amount}}"
+    ],
+    "reason": "booking_280/281 varauksen peruutus: lahjakortti, kumppanikoodi ja yhdistetty peruutusviesti (tilausnäkymä v3 §4 C ja G)"
+  },
+  {
+    "key": "ui.admin.refund_cancel.done_order_kept",
+    "lang": "fi",
+    "text": "Tilaus jää voimaan.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_280/281 varauksen peruutus: lahjakortti, kumppanikoodi ja yhdistetty peruutusviesti (tilausnäkymä v3 §4 C ja G)"
+  },
+  {
+    "key": "ui.admin.refund_cancel.done_notified",
+    "lang": "fi",
+    "text": "Peruutusviesti lähtee asiakkaalle.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_280/281 varauksen peruutus: lahjakortti, kumppanikoodi ja yhdistetty peruutusviesti (tilausnäkymä v3 §4 C ja G)"
+  },
+  {
+    "key": "ui.admin.refund_cancel.options_unavailable",
+    "lang": "en",
+    "text": "Gift card and message options could not be loaded. Try again in a moment.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_280/281 varauksen peruutus: lahjakortti, kumppanikoodi ja yhdistetty peruutusviesti (tilausnäkymä v3 §4 C ja G)"
+  },
+  {
+    "key": "ui.admin.refund_cancel.gift_card_question",
+    "lang": "en",
+    "text": "Keep the gift card code valid?",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_280/281 varauksen peruutus: lahjakortti, kumppanikoodi ja yhdistetty peruutusviesti (tilausnäkymä v3 §4 C ja G)"
+  },
+  {
+    "key": "ui.admin.refund_cancel.gift_card_share",
+    "lang": "en",
+    "text": "The booking was paid with a gift card, {{var:amount}} (code …{{var:code}}, valid until {{var:date}}).",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [
+      "{{var:amount}}",
+      "{{var:code}}",
+      "{{var:date}}"
+    ],
+    "reason": "booking_280/281 varauksen peruutus: lahjakortti, kumppanikoodi ja yhdistetty peruutusviesti (tilausnäkymä v3 §4 C ja G)"
+  },
+  {
+    "key": "ui.admin.refund_cancel.gift_card_keep",
+    "lang": "en",
+    "text": "Yes, keep the code valid and return {{var:amount}} to the card",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [
+      "{{var:amount}}"
+    ],
+    "reason": "booking_280/281 varauksen peruutus: lahjakortti, kumppanikoodi ja yhdistetty peruutusviesti (tilausnäkymä v3 §4 C ja G)"
+  },
+  {
+    "key": "ui.admin.refund_cancel.gift_card_forfeit",
+    "lang": "en",
+    "text": "No, the gift card value is forfeited",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_280/281 varauksen peruutus: lahjakortti, kumppanikoodi ja yhdistetty peruutusviesti (tilausnäkymä v3 §4 C ja G)"
+  },
+  {
+    "key": "ui.admin.refund_cancel.gift_card_expired",
+    "lang": "en",
+    "text": "The gift card has expired, so the value cannot be returned to it.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_280/281 varauksen peruutus: lahjakortti, kumppanikoodi ja yhdistetty peruutusviesti (tilausnäkymä v3 §4 C ja G)"
+  },
+  {
+    "key": "ui.admin.refund_cancel.partner_share",
+    "lang": "en",
+    "text": "The booking was paid with a partner code ({{var:amount}}). The partner payment is not refunded.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [
+      "{{var:amount}}"
+    ],
+    "reason": "booking_280/281 varauksen peruutus: lahjakortti, kumppanikoodi ja yhdistetty peruutusviesti (tilausnäkymä v3 §4 C ja G)"
+  },
+  {
+    "key": "ui.admin.refund_cancel.partner_order_stays",
+    "lang": "en",
+    "text": "The partner code has already been redeemed, so the order stays valid. You can book a new time on the same order.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_280/281 varauksen peruutus: lahjakortti, kumppanikoodi ja yhdistetty peruutusviesti (tilausnäkymä v3 §4 C ja G)"
+  },
+  {
+    "key": "ui.admin.refund_cancel.notify_question",
+    "lang": "en",
+    "text": "Send the customer a cancellation message?",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_280/281 varauksen peruutus: lahjakortti, kumppanikoodi ja yhdistetty peruutusviesti (tilausnäkymä v3 §4 C ja G)"
+  },
+  {
+    "key": "ui.admin.refund_cancel.notify_hint",
+    "lang": "en",
+    "text": "The message is sent right away. If the refund is already complete, the refund receipt is attached. If an online refund is still in progress, the message says the refund is being processed and the receipt is sent separately once the refund is confirmed.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_280/281 varauksen peruutus: lahjakortti, kumppanikoodi ja yhdistetty peruutusviesti (tilausnäkymä v3 §4 C ja G)"
+  },
+  {
+    "key": "ui.admin.refund_cancel.notify_hint_no_refund",
+    "lang": "en",
+    "text": "The message is sent right away. No refund is made for this booking, so the message does not mention a refund.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 218,
+    "placeholders": [],
+    "reason": "booking_280/281 varauksen peruutus: lahjakortti, kumppanikoodi ja yhdistetty peruutusviesti (tilausnäkymä v3 §4 C ja G)"
+  },
+  {
+    "key": "ui.admin.refund_cancel.notify_yes",
+    "lang": "en",
+    "text": "Yes, send the message",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_280/281 varauksen peruutus: lahjakortti, kumppanikoodi ja yhdistetty peruutusviesti (tilausnäkymä v3 §4 C ja G)"
+  },
+  {
+    "key": "ui.admin.refund_cancel.notify_no",
+    "lang": "en",
+    "text": "No message",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_280/281 varauksen peruutus: lahjakortti, kumppanikoodi ja yhdistetty peruutusviesti (tilausnäkymä v3 §4 C ja G)"
+  },
+  {
+    "key": "ui.admin.refund_cancel.notify_no_email",
+    "lang": "en",
+    "text": "The customer has no email address, so no cancellation message is sent.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_280/281 varauksen peruutus: lahjakortti, kumppanikoodi ja yhdistetty peruutusviesti (tilausnäkymä v3 §4 C ja G)"
+  },
+  {
+    "key": "ui.admin.refund_cancel.notify_all_unavailable",
+    "lang": "en",
+    "text": "No cancellation message is sent from this dialog when the whole order is cancelled. To send the customer a message, cancel the bookings one at a time.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_280/281 varauksen peruutus: lahjakortti, kumppanikoodi ja yhdistetty peruutusviesti (tilausnäkymä v3 §4 C ja G)"
+  },
+  {
+    "key": "ui.admin.refund_cancel.all_gift_refund_separately",
+    "lang": "en",
+    "text": "The order includes a gift card payment, so the whole order is cancelled without a money refund. If needed, refund the money payment separately with Refund payment.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_280/281 varauksen peruutus: lahjakortti, kumppanikoodi ja yhdistetty peruutusviesti (tilausnäkymä v3 §4 C ja G)"
+  },
+  {
+    "key": "ui.admin.refund_cancel.choose_required",
+    "lang": "en",
+    "text": "Answer every question.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_280/281 varauksen peruutus: lahjakortti, kumppanikoodi ja yhdistetty peruutusviesti (tilausnäkymä v3 §4 C ja G)"
+  },
+  {
+    "key": "ui.admin.refund_cancel.done_gift_returned",
+    "lang": "en",
+    "text": "{{var:amount}} returned to the gift card.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [
+      "{{var:amount}}"
+    ],
+    "reason": "booking_280/281 varauksen peruutus: lahjakortti, kumppanikoodi ja yhdistetty peruutusviesti (tilausnäkymä v3 §4 C ja G)"
+  },
+  {
+    "key": "ui.admin.refund_cancel.done_gift_forfeited",
+    "lang": "en",
+    "text": "Gift card value of {{var:amount}} forfeited.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [
+      "{{var:amount}}"
+    ],
+    "reason": "booking_280/281 varauksen peruutus: lahjakortti, kumppanikoodi ja yhdistetty peruutusviesti (tilausnäkymä v3 §4 C ja G)"
+  },
+  {
+    "key": "ui.admin.refund_cancel.done_order_kept",
+    "lang": "en",
+    "text": "The order stays valid.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_280/281 varauksen peruutus: lahjakortti, kumppanikoodi ja yhdistetty peruutusviesti (tilausnäkymä v3 §4 C ja G)"
+  },
+  {
+    "key": "ui.admin.refund_cancel.done_notified",
+    "lang": "en",
+    "text": "A cancellation message will be sent to the customer.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_280/281 varauksen peruutus: lahjakortti, kumppanikoodi ja yhdistetty peruutusviesti (tilausnäkymä v3 §4 C ja G)"
+  },
+  {
+    "key": "email.reservation_cancelled.subject",
+    "lang": "fi",
+    "text": "Varaus peruttu {{var:no}} – {{setting:business_name}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:no}}",
+      "{{setting:business_name}}"
+    ],
+    "reason": "booking_281 peruutusviesti (peruutus + hyvityksen tila lähetyshetkellä + valmiin hyvityksen kuitti), tilausnäkymä v3 §4 G"
+  },
+  {
+    "key": "email.reservation_cancelled.subject",
+    "lang": "en",
+    "text": "Booking cancelled {{var:no}} – {{setting:business_name}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:no}}",
+      "{{setting:business_name}}"
+    ],
+    "reason": "booking_281 peruutusviesti (peruutus + hyvityksen tila lähetyshetkellä + valmiin hyvityksen kuitti), tilausnäkymä v3 §4 G"
+  },
+  {
+    "key": "email.reservation_cancelled.title",
+    "lang": "fi",
+    "text": "Varaus peruttu",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_281 peruutusviesti (peruutus + hyvityksen tila lähetyshetkellä + valmiin hyvityksen kuitti), tilausnäkymä v3 §4 G"
+  },
+  {
+    "key": "email.reservation_cancelled.title",
+    "lang": "en",
+    "text": "Booking cancelled",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_281 peruutusviesti (peruutus + hyvityksen tila lähetyshetkellä + valmiin hyvityksen kuitti), tilausnäkymä v3 §4 G"
+  },
+  {
+    "key": "email.reservation_cancelled.intro",
+    "lang": "fi",
+    "text": "Varauksesi on peruttu.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_281 peruutusviesti (peruutus + hyvityksen tila lähetyshetkellä + valmiin hyvityksen kuitti), tilausnäkymä v3 §4 G"
+  },
+  {
+    "key": "email.reservation_cancelled.intro",
+    "lang": "en",
+    "text": "Your booking has been cancelled.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_281 peruutusviesti (peruutus + hyvityksen tila lähetyshetkellä + valmiin hyvityksen kuitti), tilausnäkymä v3 §4 G"
+  },
+  {
+    "key": "email.reservation_cancelled.intro_many",
+    "lang": "fi",
+    "text": "Varauksesi on peruttu.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_281 peruutusviesti (peruutus + hyvityksen tila lähetyshetkellä + valmiin hyvityksen kuitti), tilausnäkymä v3 §4 G"
+  },
+  {
+    "key": "email.reservation_cancelled.intro_many",
+    "lang": "en",
+    "text": "Your bookings have been cancelled.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_281 peruutusviesti (peruutus + hyvityksen tila lähetyshetkellä + valmiin hyvityksen kuitti), tilausnäkymä v3 §4 G"
+  },
+  {
+    "key": "email.reservation_cancelled.refund_done",
+    "lang": "fi",
+    "text": "Hyvitimme {{var:amount}} alkuperäiselle maksutavalle.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:amount}}"
+    ],
+    "reason": "booking_281 peruutusviesti (peruutus + hyvityksen tila lähetyshetkellä + valmiin hyvityksen kuitti), tilausnäkymä v3 §4 G"
+  },
+  {
+    "key": "email.reservation_cancelled.refund_done",
+    "lang": "en",
+    "text": "We have refunded {{var:amount}} to the original payment method.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:amount}}"
+    ],
+    "reason": "booking_281 peruutusviesti (peruutus + hyvityksen tila lähetyshetkellä + valmiin hyvityksen kuitti), tilausnäkymä v3 §4 G"
+  },
+  {
+    "key": "email.reservation_cancelled.refund_done_receipt",
+    "lang": "fi",
+    "text": "Hyvitimme {{var:amount}} alkuperäiselle maksutavalle. Hyvityskuitti on liitteenä PDF-tiedostona.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 300,
+    "placeholders": [
+      "{{var:amount}}"
+    ],
+    "reason": "booking_281 peruutusviesti (peruutus + hyvityksen tila lähetyshetkellä + valmiin hyvityksen kuitti), tilausnäkymä v3 §4 G"
+  },
+  {
+    "key": "email.reservation_cancelled.refund_done_receipt",
+    "lang": "en",
+    "text": "We have refunded {{var:amount}} to the original payment method. The refund receipt is attached as a PDF.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 300,
+    "placeholders": [
+      "{{var:amount}}"
+    ],
+    "reason": "booking_281 peruutusviesti (peruutus + hyvityksen tila lähetyshetkellä + valmiin hyvityksen kuitti), tilausnäkymä v3 §4 G"
+  },
+  {
+    "key": "email.reservation_cancelled.refund_done_separate",
+    "lang": "fi",
+    "text": "Hyvitimme {{var:amount}} alkuperäiselle maksutavalle. Hyvityskuitti on lähetetty sinulle erillisenä viestinä.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 350,
+    "placeholders": [
+      "{{var:amount}}"
+    ],
+    "reason": "booking_281 peruutusviesti (peruutus + hyvityksen tila lähetyshetkellä + valmiin hyvityksen kuitti), tilausnäkymä v3 §4 G"
+  },
+  {
+    "key": "email.reservation_cancelled.refund_done_separate",
+    "lang": "en",
+    "text": "We have refunded {{var:amount}} to the original payment method. The refund receipt has been sent to you in a separate message.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 350,
+    "placeholders": [
+      "{{var:amount}}"
+    ],
+    "reason": "booking_281 peruutusviesti (peruutus + hyvityksen tila lähetyshetkellä + valmiin hyvityksen kuitti), tilausnäkymä v3 §4 G"
+  },
+  {
+    "key": "email.reservation_cancelled.refund_pending",
+    "lang": "fi",
+    "text": "Hyvitys {{var:amount}} on käsittelyssä. Saat hyvityskuitin erillisenä viestinä, kun hyvitys on valmis.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 350,
+    "placeholders": [
+      "{{var:amount}}"
+    ],
+    "reason": "booking_281 peruutusviesti (peruutus + hyvityksen tila lähetyshetkellä + valmiin hyvityksen kuitti), tilausnäkymä v3 §4 G"
+  },
+  {
+    "key": "email.reservation_cancelled.refund_pending",
+    "lang": "en",
+    "text": "The refund of {{var:amount}} is being processed. You will receive the refund receipt in a separate message once the refund is complete.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 350,
+    "placeholders": [
+      "{{var:amount}}"
+    ],
+    "reason": "booking_281 peruutusviesti (peruutus + hyvityksen tila lähetyshetkellä + valmiin hyvityksen kuitti), tilausnäkymä v3 §4 G"
+  },
+  {
+    "key": "email.reservation_cancelled.refund_problem",
+    "lang": "fi",
+    "text": "Hyvityksen käsittelyssä oli ongelma. Selvitämme asian ja olemme sinuun yhteydessä.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 250,
+    "placeholders": [],
+    "reason": "booking_281 peruutusviesti (peruutus + hyvityksen tila lähetyshetkellä + valmiin hyvityksen kuitti), tilausnäkymä v3 §4 G"
+  },
+  {
+    "key": "email.reservation_cancelled.refund_problem",
+    "lang": "en",
+    "text": "There was a problem processing the refund. We will sort it out and contact you.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 250,
+    "placeholders": [],
+    "reason": "booking_281 peruutusviesti (peruutus + hyvityksen tila lähetyshetkellä + valmiin hyvityksen kuitti), tilausnäkymä v3 §4 G"
+  },
+  {
+    "key": "email.reservation_cancelled.gift_returned",
+    "lang": "fi",
+    "text": "Lahjakortilla maksettu {{var:amount}} palautettiin lahjakortille (koodi …{{var:code}}). Kortti on voimassa {{var:date}} asti.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 350,
+    "placeholders": [
+      "{{var:amount}}",
+      "{{var:code}}",
+      "{{var:date}}"
+    ],
+    "reason": "booking_281 peruutusviesti (peruutus + hyvityksen tila lähetyshetkellä + valmiin hyvityksen kuitti), tilausnäkymä v3 §4 G"
+  },
+  {
+    "key": "email.reservation_cancelled.gift_returned",
+    "lang": "en",
+    "text": "The {{var:amount}} paid with the gift card was returned to the card (code …{{var:code}}). The card is valid until {{var:date}}.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 350,
+    "placeholders": [
+      "{{var:amount}}",
+      "{{var:code}}",
+      "{{var:date}}"
+    ],
+    "reason": "booking_281 peruutusviesti (peruutus + hyvityksen tila lähetyshetkellä + valmiin hyvityksen kuitti), tilausnäkymä v3 §4 G"
+  },
+  {
+    "key": "email.reservation_cancelled.gift_forfeited",
+    "lang": "fi",
+    "text": "Lahjakortilla maksettua osuutta ({{var:amount}}) ei palauteta.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:amount}}"
+    ],
+    "reason": "booking_281 peruutusviesti (peruutus + hyvityksen tila lähetyshetkellä + valmiin hyvityksen kuitti), tilausnäkymä v3 §4 G"
+  },
+  {
+    "key": "email.reservation_cancelled.gift_forfeited",
+    "lang": "en",
+    "text": "The part paid with the gift card ({{var:amount}}) is not returned.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:amount}}"
+    ],
+    "reason": "booking_281 peruutusviesti (peruutus + hyvityksen tila lähetyshetkellä + valmiin hyvityksen kuitti), tilausnäkymä v3 §4 G"
+  },
+  {
+    "key": "email.reservation_cancelled.order_kept",
+    "lang": "fi",
+    "text": "Kumppanin lahjakoodi on jo lunastettu, joten tilauksesi on yhä voimassa. Ota yhteyttä, niin varataan sinulle uusi aika.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 350,
+    "placeholders": [],
+    "reason": "booking_281 peruutusviesti (peruutus + hyvityksen tila lähetyshetkellä + valmiin hyvityksen kuitti), tilausnäkymä v3 §4 G"
+  },
+  {
+    "key": "email.reservation_cancelled.order_kept",
+    "lang": "en",
+    "text": "The partner gift code has already been redeemed, so your order is still valid. Contact us and we will book you a new time.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 350,
+    "placeholders": [],
+    "reason": "booking_281 peruutusviesti (peruutus + hyvityksen tila lähetyshetkellä + valmiin hyvityksen kuitti), tilausnäkymä v3 §4 G"
+  },
+  {
+    "key": "email.reservation_cancelled.view_order",
+    "lang": "fi",
+    "text": "Näytä tilaus",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_281 peruutusviesti (peruutus + hyvityksen tila lähetyshetkellä + valmiin hyvityksen kuitti), tilausnäkymä v3 §4 G"
+  },
+  {
+    "key": "email.reservation_cancelled.view_order",
+    "lang": "en",
+    "text": "View order",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_281 peruutusviesti (peruutus + hyvityksen tila lähetyshetkellä + valmiin hyvityksen kuitti), tilausnäkymä v3 §4 G"
+  },
+  {
+    "key": "email.reservation_cancelled.sign_name",
+    "lang": "fi",
+    "text": "Tapio",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_281 peruutusviesti (peruutus + hyvityksen tila lähetyshetkellä + valmiin hyvityksen kuitti), tilausnäkymä v3 §4 G"
+  },
+  {
+    "key": "email.reservation_cancelled.sign_name",
+    "lang": "en",
+    "text": "Tapio",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "booking_281 peruutusviesti (peruutus + hyvityksen tila lähetyshetkellä + valmiin hyvityksen kuitti), tilausnäkymä v3 §4 G"
+  }
+]

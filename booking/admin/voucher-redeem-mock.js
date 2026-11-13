@@ -24,13 +24,14 @@ export function voucherRedeemMockHandlers({ st, need, err, now = new Date() }) {
     const live = (st.reservations || []).filter((r) => r.status !== 'cancelled');
     const pick = [...live.filter((r) => r.payment_status !== 'paid'), ...live.filter((r) => r.payment_status === 'paid')].slice(0, SEED.length);
     for (const r of pick) r.payment_status = 'unpaid';   // kokeilutila: lahjakortilla maksettava tilaus on maksamatta kunnes koodi lunastetaan
-    st.vcr = pick.map((r, i) => ({ id: 900 + i, code: SEED[i][0], source: SEED[i][1], status: 'open', order_id: r.order_id, created_at: new Date(now.getTime() - (i + 1) * 36e5 * 5).toISOString(), resolved_at: null, resolved_by: null, amount: null, payment_id: null }));
+    st.vcr = pick.map((r, i) => ({ id: 900 + i, code: SEED[i][0], source: SEED[i][1], status: i === 2 ? 'problem' : 'open', problem_code: i === 2 ? 'already_used' : null,   // kokeilutila: yksi ongelmarivi (koodi jo käytetty)
+      order_id: r.order_id, created_at: new Date(now.getTime() - (i + 1) * 36e5 * 5).toISOString(), resolved_at: null, resolved_by: null, amount: null, payment_id: null }));
   };
   const res = (c) => (st.reservations || []).find((r) => r.order_id === c.order_id) || {};
   const row = (c) => {
     const r = res(c), g = guessSource(c.code), open = ['open', 'processing', 'problem'].includes(c.status);
     return {
-      id: c.id, status: c.status, problem_code: null, code: c.code, code_masked: `…${c.code.replace(/[^A-Z0-9]/gi, '').slice(-4)}`,
+      id: c.id, status: c.status, problem_code: c.problem_code ?? null, code: c.code, code_masked: `…${c.code.replace(/[^A-Z0-9]/gi, '').slice(-4)}`,
       source: c.source, source_label: VCR_SOURCE_LABELS[c.source] || c.source,
       source_suggested: g.source, source_suggested_label: g.source ? VCR_SOURCE_LABELS[g.source] : null, suggestion_confidence: g.confidence, source_suggested_stored: g.source,
       payment_method: METHOD(c.source), payment_method_label: METHOD_LABEL(c.source), redeem_url: st.vcrUrls[c.source] || null,
@@ -79,7 +80,7 @@ export function voucherRedeemMockHandlers({ st, need, err, now = new Date() }) {
       if (a.p_amount != null && +a.p_amount > due) throw err('voucher_exceeds_total', 'Lahjakortin arvo ylittää maksettavan summan');
       const amount = a.p_amount != null ? +a.p_amount : due;
       const difference = Math.round((due - amount) * 100) / 100;
-      Object.assign(c, { status: 'redeemed', resolved_at: new Date().toISOString(), resolved_by: 'staff', amount, payment_id: 70000 + c.id });
+      Object.assign(c, { status: 'redeemed', problem_code: null, resolved_at: new Date().toISOString(), resolved_by: 'staff', amount, payment_id: 70000 + c.id });
       if (r.reservation_id) r.payment_status = difference > 0 ? 'partial' : 'paid';
       const link = difference > 0 ? { payment_id: 80000 + c.id, amount: difference, link_token: `mock-${c.id}`, link_path: `/maksa/?p=mock-${c.id}`, link_expires_at: null, status: 'pending', online_payment_enabled: true } : null;
       return { ok: true, already: false, id: c.id, payment_id: c.payment_id, amount, redeemed_via: 'staff', resolved_at: c.resolved_at, payment_method: METHOD(c.source), payment_method_label: METHOD_LABEL(c.source),

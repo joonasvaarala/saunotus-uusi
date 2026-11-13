@@ -2,24 +2,28 @@
 import { signIn, signOut, getSession, onAuthChange, rpc, select, adoptSessionFromHash, setPassword, setRpcOverride, setMockSession } from './sb.js';
 import { h, toast, errMsg, todayHel } from './ui.js';
 import { icon } from './icons.js';
-import { createAdminMock } from './options-mock.js';
 import { loadFilterTexts } from './filter-texts.js';
 import { primeSiteTexts, clearSiteTextsCache } from './site-texts-cache.js';
 import { needsManualRoute, parseAdminHash } from './reservation-query.js';
 import { resolveAdminPath, legacyFinanceGiftTarget, compactIdentity, toggleMobileNav, navGroupById, groupAllowed, selectGroupTab, shouldCollapseMobileNav, shouldCollapseOnNavLink } from './admin-navigation.js';
 import { setupQuickSearch } from './quick-search.js';
 import { loadNavTexts, navText } from './nav-texts.js';
+import { reviewAttentionCount } from './review-logic.js';
+import { VCR_RPC } from './voucher-redeem-logic.js';
 import { startHallintaPwa } from './pwa.js';
 import { getVersionController, startHallintaVersionWatch } from './version-check.js';
 
 const $ = (id) => document.getElementById(id);
 // Kokeilutila: osoite /hallinta/?mock=1 → keinoistunto + selaimen oma mock-data (options-mock.js). EI verkkokutsuja eikä kirjautumista; mikään ei tallennu. Ilman parametria ennallaan.
 const MOCK = new URLSearchParams(location.search).get('mock') === '1';
+// Kokeilutilassa Pikakassan "Kortti puhelimella (CheckoutX)" on simuloitu (booking_286): ei Surfboardia, ei rahaa; ?cx=decline hylkää ensimmäisen yrityksen.
 if (MOCK) {
   const mockRole = new URLSearchParams(location.search).get('role');
   const role = ['admin', 'manager', 'staff'].includes(mockRole) ? mockRole : 'manager';
   const staffPerms = ['blocks.manage', 'bookings.manage', 'customers.manage', 'giftcards.manage', 'payments.manage', 'pos.use', 'reports.daily', 'shifts.view'];
-  const mock = createAdminMock({ delay: 60, role, perms: role === 'staff' ? staffPerms : undefined });
+  // Kokeilutilan mock-data (options-mock.js + sen apumoduulit) ladataan vain tässä tilassa, ei tuotannon ensilataukseen.
+  const { createAdminMock } = await import(new URL('./options-mock.js' + new URL(import.meta.url).search, import.meta.url).href);
+  const mock = createAdminMock({ delay: 60, latePaymentScenario: new URLSearchParams(location.search).get('late-paid') === '1', checkoutx: true, role, perms: role === 'staff' ? staffPerms : undefined });
   setRpcOverride((fn, args) => mock.rpc(fn, args));
   setMockSession({ access_token: 'mock', refresh_token: 'mock', expires_at: 4102444800, user: { email: 'kokeilu@example.com' } });
   window.__adminMock = mock;
@@ -112,6 +116,7 @@ async function route() {
   try {
     const m = await r.mod();
     if (r.path === '') { dayModule = m; if (lastPath !== null && lastPath !== '') m.clearDayBundleCache?.(); }
+    const prevPath = lastPath;
     lastPath = r.path;
     await refs();
     const group = resolved.groupId ? navGroupById(resolved.groupId) : null;
@@ -121,7 +126,10 @@ async function route() {
     view.replaceChildren(...[].concat(out).filter(Boolean));
     const title = tab ? navText(tab.labelKey) : (r.labelFn ? r.labelFn() : r.label);
     document.title = `${title} – hallinta`;
-    if (r.path === '') setTimeout(() => m.prefetchAdjacentDay?.(query.get('d') || todayHel()), 0);
+    // Määrämerkki: ensimmäinen lataus + Tarkista-sivulle tulo/lähtö (kuittauksen jälkeen luku päivittyy).
+    if (prevPath === null || r.path === 'tarkista' || prevPath === 'tarkista') void refreshReviewBadge();
+    // Viereisten päivien nippua ei enää esihaeta avauksessa (3 raskasta kutsua → 1). Päivänäkymä esihakee
+    // edellisen/seuraavan päivän vasta, kun ‹/›-painiketta osoitetaan, kosketetaan tai se saa fokuksen (views/day.js).
   } catch (e) {
     if (seq !== routeSeq) return;
     console.warn(e);
@@ -185,6 +193,39 @@ $('login').addEventListener('submit', async (ev) => {
 });
 // Yläpalkin ja sivupalkin painikkeiden ikonit (icons.js, currentColor) ja tekstit (nav-texts.js, ui.admin.nav.*).
 for (const el of document.querySelectorAll('#shell [data-icon]')) el.replaceChildren(icon(el.dataset.icon, el.closest('.nav-toggle') ? 26 : 20));
+
+/** Yläpalkin Tarkista-määrämerkki: avoimet tarkistettavat (+ lunastamattomat kumppanikortit). Virhe/puuttuva migraatio → piiloon. */
+async function refreshReviewBadge() {
+  const el = $('quick-review-count');
+  const link = $('quick-review');
+  if (!el || !link) return;
+  try {
+    const [list, vouchers] = await Promise.all([
+      rpc('admin_review_list').catch(() => null),
+      rpc(VCR_RPC.unredeemed, { p_limit: 1 }).catch(() => null),
+    ]);
+    let voucherN = 0;
+    if (vouchers && typeof vouchers === 'object') {
+      voucherN = Number(vouchers.total);
+      if (!Number.isFinite(voucherN)) {
+        voucherN = Object.values(vouchers.counts || {}).reduce((s, n) => s + (Number(n) || 0), 0);
+      }
+    }
+    const n = reviewAttentionCount(list || {}, voucherN);
+    if (n > 0) {
+      el.textContent = String(n);
+      el.hidden = false;
+      link.setAttribute('aria-label', `${navText('ui.admin.nav.review')} (${n})`);
+    } else {
+      el.textContent = '';
+      el.hidden = true;
+      link.setAttribute('aria-label', navText('ui.admin.nav.review'));
+    }
+  } catch {
+    el.hidden = true;
+  }
+}
+
 function paintTopBarTexts() {
   const tn = (k) => navText(`ui.admin.nav.${k}`);
   const attr = (id, a, k) => $(id)?.setAttribute(a, tn(k));

@@ -13,7 +13,10 @@ function offerApi() {
 }
 
 const DONE = new Set(["accepted", "already_taken", "already_filled", "already_yours", "declined", "snoozed"]);
-const QUIET = new Set(["bad_token", "not_owner", "not_recipient", "load_error"]);
+const QUIET = new Set(["bad_token", "not_owner", "not_recipient", "load_error", "server_error"]);
+// booking_274: linkin vuoro ei ole enää auki → neutraali sävy (ei punainen)
+const NEUTRAL = new Set(["filled_other", "expired", "withdrawn", "cancelled"]);
+const OK = new Set(["accepted", "already_yours", "snoozed", "declined", "yours"]);
 
 export function el(doc, tag, className, text) {
   const node = doc.createElement(tag);
@@ -22,9 +25,11 @@ export function el(doc, tag, className, text) {
   return node;
 }
 
-function tone(result) {
+function tone(result, focusState, hasMessage) {
   if (!result) return "";
-  if (result === "accepted" || result === "already_yours" || result === "snoozed" || result === "declined") return " ok";
+  if (OK.has(result)) return " ok";
+  if (NEUTRAL.has(result) || (hasMessage && NEUTRAL.has(focusState))) return "";
+  if (hasMessage && focusState === "yours") return " ok";
   return " bad";
 }
 
@@ -75,12 +80,21 @@ export function render(doc, payload, onRespond) {
   const title = doc.getElementById("title");
   const stack = doc.getElementById("stack");
   const result = payload && payload.result ? payload.result : null;
-  const titleText = payload && payload.title ? payload.title : "Vahvista vastauksesi";
+  const message = payload && typeof payload.message === "string" && payload.message ? payload.message : null;
+  const focusState = payload && typeof payload.focus_state === "string" ? payload.focus_state : null;
+  // "Vahvista vastauksesi" vain kun linkin vuoro on auki (tai tila puuttuu, vanha rajapinta).
+  const fallback = !focusState || focusState === "open" ? "Vahvista vastauksesi" : "";
+  const titleText = payload && payload.title ? payload.title : fallback;
   if (title) title.textContent = titleText;
-  if ("title" in doc) doc.title = titleText;
-  if (banner) banner.className = "banner" + tone(result);
+  if ("title" in doc) doc.title = titleText || "Vuorotarjous";
+  if (banner) banner.className = "banner" + tone(result, focusState, !!message);
   if (stack) stack.textContent = "";
-  if (!stack || result === "load_error") return;
+  if (!stack || result === "load_error" || result === "server_error") return;
+  if (message) {
+    const note = el(doc, "article", "card state");
+    note.append(el(doc, "p", null, message));
+    stack.append(note);
+  }
   const acted = payload && payload.acted ? payload.acted : null;
   const hideId = result && DONE.has(result) && acted ? acted.offer_id : null;
   const focus = payload && payload.focus_offer_id ? payload.focus_offer_id : null;
@@ -99,7 +113,7 @@ export function render(doc, payload, onRespond) {
       onRespond,
     ));
   }
-  if (!acted && offers.length === 0 && !QUIET.has(result)) {
+  if (!acted && !message && offers.length === 0 && !QUIET.has(result)) {
     const empty = el(doc, "article", "card");
     empty.append(el(doc, "p", null, "Ei avoimia tarjouksia."));
     stack.append(empty);

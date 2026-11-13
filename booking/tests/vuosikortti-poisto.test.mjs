@@ -132,7 +132,7 @@ test('tekstit: ui.admin.annual_manage.* FI+EN, pending-import-52 täsmää sanak
   }
   const taken = new Set();
   for (const f of readdirSync(resolve(root, 'content'))) {
-    if (!/^site-texts\.(pending-import-(?!52\.)|imported|fallback)/.test(f) || !f.endsWith('.json')) continue;
+    if (!/^site-texts\.(pending-import-(?!52\.)|imported)/.test(f) || !f.endsWith('.json')) continue;
     const j = JSON.parse(rd(`content/${f}`));
     for (const r of Array.isArray(j) ? j : j.texts || []) taken.add(`${r.key}|${r.lang}`);
   }

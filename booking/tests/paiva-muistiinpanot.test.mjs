@@ -136,7 +136,7 @@ test('tekstit: ui.admin.day_memos.* FI+EN, pending-import-41 täsmää, ei pää
   }
   const taken = new Set();
   for (const f of readdirSync(join(root, 'content'))) {
-    if (!/^site-texts\.(pending-import-(?!41\.)|imported|fallback)/.test(f) || !f.endsWith('.json')) continue;
+    if (!/^site-texts\.(pending-import-(?!41\.)|imported)/.test(f) || !f.endsWith('.json')) continue;
     const j = JSON.parse(read(`content/${f}`));
     for (const r of Array.isArray(j) ? j : j.texts || []) taken.add(`${r.key}|${r.lang}`);
   }
@@ -159,7 +159,7 @@ test('tekstit: kannan rivi peittää oletuksen, puuttuva paikkamerkki → oletus
 test('näkymät eivät kovakoodaa uusia lauseita, kytkennät day.js/shared.js/dayparts.js', () => {
   const view = read('booking/admin/views/day-memos.js');
   assert.doesNotMatch(view, /text: '[A-ZÄÖ][^']*'/, 'day-memos.js käyttää t()-avaimia');
-  const day = read('booking/admin/views/day.js'), shared = read('booking/admin/views/shared.js'), parts = read('booking/admin/views/dayparts.js');
+  const day = read('booking/admin/views/day.js'), shared = read('booking/admin/views/order-card.js'), parts = read('booking/admin/views/dayparts.js');
   assert.match(day, /export const DAY_VIEW_SHOW_ANNOUNCEMENTS = false/);
   assert.match(day, /export const DAY_VIEW_SHOW_DAY_NOTES = false/);
   assert.match(day, /DAY_VIEW_SHOW_ANNOUNCEMENTS \? bulletinCard\(/);

@@ -11,6 +11,7 @@ import { h, fmtDate, fmtTime, todayHel, addDays, dayStartIso, statusBadge, payBa
 import { formatWhenRange, spansDays } from '../when-range.js';
 import { filterDrawer } from '../filter-drawer.js';
 import { reservationDialog } from './shared.js';
+import { openOrderView } from '../order-open.js';
 import { resourceBadges, spaceBadge } from './legs.js';
 import { optionBadge } from '../options.js';
 import { loadOptionTexts, optionText } from '../options-texts.js';
@@ -86,7 +87,7 @@ export async function render({ ctx, refs, reload, query, routePath = 'varaukset'
     }
     if (reset && !rows.length) list.append(empty('Ei varauksia hakuehdoilla.'));
     // kortti: ylärivillä aika (vasen) + tilausnumero (oikea yläkulma), keskellä nimi + tuote, alarivillä merkit (vasen alakulma) + hinta (oikea alakulma)
-    for (const r of rows) list.append(h('button', { type: 'button', class: 'listrow rescard', 'data-testid': 'reservation-row', 'data-reservation-id': r.reservation_id, 'data-option-missing': r.option_missing ? '1' : '0', onclick: () => reservationDialog(r, { methods: refs.methods, onChange: () => load(true), refs, can: ctx.can, role: ctx.role }) },
+    for (const r of rows) list.append(h('button', { type: 'button', class: 'listrow rescard', 'data-testid': 'reservation-row', 'data-reservation-id': r.reservation_id, 'data-option-missing': r.option_missing ? '1' : '0', onclick: () => openOrderView(r.order_no) || reservationDialog(r, { methods: refs.methods, onChange: () => load(true), refs, can: ctx.can, role: ctx.role }) },
       h('span', { class: 'rc-when' }, spansDays(r.starts_at, r.ends_at)
         ? h('strong', { text: formatWhenRange(r.starts_at, r.ends_at, 'fi') })
         : [h('strong', { text: fmtDate(r.starts_at) }), ` ${fmtTime(r.starts_at)}`]),
@@ -96,7 +97,7 @@ export async function render({ ctx, refs, reload, query, routePath = 'varaukset'
       h('span', { class: 'rc-price', text: money(r.total_gross) })));
     if (f.id && !openedDeepLink) {
       const target = rows.find((row) => String(row.reservation_id) === String(f.id));
-      if (target) { openedDeepLink = true; reservationDialog(target, { methods: refs.methods, onChange: () => load(true), refs, can: ctx.can, role: ctx.role }); }
+      if (target) { openedDeepLink = true; if (!openOrderView(target.order_no, { replace: true })) reservationDialog(target, { methods: refs.methods, onChange: () => load(true), refs, can: ctx.can, role: ctx.role }); }
     }
     offset += rows.length; count.textContent = `${Math.min(offset, total)} / ${total} varausta · ${periodLabel()}${f.treatment === TREATMENT_UNASSIGNED ? ` · ${optionText('ui.admin.options.filter_unassigned')}` : ''}`;
     more.replaceChildren(offset < total ? h('button', { type: 'button', class: 'btn ghost', onclick: () => load(false) }, 'Näytä lisää') : '');
@@ -136,7 +137,7 @@ export async function render({ ctx, refs, reload, query, routePath = 'varaukset'
   const reviewCount = h('span', { class: 'badge warn', hidden: true });
   rpc('admin_review_list').then((v) => { const n = reviewAttentionCount(v); if (n) { reviewCount.textContent = String(n); reviewCount.hidden = false; reviewCount.setAttribute('aria-label', `${n} tarkistettavaa`); } }).catch(() => {});
   const actions = h('div', { class: 'row wrap pageactions' },
-    h('a', { class: 'btn', href: '#/uusi?tyyppi=vanha', text: 'Vanha varaus' }),
+    h('a', { class: 'btn', href: '#/uusi?tyyppi=vanha', text: 'Jälkikirjaus' }),
     h('a', { class: 'btn ghost', href: '#/tarkista' }, 'Tarkista ', reviewCount));
   return [h('h1', { text: 'Varaukset' }), actions, drawer.node, count, list, more];
 }

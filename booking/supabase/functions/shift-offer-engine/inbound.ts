@@ -56,6 +56,15 @@ export type InboundDeps = {
   // soefix B9: tervetuloviesti kirjataan lähetetyksi vasta wamidilla; epäonnistunut lähetys vapauttaa varauksen.
   welcomeSent?: (staffId: string, wamid: string) => Promise<void>;
   welcomeRelease?: (staffId: string) => Promise<void>;
+  // booking_274: onko henkilöllä voimassa oleva vahvistamaton ylläpitomuutos (whatsapp_pending_actions).
+  // Vain pelkälle "ei"-viestille. Virhe → undefined (vanha käytös: abort).
+  hasPendingAction?: (staffId: string) => Promise<boolean>;
+};
+
+export type IntentContext = {
+  // false = ei odottavaa muutosta → pelkkä "ei" on vapaamuotoinen vastaus (unknown → _whatsapp_freeform).
+  // true / puuttuu = vanha käytös: "ei" peruu odottavan muutoksen.
+  pendingAction?: boolean;
 };
 
 export type WelcomeResult = { send: boolean; body: string | null; staffId?: string | null };
@@ -89,7 +98,7 @@ function named(text: string): string | null {
 }
 
 // Painike ohittaa tekstin. Numeroidut muokkauskomennot tunnistetaan ennen yleisiä sanoja.
-export function parseIntent(text: string | null, buttonId: string | null): Intent {
+export function parseIntent(text: string | null, buttonId: string | null, ctx: IntentContext = {}): Intent {
   const button = (buttonId ?? "").trim();
   const btn = button.match(new RegExp(`^([adyn]):(${UUID})$`, "i"));
   if (btn) {
@@ -149,9 +158,24 @@ export function parseIntent(text: string | null, buttonId: string | null): Inten
     return index ? { op: "decline", index } : { op: "decline" };
   }
   if (/^(?:vahvista|kyllä|kylla)$/u.test(raw)) return { op: "confirm" };
-  if (/^(?:peruuta|ei)$/u.test(raw)) return { op: "abort" };
+  if (raw === "ei") return ctx.pendingAction === false ? { op: "unknown" } : { op: "abort" };
+  if (raw === "peruuta") return { op: "abort" };
   if (/^(?:apua|ohje|help|komennot|\?)$/u.test(raw)) return { op: "help" };
   return { op: "unknown" };
+}
+
+export function isBareNo(text: string | null, buttonId: string | null): boolean {
+  return !(buttonId ?? "").trim() && fold(text ?? "") === "ei";
+}
+
+async function intentContext(message: ParsedInbound, staffId: string, deps: InboundDeps): Promise<IntentContext> {
+  if (!deps.hasPendingAction || !isBareNo(message.text, message.buttonId)) return {};
+  try {
+    return { pendingAction: await deps.hasPendingAction(staffId) };
+  } catch {
+    deps.log("whatsapp_inbound_failed", { step: "pending" });
+    return {};
+  }
 }
 
 // Tallennus tapahtuu aina. Vastaus vain, kun itsepalvelu on päällä ja numero on yksi aktiivinen työntekijä.
@@ -195,7 +219,7 @@ export async function processInboundMessage(message: ParsedInbound, deps: Inboun
   }
   if (!stored.inboundEnabled || !stored.staffId) return;
 
-  const intent = parseIntent(message.text, message.buttonId);
+  const intent = parseIntent(message.text, message.buttonId, await intentContext(message, stored.staffId, deps));
   const act = await deps.act(stored.id, intent);
   const body = act.replyBody?.trim() ?? "";
   if (!body || act.suppressed || !stored.replyTo) {

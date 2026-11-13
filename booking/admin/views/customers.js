@@ -5,8 +5,10 @@ import { navText } from '../nav-texts.js';
 import { normalizeCode } from '../../shop/src/discount-code-logic.js';
 import { amText, loadAmTexts, amCreatedMessage } from '../annual-manage-texts.js';
 import { h, fmtDT, fmtDate, todayHel, addDays, money, dialog, field, toast, run, empty, payBadge, statusBadge, badge } from '../ui.js';
+import { openOrderCard } from './order-card.js';
+import { openOrderView } from '../order-open.js';
 
-export async function render({ ctx, reload, query = new URLSearchParams() }) {
+export async function render({ ctx, reload, query = new URLSearchParams(), rest = '' }) {
   const PAGE = 50; let offset = 0, search = query.get('q') || '';
   const list = h('div', { class: 'list' }), more = h('div', { class: 'row center' }), count = h('p', { class: 'muted' });
   async function load(reset) {
@@ -14,13 +16,13 @@ export async function render({ ctx, reload, query = new URLSearchParams() }) {
     const rows = await rpc('admin_list_customers', { p_search: search || null, p_limit: PAGE, p_offset: offset });
     const total = rows[0]?.total_count ?? 0;
     if (reset && !rows.length) list.append(empty('Ei asiakkaita.'));
-    for (const c of rows) list.append(h('button', { type: 'button', class: 'listrow', onclick: () => card(c.id) },
+    for (const c of rows) list.append(h('button', { type: 'button', class: 'listrow', 'data-testid': 'customer-row', onclick: () => { location.hash = `#/asiakkaat/${c.id}`; } },
       h('span', { class: 'what' }, h('strong', { text: c.customer_kind === 'company' && c.company ? c.company : c.name }), h('small', { text: ` ${c.customer_kind === 'company' ? `${c.business_id || ''} · ${c.name} · ` : ''}${c.email || ''}${c.phone ? ' · ' + c.phone : ''}` })),
       h('span', { class: 'meta' }, c.customer_kind === 'company' ? badge('warn', 'Yritys') : badge('muted', 'Yksityinen'), c.customer_type === 'annual_card' ? badge('warn', 'Vuosikortti') : null, c.marketing_consent ? badge('ok', 'Markkinointi sallittu') : badge('muted', 'Ei markkinointia'), h('small', { text: `${c.orders_count} tilausta${c.last_visit ? ' · viimeksi ' + fmtDate(c.last_visit) : ''}` }))));
     offset += rows.length; count.textContent = `${Math.min(offset, total)} / ${total} asiakasta`;
     more.replaceChildren(offset < total ? h('button', { class: 'btn ghost', type: 'button', onclick: () => load(false) }, 'Näytä lisää') : '');
   }
-  async function card(id) {
+  async function card(id, after = () => load(true)) {
     const c = await rpc('admin_get_customer', { p_id: id });
     const f = h('form', { class: 'stack' },
       field('Nimi', h('input', { name: 'name', value: c.name, required: true })), field('Sähköposti', h('input', { name: 'email', type: 'email', value: c.email || '' })),
@@ -38,7 +40,11 @@ export async function render({ ctx, reload, query = new URLSearchParams() }) {
       h('button', { class: 'btn primary', type: 'submit', text: 'Tallenna' }));
     f.marketing_consent.checked = !!c.marketing_consent;
     const d = dialog(c.name, h('div', { class: 'stack' }, f, cardsBox(c), h('h3', { text: 'Tilaushistoria' }),
-      (c.orders || []).length ? h('ul', { class: 'reslist' }, c.orders.map((o) => h('li', { class: 'resrow' }, h('span', {}, h('strong', { text: `#${o.order_no}` }), ` ${fmtDT(o.created_at)} · ${money(o.total)} · ${o.channel}`, h('br'), (o.reservations || []).map((r) => `${r.product_name} ${fmtDT(r.starts_at)} (${r.persons} hlö)`).join('; ')), h('span', { class: 'meta' }, statusBadge(o.status), payBadge(o.payment_status))))) : empty('Ei tilauksia.')));
+      (c.orders || []).length ? h('ul', { class: 'reslist' }, c.orders.map((o) => h('li', { class: 'resrow' }, h('button', { type: 'button', class: 'linkish', 'data-testid': 'customer-open-order', onclick: () => {
+        if (o.order_no && openOrderView(o.order_no)) d.close();
+        else if (o.order_id) openOrderCard({ orderId: o.order_id, methods: ctx.refs?.methods || [], refs: ctx.refs, can: ctx.can, role: ctx.role });
+        else if (o.order_no) location.hash = `#/tilaukset?order=${encodeURIComponent(o.order_no)}`;
+      } }, h('strong', { text: `#${o.order_no}` }), ` ${fmtDT(o.created_at)} · ${money(o.total)} · ${o.channel}`, h('br'), (o.reservations || []).map((r) => `${r.product_name} ${fmtDT(r.starts_at)} (${r.persons} hlö)`).join('; ')), h('span', { class: 'meta' }, statusBadge(o.status), payBadge(o.payment_status))))) : empty('Ei tilauksia.')));
     f.addEventListener('submit', (ev) => { ev.preventDefault(); run(f.querySelector('button'), async () => {
       const fd = new FormData(f);
       const patch = { name: fd.get('name'), email: fd.get('email') || null, phone: fd.get('phone') || null, company: fd.get('company') || null, notes: fd.get('notes') || null, marketing_consent: f.marketing_consent.checked };
@@ -49,7 +55,7 @@ export async function render({ ctx, reload, query = new URLSearchParams() }) {
           einvoice_address: fd.get('einvoice_address') || null, einvoice_operator: fd.get('einvoice_operator') || null, invoice_reference: fd.get('invoice_reference') || null });
       }
       await rpc('admin_update_customer', { p_id: id, p_patch: patch });
-      toast('Tallennettu'); d.close(); load(true);
+      toast('Tallennettu'); d.close(); after();
     }); });
   }
   // Lisää asiakas: yksityis- tai yritysasiakas (yritykselle y-tunnus, laskutus- ja verkkolaskutiedot). Oikeus customers.manage.
@@ -84,6 +90,11 @@ export async function render({ ctx, reload, query = new URLSearchParams() }) {
             const r = await rpc('admin_revoke_annual_card', { p_id: a.id, p_cancel_future: cancelFuture });
             toast(`Vuosikortti peruttu${r.cancelled ? `, ${r.cancelled} varausta peruttu` : ''}`); document.querySelector('dialog')?.close(); load(true); }) }, 'Peru kortti') : null)))) : empty('Ei vuosikorttia.'),
       can ? grant : null);
+  }
+  // v3 (PR 1): #/asiakkaat/<id> = asiakasnäkymä (views/customer-view.js); Muokkaa avaa nykyisen asiakaskortin, tallennus piirtää näkymän uudelleen.
+  if (/^[1-9][0-9]{0,15}$/.test(String(rest || ''))) {
+    const { renderCustomerView } = await import('./customer-view.js');
+    return renderCustomerView({ ctx, rpc, id: Number(rest), onEdit: (cid) => card(cid, () => reload?.()) });
   }
   let t; const q = h('input', { type: 'search', value: search, placeholder: 'Hae nimellä, sähköpostilla tai puhelimella', 'aria-label': 'Hae asiakkaita', oninput: (e) => { search = e.target.value; clearTimeout(t); t = setTimeout(() => load(true), 250); } });
   await Promise.all([load(true), ctx.can('annual_cards.manage') ? loadAmTexts(rpc) : null]);   // booking_152: koodivihje (ui.admin.annual_manage.*)

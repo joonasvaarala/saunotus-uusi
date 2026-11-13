@@ -2,6 +2,7 @@
 // (pending-import-57 = alkuperäiset, imported-pr250 (ent. pending-import-97, tuotu tuotantoon 29.10.) = osallistujat, viestit ja uusi kerran lisäys). Sanakirja on varalla,
 // kunnes tuonti on ajettu. Haku epäonnistuu tai rivi puuttuu → sanakirja. Paikkamerkit {{var:nimi}} täytetään koodissa.
 import { getLang } from './talous-i18n.js';
+import { getSiteTexts, clearSiteTextsCache } from './site-texts-cache.js';
 
 export const PREFIXES = ['ui.admin.events.', 'ui.admin.product.copy', 'admin.events.'];
 const E = 'ui.admin.events.';
@@ -540,13 +541,13 @@ export const COURSE_TEXTS = {
 };
 
 let db = new Map(), loaded = false;
-export function _resetEventsTexts() { db = new Map(); loaded = false; }
+export function _resetEventsTexts() { clearSiteTextsCache(); db = new Map(); loaded = false; }
 /** Tietokannan tekstit (public_get_site_texts); virhe → sanakirja. */
 export async function loadEventsTexts(rpcFn) {
   if (loaded) return true;
   if (typeof rpcFn !== 'function') return false;
   try {
-    const t = await rpcFn('public_get_site_texts', { p_lang: null });
+    const t = await getSiteTexts(rpcFn);
     if (!t || t.ok !== true || !Array.isArray(t.texts)) return false;
     const next = new Map();
     for (const r of t.texts) {

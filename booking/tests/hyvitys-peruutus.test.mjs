@@ -56,10 +56,11 @@ test('rollback: poistaa kaikki uudet funktiot, ei koske olemassa oleviin', () =>
   assert.ok(readdirSync(join(repo, 'booking/supabase/migrations')).filter((n) => /booking_135/.test(n)).length <= 1, 'booking_135 enintään yksi (jonotuslista)');
 });
 
-test('tekstit: FI+EN samat avaimet, pending-import-37 vastaa sanakirjaa, ei emojeja eikä HTML:ää', () => {
+test('tekstit: FI+EN samat avaimet, pending-import-37 (+ booking_280/281: pending-import-138) vastaa sanakirjaa, ei emojeja eikä HTML:ää', () => {
   const { fi, en } = T.REFUND_CANCEL_TEXTS;
   assert.deepEqual(Object.keys(fi).sort(), Object.keys(en).sort());
-  const rows = JSON.parse(read('content/site-texts.pending-import-37.json'));
+  const rows = [...JSON.parse(read('content/site-texts.pending-import-37.json')),
+    ...JSON.parse(read('content/site-texts.pending-import-138.json')).filter((r) => String(r.key).startsWith('ui.admin.refund_cancel.'))];
   assert.equal(rows.length, Object.keys(fi).length * 2);
   const seen = new Set();
   for (const r of rows) {
@@ -74,7 +75,7 @@ test('tekstit: FI+EN samat avaimet, pending-import-37 vastaa sanakirjaa, ei emoj
   }
   // avain ei ole muissa tuontitiedostoissa
   for (const f of readdirSync(join(repo, 'content'))) {
-    if (!/^site-texts\.(pending-import|imported)/.test(f) || f === 'site-texts.pending-import-37.json' || !f.endsWith('.json')) continue;
+    if (!/^site-texts\.(pending-import|imported)/.test(f) || f === 'site-texts.pending-import-37.json' || f === 'site-texts.pending-import-138.json' || !f.endsWith('.json')) continue;
     for (const r of JSON.parse(read(`content/${f}`))) assert.ok(!String(r.key).startsWith('ui.admin.refund_cancel.'), `${f}: ${r.key}`);
   }
   assert.equal(T.rcText('ui.admin.refund_cancel.refund_yes', { amount: '12,00 €' }, 'fi'), 'Kyllä, hyvitä 12,00 €');
@@ -152,7 +153,7 @@ test('käyttöliittymä: kysymykset oletuksena Ei, oikeudet tarkistetaan, peruut
   assert.match(rc, /if \(canRefund\) \{\s*try \{ plan = await rpc\('admin_reservation_refund_preview'/, 'esikatselu vain payments.refund-oikeudella');
   assert.match(rc, /rpc\('admin_cancel_reservation'/);
   assert.match(rc, /processOnlineRefunds\(online, res\?\.refunds\)/, 'verkkohyvitys käsitellään Edge-funktiolla');
-  const sh = read('booking/admin/views/shared.js');
+  const sh = read('booking/admin/views/order-card.js');
   assert.match(sh, /canRefund: !!can\('payments\.refund'\)/);
   assert.doesNotMatch(sh, /confirm\('Perutaanko varaus\?'\)/, 'vanha confirm korvattu dialogilla');
   const to = read('booking/admin/views/talous-orders.js');

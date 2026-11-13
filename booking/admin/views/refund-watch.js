@@ -1,4 +1,5 @@
 // Kassa ja talous › Hyvitysten seuranta (booking_218). Oikeus bookings.manage tai admin.
+import { prText, loadPrTexts } from '../partial-refund-texts.js';
 import { h, toast, errMsg, badge } from '../ui.js';
 import { fmt, getLang } from '../talous-i18n.js';
 import { formDialog } from './talous-ui.js';
@@ -51,7 +52,7 @@ export async function render({ ctx }) {
       h('td', { text: row.order_no != null ? `#${row.order_no}` : '–' }),
       h('td', {}, badge(row.status === 'failed' ? 'st-cancelled' : 'st-pending', statusText(row)), row.aging ? badge('pay-failed', rw('ui.admin.refund_watch.aging')) : null),
       h('td', { text: rw('ui.admin.refund_watch.age_hours', { hours: row.age_hours ?? '' }) }),
-      h('td', { text: row.provider || '–' }),
+      h('td', {}, row.provider || '–', row.reason === 'customer_reduce' ? [' ', badge('st-pending', prText('refund.customer_reduce'))] : null),   // booking_284: asiakkaan oma pienennys
       h('td', {}, actions),
     );
     return tr;
@@ -101,6 +102,7 @@ export async function render({ ctx }) {
     count,
     table,
   );
+  await loadPrTexts(rpc).catch(() => false);
   try { await load(); } catch (e) { root.append(h('p', { class: 'err', role: 'alert', text: errMsg(e) })); }
   return root;
 }

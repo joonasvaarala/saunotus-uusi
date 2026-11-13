@@ -101,7 +101,7 @@ function procountorStatus(cfg) {
 const PERMS = ['bookings.manage', 'bookings.override', 'customers.manage', 'catalog.edit', 'payments.manage', 'payments.refund', 'reports.view', 'settings.edit', 'pos.use', 'invoices.manage', 'giftcards.manage', 'messages.edit'];
 const CODE_RE = /^[a-z0-9_]{1,40}$/;
 
-export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, role = 'manager' } = {}) {
+export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, role = 'manager', latePaymentScenario = false, checkoutx = false } = {}) {
   const today = todayHel(now);
   const st = {
     calls: [], perms: [...perms],
@@ -196,7 +196,9 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
     posOrders: [],
     posMail: [],
     posCustomers: [],
-    posModes: { mobilepay_mode: 'test', vismapay_mode: 'dry_run' },
+    posModes: { mobilepay_mode: 'test', vismapay_mode: 'dry_run', checkoutx_mode: checkoutx ? 'test' : 'off' },
+    // booking_286: Kortti puhelimella simuloituna (?mock=1): ei Surfboardia, ei CheckoutX-sovellusta, ei rahaa. ?cx=decline → ensimmäinen yritys hylätään.
+    cx: { terminals: [{ terminal_id: 'SIM0001', label: 'Kokeilupuhelin (simuloitu)', active: true, env: 'simulated' }], payments: [], seq: 0 },
     resendMode: 'dry_run',
     productQr: [],
     invCustomers: [],
@@ -246,7 +248,12 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
     r.legs = [{ leg_id: id, role: 'space', resource_code: 'rauni', starts_at: r.starts_at, ends_at: r.ends_at, persons, skill: null }];
     st.reservations.push(r); return r;
   };
-  addRes({ pid: 10, date: today, at: '16:00', persons: 2, cust: 1, optId: 1 });
+  {
+    // Kokeilutila: yhdellä varauksella lisäosto, jotta kortin lisäostorivi ja tilauserittely näkyvät (vain mock).
+    const r1 = addRes({ pid: 10, date: today, at: '16:00', persons: 2, cust: 1, optId: 1 });
+    r1.mock_addons = [{ addon_id: 1, name: 'Saunavihta', quantity: 1, unit_price: 13, line_total: 13, vat_rate: 25.5 }];
+    r1.total_gross = Number(r1.total_gross) + 13;
+  }
   addRes({ pid: 10, date: today, at: '18:00', persons: 1, cust: 2, optId: null, pay: 'unpaid' });   // vanha varaus: valintaa ei ole → "valitsematta"
   addRes({ pid: 8, date: today, at: '17:00', persons: 3, cust: 3, optId: null });
   addRes({ pid: 10, date: addDays(today, 1), at: '16:30', persons: 1, cust: 4, optId: 3 });
@@ -369,13 +376,31 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
       return { ok: true, reservation_id: r.reservation_id, order_id: r.order_id, status: r.status, total: amt, unallocated: 0,
         payments: amt > 0 ? [{ payment_id: r.reservation_id + 7000, provider: 'manual', method: 'card_terminal', gift_card: false, online_off: false, amount: amt, lines: [] }] : [] };
     },
+    // booking_280/281: peruutuksen valinnat. Kokeilutila: viimeinen maksettu varaus on maksettu lahjakortilla, joka kolmas (id % 3 = 0) kumppanikoodilla (lunastettu).
+    admin_reservation_cancel_options: (a) => {
+      need('bookings.manage');
+      const r = st.reservations.find((x) => x.reservation_id === +a.p_reservation_id); if (!r) throw err('not_found', 'Varausta ei löydy');
+      const paid = r.payment_status === 'paid' && !r.refunded ? +r.total_gross : 0;
+      const lastPaid = st.reservations.filter((x) => x.payment_status === 'paid').at(-1);
+      const gc = paid > 0 && r === lastPaid && r.reservation_id % 3 !== 0 ? [{ payment_id: r.reservation_id + 7100, gift_card_id: 900 + r.reservation_id, amount: paid, code_last4: '4821', valid_to: '2027-06-30', card_status: 'active', keep_allowed: true }] : [];
+      const partner = paid > 0 && r.reservation_id % 3 === 0 ? paid : 0;
+      const gcTotal = gc.reduce((s, x) => s + x.amount, 0);
+      return { ok: true, reservation_id: r.reservation_id, order_id: r.order_id, status: r.status, future: true, active_in_order: 1,
+        gift_cards: gc, gift_card_total: gcTotal, gift_card_choice_required: gc.length > 0, partner_share: partner, voucher_redeemed: partner > 0, order_stays: partner > 0,
+        money_share: st.perms.includes('payments.refund') ? paid - gcTotal - partner : null, unallocated: 0, invoice_locked: false, customer_email: !!r.customer_email || true };
+    },
     admin_cancel_reservation: (a) => {
       need('bookings.manage'); if (a.p_refund === true) need('payments.refund');
+      { const o = handlers.admin_reservation_cancel_options(a);
+        if (o.gift_card_choice_required && a.p_gift_card_keep == null) throw err('gift_card_keep_required', 'Valitse, jätetäänkö lahjakorttikoodi voimaan'); }
       const r = st.reservations.find((x) => x.reservation_id === +a.p_reservation_id); if (!r) throw err('not_found', 'Varausta ei löydy');
       if (!['pending', 'confirmed'].includes(r.status)) throw err('invalid_status', 'Vain voimassa olevan varauksen voi perua');
-      const pv = a.p_refund === true ? handlers.admin_reservation_refund_preview(a) : { payments: [], total: 0 };
+      const opt = handlers.admin_reservation_cancel_options(a);
+      const pv = a.p_refund === true && opt.money_share > 0 ? handlers.admin_reservation_refund_preview(a) : { payments: [], total: 0 };
       r.status = 'cancelled'; if (pv.total > 0) r.refunded = true;
-      return { ok: true, cancelled: true, order_id: r.order_id, refunds: pv.payments.map((p) => ({ payment_id: p.payment_id, provider: p.provider, amount: p.amount, refund_id: 9e6, status: 'done' })), refunded_total: pv.total };
+      return { ok: true, cancelled: true, order_id: r.order_id, refunds: pv.payments.map((p) => ({ payment_id: p.payment_id, provider: p.provider, amount: p.amount, refund_id: 9e6, status: 'done' })), refunded_total: pv.total,
+        gift_card: opt.gift_cards.map((g) => ({ payment_id: g.payment_id, amount: g.amount, action: a.p_gift_card_keep ? 'returned' : 'forfeited' })),
+        partner_share: opt.partner_share, order_kept: opt.voucher_redeemed, notified: a.p_notify === true, action_id: a.p_notify == null ? null : '00000000-0000-4000-a000-000000000281' };
     },
     admin_my_permissions: () => ({ role, role_label: role === 'staff' ? 'Työntekijä (esimerkki)' : role === 'admin' ? 'Pääkäyttäjä (esimerkki)' : 'Päällikkö (esimerkki)', permissions: st.perms }),
     admin_list_products: () => st.products.map((p) => ({ ...p })),
@@ -569,22 +594,41 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
         options: handlers.admin_list_product_options({}), extras: handlers.admin_day_extras(a),
         site_texts: handlers.public_get_site_texts(), notes_bundle: handlers.admin_list_day_notes(a) };
     },
+    // booking_276: kevyt päivänvaihtonippu ja hallinnan tekstit (sama sisältö kuin admin_day_bundlessa / public_get_site_texts)
+    admin_day_data: (a) => {
+      const b = handlers.admin_day_bundle(a);
+      return { date: b.date, light: true, view: b.view, reservations: b.reservations, shifts: b.shifts, addons: b.addons,
+        options: b.options, extras: b.extras, notes_bundle: b.notes_bundle };
+    },
+    admin_ui_texts: () => handlers.public_get_site_texts(),
     admin_day_view: (a) => {
       const rs = st.reservations.filter((r) => r.starts_at >= helIso(a.p_date, '00:00') && r.starts_at < helIso(addDays(a.p_date, 1), '00:00'));
       return { date: a.p_date, sessions: [], blocks: [], prep: [], addon_totals: [],
         reservations: rs.map((r) => ({ reservation_id: r.reservation_id, order_id: r.order_id, order_no: r.order_no, status: r.status, payment_status: r.payment_status, product_name: r.product_name, mode: r.mode, starts_at: r.starts_at, ends_at: r.ends_at, persons: r.persons,
           customer_name: r.customer_name, customer_phone: r.customer_phone, source: 'native', external_id: null, customer_kind: 'private', company: null, space_code: r.space_code, lifecycle: r.lifecycle, quota_exempt: false, override_reason: null,
-          therapist_missing: false, therapist_missing_open: false, notes: r.notes, legs: r.legs, addons: [], option: optJson(r.option_id), option_missing: missing(r) })) };
+          therapist_missing: false, therapist_missing_open: false, notes: r.notes, legs: r.legs, addons: (r.mock_addons || []).map((x) => ({ ...x })), option: optJson(r.option_id), option_missing: missing(r) })) };
+    },
+    admin_order_lookup: (a) => {   // booking_278: tilausnumero → order_id
+      const r = st.reservations.find((x) => x.order_no === Number(a.p_order_no)); if (!r) throw err('not_found', 'Tilausta ei löydy');
+      return { order_id: r.order_id, order_no: r.order_no };
     },
     admin_get_order: (a) => {
+      // Tilausrivit kuten tuotannossa: varausrivi + lisäostot alle, ALV tuotteen kannasta (line_vat/line_net).
+      const vatRow = (gross, rate) => { const vat = Math.round((gross - gross / (1 + rate / 100)) * 100) / 100; return { line_vat: vat, line_net: Math.round((gross - vat) * 100) / 100 }; };
+      const mockOrderItems = (r) => {
+        const extras = r.mock_addons || [], extra = extras.reduce((n, x) => n + Number(x.line_total || 0), 0);
+        const base = (Number(r.total_gross) || 0) - extra, rate = Number(product(r.product_id)?.vat_rate ?? 25.5), id = r.reservation_id * 10;
+        return [{ id, parent_item_id: null, kind: 'reservation', product_id: r.product_id, name: r.product_name, quantity: 1, unit_price: base, line_total: base, vat_rate: rate, ...vatRow(base, rate) },
+          ...extras.map((x, i) => ({ id: id + i + 1, parent_item_id: id, kind: 'addon', product_id: null, name: x.name, quantity: x.quantity, unit_price: x.unit_price, line_total: x.line_total, vat_rate: x.vat_rate, ...vatRow(x.line_total, x.vat_rate) }))];
+      };
       const r = st.reservations.find((x) => x.order_id === a.p_order_id); if (!r) throw err('not_found', 'Tilausta ei löydy');
       const total = Number(r.total_gross) || 0;
       const paid = r.payment_status === 'paid' ? total : 0;
       const unpaid = r.payment_status === 'paid' ? 0 : total;
       return { order_id: r.order_id, order_no: r.order_no, status: r.order_status, payment_status: r.payment_status, total, source_channel: 'web', created_at: r.created_at, customer_kind: 'private', billing: null, invoice_reference: null,
         customer: { id: r.customer_id, name: r.customer_name, email: r.customer_email, phone: r.customer_phone },
-        reservations: [{ id: r.reservation_id, status: r.status, product_name: r.product_name, mode: r.mode, starts_at: r.starts_at, ends_at: r.ends_at, persons: r.persons, notes: r.notes, item_total: total, product_id: r.product_id,
-          option: optJson(r.option_id), option_choices: choicesJson(r.product_id), option_missing: missing(r), addons: [] }], items: [], payments: [],
+        reservations: [{ id: r.reservation_id, item_id: r.reservation_id * 10, status: r.status, product_name: r.product_name, mode: r.mode, starts_at: r.starts_at, ends_at: r.ends_at, persons: r.persons, notes: r.notes, item_total: total, product_id: r.product_id,
+          option: optJson(r.option_id), option_choices: choicesJson(r.product_id), option_missing: missing(r), addons: (r.mock_addons || []).map((x) => ({ ...x })) }], items: mockOrderItems(r), payments: [],
         balance: { total, paid, refunded: 0, pending_link: 0, unpaid, unpaid_unlinked: unpaid, net_paid: paid },
         is_native: r.source !== 'johku', staff_can_add: r.source !== 'johku' && ['confirmed', 'completed'].includes(r.order_status) };
     },
@@ -634,6 +678,14 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
       if (o) Object.assign(o, v); else { o = { id: Math.max(0, ...st.options.map((x) => x.id)) + 1, product_id: a.p_product_id, code, ...v }; st.options.push(o); }
       return { ok: true, option: { ...o } };
     },
+    admin_ack_archived_late_payment: (a) => {
+      need('payments.manage');
+      const note = String(a.p_note || '').trim();
+      if (note.length < 3 || note.length > 1000) throw err('invalid_param', 'Kirjoita käsittelyselite');
+      if (!latePaymentScenario || a.p_payment_id !== 279001) throw err('not_found', 'Maksua ei löydy');
+      const already = !!st.latePaymentAcknowledged; st.latePaymentAcknowledged = true;
+      return { ok: true, already, mock: true, payment_id: a.p_payment_id };
+    },
     admin_review_list: () => {
       const ackedIds = new Set(st.blockAcks.map((a) => `${a.reservation_id}:${a.block_id}`));
       const open = st.blockConflicts.filter((b) => !ackedIds.has(`${b.reservation_id}:${b.block_id}`));
@@ -641,7 +693,7 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
         const a = st.blockAcks.find((x) => x.reservation_id === b.reservation_id && x.block_id === b.block_id);
         return { ...b, ack_id: a.id, ack_reason: a.ack_reason, acked_by_label: a.acked_by_label, acked_at: a.acked_at };
       });
-      return { missing_therapist: [], therapist_conflicts: [], block_conflicts: open, acked_block_conflicts: acked, overrides: [], orphan_addons: [] };
+      return { archived_late_payments: st.perms.includes('payments.manage') && latePaymentScenario && !st.latePaymentAcknowledged ? [{ payment_id: 279001, order_id: 1, order_no: 10001, amount: 20, customer_name: 'KOKEILU – ei oikea tilaus', paid_at: now.toISOString() }] : [], missing_therapist: [], therapist_conflicts: [], block_conflicts: open, acked_block_conflicts: acked, overrides: [], orphan_addons: [] };
     },
     admin_ack_block_conflict: (a) => {
       if (!st.perms.includes('blocks.manage') && !st.perms.includes('bookings.override')) throw err('forbidden', 'Ei oikeutta tähän toimintoon (blocks.manage tai bookings.override)');
@@ -670,12 +722,16 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
     },
     admin_pos_tenders: () => {
       need('pos.use');
-      return { mobilepay_mode: st.posModes.mobilepay_mode, vismapay_mode: st.posModes.vismapay_mode, site_base_url: 'https://saunotus.fi', drinks_path: '/juomat/', drinks_path_en: '/en/drinks/', tenders: [
+      return { mobilepay_mode: st.posModes.mobilepay_mode, vismapay_mode: st.posModes.vismapay_mode, checkoutx_mode: st.posModes.checkoutx_mode, site_base_url: 'https://saunotus.fi', drinks_path: '/juomat/', drinks_path_en: '/en/drinks/', tenders: [
         { code: 'payment_link', handler: 'payment_link', channels: ['pos'], active: true, sort_order: 10, unavailable_reason: null },
         { code: 'mobilepay', handler: 'mobilepay', channels: ['pos', 'drinks'], active: true, sort_order: 20, unavailable_reason: null },
         { code: 'visma_pay', handler: 'visma_pay', channels: ['drinks'], active: true, sort_order: 30, unavailable_reason: null },
         { code: 'card_terminal', handler: 'terminal', channels: ['pos'], active: false, sort_order: 40, unavailable_reason: 'not_implemented' },
-      ] };
+      ].concat(st.posModes.checkoutx_mode === 'test' ? [{ code: 'checkoutx', handler: 'checkoutx', channels: ['pos'], active: true, sort_order: 15, unavailable_reason: null }] : []) };
+    },
+    admin_get_checkoutx_status: () => {
+      need('pos.use');
+      return { ok: true, mode: st.posModes.checkoutx_mode, simulated: true, terminals: st.cx.terminals.filter((x) => x.active), secrets: [] };
     },
     admin_pos_checkout: (a) => {
       need('pos.use');
@@ -1055,7 +1111,7 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
     },
     admin_create_invoice_from_order: (a) => {
       need('invoices.manage');
-      const res = st.reservations.find((r) => r.order_id === a.p_order_id || r.order_no === a.p_order_id);
+      const res = st.reservations.find((r) => r.order_id === a.p_order_id);   // HALL-LASKUT-01: vain sisäinen id, kuten tuotannossa
       if (!res) throw err('not_found', 'Tilausta ei löydy');
       const customer = st.invCustomers[0] || { id: 1, company_name: res.customer_name, name: res.customer_name, email: res.customer_email, business_id: null, einvoice_address: null, einvoice_operator: null };
       if (!st.invCustomers.length) st.invCustomers.push(customer);
@@ -1089,5 +1145,56 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
     staffOnly();
     return structuredClone(f(args || {}));
   }
-  return { rpc, state: st, today };
+  // Edge-funktioiden kokeilutila: vain checkoutx-pos simuloidaan (muut fn-kutsut eivät kuulu Pikakassaan).
+  // Maksu hyväksytään toisella tilakyselyllä (n. 2,5 s); syvälinkkiä ei ole, joten CheckoutX-sovellusta ei avata.
+  function cxPos(b) {
+    need('pos.use');
+    if (st.posModes.checkoutx_mode !== 'test') throw err('checkoutx_off', 'Kortti puhelimella ei ole käytössä');
+    const decline = new URLSearchParams(globalThis.location?.search || '').get('cx') === 'decline';
+    const pay = () => st.cx.payments.find((x) => x.payment_id === b.payment_id);
+    switch (b.action) {
+      case 'start': {
+        const o = st.posOrders.find((x) => x.order_id === b.order_id);
+        if (!o) throw err('not_found', 'Kassatilausta ei löydy');
+        if (!st.cx.terminals.some((x) => x.active && x.terminal_id === b.terminal_id)) throw err('terminal_not_registered', 'Puhelinta ei ole liitetty');
+        for (const x of st.cx.payments) if (x.order_id === o.order_id && x.state === 'pending') x.state = 'cancelled';
+        const tries = st.cx.payments.filter((x) => x.order_id === o.order_id).length;
+        const row = { payment_id: 9000 + (++st.cx.seq), order_id: o.order_id, state: 'pending', polls: 0, outcome: decline && tries === 0 ? 'failed' : 'paid' };
+        st.cx.payments.push(row);
+        return { ok: true, simulated: true, payment_id: row.payment_id, amount: o.total, deep_link: null, configure_link: null };
+      }
+      case 'status': {
+        const row = pay();
+        if (!row) throw err('not_found', 'Maksua ei löydy');
+        if (row.state === 'pending' && ++row.polls >= 2) {
+          row.state = row.outcome;
+          if (row.state === 'paid') { const o = st.posOrders.find((x) => x.order_id === row.order_id); if (o) o.arm = true; }
+        }
+        return { ok: true, simulated: true, state: row.state, failure_reason: row.state === 'failed' ? 'DECLINED' : null };
+      }
+      case 'cancel': {
+        const row = pay();
+        if (!row) throw err('not_found', 'Maksua ei löydy');
+        if (row.state === 'pending') row.state = 'cancelled';
+        return { ok: true, simulated: true, state: row.state };
+      }
+      case 'configure': return { ok: true, simulated: true, deep_link: null };
+      case 'register_start': need('settings.edit'); return { ok: true, simulated: true, registration_code: `sim${st.cx.seq + 1}`, deep_link: null };
+      case 'register_check': {
+        need('settings.edit');
+        const id = `SIM${String(st.cx.terminals.length + 1).padStart(4, '0')}`;
+        const label = String(b.label || 'Kokeilupuhelin').slice(0, 60);
+        st.cx.terminals.push({ terminal_id: id, label, active: true, env: 'simulated' });
+        return { ok: true, simulated: true, registered: true, terminal_id: id, label };
+      }
+      default: throw err('bad_request', 'Tuntematon toiminto');
+    }
+  }
+  async function fn(name, body = {}) {
+    st.calls.push({ name: `fn:${name}`, args: body });
+    if (delay) await new Promise((r) => setTimeout(r, delay));
+    if (name !== 'checkoutx-pos') throw err('mock_unsupported', `Kokeilutila: Edge-funktiota ${name} ei ole mockattu (ei verkkokutsua).`);
+    return structuredClone(cxPos(body || {}));
+  }
+  return { rpc, fn, state: st, today };
 }

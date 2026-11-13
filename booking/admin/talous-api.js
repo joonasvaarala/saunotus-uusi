@@ -8,7 +8,8 @@
 //     siirtyy mockiin, sivu näyttää "ominaisuus ei vielä käytössä" -ilmoituksen (api.missing) – muut toiminnot pysyvät oikeina.
 //   · Kirjoittavat toiminnot (lisäys, maksulinkki, maksun kirjaus, hyvitys, kuitin uudelleenlähetys) menevät oikeassa tilassa aina oikealle palvelimelle (ei mock-varakutsua → ei näennäisiä onnistumisia).
 //   · Kuitit: getReceipt (teksti + snapshot), resendReceipt, receiptPdfUrl (receipt-pdf?t=<public_token>, URL muodostetaan hallinnan Supabase-asetuksesta, ei palvelimen pdf_url-kentästä).
-import { createMock } from './talous-mock.js';
+// Mock-data ladataan vasta kun sitä tarvitaan (?mock=1 tai puuttuvan RPC:n varapolku): ei tuotannon ensilataukseen. Sama ?v=-tunnus kuin tällä moduulilla.
+const lazyMockModule = () => import(new URL('./talous-mock.js' + new URL(import.meta.url).search, import.meta.url).href);
 
 export const RPC = {
   listOrders: 'admin_list_orders', getOrder: 'admin_get_order', listPayments: 'admin_list_payments', listAddons: 'admin_list_addons',
@@ -16,6 +17,7 @@ export const RPC = {
   reportDaily: 'admin_report_daily', reportMonthly: 'admin_report_month', reportRange: 'admin_report_range', reportTransactions: 'admin_report_transactions', reportGiftCards: 'admin_report_gift_cards', reportCsv: 'admin_report_csv', reportAccrual: 'admin_report_accrual', reportAccrualCsv: 'admin_report_accrual_csv', reportInvoices: 'admin_report_invoices', reportProviderFees: 'admin_report_provider_fees', salesChart: 'admin_sales_chart',
   getReceipt: 'admin_get_receipt', resendReceipt: 'admin_resend_receipt',
   annualCardForOrder: 'admin_annual_card_for_order',   // booking_146: tilauksen vuosikortti + koodin sähköpostin tila
+  orderDeleteCheck: 'admin_order_delete_check', deleteUnpaidOrder: 'admin_delete_unpaid_order',   // booking_279: maksamattoman tilauksen poisto (arkistointi)
 };
 export class FeatureNotReady extends Error {
   constructor(rpc) { super(`Ominaisuus ei vielä käytössä (${rpc})`); this.name = 'FeatureNotReady'; this.code = 'feature_not_ready'; this.rpc = rpc; }
@@ -44,7 +46,9 @@ export function normOrderRow(r) {
     source_channel: r.source_channel ?? '', is_native: r.is_native !== false, total_gross: total, paid_amount: paid, refunded_amount: num(r.refunded ?? r.refunded_amount),
     unpaid_amount: r.unpaid != null || r.unpaid_amount != null ? num(r.unpaid ?? r.unpaid_amount) : round2(Math.max(0, total - paid)),
     customer_name: r.customer_name ?? '', customer_company: r.customer_company ?? null, customer_kind: r.customer_kind ?? null,
-    first_reservation_at: r.first_start ?? r.first_reservation_at ?? null, last_end: r.last_end ?? null, reservation_count: num(r.reservation_count), payment_count: num(r.payment_count), receipt_count: num(r.receipt_count), last_paid_at: r.last_paid_at ?? null };
+    archived_at: r.archived_at ?? null, archived_late_paid: r.archived_late_paid === true,
+    first_reservation_at: r.first_start ?? r.first_reservation_at ?? null, last_end: r.last_end ?? null, reservation_count: num(r.reservation_count), payment_count: num(r.payment_count), receipt_count: num(r.receipt_count), last_paid_at: r.last_paid_at ?? null,
+    invoice_id: r.invoice_id ?? null, invoice_no: r.invoice_no ?? null, invoice_status: r.invoice_status ?? null, invoice_kind: r.invoice_kind ?? null };
 }
 // admin_list_payments.rows[] (EI laskurivejä: line_count; rivit haetaan admin_get_order:sta)
 export function normPaymentRow(p) {
@@ -69,7 +73,7 @@ export function normOrderPayment(p) {
 export function normOrder(o) {
   const b = o.balance || {}, payments = (o.payments || []).map(normOrderPayment);
   const reservations = (o.reservations || []).map((x) => ({ reservation_id: x.id ?? x.reservation_id, item_id: x.item_id ?? null, product_name: x.product_name, mode: x.mode ?? null, starts_at: x.starts_at, ends_at: x.ends_at, persons: x.persons, status: x.status, item_total: num(x.item_total),
-    addons: (x.addons || []).map((a) => ({ addon_id: a.addon_id ?? null, name: a.name, quantity: num(a.quantity, 1), unit_price: num(a.unit_price), line_total: num(a.line_total), vat_rate: num(a.vat_rate) })) }));
+    addons: (x.addons || []).map((a) => ({ addon_id: a.addon_id ?? null, name: a.name, quantity: num(a.quantity, 1), unit_price: num(a.unit_price), line_total: num(a.line_total), vat_rate: num(a.vat_rate), vat_known: a.vat_rate != null })) }));
   const total = num(o.total ?? b.total);
   return { order_id: o.order_id, order_no: o.order_no, johku_order_no: o.johku_order_no ?? null, status: o.status ?? null, payment_status: o.payment_status ?? 'unpaid', source_channel: o.source_channel ?? '', is_native: o.is_native !== false,
     created_at: o.created_at, customer: o.customer || {}, customer_name: o.customer?.name ?? '', internal_note: o.internal_note ?? null, customer_note: o.customer_note ?? null,
@@ -78,7 +82,8 @@ export function normOrder(o) {
     customer_kind: o.customer?.customer_kind ?? o.customer_kind ?? null, billing_method: o.billing?.invoice_method ?? null,
     balance: { total, paid: num(b.paid), refunded: num(b.refunded), pending_link: num(b.pending_link), unpaid: num(b.unpaid), unpaid_unlinked: num(b.unpaid_unlinked, num(b.unpaid)), net_paid: num(b.net_paid) },
     total_gross: total, paid_amount: num(b.paid), unpaid_amount: num(b.unpaid),
-    items: (o.items || []).map((x) => ({ id: x.id, parent_item_id: x.parent_item_id ?? null, kind: x.kind, name: x.name, quantity: num(x.quantity, 1), unit_price: num(x.unit_price), line_total: num(x.line_total), vat_rate: num(x.vat_rate), covered: num(x.covered), remaining: num(x.remaining) })),
+    items: (o.items || []).map((x) => ({ id: x.id, parent_item_id: x.parent_item_id ?? null, kind: x.kind, name: x.name, quantity: num(x.quantity, 1), unit_price: num(x.unit_price), line_total: num(x.line_total), vat_rate: num(x.vat_rate),
+      vat_known: x.vat_rate != null, line_vat: x.line_vat != null ? num(x.line_vat) : null, line_net: x.line_net != null ? num(x.line_net) : null, covered: num(x.covered), remaining: num(x.remaining) })),
     payments, reservations, receipts: (o.receipts || []).map(normReceiptRef), requests: o.requests || [], first_reservation_at: reservations.map((x) => x.starts_at).filter(Boolean).sort()[0] ?? null };
 }
 const L = (a) => (Array.isArray(a) ? a : []);
@@ -194,14 +199,32 @@ const lim = (n) => Math.min(200, Math.max(1, Math.trunc(+n) || 50));   // sopimu
 
 // ---- oikea toteutus: nimet ja p_-parametrit sopimuksen mukaan. `rpc(nimi, parametrit)` = sb.js:n rpc tai mockin rpc ----
 export function rpcBackend(rpc) {
+  let multiMissing = false;   // booking_277 (p_payment_filters) puuttuu kannasta → vanha yhden arvon kutsu
   const call = async (key, params = {}) => {
     const res = await rpc(RPC[key], params);
     if (res && res.ok === false) throw new RpcError(res.message || res.code || 'Pyyntö epäonnistui', { code: res.code, status: 400, details: res });
     return res;
   };
   return {
-    listOrders: async (a) => call('listOrders', compact({ p_search: a.search, p_status: a.status, p_payment_status: a.paymentStatus, p_payment_filter: a.paymentFilter, p_source: a.source, p_native: a.native === 'native' ? true : a.native === 'imported' ? false : undefined,
-      p_date_field: a.dateField === 'start' ? 'start' : undefined, p_from: a.from, p_to: a.to, p_sort: orderSortParam(a.sortBy, a.sortDir), p_limit: lim(a.limit), p_offset: Math.max(0, Math.trunc(+a.offset) || 0) })),
+    listOrders: async (a) => {
+      const base = compact({ p_search: a.search, p_status: a.status, p_payment_status: a.paymentStatus, p_payment_filter: a.paymentFilter, p_source: a.source, p_native: a.native === 'native' ? true : a.native === 'imported' ? false : undefined,
+        p_date_field: a.dateField === 'start' ? 'start' : undefined, p_from: a.from, p_to: a.to, p_sort: orderSortParam(a.sortBy, a.sortDir), p_limit: lim(a.limit), p_offset: Math.max(0, Math.trunc(+a.offset) || 0) });
+      // Maksutilanapit (monivalinta). Yksi tila → vanha p_payment_filter (toimii ilman booking_277:ää).
+      // Useampi → p_payment_filters (booking_277). Jos kannassa ei vielä ole parametria (PGRST202), käytetään
+      // vanhaa kutsua: p_payment_filter 'all' (näyttää enemmän, ei piilota mitään) eikä koko listaa siirretä mockiin.
+      if (Array.isArray(a.paymentFilters) && a.paymentFilters.length) {
+        const list = [...new Set(a.paymentFilters.map((v) => String(v || '').trim()).filter(Boolean))];
+        if (list.length === 1 || list.includes('all')) return call('listOrders', { ...base, p_payment_filter: list.includes('all') ? 'all' : list[0] });
+        if (!multiMissing) {
+          try { return await call('listOrders', { ...base, p_payment_filters: list }); } catch (e) {
+            if (!isMissingRpc(e)) throw e;
+            multiMissing = true;
+          }
+        }
+        return call('listOrders', { ...base, p_payment_filter: 'all' });
+      }
+      return call('listOrders', base);
+    },
     listPayments: async (a) => call('listPayments', compact({ p_search: a.search, p_method: a.method, p_status: a.status, p_from: a.from, p_to: a.to, p_sort: paymentSortParam(a.sortDir), p_limit: lim(a.limit), p_offset: Math.max(0, Math.trunc(+a.offset) || 0) })),
     getOrder: (id) => call('getOrder', { p_order_id: id }),
     listAddons: () => call('listAddons'),
@@ -228,6 +251,8 @@ export function rpcBackend(rpc) {
     getReceipt: (id) => call('getReceipt', { p_receipt_id: id }),
     resendReceipt: (id) => call('resendReceipt', { p_receipt_id: id }),
     annualCardForOrder: (id) => call('annualCardForOrder', { p_order_id: id }),
+    orderDeleteCheck: (id) => call('orderDeleteCheck', { p_order_id: id }),
+    deleteUnpaidOrder: (a) => call('deleteUnpaidOrder', compact({ p_order_id: a.orderId, p_reason: a.reason, p_notify: a.notify })),
   };
 }
 
@@ -263,7 +288,7 @@ export function normAccrual(r) {
   };
 }
 
-export function createTalousApi({ rpc, io = {}, mock = wantsMock(), mockFactory = () => createMock({ delay: 120 }) } = {}) {
+export function createTalousApi({ rpc, io = {}, mock = wantsMock(), mockFactory = () => { const inst = lazyMockModule().then((m) => m.createMock({ delay: 120 })); return { rpc: async (n, a) => (await inst).rpc(n, a) }; } } = {}) {
   const forced = !!mock, missing = new Set(), listeners = new Set();
   let mockBackend = null;
   const real = rpc && !forced ? rpcBackend(rpc) : null;
@@ -423,9 +448,37 @@ export function createTalousApi({ rpc, io = {}, mock = wantsMock(), mockFactory 
         return { result: code === 'forbidden' || e?.status === 403 ? 'forbidden' : 'error', code, status: e?.status ?? null };
       }
     },
+    // booking_286: kortti puhelimella (CheckoutX, vain testitila). admin_refund luo rivin status='requested' (provider='checkoutx');
+    // sen jälkeen POST checkoutx-pos {action:'refund', refund_id}: saman päivän koko maksu mitätöidään (void). Ei heitä.
+    // Palauttaa { result: done | failed | not_supported | retry_later | not_configured | none | off | forbidden | error }.
+    async checkoutxRefund(refundId) {
+      if (!real || !io.fn) return { result: 'done', mock: true };
+      try {
+        const j = await io.fn('checkoutx-pos', { action: 'refund', refund_id: refundId });
+        const x = (j?.processed || []).find((p) => +p.refund_id === +refundId);
+        if (x) return { result: String(x.result || 'error'), detail: x.detail ?? null };
+        return { result: j?.mode === 'off' ? 'off' : 'none' };
+      } catch (e) {
+        const code = e?.code || e?.details?.code || null;
+        return { result: code === 'forbidden' || e?.status === 403 ? 'forbidden' : code === 'not_configured' ? 'not_configured' : 'error', code, status: e?.status ?? null };
+      }
+    },
     addToOrder: (a) => act('addToOrder', a), createPaymentLink: (a) => act('createPaymentLink', a), refund: (a) => act('refund', a), refundOrder: (a) => act('refundOrder', a), recordPayment: (a) => act('recordPayment', a),
     reservationRefundPreview: (id) => act('reservationRefundPreview', id), cancelReservation: (a) => act('cancelReservation', a),
     // booking_146: tilauksen vuosikortti (koodi, voimassaolo, sähköpostin tila). Oikeassa tilassa EI mock-varaa: puuttuva RPC → null (näkymä ei näytä mitään keksittyä koodia).
+    // booking_279: poiston esitarkistus. Oikeassa tilassa EI mock-varaa: puuttuva RPC tai virhe → null (näkymä ei näytä Poista-nappia).
+    orderDeleteCheck: async (id) => {
+      if (!real) return getMock().orderDeleteCheck(id);
+      if (missing.has('orderDeleteCheck')) return null;
+      try { return await real.orderDeleteCheck(id); } catch (e) { if (isMissingRpc(e)) missing.add('orderDeleteCheck'); return null; }
+    },
+    // Poisto: vain oikealle palvelimelle (act). Esto palautuu RpcError-virheenä (details.blockers).
+    deleteUnpaidOrder: (a) => act('deleteUnpaidOrder', a),
+    // Avatun Montonio-maksun tila suoraan Montoniolta (julkinen montonio-notify reconcile, sama kuin tilaussivun tarkistus). Ei heitä.
+    async montonioVerify(orderToken) {
+      if (!real || !io.fn) return { ok: true, mock: true, payment_status: null, results: [] };
+      try { return await io.fn('montonio-notify', { action: 'reconcile', order_token: orderToken }); } catch (e) { return { ok: false, code: e?.code || 'error' }; }
+    },
     annualCardForOrder: async (id) => {
       if (!real) return getMock().annualCardForOrder(id);
       if (missing.has('annualCardForOrder')) return null;

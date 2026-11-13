@@ -160,6 +160,26 @@ h2 .icon,h3 .icon,.addon-mark .icon{display:inline-block;vertical-align:-3px;mar
 .moverow{margin-top:10px;border-top:1px solid var(--line);padding-top:8px}
 .moverow .row{align-items:flex-end}
 .typeset{margin:0 0 12px}
+
+/* Hallinnan UX-uudistus: Tarkista Kunnossa-rivi + Uusi varaus -tyyppikortit + yläpalkin määrä */
+.review-ok{display:flex;align-items:flex-start;gap:10px;margin:12px 0;padding:12px 14px;border-radius:10px;background:var(--okbg);color:var(--ok);border:1px solid var(--line);font-size:14px;font-weight:600}
+.review-ok-mark{flex:none;font-size:16px;line-height:1.2}
+.nb-types{border:0;padding:0;margin:0 0 14px;min-width:0}
+.nb-types>legend{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0}
+.nb-typegrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.nb-typecard{position:relative;display:flex;flex-direction:column;gap:4px;min-height:72px;padding:14px 16px;border:1px solid var(--line);border-radius:12px;background:var(--card);cursor:pointer;color:var(--ink)}
+.nb-typecard input{position:absolute;opacity:0;inset:0;width:100%;height:100%;margin:0;cursor:pointer}
+.nb-typecard strong{font-size:15px;font-weight:700;line-height:1.25}
+.nb-typecard small{font-size:13px;font-weight:500;color:var(--muted);line-height:1.35}
+.nb-typecard.on,.nb-typecard:has(input:checked){background:var(--green);border-color:var(--green);color:var(--card)}
+.nb-typecard.on small,.nb-typecard:has(input:checked) small{color:var(--card);opacity:.88}
+.nb-typecard:has(input:focus-visible){outline:3px solid var(--gold);outline-offset:2px}
+.top .quick-action{position:relative}
+.top .quick-review-count{display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;padding:0 5px;margin-left:2px;border-radius:999px;background:var(--warnbg);color:var(--gold);font-size:11px;font-weight:700;line-height:1}
+.top .quick-review-count[hidden]{display:none!important}
+@media (max-width:45em){.nb-typegrid{grid-template-columns:1fr}}
+@media (max-width:899px){.top .quick-review-count{position:absolute;top:2px;right:2px;margin:0}}
+
 .override-box{border-color:rgba(107,75,0,.45);background:var(--warnbg)}
 .override-box .ovr-reason[hidden]{display:none}
 .review-sec h2{display:flex;align-items:center;gap:8px;margin:0 0 4px;font-size:17px}
@@ -474,6 +494,16 @@ input[aria-invalid=true],select[aria-invalid=true],textarea[aria-invalid=true]{b
 .filter-drawer-bar>.tl-search{flex:1 1 100%;min-width:0}
 .filter-chip{flex:0 0 auto;display:inline-flex;align-items:center;min-height:44px;padding:8px 12px;border-radius:999px;background:var(--green);color:#fff;font-weight:700;font-size:14px;line-height:1.2;white-space:nowrap}
 .filter-search-note{flex:1 1 100%;margin:0;font-size:14px}
+/* Tilaukset: maksamattoman tilauksen rivi hyvin haalealla punaisella (var --unpaidbg vaalennettuna), teksti pysyy luettavana */
+.tl-row.is-unpaid{background:#fcf3f4;background:color-mix(in srgb,var(--unpaidbg) 40%,#fff)}
+.tl-row.is-unpaid>.tl-head:hover{background:rgba(123,29,18,.04)}
+.tl-toolbar>.orders-drawer{grid-column:1/-1}
+.pay-chips{flex:1 1 0;min-width:min(100%,260px);display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.pay-chips>.pay-chip{width:auto;margin:0;border:1px solid var(--green);background:#fff;color:var(--green);font-family:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.pay-chips>.pay-chip[aria-pressed=true]{background:var(--green);color:#fff}
+.pay-chips>.pay-chip:focus-visible{outline:2px solid var(--green);outline-offset:2px}
+@media (hover:hover){.pay-chips>.pay-chip[aria-pressed=false]:hover{background:rgba(43,58,48,.06)}}
+@media (max-width:560px){.pay-chips{flex-basis:100%;gap:6px}.pay-chips>.pay-chip{padding:8px 11px}}
 .filter-panel{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;align-items:end}
 .filter-panel .filter-groups{grid-column:1/-1}
 .tl-toolbar input,.tl-toolbar select{min-width:0}
@@ -977,6 +1007,10 @@ body.shot #shell .nav .lbl{display:inline}
 .vcr-sel{min-height:36px;padding:4px 8px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink);font:inherit}
 .vcr-meta{margin:0;font-size:14px}
 .vcr-meta a{color:var(--gold);font-weight:600}
+.vcr-row.is-problem{padding-left:10px;border-left:4px solid var(--err)}
+.vcr-problem{display:grid;gap:4px;padding:6px 10px;border-radius:8px;background:var(--errbg);color:var(--err)}
+.vcr-problem p{margin:0;font-size:14px;color:var(--ink)}
+.vcr-problem .badge.err{font-weight:700}
 .vcr-warn{margin:0;padding:6px 10px;border-left:4px solid var(--gold);background:var(--warnbg);color:var(--ink);font-size:14px}
 .vcr-actions{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
 .vcr-actions .btn{text-decoration:none}
@@ -987,6 +1021,77 @@ body.shot #shell .nav .lbl{display:inline}
 .vcr-chip.on{background:var(--green);color:var(--card);border-color:var(--green)}
 .vcr-group h3{margin:10px 0 2px;font-size:15px}
 .vcr-box h3{display:flex;align-items:center;gap:6px}
+/* Yhteinen varaus- ja tilauskortti (luonnos 10.11.2026) */
+.oc-hero{background:var(--bg);border-radius:12px;padding:14px 16px;min-width:0}
+.oc-hero-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.oc-name{margin:0;font-size:20px;line-height:1.3;font-weight:700;color:var(--ink)}
+.oc-oid{font-size:13px;color:var(--muted);font-weight:600;white-space:nowrap;padding-top:4px}
+.oc-when{margin:4px 0 0;font-size:16px;line-height:1.4;font-weight:600;color:var(--ink)}
+.oc-meta{margin:2px 0 0;font-size:14px;color:var(--text);overflow-wrap:anywhere}
+.oc-badges{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px;align-items:center}
+.oc-badges .badge.pay,.oc-badges .badge.err{font-size:13px;padding:4px 10px}
+.oc-contact{margin-top:10px;display:flex;flex-wrap:wrap;gap:2px 16px;align-items:center}
+.oc-contact a{color:var(--ink);text-decoration:underline;text-underline-offset:3px;min-height:32px;display:inline-flex;align-items:center;overflow-wrap:anywhere}
+.oc-actions{display:flex;flex-wrap:wrap;gap:8px}
+.oc-actions .btn{flex:1 1 145px;min-height:44px;white-space:normal;overflow-wrap:anywhere}
+.oc-actions .btn.primary{flex-grow:2}
+.oc-actions.no-primary .btn{flex:1 1 160px}
+.oc-sections{display:grid;gap:8px}
+.oc-sec{border:1px solid var(--line);background:var(--card);border-radius:12px;padding:0 14px}
+.oc-sec>summary{display:flex;align-items:center;justify-content:space-between;gap:10px;cursor:pointer;list-style:none;min-height:52px;padding:10px 0;font-weight:600;color:var(--ink)}
+.oc-sec>summary::-webkit-details-marker{display:none}
+.oc-sec>summary .oc-sum{font-weight:500;color:var(--muted);font-size:14px;margin-left:auto;text-align:right;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.oc-sec>summary .oc-chev{flex:none;width:20px;height:20px;color:var(--muted);transition:transform .15s}
+.oc-sec[open]>summary{border-bottom:1px solid var(--line)}
+.oc-sec[open]>summary .oc-chev{transform:rotate(90deg)}
+.oc-sec-body{padding:10px 0 14px;display:grid;gap:8px;min-width:0}
+.oc-line{display:flex;justify-content:space-between;gap:12px;align-items:baseline;font-size:14px}
+.oc-line .nm{color:var(--ink)}
+.oc-line .pr{font-variant-numeric:tabular-nums;color:var(--ink);font-weight:600;white-space:nowrap}
+.oc-line.total{border-top:2px solid var(--green);padding-top:8px;margin-top:4px;font-weight:700;font-size:16px;color:var(--ink)}
+.oc-line .vat{font-weight:500;color:var(--muted);font-size:13px}
+/* Tilauserittely: rivi per tuote, alla määrä ja ALV; loppuun ALV-erittely kannoittain */
+.oc-breakdown{display:grid;gap:8px;min-width:0}
+.oc-bd-row{display:grid;gap:2px;min-width:0}
+.oc-bd-row .oc-line .nm{overflow-wrap:anywhere;min-width:0}
+.oc-bd-row.child{padding-left:14px}
+.oc-bd-sub{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.oc-vat-table{display:grid;gap:2px;font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums;margin-top:2px}
+.oc-vat-head,.oc-vat-row{display:grid;grid-template-columns:minmax(64px,1fr) repeat(3,minmax(0,auto));gap:4px 14px;align-items:baseline}
+.oc-vat-head span:not(:first-child),.oc-vat-row span:not(:first-child){text-align:right;white-space:nowrap}
+.oc-vat-head{font-weight:600}
+.oc-addon-tools{display:grid;gap:8px;justify-items:start}
+.oc-payrow{display:grid;grid-template-columns:1fr auto;gap:2px 12px;font-size:14px;padding:6px 0;border-bottom:1px solid var(--line);align-items:center}
+.oc-payrow:last-of-type{border-bottom:0}
+.oc-payrow .how{grid-column:1;grid-row:1;color:var(--ink);font-weight:600}
+.oc-payrow .when{grid-column:1;grid-row:2;color:var(--muted);font-size:13px}
+.oc-payrow .amt{grid-column:2;grid-row:1 / span 2;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums}
+.oc-log{display:grid;gap:8px;margin:0;padding:0;list-style:none}
+.oc-log li{display:grid;gap:1px;padding:0 0 8px;border-bottom:1px solid var(--line);font-size:14px}
+.oc-log li:last-child{border-bottom:0;padding-bottom:0}
+.oc-log .t{color:var(--muted);font-size:13px}
+.oc-footer{display:flex;justify-content:center;padding-top:2px}
+.oc-footer .linkish,.oc-footer button.linkish{background:none;border:0;padding:8px 0;min-height:44px;font:600 14px/1.2 inherit;color:var(--gold);cursor:pointer;text-decoration:underline;text-underline-offset:3px;text-align:center}
+/* booking_279: maksamattoman tilauksen poisto korttiin – toissijainen, punainen reunus, oma alue kortin lopussa */
+.oc-delete-wrap{border-top:1px solid var(--line);padding-top:12px;margin-top:4px}
+.oc-delete{display:grid;gap:6px;justify-items:start}
+.oc-delete .btn.danger{min-height:44px;background:transparent}
+.oc-delete-info h4{margin:0;font-size:15px}
+.oc-delete-info p{margin:0;font-size:14px}
+.oc-delete-note p{margin:0}
+.rd-dialog .oc-sec .rd-card,.rd-dialog .oc-sec .rd-more{border:0;padding:0;margin:0;background:none;border-radius:0}
+@media(max-width:43.6875em){
+  .oc-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .oc-actions .btn.primary{grid-column:1 / -1}
+  .oc-actions.no-primary{grid-template-columns:1fr}
+  .oc-name{font-size:19px}
+  .oc-when{font-size:15px}
+  .oc-sec>summary{min-height:48px;padding:8px 0;gap:8px}
+  .oc-sec>summary .oc-sum{font-size:13px}
+  .oc-hero{padding:12px}
+  .oc-delete .btn.danger{width:100%;justify-content:center}
+}
+
 /* booking_174: lahjakortin arvo käsin vahvistuksessa + erotuksen maksulinkki. Vain teeman muuttujat (vihreä, hiekka, kulta, tumma teksti), ei sinistä; kapealla näytöllä ei vaakavieritystä. */
 .vcr-field{display:grid;grid-template-columns:minmax(0,1fr);gap:4px;margin:0 0 8px;max-width:22rem}
 .vcr-value{width:100%;max-width:12rem;min-height:40px;padding:6px 10px;border:1px solid var(--muted);border-radius:8px;background:var(--card);color:var(--ink);font:inherit;font-size:16px}
@@ -1173,3 +1278,168 @@ body.shot #shell .nav .lbl{display:inline}
   body.training-printing .training-print-only { display: block; }
   body.training-printing table { font-size: 10pt; width: 100%; }
 }
+
+
+.nb-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(220px,280px);gap:14px;align-items:start}
+.nb-summary{position:sticky;top:72px;padding:14px 16px}
+.nb-summary h3{margin:0 0 8px;font-size:16px}
+.nb-summary-line{margin:0 0 8px;font-size:14px;line-height:1.4}
+.nb-summary-price{margin:0;font-size:15px;font-weight:700;color:var(--ink)}
+@media (max-width:56.25em){.nb-layout{grid-template-columns:1fr}.nb-summary{position:static}}
+
+
+.paylink-chips{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 12px}
+.paylink-chip.on{background:var(--green);border-color:var(--green);color:var(--card)}
+.paylink-cards{display:flex;flex-direction:column;gap:12px}
+.paylink-card{padding:16px 18px}
+.paylink-card-top{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+.paylink-card-who{display:flex;flex-direction:column;gap:2px;min-width:0}
+.paylink-card-amount{text-align:right}
+.paylink-card-amount strong{display:block;font-size:22px;font-weight:800;line-height:1.15}
+.paylink-card-res{margin:8px 0}
+.paylink-card-meta{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;margin:0 0 12px;font-size:13px}
+.paylink-card-actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.paylink-more{position:relative}
+.paylink-more-btn{min-width:40px;font-size:18px;line-height:1}
+.paylink-more-menu{position:absolute;right:0;bottom:calc(100% + 4px);z-index:5;min-width:12rem;padding:6px;border:1px solid var(--line);border-radius:10px;background:var(--card);box-shadow:0 8px 24px var(--line)}
+.paylink-more-item{display:block;width:100%;text-align:left;border:0;background:transparent;padding:10px 12px;border-radius:8px;font:inherit;cursor:pointer}
+.paylink-more-item:hover,.paylink-more-item:focus-visible{background:var(--bg)}
+
+/* ---- Tilausnäkymä v3 (PR 1): yhteenvetopaneeli, koko tilaus, peruutusdialogi, asiakasnäkymä. Etuliite .ov- ---- */
+.ov-listwrap{display:block}
+.ov-listcol{min-width:0}
+.ov-summary{display:none}
+@media(min-width:75em){
+  .ov-listwrap.has-summary{display:grid;grid-template-columns:minmax(0,1fr) 430px;gap:14px;align-items:start}
+  .ov-listwrap.has-summary .tl-cols{display:none}
+  .ov-listwrap.has-summary .tl-head{grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto 24px;grid-template-areas:"main main sum chev" "date first first chev" "badges badges badges chev"}
+  .ov-listwrap.has-summary .ov-summary:not([hidden]){display:grid}
+}
+.tl-row.is-selected{border-color:var(--green);box-shadow:inset 4px 0 0 var(--green)}
+.ov-summary{position:sticky;top:70px;gap:12px;background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px 18px;max-height:calc(100vh - 90px);overflow:auto;box-shadow:0 6px 18px color-mix(in srgb,var(--ink) 8%,transparent)}
+.ov-summary:focus{outline:none}
+.ov-sum-head{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}.ov-sum-head .icon-btn{margin:-8px -10px 0 0}
+.ov-sum-name{margin:0;font-size:20px}
+.ov-sum-head p{margin:0}
+.ov-sum-res p{margin:0 0 2px}.ov-sum-when{font-size:16px;color:var(--ink)}
+.ov-sum-note,.ov-note{background:var(--warnbg);border:1px solid color-mix(in srgb,var(--gold) 30%,transparent);border-radius:8px;padding:8px 10px;margin:0;color:var(--ink);white-space:pre-wrap;font-size:14px}
+.ov-sum-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}.ov-sum-actions .btn:only-child{grid-column:1/-1}
+.ov-sum-contact .ov-contact{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.ov-wide{width:100%;justify-content:center;text-align:center}
+.ov-small{font-size:13px;margin:0}
+.ov-sum-hint{text-align:center}
+.ov-badges{display:inline-flex;flex-wrap:wrap;gap:6px;align-items:center}
+.badge.strong{font-weight:700}.badge.err.strong{background:var(--err);color:var(--card)}
+.badge.pay-invoiced{background:color-mix(in srgb,var(--green) 12%,var(--card));color:var(--green)}
+/* koko näkymä */
+.ov-page{display:grid;gap:12px}
+.ov-crumb{font-size:13px;color:var(--muted)}.ov-crumb a{color:var(--muted);text-decoration:none}.ov-crumb a:hover{text-decoration:underline}
+.ov-head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-start;gap:10px}
+.ov-head-main{min-width:0}
+.ov-title{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px}.ov-title h1{margin:0}
+.ov-meta{margin:2px 0 0;font-size:13px}
+.ov-head-actions{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.ov-link{font-weight:600;font-size:14px;color:var(--ink);text-decoration:none}.ov-link:hover{text-decoration:underline}
+.ov-grid{display:grid;gap:12px}
+.ov-main,.ov-side{display:grid;gap:12px;align-content:start;min-width:0}
+@media(min-width:62.5em){.ov-grid{grid-template-columns:minmax(0,1fr) 300px}}
+@media(min-width:80em){.ov-grid{grid-template-columns:minmax(0,1fr) 340px}}
+.ov-card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;display:grid;gap:10px;min-width:0}
+.ov-card-head .row{justify-content:space-between}.row.between{justify-content:space-between}
+.ov-h{margin:0;font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.ov-cap{display:block;font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.ov-next{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;border-radius:var(--r);padding:12px 16px;background:var(--warnbg);border:1px solid color-mix(in srgb,var(--gold) 25%,transparent)}
+.ov-next p{margin:0}.ov-next .grow{min-width:12.5rem}
+.ov-next-ico{display:grid;place-items:center;width:32px;height:32px;border-radius:50%;background:var(--errbg);color:var(--err);font-weight:700}
+.ov-next-today .ov-next-ico{background:var(--okbg);color:var(--ok)}
+.ov-next-invoice{background:color-mix(in srgb,var(--green) 10%,var(--card));border-color:color-mix(in srgb,var(--green) 35%,transparent);color:var(--green)}.ov-next-invoice a{color:var(--green);font-weight:700}
+.ov-next-problem{background:var(--errbg);border-color:color-mix(in srgb,var(--err) 35%,transparent)}.ov-next-problem a{color:var(--err);font-weight:700}
+.ov-next-refund_pending{background:var(--card);border-color:var(--line)}.ov-next-refund_pending .ov-next-ico{background:color-mix(in srgb,var(--green) 10%,var(--card));color:var(--green)}
+.ov-res{border:1px solid var(--line);border-radius:10px;padding:12px 14px;display:grid;gap:6px}
+.ov-res.is-today{border-color:color-mix(in srgb,var(--ok) 45%,transparent);background:var(--okbg)}
+.ov-res.is-off{opacity:.7}
+.ov-res-top{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.ov-res-when{margin:0;font-size:17px;color:var(--ink)}
+.ov-res-meta{margin:0;color:var(--text)}
+.ov-res-price{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.ov-addons{display:grid;gap:4px;border-left:3px solid var(--line);padding-left:10px}
+.ov-addon{display:flex;justify-content:space-between;gap:8px;font-size:14px}
+.ov-amt{flex:none}
+.ov-res-actions{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px;margin-top:4px}
+.ov-menu{position:relative;display:inline-block}
+.ov-menu>summary{list-style:none;cursor:pointer;min-width:40px;justify-content:center}.ov-menu>summary::-webkit-details-marker{display:none}
+.ov-menu-list{position:absolute;right:0;top:calc(100% + 4px);z-index:60;box-sizing:border-box;min-width:13.75rem;max-width:calc(100vw - 16px);background:var(--card);border:1px solid var(--line);border-radius:10px;box-shadow:0 10px 28px color-mix(in srgb,var(--ink) 14%,transparent);padding:6px;display:grid}
+.ov-res-actions .ov-menu-list{left:0;right:auto}
+.ov-menu-item{all:unset;box-sizing:border-box;display:block;padding:10px 12px;border-radius:8px;cursor:pointer;font-size:14px;color:var(--ink);min-height:40px;overflow-wrap:anywhere}
+.ov-menu-item:hover,.ov-menu-item:focus-visible{background:var(--bg)}
+/* Summalaatikko (amountBox): yksi iso luku + sitä vastaava otsikko; sävy kertoo tilan (maksettu vihreä, maksamatta meripihka, hyvitettävää kultareunus). */
+.ov-paybox{display:grid;gap:6px;border-radius:10px;padding:12px 14px;background:var(--bg);border:1px solid var(--line);--amt-c:var(--text)}
+.ov-paybox.tone-ok{background:var(--okbg);border-color:color-mix(in srgb,var(--ok) 22%,transparent);--amt-c:var(--ok)}
+.ov-paybox.tone-due{background:var(--warnbg);border-color:color-mix(in srgb,var(--gold) 32%,transparent);--amt-c:var(--gold)}
+.ov-paybox.tone-warn{border-color:color-mix(in srgb,var(--gold) 45%,transparent);--amt-c:var(--gold)}
+.ov-paybox.tone-info{--amt-c:var(--green)}
+.ov-paybox.tone-muted{--amt-c:var(--muted)}
+.ov-paybox-meta{margin:0;font-size:13px;line-height:1.4;color:var(--muted);font-variant-numeric:tabular-nums}.ov-paybox-meta span{display:inline-block}
+.ov-paybox-main{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:2px 12px}
+.ov-paybox-label{display:inline-flex;align-items:center;gap:6px;font-size:15px;font-weight:600;color:var(--amt-c)}
+.ov-paybox-label .icon{width:18px;height:18px}
+.ov-paybox-value{font-size:26px;line-height:1.15;font-weight:700;color:var(--amt-c);font-variant-numeric:tabular-nums;letter-spacing:-.01em;margin-left:auto}
+.ov-paybox.tone-muted .ov-paybox-value{color:var(--ink)}
+.ov-kv{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;margin:0;font-size:14px}.ov-kv dt{color:var(--muted)}.ov-kv dd{margin:0;text-align:right}
+.ov-stack{display:grid;gap:8px}
+.ov-bd{width:100%;border-collapse:collapse;font-size:14px}.ov-bd td,.ov-bd th{padding:4px 0;text-align:left;font-weight:400}.ov-bd .r{text-align:right}
+.ov-bd tr.is-child td:first-child{padding-left:14px}.ov-bd tr.is-off td{text-decoration:line-through;color:var(--muted)}
+.ov-bd tfoot th{border-top:1px solid var(--line);padding-top:8px;font-weight:700}
+.ov-vat summary{cursor:pointer;font-size:13px;font-weight:600;color:var(--ink)}
+.ov-tl{list-style:none;margin:0;padding:0;display:grid;gap:6px;font-size:14px}
+.ov-tl-row{display:grid;grid-template-columns:110px 12px 1fr;gap:8px;align-items:baseline}
+.ov-tl-row time{color:var(--muted);font-size:13px}
+.ov-dot{width:8px;height:8px;border-radius:50%;background:var(--line);align-self:center}
+.ov-tl-row.k-ok .ov-dot{background:var(--ok)}.ov-tl-row.k-err .ov-dot{background:var(--err)}.ov-tl-row.k-warn .ov-dot{background:var(--gold)}
+.ov-cust-name{margin:0}
+.ov-contact .btn{gap:6px}
+.ov-note-block{display:grid;gap:4px}
+.ov-note-head{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.ov-note-edit,.ov-page .linkish,.ov-summary .linkish{background:none;border:0;padding:4px 0;font:inherit;font-weight:600;font-size:13px;color:var(--ink);cursor:pointer;text-decoration:underline}
+.ov-note-empty{all:unset;box-sizing:border-box;display:block;width:100%;border:1px solid var(--line);border-radius:8px;padding:8px 10px;color:var(--muted);cursor:text;font-size:14px}
+.ov-quote{margin:0;font-style:italic}
+.ov-sys{margin:0;background:var(--bg);border-radius:8px;padding:8px 10px;font-size:12px;white-space:pre-wrap;overflow-wrap:anywhere}
+.ov-danger{border-color:color-mix(in srgb,var(--err) 35%,transparent);background:color-mix(in srgb,var(--errbg) 50%,var(--card))}.ov-danger .ov-h{color:var(--err)}
+.btn.danger-ghost{border-color:var(--err);color:var(--err);background:var(--card)}.btn.danger-ghost:hover{background:var(--errbg)}
+.ov-mbar{display:none}
+@media(max-width:62.4375em){
+  .ov-hide-m{display:none}
+  .ov-page.has-bar{padding-bottom:76px}
+  .ov-mbar{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:10px;position:fixed;left:0;right:0;bottom:0;z-index:19;padding:10px 14px calc(10px + env(safe-area-inset-bottom,0px));background:var(--card);border-top:1px solid var(--line);box-shadow:0 -4px 14px color-mix(in srgb,var(--ink) 6%,transparent)}
+  .ov-mbar .btn{min-height:48px;justify-content:center;font-size:16px}
+  .ov-title h1{font-size:22px}
+}
+@media(min-width:56.25em) and (max-width:62.4375em){.ov-mbar{left:220px}}
+@media(max-width:56.1875em){.ov-mbar{left:var(--side-narrow,0px)}#shell.nav-expanded .ov-mbar{left:var(--side-wide,0px)}.ov-page.has-bar .ov-next>.row{display:none}}
+/* peruutusdialogi */
+.ov-cx{display:grid;gap:10px}
+.ov-steps{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(4,1fr);gap:8px;font-size:12px;font-weight:700;color:var(--ink)}
+.ov-steps li{border-top:3px solid var(--green);padding-top:4px}.ov-steps li.is-off{border-top-color:var(--line);color:var(--muted);text-decoration:line-through}
+.ov-cx-body{display:grid;gap:14px}
+.ov-cx-sec{border:0;margin:0;padding:0 0 12px;display:grid;gap:8px;border-bottom:1px solid var(--line)}.ov-cx-sec:last-child{border-bottom:0}
+.ov-cx-sec legend{padding:0;margin-bottom:6px}
+.ov-cx-sec.is-off{opacity:.75}
+.ov-cx-q{margin:0;font-size:15px;display:flex;align-items:center;gap:8px}.ov-cx-q.is-off{color:var(--muted)}
+.ov-num{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;background:var(--ink);color:var(--card);font-size:12px}
+.ov-cx-q.is-off .ov-num{background:var(--muted)}
+.ov-opt{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);border-radius:10px;padding:10px 12px;cursor:pointer;margin:0}
+.ov-opt.is-on{border-color:var(--ink);background:var(--bg)}.ov-opt.is-off{opacity:.6;cursor:not-allowed}
+.ov-opt span{display:grid;gap:2px;text-align:left}.ov-opt input{width:20px;height:20px;min-height:0;padding:0;margin:2px 0 0;flex:none;accent-color:var(--green)}
+.ov-cx-sum{background:var(--bg);border-radius:10px;padding:10px 12px}.ov-cx-sum dd{font-weight:600}
+.ov-cx-foot{display:flex;justify-content:flex-end;gap:10px;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:12px}
+/* asiakasnäkymä */
+.ov-stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+@media(min-width:43.75em){.ov-stats{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.ov-stat{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:10px 12px;display:grid;gap:2px}
+.ov-stat strong{font-size:22px;color:var(--ink)}.ov-stat.is-err strong{color:var(--err)}
+.ov-clist{display:grid}
+.ov-crow{display:grid;grid-template-columns:70px minmax(0,1fr) auto;grid-template-areas:"no when sum" "no what what" "no badges badges";gap:2px 10px;padding:10px 4px;border-top:1px solid var(--line);color:var(--text);text-decoration:none;align-items:center;min-height:44px}
+.ov-crow:first-child{border-top:0}.ov-crow:hover{background:var(--bg)}
+.ov-crow-no{grid-area:no;color:var(--ink)}.ov-crow-when{grid-area:when;font-size:14px}.ov-crow-what{grid-area:what;font-size:14px}.ov-crow-badges{grid-area:badges;display:flex;gap:6px;flex-wrap:wrap}.ov-crow-sum{grid-area:sum;text-align:right;font-weight:600}
+@media(min-width:62.5em){.ov-crow{grid-template-columns:70px 170px minmax(0,1fr) auto 90px;grid-template-areas:"no when what badges sum"}}
+.ov-gifts{margin:0;padding-left:18px;font-size:13px}

@@ -2,6 +2,7 @@
 // public_get_site_texts peittää sanakirjan. Haku epäonnistuu tai rivi puuttuu → ORDER_TEXTS.
 // Tuonti: content/site-texts.pending-import-8.json (ei ylikirjoita olemassa olevia).
 import { getLang } from './talous-i18n.js';
+import { getSiteTexts, clearSiteTextsCache } from './site-texts-cache.js';
 
 export const PREFIX = 'ui.admin.orders.';
 
@@ -40,6 +41,7 @@ export const ORDER_TEXTS = {
     'ui.admin.orders.pay_all': 'Kaikki',
     'ui.admin.orders.pay_refunded': 'Hyvitetyt',
     'ui.admin.orders.pay_cancelled': 'Peruttu',
+    'ui.admin.orders.pay_archived': 'Poistetut',
     'ui.admin.orders.pay_showing': 'Maksutila: {{var:label}}',
     'ui.admin.orders.search_all': 'Haku kaikista tilauksista',
     'ui.admin.orders.open_reservation': 'Avaa varaus',
@@ -85,6 +87,56 @@ export const ORDER_TEXTS = {
     'ui.admin.res.paid_addon_refund': 'Vähennä jo maksettua lisäpalvelua tilauksen hyvityksen kautta.',
     'ui.admin.res.open_refund': 'Avaa tilaus hyvitystä varten',
     'ui.admin.res.payment_link': 'Luo maksulinkki',
+    'ui.admin.res.pay_unpaid_amount': 'Maksamatta {{var:amount}}',
+    'ui.admin.res.pay_paid_amount': 'Maksettu {{var:amount}}',
+    'ui.admin.res.pay_invoiced_amount': 'Laskutettu {{var:amount}}',
+    'ui.admin.res.pay_refunded_amount': 'Palautettu {{var:amount}}',
+    'ui.admin.res.pay_pending_amount': 'Maksu kesken {{var:amount}}',
+    'ui.admin.res.arrived': 'Saapunut',
+    'ui.admin.res.take_payment': 'Ota maksu',
+    'ui.admin.res.send_pay_link': 'Lähetä maksulinkki',
+    'ui.admin.res.section_addons': 'Lisäostot',
+    'ui.admin.res.section_items': 'Ostokset',
+    'ui.admin.res.section_payments': 'Maksut ja laskut',
+    'ui.admin.res.section_messages': 'Viestit',
+    'ui.admin.res.section_history': 'Historia',
+    'ui.admin.res.section_notes': 'Muistiinpanot',
+    'ui.admin.res.sum_no_addons': 'ei lisäostoksia',
+    'ui.admin.res.sum_addons': '{{var:n}} tuotetta, {{var:amount}}',
+    'ui.admin.res.sum_items': '{{var:n}} riviä, {{var:amount}}',
+    'ui.admin.res.sum_unpaid': 'maksamatta {{var:amount}}',
+    'ui.admin.res.sum_paid': 'maksettu {{var:amount}}',
+    'ui.admin.res.sum_invoiced': 'laskutettu {{var:amount}}',
+    'ui.admin.res.sum_no_messages': 'ei viestejä',
+    'ui.admin.res.sum_messages': '{{var:n}} viestiä',
+    'ui.admin.res.sum_add_note': 'lisää muistiinpano',
+    'ui.admin.res.no_booking': 'ei ajanvarausta',
+    'ui.admin.res.ordered_at': 'Tilattu {{var:when}}',
+    'ui.admin.res.gift_title': 'Lahjakortti',
+    'ui.admin.res.order_title': 'Tilaus',
+    'ui.admin.res.webshop': 'Verkkokauppa',
+    'ui.admin.res.option_missing': 'Hoito valitsematta',
+    'ui.admin.res.no_open_invoices': 'Ei avoimia laskuja.',
+    'ui.admin.res.refund_order': 'Hyvitä tilaus',
+    'ui.admin.res.incl_vat': 'sis. alv',
+    'ui.admin.res.section_breakdown': 'Tilauserittely',
+    'ui.admin.res.sum_breakdown': 'Yhteensä {{var:amount}}',
+    'ui.admin.res.addons_line_label': 'Lisäostot',
+    'ui.admin.res.breakdown_empty': 'Tilauksella ei ole rivejä.',
+    'ui.admin.res.breakdown_qty': '{{var:n}} × {{var:price}}',
+    'ui.admin.res.breakdown_vat': 'ALV {{var:rate}} · {{var:amount}}',
+    'ui.admin.res.breakdown_vat_missing': 'ALV-kanta puuttuu',
+    'ui.admin.res.breakdown_cancelled': 'peruttu',
+    'ui.admin.res.breakdown_total': 'Yhteensä',
+    'ui.admin.res.breakdown_vat_rate': 'ALV-kanta',
+    'ui.admin.res.breakdown_net': 'Veroton',
+    'ui.admin.res.breakdown_vat_eur': 'ALV',
+    'ui.admin.res.breakdown_gross': 'Verollinen',
+    'ui.admin.res.breakdown_vat_unknown_note': 'Osalta riveistä puuttuu ALV-kanta, joten ne eivät näy ALV-erittelyssä.',
+    'ui.admin.res.breakdown_rows_total': 'Rivien summa {{var:amount}} poikkeaa tilauksen summasta.',
+    'ui.admin.res.history_created': 'Luotu {{var:when}}',
+    'ui.admin.res.resend_card': 'Lähetä lahjakortti uudelleen',
+    'ui.admin.res.copy_code': 'Kopioi koodi',
   },
   en: {
     'ui.admin.res.order_no': 'Order #{{var:no}}',
@@ -120,6 +172,7 @@ export const ORDER_TEXTS = {
     'ui.admin.orders.pay_all': 'All',
     'ui.admin.orders.pay_refunded': 'Refunded',
     'ui.admin.orders.pay_cancelled': 'Cancelled',
+    'ui.admin.orders.pay_archived': 'Deleted',
     'ui.admin.orders.pay_showing': 'Payment status: {{var:label}}',
     'ui.admin.orders.search_all': 'Search covers all orders',
     'ui.admin.orders.open_reservation': 'Open booking',
@@ -165,6 +218,56 @@ export const ORDER_TEXTS = {
     'ui.admin.res.paid_addon_refund': 'Use the order refund flow to remove a paid add-on.',
     'ui.admin.res.open_refund': 'Open order to refund',
     'ui.admin.res.payment_link': 'Create payment link',
+    'ui.admin.res.pay_unpaid_amount': 'Unpaid {{var:amount}}',
+    'ui.admin.res.pay_paid_amount': 'Paid {{var:amount}}',
+    'ui.admin.res.pay_invoiced_amount': 'Invoiced {{var:amount}}',
+    'ui.admin.res.pay_refunded_amount': 'Refunded {{var:amount}}',
+    'ui.admin.res.pay_pending_amount': 'Payment pending {{var:amount}}',
+    'ui.admin.res.arrived': 'Arrived',
+    'ui.admin.res.take_payment': 'Take payment',
+    'ui.admin.res.send_pay_link': 'Send payment link',
+    'ui.admin.res.section_addons': 'Add-ons',
+    'ui.admin.res.section_items': 'Items',
+    'ui.admin.res.section_payments': 'Payments and invoices',
+    'ui.admin.res.section_messages': 'Messages',
+    'ui.admin.res.section_history': 'History',
+    'ui.admin.res.section_notes': 'Notes',
+    'ui.admin.res.sum_no_addons': 'no add-ons',
+    'ui.admin.res.sum_addons': '{{var:n}} items, {{var:amount}}',
+    'ui.admin.res.sum_items': '{{var:n}} lines, {{var:amount}}',
+    'ui.admin.res.sum_unpaid': 'unpaid {{var:amount}}',
+    'ui.admin.res.sum_paid': 'paid {{var:amount}}',
+    'ui.admin.res.sum_invoiced': 'invoiced {{var:amount}}',
+    'ui.admin.res.sum_no_messages': 'no messages',
+    'ui.admin.res.sum_messages': '{{var:n}} messages',
+    'ui.admin.res.sum_add_note': 'add a note',
+    'ui.admin.res.no_booking': 'no booking time',
+    'ui.admin.res.ordered_at': 'Ordered {{var:when}}',
+    'ui.admin.res.gift_title': 'Gift card',
+    'ui.admin.res.order_title': 'Order',
+    'ui.admin.res.webshop': 'Web shop',
+    'ui.admin.res.option_missing': 'Treatment not selected',
+    'ui.admin.res.no_open_invoices': 'No open invoices.',
+    'ui.admin.res.refund_order': 'Refund order',
+    'ui.admin.res.incl_vat': 'incl. VAT',
+    'ui.admin.res.section_breakdown': 'Order breakdown',
+    'ui.admin.res.sum_breakdown': 'Total {{var:amount}}',
+    'ui.admin.res.addons_line_label': 'Add-ons',
+    'ui.admin.res.breakdown_empty': 'The order has no lines.',
+    'ui.admin.res.breakdown_qty': '{{var:n}} × {{var:price}}',
+    'ui.admin.res.breakdown_vat': 'VAT {{var:rate}} · {{var:amount}}',
+    'ui.admin.res.breakdown_vat_missing': 'VAT rate missing',
+    'ui.admin.res.breakdown_cancelled': 'cancelled',
+    'ui.admin.res.breakdown_total': 'Total',
+    'ui.admin.res.breakdown_vat_rate': 'VAT rate',
+    'ui.admin.res.breakdown_net': 'Net',
+    'ui.admin.res.breakdown_vat_eur': 'VAT',
+    'ui.admin.res.breakdown_gross': 'Gross',
+    'ui.admin.res.breakdown_vat_unknown_note': 'Some lines have no VAT rate, so they are not in the VAT summary.',
+    'ui.admin.res.breakdown_rows_total': 'Lines add up to {{var:amount}}, which differs from the order total.',
+    'ui.admin.res.history_created': 'Created {{var:when}}',
+    'ui.admin.res.resend_card': 'Resend gift card',
+    'ui.admin.res.copy_code': 'Copy code',
   },
 };
 
@@ -190,7 +293,7 @@ export async function loadOrderTexts(rpcFn) {
   if (loaded) return true;
   if (typeof rpcFn !== 'function') return false;
   try {
-    const t = await rpcFn('public_get_site_texts', { p_lang: null });
+    const t = await getSiteTexts(rpcFn);
     if (!t || t.ok !== true || !Array.isArray(t.texts)) return false;
     const next = new Map();
     for (const r of t.texts) {
@@ -208,6 +311,7 @@ export async function loadOrderTexts(rpcFn) {
 }
 
 export function clearOrderTextCache() {
+  clearSiteTextsCache();
   db = new Map();
   loaded = false;
 }

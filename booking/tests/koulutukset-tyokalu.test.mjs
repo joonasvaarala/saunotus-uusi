@@ -147,7 +147,7 @@ test('opening space form does not reserve; cancellation asks confirmation',async
  assert.ok(dom.body.textContent.includes('Peruuta'));
 });
 test('all new FI/EN texts are in pending-import and contain no angle brackets',()=>{
- const rows=[...JSON.parse(read('content/site-texts.pending-import-127.json')),...JSON.parse(read('content/site-texts.pending-import-128.json'))];
+ const rows=[...JSON.parse(read('content/site-texts.pending-import-127.json')),...JSON.parse(read('content/site-texts.pending-import-128.json')),...JSON.parse(read('content/site-texts.pending-import-136.json'))];
  for(const lang of ['fi','en'])for(const [k,text] of Object.entries(TRAINING_TEXTS[lang])){
   assert.equal(rows.find(x=>x.key==='admin.training.'+k&&x.lang===lang)?.text,text,k);assert.doesNotMatch(text,/[<>]/);
  }

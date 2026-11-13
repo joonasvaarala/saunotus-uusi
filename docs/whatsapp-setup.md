@@ -26,6 +26,8 @@ Nämä neljä annetaan Supabasen edge-funktion ympäristöön. Niitä ei kirjoit
 | `WHATSAPP_APP_SECRET` | Sovelluksen App settings → Basic → App secret. Webhookin `X-Hub-Signature-256` tarkistetaan tällä |
 | `WHATSAPP_VERIFY_TOKEN` | Itse keksitty pitkä satunnainen merkkijono. Sama arvo Metan webhook-lomakkeeseen |
 
+Lisäksi ei-salainen `WHATSAPP_MESSAGING_ACCOUNT_ID` = WhatsApp Business Account ID (WABA id, nyt `1810665439953162`). Funktio lisää sen kenttänä `messaging_account_id` jokaiseen `/messages`-kutsuun (pohjat, vapaamuotoiset viestit ja vastaukset saapuviin). Ilman sitä Meta voi hylätä pohjaviestin virheellä 132001, jos puhelinnumero kuuluu useaan messaging-tiliin. Tyhjä arvo → kenttää ei lähetetä.
+
 Lisäksi vastauslinkki tarvitsee jo aiemmin sovitun holvisalaisuuden `shift_offer_token_secret` (Vault, ei edge-ympäristö). Ilman sitä painikemallit eivät lähde: rivi jää jonoon ja `last_error` on `no_token`.
 
 Paikka Supabasessa: projekti Tapio-havuhattu (`sxbofnuisemspgquoxyv`) → Edge Functions → Secrets. Tai myöhemmin, kun deploy on tarkoitus tehdä: `supabase secrets set --project-ref sxbofnuisemspgquoxyv`. Älä laita arvoja komentorivin historiaan jaettuun lokiin, jos et halua niiden jäävän talteen.

@@ -248,3 +248,68 @@ Deno.test("the page source does not build HTML from data and the door image is r
   assert(css.includes("font-weight:600"));
   assert(css.includes("min-height:48px"));
 });
+
+// booking_274: linkin vuoro ei ole enää auki → otsikko ja tilateksti, ei "Ei avoimia tarjouksia", neutraali sävy.
+Deno.test("booking_274: jo mennyt vuoro näyttää tilatekstin neutraalisti, ei 'Ei avoimia tarjouksia'", () => {
+  const { doc, stack, banner, title } = page();
+  render(doc, {
+    ok: true,
+    result: "filled_other",
+    title: "Tämä vuoro on jo mennyt",
+    focus_state: "filled_other",
+    message: NASTY,
+    focus_offer_id: FOCUS,
+    acted: null,
+    snooze_open_offer_id: null,
+    offers: [],
+  }, () => {});
+  assertEquals(title.textContent, "Tämä vuoro on jo mennyt");
+  assertEquals(doc.title, "Tämä vuoro on jo mennyt");
+  assertEquals(banner.className, "banner");
+  const cards = tags(stack, "article");
+  assertEquals(cards.length, 1);
+  assertEquals(cards[0].textContent, NASTY);
+  assertEquals(tags(stack, "img").length, 0);
+  assert(!stack.textContent.includes("Ei avoimia tarjouksia."));
+  assertEquals(tags(stack, "button").length, 0);
+});
+
+Deno.test("booking_274: expired/withdrawn/cancelled neutraali, yours ok, muut avoimet tarjoukset säilyvät", () => {
+  for (const state of ["expired", "withdrawn", "cancelled"]) {
+    const { doc, banner } = page();
+    render(doc, { ok: true, result: state, title: "x", focus_state: state, message: "Teksti", focus_offer_id: FOCUS, offers: [] }, () => {});
+    assertEquals(banner.className, "banner", state);
+  }
+  const { doc, stack, banner } = page();
+  render(doc, { ok: true, result: "yours", title: "Vuoro on sinun", focus_state: "yours", message: "Lämmitysvuoro on sinun. Kiitos!", focus_offer_id: FOCUS, offers: [heater] }, () => {});
+  assert(banner.className.includes("ok"));
+  const cards = tags(stack, "article");
+  assertEquals(cards.length, 2);
+  assertEquals(cards[0].textContent, "Lämmitysvuoro on sinun. Kiitos!");
+  assertEquals(tags(cards[1], "button").map((b) => b.textContent), ["Hyväksy", "Kieltäydy"]);
+});
+
+Deno.test("booking_274: POST-vastaus already_taken + tilateksti ei ole punainen", () => {
+  const { doc, banner, stack } = page();
+  render(doc, { ok: true, result: "already_taken", title: "Tämä vuoro on jo mennyt", focus_state: "filled_other", message: "Vuoro on jo täytetty. Kiitos!", focus_offer_id: FOCUS, acted: null, offers: [] }, () => {});
+  assertEquals(banner.className, "banner");
+  assertEquals(tags(stack, "article")[0].textContent, "Vuoro on jo täytetty. Kiitos!");
+});
+
+Deno.test("booking_274: 'Vahvista vastauksesi' vain kun linkin vuoro on auki", () => {
+  const a = page();
+  render(a.doc, { ok: true, result: null, focus_state: "open", focus_offer_id: FOCUS, offers: [therapist] }, () => {});
+  assertEquals(a.title.textContent, "Vahvista vastauksesi");
+  const b = page();
+  render(b.doc, { ok: true, result: "declined", focus_state: "declined", message: "Kirjattu.", focus_offer_id: FOCUS, offers: [] }, () => {});
+  assert(b.title.textContent !== "Vahvista vastauksesi");
+  assertEquals(b.title.textContent, "");
+});
+
+Deno.test("palvelinvirhe ei näy 'Linkki ei kelpaa' -tekstinä eikä 'Ei avoimia tarjouksia'", () => {
+  const { doc, stack, title, banner } = page();
+  render(doc, { ok: false, result: "server_error", title: "Jokin meni vikaan, yritä hetken päästä uudelleen.", focus_offer_id: null, offers: [] }, () => {});
+  assertEquals(title.textContent, "Jokin meni vikaan, yritä hetken päästä uudelleen.");
+  assert(banner.className.includes("bad"));
+  assertEquals(tags(stack, "article").length, 0);
+});

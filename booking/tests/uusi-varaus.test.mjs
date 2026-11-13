@@ -84,7 +84,7 @@ test('Tekstit: FI ja EN sisältävät samat avaimet, ei tyhjiä', () => {
   assert.match(NB.en['step.inc'], /Increase: \{name\}/);
 });
 test('Tekstit: näkymissä käytetyt nbt-avaimet löytyvät', () => {
-  for (const f of ['admin/views/newbooking.js', 'admin/views/customerform.js', 'admin/views/addons.js', 'admin/views/shared.js', 'admin/stepper.js']) {
+  for (const f of ['admin/views/newbooking.js', 'admin/views/customerform.js', 'admin/views/addons.js', 'admin/views/shared.js', 'admin/views/order-card.js', 'admin/stepper.js']) {
     const src = readFileSync(join(root, f), 'utf8');
     for (const m of src.matchAll(/\b(?:T|nbt)\('([\w.]+)'/g)) assert.ok(NB.fi[m[1]] != null, `${f}: avain ${m[1]} puuttuu`);
     for (const m of src.matchAll(/nbt\(`([\w.]+)\.\$\{/g)) assert.ok(Object.keys(NB.fi).some((k) => k.startsWith(`${m[1]}.`)), `${f}: avainryhmä ${m[1]}`);
@@ -94,14 +94,15 @@ test('Ikonit: stepperin ikonit on määritelty', async () => {
   const { ICONS } = await imp('admin/icons.js');
   for (const k of ['minus', 'add', 'pgprev', 'pgnext', 'check']) assert.ok(ICONS[k], k);
 });
-test('Tyylit: ei sinistä focus-rengasta, nav-järjestys: yhdeksän kohtaa (Talous on Kassa ja talous -ryhmän välilehti)', () => {
+test('Tyylit: ei sinistä focus-rengasta, nav-järjestys: palkin reitit + yläpalkin uusi/tarkista (Talous on Kassa ja talous -ryhmä)', () => {
   const css = readFileSync(join(root, 'admin/admin.css'), 'utf8');
   assert.ok(!/1d6fd8/i.test(css), 'sininen #1d6fd8 pois');
   assert.match(css, /:focus-visible\{outline:3px solid var\(--gold\)/);
   const js = readFileSync(join(root, 'admin/admin.js'), 'utf8');
   const order = [...js.matchAll(/\{ path: '([^']*)', label:/g)].map((m) => m[1]);
-  assert.deepEqual(order.slice(0, 9), ['', 'kalenteri', 'tilaukset', 'asiakkaat', 'kassa', 'tuotteet', 'viestit', 'tilat', 'asetukset']);
-  assert.deepEqual(order.slice(9), ['uusi', 'tarkista']);
+  // Hyväksytty nykyinen ROUTES (main/PR315+): lahjakortit + koulutukset palkissa; tilat/asetukset ryhmäreitteinä.
+  assert.deepEqual(order.slice(0, 11), ['', 'kalenteri', 'tilaukset', 'asiakkaat', 'lahjakortit', 'kassa', 'tuotteet', 'koulutukset', 'viestit', 'tilat', 'asetukset']);
+  assert.deepEqual(order.slice(11), ['uusi', 'tarkista']);
 });
 
 test('Maksulinkki: paidDefaultFor false; validate vaatii emailin; payload paid=false', () => {

@@ -6,6 +6,8 @@ import { icon } from '../icons.js';
 import { CATEGORIES, UNITS, DIRECTIONS, ANCHORS, PLACEHOLDERS, timingLabel, validateMessage, emptyMessage } from '../messages-logic.js';
 import { loadRichTexts, richText } from '../rich-texts.js';
 import { mountRichFields, syncRichFields } from '../rich-editor.js';
+import { loadCustomerMessageTexts } from '../customer-message-texts.js';
+import { currentMessagesTab, messagesTabBar, renderCustomerMessagePanel } from './customer-message-panel.js';
 
 const ERR = {
   invalid_name: 'Anna nimelle 1–120 merkkiä.',
@@ -21,11 +23,15 @@ const ERR = {
 const catLabel = (id) => CATEGORIES.find((c) => c.id === id)?.label || id;
 
 export async function render({ ctx, refs }) {
-  await loadRichTexts(rpc);
+  await Promise.all([loadRichTexts(rpc), loadCustomerMessageTexts(rpc)]);
   const can = ctx.can('messages.edit');
   const wrap = h('section', { class: 'stack', 'data-testid': 'messages-page', 'aria-labelledby': 'messages-h' });
   if (!can) {
     wrap.append(h('h1', { id: 'messages-h', text: 'Viestit' }), h('p', { class: 'muted', text: 'Viestien muokkaus vaatii oikeuden messages.edit.' }));
+    return wrap;
+  }
+  if (currentMessagesTab() === 'asiakkaalle') {
+    await renderCustomerMessagePanel({ wrap, refs });
     return wrap;
   }
   const products = [...(refs?.products || [])].sort((a, b) => String(a.name).localeCompare(String(b.name), 'fi'));
@@ -42,9 +48,10 @@ export async function render({ ctx, refs }) {
       h('span', { class: 'what' }, h('strong', { text: m.name }), h('small', { text: timingLabel(m) })),
       h('span', { class: 'meta' }, badge(m.active ? 'ok' : 'muted', m.active ? 'Käytössä' : 'Pois'), badge('muted', catLabel(m.category)), h('small', { text: `${(m.product_ids || []).length} tuotetta` })))) : [empty('Ei viestejä. Lisää ensimmäinen pohja.')]);
     wrap.replaceChildren(
+      messagesTabBar('pohjat'),
       h('div', { class: 'row between wrap' }, h('h1', { id: 'messages-h' }, icon('mail', 22), ' Viestit'), h('button', { type: 'button', class: 'btn', 'data-testid': 'message-new', onclick: () => edit(emptyMessage()) }, 'Uusi viesti')),
       h('p', { class: 'muted', text: 'Ohjeen lyhyt teksti näkyy tilausvahvistuksessa ja tilaussivulla, ja täysi teksti avautuu napista Näytä ohjeet. Jälkimarkkinointi ja palautepyyntö lähtevät vain ajastettuna. Jälkimarkkinointi lähtee vain, jos asiakkaalla on markkinointilupa, ja viestin loppuun tulee peruutuslinkki. Ohje ja palautepyyntö ovat palveluviestejä. Sama viesti lähtee tilauksesta kerran, vaikka tuotteita olisi useita.' }),
-      h('label', { class: 'check big', 'data-testid': 'messages-timed-label' }, sw, h('span', {}, h('strong', { text: 'Ajastetut viestit päällä' }), h('small', { text: 'Oletus pois. Ennen päälle kytkemistä tarkista pohjat. Lähetys kunnioittaa yhä sähköpostin tilaa (off, dry_run, live) ja vastaanottajarajausta. Kytkin ei lähetä yli 36 tuntia myöhässä olevia vanhoja viestejä.' }))),
+      h('label', { class: 'check big', 'data-testid': 'messages-timed-label' }, sw, h('span', {}, h('strong', { text: 'Ajastetut viestit päällä' }), h('small', { text: 'Oletus pois. Ennen päälle kytkemistä tarkista pohjat. Lähetys kunnioittaa yhä sähköpostin tilaa (pois / harjoitus / käytössä) ja vastaanottajarajausta. Kytkin ei lähetä yli 36 tuntia myöhässä olevia vanhoja viestejä.' }))),
       list);
   }
 
