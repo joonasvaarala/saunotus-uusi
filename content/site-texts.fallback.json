@@ -810,8 +810,8 @@
   {
    "key": "admin.training.copy_hint",
    "lang": "fi",
-   "text": "Päivät ja tilavaraukset siirtyvät samalla määrällä päiviä. Viestipohjat kopioidaan, osallistujat jäävät tyhjiksi. Uusi [REDACTED] pysyy piilotettuna.",
-   "version": 1,
+   "text": "Päivät ja tilavaraukset siirtyvät samalla määrällä päiviä. Viestipohjat kopioidaan, osallistujat jäävät tyhjiksi. Uusi koulutus pysyy piilotettuna.",
+   "version": 2,
    "placeholders": []
   },
   {
@@ -978,8 +978,8 @@
   {
    "key": "admin.training.hidden",
    "lang": "fi",
-   "text": "Piilotettu [REDACTED] – ei vielä myynnissä",
-   "version": 1,
+   "text": "Piilotettu koulutus – ei vielä myynnissä",
+   "version": 2,
    "placeholders": []
   },
   {
