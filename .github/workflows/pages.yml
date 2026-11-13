@@ -198,6 +198,9 @@ jobs:
       # booking_286: Pikakassan kortti puhelimella (CheckoutX / Surfboard demo, vain testitila). Edge-logiikka Surfboard-mockilla yllä (checkoutx_test.ts).
       # t286 (booking/supabase/tests/pos/t286_checkoutx_pos.sql) ei ole tässä ajossa: työnkulussa ei ole Postgresia. Bottiavustus ajaa sen psql:llä migraation jälkeen.
       - run: node --test booking/tests/checkoutx-pikakassa.test.mjs
+      # Tilausnäkymä v3, PR 3 (booking_282–284): osahyvitys ja asiakkaan oma pienennys lippujen takana; tekstit pending-import-139.
+      # SQL: booking/supabase/tests/talous/t282_*.sql, t283_*.sql, t284_*.sql ja race_283.sh ajetaan paikallisessa PG17:ssä. Työnkulussa ei ole Postgresia.
+      - run: node --test booking/tests/osahyvitys-v3.test.mjs booking/tests/tilausnakyma-hyvitys-15149.test.mjs booking/tests/hyvitys-kasittelyssa-15149.test.mjs
       # QR-tuote, tulostus ja asetusten välilehdet (booking_104–105).
       # t104 (booking/supabase/tests/pos/t104_product_qr.sql) ei ole tässä ajossa:
       # työnkulussa ei ole Postgresia, ja booking/supabase/tests/run.sh ajaa vain juuren [0-9]*.test.sql.

@@ -65,7 +65,7 @@ begin
   perform pg_temp.ck(not has_function_privilege('anon', 'booking.admin_reservation_refund_preview(bigint)', 'execute'), 'B7: anon ei esikatselua');
   perform pg_temp.ck(not has_function_privilege('authenticated', 'booking._reservation_refund_plan(bigint)', 'execute')
                      and not has_function_privilege('anon', 'booking._reservation_refund_plan(bigint)', 'execute'), 'B8: sisäinen funktio suljettu');
-  perform pg_temp.ck(not has_function_privilege('anon', coalesce(to_regprocedure('booking.admin_cancel_reservation(bigint,text,boolean,text,boolean,boolean)'), to_regprocedure('booking.admin_cancel_reservation(bigint,text,boolean,text,boolean)'), to_regprocedure('booking.admin_cancel_reservation(bigint,text,boolean,text)'))::oid, 'execute') -- booking_280/281 lisäsivät argumentteja
+  perform pg_temp.ck(not has_function_privilege('anon', coalesce(to_regprocedure('booking.admin_cancel_reservation(bigint,text,boolean,text,boolean,boolean,numeric)'), to_regprocedure('booking.admin_cancel_reservation(bigint,text,boolean,text,boolean,boolean)'), to_regprocedure('booking.admin_cancel_reservation(bigint,text,boolean,text,boolean)'), to_regprocedure('booking.admin_cancel_reservation(bigint,text,boolean,text)'))::oid, 'execute') -- booking_280/281 lisäsivät argumentteja
                      and not has_function_privilege('anon', 'booking.admin_refund_order(bigint,numeric,text,jsonb,boolean)', 'execute'), 'B9: anon ei uusia RPC:itä');
 
   -- ---- C: aiempi osahyvitys rajaa (rivikohtainen) ----

@@ -19,6 +19,8 @@ import { addonPicker } from './addons.js';
 import { showReceipt, resendDialog } from './talous-receipts.js';
 import { openOrderPaymentLink, openOrderRecordPayment, openAddToOrder } from './order-add.js';
 import { openCancelFlow } from './order-cancel-flow.js';
+import { loadRefundInfo, openOverpaymentFlow, overpaymentButton } from './partial-refund-flow.js';
+import { overpaymentView } from '../partial-refund-logic.js';
 import { ov, loadOvTexts } from '../order-view-texts.js';
 import { loadOrderTexts, orderText } from '../orders-texts.js';
 import {
@@ -67,7 +69,12 @@ export function createActionRunner(env) {
     sendLink(m) { const o = order(m); if (env.dialogs?.link) env.dialogs.link(o); else openOrderPaymentLink({ api: env.api, ctx, order: o, onDone: done }); },
     resendLink(m) { this.sendLink(m); },
     openBilling(m) { location.hash = m.invoice?.id ? invoiceHref(m.invoice.id) : '#/laskut'; },
-    refund(m) {
+    async refund(m) {
+      // booking_283 (PR 3): ylisuoritus + lippu partial_refunds_enabled → ylisuorituksen hyvitysdialogi (palvelin päättää summan ja maksun)
+      if (m.overpaid > 0.004 && !m.locked && ctx.can('payments.refund')) {
+        const info = await loadRefundInfo(rpc, m.order_id);
+        if (overpaymentView(info).show) { openOverpaymentFlow({ model: m, ctx, rpc, api: env.api, onDone: done, info }); return; }
+      }
       const o = order(m);
       // Vain hyvitettävissä olevat maksut (booking_278 refundable_by_payment: ei lahjakortti-, kumppani-, vuosikortti- eikä laskumaksuja).
       const refundable = refundTargets(m, o.payments, { can: ctx.can });
@@ -308,6 +315,7 @@ function paymentCard(m, env, runner) {
     amountBox(box.display, { meta: false, testid: 'ov-pay-box', amountTestid: 'ov-pay-amount' }),
     h('dl', { class: 'ov-kv' }, rows.map(([k, v]) => [h('dt', { text: ov(k) }), h('dd', { text: v })])),
     btns.length ? h('div', { class: 'ov-stack' }, btns) : null,
+    h('div', { class: 'ov-stack', 'data-slot': 'ov-over', 'data-testid': 'ov-over-slot' }),   // PR 3: "Hyvitä ylisuoritus…" lisätään asynkronisesti, kun palvelin sallii
     box.locked ? h('p', { class: 'muted ov-small', 'data-testid': 'ov-pay-locked', text: ov('order_view.pay_locked_note') }) : null,
     !box.locked && box.actions.sendLink && (box.openLink || box.linkSentAt) ? h('p', { class: 'muted ov-small', text: ov('order_view.pay_link_hint') }) : null);
 }
@@ -497,6 +505,14 @@ export async function renderOrderView({ ctx, refs, rpc = sbRpc, orderNo = null, 
     root.replaceChildren(...list(backLink(m), head, h('div', { class: 'ov-grid' }, mainCol, side), bar));
     root.classList.toggle('has-bar', !!bar);
     root.dataset.orderId = m.order_id; root.dataset.orderNo = m.order_no;
+    hydrateOverpayment(m);
+  }
+  // booking_283 (PR 3): ylisuorituksen hyvitysnappi vain kun palvelimen lippu, oikeus ja ylisuoritus täsmäävät (muuten ei nappia, vanha hyvitys ennallaan)
+  function hydrateOverpayment(m) {
+    const slot = root.querySelector('[data-slot=ov-over]');
+    if (!slot || m.overpaid <= 0.004 || m.locked || !ctx.can('payments.refund')) return;
+    overpaymentButton({ model: m, ctx, rpc, api: talousApi, onDone: () => load() })
+      .then((b) => { if (b && slot.isConnected && String(root.dataset.orderId) === String(m.order_id)) slot.append(b); }).catch(() => {});
   }
   await load();
   return root;

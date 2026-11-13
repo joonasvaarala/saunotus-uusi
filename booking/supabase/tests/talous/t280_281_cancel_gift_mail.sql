@@ -186,8 +186,8 @@ begin
   perform pg_temp.ck(to_regprocedure('booking._add_bank_days(timestamp with time zone,integer)') is null and to_regclass('booking.refund_mail_links') is null, 'D5: ei pankkipäiväodotusta eikä linkkitaulua');
 
   -- ================= oikeudet =================
-  perform pg_temp.ck(not has_function_privilege('anon', 'booking.admin_cancel_reservation(bigint,text,boolean,text,boolean,boolean)', 'execute')
-                     and has_function_privilege('authenticated', 'booking.admin_cancel_reservation(bigint,text,boolean,text,boolean,boolean)', 'execute'), 'R1: peruutus-RPC vain kirjautuneille');
+  perform pg_temp.ck(not has_function_privilege('anon', 'booking.admin_cancel_reservation(bigint,text,boolean,text,boolean,boolean,numeric)', 'execute')
+                     and has_function_privilege('authenticated', 'booking.admin_cancel_reservation(bigint,text,boolean,text,boolean,boolean,numeric)', 'execute'), 'R1: peruutus-RPC vain kirjautuneille');
   perform pg_temp.ck(to_regprocedure('booking.admin_cancel_reservation(bigint,text,boolean,text,boolean)') is null
                      and to_regprocedure('booking.admin_cancel_reservation(bigint,text,boolean,text)') is null, 'R2: vanhat ylikuormitukset poissa');
   perform pg_temp.ck(not has_function_privilege('authenticated', 'booking._reservation_cancelled_mail(bigint)', 'execute')

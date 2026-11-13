@@ -7,7 +7,10 @@ import { telHref, mailHref, createLatestGate } from '../reservation-dialog-logic
 import { cardActions, cardPaymentStatus, cardSectionSummaries, cardAddonLine, orderBreakdown, vatRateLabel } from '../order-card-logic.js';
 import { loadOrderTexts, orderText as tx } from '../orders-texts.js';
 import { loadRcTexts } from '../refund-cancel-texts.js';
-import { cancelReservationDialog, CX_KINDS } from './refund-cancel.js';
+import { cancelReservationDialog, CX_KINDS, processOnlineRefunds } from './refund-cancel.js';
+import { changeRefundStep } from './partial-refund-flow.js';
+import { prText } from '../partial-refund-texts.js';
+import { errorKey } from '../partial-refund-logic.js';
 import { openAddToOrder, openOrderPaymentLink, openOrderRecordPayment } from './order-add.js';
 import { formDialog } from './talous-ui.js';
 import { t } from '../talous-i18n.js';
@@ -716,8 +719,16 @@ export function changeDialog(r, onChange, order = null, can = () => false) {
     }
     args.p_allow_overbook = over;
     args.p_allow_off_schedule = off;
-    await rpc('admin_change_booking', args);
-    toast('Varaus muutettu'); d.close(); onChange?.();
+    // booking_282 (PR 3): hinta palvelimen esikatselusta + hyvitysvaihe (vain kun lippu partial_refunds_enabled on päällä ja käyttäjällä on payments.refund)
+    const pr = await changeRefundStep({ rpc, previewArgs: { p_reservation_id: r.reservation_id, p_rule_id: args.p_rule_id ?? null, p_date: args.p_date ?? null, p_persons: args.p_persons ?? null, p_start: args.p_start ?? null },
+      hasEmail: !!order?.customer?.email });
+    if (pr.cancelled) return;
+    Object.assign(args, pr.args || {});
+    let res;
+    try { res = await rpc('admin_change_booking', args); }
+    catch (e) { const k = errorKey(e); throw k ? new Error(prText(k)) : e; }
+    if (res?.refunds?.length) await processOnlineRefunds(createTalousApi({ rpc, io: { fn } }), res.refunds);
+    toast(res?.refunded_total > 0 ? prText('over.done', { amount: money(res.refunded_total) }) : pr.hint === 'price_up' ? prText('change.extra_payment') : 'Varaus muutettu'); d.close(); onChange?.();
   }); } },
     h('p', { class: 'muted', text: `Nykyinen: ${spansDays(r.starts_at, r.ends_at) ? formatWhenRange(r.starts_at, r.ends_at, 'fi') : `${fmtDay(r.starts_at)}, ${fmtTime(r.starts_at)}–${fmtTime(r.ends_at)}`}, ${r.persons} hlö` }),
     changeUi.locked ? h('p', { class: 'muted', role: 'status', 'data-testid': 'invoice-change-hint', text: alt('invoiced_hint') }) : null,

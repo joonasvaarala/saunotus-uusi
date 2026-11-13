@@ -659,7 +659,7 @@ begin
   perform pg_temp.ck((
     select bool_and(not has_function_privilege('anon', fn, 'execute') and has_function_privilege('authenticated', fn, 'execute'))
       from unnest(array[
-        coalesce(to_regprocedure('booking.admin_cancel_reservation(bigint,text,boolean,text,boolean,boolean)'), to_regprocedure('booking.admin_cancel_reservation(bigint,text,boolean,text,boolean)'), to_regprocedure('booking.admin_cancel_reservation(bigint,text,boolean,text)'))::text, -- booking_280/281 lisäsivät argumentteja
+        coalesce(to_regprocedure('booking.admin_cancel_reservation(bigint,text,boolean,text,boolean,boolean,numeric)'), to_regprocedure('booking.admin_cancel_reservation(bigint,text,boolean,text,boolean,boolean)'), to_regprocedure('booking.admin_cancel_reservation(bigint,text,boolean,text,boolean)'), to_regprocedure('booking.admin_cancel_reservation(bigint,text,boolean,text)'))::text, -- booking_280/281 lisäsivät argumentteja
         'booking.admin_record_payment(bigint,text,numeric,text,jsonb)',
         'booking.admin_get_order(bigint)',
         'booking.admin_set_reservation_addons(bigint,jsonb)'
@@ -667,7 +667,7 @@ begin
   perform pg_temp.ck((
     select bool_and(not has_function_privilege('anon', fn, 'execute') and not has_function_privilege('authenticated', fn, 'execute'))
       from unnest(array[
-        'booking._change_booking_core(bigint,bigint,date,integer,boolean,integer,uuid,text)',
+        coalesce(to_regprocedure('booking._change_booking_core(bigint,bigint,date,integer,boolean,integer,uuid,text,boolean)'), to_regprocedure('booking._change_booking_core(bigint,bigint,date,integer,boolean,integer,uuid,text)'))::oid::regprocedure::text,
         'booking._clamp_addons(bigint,integer)',
         'booking._addon_total_after(bigint,integer)',
         'booking._annual_res_discount_trg()',

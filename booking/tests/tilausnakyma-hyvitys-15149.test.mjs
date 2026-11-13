@@ -51,7 +51,9 @@ test('refundTargets: ei oikeutta / laskulukko / lahjakortti → tyhjä', () => {
 
 test('tilausnäkymän runner käyttää refundTargetsia, välittää esitäytön eikä epäonnistu hiljaa', () => {
   const src = read('booking/admin/views/order-view.js');
-  const body = src.slice(src.indexOf('    refund(m) {'), src.indexOf('    addPurchase(m'));
+  const start = src.search(/\n {4}(async )?refund\(m\) \{/);   // PR 3 (booking_283): refund on async (ylisuorituksen hyvitysdialogi)
+  assert.ok(start > 0);
+  const body = src.slice(start, src.indexOf('    addPurchase(m'));
   assert.match(body, /refundTargets\(m, o\.payments/);
   assert.doesNotMatch(body, /String\(p\.id\)/);
   assert.match(body, /suggest:/);
