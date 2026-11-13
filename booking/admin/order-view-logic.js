@@ -526,7 +526,7 @@ export function customerModel(c, { now = new Date() } = {}) {
     email: c.email || null, phone: c.phone || null, language: c.language || null, notes: String(c.notes || '').trim(),
     consent: { given: !!c.marketing_consent, at: c.marketing_consent_at || null, source: c.marketing_consent_source || null, unsubscribed_at: c.marketing_unsubscribed_at || null },
     stats, open_balance: c.open_balance != null ? num(c.open_balance) : null, open_orders: c.open_orders != null ? num(c.open_orders) : unpaidOrders.length,
-    gift_cards: c.gift_cards || null, annual_cards: c.annual_cards || [], anonymized: !!c.anonymized_at,
+    gift_cards: c.gift_cards || null, annual_cards: c.annual_cards || [], anonymized: !!c.anonymized_at, merged_into: c.merged_into ?? null,
     upcoming, past, created_at: c.created_at || null,
   };
 }

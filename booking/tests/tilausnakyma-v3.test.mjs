@@ -212,15 +212,15 @@ test('asiakasnäkymä: tulevat / menneet, tunnusluvut palvelimelta, ei yhdistä/
   assert.deepEqual(L.customerOrderBadges(m.past[1]).map((b) => b.key), ['status.no_show', 'pay.paid']);
   assert.deepEqual(L.customerOrderBadges(m.upcoming[0]).map((b) => b.key), ['status.confirmed', 'pay.unpaid_short']);
   const src = read('booking/admin/views/customer-view.js');
-  assert.doesNotMatch(src, /admin_merge|anonymi[sz]e_customer|admin_delete_customer/, 'ei yhdistä/poista-osiota PR 1:ssä');
+  assert.doesNotMatch(src, /admin_merge|anonymi[sz]e_customer|admin_delete_customer/, 'kantakutsut yhdistä/anonymisoi vain omassa paneelimoduulissa (customer-admin-panel.js, PR 4)');
   const card = read('booking/admin/views/order-view.js');
   assert.doesNotMatch(card, /admin_get_customer/, 'asiakashistoria vain asiakasnäkymässä');
 });
 
 test('tekstit: FI = EN, pending-import-137 täsmää, paikkamerkit, ei HTML:ää, ei päällekkäisyyttä muiden tuontien kanssa', () => {
   assert.deepEqual(Object.keys(ORDER_VIEW_TEXTS.fi).sort(), Object.keys(ORDER_VIEW_TEXTS.en).sort());
-  // import 140 (summalaatikko, ui.admin.order_view.amt.*) jatkaa 137:ää samalla etuliitteellä
-  const OWN = ['site-texts.pending-import-137.json', 'site-texts.pending-import-140.json', 'site-texts.pending-import-144.json'];
+  // import 140 (summalaatikko, ui.admin.order_view.amt.*) jatkaa 137:ää samalla etuliitteellä; import 142 (PR 4: asiakkaan yhdistäminen/anonymisointi, customer_view.merge.*); import 144 (amt.refund_pending*)
+  const OWN = ['site-texts.pending-import-137.json', 'site-texts.pending-import-140.json', 'site-texts.pending-import-142.json', 'site-texts.pending-import-144.json'];
   const rows = OWN.flatMap((f) => JSON.parse(read(`content/${f}`)));
   assert.equal(rows.length, Object.keys(ORDER_VIEW_TEXTS.fi).length * 2);
   const seen = new Set();
