@@ -15,7 +15,7 @@
   .prep-head { display: flex; align-items: center; gap: var(--sp-2); margin-bottom: var(--sp-2); }
   .prep-head h2 { font-size: var(--fs-md); }
   .prep-head .rev { margin-left: auto; font-size: var(--fs-sm); color: var(--c-ink); }
-  .tiles { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: var(--sp-2); }
+  .tiles { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--sp-2); }
   .tile { display: grid; gap: 2px; padding: 8px 10px; border-radius: var(--r-md); background: #F8F6EA; border: 1px solid rgba(79,97,48,.2); color: var(--c-ink); }
   .tile .top { display: flex; align-items: center; justify-content: space-between; }
   .tile b { font-size: var(--fs-xl); }
@@ -83,10 +83,9 @@
         <div class="tile"><div class="top"><span data-icon="users" data-size="22"></span><b class="num">23</b></div><span>henkilöä</span></div>
         <div class="tile"><div class="top"><span data-icon="towel" data-size="22"></span><b class="num">8</b></div><span>pyyhettä</span></div>
         <div class="tile"><div class="top"><span data-icon="whisk" data-size="22"></span><b class="num">3</b></div><span>saunavihtaa</span></div>
-        <div class="tile"><div class="top"><span data-icon="mask" data-size="22"></span><b class="num">2</b></div><span>turvenaamiota</span></div>
-        <div class="tile"><div class="top"><span data-icon="foot" data-size="22"></span><b class="num">1</b></div><span>jalkakylpy</span></div>
+        <div class="tile"><div class="top"><span class="row" style="gap:2px"><span data-icon="mask" data-size="22"></span><span data-icon="foot" data-size="22"></span></span><b class="num">2</b></div><span>turvenaamio ja jalkakylpy</span></div>
       </div>
-      <p class="prep-rows"><b>16.00</b> 4 pyyhettä, 2 vihtaa · <b>17.00</b> 4 pyyhettä, 1 vihta, 2 naamiota · <b>18.00</b> 1 jalkakylpy</p>
+      <p class="prep-rows"><b>16.00</b> 4 pyyhettä, 2 vihtaa · <b>17.00</b> 4 pyyhettä, 1 vihta · <b>18.00</b> 2 × turvenaamio ja jalkakylpy</p>
     </section>
 
     <div class="stack">
@@ -190,7 +189,7 @@
     <li><span class="pin">1</span><div><b>Valikossa nimet myös tabletilla, ja Koulutukset on oma päävalikon kohtansa.</b> <span class="before">Nyt alle 900 px näkyy 11 ikonia ilman nimiä.</span> <code>HALL-KUORI-01</code> <code>HALL-KUORI-02</code></div></li>
     <li><span class="pin">2</span><div><b>Kassa yläpalkissa</b> yhden napautuksen päässä joka näkymästä; yläpalkin painikkeet 44 px. <span class="before">Nyt pikakassa on Kassa ja talous -ryhmän välilehti, painikkeet 38 px.</span> <code>HALL-KUORI-01</code></div></li>
     <li><span class="pin">3</span><div><b>Päivän vaihto heti otsikon vieressä ja kiinteänä; näkymä päivittyy itsestään.</b> <span class="before">Nyt päivätyökalut ovat tuoton, työvuorojen ja muistutuksen alla, eikä uusia verkkovarauksia näe ilman siirtymää.</span> <code>HALL-PAIVA-01</code> <code>HALL-PAIVA-04</code></div></li>
-    <li><span class="pin">4</span><div><b>Valmistelu heti ylhäällä:</b> henkilöt ja tilatut lisäpalvelut lajeittain (pyyhkeet, saunavihdat, turvenaamiot, jalkakylvyt) yhdellä silmäyksellä, alla aloitusajoittain; päivän tuotto samalla rivillä. <span class="before">Nyt sama Valmistelu-kortti on tuoton, työvuorojen, muistutuksen ja päivätyökalujen alapuolella.</span> <code>HALL-PAIVA-01</code></div></li>
+    <li><span class="pin">4</span><div><b>Valmistelu heti ylhäällä:</b> henkilöt ja tilatut lisäpalvelut lajeittain (pyyhkeet, saunavihdat, turvenaamio ja jalkakylpy) yhdellä silmäyksellä, alla aloitusajoittain; päivän tuotto samalla rivillä. <span class="before">Nyt sama Valmistelu-kortti on tuoton, työvuorojen, muistutuksen ja päivätyökalujen alapuolella.</span> <code>HALL-PAIVA-01</code></div></li>
     <li><span class="pin">5</span><div><b>Sisäänkirjausympyrä säilyy</b>: vihreäreunainen ympyrä täyttyy vihreäksi, kun asiakas on kirjattu sisään. Muutos on vain se, että tilan nimi on "Saapunut" (nyt "Toteutunut") ja ruudunlukija lukee ympyrän nimen ja tilan. <code>HALL-PAIVA-02</code></div></li>
     <li><span class="pin">6</span><div><b>Rivin pikatoiminnot ja puhelinnumero:</b> siirto (myös vapaasti valittavaan ajankohtaan), soitto, maksu, Ei saapunut ja peruutus poistumatta päivästä. <span class="before">Nyt siirto vaatii 5–6 vaihetta ja kaksi näkymänvaihtoa; "Ei saapunut" puuttuu.</span> <code>HALL-PAIVA-03</code></div></li>
     <li><span class="pin">7</span><div><b>Päivän muistiinpano käyttöön</b> (valmis toiminto on nyt liputettu pois). <code>HALL-PAIVA-05</code></div></li>
