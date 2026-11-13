@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="fi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Luonnos 01: Päivänäkymä tabletilla – hallinta</title>
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="ui.css">
+<style>
+  .daybar { position: sticky; top: 0; z-index: 4; display: flex; align-items: center; gap: var(--sp-2); flex-wrap: wrap; padding: var(--sp-3) 0; background: var(--c-bg); }
+  .daybar h1 { font-size: var(--fs-xl); margin-right: auto; }
+  .daybar .upd { font-size: var(--fs-xs); color: var(--c-muted); display: flex; align-items: center; gap: 4px; }
+  .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--sp-2); margin: var(--sp-2) 0 var(--sp-4); }
+  .kpi { background: var(--c-surface); border: 1px solid var(--c-line); border-radius: var(--r-md); padding: 8px 12px; }
+  .kpi span { display: block; font-size: var(--fs-xs); color: var(--c-muted); }
+  .kpi b { font-size: var(--fs-lg); color: var(--c-ink); }
+  .note { display: flex; gap: var(--sp-3); align-items: flex-start; }
+  .note .who { font-size: var(--fs-xs); color: var(--c-muted); }
+  .session { padding: 0; overflow: visible; }
+  .session-head { display: flex; align-items: center; gap: var(--sp-3); flex-wrap: wrap; padding: var(--sp-3) var(--sp-4); border-bottom: 1px solid var(--c-line); }
+  .session-head h2 { font-size: var(--fs-md); }
+  .session-head .time { font-size: var(--fs-lg); font-weight: 700; color: var(--c-ink); }
+  .session-head .meter { margin-left: auto; }
+  .res { position: relative; display: grid; grid-template-columns: 1fr auto auto; gap: var(--sp-3); align-items: center; padding: var(--sp-3) var(--sp-4); border-bottom: 1px solid var(--c-line); }
+  .res:last-child { border-bottom: 0; }
+  .res .name { font-weight: 700; color: var(--c-ink); }
+  .res .meta { display: flex; flex-wrap: wrap; gap: 6px var(--sp-3); align-items: center; font-size: var(--fs-sm); color: var(--c-text); margin-top: 4px; }
+  .res .meta a { color: var(--c-text); }
+  .arrive { display: inline-flex; align-items: center; gap: 6px; min-height: var(--tap); padding: 0 14px; border-radius: var(--r-md); border: 2px solid var(--c-ok); background: #fff; color: var(--c-ok); font: 700 var(--fs-sm)/1 var(--f-ui); }
+  .arrive[aria-pressed="true"] { background: var(--c-ok); color: #fff; }
+  .res.is-unpaid { background: #fffaf3; }
+  .tag-allergy { background: var(--c-danger-bg); color: var(--c-danger); }
+  .menu.at-row { right: 12px; top: 58px; }
+</style>
+</head>
+<body>
+<div class="mock-bar"><b>Luonnos 01/10</b> Hallinta · Päivänäkymä vastaanoton tabletilla (820 px) · <a href="index.html">kaikki luonnokset</a><span class="ids">HALL-PAIVA-01–05 · HALL-KUORI-01–02 · HALL-ASIAKKAAT-03</span></div>
+<div class="app">
+  <header class="app-top">
+    <a class="brand" href="#"><img src="../../../booking/admin/logo-haalea.svg" alt="Hallinta" width="26" height="36"></a>
+    <div class="search"><span data-icon="search" data-size="18"></span>Hae nimeä, numeroa tai koodia</div>
+    <a class="top-btn" href="#"><span data-icon="plus" data-size="18"></span>Uusi varaus</a>
+    <a class="top-btn" href="#"><span data-icon="till" data-size="18"></span>Kassa</a><span class="pin" style="margin-left:-14px;margin-top:-30px">2</span>
+    <a class="top-btn" href="#"><span data-icon="check" data-size="18"></span>Tarkista <span class="count">3</span></a>
+    <span class="user"><i>J</i></span>
+  </header>
+  <nav class="app-nav" aria-label="Päävalikko">
+    <a href="#" aria-current="page"><span data-icon="day"></span>Päivä</a>
+    <a href="#"><span data-icon="calendar"></span>Kalenteri</a>
+    <a href="#"><span data-icon="list"></span>Tilaukset<span class="badge badge--warn">2</span></a>
+    <a href="#"><span data-icon="users"></span>Asiakkaat</a>
+    <a href="#"><span data-icon="gift"></span>Lahjakortit ja koodit</a>
+    <a href="#"><span data-icon="tag"></span>Tarjonta</a>
+    <a href="#"><span data-icon="chart"></span>Talous</a>
+    <a href="#"><span data-icon="mail"></span>Sisältö</a>
+    <a href="#"><span data-icon="sliders"></span>Asetukset</a>
+    <p class="xs muted" style="padding:12px 16px 0;display:flex;gap:8px;align-items:center"><span class="pin">1</span>Nimet näkyvät myös tabletilla</p>
+  </nav>
+  <main class="app-main">
+    <div class="daybar">
+      <h1>Torstai 12.11.2026</h1>
+      <button class="icon-btn" aria-label="Edellinen päivä"><span data-icon="pgprev"></span></button>
+      <button class="btn btn--sm">Tänään</button>
+      <button class="icon-btn" aria-label="Seuraava päivä"><span data-icon="pgnext"></span></button>
+      <button class="icon-btn" aria-label="Valitse päivä"><span data-icon="calendar"></span></button>
+      <span class="pin">3</span>
+      <span class="upd" style="flex-basis:100%"><span data-icon="undo" data-size="14"></span>Päivitetty klo 14.05 · päivittyy itsestään minuutin välein</span>
+    </div>
+
+    <div class="kpis">
+      <div class="kpi"><span>Varauksia</span><b class="num">9</b></div>
+      <div class="kpi"><span>Henkilöitä</span><b class="num">23</b></div>
+      <div class="kpi"><span>Lisäpalveluita</span><b class="num">6</b></div>
+      <div class="kpi"><span>Päivän tuotto</span><b class="num">1 245 €</b></div>
+    </div>
+
+    <div class="stack">
+      <div class="alert alert--warn"><span data-icon="eye"></span><div><b>1 hoitovaraus ilman valittua hoitoa</b>Klo 16.00 saunahoito: asiakas ei ole valinnut hoitoa.</div><a class="btn btn--sm" href="#">Avaa</a></div>
+
+      <section class="card note" aria-label="Päivän muistiinpano">
+        <span data-icon="receipt"></span>
+        <div class="grow"><b style="color:var(--c-ink)">Päivän muistiinpano</b> <span class="pin">7</span>
+          <p class="small">Rauni lämpiää klo 15.30 alkaen. Pyyhkeitä haettava varastosta ennen iltavuoroa.</p>
+          <p class="who">Lisätty klo 09.12 · Muokkaa</p></div>
+      </section>
+
+      <div class="row wrap" style="justify-content:flex-end">
+        <button class="btn btn--sm"><span data-icon="print" data-size="18"></span>Tulosta päivälista</button><span class="pin">8</span>
+        <button class="btn btn--sm"><span data-icon="lock" data-size="18"></span>Lisää sulku</button>
+      </div>
+
+      <section class="card session">
+        <header class="session-head">
+          <span class="time num">16.00–19.00</span>
+          <h2>Turvetorstai</h2>
+          <span class="badge badge--info">Yleinen vuoro</span>
+          <span class="meter"><i><b style="width:56%"></b></i><span class="num">9 / 16</span></span><span class="pin">4</span>
+        </header>
+        <div class="res">
+          <div>
+            <div class="name">Maija Esimerkki · 2 hlö</div>
+            <div class="meta"><a href="tel:+358401234567"><span class="row" style="gap:4px"><span data-icon="link" data-size="14"></span>040 123 4567</span></a><span>2 × pyyhe</span><span class="badge badge--ok">Maksettu</span><span class="muted">#15123</span></div>
+          </div>
+          <button class="arrive" aria-pressed="true"><span data-icon="tick" data-size="18"></span>Saapui</button>
+          <button class="icon-btn" aria-label="Lisää toimintoja: Maija Esimerkki">⋯</button>
+        </div>
+        <div class="res is-unpaid">
+          <div>
+            <div class="name">Ville Testinen · 4 hlö</div>
+            <div class="meta"><span>040 765 4321</span><span>1 × saunavihta</span><span class="badge badge--warn">Maksamatta 72,00 €</span><span class="muted">#15131</span></div>
+          </div>
+          <button class="arrive" aria-pressed="false">Saapui</button><span class="pin abs" style="right:150px;top:12px">5</span>
+          <button class="icon-btn" aria-label="Lisää toimintoja: Ville Testinen" aria-expanded="true">⋯</button>
+          <div class="menu at-row" role="group" aria-label="Toiminnot">
+            <button><span data-icon="calendar" data-size="18"></span>Siirrä toiseen vuoroon…</button>
+            <button><span data-icon="link" data-size="18"></span>Soita 040 765 4321</button>
+            <button><span data-icon="euro" data-size="18"></span>Ota maksu</button>
+            <button><span data-icon="list" data-size="18"></span>Avaa tilaus</button>
+            <hr>
+            <button>Ei saapunut…</button>
+            <button class="danger"><span data-icon="close" data-size="18"></span>Peru varaus…</button>
+          </div>
+          <span class="pin abs" style="right:262px;top:66px">6</span>
+        </div>
+        <div class="res">
+          <div>
+            <div class="name">Leena Malli · 3 hlö</div>
+            <div class="meta"><span>050 111 2233</span><span class="badge badge--ok">Maksettu</span><span class="badge badge--outline">Vuosikortti</span><span class="muted">#15140</span></div>
+          </div>
+          <button class="arrive" aria-pressed="false">Saapui</button>
+          <button class="icon-btn" aria-label="Lisää toimintoja: Leena Malli">⋯</button>
+        </div>
+      </section>
+
+      <section class="card session">
+        <header class="session-head">
+          <span class="time num">16.00–17.30</span>
+          <h2>Saunahoito · Rauni</h2>
+          <span class="badge badge--neutral">Hoito</span>
+          <span class="meter"><i><b style="width:100%"></b></i><span>Varattu</span></span>
+        </header>
+        <div class="res">
+          <div>
+            <div class="name">Anni Kokeilu · 2 hlö</div>
+            <div class="meta"><span>044 222 3344</span><span class="badge badge--warn">Hoito valitsematta</span><span class="badge badge--ok">Maksettu</span><span class="muted">#15102</span></div>
+          </div>
+          <button class="arrive" aria-pressed="false">Saapui</button>
+          <button class="icon-btn" aria-label="Lisää toimintoja: Anni Kokeilu">⋯</button>
+        </div>
+      </section>
+
+      <section class="card session">
+        <header class="session-head">
+          <span class="time num">18.00–21.00</span>
+          <h2>Oma savusaunavuoro</h2>
+          <span class="badge badge--warn">Yksityinen</span>
+          <span class="meter is-full"><i><b style="width:100%"></b></i><span>Varattu</span></span>
+        </header>
+        <div class="res">
+          <div>
+            <div class="name">Testi Oy · 12 hlö</div>
+            <div class="meta"><span>Yhteyshenkilö 040 999 8877</span><span class="badge tag-allergy">Allergia: koivu</span><span class="pin">9</span><span class="badge badge--info">Laskutetaan</span><span class="muted">#15117</span></div>
+          </div>
+          <button class="arrive" aria-pressed="false">Saapui</button>
+          <button class="icon-btn" aria-label="Lisää toimintoja: Testi Oy">⋯</button>
+        </div>
+      </section>
+    </div>
+  </main>
+</div>
+
+<section class="legend" aria-label="Mitä muuttui">
+  <h2>Mitä muuttui nykyiseen päivänäkymään verrattuna</h2>
+  <ol>
+    <li><span class="pin">1</span><div><b>Valikossa nimet myös tabletilla ja uusi 9 kohdan rakenne.</b> <span class="before">Nyt alle 900 px näkyy 11 ikonia ilman nimiä.</span> <code>HALL-KUORI-01</code> <code>HALL-KUORI-02</code></div></li>
+    <li><span class="pin">2</span><div><b>Kassa yläpalkissa</b> yhden napautuksen päässä joka näkymästä; yläpalkin painikkeet 44 px. <span class="before">Nyt pikakassa on Kassa ja talous -ryhmän välilehti, painikkeet 38 px.</span> <code>HALL-KUORI-01</code></div></li>
+    <li><span class="pin">3</span><div><b>Päivän vaihto heti otsikon vieressä ja kiinteänä; näkymä päivittyy itsestään.</b> <span class="before">Nyt päivätyökalut ovat tuoton, työvuorojen ja muistutuksen alla, eikä uusia verkkovarauksia näe ilman siirtymää.</span> <code>HALL-PAIVA-01</code> <code>HALL-PAIVA-04</code></div></li>
+    <li><span class="pin">4</span><div><b>Vuoron tyyppi tekstinä ja täyttöaste 9 / 16.</b> <span class="before">Nyt tyyppi näkyy vain reunan värinä ja kapasiteetista "Vapaana: N"; aika ja henkilömäärä toistuvat otsikossa ja rivillä.</span> <code>HALL-PAIVA-01</code></div></li>
+    <li><span class="pin">5</span><div><b>Näkyvä "Saapui"-painike</b> (painettuna vihreä ja rasti). <span class="before">Nyt tyhjä ympyrä ilman tekstiä; painettuna tilaksi tulee "Toteutunut".</span> <code>HALL-PAIVA-02</code></div></li>
+    <li><span class="pin">6</span><div><b>Rivin pikatoiminnot ja puhelinnumero:</b> siirto, soitto, maksu, Ei saapunut ja peruutus poistumatta päivästä. <span class="before">Nyt siirto vaatii 5–6 vaihetta ja kaksi näkymänvaihtoa; "Ei saapunut" puuttuu.</span> <code>HALL-PAIVA-03</code></div></li>
+    <li><span class="pin">7</span><div><b>Päivän muistiinpano käyttöön</b> (valmis toiminto on nyt liputettu pois). <code>HALL-PAIVA-05</code></div></li>
+    <li><span class="pin">8</span><div><b>Tulostettava päivälista</b> ja sulku työkaluriville. <span class="before">Nyt Sulut-osio on sivun lopussa, tulostusta ei ole.</span> <code>HALL-PAIVA-04</code></div></li>
+    <li><span class="pin">9</span><div><b>Asiakkaan tagi näkyy rivillä</b> (esim. allergia). <code>HALL-ASIAKKAAT-03</code></div></li>
+  </ol>
+  <p class="small muted" style="margin-top:12px">Esimerkkinimet ja -numerot ovat keksittyjä. Värit, painikkeet ja välit tulevat tiedostoista tokens.css ja ui.css (raportin luku 2).</p>
+</section>
+<script src="icons.js"></script>
+</body>
+</html>

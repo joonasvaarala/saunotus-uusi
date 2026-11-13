@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="fi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Luonnos 05: Pikakassa – hallinta</title>
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="ui.css">
+<style>
+  .pos { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: var(--sp-5); align-items: start; }
+  .prods { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--sp-3); margin-top: var(--sp-3); }
+  .prod { display: grid; gap: 4px; align-content: space-between; min-height: 96px; padding: var(--sp-3); border-radius: var(--r-lg); border: 1px solid var(--c-line); background: var(--c-surface); box-shadow: var(--shadow-card); text-align: left; font: inherit; color: var(--c-ink); position: relative; }
+  .prod b { font-size: var(--fs-md); padding-right: 30px; overflow-wrap: anywhere; }
+  .prod span { font-size: var(--fs-lg); font-weight: 700; }
+  .prod .qty { position: absolute; top: 8px; right: 8px; min-width: 26px; height: 26px; border-radius: 13px; background: var(--c-brand); color: #fff; display: grid; place-items: center; font: 700 13px/1 var(--f-ui); }
+  .prod.wide { grid-column: span 2; background: var(--c-tint); }
+  .cart { position: sticky; top: 12px; }
+  .line { display: grid; grid-template-columns: 1fr auto; gap: 4px var(--sp-2); align-items: center; padding: var(--sp-2) 0; border-top: 1px solid var(--c-line); }
+  .line:first-of-type { border-top: 0; }
+  .line b { color: var(--c-ink); }
+  .line .stepper { grid-column: 1; justify-self: start; }
+  .line .sum { grid-row: 1; grid-column: 2; font-weight: 700; color: var(--c-ink); }
+  .total { display: flex; justify-content: space-between; align-items: baseline; padding-top: var(--sp-3); border-top: 2px solid var(--c-ink); margin-top: var(--sp-2); }
+  .total b { font-size: var(--fs-2xl); color: var(--c-ink); }
+  .tender { display: grid; gap: var(--sp-2); margin-top: var(--sp-3); }
+  .tender .btn { width: 100%; min-height: 56px; justify-content: flex-start; font-size: var(--fs-md); white-space: normal; text-align: left; }
+  .tender .btn small { margin-left: auto; font-weight: 500; color: inherit; opacity: .8; }
+  .confirm { padding: var(--sp-4); border-radius: var(--r-lg); background: var(--c-info-bg); border: 2px solid var(--c-brand); display: grid; gap: var(--sp-3); margin-top: var(--sp-3); }
+  .confirm .big { font-size: var(--fs-xl); font-weight: 700; color: var(--c-ink); }
+  .layout > *, .ov > *, .pos > * { min-width: 0; }
+</style>
+</head>
+<body>
+<div class="mock-bar"><b>Luonnos 05/10</b> Hallinta · Pikakassa vastaanoton tabletilla vaakatasossa (1180 px) · <a href="index.html">kaikki luonnokset</a><span class="ids">HALL-KASSA-01 · HALL-KASSA-02 · HALL-KUORI-01</span></div>
+<div class="app">
+  <header class="app-top">
+    <a class="brand" href="#"><img src="../../../booking/admin/logo-haalea.svg" alt="Hallinta" width="26" height="36"></a>
+    <div class="search"><span data-icon="search" data-size="18"></span>Hae nimeä, numeroa tai koodia</div>
+    <span class="spacer"></span>
+    <a class="top-btn" href="#"><span data-icon="plus" data-size="18"></span>Uusi varaus</a>
+    <a class="top-btn is-current" href="#" aria-current="page"><span data-icon="till" data-size="18"></span>Kassa</a><span class="pin" style="margin-left:-14px;margin-top:-30px">1</span>
+    <a class="top-btn" href="#"><span data-icon="check" data-size="18"></span>Tarkista <span class="count">3</span></a>
+    <span class="user"><i>O</i>Työntekijä</span>
+  </header>
+  <nav class="app-nav" aria-label="Päävalikko">
+    <a href="#"><span data-icon="day"></span>Päivä</a>
+    <a href="#"><span data-icon="calendar"></span>Kalenteri</a>
+    <a href="#"><span data-icon="list"></span>Tilaukset<span class="badge badge--warn">2</span></a>
+    <a href="#"><span data-icon="users"></span>Asiakkaat</a>
+    <a href="#"><span data-icon="gift"></span>Lahjakortit ja koodit</a>
+  </nav>
+  <main class="app-main">
+    <div class="pos">
+      <section aria-label="Tuotteet">
+        <div class="row wrap"><h1 style="font-size:var(--fs-xl);margin-right:auto">Kassa</h1>
+          <div class="chips"><button class="chip" aria-pressed="true">Kaikki</button><button class="chip" aria-pressed="false">Juomat</button><button class="chip" aria-pressed="false">Vuokrat</button><button class="chip" aria-pressed="false">Tuotteet</button><button class="chip" aria-pressed="false">Lahjakortit</button></div></div>
+        <div class="prods">
+          <button class="prod"><b>Vichy</b><span class="num">3,00 €</span><i class="qty">2</i></button>
+          <button class="prod"><b>Olut 0,0 %</b><span class="num">5,00 €</span></button>
+          <button class="prod"><b>Kahvi ja pulla</b><span class="num">6,00 €</span></button>
+          <button class="prod"><b>Sipsit</b><span class="num">3,00 €</span></button>
+          <button class="prod"><b>Pyyhevuokra</b><span class="num">5,00 €</span><i class="qty">1</i></button>
+          <button class="prod"><b>Käsipyyhe</b><span class="num">4,00 €</span></button>
+          <button class="prod"><b>Saunavihta</b><span class="num">8,00 €</span></button>
+          <button class="prod"><b>Turvenaamio</b><span class="num">12,00 €</span></button>
+          <button class="prod wide"><b>Lahjakortti, avoin</b><span class="small" style="font-weight:500">Valitse summa →</span></button>
+          <button class="prod wide"><b>Vapaa rivi</b><span class="small" style="font-weight:500">Kirjoita nimi ja summa →</span></button>
+        </div>
+        <p class="small muted" style="margin-top:var(--sp-3)">Tuotteet ja järjestys: Tarjonta › Tuotteet › Myynti ja näkyvyys › Pikakassa.</p>
+      </section>
+
+      <aside class="card cart" aria-label="Ostoskori">
+        <div class="card-head"><h2>Ostoskori</h2><button class="linkbtn">Tyhjennä</button><span class="pin">2</span></div>
+        <div class="line"><b>Vichy</b><span class="sum num">6,00 €</span><span class="stepper"><button aria-label="Vähennä Vichy">−</button><output>2</output><button aria-label="Lisää Vichy">+</button></span></div>
+        <div class="line"><b>Pyyhevuokra</b><span class="sum num">5,00 €</span><span class="stepper"><button aria-label="Vähennä Pyyhevuokra">−</button><output>1</output><button aria-label="Lisää Pyyhevuokra">+</button></span></div>
+        <div class="total" aria-live="polite"><span>Yhteensä <span class="small muted">sis. ALV</span></span><b class="num">11,00 €</b></div>
+        <div class="tender" role="group" aria-label="Maksutapa">
+          <button class="btn btn--primary"><span data-icon="euro"></span>Korttipääte<small>Kuittaa maksu</small></button>
+          <button class="btn"><span data-icon="till"></span>Kortti puhelimella</button>
+          <button class="btn"><span data-icon="link"></span>Maksulinkki QR-koodina<small>ei sähköpostia</small></button>
+          <span class="pin">3</span>
+        </div>
+        <div class="confirm" role="dialog" aria-label="Korttipäätemaksu">
+          <span class="small">Veloita korttipäätteellä</span>
+          <span class="big num">11,00 €</span>
+          <p class="small">Kun pääte hyväksyy maksun, kuittaa se tästä. Kuitti tallentuu ja voidaan lähettää sähköpostiin.</p>
+          <div class="row"><button class="btn btn--primary grow">Maksu hyväksytty</button><button class="btn btn--ghost">Peruuta</button></div>
+        </div>
+      </aside>
+    </div>
+  </main>
+</div>
+
+<section class="legend" aria-label="Mitä muuttui">
+  <h2>Mitä muuttui nykyiseen pikakassaan verrattuna</h2>
+  <ol>
+    <li><span class="pin">1</span><div><b>Kassa avautuu yläpalkista</b> yhdellä napautuksella, ilman ryhmäotsikoita. Peruskäyttäjän valikossa näkyvät vain hänen kohtansa. <span class="before">Nyt kassa on Kassa ja talous -ryhmän ensimmäinen välilehti; ryhmän H1, välilehdet ja oma H1 vievät noin 300 px ennen ensimmäistä tuotetta.</span> <code>HALL-KUORI-01</code> <code>HALL-KASSA-01</code></div></li>
+    <li><span class="pin">2</span><div><b>Ostoskori näkyy koko ajan</b>, nimellä "Ostoskori", määränapeilla selkeät nimet ja summa ilmoitetaan ruudunlukijalle. <span class="before">Nyt kori on oletuksena kiinni ja nimeltään "Maksurivit", −/+ -napeilla sama nimi "Määrä".</span> <code>HALL-KASSA-01</code></div></li>
+    <li><span class="pin">3</span><div><b>Tiskimyynti korttipäätteellä</b>: veloita päätteellä ja kuittaa, kuitti syntyy. Maksulinkki myös pelkkänä QR-koodina. <span class="before">Nyt korttipääte on "Tulossa" ja maksulinkki vaatii asiakkaan sähköpostin; juoman myynti vie 6–7 vaihetta.</span> <code>HALL-KASSA-02</code></div></li>
+  </ol>
+  <p class="small muted" style="margin-top:12px">Vaatii pienen tietokantamuutoksen (korttipäätteen kuittaus) ja liiketoimintapäätöksen erillisestä päätteestä. Tuotteet ja hinnat ovat esimerkkejä.</p>
+</section>
+<script src="icons.js"></script>
+</body>
+</html>

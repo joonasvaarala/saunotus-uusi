@@ -115,6 +115,23 @@ Verrokkien sarakkeet ovat yleistietoa (OLETUS, ei testattu tätä raporttia vart
 | Jonotuslista täysiin | ◐ | ✔ | ◐ | ◐ | ✔ (tapahtumat) | KAUPPA-JONO-01 |
 | Salasanan palautus itse | ✔ | ✔ | ✔ | ✔ | – | HALL-KUORI-03 |
 
+### 1.6 Luonnokset
+
+Kymmenestä eniten muuttuvasta ja tärkeimmästä näkymästä on klikattavat HTML-luonnokset kansiossa `docs/mockups/uudistus/` (hakemisto `index.html`, kuvat kansiossa `kuvat/`). Ne käyttävät luvun 2 ehdotettua tyylijärjestelmää (`tokens.css`, `ui.css`), ja jokaisen alalaidassa on numeroitu selitys muutoksista raportin tunnisteineen.
+
+| Nro | Luonnos | Leveys | Kohdat |
+|---|---|---|---|
+| 01 | Päivänäkymä vastaanoton tabletilla | 820 px | HALL-PAIVA-01–05, HALL-KUORI-01–02 |
+| 02 | Tilausnäkymä | 1280 px | HALL-TILAUS-01–08 |
+| 03 | Aukiolot ja poikkeuspäivät (uusi) | 1280 px | HALL-TILAT-01–02 |
+| 04 | Tuotteen muokkaus | 1280 px | HALL-TUOTTEET-01–06 |
+| 05 | Pikakassa tabletilla | 1180 px | HALL-KASSA-01–02 |
+| 06 | Asetukset puhelimella | 390 px | HALL-ASETUKSET-01–02, HALL-TAPAHTUMAT-01 |
+| 07 | Tekstit (uusi) | 1280 px | SIVU-YHT-03, HALL-VIESTIT-01 |
+| 08 | Varauslomake puhelimella | 390 px | KAUPPA-KASSA-01–03, KAUPPA-YHT-01 |
+| 09 | Vahvistussivu, kaksi tilaa | 390 px | KAUPPA-VAHVISTUS-01, KAUPPA-MAKSU-01 |
+| 10 | Sivuston etusivu ja yleisilme | 390 ja 1280 px | SIVU-YHT-01–05, SIVU-ETUSIVU-01–02, SIVU-SAUNAVUOROT-01 |
+
 ## 2. Yhteinen ulkoasujärjestelmä
 
 ### 2.1 Nykytila lyhyesti (varmat havainnot)

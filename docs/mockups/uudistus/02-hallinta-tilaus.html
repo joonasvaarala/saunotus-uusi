@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="fi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Luonnos 02: Tilausnäkymä – hallinta</title>
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="ui.css">
+<style>
+  .ov { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: var(--sp-5); align-items: start; }
+  .ov-head { display: flex; align-items: center; gap: var(--sp-3); flex-wrap: wrap; margin-bottom: var(--sp-3); position: relative; }
+  .ov-head h1 { font-size: var(--fs-2xl); }
+  .ov-head .actions { margin-left: auto; display: flex; gap: var(--sp-2); position: relative; }
+  .next { display: flex; gap: var(--sp-3); align-items: flex-start; padding: var(--sp-3) var(--sp-4); border-radius: var(--r-lg); background: var(--c-warn-bg); border: 1px solid rgba(107,75,0,.3); margin-bottom: var(--sp-5); }
+  .next .lead { font-weight: 700; color: var(--c-ink); }
+  .next q { display: block; color: var(--c-text); font-size: var(--fs-sm); margin-top: 2px; }
+  .next .btns { margin-left: auto; display: flex; gap: var(--sp-2); }
+  .resline { display: grid; grid-template-columns: 1fr auto; gap: var(--sp-3); align-items: start; }
+  .resline .when { font-size: var(--fs-lg); font-weight: 700; color: var(--c-ink); }
+  .change { margin-top: var(--sp-3); padding: var(--sp-4); border-radius: var(--r-md); background: var(--c-bg); border: 1px dashed var(--c-field); display: grid; gap: var(--sp-3); }
+  .slots { display: flex; gap: var(--sp-2); flex-wrap: wrap; }
+  .slot { min-height: 44px; padding: 6px 12px; border-radius: var(--r-md); border: 1px solid var(--c-line); background: #fff; font-size: var(--fs-sm); color: var(--c-ink); text-align: left; }
+  .slot small { display: block; color: var(--c-muted); }
+  .slot[aria-pressed="true"] { border: 2px solid var(--c-brand); background: var(--c-info-bg); }
+  .price-diff { display: flex; justify-content: space-between; align-items: center; padding: var(--sp-3); border-radius: var(--r-md); background: #fff; border: 1px solid var(--c-line); }
+  .timeline { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; }
+  .timeline li { display: grid; grid-template-columns: 92px 18px 1fr; gap: var(--sp-2); font-size: var(--fs-sm); padding-bottom: var(--sp-3); position: relative; }
+  .timeline li::before { content: ""; position: absolute; left: 100px; top: 16px; bottom: 0; width: 2px; background: var(--c-line); }
+  .timeline li:last-child::before { display: none; }
+  .timeline time { color: var(--c-muted); }
+  .timeline .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--c-brand); margin: 5px 4px; }
+  .timeline b { color: var(--c-ink); }
+  .paybox { display: grid; gap: 4px; padding: var(--sp-3) var(--sp-4); border-radius: var(--r-md); background: var(--c-ok-bg); }
+  .paybox b { font-size: var(--fs-xl); color: var(--c-ok); }
+  .menu.at-head { right: 0; top: 52px; }
+  .layout > *, .ov > *, .pos > * { min-width: 0; }
+</style>
+</head>
+<body>
+<div class="mock-bar"><b>Luonnos 02/10</b> Hallinta · Tilausnäkymä (1280 px) · <a href="index.html">kaikki luonnokset</a><span class="ids">HALL-TILAUS-01–08 · HALL-ASIAKKAAT-03</span></div>
+<div class="app">
+  <header class="app-top">
+    <a class="brand" href="#"><img src="../../../booking/admin/logo-haalea.svg" alt="Hallinta" width="26" height="36"></a>
+    <div class="search"><span data-icon="search" data-size="18"></span>Hae nimeä, numeroa tai koodia</div>
+    <span class="spacer"></span>
+    <a class="top-btn" href="#"><span data-icon="plus" data-size="18"></span>Uusi varaus</a>
+    <a class="top-btn" href="#"><span data-icon="till" data-size="18"></span>Kassa</a>
+    <a class="top-btn" href="#"><span data-icon="check" data-size="18"></span>Tarkista <span class="count">3</span></a>
+    <span class="user"><i>J</i>Joonas · Pääkäyttäjä</span>
+  </header>
+  <nav class="app-nav" aria-label="Päävalikko">
+    <a href="#"><span data-icon="day"></span>Päivä</a>
+    <a href="#"><span data-icon="calendar"></span>Kalenteri</a>
+    <a href="#" aria-current="page"><span data-icon="list"></span>Tilaukset<span class="badge badge--warn">2</span></a>
+    <a href="#"><span data-icon="users"></span>Asiakkaat</a>
+    <a href="#"><span data-icon="gift"></span>Lahjakortit ja koodit</a>
+    <a href="#"><span data-icon="tag"></span>Tarjonta</a>
+    <a href="#"><span data-icon="chart"></span>Talous</a>
+    <a href="#"><span data-icon="mail"></span>Sisältö</a>
+    <a href="#"><span data-icon="sliders"></span>Asetukset</a>
+  </nav>
+  <main class="app-main">
+    <a class="crumb" href="#"><span data-icon="pgprev" data-size="18"></span>Takaisin päivään 14.11.</a> <span class="pin">1</span>
+    <div class="ov-head">
+      <h1>Tilaus 15123</h1>
+      <span class="badge badge--ok">Vahvistettu</span>
+      <span class="badge badge--ok">Maksettu</span>
+      <span class="muted small">Verkkokauppa · tehty 10.11.2026 klo 18.01</span>
+      <div class="actions">
+        <button class="btn"><span data-icon="mail" data-size="18"></span>Lähetä viesti</button>
+        <button class="btn" aria-expanded="true">Lisää toimintoja ⋯</button>
+        <span class="pin">2</span>
+        <div class="menu at-head" role="group" aria-label="Tilauksen toiminnot">
+          <button><span data-icon="mail" data-size="18"></span>Lähetä vahvistus uudelleen</button>
+          <button><span data-icon="link" data-size="18"></span>Lähetä maksulinkki…</button>
+          <button><span data-icon="receipt" data-size="18"></span>Luo lasku tilauksesta</button>
+          <button><span data-icon="add" data-size="18"></span>Lisää tilaukseen varaus tai tuote</button>
+          <hr>
+          <button>Merkitse: Ei saapunut…</button>
+          <button class="danger"><span data-icon="trash" data-size="18"></span>Poista tilaus (vain maksamaton)</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="next" role="status">
+      <span data-icon="eye"></span>
+      <div><span class="lead">Asiakas pyysi peruutusta 11.11. klo 21.40</span> <span class="pin">3</span>
+        <q>Sairastuimme, voisiko varauksen perua tai siirtää myöhemmäksi?</q>
+        <div class="row" style="margin-top:10px"><button class="btn btn--sm btn--primary">Peru ja hyvitä…</button><button class="btn btn--sm">Siirrä aikaa</button><button class="btn btn--sm btn--ghost">Merkitse käsitellyksi</button></div></div>
+    </div>
+
+    <div class="ov">
+      <div class="stack-lg">
+        <section class="card">
+          <div class="card-head"><h2>Varaukset</h2><span class="muted small">1 varaus</span></div>
+          <div class="resline">
+            <div>
+              <div class="when num">La 14.11.2026 klo 14.00–16.00</div>
+              <div>Yleinen saunavuoro · 2 henkilöä · Savusauna</div>
+              <div class="small muted">Lisäpalvelut: 1 × pyyhe</div>
+            </div>
+            <div class="row"><button class="btn btn--sm">Merkitse saapuneeksi</button><button class="btn btn--sm btn--primary" aria-expanded="true">Muuta tai siirrä</button></div>
+          </div>
+          <div class="change">
+            <div class="row"><b style="color:var(--c-ink)">Siirrä toiseen vuoroon</b><span class="pin">4</span></div>
+            <div class="row wrap"><button class="btn btn--sm">‹ Pe 13.11.</button><b>La 14.11.2026</b><button class="btn btn--sm">Su 15.11. ›</button><span class="grow"></span><span class="small muted">Henkilöt</span><span class="stepper"><button aria-label="Vähemmän henkilöitä">−</button><output>3</output><button aria-label="Enemmän henkilöitä">+</button></span></div>
+            <div class="slots">
+              <button class="slot">14.00–16.00<small>Nykyinen · 2 vapaana</small></button>
+              <button class="slot" aria-pressed="true">16.00–18.00<small>4 vapaana</small></button>
+              <button class="slot">17.00–19.00<small>1 vapaana</small></button>
+            </div>
+            <div class="price-diff"><span>Uusi hinta <b class="num" style="color:var(--c-ink)">92,00 €</b> <span class="muted">(oli 63,00 €)</span></span><span class="badge badge--warn">Maksettavaa +29,00 €</span></div>
+            <label class="check"><input type="checkbox" checked><span>Lähetä asiakkaalle muutosvahvistus ja maksulinkki erotuksesta</span></label>
+            <div class="row"><button class="btn btn--primary">Tallenna muutos</button><button class="btn btn--ghost">Peruuta</button></div>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="card-head"><h2>Erittely</h2><button class="linkbtn">ALV-erittely</button></div>
+          <table class="table">
+            <tbody>
+              <tr><td>Yleinen saunavuoro, 2 × 29,00 €</td><td class="r num">58,00 €</td></tr>
+              <tr><td>Pyyhe, 1 × 5,00 €</td><td class="r num">5,00 €</td></tr>
+              <tr><td><b>Yhteensä</b> <span class="muted small">sis. ALV 25,5 % 12,77 €</span></td><td class="r num"><b>63,00 €</b></td></tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section class="card">
+          <div class="card-head"><h2>Tapahtumat</h2><span class="pin">5</span></div>
+          <ol class="timeline">
+            <li><time class="num">11.11. 21.40</time><span class="dot" style="background:var(--c-warn)"></span><div><b>Asiakas pyysi peruutusta</b> tilaussivulla</div></li>
+            <li><time class="num">10.11. 18.03</time><span class="dot"></span><div><b>Vahvistus lähetetty</b> osoitteeseen m•••@example.com</div></li>
+            <li><time class="num">10.11. 18.02</time><span class="dot"></span><div><b>Maksettu 63,00 €</b> · verkkomaksu (kortti), kuitti K000231</div></li>
+            <li><time class="num">10.11. 18.01</time><span class="dot"></span><div><b>Tilaus tehty</b> verkkokaupassa</div></li>
+          </ol>
+          <button class="linkbtn">Näytä kaikki muutokset</button>
+        </section>
+      </div>
+
+      <aside class="stack-lg">
+        <section class="card">
+          <h2>Maksu</h2>
+          <div class="paybox"><span class="small">Maksettu kokonaan</span><b class="num">63,00 €</b><span class="small">Kortti · 10.11. klo 18.02</span></div>
+          <div class="row" style="margin-top:12px"><button class="btn btn--sm">Kuitti (PDF)</button><button class="btn btn--sm">Hyvitä…</button></div>
+        </section>
+        <section class="card">
+          <div class="card-head"><h2>Asiakas</h2><a class="linkbtn" href="#">Avaa asiakas</a></div>
+          <p style="color:var(--c-ink);font-weight:700">Maija Esimerkki</p>
+          <p class="small">m•••@example.com · 040 123 4567</p>
+          <div class="row wrap" style="margin-top:8px"><span class="badge badge--outline">Kieli: suomi</span><span class="badge badge--info">Vakioasiakas</span><span class="pin">6</span></div>
+          <p class="small muted" style="margin-top:8px">4 käyntiä · 0 kertaa ei saapunut</p>
+        </section>
+        <section class="card">
+          <div class="card-head"><h2>Muistiinpanot</h2><button class="linkbtn">Lisää</button></div>
+          <p class="small">Toivoi ylälauteita, polvivaiva.</p>
+          <p class="xs muted">Henkilökunta · 10.11. klo 18.30</p>
+        </section>
+        <section class="card">
+          <h2>Peruutus ja poisto</h2>
+          <div class="stack">
+            <button class="btn btn--danger btn--block">Peru varaus…</button>
+            <button class="btn btn--block" disabled>Poista tilaus</button>
+            <p class="xs muted">Poisto on mahdollinen vain maksamattomalle tilaukselle. <span class="pin">7</span></p>
+          </div>
+        </section>
+      </aside>
+    </div>
+  </main>
+</div>
+
+<section class="legend" aria-label="Mitä muuttui">
+  <h2>Mitä muuttui nykyiseen tilausnäkymään (v3) verrattuna</h2>
+  <ol>
+    <li><span class="pin">1</span><div><b>Paluu lähtönäkymään toimii</b> ("Takaisin päivään 14.11."). <span class="before">Nyt paluulinkki on aina "← Tilaukset", koska julkaisu lataa moduulin kahdesti.</span> <code>HALL-TILAUS-02</code></div></li>
+    <li><span class="pin">2</span><div><b>Kaikki tilauksen toiminnot yhdessä valikossa:</b> vahvistuksen uudelleenlähetys, maksulinkki, lasku, lisäys, Ei saapunut ja maksamattoman poisto. <span class="before">Nyt Ei saapunut, poisto ja laajempi lisäys ovat vain vanhassa kortissa; vahvistusta ei voi lähettää uudelleen.</span> <code>HALL-TILAUS-01</code> <code>HALL-TILAUS-04</code> <code>HALL-TILAUS-06</code></div></li>
+    <li><span class="pin">3</span><div><b>Asiakkaan peruutuspyyntö "Seuraava askel" -palkissa</b> toimintoineen. <span class="before">Nyt pyyntö ei näy uudessa näkymässä lainkaan.</span> <code>HALL-TILAUS-01</code></div></li>
+    <li><span class="pin">4</span><div><b>Siirto näyttää uuden hinnan ja erotuksen ennen tallennusta</b> ja tarjoaa muutosvahvistuksen asiakkaalle. <span class="before">Nyt hinnan muutos selviää vasta tallennuksen jälkeen, eikä asiakkaalle lähde ilmoitusta.</span> <code>HALL-TILAUS-05</code></div></li>
+    <li><span class="pin">5</span><div><b>Selkokielinen aikajana</b> (mitä tapahtui, kenelle lähti viesti). <span class="before">Nyt historia näyttää esim. "Tila confirmed → cancelled (reservations)".</span> <code>HALL-TILAUS-07</code></div></li>
+    <li><span class="pin">6</span><div><b>Asiakkaan kieli, tagit ja käyntitilasto</b> tilauksella; yksi asiakaslinkki kolmen sijaan. <code>HALL-ASIAKKAAT-01</code> <code>HALL-ASIAKKAAT-03</code> <code>HALL-TILAUS-08</code></div></li>
+    <li><span class="pin">7</span><div><b>Poisto täyttää nyt tyhjänä olevan paikan</b> "Peruutus ja poisto" -kortissa ja kertoo, milloin se on mahdollinen. <code>HALL-TILAUS-01</code></div></li>
+  </ol>
+  <p class="small muted" style="margin-top:12px">Esimerkkinimet, -numerot ja -viestit ovat keksittyjä.</p>
+</section>
+<script src="icons.js"></script>
+</body>
+</html>

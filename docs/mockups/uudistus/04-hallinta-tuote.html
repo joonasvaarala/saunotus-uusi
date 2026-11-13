@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="fi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Luonnos 04: Tuotteen muokkaus – hallinta</title>
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="ui.css">
+<style>
+  .layout { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: var(--sp-5); align-items: start; }
+  .vis { display: grid; gap: var(--sp-2); }
+  .opt { display: grid; grid-template-columns: 24px 1fr; gap: var(--sp-3); align-items: start; padding: var(--sp-3) var(--sp-4); border: 1px solid var(--c-line); border-radius: var(--r-md); background: #fff; }
+  .opt input { width: 20px; height: 20px; margin: 2px 0 0; accent-color: var(--c-brand); }
+  .opt b { color: var(--c-ink); }
+  .opt[data-on] { border: 2px solid var(--c-brand); background: var(--c-info-bg); }
+  .ready { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; font-size: var(--fs-sm); }
+  .ready li { display: flex; gap: var(--sp-2); align-items: center; }
+  .ready .ok { color: var(--c-ok); }
+  .ready .no { color: var(--c-warn); }
+  .chan { display: grid; grid-template-columns: 1fr auto; gap: var(--sp-2); align-items: center; padding: var(--sp-2) 0; border-top: 1px solid var(--c-line); }
+  .chan:first-of-type { border-top: 0; }
+  .thumb { width: 100%; aspect-ratio: 3/2; object-fit: cover; border-radius: var(--r-md); display: block; }
+  .vrow { display: grid; grid-template-columns: minmax(0, 1fr) 70px 44px 70px; gap: var(--sp-2); align-items: center; font-size: var(--fs-sm); padding: 6px 0; border-top: 1px solid var(--c-line); }
+  .vrow.h { color: var(--c-muted); font-size: var(--fs-xs); border-top: 0; text-transform: uppercase; letter-spacing: .04em; }
+  .layout > *, .ov > *, .pos > * { min-width: 0; }
+</style>
+</head>
+<body>
+<div class="mock-bar"><b>Luonnos 04/10</b> Hallinta · Tuotteen muokkaus omana näkymänä (1280 px) · <a href="index.html">kaikki luonnokset</a><span class="ids">HALL-TUOTTEET-01 · -02 · -04 · -06 · YHT-02</span></div>
+<div class="app">
+  <header class="app-top">
+    <a class="brand" href="#"><img src="../../../booking/admin/logo-haalea.svg" alt="Hallinta" width="26" height="36"></a>
+    <div class="search"><span data-icon="search" data-size="18"></span>Hae nimeä, numeroa tai koodia</div>
+    <span class="spacer"></span>
+    <a class="top-btn" href="#"><span data-icon="plus" data-size="18"></span>Uusi varaus</a>
+    <a class="top-btn" href="#"><span data-icon="till" data-size="18"></span>Kassa</a>
+    <a class="top-btn" href="#"><span data-icon="check" data-size="18"></span>Tarkista <span class="count">3</span></a>
+    <span class="user"><i>J</i>Joonas · Pääkäyttäjä</span>
+  </header>
+  <nav class="app-nav" aria-label="Päävalikko">
+    <a href="#"><span data-icon="day"></span>Päivä</a>
+    <a href="#"><span data-icon="calendar"></span>Kalenteri</a>
+    <a href="#"><span data-icon="list"></span>Tilaukset<span class="badge badge--warn">2</span></a>
+    <a href="#"><span data-icon="users"></span>Asiakkaat</a>
+    <a href="#"><span data-icon="gift"></span>Lahjakortit ja koodit</a>
+    <a href="#" aria-current="page"><span data-icon="tag"></span>Tarjonta</a>
+    <a href="#"><span data-icon="chart"></span>Talous</a>
+    <a href="#"><span data-icon="mail"></span>Sisältö</a>
+    <a href="#"><span data-icon="sliders"></span>Asetukset</a>
+  </nav>
+  <main class="app-main">
+    <a class="crumb" href="#"><span data-icon="pgprev" data-size="18"></span>Tuotteet</a>
+    <div class="page-head">
+      <div class="row wrap"><h1>Saunahoito</h1><span class="badge badge--ok">Myynnissä verkossa</span><span class="badge badge--warn">EN-kuvaus puuttuu</span><span class="pin">1</span></div>
+      <div class="row"><button class="btn">Kopioi tuote</button><button class="btn">Avaa kaupassa ↗</button></div>
+    </div>
+    <div class="tabs" role="tablist" aria-label="Tuotteen tiedot">
+      <a role="tab" href="#">Perustiedot</a>
+      <a role="tab" href="#">Hinnat</a>
+      <a role="tab" href="#" aria-selected="true">Myynti ja näkyvyys</a>
+      <a role="tab" href="#">Kuva</a>
+      <a role="tab" href="#">Valinnat ja lisäpalvelut</a>
+      <a role="tab" href="#">Lisämyynti</a>
+      <span class="pin" style="align-self:center">2</span>
+    </div>
+
+    <div class="layout">
+      <div class="stack-lg">
+        <section class="card">
+          <div class="card-head"><h2>Missä tuote myydään?</h2><span class="pin">3</span></div>
+          <div class="vis" role="radiogroup" aria-label="Näkyvyys">
+            <label class="opt" data-on><input type="radio" name="v" checked><div><b>Myynnissä verkossa</b><p class="small">Näkyy kaupassa ja sivuston korteissa, varattavissa verkossa sekä kassalla ja hallinnassa.</p></div></label>
+            <label class="opt"><input type="radio" name="v"><div><b>Vain kassalla ja hallinnassa</b><p class="small">Ei näy kaupassa. Henkilökunta voi myydä ja varata.</p></div></label>
+            <label class="opt"><input type="radio" name="v"><div><b>Piilotettu</b><p class="small">Ei myynnissä missään. Vanhat tilaukset säilyvät.</p></div></label>
+          </div>
+        </section>
+        <section class="card">
+          <h2>Valmis verkkomyyntiin?</h2>
+          <ul class="ready">
+            <li><span class="ok">✓</span>Hinta 99,00 € (sis. 1 hlö, lisähenkilö +35,00 €)</li>
+            <li><span class="ok">✓</span>Kesto 1 h</li>
+            <li><span class="ok">✓</span>Tuotekuva</li>
+            <li><span class="ok">✓</span>Vapaita aikoja seuraavalla 14 päivällä: 37</li>
+            <li><span class="no">!</span>Englanninkielinen kuvaus puuttuu: EN-sivulla näkyy suomenkielinen teksti. <a href="#">Lisää käännös</a></li>
+          </ul>
+          <span class="pin" style="margin-top:8px">4</span>
+        </section>
+        <section class="card">
+          <h2>Myyntikanavat</h2>
+          <div class="chan"><div><b style="color:var(--c-ink)">Verkkokauppa</b><p class="small muted">Asiakas varaa itse</p></div><span class="switch" role="switch" aria-checked="true" aria-label="Verkkokauppa"></span></div>
+          <div class="chan"><div><b style="color:var(--c-ink)">Lahjakorttipaketit</b><p class="small muted">Tuotetta voi ostaa lahjaksi</p></div><span class="switch" role="switch" aria-checked="true" aria-label="Lahjakortit"></span></div>
+          <div class="chan"><div><b style="color:var(--c-ink)">Pikakassa</b><p class="small muted">Ei käytössä hoidoille</p></div><span class="switch" role="switch" aria-checked="false" aria-label="Pikakassa"></span></div>
+        </section>
+      </div>
+
+      <aside class="stack-lg">
+        <section class="card">
+          <img class="thumb" src="../../../public/img/hunaja-480.webp" alt="">
+          <dl class="kv" style="margin-top:12px">
+            <dt>Kategoria</dt><dd>Hoidot</dd>
+            <dt>Hinta</dt><dd class="num">99,00 €</dd>
+            <dt>ALV</dt><dd class="num">25,5 %</dd>
+            <dt>Kesto</dt><dd>1 h</dd>
+            <dt>Tila</dt><dd>Rauni</dd>
+          </dl>
+        </section>
+        <section class="card">
+          <div class="card-head"><h2>Hintavaihtoehdot</h2><span class="pin">5</span></div>
+          <div class="vrow h"><span>Nimi</span><span>Hinta</span><span>Sis.</span><span>Lisä</span></div>
+          <div class="vrow"><span>Saunahoito 1 h</span><span class="num">99,00 €</span><span>1</span><span class="num">+35,00 €</span></div>
+          <div class="vrow"><span>Joulukausi 1.–31.12.</span><span class="num">109,00 €</span><span>1</span><span class="num">+35,00 €</span></div>
+          <button class="linkbtn">+ Lisää hintavaihtoehto</button>
+        </section>
+      </aside>
+    </div>
+
+    <div class="savebar" style="position:static" role="region" aria-label="Tallentamattomat muutokset">
+      <span class="dot"></span><span><b style="color:var(--c-ink)">2 muutosta tallentamatta</b> <span class="muted small">· näkyvyys, joulukauden hinta</span></span>
+      <span class="grow"></span><button class="btn btn--ghost">Hylkää</button><button class="btn btn--primary">Tallenna muutokset</button><span class="pin">6</span>
+    </div>
+  </main>
+</div>
+
+<section class="legend" aria-label="Mitä muuttui">
+  <h2>Mitä muuttui nykyiseen tuote-editoriin verrattuna</h2>
+  <ol>
+    <li><span class="pin">1</span><div><b>Tuote omana näkymänään</b> (osoite <code>#/tuotteet/&lt;id&gt;</code>), otsikossa tila ja puuttuvat tiedot. <span class="before">Nyt leveä dialogi, jonka sisältö on noin 3 200 px korkea.</span> <code>HALL-TUOTTEET-01</code></div></li>
+    <li><span class="pin">2</span><div><b>Välilehdet</b> Perustiedot · Hinnat · Myynti ja näkyvyys · Kuva · Valinnat ja lisäpalvelut · Lisämyynti. <span class="before">Nyt kaikki on yhdessä pitkässä lomakkeessa, ja tuotevalinnat sekä lisäpalvelut ovat tuotelistan alaosassa.</span> <code>HALL-TUOTTEET-01</code> <code>HALL-TUOTTEET-05</code></div></li>
+    <li><span class="pin">3</span><div><b>Yksi näkyvyysvalinta kolmella vaihtoehdolla.</b> <span class="before">Nyt näkyvyyteen vaikuttavat "Aktiivinen (näkyy kb:ssä)", "Varattavissa verkossa", "Näkyy kaupan listassa" ja Tapahtumat-välilehden myyntikanavat.</span> <code>HALL-TUOTTEET-02</code></div></li>
+    <li><span class="pin">4</span><div><b>"Valmis verkkomyyntiin?" -tarkistus</b> kertoo, miksi tuote ei näy kaupassa ja mikä käännös puuttuu. <code>HALL-TUOTTEET-02</code> <code>HALL-TUOTTEET-06</code></div></li>
+    <li><span class="pin">5</span><div><b>Hintavaihtoehdot muokattaviksi ja uuden lisäys</b> (esim. kausihinta), kesto tunteina. <span class="before">Nyt vain variantin hinta on muokattavissa, uutta ei voi lisätä eikä kestoa muuttaa.</span> <code>HALL-TUOTTEET-04</code></div></li>
+    <li><span class="pin">6</span><div><b>Yksi tallennuspalkki</b>, joka kertoo tallentamattomat muutokset ja varoittaa ennen poistumista. <span class="before">Nyt 4–5 erillistä Tallenna-painiketta, ja tallennus sulkee dialogin hävittäen muiden osioiden muutokset.</span> <code>HALL-TUOTTEET-01</code> <code>YHT-02</code></div></li>
+  </ol>
+  <p class="small muted" style="margin-top:12px">Hinnat ja kesto ovat esimerkkejä. Kuva: repon <code>public/img/hunaja-480.webp</code>.</p>
+</section>
+<script src="icons.js"></script>
+</body>
+</html>

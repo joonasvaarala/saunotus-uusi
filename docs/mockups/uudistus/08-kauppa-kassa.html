@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="fi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Luonnos 08: Varauslomake puhelimella – kauppa</title>
+<link rel="stylesheet" href="fonts.css">
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="ui.css">
+<style>
+  .frame .s-head { min-height: 58px; }
+  .frame .s-brand b { font-size: 17px; }
+  .sel { display: flex; gap: var(--sp-3); align-items: center; padding: var(--sp-3) var(--sp-4); background: var(--c-surface-2); border-bottom: 1px solid var(--c-line); }
+  .sel img { width: 56px; height: 56px; border-radius: var(--r-md); object-fit: cover; }
+  .sel b { display: block; font: 600 15px/1.3 var(--f-label); color: var(--c-ink); }
+  .sel span { font-size: var(--fs-sm); }
+  .form { padding: var(--sp-4); display: grid; gap: var(--sp-4); }
+  .form h1 { font-size: 28px; }
+  .form h2 { font: 600 16px/1.3 var(--f-label); color: var(--c-ink); }
+  .site .field > span { font-family: var(--f-body); }
+  .errsum { border: 2px solid var(--c-danger); border-radius: var(--r-lg); background: var(--c-danger-bg); padding: var(--sp-3) var(--sp-4); font-size: var(--fs-sm); color: var(--c-ink); }
+  .errsum a { color: var(--c-danger); font-weight: 700; }
+  .addon { display: flex; align-items: center; gap: var(--sp-3); justify-content: space-between; padding: var(--sp-3); border: 1px solid var(--c-line); border-radius: var(--r-md); background: #fff; }
+  .info { display: flex; gap: var(--sp-2); font-size: var(--fs-sm); color: var(--c-ink); background: var(--c-info-bg); border-radius: var(--r-md); padding: var(--sp-3); }
+  .paybar { position: sticky; bottom: 0; z-index: 6; background: #fff; border-top: 1px solid var(--c-line); box-shadow: 0 -8px 24px rgba(47,41,35,.12); padding: var(--sp-3) var(--sp-4) var(--sp-4); display: grid; gap: var(--sp-2); }
+  .paybar .tot { display: flex; justify-content: space-between; align-items: baseline; }
+  .paybar .tot b { font-size: 24px; color: var(--c-ink); }
+  .paybar .hold { font-size: var(--fs-xs); color: var(--c-muted); display: flex; gap: 6px; align-items: center; }
+  .seg { width: 100%; }
+  .frame.vp { height: 844px; overflow-y: auto; scrollbar-width: none; }
+  .seg button { flex: 1; }
+</style>
+</head>
+<body class="site">
+<div class="mock-bar"><b>Luonnos 08/10</b> Kauppa · Varauslomake puhelimella (390 px) · <a href="index.html">kaikki</a><span class="ids">KAUPPA-KASSA-01–03 · KAUPPA-YHT-01 · KAUPPA-TUOTE-01 · YHT-07</span></div>
+<div class="frames">
+  <div>
+    <p class="frame-label">Lähetys ilman kelvollista sähköpostia</p>
+    <div class="frame vp">
+      <header class="s-head">
+        <a class="s-brand" href="#"><img src="../../../public/img/favicon.svg" alt=""><span><b>SAUNOTUS</b><small>Sipoonjoen perinnesauna</small></span></a>
+      </header>
+      <div class="sel"><img src="../../../public/img/j-yleinen-480.webp" alt=""><div class="grow"><b>Yleinen saunavuoro</b><span>La 14.11. klo 14.00–16.00</span></div><a href="#" class="small" style="color:var(--c-accent);font-weight:700">Vaihda</a><span class="pin">1</span></div>
+      <div class="form">
+        <ol class="steps" aria-label="Vaiheet"><li class="done">Valinta</li><li class="now" aria-current="step">Tiedot</li><li>Maksu</li><li>Vahvistus</li></ol>
+        <span class="pin" style="margin-top:-8px">2</span>
+        <h1>Varauksen tiedot</h1>
+        <div class="errsum" role="alert" tabindex="-1"><b>Korjaa 1 kohta:</b> <a href="#email">Sähköposti</a><span class="pin" style="margin-left:8px">3</span></div>
+
+        <div class="field"><span>Henkilöt</span><div class="row"><span class="stepper"><button aria-label="Vähemmän henkilöitä">−</button><output>2</output><button aria-label="Enemmän henkilöitä">+</button></span><span class="small muted">29,00 € / hlö · 6 paikkaa vapaana</span></div></div>
+        <div class="seg" role="group" aria-label="Asiakastyyppi"><button aria-pressed="true">Yksityinen</button><button aria-pressed="false">Yritys</button></div>
+
+        <h2>Yhteystiedot</h2>
+        <label class="field"><span>Nimi<span class="req" aria-hidden="true">*</span></span><input class="input" value="Maija Esimerkki" autocomplete="name"></label>
+        <label class="field" id="email"><span>Sähköposti<span class="req" aria-hidden="true">*</span></span><input class="input" value="maija.esimerkki@" aria-invalid="true" aria-describedby="e-err" inputmode="email" autocomplete="email"><span class="error" id="e-err">Tarkista sähköpostiosoite, esim. nimi@esimerkki.fi</span></label>
+        <label class="field"><span>Puhelin<span class="req" aria-hidden="true">*</span></span><input class="input" value="040 123 4567" inputmode="tel" autocomplete="tel"><span class="hint">Soitamme vain, jos vuoroon tulee muutos.</span></label>
+
+        <h2>Lisäpalvelut</h2>
+        <div class="addon"><div><b style="color:var(--c-ink)">Pyyhe</b><div class="small muted">5,00 € / kpl</div></div><span class="stepper"><button aria-label="Vähemmän pyyhkeitä">−</button><output>1</output><button aria-label="Enemmän pyyhkeitä">+</button></span></div>
+
+        <div class="info"><span data-icon="gift" data-size="18"></span><span>Onko sinulla lahjakortti? Syötät koodin seuraavassa vaiheessa, maksun yhteydessä.</span></div>
+        <button class="linkbtn" style="justify-self:start">Onko sinulla alennuskoodi?</button>
+        <label class="check"><input type="checkbox" checked><span>Hyväksyn <a href="#">varausehdot</a>. Siirto ja peruutuspyyntö viimeistään 48 h ennen alkua.</span></label>
+      </div>
+      <div class="paybar" role="region" aria-label="Yhteenveto ja maksu">
+        <div class="tot"><span>Yhteensä <span class="small muted">sis. ALV</span></span><b class="num">63,00 €</b></div>
+        <span class="hold"><span data-icon="lock" data-size="14"></span>Paikka varataan sinulle 15 minuutiksi, kun jatkat.</span>
+        <button class="s-btn s-btn--gold" style="width:100%">Jatka maksamaan</button>
+        <div class="paymarks" aria-label="Maksutavat"><img src="../../../public/img/pay/bank.svg" alt="Verkkopankki"><img src="../../../public/img/pay/card.svg" alt="Kortti"><img src="../../../public/img/pay/mobilepay.svg" alt="MobilePay"><img src="../../../public/img/pay/apple-pay.svg" alt="Apple Pay"><img src="../../../public/img/pay/google-pay.svg" alt="Google Pay"><span class="xs muted" style="margin-left:auto">Turvallinen maksu Montonio</span></div>
+        <span class="pin abs" style="right:10px;top:-11px">5</span>
+      </div>
+    </div>
+  </div>
+  <div>
+    <p class="frame-label">Sama näkymä vieritettynä alas: palkki pysyy</p>
+    <div class="frame vp" data-scroll="end">
+      <header class="s-head">
+        <a class="s-brand" href="#"><img src="../../../public/img/favicon.svg" alt=""><span><b>SAUNOTUS</b><small>Sipoonjoen perinnesauna</small></span></a>
+      </header>
+      <div class="sel"><img src="../../../public/img/j-yleinen-480.webp" alt=""><div class="grow"><b>Yleinen saunavuoro</b><span>La 14.11. klo 14.00–16.00</span></div><a href="#" class="small" style="color:var(--c-accent);font-weight:700">Vaihda</a></div>
+      <div class="form">
+        <ol class="steps" aria-label="Vaiheet"><li class="done">Valinta</li><li class="now" aria-current="step">Tiedot</li><li>Maksu</li><li>Vahvistus</li></ol>
+        
+        <h1>Varauksen tiedot</h1>
+        <div class="errsum" role="alert" tabindex="-1"><b>Korjaa 1 kohta:</b> <a href="#email">Sähköposti</a></div>
+
+        <div class="field"><span>Henkilöt</span><div class="row"><span class="stepper"><button aria-label="Vähemmän henkilöitä">−</button><output>2</output><button aria-label="Enemmän henkilöitä">+</button></span><span class="small muted">29,00 € / hlö · 6 paikkaa vapaana</span></div></div>
+        <div class="seg" role="group" aria-label="Asiakastyyppi"><button aria-pressed="true">Yksityinen</button><button aria-pressed="false">Yritys</button></div>
+
+        <h2>Yhteystiedot</h2>
+        <label class="field"><span>Nimi<span class="req" aria-hidden="true">*</span></span><input class="input" value="Maija Esimerkki" autocomplete="name"></label>
+        <label class="field" id="email"><span>Sähköposti<span class="req" aria-hidden="true">*</span></span><input class="input" value="maija.esimerkki@" aria-invalid="true" aria-describedby="e-err" inputmode="email" autocomplete="email"><span class="error" id="e-err">Tarkista sähköpostiosoite, esim. nimi@esimerkki.fi</span></label>
+        <label class="field"><span>Puhelin<span class="req" aria-hidden="true">*</span></span><input class="input" value="040 123 4567" inputmode="tel" autocomplete="tel"><span class="hint">Soitamme vain, jos vuoroon tulee muutos.</span></label>
+
+        <h2>Lisäpalvelut</h2>
+        <div class="addon"><div><b style="color:var(--c-ink)">Pyyhe</b><div class="small muted">5,00 € / kpl</div></div><span class="stepper"><button aria-label="Vähemmän pyyhkeitä">−</button><output>1</output><button aria-label="Enemmän pyyhkeitä">+</button></span></div>
+
+        <div class="info"><span data-icon="gift" data-size="18"></span><span>Onko sinulla lahjakortti? Syötät koodin seuraavassa vaiheessa, maksun yhteydessä.</span><span class="pin">4</span></div>
+        <button class="linkbtn" style="justify-self:start">Onko sinulla alennuskoodi?</button>
+        <label class="check"><input type="checkbox" checked><span>Hyväksyn <a href="#">varausehdot</a>. Siirto ja peruutuspyyntö viimeistään 48 h ennen alkua.</span></label>
+      </div>
+      <div class="paybar" role="region" aria-label="Yhteenveto ja maksu">
+        <div class="tot"><span>Yhteensä <span class="small muted">sis. ALV</span></span><b class="num">63,00 €</b></div>
+        <span class="hold"><span data-icon="lock" data-size="14"></span>Paikka varataan sinulle 15 minuutiksi, kun jatkat.</span>
+        <button class="s-btn s-btn--gold" style="width:100%">Jatka maksamaan</button>
+        <div class="paymarks" aria-label="Maksutavat"><img src="../../../public/img/pay/bank.svg" alt="Verkkopankki"><img src="../../../public/img/pay/card.svg" alt="Kortti"><img src="../../../public/img/pay/mobilepay.svg" alt="MobilePay"><img src="../../../public/img/pay/apple-pay.svg" alt="Apple Pay"><img src="../../../public/img/pay/google-pay.svg" alt="Google Pay"><span class="xs muted" style="margin-left:auto">Turvallinen maksu Montonio</span></div>
+        <span class="pin abs" style="right:10px;top:-11px">5</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<section class="legend" aria-label="Mitä muuttui" style="max-width:720px">
+  <h2>Mitä muuttui nykyiseen varauslomakkeeseen verrattuna</h2>
+  <ol>
+    <li><span class="pin">1</span><div><b>Tiivis valintarivi heron tilalla</b> (kuva, tuote, aika, Vaihda). <span class="before">Nyt tuotekuva-hero on vähintään 300 px myös kassalla, joten mobiilin ensimmäinen näkymä on lähes pelkkää kuvaa; nimikenttä alkaa noin 930 px:n kohdalta.</span> <code>KAUPPA-TUOTE-01</code></div></li>
+    <li><span class="pin">2</span><div><b>Vaihepalkki</b> Valinta · Tiedot · Maksu · Vahvistus, sama kaikissa kuluissa. <span class="before">Nyt hoitokulussa on numeroidut vaiheet, vuorokulussa ei.</span> <code>KAUPPA-YHT-01</code></div></li>
+    <li><span class="pin">3</span><div><b>Virheet kentän alla ja koonti lomakkeen alussa</b>, pakolliset kentät merkitty, oikeat näppäimistöt. <span class="before">Nyt yksi viesti "Täytä kaikki pakolliset kentät." napin vieressä, mobiilissa ruudun ulkopuolella, myös kun sähköposti on täytetty väärin.</span> <code>KAUPPA-KASSA-02</code> <code>YHT-07</code></div></li>
+    <li><span class="pin">4</span><div><b>Lahjakorttiohje näkyvissä</b> ilman lisäklikkausta. <span class="before">Nyt ohje näkyy vasta, kun suljettu alennuskoodiosio avataan.</span> <code>KAUPPA-KASSA-03</code></div></li>
+    <li><span class="pin">5</span><div><b>Kiinteä summapalkki:</b> kokonaishinta, 15 minuutin pito, maksupainike ja maksutapalogot näkyvät koko ajan. <span class="before">Nyt summa (noin 2 700 px) ja pidon ehto ovat napin (noin 2 370 px) alapuolella, ja maksutavat ovat pelkkää tekstiä.</span> <code>KAUPPA-KASSA-01</code> <code>KAUPPA-KASSA-03</code></div></li>
+  </ol>
+  <p class="small muted" style="margin-top:12px">Painike on sivuston kultainen markkinointipainike (yksi pääpainikkeen tyyli kaupassa, KAUPPA-YHT-01). Hinnat ovat esimerkkejä.</p>
+</section>
+<script src="icons.js"></script>
+<script>document.querySelectorAll('[data-scroll="end"]').forEach(function (el) { el.scrollTop = el.scrollHeight; });</script>
+</body>
+</html>
