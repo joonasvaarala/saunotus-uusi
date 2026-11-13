@@ -415,6 +415,9 @@ jobs:
       # Tilausnäkymä v3, PR 1 (booking_278): yhteenveto, koko tilaus #/tilaukset/<nro>, peruutusdialogi ja asiakasnäkymä #/asiakkaat/<id>; tekstit pending-import-137.
       # SQL: booking/supabase/tests/t278_admin_order_customer_read.sql ajetaan paikallisessa PG17:ssä. Työnkulussa ei ole Postgresia.
       - run: node --test booking/tests/tilausnakyma-v3.test.mjs
+      # booking_289: saatavuushaun nopeutus (laiska koulutuspaikkalaskenta, kauppa yhdistää ja jakaa kuukausihaut).
+      # SQL: booking/supabase/tests/t289_availability_equivalence.sql ajetaan paikallisessa PG17:ssä. Työnkulussa ei ole Postgresia.
+      - run: node --test booking/tests/saatavuus-nopeutus-289.test.mjs booking/tests/paiva-ja-saatavuus-nopeutus.test.mjs
       - uses: actions/upload-pages-artifact@v3
         if: github.event_name != 'pull_request'
         with:
