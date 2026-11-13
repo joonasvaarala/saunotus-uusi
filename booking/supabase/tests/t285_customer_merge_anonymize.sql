@@ -7,7 +7,7 @@
 begin;
 set local statement_timeout = '120s';
 set local lock_timeout = '3s';
-\ir ../migrations/20261113000200_booking_285_customer_merge_anonymize.sql
+\ir ../migrations/20261113064842_booking_285_customer_merge_anonymize.sql
 
 create function pg_temp.ck(ok boolean, label text) returns void language plpgsql as $$
 begin
