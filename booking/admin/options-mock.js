@@ -118,7 +118,7 @@ export const MOCK_SALES_CHANNELS = [
   { code: 'gift_shop', name: 'Lahjakorttikauppa', name_en: 'Gift card shop', sort_order: 60, active: true, public_booking: false },
 ];
 
-export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, role = 'manager', latePaymentScenario = false, checkoutx = false } = {}) {
+export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, role = 'manager', latePaymentScenario = false, checkoutx = false, sumup = false } = {}) {
   const today = todayHel(now);
   const st = {
     calls: [], perms: [...perms],
@@ -214,7 +214,9 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
     posOrders: [],
     posMail: [],
     posCustomers: [],
-    posModes: { mobilepay_mode: 'test', vismapay_mode: 'dry_run', checkoutx_mode: checkoutx ? 'test' : 'off' },
+    posModes: { mobilepay_mode: 'test', vismapay_mode: 'dry_run', checkoutx_mode: checkoutx ? 'test' : 'off', sumup_mode: sumup ? 'test' : 'off' },
+    // booking_295: SumUp Solo simuloituna (?mock=1): ei SumUpia, ei lukijaa, ei rahaa. ?su=decline → ensimmäinen yritys hylätään.
+    su: { readers: [{ reader_id: 'sim_reader_1', name: 'Kokeilulukija (simuloitu)', is_default: true, active: true }], payments: [], seq: 0 },
     // booking_286: Kortti puhelimella simuloituna (?mock=1): ei Surfboardia, ei CheckoutX-sovellusta, ei rahaa. ?cx=decline → ensimmäinen yritys hylätään.
     cx: { terminals: [{ terminal_id: 'SIM0001', label: 'Kokeilupuhelin (simuloitu)', active: true, env: 'simulated' }], payments: [], seq: 0 },
     resendMode: 'dry_run',
@@ -777,12 +779,31 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
     },
     admin_pos_tenders: () => {
       need('pos.use');
-      return { mobilepay_mode: st.posModes.mobilepay_mode, vismapay_mode: st.posModes.vismapay_mode, checkoutx_mode: st.posModes.checkoutx_mode, site_base_url: 'https://saunotus.fi', drinks_path: '/juomat/', drinks_path_en: '/en/drinks/', tenders: [
+      return { mobilepay_mode: st.posModes.mobilepay_mode, vismapay_mode: st.posModes.vismapay_mode, checkoutx_mode: st.posModes.checkoutx_mode, sumup_mode: st.posModes.sumup_mode, site_base_url: 'https://saunotus.fi', drinks_path: '/juomat/', drinks_path_en: '/en/drinks/', tenders: [
         { code: 'payment_link', handler: 'payment_link', channels: ['pos'], active: true, sort_order: 10, unavailable_reason: null },
         { code: 'mobilepay', handler: 'mobilepay', channels: ['pos', 'drinks'], active: true, sort_order: 20, unavailable_reason: null },
         { code: 'visma_pay', handler: 'visma_pay', channels: ['drinks'], active: true, sort_order: 30, unavailable_reason: null },
         { code: 'card_terminal', handler: 'terminal', channels: ['pos'], active: false, sort_order: 40, unavailable_reason: 'not_implemented' },
-      ].concat(st.posModes.checkoutx_mode === 'test' ? [{ code: 'checkoutx', handler: 'checkoutx', channels: ['pos'], active: true, sort_order: 15, unavailable_reason: null }] : []) };
+      ].concat(st.posModes.sumup_mode === 'test' || st.posModes.sumup_mode === 'live' ? [{ code: 'sumup', handler: 'sumup', channels: ['pos'], active: true, sort_order: 14, unavailable_reason: null }] : [])
+        .concat(st.posModes.checkoutx_mode === 'test' ? [{ code: 'checkoutx', handler: 'checkoutx', channels: ['pos'], active: true, sort_order: 15, unavailable_reason: null }] : []) };
+    },
+    admin_get_sumup_status: () => {
+      need('pos.use');
+      return { ok: true, mode: st.posModes.sumup_mode, simulated: true, readers: st.su.readers.filter((x) => x.active), secrets: [] };
+    },
+    admin_sumup_reader_remove: (a) => {
+      need('settings.edit');
+      const r = st.su.readers.find((x) => x.reader_id === a.p_reader_id);
+      if (!r) throw err('not_found', 'Lukijaa ei löydy');
+      r.active = false; r.is_default = false;
+      return { ok: true, reader_id: r.reader_id };
+    },
+    admin_sumup_reader_set_default: (a) => {
+      need('settings.edit');
+      const r = st.su.readers.find((x) => x.reader_id === a.p_reader_id && x.active);
+      if (!r) throw err('not_found', 'Lukijaa ei löydy');
+      for (const x of st.su.readers) x.is_default = x === r;
+      return { ok: true, reader_id: r.reader_id };
     },
     admin_get_checkoutx_status: () => {
       need('pos.use');
@@ -1323,9 +1344,54 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
       default: throw err('bad_request', 'Tuntematon toiminto');
     }
   }
+  // booking_295: SumUp Solo simuloituna. Maksu hyväksytään toisella tilakyselyllä; ?su=decline hylkää ensimmäisen yrityksen.
+  function suPos(b) {
+    need('pos.use');
+    if (st.posModes.sumup_mode !== 'test' && st.posModes.sumup_mode !== 'live') throw err('sumup_off', 'Korttipääte ei ole käytössä');
+    const decline = new URLSearchParams(globalThis.location?.search || '').get('su') === 'decline';
+    const pay = () => st.su.payments.find((x) => x.payment_id === b.payment_id);
+    switch (b.action) {
+      case 'start': {
+        const o = st.posOrders.find((x) => x.order_id === b.order_id);
+        if (!o) throw err('not_found', 'Kassatilausta ei löydy');
+        if (!st.su.readers.some((x) => x.active && x.reader_id === b.reader_id)) throw err('reader_not_paired', 'Lukijaa ei ole paritettu');
+        for (const x of st.su.payments) if (x.order_id === o.order_id && x.state === 'pending') x.state = 'cancelled';
+        const tries = st.su.payments.filter((x) => x.order_id === o.order_id).length;
+        const row = { payment_id: 9500 + (++st.su.seq), order_id: o.order_id, state: 'pending', polls: 0, outcome: decline && tries === 0 ? 'failed' : 'paid' };
+        st.su.payments.push(row);
+        return { ok: true, simulated: true, payment_id: row.payment_id, amount: o.total, reader_id: b.reader_id };
+      }
+      case 'status': {
+        const row = pay();
+        if (!row) throw err('not_found', 'Maksua ei löydy');
+        if (row.state === 'pending' && ++row.polls >= 2) {
+          row.state = row.outcome;
+          if (row.state === 'paid') { const o = st.posOrders.find((x) => x.order_id === row.order_id); if (o) o.arm = true; }
+        }
+        return { ok: true, simulated: true, state: row.state };
+      }
+      case 'cancel': {
+        const row = pay();
+        if (!row) throw err('not_found', 'Maksua ei löydy');
+        if (row.state === 'pending') row.state = 'cancelled';
+        return { ok: true, simulated: true, state: row.state };
+      }
+      case 'reader_list': return { ok: true, simulated: true, readers: st.su.readers.filter((x) => x.active).map((x) => ({ reader_id: x.reader_id, name: x.name, status: 'paired' })) };
+      case 'reader_pair': {
+        need('settings.edit');
+        if (!/^[A-Za-z0-9]{6,12}$/.test(String(b.pairing_code || ''))) throw err('invalid_param', 'Virheellinen parituskoodi');
+        const id = `sim_reader_${st.su.readers.length + 1}`;
+        const name = String(b.name || 'Kokeilulukija').slice(0, 60);
+        st.su.readers.push({ reader_id: id, name, is_default: !st.su.readers.some((x) => x.active && x.is_default), active: true });
+        return { ok: true, simulated: true, reader_id: id, name, status: 'paired' };
+      }
+      default: throw err('bad_request', 'Tuntematon toiminto');
+    }
+  }
   async function fn(name, body = {}) {
     st.calls.push({ name: `fn:${name}`, args: body });
     if (delay) await new Promise((r) => setTimeout(r, delay));
+    if (name === 'sumup-pos') return structuredClone(suPos(body || {}));
     if (name !== 'checkoutx-pos') throw err('mock_unsupported', `Kokeilutila: Edge-funktiota ${name} ei ole mockattu (ei verkkokutsua).`);
     return structuredClone(cxPos(body || {}));
   }

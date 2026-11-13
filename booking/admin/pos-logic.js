@@ -4,6 +4,7 @@ export const TENDER_HANDLERS = {
   mobilepay: { kind: 'mobilepay', flows: ['QR', 'PUSH_MESSAGE'] },
   visma_pay: { kind: 'visma' },
   terminal: { kind: 'terminal', later: true },
+  sumup: { kind: 'sumup' },
 };
 
 const ALCOHOL = /(^|[^\p{L}])(olut|oluet|viini|viinit|siideri|lonkero|alkoholi|viina|beer|beers|wine|wines|cider|ciders|whiskey|whisky|vodka|gin|rum|champagne|prosecco|spirits)([^\p{L}]|$)/iu;
@@ -121,9 +122,9 @@ export function tendersFor(list, channel) {
 
 const DIRECT_ONLINE = new Set(['mobilepay', 'visma_pay']);
 
-/** Pikakassan maksuikkuna: ei suoraa MobilePayta eikä Visma Payta. Maksulinkki ja korttipääte jäävät. */
+/** Pikakassan maksuikkuna: ei suoraa MobilePayta eikä Visma Payta. Maksulinkki ja korttipääte (SumUp) jäävät. CheckoutX on piilotettu (booking_295). */
 export function posSheetTenders(list) {
-  return tendersFor(list, 'pos').filter((t) => !DIRECT_ONLINE.has(t.code) && !DIRECT_ONLINE.has(t.handler));
+  return tendersFor(list, 'pos').filter((t) => !DIRECT_ONLINE.has(t.code) && !DIRECT_ONLINE.has(t.handler) && t.handler !== 'checkoutx' && t.code !== 'checkoutx');
 }
 
 /** Asiakasrekisterin osumat maksukenttään. Tilauksilta poimitut yritykset (source orders) ja osoitteettomat jätetään pois. */
@@ -150,8 +151,9 @@ export function tenderAvailable(tender, modes) {
   if (!tender) return false;
   if (tender.handler === 'terminal' || tender.code === 'card_terminal') return false;
   if (!tender.active) return false;
-  // booking_286: kortti puhelimella (CheckoutX) vain, kun palvelin kertoo tilan test. Tuotannossa tila on off.
-  if (tender.handler === 'checkoutx' || tender.code === 'checkoutx') return !!modes && modes.checkoutx_mode === 'test';
+  // booking_295: CheckoutX on piilotettu Pikakassasta (koodi ja data jäävät). Korttipääte (SumUp Solo) vain tiloissa test/live; off → ei näy lainkaan.
+  if (tender.handler === 'checkoutx' || tender.code === 'checkoutx') return false;
+  if (tender.handler === 'sumup' || tender.code === 'sumup') return !!modes && (modes.sumup_mode === 'test' || modes.sumup_mode === 'live');
   if (tender.handler === 'mobilepay' || tender.code === 'mobilepay') return false;
   if (tender.handler === 'visma_pay' || tender.code === 'visma_pay') return false;
   if (tender.handler === 'payment_link' || tender.code === 'payment_link') {

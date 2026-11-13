@@ -368,9 +368,79 @@ export function clearPosTextCache() {
   loaded = false;
 }
 
+// Korttipääte (SumUp Solo, Cloud API, booking_295): pending-import-150 (POS_SUMUP_TEXTS). Näkyy vain, kun sumup-tila on test tai live.
+export const POS_SUMUP_TEXTS = {
+  fi: {
+    method_sumup: 'Korttipääte (SumUp Solo)',
+    su_test_note: 'Testitila: SumUpin sandbox-tili, rahaa ei veloiteta.',
+    su_simulated: 'Simuloitu maksu: lukijaa ei käytetä, eikä rahaa liiku. Maksu hyväksytään muutaman sekunnin kuluttua.',
+    su_reader: 'Lukija',
+    su_pick: 'Valitse lukija',
+    su_no_reader: 'Lukijaa ei ole valittu tai paritettu.',
+    su_pair_title: 'Pariuta uusi lukija',
+    su_pair_code: 'Parituskoodi (lukijan näytöllä)',
+    su_pair_name: 'Lukijan nimi',
+    su_pair: 'Pariuta lukija',
+    su_pair_done: 'Lukija on paritettu.',
+    su_pair_invalid: 'Anna lukijan näytöllä näkyvä parituskoodi (6–12 merkkiä).',
+    su_pair_admin: 'Pyydä ylläpitäjää paritamaan lukija.',
+    su_default: 'Oletukseksi',
+    su_default_set: 'Oletuslukija päivitetty.',
+    su_remove: 'Poista lukija',
+    su_removed: 'Lukija poistettu käytöstä.',
+    su_default_badge: 'oletus',
+    su_waiting_help: 'Lukija näyttää summan. Asiakas koskettaa korttia tai puhelinta lukijaan. Tila päivittyy itsestään.',
+    su_failed: 'Korttimaksu ei onnistunut.',
+    su_cancelled: 'Korttimaksu peruttiin.',
+    su_retry: 'Yritä uudelleen',
+    su_cancel: 'Peru maksu',
+    su_already_paid: 'Asiakas ehti maksaa, joten maksua ei peruttu.',
+    su_off: 'Korttipääte ei ole käytössä.',
+    su_not_configured: 'SumUp-tunnukset puuttuvat. Maksua ei aloitettu.',
+    su_reader_offline: 'Lukija ei ole yhteydessä. Tarkista lukijan verkkoyhteys ja yritä uudelleen.',
+    su_unavailable: 'SumUp ei vastaa juuri nyt. Yritä hetken kuluttua uudelleen.',
+    su_provider_error: 'SumUp ei hyväksynyt pyyntöä. Yritä uudelleen.',
+    su_in_progress: 'Tilauksella on jo avoin maksu toisella maksutavalla.',
+    su_forbidden: 'Sinulla ei ole oikeutta tähän toimintoon.',
+  },
+  en: {
+    method_sumup: 'Card terminal (SumUp Solo)',
+    su_test_note: 'Test mode: SumUp sandbox account, no money is charged.',
+    su_simulated: 'Simulated payment: the reader is not used and no money moves. The payment is approved after a few seconds.',
+    su_reader: 'Reader',
+    su_pick: 'Choose reader',
+    su_no_reader: 'No reader is selected or paired.',
+    su_pair_title: 'Pair a new reader',
+    su_pair_code: 'Pairing code (shown on the reader)',
+    su_pair_name: 'Reader name',
+    su_pair: 'Pair reader',
+    su_pair_done: 'The reader has been paired.',
+    su_pair_invalid: 'Enter the pairing code shown on the reader (6–12 characters).',
+    su_pair_admin: 'Ask an administrator to pair the reader.',
+    su_default: 'Make default',
+    su_default_set: 'Default reader updated.',
+    su_remove: 'Remove reader',
+    su_removed: 'The reader has been removed.',
+    su_default_badge: 'default',
+    su_waiting_help: 'The reader shows the amount. The customer taps their card or phone on the reader. The status updates by itself.',
+    su_failed: 'The card payment did not go through.',
+    su_cancelled: 'The card payment was cancelled.',
+    su_retry: 'Try again',
+    su_cancel: 'Cancel payment',
+    su_already_paid: 'The customer had already paid, so the payment was not cancelled.',
+    su_off: 'The card terminal is not in use.',
+    su_not_configured: 'SumUp credentials are missing. The payment was not started.',
+    su_reader_offline: 'The reader is not connected. Check its network connection and try again.',
+    su_unavailable: 'SumUp is not responding right now. Please try again shortly.',
+    su_provider_error: 'SumUp did not accept the request. Please try again.',
+    su_in_progress: 'The order already has an open payment with another method.',
+    su_forbidden: 'You do not have permission for this action.',
+  },
+};
+
 export function posText(key, lang = getLang()) {
   const live = db.get(`${PREFIX}${key}|${lang}`);
   if (live) return live;
-  return POS_TEXTS[lang]?.[key] || POS_EDIT_TEXTS[lang]?.[key] || POS_PAY_TEXTS[lang]?.[key] || POS_LINK_TEXTS[lang]?.[key] || POS_CUSTOMER_TEXTS[lang]?.[key] || POS_CUSTOM_TEXTS[lang]?.[key] || POS_CHECKOUTX_TEXTS[lang]?.[key] || POS_CART_TEXTS[lang]?.[key] || POS_LINK_HOLD_TEXTS[lang]?.[key]
-    || POS_TEXTS.fi[key] || POS_EDIT_TEXTS.fi[key] || POS_PAY_TEXTS.fi[key] || POS_LINK_TEXTS.fi[key] || POS_CUSTOMER_TEXTS.fi[key] || POS_CUSTOM_TEXTS.fi[key] || POS_CHECKOUTX_TEXTS.fi[key] || POS_CART_TEXTS.fi[key] || POS_LINK_HOLD_TEXTS.fi[key] || key;
+  return POS_TEXTS[lang]?.[key] || POS_EDIT_TEXTS[lang]?.[key] || POS_PAY_TEXTS[lang]?.[key] || POS_LINK_TEXTS[lang]?.[key] || POS_CUSTOMER_TEXTS[lang]?.[key] || POS_CUSTOM_TEXTS[lang]?.[key] || POS_CHECKOUTX_TEXTS[lang]?.[key] || POS_CART_TEXTS[lang]?.[key] || POS_LINK_HOLD_TEXTS[lang]?.[key] || POS_SUMUP_TEXTS[lang]?.[key]
+    || POS_TEXTS.fi[key] || POS_EDIT_TEXTS.fi[key] || POS_PAY_TEXTS.fi[key] || POS_LINK_TEXTS.fi[key] || POS_CUSTOMER_TEXTS.fi[key] || POS_CUSTOM_TEXTS.fi[key] || POS_CHECKOUTX_TEXTS.fi[key] || POS_CART_TEXTS.fi[key] || POS_LINK_HOLD_TEXTS.fi[key] || POS_SUMUP_TEXTS.fi[key] || key;
 }

@@ -42,6 +42,7 @@ const MP_KINDS = { done: 'ok', failed: 'err', retry_later: 'warn', unverified: '
 const VP_KINDS = { ...MP_KINDS, awaiting_customer: 'warn', not_settled: 'err', not_configured: 'warn' };
 const MO_KINDS = { done: 'ok', pending: 'warn', awaiting_settlement: 'warn', failed: 'err', retry_later: 'warn', db_error: 'warn', not_configured: 'warn', none: 'warn', off: 'warn', forbidden: 'err', error: 'warn' };
 export const CX_KINDS = { done: 'ok', failed: 'err', not_supported: 'err', retry_later: 'warn', not_configured: 'warn', none: 'warn', off: 'warn', forbidden: 'err', error: 'warn' };
+export const SU_KINDS = { done: 'ok', failed: 'err', not_supported: 'err', retry_later: 'warn', not_configured: 'warn', none: 'warn', off: 'warn', forbidden: 'err', error: 'warn' };
 /** Verkkomaksun hyvitysrivit (status requested) käsitellään heti: api = createTalousApi(...) (mobilepayRefund / vismapayRefund / montonioRefund). */
 export async function processOnlineRefunds(api, refunds = []) {
   for (const x of refunds) {
@@ -49,6 +50,7 @@ export async function processOnlineRefunds(api, refunds = []) {
     if (x.provider === 'mobilepay') { const m = await api.mobilepayRefund(x.refund_id); toast(t(MP_KINDS[m.result] ? `refund.mp.${m.result}` : 'refund.mp.error'), MP_KINDS[m.result] || 'warn'); }
     if (x.provider === 'visma_pay') { const m = await api.vismapayRefund(x.refund_id); toast(t(VP_KINDS[m.result] ? `refund.vp.${m.result}` : 'refund.vp.error'), VP_KINDS[m.result] || 'warn'); }
     if (x.provider === 'montonio') { const m = await api.montonioRefund(x.refund_id); toast(t(MO_KINDS[m.result] ? `refund.mo.${m.result}` : 'refund.mo.error'), MO_KINDS[m.result] || 'warn'); }
+    if (x.provider === 'sumup' && api.sumupRefund) { const m = await api.sumupRefund(x.refund_id); toast(t(SU_KINDS[m.result] ? `refund.su.${m.result}` : 'refund.su.error'), SU_KINDS[m.result] || 'warn'); }
     if (x.provider === 'checkoutx' && api.checkoutxRefund) { const m = await api.checkoutxRefund(x.refund_id); toast(t(CX_KINDS[m.result] ? `refund.cx.${m.result}` : 'refund.cx.error'), CX_KINDS[m.result] || 'warn'); }
   }
 }

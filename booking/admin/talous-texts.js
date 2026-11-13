@@ -126,6 +126,16 @@ export const TEXTS = {
     'refund.vp.not_settled': 'Maksu ei ole Visma Payssa tilassa, jossa hyvitys onnistuu. Tarkista maksun tila.',
     'refund.vp.not_configured': 'Visma Payn tunnukset puuttuvat. Hyvitystä ei lähetetty. Aseta tunnukset ja käsittele uudelleen.',
     'refund.montonio': 'Verkkomaksun hyvitys lähtee Montonioon heti pyynnön jälkeen. Hyvityskuitti syntyy vasta, kun hyvitys on valmis.',
+    // booking_295: korttipääte (SumUp Solo): hyvitys SumUpin rajapinnalla
+    'refund.su.done': 'SumUp-maksu on hyvitetty. Hyvityskuitti on luotu.',
+    'refund.su.failed': 'SumUp ei hyväksynyt hyvitystä. Kirjaa hyvitys käsin.',
+    'refund.su.not_supported': 'SumUp-maksun voi hyvittää vain kokonaan. Kirjaa osittainen hyvitys käsin.',
+    'refund.su.retry_later': 'SumUp ei vastannut. Yritä hyvitystä hetken kuluttua uudelleen.',
+    'refund.su.not_configured': 'SumUp-tunnukset puuttuvat. Hyvitystä ei lähetetty.',
+    'refund.su.none': 'Hyvitystä ei ollut käsiteltävänä.',
+    'refund.su.off': 'Korttipääte ei ole käytössä: hyvitys jäi odottamaan.',
+    'refund.su.forbidden': 'Ei oikeutta hyvittää.',
+    'refund.su.error': 'SumUp-hyvityksen käsittely epäonnistui. Yritä uudelleen.',
     // booking_286: kortti puhelimella (CheckoutX, vain testitila): saman päivän koko maksun mitätöinti
     'refund.cx.done': 'CheckoutX-maksu on mitätöity. Hyvityskuitti on luotu.',
     'refund.cx.failed': 'CheckoutX ei mitätöinyt maksua (mitätöinti onnistuu vain maksupäivänä klo 23.50 asti). Kirjaa hyvitys käsin.',
@@ -275,6 +285,16 @@ export const TEXTS = {
     'refund.vp.not_settled': 'The payment is not in a Visma Pay state that can be refunded. Check the payment status.',
     'refund.vp.not_configured': 'Visma Pay credentials are missing. The refund was not sent. Set the credentials and process again.',
     'refund.montonio': 'An online payment refund is sent to Montonio right after the request. The refund receipt is created only when the refund is complete.',
+    // booking_295: card terminal (SumUp Solo): refund through the SumUp API
+    'refund.su.done': 'The SumUp payment has been refunded. The refund receipt has been created.',
+    'refund.su.failed': 'SumUp did not accept the refund. Record the refund manually.',
+    'refund.su.not_supported': 'A SumUp payment can only be refunded in full. Record a partial refund manually.',
+    'refund.su.retry_later': 'SumUp did not respond. Try the refund again shortly.',
+    'refund.su.not_configured': 'SumUp credentials are missing. The refund was not sent.',
+    'refund.su.none': 'There was no refund to process.',
+    'refund.su.off': 'The card terminal is not in use: the refund is waiting.',
+    'refund.su.forbidden': 'You do not have permission to refund.',
+    'refund.su.error': 'Processing the SumUp refund failed. Please try again.',
     // booking_286: card on phone (CheckoutX, test mode only): same-day full void
     'refund.cx.done': 'The CheckoutX payment has been voided. The refund receipt has been created.',
     'refund.cx.failed': 'CheckoutX did not void the payment (voids only work on the payment day until 23:50 CET). Record the refund manually.',
