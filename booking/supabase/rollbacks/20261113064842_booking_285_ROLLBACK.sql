@@ -8,6 +8,9 @@
 -- Yhdistämistä ei voi kumota automaattisesti: tilaukset ym. on siirretty. Käsin palautukseen: customer_merge_log.merge_snapshot (yhdistetyn rivin
 -- sisältö) ja customer_merge_log.moved (taulu → siirretyt id:t). Anonymisointia ei voi kumota.
 -- Jos haluat silti purkaa rakenteen, hoida data ensin käsin päätöksellä (Joonas) ja aja tämä uudelleen.
+-- HUOM (booking_299, 14.11.2026): 299 yhdisti uutiskirjeen kieltolistan marketing_suppressions-tauluun (newsletter_suppressions on nyt näkymä).
+--   Aja ENSIN 299:n rollback (rollbacks/20261114004910_booking_299_ROLLBACK.sql), vasta sitten tämä. Muuten tämä pysähtyy
+--   marketing_suppressions-rivien takia tai pudottaisi taulun, josta newsletter_suppressions-näkymä ja uutiskirjefunktiot riippuvat.
 set local lock_timeout = '5s';
 
 do $g$
