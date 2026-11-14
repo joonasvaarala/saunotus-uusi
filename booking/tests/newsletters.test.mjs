@@ -61,13 +61,13 @@ test('newsletter is a tab on the Viestit page (no separate entry), sandboxed pre
  assert.match(read('scripts/build-pages.mjs'),/'views\/newsletters\.js'/);
 });
 test('booking_306: newsletter_enabled defaults to false, migration never sets true, both functions check it',()=>{
- const m=read('booking/supabase/migrations/20261114030000_booking_306_newsletter_enabled_flag.sql');
+ const m=read('booking/supabase/migrations/20261114013050_booking_306_newsletter_enabled_flag.sql');
  assert.match(m,/\('newsletter_enabled', 'false'::jsonb/);assert.match(m,/on conflict \(key\) do nothing/);
  assert.doesNotMatch(m,/newsletter_enabled'[^\n]*'true'|update booking\.settings|set value/i);
  assert.match(m,/coalesce\(p_confirm,false\) and not booking\._newsletter_flag\('newsletter_enabled'\)/);
  assert.match(m,/not booking\._newsletter_flag\('newsletter_enabled'\) then return jsonb_build_object\('allowed',false\)/);
  assert.doesNotMatch(m,/public\./);
- assert.ok(existsSync(new URL('../supabase/rollbacks/20261114030000_booking_306_ROLLBACK.sql',import.meta.url)));
+ assert.ok(existsSync(new URL('../supabase/rollbacks/20261114013050_booking_306_ROLLBACK.sql',import.meta.url)));
  const sql=read('booking/supabase/tests/t306_newsletter_enabled.sql');
  assert.match(sql,/dispatch\(confirm=true\) antaa virheen kun kytkin on false/);assert.match(sql,/payload allowed:false/);
 });
@@ -76,7 +76,7 @@ test('booking_299: one suppression table + compatibility view; branch union migr
  assert.match(m,/create (or replace )?view booking\.newsletter_suppressions/i);assert.match(m,/from booking\.marketing_suppressions/);
  assert.ok(!existsSync(new URL('../supabase/migrations/20261113120100_booking_291_newsletter_suppression_union.sql',import.meta.url)));
  assert.ok(!existsSync(new URL('../supabase/rollbacks/20261113120100_booking_291_ROLLBACK.sql',import.meta.url)));
- for(const f of ['20261106223314_booking_259','20261106223319_booking_262','20261114030000_booking_306']){
+ for(const f of ['20261106223314_booking_259','20261106223319_booking_262','20261114013050_booking_306']){
   const r=read('booking/supabase/rollbacks/'+f+'_ROLLBACK.sql');
   assert.doesNotMatch(r.replace(/--[^\n]*/g,''),/(drop|delete|truncate)[^;]*(newsletter_suppressions|marketing_suppressions|newsletter_optout_tokens)/i,f);
  }

@@ -1,12 +1,16 @@
 -- booking_306 ROLLBACK: palauttaa admin_newsletter_dispatch- ja email_newsletter_payload-funktiot booking_259:n runkoon ja poistaa kytkinfunktiot.
 -- VAROITUS: rollbackin jälkeen lähetystä ei suojaa enää kytkin. Resend on PRODissa live. Aja vain, jos uutiskirjeominaisuus poistetaan käytöstä muulla tavoin.
+-- Migraatio: ../migrations/20261114013050_booking_306_newsletter_enabled_flag.sql (DEV 20261114013011, PROD 20261114013050).
 -- Asetusrivi booking.settings newsletter_enabled jätetään paikalleen (vaaraton; poisto käsin päätöksellä). Suppressiodataan ei koskea.
 set local lock_timeout = '5s';
 
 do $pre$
 begin
-  if (select md5(prosrc) from pg_catalog.pg_proc where oid = 'booking.admin_newsletter_dispatch(bigint,integer,boolean,uuid)'::regprocedure) <> '74b3bf2d8b7f6451cec5c5114108ae94'
-     or (select md5(prosrc) from pg_catalog.pg_proc where oid = 'booking.email_newsletter_payload(bigint)'::regprocedure) <> 'e88487302149a408ece7b0435baac8db' then
+  -- booking_306:n jälkeiset rungot (PROD 20261114013050, md5(prosrc) tarkistettu 14.11.2026)
+  if (select md5(prosrc) from pg_catalog.pg_proc where oid = to_regprocedure('booking._newsletter_flag(text)')) is distinct from '53af72c58295f4db236231fe20b556f9'
+     or (select md5(prosrc) from pg_catalog.pg_proc where oid = to_regprocedure('booking.admin_newsletter_enabled()')) is distinct from 'ef9a01a0096fcc7986378a9ae41ecac1'
+     or (select md5(prosrc) from pg_catalog.pg_proc where oid = to_regprocedure('booking.admin_newsletter_dispatch(bigint,integer,boolean,uuid)')) is distinct from '094a68e92c43bc3835eee21d0a4e2d21'
+     or (select md5(prosrc) from pg_catalog.pg_proc where oid = to_regprocedure('booking.email_newsletter_payload(bigint)')) is distinct from '870578dbd7472b4aa075099c2f67284f' then
     raise exception 'rollback 306: funktiot poikkeavat booking_306:n jälkeisestä tilasta. Ei muutoksia.'; end if;
 end $pre$;
 

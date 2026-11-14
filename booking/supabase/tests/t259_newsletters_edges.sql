@@ -11,7 +11,10 @@ create function pg_temp.nc(label text,lang text default 'fi') returns bigint lan
  values('n259-'||label,'n259-'||replace(gen_random_uuid()::text,'-','')||'@example.test',true,now(),lang) returning id into c;return c;
 end$$;
 create function pg_temp.nr(c bigint,p bigint,st text default 'completed',future boolean default false,rule bigint default null) returns bigint language plpgsql as $$
-declare o bigint;r bigint;space bigint;finish timestamptz:=case when future then now()+interval '2 days' else now()-interval '2 days' end;begin
+declare o bigint;r bigint;space bigint;d0 date:=(now() at time zone 'Europe/Helsinki')::date+case when future then 2 else -2 end;d date;finish timestamptz;begin
+ -- Kiinteä kellonaika (ke 17–18 Helsingin aikaa), ettei testi riipu ajohetkestä: hoitojen aikaikkuna ma–pe 16–20 (reservations-validointi).
+ d:=case when future then d0+((3-extract(isodow from d0)::int+7)%7) else d0-((extract(isodow from d0)::int-3+7)%7) end;
+ finish:=(d+time '18:00') at time zone 'Europe/Helsinki';
  select id into space from booking.resources order by id limit 1;
  insert into booking.orders(customer_id,status,payment_status,locale)values(c,'confirmed','paid','fi')returning id into o;
  insert into booking.reservations(order_id,product_id,space_id,mode,persons,starts_at,ends_at,status,rule_id)

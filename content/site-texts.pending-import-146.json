@@ -262,12 +262,12 @@
   {
     "key": "admin.newsletter.confirm_body",
     "lang": "fi",
-    "text": "Uutiskirje lisätään sähköpostijonoon {count} vastaanottajalle. Lähetetäänkö?",
+    "text": "Uutiskirje lisätään sähköpostijonoon {{var:count}} vastaanottajalle. Lähetetäänkö?",
     "class": "normal",
     "kind": "plain",
     "max_len": 400,
     "placeholders": [
-      "count"
+      "{{var:count}}"
     ],
     "reason": "booking_259: erillinen uutiskirjenäkymä"
   },
@@ -304,14 +304,14 @@
   {
     "key": "admin.newsletter.count",
     "lang": "fi",
-    "text": "Vastaanottajia: {count} (FI {fi}, EN {en}).",
+    "text": "Vastaanottajia: {{var:count}} (FI {{var:fi}}, EN {{var:en}}).",
     "class": "normal",
     "kind": "plain",
     "max_len": 400,
     "placeholders": [
-      "count",
-      "fi",
-      "en"
+      "{{var:count}}",
+      "{{var:fi}}",
+      "{{var:en}}"
     ],
     "reason": "booking_259: erillinen uutiskirjenäkymä"
   },
@@ -338,12 +338,12 @@
   {
     "key": "admin.newsletter.suggestion",
     "lang": "fi",
-    "text": "Botin ehdottama lähetysaika (Europe/Helsinki): {date}. Ei automaattista ajastusta.",
+    "text": "Botin ehdottama lähetysaika (Europe/Helsinki): {{var:date}}. Ei automaattista ajastusta.",
     "class": "normal",
     "kind": "plain",
     "max_len": 400,
     "placeholders": [
-      "date"
+      "{{var:date}}"
     ],
     "reason": "booking_259: erillinen uutiskirjenäkymä"
   },
@@ -380,16 +380,16 @@
   {
     "key": "admin.newsletter.history",
     "lang": "fi",
-    "text": "Vastaanottajia {count} · jonoon {queued} · toimitettu {sent} · virhe {failed} · ohitettu / koelähetys {skipped}",
+    "text": "Vastaanottajia {{var:count}} · jonoon {{var:queued}} · toimitettu {{var:sent}} · virhe {{var:failed}} · ohitettu / koelähetys {{var:skipped}}",
     "class": "normal",
     "kind": "plain",
     "max_len": 400,
     "placeholders": [
-      "count",
-      "queued",
-      "sent",
-      "failed",
-      "skipped"
+      "{{var:count}}",
+      "{{var:queued}}",
+      "{{var:sent}}",
+      "{{var:failed}}",
+      "{{var:skipped}}"
     ],
     "reason": "booking_259: erillinen uutiskirjenäkymä"
   },
@@ -816,12 +816,12 @@
   {
     "key": "admin.newsletter.confirm_body",
     "lang": "en",
-    "text": "The newsletter will be queued for {count} recipients. Send?",
+    "text": "The newsletter will be queued for {{var:count}} recipients. Send?",
     "class": "normal",
     "kind": "plain",
     "max_len": 400,
     "placeholders": [
-      "count"
+      "{{var:count}}"
     ],
     "reason": "booking_259: erillinen uutiskirjenäkymä"
   },
@@ -858,14 +858,14 @@
   {
     "key": "admin.newsletter.count",
     "lang": "en",
-    "text": "Recipients: {count} (FI {fi}, EN {en}).",
+    "text": "Recipients: {{var:count}} (FI {{var:fi}}, EN {{var:en}}).",
     "class": "normal",
     "kind": "plain",
     "max_len": 400,
     "placeholders": [
-      "count",
-      "fi",
-      "en"
+      "{{var:count}}",
+      "{{var:fi}}",
+      "{{var:en}}"
     ],
     "reason": "booking_259: erillinen uutiskirjenäkymä"
   },
@@ -892,12 +892,12 @@
   {
     "key": "admin.newsletter.suggestion",
     "lang": "en",
-    "text": "Bot-suggested delivery time (Europe/Helsinki): {date}. No automatic scheduling.",
+    "text": "Bot-suggested delivery time (Europe/Helsinki): {{var:date}}. No automatic scheduling.",
     "class": "normal",
     "kind": "plain",
     "max_len": 400,
     "placeholders": [
-      "date"
+      "{{var:date}}"
     ],
     "reason": "booking_259: erillinen uutiskirjenäkymä"
   },
@@ -934,16 +934,16 @@
   {
     "key": "admin.newsletter.history",
     "lang": "en",
-    "text": "Recipients {count} · queued {queued} · delivered {sent} · failed {failed} · skipped / dry run {skipped}",
+    "text": "Recipients {{var:count}} · queued {{var:queued}} · delivered {{var:sent}} · failed {{var:failed}} · skipped / dry run {{var:skipped}}",
     "class": "normal",
     "kind": "plain",
     "max_len": 400,
     "placeholders": [
-      "count",
-      "queued",
-      "sent",
-      "failed",
-      "skipped"
+      "{{var:count}}",
+      "{{var:queued}}",
+      "{{var:sent}}",
+      "{{var:failed}}",
+      "{{var:skipped}}"
     ],
     "reason": "booking_259: erillinen uutiskirjenäkymä"
   },

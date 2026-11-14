@@ -29,18 +29,18 @@ export const NEWSLETTER_TEXTS = {
     "preview": "Tallenna ja esikatsele",
     "send": "Lähetä uutiskirje",
     "confirm_title": "Vahvista uutiskirjeen lähetys",
-    "confirm_body": "Uutiskirje lisätään sähköpostijonoon {count} vastaanottajalle. Lähetetäänkö?",
+    "confirm_body": "Uutiskirje lisätään sähköpostijonoon {{var:count}} vastaanottajalle. Lähetetäänkö?",
     "cancel": "Peruuta",
     "saved": "Luonnos tallennettu.",
     "queued": "Uutiskirje lisätty lähetysjonoon. Tämä ei vielä vahvista toimitusta.",
-    "count": "Vastaanottajia: {count} (FI {fi}, EN {en}).",
+    "count": "Vastaanottajia: {{var:count}} (FI {{var:fi}}, EN {{var:en}}).",
     "privacy": "Vain markkinointiluvan antaneet, ei anonymisoituja. Yksi viesti per asiakas ja sähköpostiosoite. Vastaanottajia ei listata. Suostumus tarkistetaan uudelleen lähetyshetkellä.",
     "style": "Ulkoasu on botin toimittama. Esikatselun peruutuslinkki on esimerkki.",
-    "suggestion": "Botin ehdottama lähetysaika (Europe/Helsinki): {date}. Ei automaattista ajastusta.",
+    "suggestion": "Botin ehdottama lähetysaika (Europe/Helsinki): {{var:date}}. Ei automaattista ajastusta.",
     "draft": "Luonnos",
     "previewed": "Esikatseltu",
     "sent": "Lähetysjonossa / lähetetty",
-    "history": "Vastaanottajia {count} · jonoon {queued} · toimitettu {sent} · virhe {failed} · ohitettu / koelähetys {skipped}",
+    "history": "Vastaanottajia {{var:count}} · jonoon {{var:queued}} · toimitettu {{var:sent}} · virhe {{var:failed}} · ohitettu / koelähetys {{var:skipped}}",
     "preview_required": "Esikatsele uudelleen. Muutos tai yli 30 minuuttia vanha esikatselu estää lähettämisen.",
     "error": "Toiminto epäonnistui. Lataa luonnos uudelleen ja esikatsele.",
     "loading": "Ladataan…",
@@ -85,18 +85,18 @@ export const NEWSLETTER_TEXTS = {
     "preview": "Save and preview",
     "send": "Send newsletter",
     "confirm_title": "Confirm newsletter delivery",
-    "confirm_body": "The newsletter will be queued for {count} recipients. Send?",
+    "confirm_body": "The newsletter will be queued for {{var:count}} recipients. Send?",
     "cancel": "Cancel",
     "saved": "Draft saved.",
     "queued": "Newsletter queued. This is not a delivery confirmation.",
-    "count": "Recipients: {count} (FI {fi}, EN {en}).",
+    "count": "Recipients: {{var:count}} (FI {{var:fi}}, EN {{var:en}}).",
     "privacy": "Only marketing-consented customers; no anonymised contacts. One message per customer and email address. No recipient list. Consent is checked again before delivery.",
     "style": "The bot supplies the visual style. The preview unsubscribe link is an example.",
-    "suggestion": "Bot-suggested delivery time (Europe/Helsinki): {date}. No automatic scheduling.",
+    "suggestion": "Bot-suggested delivery time (Europe/Helsinki): {{var:date}}. No automatic scheduling.",
     "draft": "Draft",
     "previewed": "Previewed",
     "sent": "Queued / sent",
-    "history": "Recipients {count} · queued {queued} · delivered {sent} · failed {failed} · skipped / dry run {skipped}",
+    "history": "Recipients {{var:count}} · queued {{var:queued}} · delivered {{var:sent}} · failed {{var:failed}} · skipped / dry run {{var:skipped}}",
     "preview_required": "Preview again. Changes or a preview older than 30 minutes prevent delivery.",
     "error": "The action failed. Reload the draft and preview again.",
     "loading": "Loading…",
@@ -123,6 +123,7 @@ export async function loadNewsletterTexts(rpc) {
 }
 export function newsletterText(key, vars={}, lang=getLang()) {
   let value = remote[key+'|'+lang] || NEWSLETTER_TEXTS[lang==='en'?'en':'fi'][key] || key;
-  for (const [k,v] of Object.entries(vars)) value=value.replaceAll('{'+k+'}',String(v));
+  // Sivutekstien paikkamerkit ovat muotoa {{var:nimi}} (admin_texts_import tarkistaa); vanha {nimi} toimii yhä.
+  for (const [k,v] of Object.entries(vars)) value=value.replaceAll('{{var:'+k+'}}',String(v)).replaceAll('{'+k+'}',String(v));
   return value;
 }
