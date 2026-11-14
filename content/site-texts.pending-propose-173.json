@@ -1,0 +1,28 @@
+[
+  {
+    "key": "ui.admin.product.qr_hint",
+    "lang": "fi",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "apply": "texts_propose",
+    "base_version": 2,
+    "base_text": "QR-koodi tehdään tämän sivun osiossa QR-koodin tulostus.",
+    "text": "QR-koodi tehdään Tuotteet-sivun osiossa QR-koodin tulostus.",
+    "reason": "UX2-C korjaus: tuote-editori on #389:n jälkeen oma näkymänsä, joten \"tämän sivun\" -> Tuotteet-sivu (EN: Products, ui.admin.nav.products; osio ui.admin.qr.section_title). Koodari 15.11.2026"
+  },
+  {
+    "key": "ui.admin.product.qr_hint",
+    "lang": "en",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "apply": "texts_propose",
+    "base_version": 2,
+    "base_text": "The QR code is created in the QR code printing section of this page.",
+    "text": "The QR code is created in the QR code printing section of the Products page.",
+    "reason": "UX2-C korjaus: tuote-editori on #389:n jälkeen oma näkymänsä, joten \"tämän sivun\" -> Tuotteet-sivu (EN: Products, ui.admin.nav.products; osio ui.admin.qr.section_title). Koodari 15.11.2026"
+  }
+]
