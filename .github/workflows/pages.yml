@@ -182,6 +182,8 @@ jobs:
       - run: node --test booking/tests/sivutekstit-funktiot.test.mjs
       # Sivutekstitiedostoissa ei suodattimen paikkamerkkiä (fallback + pending-import-*).
       - run: node --test booking/tests/sivutekstit-ei-redacted.test.mjs
+      # UX-uudistus vaihe 1: jaetut tokenit ja peruskomponentit (booking/shared), hallinnan tabletti-valikko ja 44 px kosketuskohteet
+      - run: node --test booking/tests/tokenit.test.mjs
       # edge-funktioiden Deno-testit: PDF:t samat tavut kuin ennen tekstisiirtoa, tekstihaku (_shared/site_texts.ts), MobilePay-virhetekstit
       # bot-gateway (Oton botin yhdyskäytävä, koodari_otto.md): mock-rpc, kytkin, 16 kB raja, virhemappaus (BG429 -> 429), log_failure, ei avainta/tiivistettä/args-sisältöä lokiin
       - uses: denoland/setup-deno@v2
