@@ -217,9 +217,9 @@ test('tekstit: FI ja EN, paikkamerkit, tuontitiedosto vastaa sanakirjaa', () => 
   assert.equal(fillDayText(DAY_TEXTS.en['ui.admin.day.revenue_unpaid'], { amount: '€10.00' }), 'Of which unpaid €10.00');
   const pending = JSON.parse(readFileSync(new URL('../../content/site-texts.imported-pr68.json', import.meta.url), 'utf8'));
   // Uudet avaimet odottavat tuontia omassa tiedostossaan (lahjakorttimerkki: pending-import-32); niitä ei vielä ole pr68:ssa eikä varatekstissä.
-  const later = new Set(JSON.parse(readFileSync(new URL('../../content/site-texts.pending-import-32.json', import.meta.url), 'utf8')).map((r) => r.key));
-  const later155 = JSON.parse(readFileSync(new URL('../../content/site-texts.pending-import-155.json', import.meta.url), 'utf8')).map((r) => r.key);   // HALL-PAIVA-01
-  const keys = new Set(Object.keys(DAY_TEXTS.fi).filter((k) => !later.has(k) && !later155.includes(k)));
+  // HALL-PAIVA-01/04: uudet avaimet odottavat tuontia tiedostoissa pending-import-155 ja -157.
+  const later = new Set(['32', '155', '157'].flatMap((n) => JSON.parse(readFileSync(new URL(`../../content/site-texts.pending-import-${n}.json`, import.meta.url), 'utf8'))).map((r) => r.key));
+  const keys = new Set(Object.keys(DAY_TEXTS.fi).filter((k) => !later.has(k)));
   const fallback = JSON.parse(readFileSync(new URL('../../content/site-texts.fallback.json', import.meta.url), 'utf8'));
   const live = (fallback.texts || []).filter((r) => keys.has(r.key));
   assert.equal(live.length, keys.size * 2);
