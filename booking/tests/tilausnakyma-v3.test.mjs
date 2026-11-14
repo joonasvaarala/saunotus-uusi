@@ -324,7 +324,7 @@ test('placeOverflowMenu: otsikon valikko pysyy ruudulla mobiilissa, työpöydän
 });
 
 test('overflowMenu kiinnittää listan ruutuun ja css rajaa leveyden sekä pinon sivupalkin yläpuolelle', () => {
-  const view = read('booking/admin/views/order-view.js');
+  const view = read('booking/admin/views/overflow-menu.js') + read('booking/admin/views/order-view.js');
   assert.match(view, /placeOverflowMenu\(/);
   assert.match(view, /list\.style\.position = 'fixed'/);
   assert.match(view, /prefer: 'start'/);

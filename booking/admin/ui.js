@@ -45,6 +45,8 @@ export const STATUS = { confirmed: 'Vahvistettu', pending: 'Odottaa', cancelled:
 export const PAY = { unpaid: 'Maksamatta', pending: 'Maksu kesken', paid: 'Maksettu', partially_paid: 'Osittain maksettu', refunded: 'Hyvitetty', partially_refunded: 'Osittain hyvitetty', failed: 'Epäonnistui', invoiced: 'Laskutettu' };
 export const badge = (kind, text) => h('span', { class: `badge ${kind}`, text });
 export const statusBadge = (s) => badge(`st-${s}`, STATUS[s] || s);
+// HALL-PAIVA-02: päivänäkymässä Saapunut-painike asettaa tilan 'completed'; merkki kertoo saman sanan ("Saapunut", ei "Toteutunut").
+export const arrivalStatusBadge = (s) => (s === 'completed' ? badge('st-completed', 'Saapunut') : statusBadge(s));
 export const payBadge = (s) => badge(`pay-${s}`, PAY[s] || s);
 // Johku-tunniste: vain lähteelle 'johku' (admin_list_reservations / admin_day_view: source). Puuttuva tai 'native' → ei tunnistetta (defensiivinen: vanha kanta ei palauta kenttää).
 export const isJohku = (r) => r?.source === 'johku';

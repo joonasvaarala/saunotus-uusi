@@ -641,6 +641,13 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
           billing: { company: 'Esimerkki Oy', business_id: '1234567-8', street: 'Testikatu 1', zip: '00100', city: 'Helsinki', invoice_method: 'einvoice', einvoice_address: '003712345678', einvoice_operator: 'OKOYFIHH', contact_name: r.customer_name, contact_email: r.customer_email },
           requests: [{ id: 1, kind: 'cancel', status: 'open', reason: 'Asiakas sairastui.', created_at: r.created_at }] } : {}) };
     },
+    admin_set_reservation_status: (a) => {   // HALL-PAIVA-02: Saapui (completed) / takaisin (confirmed) / Ei saapunut (no_show) kokeilutilassa
+      need('bookings.manage');
+      const r = st.reservations.find((x) => x.reservation_id === a.p_reservation_id); if (!r) throw err('not_found', 'Varausta ei löydy');
+      if (!['pending', 'confirmed', 'completed', 'no_show', 'cancelled'].includes(a.p_status)) throw err('bad_status', 'Tila ei kelpaa');
+      r.status = a.p_status;
+      return { ok: true, reservation_id: r.reservation_id, status: r.status };
+    },
     admin_set_reservation_option: (a) => {
       need('bookings.manage');
       const r = st.reservations.find((x) => x.reservation_id === a.p_reservation_id); if (!r) throw err('not_found', 'Varausta ei löydy');
