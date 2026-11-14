@@ -1,0 +1,80 @@
+[
+  {
+    "key": "ui.admin.product.qr_hint",
+    "lang": "fi",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "apply": "texts_propose",
+    "base_version": 1,
+    "base_text": "QR-koodi tehdään asetusten tulostusnäkymässä.",
+    "text": "QR-koodi tehdään tämän sivun osiossa QR-koodin tulostus.",
+    "reason": "HALL-ASETUKSET-01: teksti on jo kannassa (v1), joten admin_texts_import (tuonti 167) ei päivitä sitä. Asetukset jaettiin uusiksi välilehdiksi (Yleiset, Varaukset, Maksut ja laskutus, Järjestelmä) ja QR-tulostus siirtyi Tuotteisiin."
+  },
+  {
+    "key": "ui.admin.product.qr_hint",
+    "lang": "en",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "apply": "texts_propose",
+    "base_version": 1,
+    "base_text": "The QR code is created in settings, under QR printing.",
+    "text": "The QR code is created in the QR code printing section of this page.",
+    "reason": "HALL-ASETUKSET-01: teksti on jo kannassa (v1), joten admin_texts_import (tuonti 167) ei päivitä sitä. Asetukset jaettiin uusiksi välilehdiksi (Yleiset, Varaukset, Maksut ja laskutus, Järjestelmä) ja QR-tulostus siirtyi Tuotteisiin."
+  },
+  {
+    "key": "ui.admin.settings.bill_help",
+    "lang": "fi",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 115,
+    "placeholders": [],
+    "apply": "texts_propose",
+    "base_version": 1,
+    "base_text": "Tili saa olla tyhjä, kunnes se on tiedossa. Kuitin nimi ja ALV tulevat Yritys-välilehdeltä.",
+    "text": "Tili saa olla tyhjä, kunnes se on tiedossa. Kuitin nimi ja ALV tulevat Yleiset-välilehden yritystiedoista.",
+    "reason": "HALL-ASETUKSET-01: teksti on jo kannassa (v1), joten admin_texts_import (tuonti 167) ei päivitä sitä. Asetukset jaettiin uusiksi välilehdiksi (Yleiset, Varaukset, Maksut ja laskutus, Järjestelmä) ja QR-tulostus siirtyi Tuotteisiin."
+  },
+  {
+    "key": "ui.admin.settings.bill_help",
+    "lang": "en",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 122,
+    "placeholders": [],
+    "apply": "texts_propose",
+    "base_version": 1,
+    "base_text": "The account can stay empty until it is known. The receipt name and VAT come from the Business tab.",
+    "text": "The account can stay empty until it is known. The receipt name and VAT come from the company details on the General tab.",
+    "reason": "HALL-ASETUKSET-01: teksti on jo kannassa (v1), joten admin_texts_import (tuonti 167) ei päivitä sitä. Asetukset jaettiin uusiksi välilehdiksi (Yleiset, Varaukset, Maksut ja laskutus, Järjestelmä) ja QR-tulostus siirtyi Tuotteisiin."
+  },
+  {
+    "key": "ui.admin.settings.tab_maksut",
+    "lang": "fi",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "apply": "texts_propose",
+    "base_version": 1,
+    "base_text": "Maksut",
+    "text": "Maksut ja laskutus",
+    "reason": "HALL-ASETUKSET-01: teksti on jo kannassa (v1), joten admin_texts_import (tuonti 167) ei päivitä sitä. Asetukset jaettiin uusiksi välilehdiksi (Yleiset, Varaukset, Maksut ja laskutus, Järjestelmä) ja QR-tulostus siirtyi Tuotteisiin."
+  },
+  {
+    "key": "ui.admin.settings.tab_maksut",
+    "lang": "en",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "apply": "texts_propose",
+    "base_version": 1,
+    "base_text": "Payments",
+    "text": "Payments and invoicing",
+    "reason": "HALL-ASETUKSET-01: teksti on jo kannassa (v1), joten admin_texts_import (tuonti 167) ei päivitä sitä. Asetukset jaettiin uusiksi välilehdiksi (Yleiset, Varaukset, Maksut ja laskutus, Järjestelmä) ja QR-tulostus siirtyi Tuotteisiin."
+  }
+]
