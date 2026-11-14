@@ -1,10 +1,11 @@
 // Tilausnäkymä v3 (PR 1): yhteenvetopaneelin, koko tilausnäkymän, peruutusdialogin ja asiakasnäkymän tekstit (FI + EN).
 // Avaimet: ui.admin.order_view.*, ui.admin.order_cancel.*, ui.admin.customer_view.*. Sama mekanismi kuin day-memos-texts.js:
 // public_get_site_texts (admin_ui_texts-välimuisti) peittää sanakirjan; puuttuva rivi tai täyttymätön paikkamerkki → oletus.
-// Tuonti: content/site-texts.pending-import-137.json (vain uudet avaimet; PR 4:n asiakashallinta pending-import-142.json); summalaatikon ui.admin.order_view.amt.* pending-import-140.json (+ amt.refund_pending* pending-import-144.json). Tekstit ovat pelkkää tekstiä, ei HTML:ää.
+// Tuonti: content/site-texts.pending-import-137.json (vain uudet avaimet; PR 4:n asiakashallinta pending-import-142.json; HALL-ASIAKKAAT-01 pending-import-161.json); summalaatikon ui.admin.order_view.amt.* pending-import-140.json (+ amt.refund_pending* pending-import-144.json). Tekstit ovat pelkkää tekstiä, ei HTML:ää.
 import { getLang } from './talous-i18n.js';
 import { getSiteTexts } from './site-texts-cache.js';
 import { CUSTOMER_ADMIN_TEXTS } from './customer-admin-texts.js';
+import { CUSTOMER_EDIT_TEXTS } from './customer-edit-texts.js';
 
 export const PREFIXES = ['ui.admin.order_view.', 'ui.admin.order_cancel.', 'ui.admin.customer_view.'];
 
@@ -596,6 +597,9 @@ export const ORDER_VIEW_TEXTS = {
 // PR 4 (booking_285): asiakkaiden yhdistäminen ja anonymisointi (ui.admin.customer_view.merge.*, anonymize.*). Tuonti pending-import-142.json.
 Object.assign(ORDER_VIEW_TEXTS.fi, CUSTOMER_ADMIN_TEXTS.fi);
 Object.assign(ORDER_VIEW_TEXTS.en, CUSTOMER_ADMIN_TEXTS.en);
+// HALL-ASIAKKAAT-01: paikallaan muokattavat asiakaskortit (tuonti 161)
+Object.assign(ORDER_VIEW_TEXTS.fi, CUSTOMER_EDIT_TEXTS.fi);
+Object.assign(ORDER_VIEW_TEXTS.en, CUSTOMER_EDIT_TEXTS.en);
 
 let db = new Map();
 let loaded = false;

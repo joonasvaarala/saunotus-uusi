@@ -26,6 +26,7 @@ export function viewsMockHandlers({ st, need, err, now = new Date(), resources =
   const PUBLIC_STAFF = [{ id: 1, name: 'Kokeilu Käyttäjä', active: true }, { id: 2, name: 'Aino', active: true }, { id: 3, name: 'Eero', active: true }];
   const byId = (rows, id, what) => { const r = rows.find((x) => x.id === Number(id)); if (!r) throw err('not_found', `${what} ei löydy`); return r; };
 
+  const consentOf = (c) => (c.marketing_consent != null ? !!c.marketing_consent : c.id % 2 === 1);
   const customerOrders = (cid) => {
     const by = new Map();
     for (const r of st.reservations.filter((x) => x.customer_id === cid)) {
@@ -89,17 +90,31 @@ export function viewsMockHandlers({ st, need, err, now = new Date(), resources =
       const s = st.staff.find((x) => x.user_id === a.p_user_id); if (!s) throw err('not_found', 'Käyttäjää ei löydy');
       s.public_staff_id = a.p_public_staff_id == null || a.p_public_staff_id === '' ? null : Number(a.p_public_staff_id); return { ok: true };
     },
+    // HALL-ASIAKKAAT-01: asiakasnäkymän paikallaan muokkaus (kuten admin_update_customer: sallitut kentät, tyyppi- ja y-tunnussäännöt; vain muistissa)
+    admin_update_customer: (a) => {
+      need('customers.manage');
+      const c = byId(st.customers, a.p_id, 'Asiakasta'); const p = a.p_patch || {};
+      const ok = ['name', 'email', 'phone', 'company', 'address', 'zip', 'city', 'country', 'language', 'notes', 'marketing_consent', 'customer_kind', 'business_id', 'einvoice_address', 'einvoice_operator', 'invoice_reference'];
+      for (const k of Object.keys(p)) if (!ok.includes(k)) throw err('unknown_field', `Kenttää ei saa muokata: ${k}`);
+      if ('name' in p && !String(p.name || '').trim()) throw err('invalid_name', 'Nimi ei voi olla tyhjä');
+      const next = { ...c, ...p };
+      if (next.customer_kind === 'company' && (!String(next.company || '').trim() || !next.business_id)) throw err('invalid_company', 'Yritysasiakkaalla pitää olla yrityksen nimi ja kelvollinen y-tunnus');
+      if ('marketing_consent' in p && !!p.marketing_consent !== consentOf(c)) { next.marketing_consent_at = p.marketing_consent ? now.toISOString() : c.marketing_consent_at ?? null; next.marketing_consent_source = p.marketing_consent ? 'admin' : c.marketing_consent_source ?? null; }
+      Object.assign(c, next); return { ok: true };
+    },
     admin_get_customer: (a) => {
       const c = st.customers.find((x) => x.id === Number(a.p_id)); if (!c) throw err('not_found', 'Asiakasta ei löydy');
       const orders = customerOrders(c.id);
       const open = orders.filter((o) => ['unpaid', 'partially_paid'].includes(o.payment_status) && !['cancelled', 'expired'].includes(o.status));
       return {
         id: c.id, name: c.name, email: c.email || null, phone: c.phone || null, customer_kind: c.customer_kind || 'private', company: c.company || null, business_id: c.business_id || null,
-        language: c.language || 'fi', notes: c.notes || '', marketing_consent: c.id % 2 === 1, marketing_consent_at: c.id % 2 === 1 ? '2026-06-01T09:00:00Z' : null, marketing_consent_source: c.id % 2 === 1 ? 'shop' : null,
+        address: c.address || null, zip: c.zip || null, city: c.city || null, einvoice_address: c.einvoice_address || null, einvoice_operator: c.einvoice_operator || null, invoice_reference: c.invoice_reference || null,
+        customer_type: c.customer_type || 'regular',
+        language: c.language || 'fi', notes: c.notes || '', marketing_consent: consentOf(c), marketing_consent_at: c.marketing_consent_at ?? (consentOf(c) ? '2026-06-01T09:00:00Z' : null), marketing_consent_source: c.marketing_consent_source ?? (consentOf(c) ? 'shop' : null),
         created_at: c.created_at || '2026-05-01T09:00:00Z', anonymized_at: c.anonymized_at || null, merged_into: null,
         open_balance: open.reduce((n, o) => n + o.total, 0), open_orders: open.length,
         gift_cards: { bought_count: 0, bought_total: 0, redeemed_count: 0, bought: [] },
-        annual_cards: (st.annualCards || []).filter((x) => x.customer_id === c.id).map((x) => ({ code: x.code, valid_from: x.valid_from, valid_to: x.valid_to, active: x.active !== false })),
+        annual_cards: (st.annualCards || []).filter((x) => x.customer_id === c.id).map((x) => ({ id: x.id, notes: x.notes || null, code: x.code, valid_from: x.valid_from, valid_to: x.valid_to, active: x.active !== false })),
         orders,
       };
     },

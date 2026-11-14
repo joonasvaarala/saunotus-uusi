@@ -10,7 +10,7 @@ export const giftSearchTerm = (q) => (/^[A-Za-z0-9 -]+$/.test(q) && /\d/.test(q)
 export function resultHref(kind, row) {
   if (kind === 'order') return `#/tilaukset?order=${encodeURIComponent(row.order_no)}`;
   if (kind === 'reservation') return `#/varaukset?id=${encodeURIComponent(row.reservation_id)}&q=${encodeURIComponent(row.order_no)}&period=all`;
-  if (kind === 'customer') return `#/asiakkaat?id=${encodeURIComponent(row.id)}`;
+  if (kind === 'customer') return `#/asiakkaat/${encodeURIComponent(row.id)}`;   // HALL-ASIAKKAAT-01: asiakasnäkymä, ei vanhaa modaalia
   if (kind === 'giftcard') return `#/lahjakortit?tab=omat&code=${encodeURIComponent(row.code)}`;
   return '#/';
 }

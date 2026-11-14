@@ -219,8 +219,8 @@ test('asiakasnäkymä: tulevat / menneet, tunnusluvut palvelimelta, ei yhdistä/
 
 test('tekstit: FI = EN, pending-import-137 täsmää, paikkamerkit, ei HTML:ää, ei päällekkäisyyttä muiden tuontien kanssa', () => {
   assert.deepEqual(Object.keys(ORDER_VIEW_TEXTS.fi).sort(), Object.keys(ORDER_VIEW_TEXTS.en).sort());
-  // import 140 (summalaatikko, ui.admin.order_view.amt.*) jatkaa 137:ää samalla etuliitteellä; import 142 (PR 4: asiakkaan yhdistäminen/anonymisointi, customer_view.merge.*); import 144 (amt.refund_pending*)
-  const OWN = ['site-texts.pending-import-137.json', 'site-texts.pending-import-140.json', 'site-texts.pending-import-142.json', 'site-texts.pending-import-144.json', 'site-texts.pending-import-170.json'];
+  // import 140 (summalaatikko, ui.admin.order_view.amt.*) jatkaa 137:ää samalla etuliitteellä; import 142 (PR 4: asiakkaan yhdistäminen/anonymisointi, customer_view.merge.*); import 144 (amt.refund_pending*); import 161 (HALL-ASIAKKAAT-01: paikallaan muokattavat asiakaskortit); import 170 (maksutavat)
+  const OWN = ['site-texts.pending-import-137.json', 'site-texts.pending-import-140.json', 'site-texts.pending-import-142.json', 'site-texts.pending-import-144.json', 'site-texts.pending-import-161.json', 'site-texts.pending-import-170.json'];
   const rows = OWN.flatMap((f) => JSON.parse(read(`content/${f}`)));
   assert.equal(rows.length, Object.keys(ORDER_VIEW_TEXTS.fi).length * 2);
   const seen = new Set();

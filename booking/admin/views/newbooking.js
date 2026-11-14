@@ -30,6 +30,11 @@ export async function render({ ctx, refs, query, reload }) {
     loadBookingTexts(rpc).catch(() => false),
   ]);
   const st = { date: /^\d{4}-\d\d-\d\d$/.test(query.get('d') || '') ? query.get('d') : todayHel(), session: null, customer: null, pre: query.get('r') && query.get('t') ? { r: query.get('r'), t: query.get('t') } : null };
+  // HALL-ASIAKKAAT-01: #/uusi?c=<asiakas-id> (Uusi varaus tälle asiakkaalle asiakasnäkymästä) esitäyttää asiakkaan; virhe → tavallinen tyhjä lomake
+  st.preCustomer = null;
+  if (/^[1-9]\d{0,15}$/.test(query.get('c') || '')) {
+    try { const c = await rpc('admin_get_customer', { p_id: Number(query.get('c')) }); if (c && !c.anonymized_at && !c.merged_into) st.preCustomer = { ...c, street: c.address || '' }; } catch { /* ei esitäyttöä */ }
+  }
   const root = h('div', { class: 'stack nb' });
   const sessionsBox = h('div', { class: 'stack' }); const formBox = h('div', {}); const result = h('div', { class: 'nb-result' });
   const summaryBox = h('aside', { class: 'card nb-summary', 'data-testid': 'nb-summary', hidden: true });
@@ -356,6 +361,8 @@ export async function render({ ctx, refs, query, reload }) {
       persSec, custSec, picker.node, paySec, noteSec, bar);
     formBox.replaceChildren(f);
     syncGift(); syncPaidForMethod(); syncCard(); syncInv();
+    // pick() täyttää lomakkeen ja valitsee asiakkaan (sama kuin haun osuman valinta); piirtyy uudelleen vuoroa vaihdettaessa
+    if (st.preCustomer && (st.customer ? st.customer.id === st.preCustomer.id : !st.prePicked)) { st.prePicked = true; cs.pick(st.preCustomer); }   // "Uusi asiakas" -painikkeen jälkeen ei esitäytetä uudelleen
     if (reveal) revealForm(f);
   }
 
