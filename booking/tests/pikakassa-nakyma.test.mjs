@@ -276,11 +276,11 @@ test('maksurivipalkki on matala rivi ja maara on samalla rivilla', async () => {
   assert.equal(btn.classList.contains('pos-lines-btn'), true);
   assert.equal(btn.classList.contains('pos-btn'), false);
   assert.equal(btn.getAttribute('aria-expanded'), 'false');
-  assert.equal(btn.getAttribute('aria-label'), 'Maksurivit 0');
+  assert.equal(btn.getAttribute('aria-label'), 'Ostoskori 0');
   const kids = btn.children.filter((c) => c.nodeType === 1);
   assert.equal(kids.length, 2);
   assert.equal(kids[0].className, 'pos-lines-label');
-  assert.equal(kids[0].textContent, 'Maksurivit');
+  assert.equal(kids[0].textContent, 'Ostoskori');
   assert.equal(kids[1].className, 'pos-lines-count');
   assert.equal(kids[1].classList.contains('pos-price'), false);
   assert.equal(kids[1].textContent, '0');
@@ -289,7 +289,7 @@ test('maksurivipalkki on matala rivi ja maara on samalla rivilla', async () => {
   q(root, 'pos-product-101').click();
   btn = q(root, 'pos-lines');
   assert.equal(btn.getAttribute('aria-expanded'), 'false');
-  assert.equal(btn.getAttribute('aria-label'), 'Maksurivit 2');
+  assert.equal(btn.getAttribute('aria-label'), 'Ostoskori 2');
   assert.equal(btn.children.filter((c) => c.nodeType === 1)[1].textContent, '2');
   assert.equal(q(root, 'pos-panel').textContent.includes('Vichy'), false);
   btn.click();
@@ -870,4 +870,58 @@ test('pending-import-113: asiakaskentan uudet tekstit FI+EN, normal, ei numeroit
   for (const key of Object.keys(texts.POS_CUSTOMER_TEXTS.fi)) assert.match(src, new RegExp(`t\\('${key}'\\)`));
   assert.match(read('../admin/admin.css'), /\.pos-suggest\{/);
   assert.match(read('../admin/admin.css'), /\.pos-hit\{[^}]*min-height:48px/);
+});
+
+// HALL-KASSA-01: kori sivupaneelina ≥ 800 px, selkeät painikenimet, aria-live ja kieli yhteisestä valinnasta
+test('leveällä näytöllä kori on aina näkyvissä sivupaneelissa ilman avauspainiketta', async () => {
+  globalThis.matchMedia = (q) => ({ matches: /800px/.test(q), addEventListener() {}, removeEventListener() {} });
+  try {
+    const root = await mount();
+    assert.equal(q(root, 'pos-lines'), null, 'ei avauspainiketta');
+    const side = q(root, 'pos-side');
+    assert.ok(ids(side).includes('pos-panel'), 'kori on sivupaneelissa');
+    assert.ok(side.children.some((c) => c.tagName === 'H2' && c.textContent === 'Ostoskori'));
+    assert.match(side.textContent, /Ostoskori on tyhjä/);
+    q(root, 'pos-product-101').click();
+    assert.match(q(root, 'pos-side').textContent, /Vichy/);
+    assert.ok(ids(q(root, 'pos-side')).includes('pos-product-line'));
+    assert.equal(ids(q(root, 'pos-grid')).includes('pos-panel'), false);
+    assert.ok(ids(root).includes('pos-custom-add'), 'vapaa rivi säilyy');
+  } finally { delete globalThis.matchMedia; }
+});
+
+test('−/+ -painikkeilla on omat nimet ja summa ilmoitetaan ruudunlukijalle', async () => {
+  const root = await mount();
+  q(root, 'pos-product-101').click();
+  q(root, 'pos-lines').click();
+  const labels = all(q(root, 'pos-product-line')).filter((n) => n.tagName === 'BUTTON').map((n) => n.getAttribute('aria-label'));
+  assert.deepEqual(labels.slice(0, 2), ['Vähennä', 'Lisää']);
+  assert.equal(q(root, 'pos-total').getAttribute('aria-live'), 'polite');
+});
+
+test('pikakassan kieli tulee yhteisestä valinnasta', async () => {
+  const i18n = await import(href('../admin/talous-i18n.js'));
+  i18n.setLang('en');
+  try {
+    const root = await mount();
+    assert.equal(q(root, 'pos-lines').getAttribute('aria-label'), 'Cart 0');
+    assert.equal(q(root, 'pos-pay').textContent, 'Pay');
+  } finally { i18n.setLang('fi'); }
+  assert.equal(read('../admin/pos-screen.js').includes("const lang = 'fi'"), false);
+});
+
+test('pending-import-159: ostoskorin tekstit FI+EN vastaavat koodin sanakirjaa', () => {
+  const rows = JSON.parse(read('../../content/site-texts.pending-import-159.json'));
+  for (const key of Object.keys(texts.POS_CART_TEXTS.fi)) {
+    for (const lang of ['fi', 'en']) {
+      const row = rows.find((r) => r.key === `ui.pos.${key}` && r.lang === lang);
+      assert.ok(row, `${key} ${lang}`);
+      assert.equal(row.text, texts.POS_CART_TEXTS[lang][key]);
+      assert.equal(row.class, 'normal');
+    }
+  }
+  assert.equal(rows.length, Object.keys(texts.POS_CART_TEXTS.fi).length * 2);
+  const css = read('../admin/admin.css');
+  assert.match(css, /@media\(min-width:1000px\)\{\.pos-grid\{grid-template-columns:repeat\(4,1fr\)\}/);
+  assert.match(css, /@media\(min-width:800px\)\{\.pos-layout\{grid-template-columns:minmax\(0,1fr\) 300px\}/);
 });
