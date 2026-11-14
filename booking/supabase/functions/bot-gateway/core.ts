@@ -1,5 +1,6 @@
 // bot-gateway: Oton botin kapea yhdyskäytävä (koodari_otto.md §1–3). Ydin ilman Supabasea ja ilman Denon palvelinta.
-// Kaikki tietokantatyö tehdään public.botgw_call -funktiossa (botgw.call, migraatiot 20261025145539 + 20261025151402):
+// Kaikki tietokantatyö tehdään public.botgw_call -funktiossa (botgw.call, migraatiot 20261025145539 + 20261025151402,
+// uutiskirjeluonnokset 20261114233500_booking_315):
 // henkilö tulee avainriviltä, scopet, rajat, idempotenssi, validoinnit, vuoromuutokset (shift_apply_change -> shift_outbox)
 // ja kirjaukset (shift_change_log, audit_log, botgw.call_log). Tämä ydin tekee vain:
 //   * kytkin BOTGW_DISABLED=1 -> 503 (tietokantaa ei kutsuta)
@@ -92,6 +93,12 @@ const AREAS = ["notifications", "shift_offers", "other"] as const;
 const OFFER_RESPONSES = ["accept", "decline", "snooze"] as const; // public.shift_offer_respond
 const BACKLOG_STATUSES = ["queued", "in_progress", "waiting", "done"] as const; // feature_backlog_status_check
 const BACKLOG_KINDS = ["fix", "project"] as const; // feature_backlog_kind_check
+// Uutiskirjeet (booking_315): booking._newsletter_validate / booking.newsletters
+const NL_SEGMENTS = ["all", "training", "treatment", "event", "session_only", "gift_buyers", "christmas_gift_buyers"] as const;
+const NL_LANGUAGES = ["all", "fi", "en"] as const;
+const NL_STATES = ["draft", "previewed", "sent"] as const;
+const NL_CONTENT = ["subject_fi", "subject_en", "body_fi", "body_en", "style", "segment", "language"] as const;
+const NL_CREATE_REQUIRED = ["subject_fi", "subject_en", "body_fi", "body_en", "style", "segment"] as const;
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 // ISO-aika; ilman vyöhykettä tietokanta tulkitsee Europe/Helsinki-ajaksi (botgw._ts).
@@ -237,6 +244,35 @@ export const ACTIONS: Record<string, ActionSpec> = {
     },
   },
   proposal_list: { write: false, fields: {} },
+  // uutiskirjeet VAIN luonnoksina (booking_315, scope newsletter.draft). Ei lähetystä, ajastusta (suggested_send_at),
+  // esikatselua/testilähetystä eikä lippuja: niille ei ole toimintoa, ja tuntemattomat argumentit hylätään (unknown_arg).
+  // Sisältösäännöt (otsikko ilman rivinvaihtoa, style-avaimet, https-cta jne.) tarkistaa booking._newsletter_validate.
+  newsletter_list: { write: false, fields: { state: f(enm(NL_STATES)) } },
+  newsletter_get: { write: false, fields: { id: f(int, REQ) } },
+  newsletter_save: {
+    write: true,
+    fields: {
+      id: f(int),
+      version: f(int),
+      subject_fi: f(str(200)),
+      subject_en: f(str(200)),
+      body_fi: f(str(16000)),
+      body_en: f(str(16000)),
+      style: f({ t: "object", maxBytes: 4096 }),
+      segment: f(enm(NL_SEGMENTS)),
+      language: f(enm(NL_LANGUAGES)),
+      request_id,
+    },
+    check: (a) => {
+      if (a.id === undefined) {
+        if (a.version !== undefined) return "version vain muokattaessa (id)";
+        const miss = NL_CREATE_REQUIRED.find((k) => a[k] === undefined);
+        return miss ? `missing_arg:${miss}` : null;
+      }
+      if (a.version === undefined) return "missing_arg:version";
+      return NL_CONTENT.some((k) => a[k] !== undefined) ? null : "Ei tallennettavaa";
+    },
+  },
 };
 
 function isPlainObject(v: unknown): v is Record<string, unknown> {

@@ -374,11 +374,24 @@ const SUCCESS: Record<string, Record<string, unknown>> = {
     request_id: RID,
   },
   own_shift_release: { shift_id: U1, absence_id: U2, reason: "terveystieto-xyz", confirmed: true, request_id: RID },
+  // uutiskirjeluonnokset (booking_315)
+  newsletter_list: { state: "draft" },
+  newsletter_get: { id: 12 },
+  newsletter_save: {
+    subject_fi: "ARGVALUE-123",
+    subject_en: "Christmas slots",
+    body_fi: "terveystieto-xyz",
+    body_en: "Hi!",
+    style: { layout: "letter", accent: "#aa3300" },
+    segment: "all",
+    language: "fi",
+    request_id: RID,
+  },
 };
 
 Deno.test("jokaiselle spec-toiminnolle on onnistumistesti", () => {
   assertEquals(Object.keys(SUCCESS).sort(), Object.keys(ACTIONS).sort());
-  assertEquals(Object.keys(ACTIONS).length, 27); // 23 (v1) + 4 (v2 §1b)
+  assertEquals(Object.keys(ACTIONS).length, 30); // 23 (v1) + 4 (v2 §1b) + 3 (uutiskirjeluonnokset, booking_315)
 });
 
 for (const [action, args] of Object.entries(SUCCESS)) {
@@ -572,4 +585,82 @@ Deno.test("v2: own_absence_sync runkoraja 16 kB (300 tapahtumaa ei mahdu; ~230 l
   assertEquals(ok.res.status, 200, `230 tapahtumaa = ${mk(230).length} tavua`);
   const big = await run(req(mk(300)));
   assertEquals(big.res.status, 413, `300 tapahtumaa = ${mk(300).length} tavua`);
+});
+
+// ---------- uutiskirjeluonnokset (booking_315, scope newsletter.draft) ----------
+Deno.test("uutiskirje: validointi ennen tietokantaa", () => {
+  const C = { subject_fi: "a", subject_en: "a", body_fi: "a", body_en: "a", style: { layout: "letter" }, segment: "all" };
+  const bad: [string, Record<string, unknown>, string][] = [
+    ["newsletter_list", { state: "queued" }, "bad_arg:state"],
+    ["newsletter_list", { limit: 5 }, "unknown_arg:limit"],
+    ["newsletter_get", {}, "missing_arg:id"],
+    ["newsletter_get", { id: "12" }, "bad_arg:id"],
+    ["newsletter_get", { id: 0 }, "bad_arg:id"],
+    ["newsletter_save", { ...C, body_en: undefined }, "missing_arg:body_en"],
+    ["newsletter_save", { subject_fi: "a" }, "missing_arg:subject_en"],
+    ["newsletter_save", { ...C, version: 1 }, "version vain muokattaessa (id)"],
+    ["newsletter_save", { id: 5, subject_fi: "a" }, "missing_arg:version"],
+    ["newsletter_save", { id: 5, version: 2 }, "Ei tallennettavaa"],
+    ["newsletter_save", { id: 5, version: 2, request_id: RID }, "Ei tallennettavaa"],
+    ["newsletter_save", { id: null, ...C }, "bad_arg:id"],
+    ["newsletter_save", { ...C, subject_fi: "s".repeat(201) }, "too_long:subject_fi"],
+    ["newsletter_save", { ...C, body_fi: "b".repeat(16001) }, "too_long:body_fi"],
+    ["newsletter_save", { ...C, style: "letter" }, "bad_arg:style"],
+    ["newsletter_save", { ...C, style: { layout: "letter", image_url: "x".repeat(4100) } }, "too_long:style"],
+    ["newsletter_save", { ...C, segment: "everyone" }, "bad_arg:segment"],
+    ["newsletter_save", { ...C, language: "sv" }, "bad_arg:language"],
+    // ajastus, tila ja lähetys eivät ole botin argumentteja
+    ["newsletter_save", { ...C, suggested_send_at: "2026-12-01T10:00" }, "unknown_arg:suggested_send_at"],
+    ["newsletter_save", { id: 5, version: 2, state: "sent" }, "unknown_arg:state"],
+    ["newsletter_save", { ...C, send: true }, "unknown_arg:send"],
+    ["newsletter_save", { ...C, test_email: "a@b.fi" }, "unknown_arg:test_email"],
+  ];
+  for (const [action, args, want] of bad) {
+    const clean = Object.fromEntries(Object.entries(args).filter(([, v]) => v !== undefined));
+    assertEquals(validateArgs(action, clean), want, `${action} ${JSON.stringify(clean).slice(0, 80)}`);
+  }
+  assertEquals(validateArgs("newsletter_save", { id: 5, version: 2, body_en: "uusi" }), null);
+  assertEquals(validateArgs("newsletter_save", { id: 5, version: 2, segment: "christmas_gift_buyers", language: "all" }), null);
+  assertEquals(validateArgs("newsletter_list", {}), null);
+});
+
+Deno.test("uutiskirje: lähetys-, ajastus-, esikatselu- ja lipputoimintoja ei ole", async () => {
+  const names = ["newsletter_dispatch", "newsletter_send", "newsletter_schedule", "newsletter_test_send", "newsletter_preview",
+    "newsletter_enable", "newsletter_flag", "newsletter_delete", "admin_newsletter_dispatch", "admin_newsletter_enabled"];
+  for (const action of names) {
+    assert(!(action in ACTIONS), action);
+    assertEquals(validateArgs(action, {}), "unknown_action");
+    const { res, calls } = await run(req({ action, args: { id: 1 } }));
+    assertEquals(res.status, 400, action);
+    assert(!calls.some((c) => c.fn === "botgw_call"), `${action} ei saa kutsua botgw_callia`);
+  }
+  assertEquals(Object.keys(ACTIONS).filter((a) => a.startsWith("newsletter")).sort(), ["newsletter_get", "newsletter_list", "newsletter_save"]);
+  assertEquals(ACTIONS.newsletter_save.write, true);
+  assertEquals(ACTIONS.newsletter_list.write || ACTIONS.newsletter_get.write, false);
+});
+
+Deno.test("uutiskirje: tietokannan virheet -> HTTP", async () => {
+  const save = { id: 5, version: 2, subject_fi: "ARGVALUE-123" };
+  const cases: [RpcError, number, string][] = [
+    [{ code: "42501", message: "not_editable: vain luonnosta voi muokata (tila sent)" }, 403, "not_editable: vain luonnosta voi muokata (tila sent)"],
+    [{ code: "42501", message: "forbidden:newsletter.draft" }, 403, "forbidden:newsletter.draft"],
+    [{ code: "22023", message: "version_conflict: luonnos on muuttunut (versio 3), hae se uudelleen" }, 400, "version_conflict: luonnos on muuttunut (versio 3), hae se uudelleen"],
+    [{ code: "22023", message: "invalid_newsletter: Invalid newsletter text" }, 400, "invalid_newsletter: Invalid newsletter text"],
+    [{ code: "P0002", message: "not_found" }, 404, "not_found"],
+    [{ code: "BG429", message: "rate_limited" }, 429, "rate_limited"],
+  ];
+  for (const [error, status, msg] of cases) {
+    const { res, body, calls } = await run(req({ action: "newsletter_save", args: save }), { error });
+    assertEquals(res.status, status, error.message);
+    assertEquals(body.error, msg);
+    assertEquals(calls[1]?.fn, "botgw_log_failure");
+  }
+});
+
+Deno.test("uutiskirje: pitkät rungot mahtuvat 16 kB:n pyyntöön vain osissa", async () => {
+  const body = (n: number) => ({ action: "newsletter_save", args: { id: 5, version: 2, body_fi: "x".repeat(n) } });
+  const ok = await run(req(body(16000)));
+  assertEquals(ok.res.status, 200);
+  const big = await run(req({ action: "newsletter_save", args: { id: 5, version: 2, body_fi: "x".repeat(9000), body_en: "y".repeat(9000) } }));
+  assertEquals(big.res.status, 413);
 });
