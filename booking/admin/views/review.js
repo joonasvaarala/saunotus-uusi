@@ -11,6 +11,8 @@ import {
   canAckBlockConflict, conflictReason, nextAckStep, nextUnackStep, ackArgs, unackArgs,
   reviewAttentionCount, reviewAttentionSections, attentionKeysEmpty, ATTENTION_LABELS_FI, latePaymentAckNoteOk, latePaymentAckArgs,
 } from '../review-logic.js';
+import { op } from '../open-payments-texts.js';
+import { loadOpenPaymentCounts, canSeeOpenPayments } from '../open-payments-logic.js';
 
 const day = (iso) => new Date(iso).toLocaleDateString('sv-SE', { timeZone: 'Europe/Helsinki' });
 const when = (iso) => `${fmtDay(iso)} ${fmtTime(iso)}`;
@@ -134,12 +136,22 @@ export async function render({ ctx, refs, reload }) {
   let vouchers = null;
   try { vouchers = await unredeemedSection({ rpc, hideEmpty: true }); } catch { vouchers = null; }
   const voucherCount = vouchers ? Number(vouchers.dataset.count || 0) : 0;
-  const total = reviewAttentionCount(v, voucherCount);
-  const sectionCount = reviewAttentionSections(v, voucherCount);
+  // HALL-AVOIMET-01: sama määrä kuin yläpalkin merkissä; osio vie Avoimet maksut -jonoon.
+  const openPay = canSeeOpenPayments(ctx?.can, ctx?.role) ? await loadOpenPaymentCounts(rpc, ctx.can, ctx.role).catch(() => null) : null;
+  const openN = openPay?.total || 0;
+  const total = reviewAttentionCount(v, voucherCount + openN);
+  const sectionCount = reviewAttentionSections(v, voucherCount) + (openN > 0 ? 1 : 0);
   const emptyKeys = attentionKeysEmpty(v);
   // Kunnossa-riville myös lunastamattomat, jos niitä ei ole.
   const okBits = emptyKeys.map((k) => `${ATTENTION_LABELS_FI[k]} 0`);
   if (!voucherCount) okBits.unshift(`${ATTENTION_LABELS_FI.unredeemed_vouchers} 0`);
+  if (openPay && !openN) okBits.unshift(`${op('ui.admin.open_payments.review_ok')} 0`);
+  const openPaySec = openN > 0 ? h('section', { class: 'card review-sec has', 'data-testid': 'review-open_payments', 'data-count': String(openN) },
+    h('h2', {}, op('ui.admin.open_payments.review_title'), ' ', badge('warn', `${openN} kpl`)), h('p', { class: 'muted', text: op('ui.admin.open_payments.review_hint') }),
+    h('ul', { class: 'reslist' },
+      openPay.links > 0 ? h('li', { class: 'resrow', 'data-testid': 'review-open-links' }, op('ui.admin.open_payments.review_links', { n: openPay.links })) : null,
+      openPay.refunds > 0 ? h('li', { class: 'resrow', 'data-testid': 'review-open-refunds' }, op('ui.admin.open_payments.review_refunds', { n: openPay.refunds })) : null),
+    h('a', { class: 'btn', href: '#/tilaukset?tab=open-payments', 'data-testid': 'review-open-payments-link', text: op('ui.admin.open_payments.review_open') })) : null;
   const statusText = sectionCount
     ? `${sectionCount} asiaa vaatii huomiota. Muut kunnossa.`
     : 'Ei tarkistettavaa – kaikki tulevat varaukset ovat kunnossa.';
@@ -165,6 +177,7 @@ export async function render({ ctx, refs, reload }) {
     h('p', { class: 'muted', role: 'status', 'data-testid': 'review-total', 'data-count': String(total), 'data-sections': String(sectionCount), text: statusText }),
     h('button', { type: 'button', class: 'btn ghost sm', text: 'Päivitä', onclick: () => reload() }),
     vouchers,
+    openPaySec,
     ...SECTIONS.map(sec).filter(Boolean),
     okRow,
     ackedSec];

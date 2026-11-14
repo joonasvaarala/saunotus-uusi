@@ -6,16 +6,18 @@ import { formDialog } from './talous-ui.js';
 import { createRefundWatchApi } from '../refund-watch-api.js';
 import { rw } from '../refund-watch-texts.js';
 import { rpc, fn } from '../sb.js';
+import { notifyOpenPaymentsChanged } from '../open-payments-logic.js';
 
 const fld = (label, input) => h('label', { class: 'fld' }, h('span', { text: label }), input);
 
-export async function render({ ctx }) {
+// embedded: Avoimet maksut -välilehden osio (H2, oma otsikko). Oikeuden tarkistaa isäntänäkymä.
+export async function render({ ctx, embedded = false, title = '' }) {
   const lang = getLang();
   const api = createRefundWatchApi({ rpc, fn });
   const can = !!ctx?.can?.('bookings.manage') || ctx?.role === 'admin';
   const root = h('section', { class: 'tl refund-watch', 'data-testid': 'refund-watch', lang });
   if (!can) {
-    root.append(h('h1', { text: rw('ui.admin.refund_watch.title') }), h('p', { class: 'err', role: 'alert', text: rw('ui.admin.refund_watch.no_perm') }));
+    root.append(h(embedded ? 'h2' : 'h1', { class: embedded ? 'view-title' : null, text: title || rw('ui.admin.refund_watch.title') }), h('p', { class: 'err', role: 'alert', text: rw('ui.admin.refund_watch.no_perm') }));
     return root;
   }
   const banner = h('p', { class: 'tl-banner', role: 'status', 'data-testid': 'refund-aging', hidden: true });
@@ -46,14 +48,16 @@ export async function render({ ctx }) {
       actions.append(h('button', { type: 'button', class: 'btn', 'data-testid': 'refund-watch-retry', onclick: () => retry(row) }, rw('ui.admin.refund_watch.retry')));
     }
     actions.append(h('button', { type: 'button', class: 'btn', 'data-testid': 'refund-watch-manual', onclick: () => manual(row) }, rw('ui.admin.refund_watch.manual')));
+    // Mobiilissa rivi on kortti: data-label näyttää kentän nimen (.tl-table td::before).
+    const L = (k) => rw(`ui.admin.refund_watch.col.${k}`);
     tr.append(
-      h('td', { text: fmt.money(row.amount) }),
-      h('td', { text: row.customer_name || '–' }),
-      h('td', { text: row.order_no != null ? `#${row.order_no}` : '–' }),
-      h('td', {}, badge(row.status === 'failed' ? 'st-cancelled' : 'st-pending', statusText(row)), row.aging ? badge('pay-failed', rw('ui.admin.refund_watch.aging')) : null),
-      h('td', { text: rw('ui.admin.refund_watch.age_hours', { hours: row.age_hours ?? '' }) }),
-      h('td', {}, row.provider || '–', row.reason === 'customer_reduce' ? [' ', badge('st-pending', prText('refund.customer_reduce'))] : null),   // booking_284: asiakkaan oma pienennys
-      h('td', {}, actions),
+      h('td', { 'data-label': L('amount'), text: fmt.money(row.amount) }),
+      h('td', { 'data-label': L('customer'), text: row.customer_name || '–' }),
+      h('td', { 'data-label': L('order'), text: row.order_no != null ? `#${row.order_no}` : '–' }),
+      h('td', { 'data-label': L('status') }, badge(row.status === 'failed' ? 'st-cancelled' : 'st-pending', statusText(row)), row.aging ? badge('pay-failed', rw('ui.admin.refund_watch.aging')) : null),
+      h('td', { 'data-label': L('age'), text: rw('ui.admin.refund_watch.age_hours', { hours: row.age_hours ?? '' }) }),
+      h('td', { 'data-label': L('provider') }, row.provider || '–', row.reason === 'customer_reduce' ? [' ', badge('st-pending', prText('refund.customer_reduce'))] : null),   // booking_284: asiakkaan oma pienennys
+      h('td', { 'data-label': L('actions') }, actions),
     );
     return tr;
   }
@@ -68,6 +72,7 @@ export async function render({ ctx }) {
       const sent = await api.providerRefund(row.provider, row.refund_id);
       toast(sent?.result && sent.result !== 'done' && sent.result !== 'pending' ? `${rw('ui.admin.refund_watch.retry_done')} (${sent.result})` : rw('ui.admin.refund_watch.retry_done'));
       await load();
+      notifyOpenPaymentsChanged();
     } catch (e) { toast(errMsg(e), 'err'); }
   }
   function manual(row) {
@@ -91,11 +96,12 @@ export async function render({ ctx }) {
       });
       toast(rw('ui.admin.refund_watch.done'));
       await load();
+      notifyOpenPaymentsChanged();
     });
   }
   search.addEventListener('input', paint);
   root.append(
-    h('h1', { text: rw('ui.admin.refund_watch.title') }),
+    h(embedded ? 'h2' : 'h1', { class: embedded ? 'view-title' : null, text: title || rw('ui.admin.refund_watch.title') }),
     h('p', { class: 'muted', text: rw('ui.admin.refund_watch.intro') }),
     banner,
     h('form', { class: 'tl-toolbar', onsubmit: (e) => e.preventDefault() }, search),

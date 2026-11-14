@@ -20,8 +20,6 @@ export const NAV_GROUPS = [
   ] },
   { id: 'cash', path: 'talous', labelKey: 'ui.admin.nav.finance', tabs: [
     { id: 'talous', path: 'talous', labelKey: 'ui.admin.nav.finance', view: 'talous', any: ['payments.manage', 'giftcards.manage'] },
-    { id: 'seurattavat', path: 'seurattavat-maksut', labelKey: 'ui.admin.nav.paylink_watch', view: 'paylink-watch', any: ['payments.manage'] },
-    { id: 'hyvitykset', path: 'hyvitysten-seuranta', labelKey: 'ui.admin.nav.refund_watch', view: 'refund-watch', any: ['bookings.manage'] },
     { id: 'laskut', path: 'laskut', labelKey: 'ui.admin.nav.invoices', view: 'invoices', any: ['invoices.manage'] },
   ] },
   { id: 'settings', path: 'asetukset', labelKey: 'ui.admin.nav.settings', tabs: [
@@ -31,6 +29,8 @@ export const NAV_GROUPS = [
 ];
 /** Poistuneet ryhmäosoitteet → uusi välilehti (kirjanmerkit). */
 export const LEGACY_GROUP_PATHS = { tilat: 'resurssit', kassa: 'pikakassa' };   // #/kassa avasi ennen Pikakassan
+// HALL-AVOIMET-01: Seurattavat maksut ja Hyvitysten seuranta ovat yksi jono, Tilaukset › Avoimet maksut. Vanhat osoitteet (kirjanmerkit) toimivat.
+export const LEGACY_ORDER_TABS = { 'seurattavat-maksut': 'open-payments', 'hyvitysten-seuranta': 'open-payments' };
 const GROUP_BY_ID = new Map(NAV_GROUPS.map((g) => [g.id, g]));
 const GROUP_BY_CHILD = new Map(NAV_GROUPS.flatMap((g) => g.tabs.map((t) => [t.path, { group: g, tab: t }])));
 const GROUP_BY_PATH = new Map(NAV_GROUPS.map((g) => [g.path, g]));
@@ -47,6 +47,7 @@ export function legacyFinanceGiftTarget(path, query) {
 }
 export function resolveAdminPath(path) {
   if (path === 'varaukset') return resolved('tilaukset', true, null, null);
+  if (LEGACY_ORDER_TABS[path]) return resolved('tilaukset', false, null, LEGACY_ORDER_TABS[path]);
   if (LEGACY_GROUP_PATHS[path]) path = LEGACY_GROUP_PATHS[path];
   const child = GROUP_BY_CHILD.get(path);
   if (child) return resolved(child.group.path, false, child.group.id, child.tab.id);
@@ -82,7 +83,8 @@ export function shouldCollapseOnNavLink(target, { expanded = false, mobile = fal
   if (!el || !nav?.contains?.(el)) return false;
   return typeof el.closest === 'function' && !!el.closest('a[href]');
 }
-export function initialOrdersTab({ legacyReservations = false, query = new URLSearchParams(), canOrders = true } = {}) {
+export function initialOrdersTab({ legacyReservations = false, query = new URLSearchParams(), canOrders = true, canOpenPayments = false, tabId = null } = {}) {
+  if (canOpenPayments && !legacyReservations && (tabId === 'open-payments' || query.get('tab') === 'open-payments')) return 'open-payments';
   if (legacyReservations || query.get('tab') === 'reservations' || !canOrders) return 'reservations';
   return 'orders';
 }

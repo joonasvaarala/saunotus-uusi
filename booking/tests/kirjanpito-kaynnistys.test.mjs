@@ -14,15 +14,14 @@ import { createTalousApi } from '../admin/talous-api.js';
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const src = (p) => readFileSync(join(root, p), 'utf8');
 
-test('navigaatio: Hyvitysten seuranta on Kassa ja talous -välilehti', () => {
+test('navigaatio: Hyvitysten seuranta on osa Tilaukset › Avoimet maksut -jonoa (HALL-AVOIMET-01), vanha osoite toimii', () => {
   assert.equal(NAV_TEXTS.fi['ui.admin.nav.refund_watch'], 'Hyvitysten seuranta');
   assert.equal(NAV_TEXTS.en['ui.admin.nav.refund_watch'], 'Refund follow-up');
-  assert.deepEqual(resolveAdminPath('hyvitysten-seuranta'), { path: 'talous', legacyReservations: false, groupId: 'cash', tabId: 'hyvitykset' });
+  assert.deepEqual(resolveAdminPath('hyvitysten-seuranta'), { path: 'tilaukset', legacyReservations: false, groupId: null, tabId: 'open-payments' });
   const cash = navGroupById('cash');
   const can = (list) => (p) => list.includes(p);
-  assert.deepEqual(visibleGroupTabs(cash, can(['payments.manage'])).map((t) => t.id), ['talous', 'seurattavat']);
-  assert.equal(visibleGroupTabs(cash, can(['bookings.manage'])).find((t) => t.id === 'hyvitykset').view, 'refund-watch');
-  assert.equal(visibleGroupTabs(cash, can(['giftcards.manage'])).some((t) => t.id === 'hyvitykset'), false);
+  assert.equal(visibleGroupTabs(cash, can(['bookings.manage'])).some((t) => t.id === 'hyvitykset'), false);
+  assert.match(src('admin/views/open-payments.js'), /import\('\.\/refund-watch\.js'\)/);
   const view = src('admin/views/refund-watch.js');
   assert.match(view, /data-testid': 'refund-watch'/);
   assert.match(view, /admin_record_manual_refund|manual\(/);

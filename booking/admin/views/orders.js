@@ -7,6 +7,8 @@ import { createOrdersTab } from './talous-orders.js';
 import { loadOrderTexts } from '../orders-texts.js';
 import { initialOrdersTab } from '../admin-navigation.js';
 import { navText } from '../nav-texts.js';
+import { op } from '../open-payments-texts.js';
+import { canSeeOpenPayments, loadOpenPaymentCounts, OPEN_PAYMENTS_EVENT, OPEN_PAYMENTS_TAB } from '../open-payments-logic.js';
 import { isFlowEnabledValue } from '../order-reservation-logic.js';
 
 // v3 (PR 1): #/tilaukset/<tilausnro> = koko tilausnäkymä (views/order-view.js). Dialogit (lisäosto, maksulinkki, maksun kirjaus,
@@ -23,15 +25,17 @@ async function renderOrderRoute({ ctx, refs, orderNo }) {
     onBack: () => { if (ret || hasOrdersResume()) history.back(); else location.hash = '#/tilaukset'; } });
 }
 
-export async function render({ ctx, refs, reload, query, rest = '', legacyReservations = false }) {
+export async function render({ ctx, refs, reload, query, rest = '', legacyReservations = false, tabId = null }) {
   if (!legacyReservations && /^[1-9][0-9]{0,11}$/.test(String(rest || ''))) return renderOrderRoute({ ctx, refs, orderNo: String(rest) });
   const canOrders = ctx.can('payments.manage');
-  const selected = initialOrdersTab({ legacyReservations, query, canOrders });
-  const TAB_LABELS = [['orders', 'ui.admin.nav.orders'], ['reservations', 'ui.admin.nav.reservations']];
-  const options = TAB_LABELS.filter(([k]) => canOrders || k === 'reservations').map(([k, key]) => [k, navText(key)]);
+  const canOpenPayments = canSeeOpenPayments(ctx.can, ctx.role);   // HALL-AVOIMET-01: Avoimet maksut (maksulinkit + hyvitykset)
+  const selected = initialOrdersTab({ legacyReservations, query, canOrders, canOpenPayments, tabId });
+  const TAB_LABELS = [['orders', 'ui.admin.nav.orders'], [OPEN_PAYMENTS_TAB, 'ui.admin.open_payments.tab'], ['reservations', 'ui.admin.nav.reservations']];
+  const visibleTab = (k) => (k === 'orders' ? canOrders : k === OPEN_PAYMENTS_TAB ? canOpenPayments : true);
+  const options = TAB_LABELS.filter(([k]) => visibleTab(k)).map(([k, key]) => [k, key.startsWith('ui.admin.open_payments.') ? op(key) : navText(key)]);
   const panels = new Map(), buttons = new Map();
   let active = null, sequence = 0;
-  const heading = h('h1', { text: navText(canOrders ? 'ui.admin.nav.orders' : 'ui.admin.nav.reservations') });
+  const heading = h('h1', { text: navText(canOrders || canOpenPayments ? 'ui.admin.nav.orders' : 'ui.admin.nav.reservations') });
   const tabs = tabList({ label: navText('ui.admin.nav.orders_tabs'), idPrefix: 'orders-tab', hidden: options.length < 2, selected: null,
     onSelect: (key, focus) => selectTab(key, true, focus),
     items: options.map(([key, label]) => ({ id: key, text: label, controls: `orders-panel-${key}`, testid: `orders-tab-${key}` })) });
@@ -40,6 +44,22 @@ export async function render({ ctx, refs, reload, query, rest = '', legacyReserv
     const b = tabs.button(key);
     const panel = h('section', { class: 'orders-panel', role: 'tabpanel', id: `orders-panel-${key}`, 'aria-labelledby': b.id, hidden: true });
     buttons.set(key, b); panels.set(key, panel); host.append(panel);
+  }
+  // Välilehden merkki: toimenpidettä vaativien maksulinkkien ja hyvitysten määrä palvelimelta (ei vain ensimmäiset 50 riviä).
+  async function paintOpenPaymentsCount() {
+    const b = buttons.get(OPEN_PAYMENTS_TAB);
+    if (!b) return;
+    const label = op('ui.admin.open_payments.tab');
+    try {
+      const { total } = await loadOpenPaymentCounts(rpc, ctx.can, ctx.role);
+      b.replaceChildren(label, ...(total > 0 ? [' ', h('span', { class: 'badge warn tab-count', 'data-testid': 'open-payments-count', 'data-count': String(total), text: String(total) })] : []));
+      b.setAttribute('aria-label', total > 0 ? `${label} (${total})` : label);
+    } catch { /* määrä jää pois, välilehti toimii */ }
+  }
+  if (buttons.has(OPEN_PAYMENTS_TAB)) {
+    const onChange = () => { if (!host.isConnected) { window.removeEventListener(OPEN_PAYMENTS_EVENT, onChange); return; } void paintOpenPaymentsCount(); };
+    window.addEventListener(OPEN_PAYMENTS_EVENT, onChange);
+    void paintOpenPaymentsCount();
   }
   async function selectTab(key, sync, focus = false) {
     if (!panels.has(key)) return;
@@ -79,6 +99,12 @@ export async function render({ ctx, refs, reload, query, rest = '', legacyReserv
         }
         const orderNo = (query.get('order') || '').replace(/^#/, '').trim();
         if (orderNo && !sync) view.setSearch(orderNo, { open: true });
+      } else if (key === OPEN_PAYMENTS_TAB) {
+        const mod = await import('./open-payments.js');
+        const next = await mod.render({ ctx, refs, reload });
+        if (seq !== sequence) return;
+        panel.replaceChildren(...[].concat(next).filter(Boolean));
+        panel.dataset.ready = '1';
       } else {
         const mod = await import('./reservations.js');
         if (seq !== sequence) return;

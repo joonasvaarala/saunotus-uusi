@@ -12,15 +12,14 @@ import { createAdminMock } from '../admin/options-mock.js';
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const src = (p) => readFileSync(join(root, p), 'utf8');
 
-test('navigaatio: Seurattavat maksut on Kassa ja talous -välilehti, oikeus payments.manage', () => {
+test('navigaatio: Seurattavat maksut on osa Tilaukset › Avoimet maksut -jonoa (HALL-AVOIMET-01), oikeus payments.manage', () => {
   assert.equal(NAV_TEXTS.fi['ui.admin.nav.paylink_watch'], 'Seurattavat maksut');
   assert.equal(NAV_TEXTS.en['ui.admin.nav.paylink_watch'], 'Payments to follow');
-  assert.deepEqual(resolveAdminPath('seurattavat-maksut'), { path: 'talous', legacyReservations: false, groupId: 'cash', tabId: 'seurattavat' });
+  assert.deepEqual(resolveAdminPath('seurattavat-maksut'), { path: 'tilaukset', legacyReservations: false, groupId: null, tabId: 'open-payments' });
   const cash = navGroupById('cash');
   const can = (list) => (p) => list.includes(p);
-  assert.deepEqual(visibleGroupTabs(cash, can(['payments.manage'])).map((t) => t.id), ['talous', 'seurattavat']);
-  assert.deepEqual(visibleGroupTabs(cash, can(['giftcards.manage'])).map((t) => t.id), ['talous']);
-  assert.equal(visibleGroupTabs(cash, can(['payments.manage'])).find((t) => t.id === 'seurattavat').view, 'paylink-watch');
+  assert.deepEqual(visibleGroupTabs(cash, can(['payments.manage'])).map((t) => t.id), ['talous']);
+  assert.match(src('admin/views/open-payments.js'), /import\('\.\/paylink-watch\.js'\)/);
   assert.match(src('admin/views/paylink-watch.js'), /data-testid': 'paylink-watch'/);
   assert.match(src('admin/views/paylink-watch.js'), /admin_payment_link_mark_handled|markHandled/);
   assert.doesNotMatch(src('admin/views/paylink-watch.js'), /montonio/i);

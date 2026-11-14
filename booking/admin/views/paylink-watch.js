@@ -5,7 +5,11 @@ import { fmt, getLang, setLang, LANGS } from '../talous-i18n.js';
 import { formDialog } from './talous-ui.js';
 import { createPaylinkWatchApi } from '../paylink-watch-api.js';
 import { pw, linkAge } from '../paylink-watch-texts.js';
+import { op } from '../open-payments-texts.js';
 import { rpc } from '../sb.js';
+import { paylinkTotals, paylinkChipCounts, notifyOpenPaymentsChanged } from '../open-payments-logic.js';
+
+const PAGE = 50;
 
 const SKIP_METHODS = new Set(['cash', 'gift_card', 'partner_voucher', 'pay_later', 'annual_card']);
 const FILTERS = ['', 'needs_action', 'watching', 'paused'];
@@ -14,13 +18,15 @@ function manualMethods(refs) {
   return (refs?.methods || []).filter((m) => m.is_manual && m.active && !SKIP_METHODS.has(m.code));
 }
 
-export async function render({ ctx, refs, reload }) {
+// embedded: Avoimet maksut -välilehden osio (H2, oma otsikko). Oikeuden tarkistaa isäntänäkymä.
+export async function render({ ctx, refs, reload, embedded = false, title = '' }) {
   const lang = getLang();
   const api = createPaylinkWatchApi({ rpc });
-  const st = { search: '', status: '', rows: [], total: 0, counts: { '': 0, watching: 0, paused: 0, needs_action: 0 } };
+  const st = { search: '', status: '', rows: [], total: 0, counts: paylinkChipCounts() };
+  const heading = (txt) => h(embedded ? 'h2' : 'h1', { class: embedded ? 'view-title' : null, text: txt });
   const root = h('section', { class: 'tl paylink-watch', 'data-testid': 'paylink-watch', lang });
   if (!ctx?.can?.('payments.manage')) {
-    root.append(h('h1', { text: pw('ui.admin.paylink_watch.title') }), h('p', { class: 'err', role: 'alert', text: pw('ui.admin.paylink_watch.no_perm') }));
+    root.append(heading(title || pw('ui.admin.paylink_watch.title')), h('p', { class: 'err', role: 'alert', text: pw('ui.admin.paylink_watch.no_perm') }));
     return root;
   }
   const count = h('p', { class: 'muted', 'data-testid': 'paylink-count' });
@@ -40,7 +46,7 @@ export async function render({ ctx, refs, reload }) {
     return pw('ui.admin.paylink_watch.reminders_n', { n, when: fmt.dt(row.last_reminder_at || row.reminders?.[n - 1]?.at) });
   }
   async function run(fn, okKey) {
-    try { await fn(); if (okKey) toast(pw(okKey), 'ok'); await load(); }
+    try { await fn(); if (okKey) toast(pw(okKey), 'ok'); await load(); notifyOpenPaymentsChanged(); }
     catch (e) { toast(errMsg(e), 'err'); }
   }
   function handled(row) {
@@ -59,6 +65,7 @@ export async function render({ ctx, refs, reload }) {
       const receipt = res?.receipt_no ? pw('ui.admin.paylink_watch.receipt_bit', { no: res.receipt_no }) : '';
       toast(pw('ui.admin.paylink_watch.handled_ok', { receipt }), 'ok');
       await load();
+      notifyOpenPaymentsChanged();
     });
   }
   function moreMenu(row, status) {
@@ -73,7 +80,7 @@ export async function render({ ctx, refs, reload }) {
       items.push({ testid: 'paylink-remind', label: pw('ui.admin.paylink_watch.action.remind_now'), run: () => run(() => api.remindNow(row.payment_id), 'ui.admin.paylink_watch.sent') });
     }
     const menu = h('div', { class: 'paylink-more-menu', hidden: true, role: 'menu' });
-    const btn = h('button', { type: 'button', class: 'btn ghost paylink-more-btn', 'aria-haspopup': 'true', 'aria-expanded': 'false', 'data-testid': 'paylink-more', 'aria-label': 'Lisää toimintoja', text: '⋯' });
+    const btn = h('button', { type: 'button', class: 'btn ghost paylink-more-btn', 'aria-haspopup': 'true', 'aria-expanded': 'false', 'data-testid': 'paylink-more', 'aria-label': op('ui.admin.open_payments.more_actions'), text: '⋯' });
     const close = () => { menu.hidden = true; btn.setAttribute('aria-expanded', 'false'); };
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
@@ -100,21 +107,18 @@ export async function render({ ctx, refs, reload }) {
       return h('button', {
         type: 'button', class: `btn sm paylink-chip${on ? ' on' : ''}`, 'aria-pressed': on ? 'true' : 'false',
         'data-testid': `paylink-chip-${v || 'all'}`,
-        onclick: () => { st.status = v; paintChips(); draw(filtered()); },
+        onclick: () => { st.status = v; load(); },
       }, `${label} ${n}`);
     }));
   }
-  function filtered() {
-    if (!st.status) return st.rows;
-    return st.rows.filter((r) => statusOf(r) === st.status);
-  }
+  // Suodatus tehdään palvelimella: sirun rivit ja määrä ovat koko joukosta, eivät vain ensimmäisistä 50 rivistä.
   function draw(rows) {
     count.textContent = pw('ui.admin.paylink_watch.count', { n: st.total });
     if (!rows.length) {
       list.replaceChildren(h('p', { class: 'empty', 'data-testid': 'paylink-empty', text: pw('ui.admin.paylink_watch.empty') }));
       return;
     }
-    list.replaceChildren(...rows.map((row) => {
+    const cards = rows.map((row) => {
       const status = statusOf(row);
       const due = row.link_expires_at ? fmt.date(row.link_expires_at) : pw('ui.admin.paylink_watch.no_due');
       const next = row.next_reminder_at ? fmt.dt(row.next_reminder_at) : null;
@@ -136,31 +140,46 @@ export async function render({ ctx, refs, reload }) {
         h('p', { class: 'paylink-card-res muted', text: reservationText(row) || '–' }),
         h('div', { class: 'paylink-card-meta' }, mark, h('span', { class: 'muted', text: meta }), h('span', { class: 'muted', text: linkAge(row.created_at, lang) })),
         h('div', { class: 'paylink-card-actions' }, primaryAction(row, status), moreMenu(row, status)));
-    }));
+    });
+    const left = st.total - st.rows.length;
+    if (left > 0) {
+      cards.push(h('button', { type: 'button', class: 'btn ghost paylink-more-rows', 'data-testid': 'paylink-load-more', onclick: () => load({ append: true }) },
+        op('ui.admin.open_payments.load_more', { n: left })));
+    }
+    list.replaceChildren(...cards);
   }
-  async function load() {
-    list.replaceChildren(h('p', { class: 'muted', text: pw('ui.admin.paylink_watch.loading') }));
+  let loadSeq = 0;
+  async function load({ append = false } = {}) {
+    const seq = ++loadSeq;
+    if (!append) list.replaceChildren(h('p', { class: 'muted', text: pw('ui.admin.paylink_watch.loading') }));
     try {
-      const res = await api.list({ search: st.search, status: null, limit: 50, offset: 0 });
-      st.rows = res?.rows || [];
+      const offset = append ? st.rows.length : 0;
+      const [res, totals] = await Promise.all([
+        api.list({ search: st.search, status: st.status || null, limit: PAGE, offset }),
+        append ? null : paylinkTotals(rpc, st.search).catch(() => null),
+      ]);
+      if (seq !== loadSeq) return;   // uudempi haku (haku/siru) ehti ohi
+      const rows = res?.rows || [];
+      st.rows = append ? [...st.rows, ...rows] : rows;
       st.total = Number(res?.total ?? st.rows.length);
-      st.counts = { '': st.total, watching: 0, paused: 0, needs_action: 0 };
-      for (const r of st.rows) st.counts[statusOf(r)] = (st.counts[statusOf(r)] || 0) + 1;
+      if (totals) st.counts = paylinkChipCounts(totals);
+      else if (!append) { st.counts = paylinkChipCounts(); st.counts[st.status] = st.total; }
       paintChips();
-      draw(filtered());
+      draw(st.rows);
     } catch (e) {
+      if (seq !== loadSeq) return;
       st.rows = []; st.total = 0; count.textContent = '';
       list.replaceChildren(h('p', { class: 'err', role: 'alert', text: errMsg(e) }));
     }
   }
   let searchTimer = 0;
-  const search = h('input', { type: 'search', 'data-testid': 'paylink-search', placeholder: pw('ui.admin.paylink_watch.search'), oninput: (e) => {
+  const search = h('input', { type: 'search', 'data-testid': 'paylink-search', placeholder: pw('ui.admin.paylink_watch.search'), 'aria-label': pw('ui.admin.paylink_watch.search'), oninput: (e) => {
     st.search = e.target.value;
     clearTimeout(searchTimer);
     searchTimer = setTimeout(() => load(), 200);
   } });
   // Piilotettu select säilyttää vanhan testid-sopimuksen (suodatin = sirut).
-  const filter = h('select', { hidden: true, 'data-testid': 'paylink-filter-select', onchange: (e) => { st.status = e.target.value; paintChips(); draw(filtered()); } },
+  const filter = h('select', { hidden: true, 'data-testid': 'paylink-filter-select', onchange: (e) => { st.status = e.target.value; load(); } },
     ...FILTERS.map((v) => h('option', { value: v, text: pw(`ui.admin.paylink_watch.filter.${v || 'all'}`) })));
   const langs = h('div', { class: 'tl-langs', role: 'group' }, LANGS.map((l) => h('button', {
     type: 'button', class: 'tl-lang', 'aria-pressed': String(lang === l), lang: l,
@@ -172,7 +191,7 @@ export async function render({ ctx, refs, reload }) {
     root.querySelectorAll('.paylink-more-btn').forEach((b) => b.setAttribute('aria-expanded', 'false'));
   });
   root.append(
-    h('div', { class: 'row between wrap' }, h('h1', { text: pw('ui.admin.paylink_watch.title') }), langs),
+    h('div', { class: 'row between wrap' }, heading(title || pw('ui.admin.paylink_watch.title')), langs),
     h('p', { class: 'muted', text: pw('ui.admin.paylink_watch.intro') }),
     h('div', { class: 'paylink-tools' }, search, filter),
     chips, count, list);

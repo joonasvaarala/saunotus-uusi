@@ -1377,6 +1377,11 @@ body.shot #shell .nav .lbl{display:inline}
 .paylink-more-menu{position:absolute;right:0;bottom:calc(100% + 4px);z-index:5;min-width:12rem;padding:6px;border:1px solid var(--line);border-radius:10px;background:var(--card);box-shadow:0 8px 24px var(--line)}
 .paylink-more-item{display:block;width:100%;text-align:left;border:0;background:transparent;padding:10px 12px;border-radius:8px;font:inherit;cursor:pointer}
 .paylink-more-item:hover,.paylink-more-item:focus-visible{background:var(--bg)}
+/* HALL-AVOIMET-01: Avoimet maksut */
+.open-payments-sec+.open-payments-sec{margin-top:28px;padding-top:20px;border-top:1px solid var(--line)}
+.open-payments-sec>h2{margin:0 0 6px}
+.tl-tabbtn .tab-count{margin-left:4px;font-size:12px;padding:1px 7px}
+.paylink-more-rows{align-self:center;min-height:44px}
 
 /* ---- Tilausnäkymä v3 (PR 1): yhteenvetopaneeli, koko tilaus, peruutusdialogi, asiakasnäkymä. Etuliite .ov- ---- */
 .ov-listwrap{display:block}
