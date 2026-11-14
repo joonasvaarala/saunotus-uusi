@@ -1,9 +1,5 @@
-// Viikko-ohjelman ajonaikainen täydennys (etusivu + saunavuorot).
-// Lähteet ovat samat kuin kaupalla: public_availability_all, public_events ja public_catalog.
-// Päiviä ei näytetä. Täysi yleinen vuoro piilotetaan. Tuleva täysi tapahtuma jää tapahtumakortille
-// (booking_210: himmennetty, Täynnä, jonotus). Viikkoriville täyttä tapahtumaa ei lisätä.
-// Hakuvirheessä kutsua ei tehdä, ja ohjelma jää ennalleen.
-import { addDaysIso, weekdayIso } from './quiet-offers-logic.js';
+// Tapahtumien ja kellonaikojen apufunktiot: viikko-ohjelma (week-grid-logic.js) ja tapahtumakortit (quiet-week.js, src/event-cards.mjs).
+// Lähde public_events. Tapahtumakortti: booking_210 (himmennetty, Täynnä, jonotus).
 import { dayLabel } from './event-date.js';
 import { formatWhenRange, spansDays } from './when-range.js';
 
@@ -16,12 +12,6 @@ const clock = (iso) => {
   const m = /(\d{1,2})\D(\d{2})/.exec(s);
   return m ? `${m[1].padStart(2, '0')}:${m[2]}` : null;
 };
-/** 16:00, 16.00, 16.30 ja 9.05 → minuutit. data-open on HH:MM, näytetty aika FI 16.00 / EN 16:00. */
-export function parseClock(txt) {
-  const m = /^(\d{1,2})[:.](\d{2})$/.exec(String(txt || '').trim());
-  return m ? +m[1] * 60 + +m[2] : null;
-}
-const mins = parseClock;
 const shown = (iso, lang = 'fi') => {
   const c = clock(iso);
   if (!c) return '';
@@ -45,67 +35,10 @@ export const ymdHel = (iso) => {
   return new Date(t).toLocaleDateString('sv-SE', { timeZone: TZ });
 };
 
-/** Viikonpäivän (1–7) päivä ikkunassa tänään…tänään+6. Sama viikonpäivä ei toistu. */
-export function dateForWeekday(today, weekday) {
-  if (!/^\d{4}-\d\d-\d\d$/.test(today || '') || weekday < 1 || weekday > 7) return null;
-  const wd = weekdayIso(today);
-  if (!wd) return null;
-  return addDaysIso(today, (weekday - wd + 7) % 7);
-}
-
-const overlaps = (slot, open, close) => {
-  const a = mins(clock(slot.starts_at)), b = mins(clock(slot.ends_at)), o = mins(open), c = mins(close);
-  if (a == null || b == null || o == null || c == null) return false;
-  return a < c && b > o;
-};
-
-/**
- * true vain kun tämän päivän vuoro on loppuunmyyty: vähintään yksi full eikä yhtään available.
- * Tyhjä tai tuntematon vastaus → false (rivi jää näkyviin).
- */
-export function shiftIsFull(rows, { productId, date, open, close } = {}) {
-  if (!/^\d{4}-\d\d-\d\d$/.test(date || '') || !Number.isFinite(+productId)) return false;
-  const mine = (rows || []).filter((r) => r && +r.product_id === +productId && r.session_date === date && r.status);
-  if (!mine.length) return false;
-  const hit = open && close ? mine.filter((r) => overlaps(r, open, close)) : [];
-  const set = hit.length ? hit : mine;
-  if (set.some((r) => r.status === 'available')) return false;
-  return set.some((r) => r.status === 'full');
-}
-
 export function asEventList(raw) {
   if (Array.isArray(raw)) return raw;
   if (typeof raw === 'string') { try { const j = JSON.parse(raw); return Array.isArray(j) ? j : []; } catch { return []; } }
   return [];
-}
-
-/**
- * Julkiset tapahtumat, joilla on vapaa paikka näkyvällä viikolla (tänään + 6).
- * status full ja closed jäävät pois viikkoriviltä (täysi yleinen vuoro piilotetaan erikseen).
- * Menneet ja ikkunan ulkopuoliset jäävät pois. Täysi tapahtuma näkyy tapahtumakortilla, ei tässä.
- */
-export function weekEvents(events, { today, now } = {}) {
-  if (!/^\d{4}-\d\d-\d\d$/.test(today || '') || !Number.isFinite(+now)) return [];
-  const last = addDaysIso(today, 6);
-  const out = [];
-  for (const ev of asEventList(events)) {
-    if (!ev || ev.category !== 'event' || typeof ev.slug !== 'string' || !ev.slug || !ev.name) continue;
-    for (const o of Array.isArray(ev.occurrences) ? ev.occurrences : []) {
-      if (!o || o.status !== 'available' || !o.starts_at) continue;
-      const start = Date.parse(o.starts_at);
-      if (!Number.isFinite(start) || start <= +now) continue;
-      const date = ymdHel(o.starts_at);
-      if (!date || date < today || date > last) continue;
-      const weekday = weekdayIso(date);
-      if (!weekday) continue;
-      out.push({
-        weekday, date, slug: ev.slug, productId: ev.product_id, ruleId: o.rule_id,
-        name: ev.name, nameEn: ev.name_en || '', time: rangeLabel(o.starts_at, o.ends_at), span: spansDays(o.starts_at, o.ends_at),
-        key: `${ev.product_id}|${o.rule_id}|${date}`,
-      });
-    }
-  }
-  return out.sort((a, b) => a.date.localeCompare(b.date) || a.time.localeCompare(b.time, 'fi') || String(a.key).localeCompare(String(b.key)));
 }
 
 /** Kortin päivä(t). Kuluva vuosi ilman vuotta, muu vuosi vuoden kanssa. Monipäiväinen: alku–loppu. */

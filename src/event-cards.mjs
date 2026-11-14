@@ -45,7 +45,7 @@ export function selectHomeEvents(list, now = Date.now()) {
  */
 export function shopEventsHtml(events, lang, deps) {
   const { e, money, link, img, card = () => null, arrow = '', fullText = '', fullCta = '', empty = '' } = deps;
-  return `<ul class="events" data-live-events data-hide-events="${e([...HOME_UNFEATURED_EVENT_SLUGS].join(','))}" data-empty="${e(empty)}" data-full-label="${e(fullText)}" data-full-cta="${e(fullCta || arrow)}">${events.map((ev) => {
+  return `<ul class="events" data-live-events data-hide-events="${e([...HOME_UNFEATURED_EVENT_SLUGS].join(','))}" data-empty="${e(empty)}" data-reserve="${e(arrow)}" data-full-label="${e(fullText)}" data-full-cta="${e(fullCta || arrow)}">${events.map((ev) => {
     const c = card(ev)?.[lang];
     const title = c?.title || (lang === 'en' && ev.name_en) || ev.name;
     const text = c?.text || plainText((lang === 'en' && ev.description_short_en) || ev.description_short);

@@ -1,0 +1,105 @@
+// Viikko-ohjelman ajonaikainen ohjaus (etusivu + saunavuorot): hakee julkiset RPC:t viikko kerrallaan, rakentaa mallin (week-grid-logic.js)
+// ja piirtää sen (week-grid-view.js, createElement + textContent). Viikkoja selataan nuolilla; mobiilissa päivänauha valitsee yhden päivän.
+// Haut: public_availability_all, public_quiet_offers (≤ 14 pv), public_events, public_catalog ja hoidoille public_treatment_availability
+// (treatments.js, ≤ 14 pv:n varausikkuna). Hakuvirhe ei riko sivua: staattinen varaversio jää, tai viikko piirretään ilman puuttuvaa osaa.
+import { addDaysIso, quietWindow } from './quiet-offers-logic.js';
+import { buildWeek, clampWeek, weekStartOf, CARE_HORIZON_DAYS, careEntry } from './week-grid-logic.js';
+import { weekGridTree, toDom } from './week-grid-view.js';
+
+const enc = encodeURIComponent;
+export const shopHrefs = (base) => ({
+  product: (slug, date) => `${base}#/tuote/${enc(slug)}/${date}`,
+  care: (slug, date) => `${base}#/tuote/${enc(slug)}?n=1&d=${date}`,
+  after: (rule, date) => `${base}#/varaa/${enc(rule)}/${date}/26`,
+  event: (slug, date) => `${base}#/tuote/${enc(slug)}/${date}`,
+  eventOpen: (slug) => `${base}#/tuote/${enc(slug)}`,
+});
+
+/** Hoitotuotteiden vapaat päivät viikolle. Virhe yhdessä tuotteessa ei estä muita; kaikki epäonnistuvat → null. */
+export async function loadCare(catalog, from, to) {
+  const T = await import('./treatments.js');
+  const list = T.splitCatalog(catalog, new Map()).treatments.filter(T.isListed);
+  if (!list.length) return [];
+  let ok = 0;
+  const out = await Promise.all(list.map(async (p) => {
+    try { const byDay = await T.loadAvailability(p, 1, from, to); ok++; return careEntry(p, byDay); } catch { return null; }
+  }));
+  return ok ? out.filter(Boolean) : null;
+}
+
+/** Viikon haut. Kaikki osat ovat valinnaisia: null = ei saatu. */
+export async function loadWeek(start, { rpc, today, catalog, loadCareFn = loadCare }) {
+  const from = start < today ? today : start, to = addDaysIso(start, 6);
+  const qEnd = quietWindow(today);
+  const offerFrom = from, offerTo = to < qEnd ? to : qEnd;
+  const careEnd = addDaysIso(today, CARE_HORIZON_DAYS - 1), careTo = to < careEnd ? to : careEnd;
+  const [rows, offers, care] = await Promise.all([
+    to < today ? Promise.resolve([]) : rpc('public_availability_all', { p_from: from, p_to: to, p_audience: 'consumer' }).then((r) => (Array.isArray(r) ? r : null)).catch(() => null),
+    offerFrom <= offerTo ? rpc('public_quiet_offers', { p_from: offerFrom, p_to: offerTo, p_audience: 'consumer' }).then((r) => (Array.isArray(r) ? r : [])).catch(() => []) : Promise.resolve([]),
+    Array.isArray(catalog) && from <= careTo ? loadCareFn(catalog, from, careTo).catch(() => null) : Promise.resolve(from > careEnd ? [] : null),
+  ]);
+  return { rows, offers, care };
+}
+
+export function mountWeekGrid(root, { rpc, lang = 'fi', shopHref = '', now = () => Date.now(), loadCareFn } = {}) {
+  const doc = root.ownerDocument;
+  let T, opts;
+  try { T = JSON.parse(root.dataset.vkTexts || ''); opts = JSON.parse(root.dataset.vkOpts || '{}'); } catch { return null; }
+  if (!T || !Array.isArray(T.daysLong)) return null;
+  const hrefs = shopHrefs(shopHref);
+  const todayOf = () => new Date(now()).toLocaleDateString('sv-SE', { timeZone: 'Europe/Helsinki' });
+  const today = todayOf();
+  const cache = new Map();
+  let shared = null;   // { catalog, events }
+  let start = weekStartOf(today), sel = null, token = 0;
+
+  const fetchShared = () => (shared ||= Promise.all([
+    rpc('public_events', { p_from: today, p_channel: 'shop' }).catch(() => null),
+    rpc('public_catalog', {}).then((r) => (Array.isArray(r) ? r : null)).catch(() => null),
+  ]).then(([events, catalog]) => ({ events, catalog })));
+  const fetchWeek = (s) => {
+    if (!cache.has(s)) cache.set(s, fetchShared().then(({ catalog }) => loadWeek(s, { rpc, today, catalog, loadCareFn })));
+    return cache.get(s);
+  };
+
+  function draw(model, focus) {
+    if (sel == null || model.days[sel]?.past) sel = model.todayIdx >= 0 ? model.todayIdx : 0;
+    root.replaceChildren(...weekGridTree(model, T, { ...opts, selected: sel }).map((n) => toDom(doc, n)));
+    root.classList.add('is-js');
+    root.removeAttribute('aria-busy');
+    root.classList.remove('is-loading');
+    const f = focus && root.querySelector(`[data-vk-nav="${focus}"]:not([disabled])`);
+    if (f) f.focus();
+  }
+  async function show(s, focus) {
+    const my = ++token;
+    root.setAttribute('aria-busy', 'true');
+    root.classList.add('is-loading');
+    const [{ events, catalog }, data] = await Promise.all([fetchShared(), fetchWeek(s)]);
+    if (my !== token) return;
+    const failed = data.rows == null;
+    if (failed && s === weekStartOf(today) && !root.dataset.vkLive) { root.classList.remove('is-loading'); root.classList.add('is-js'); root.removeAttribute('aria-busy'); return; }   // ensimmäinen haku kaatui: staattinen varaversio jää
+    const model = buildWeek({ start: s, today, now: now(), rows: data.rows, catalog, care: data.care, events, offers: data.offers, lang, hrefs });
+    model.error = failed;
+    root.dataset.vkLive = '1';
+    start = s;
+    draw(model, focus);
+  }
+  root.addEventListener('click', (ev) => {
+    const t = ev.target.closest?.('[data-vk-nav],[data-vk-pick]');
+    if (!t || !root.contains(t)) return;
+    if (t.dataset.vkPick != null) {
+      sel = +t.dataset.vkPick;
+      root.querySelector('.vk-days')?.setAttribute('data-vk-sel', String(sel));
+      root.querySelectorAll('.vk-day').forEach((d) => d.classList.toggle('is-on', +d.dataset.vkDay === sel));
+      root.querySelectorAll('.vk-tab').forEach((b) => { const on = +b.dataset.vkPick === sel; b.classList.toggle('is-on', on); b.setAttribute('aria-pressed', String(on)); });
+      return;
+    }
+    const kind = t.dataset.vkNav;
+    if (kind === 'now') { sel = null; show(weekStartOf(today), 'next'); return; }
+    const next = clampWeek(addDaysIso(start, kind === 'next' ? 7 : -7), today);
+    if (next !== start) show(next, kind);
+  });
+  show(start, null);
+  return { show, get start() { return start; } };
+}
