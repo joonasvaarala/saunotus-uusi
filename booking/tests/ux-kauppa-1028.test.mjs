@@ -85,7 +85,7 @@ test('maksutapojen merkit ovat jaetussa kansiossa eikä välittäjän nimeä nä
 test('ohjelmallinen otsikkofokus ei piirrä kehystä, näppäimistökehys säilyy', () => {
   const css = read('src/styles.css');
   const shopCss = read('booking/shop/src/shop.css');
-  assert.match(css, /:focus-visible\{outline:3px solid #1d6fd8/);
+  assert.match(css, /:focus-visible\{outline:3px solid var\(--gold\)/);
   assert.match(css, /\[tabindex="-1"\]:focus-visible\{outline:none!important\}/);
   assert.doesNotMatch(css, /\.hero\.page :is\(h1,h2\):focus-visible\{outline:/);
   assert.doesNotMatch(shopCss, /\.hero\.page :is\(h1,h2\):focus-visible\{outline:3px/);

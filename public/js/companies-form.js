@@ -24,7 +24,25 @@ function applyMode(mode, { focus = false } = {}) {
   }
 }
 
+// Virhekoodi → kenttä (YHT-07): kenttä saa aria-invalid ja aria-describedby osoittaa sen alla olevaan viestiin.
+const FIELD_OF_CODE = {
+  invalid_company: '[name="company_name"]', invalid_contact: '[name="contact_name"]', invalid_email: '[name="email"]',
+  invalid_phone: '[name="phone"]', invalid_when: '[name="preferred_when"]', invalid_persons: '[name="persons"]',
+  invalid_offerings: 'input[name="offering"]', invalid_offering_other: '[name="offering_other"]',
+  invalid_message: '[name="message"]', privacy_required: '[name="privacy"]',
+};
+
+function clearFieldErrors(form) {
+  for (const el of form.querySelectorAll('[aria-invalid]')) el.removeAttribute('aria-invalid');
+  for (const el of form.querySelectorAll('[data-err-for]')) {
+    el.removeAttribute('data-err-for');
+    const ids = (el.getAttribute('aria-describedby') || '').split(/\s+/).filter((x) => x && !x.startsWith('co-err-'));
+    if (ids.length) el.setAttribute('aria-describedby', ids.join(' ')); else el.removeAttribute('aria-describedby');
+  }
+}
+
 function showCode(form, code) {
+  clearFieldErrors(form);
   let hit = null;
   for (const el of form.querySelectorAll('[data-code]')) {
     const on = el.getAttribute('data-code') === code;
@@ -34,6 +52,17 @@ function showCode(form, code) {
   if (!hit) {
     const generic = form.querySelector('[data-code="error_generic"]');
     if (generic) { generic.hidden = false; hit = generic; }
+  }
+  const fields = FIELD_OF_CODE[code] ? [...form.querySelectorAll(FIELD_OF_CODE[code])] : [];
+  if (fields.length && hit) {
+    for (const t of fields) {
+      t.setAttribute('aria-invalid', 'true');
+      t.setAttribute('data-err-for', code);
+      const ids = (t.getAttribute('aria-describedby') || '').split(/\s+/).filter(Boolean);
+      t.setAttribute('aria-describedby', [...ids, hit.id].join(' '));
+    }
+    fields[0].focus();
+    return hit;
   }
   if (hit) { hit.setAttribute('tabindex', '-1'); hit.focus({ focusVisible: false }); }
   return hit;
@@ -57,6 +86,7 @@ if (form) {
   form.addEventListener('submit', async (ev) => {
     ev.preventDefault();
     for (const el of form.querySelectorAll('[data-code]')) el.hidden = true;
+    clearFieldErrors(form);
     const fd = new FormData(form);
     const offerings = fd.getAll('offering').map(String);
     const result = validateQuote({

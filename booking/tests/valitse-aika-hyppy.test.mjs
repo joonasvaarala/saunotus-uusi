@@ -59,6 +59,6 @@ test('tapahtumatuotteella ei hyppyä, kalenteri ja hoito käyttävät painiketta
   assert.doesNotMatch(shop, /href:\s*'#valitse-aika'/);
   assert.doesNotMatch(treat, /href:\s*'#valitse-aika'/);
   assert.match(css, /#valitse-aika\{scroll-margin-top:84px\}/);
-  assert.match(css, /\.bk-jump:focus-visible\{outline:3px solid var\(--ink\)/);
+  assert.match(css, /\.bk-jump:focus-visible\{outline:3px solid var\(--gold\)/);
   assert.match(read('.github/workflows/pages.yml'), /node --test booking\/tests\/valitse-aika-hyppy\.test\.mjs/);
 });
