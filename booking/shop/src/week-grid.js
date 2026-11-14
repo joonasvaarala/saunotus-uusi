@@ -49,6 +49,7 @@ export async function careHorizon(settings) {
 /** shared: valinnainen () => Promise<{ events, catalog }>; sivun muu skripti (quiet-week.js) jakaa saman haun, jolloin katalogia ja tapahtumia ei haeta kahdesti. */
 export function mountWeekGrid(root, { rpc, lang = 'fi', shopHref = '', now = () => Date.now(), loadCareFn, shared: sharedFetch } = {}) {
   const doc = root.ownerDocument;
+  if (!root.getAttribute('lang')) root.setAttribute('lang', lang);   // tavutus (hyphens:auto) sivun kielen mukaan
   let T, opts;
   try { T = JSON.parse(root.dataset.vkTexts || ''); opts = JSON.parse(root.dataset.vkOpts || '{}'); } catch { return null; }
   if (!T || !Array.isArray(T.daysLong)) return null;

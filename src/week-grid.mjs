@@ -49,6 +49,6 @@ export function weekGrid(lang, opt = {}) {
   const u = site.ui[lang], T = gridTexts(lang);
   const o = { heading: opt.heading ? { kicker: u.weekKicker, title: T.title } : null, links: opt.links ? { training: trainingUrl(lang), all: opt.links.all } : null };
   // data-quiet-week: build lisää kaupan skriptin (quiet-week.js) sivulle. data-vk-texts = koko tekstisanakirja (myös ale-tekstit) selaimelle.
-  const root = `<div class="vk" data-vk data-quiet-week data-vk-opts="${e(JSON.stringify(o))}" data-vk-texts="${e(JSON.stringify(T))}">`;
+  const root = `<div class="vk" data-vk data-quiet-week lang="${lang}" data-vk-opts="${e(JSON.stringify(o))}" data-vk-texts="${e(JSON.stringify(T))}">`;
   return `${root}${weekGridTree(staticModel(lang), T, o).map(toHtml).join('')}</div>`;
 }
