@@ -3,12 +3,14 @@
 // Oikeudet: välilehti giftcards.manage; saldokorjaus/mitätöinti/aktivointi giftcards.admin; maksulla myynti ja lunastus payments.manage.
 import { h, dialog, toast, badge } from '../ui.js';
 import { icon } from '../icons.js';
-import { t, fmt, getLang } from '../talous-i18n.js';
+import { t, fmt, getLang, has } from '../talous-i18n.js';
 import { deliveryErrors, SERVER_FIELD, deliverMaxDate, helsinkiNow, coverState, COVER_MAX, giftExtendDate } from '../giftcards-delivery.js';
 import { GC_STATUSES, GC_SORTS, GC_PAY_METHODS, GC_GREETING_MAX, normalizeGiftCode, formatGiftCode, giftCodeValid } from '../giftcards-api.js';
 import { reportText } from '../reports-texts.js';
 import { loading, emptyBox, errorBox, pager, selectFld, searchFld, expandRow, actionBtn, formDialog, friendly, methodLabel } from './talous-ui.js';
 import { countActive, filterDrawer } from '../filter-drawer.js';
+import { GC_MODE_LINK, GC_LOCALES, gcLocale, saleMode, createCardAndLink, tryLink, linkState, step1Error } from '../giftcards-sale-logic.js';
+import { absLink } from '../talous-api.js';
 
 const fld = (label, ...kids) => h('label', { class: 'fld' }, h('span', { text: label }), ...kids);
 const STATUS_BADGE = { active: 'pay-paid', used: 'muted', expired: 'pay-refunded', cancelled: 'pay-failed', pending_verification: 'pay-pending', pending_payment: 'pay-pending' };
@@ -72,7 +74,7 @@ export async function redeemSubmit({ gift, order, code, amount, note }) {
 // ---- välilehti ----
 export const GC_PAGE = 20;   // Joonas: tiheät rivit, 20 kerrallaan (palvelimen sivutus)
 const prodOf = (c) => c.product_name || c.package_name || '';   // booking_145: product_name = paketti / Johkun tuote / malli
-export function createGiftcardsTab({ api, gift, ctx, onOpenOrder = () => {}, searchFirst = false, initialSearch = '', browse = false }) {
+export function createGiftcardsTab({ api, gift, pay = null, ctx, onOpenOrder = () => {}, searchFirst = false, initialSearch = '', browse = false }) {
   const st = { search: initialSearch || '', status: '', source: '', package: '', sort: 'created_desc', balance: '', expiring: '', unverified: '', limit: GC_PAGE, offset: 0, browse: !!(searchFirst && browse) };   // booking_145: 20 korttia kerrallaan
   const listed = () => !searchFirst || st.browse || String(st.search || '').trim() !== '' || st.status || st.source || st.package || st.balance || st.expiring || st.unverified;
   const canAdmin = !!ctx.can('giftcards.admin'), canPay = !!ctx.can('payments.manage');
@@ -224,7 +226,7 @@ export function createGiftcardsTab({ api, gift, ctx, onOpenOrder = () => {}, sea
   async function createDialog() {
     if (!packages.length) { try { packages = (await gift.packages()).packages; } catch (e) { toast(friendly(e), 'err'); return; } }
     const pk = (code) => packages.find((p) => p.code === code);
-    const mode = h('select', { name: 'mode', 'data-testid': 'gc-new-mode' }, h('option', { value: 'free', text: t('gc.n.free') }), ...GC_PAY_METHODS.map((m) => h('option', { value: m, text: methodLabel(m), disabled: canPay ? null : true })));
+    const mode = h('select', { name: 'mode', 'data-testid': 'gc-new-mode' }, h('option', { value: 'free', text: t('gc.n.free') }), pay ? h('option', { value: GC_MODE_LINK, text: t('gc.n.mode.link'), disabled: canPay ? null : true }) : null, ...GC_PAY_METHODS.map((m) => h('option', { value: m, text: methodLabel(m), disabled: canPay ? null : true })));
     const pkgs = packages.filter((p) => p.active !== false);
     const pkg = h('select', { name: 'package', 'data-testid': 'gc-new-package' }, pkgs.map((p) => h('option', { value: p.code, text: p.is_open ? p.name : `${p.name} · ${fmt.money(p.price)}` })));
     const amount = h('input', { name: 'amount', type: 'number', step: '0.01', inputmode: 'decimal', 'data-testid': 'gc-new-amount' }), amountHint = h('small', {});
@@ -254,15 +256,16 @@ export function createGiftcardsTab({ api, gift, ctx, onOpenOrder = () => {}, sea
     const vatFld = fld(t('gc.n.vat'), vat);
     const channel = h('select', { name: 'channel' }, ['admin', 'phone', 'email', 'walk_in', 'other'].map((c) => h('option', { value: c, text: t(`gc.n.ch.${c}`) })));
     const monthsInput = h('input', { name: 'months', type: 'number', min: 1, max: 36, inputmode: 'numeric' });
+    const locale = h('select', { name: 'locale', 'data-testid': 'gc-new-locale' }, GC_LOCALES.map((l) => h('option', { value: l, text: t(`gc.n.locale.${l}`) })));
     const sync = () => {
-      const p = pk(pkg.value), free = mode.value === 'free';
+      const p = pk(pkg.value), free = mode.value === 'free', link = mode.value === GC_MODE_LINK;
       vat.replaceChildren(h('option', { value: '', text: t('gc.n.vatDefault') }));
       vatFld.hidden = true;
       vatHint.textContent = reportText(free ? 'ui.admin.giftcards.vat_free' : 'ui.admin.giftcards.vat_paid');
       amount.disabled = !p?.is_open; amount.required = !!p?.is_open; if (!p?.is_open) amount.value = '';
       amountHint.textContent = !p ? '' : p.is_open ? t('gc.n.range', { min: p.min_amount, max: p.max_amount }) : t('gc.n.fixed', { price: fmt.money(p.price) });
       noteLab.textContent = free ? t('gc.n.noteFree') : t('gc.n.note'); note.required = free; buyerBox.hidden = free; channel.closest('label').hidden = free;
-      hint.textContent = t(free ? 'gc.n.freeHint' : 'gc.n.payHint') + (canPay ? '' : ` ${t('gc.n.needPay')}`);
+      hint.textContent = t(free ? 'gc.n.freeHint' : link ? 'gc.n.linkHint' : 'gc.n.payHint') + (canPay ? '' : ` ${t('gc.n.needPay')}`);
       const rec = sel('dlv') === 'recipient', later = rec && sel('when') === 'later', months = Math.min(12, Math.trunc(+monthsInput.value) || p?.valid_months || 6), today = helsinkiNow().date;
       dlvBox.querySelector('[data-testid=gc-new-dlv-hint]').textContent = t(rec ? 'gc.n.dlv.recipientHint' : 'gc.n.dlv.buyerHint');
       recEmailFld.hidden = !rec; whenBox.hidden = !rec; whenFields.hidden = !later; coverFld.hidden = !rec;
@@ -270,10 +273,28 @@ export function createGiftcardsTab({ api, gift, ctx, onOpenOrder = () => {}, sea
     };
     dlvBox.addEventListener('change', () => sync()); whenBox.addEventListener('change', () => sync());
     mode.addEventListener('change', sync); pkg.addEventListener('change', sync); monthsInput.addEventListener('input', sync);
-    const d = formDialog(t('gc.n.title'), [fld(t('gc.n.mode'), mode), fld(t('gc.n.package'), pkg), h('label', { class: 'fld' }, h('span', { text: t('gc.n.amount') }), amount, amountHint), fld(t('gc.n.qty'), qty),
-      buyerBox, fld(t('gc.n.recName'), h('input', { name: 'recipient_name', maxlength: 120, 'data-testid': 'gc-new-rec-name' })), dlvBox, recEmailFld, whenBox,
+    // Kaksi vaihetta samassa dialogissa: 1 Kortti ja maksu → 2 Toimitus ja tervehdys (HALL-LAHJAKORTIT-01). Vaiheet ovat saman lomakkeen osia, joten arvot säilyvät edestakaisin.
+    const step1 = h('div', { class: 'stack', 'data-testid': 'gc-new-step1', 'data-step': '1' }, fld(t('gc.n.mode'), mode), fld(t('gc.n.package'), pkg), h('label', { class: 'fld' }, h('span', { text: t('gc.n.amount') }), amount, amountHint), fld(t('gc.n.qty'), qty),
+      buyerBox, fld(t('gc.n.locale'), locale), h('small', { class: 'muted', text: t('gc.n.localeHint') }), hint);
+    const step2 = h('div', { class: 'stack', 'data-testid': 'gc-new-step2', 'data-step': '2', hidden: true }, fld(t('gc.n.recName'), h('input', { name: 'recipient_name', maxlength: 120, 'data-testid': 'gc-new-rec-name' })), dlvBox, recEmailFld, whenBox,
       h('label', { class: 'fld' }, h('span', { text: t('gc.n.greetingCard') }), greeting, counter, errEl('greeting')), coverFld, vatFld, vatHint, fld(t('gc.n.months'), monthsInput),
-      h('label', { class: 'fld' }, noteLab, note), fld(t('gc.n.channel'), channel), hint], t('gc.n.submit'), async (fd) => {
+      h('label', { class: 'fld' }, noteLab, note), fld(t('gc.n.channel'), channel));
+    const stepNo = h('p', { class: 'muted tl-hint', 'data-testid': 'gc-new-stepno', role: 'status' });
+    let step = 1, submitBtn = null;
+    const nextBtn = h('button', { type: 'button', class: 'btn primary', 'data-testid': 'gc-new-next', onclick: () => goStep(2) }, t('gc.n.next'));
+    const backBtn = h('button', { type: 'button', class: 'btn', 'data-testid': 'gc-new-back', hidden: true, onclick: () => goStep(1) }, t('gc.n.back'));
+    const goStep = (n) => {
+      if (n === 2) {   // vaiheen 1 tarkistus ennen siirtymistä
+        const p = pk(pkg.value), free = mode.value === 'free', form = step1.closest('form');
+        const e1 = step1Error({ pkg: p, amount: Math.round(+amount.value * 100) / 100, centsOk: centsOk(+amount.value), free, buyerName: form.elements.buyer_name?.value, buyerEmail: form.elements.buyer_email?.value });
+        if (e1) { toast(t(e1 === 'amount' ? 'gc.n.bad.amount' : 'gc.n.bad.buyer', { min: p?.min_amount, max: p?.max_amount }), 'err'); return; }
+      }
+      step = n; step1.hidden = n !== 1; step2.hidden = n !== 2; nextBtn.hidden = n !== 1; backBtn.hidden = n !== 2; if (submitBtn) submitBtn.hidden = n !== 2;
+      stepNo.textContent = t('gc.n.stepNo', { n, title: t(n === 1 ? 'gc.n.step1' : 'gc.n.step2') });
+      (n === 1 ? mode : step2.querySelector('input,textarea,select'))?.focus();
+    };
+    const d = formDialog(t('gc.n.title'), [stepNo, step1, step2, h('div', { class: 'row wrap' }, backBtn, nextBtn)], t('gc.n.submit'), async (fd) => {
+      if (step === 1) { goStep(2); throw Object.assign(new Error('step'), { handled: true }); }   // Enter vaiheessa 1 = Seuraava
       const p = pk(fd.get('package')), free = fd.get('mode') === 'free', amt = p?.is_open ? Math.round(+fd.get('amount') * 100) / 100 : undefined;
       if (p?.is_open && (!(amt >= p.min_amount && amt <= p.max_amount) || !centsOk(+fd.get('amount')))) throw new Error(t('gc.n.bad.amount', { min: p.min_amount, max: p.max_amount }));
       const note2 = String(fd.get('note') || '').trim();
@@ -289,27 +310,48 @@ export function createGiftcardsTab({ api, gift, ctx, onOpenOrder = () => {}, sea
       const text = (code) => t(`err.${code}`, { months });
       for (const k of Object.keys(errs)) setErr(k, fe[k] ? text(fe[k]) : '');
       if (Object.keys(fe).length) { dlvBox.closest('form').querySelector('[aria-invalid=true]')?.focus(); throw Object.assign(new Error('fields'), { handled: true }); }
-      let res;
+      let out;
       try {
-        res = await gift.create({ package: p.code, amount: amt, quantity: Math.max(1, Math.trunc(+fd.get('quantity')) || 1), buyer: free ? undefined : { name: bn, email: be, phone: String(fd.get('buyer_phone') || '').trim() },
-          recipientName: String(fd.get('recipient_name') || '').trim(), recipientEmail: to === 'recipient' ? re : undefined, greeting: gr, paymentMethod: free ? undefined : fd.get('mode'),
-          validMonths: fd.get('months') ? Math.trunc(+fd.get('months')) : undefined, locale: 'fi', note: note2 || undefined, channel: free ? undefined : fd.get('channel'),
-          deliveryTo: to, coverMessage: to === 'recipient' ? cv : undefined, deliverOn: later ? String(fd.get('deliver_on') || '') : undefined, deliverTime: later ? String(fd.get('deliver_time') || '') : undefined });
+        out = await createCardAndLink({ mode: fd.get('mode'), createLink: (orderId) => pay.createPaymentLink({ orderId, sendEmail: true }), create: (paymentMethod) => gift.create({ package: p.code, amount: amt, quantity: Math.max(1, Math.trunc(+fd.get('quantity')) || 1), buyer: free ? undefined : { name: bn, email: be, phone: String(fd.get('buyer_phone') || '').trim() },
+          recipientName: String(fd.get('recipient_name') || '').trim(), recipientEmail: to === 'recipient' ? re : undefined, greeting: gr, paymentMethod: free ? undefined : paymentMethod,
+          validMonths: fd.get('months') ? Math.trunc(+fd.get('months')) : undefined, locale: gcLocale(fd.get('locale')), note: note2 || undefined, channel: free ? undefined : fd.get('channel'),
+          deliveryTo: to, coverMessage: to === 'recipient' ? cv : undefined, deliverOn: later ? String(fd.get('deliver_on') || '') : undefined, deliverTime: later ? String(fd.get('deliver_time') || '') : undefined }) });
       } catch (e) {   // palvelimen toimitusvirhe (BK001, koodi = e.code) → kenttäkohtaisesti
         const key = SERVER_FIELD[e?.code];
         if (key && errs[key]) { setErr(key, text(e.code)); dlvBox.closest('form').querySelector('[aria-invalid=true]')?.focus(); throw Object.assign(e, { handled: true }); }
         throw e;
       }
-      doneToast(gift, 'admin_create_gift_card'); load(); resultDialog(res);
+      doneToast(gift, 'admin_create_gift_card'); load(); resultDialog(out, be);
     });
-    sync(); return d;
+    submitBtn = d.querySelector('form button[type=submit]');
+    d.querySelector('form').querySelector('.row.wrap')?.append(submitBtn);   // Takaisin · Seuraava · Luo samalle riville
+    if (pay && canPay) mode.value = GC_MODE_LINK;   // puhelinmyynnin oletus: maksulinkki sähköpostiin
+    sync(); goStep(1); return d;
   }
-  function resultDialog(res) {
-    const cards = res.cards || [], one = cards.length === 1;
+  // Tulosdialogi: kortit, tilaus (linkki tilaukseen) ja maksulinkin tila. Linkin epäonnistuminen ei peru korttia: "Luo maksulinkki uudelleen" käyttää samaa tilausta (ei tuplakorttia).
+  function resultDialog(out, buyerEmail = '') {
+    const res = out.res, cards = res.cards || [], one = cards.length === 1, state = { v: out };
     const status = res.complimentary ? t('gc.r.free') : res.paid ? t('gc.r.paid') : t('gc.r.pending');
-    dialog(t(one ? 'gc.r.title' : 'gc.r.titleN', { n: cards.length }), h('div', { class: 'stack', 'data-testid': 'gc-result' }, h('p', { text: status }), res.order_no ? h('p', { class: 'muted', text: t('gc.r.order', { no: res.order_no }) }) : null,
+    const linkBox = h('div', { class: 'stack', 'data-testid': 'gc-result-link' });
+    const drawLink = () => {
+      const o = state.v, ls = linkState(o);
+      linkBox.dataset.state = ls;
+      if (ls === 'none') { linkBox.replaceChildren(); return; }
+      const url = o.link?.link_path ? absLink(o.link.link_path, null) : '';
+      const kids = [h('p', { role: 'status', class: ls === 'failed' ? 'tl-error' : null, 'data-testid': 'gc-result-link-status', text: ls === 'failed' ? t('gc.r.link.failed', { reason: o.linkError?.code && has(`err.${o.linkError.code}`) ? t(`err.${o.linkError.code}`) : o.linkError?.message || '' })
+        : ls === 'sent' ? t('gc.r.link.sent', { email: buyerEmail }) : o.link?.mock ? t('gc.r.link.mock') : t('gc.r.link.created') })];
+      if (url) kids.push(h('input', { readonly: true, value: url, 'aria-label': t('gc.r.link.url'), 'data-testid': 'gc-result-link-url', onfocus: (e) => e.target.select() }));
+      if (ls !== 'sent') kids.push(h('button', { type: 'button', class: 'btn', 'data-testid': 'gc-result-link-retry', onclick: async (ev) => {
+        const b = ev.currentTarget; b.disabled = true;
+        state.v = { ...state.v, ...(await tryLink(state.v.orderId, (id) => pay.createPaymentLink({ orderId: id, sendEmail: true }))) }; drawLink();
+      } }, t(ls === 'failed' ? 'gc.r.link.retry' : 'gc.r.link.resend')));
+      linkBox.replaceChildren(...kids);
+    };
+    drawLink();
+    const orderBtn = res.order_no ? h('button', { type: 'button', class: 'btn', 'data-testid': 'gc-result-order', onclick: () => { document.querySelector('dialog[open]')?.close(); onOpenOrder(res.order_no); } }, icon('eye', 18), h('span', { text: t('gc.r.openOrder', { no: res.order_no }) })) : null;
+    dialog(t(one ? 'gc.r.title' : 'gc.r.titleN', { n: cards.length }), h('div', { class: 'stack', 'data-testid': 'gc-result' }, h('p', { text: status }), res.order_no ? h('p', { class: 'muted', text: t('gc.r.order', { no: res.order_no }) }) : null, linkBox,
       h('ul', { class: 'tl-sub' }, cards.map((c) => h('li', {}, h('span', { class: 'tl-sub-main' }, h('strong', { class: 'gc-code', 'data-testid': 'gc-result-code', text: c.code })), h('span', { class: 'tl-sub-meta', text: [c.package_name, c.recipient_name, deliveryStatus(c)?.[1]].filter(Boolean).join(' · ') }), h('span', { class: 'tl-sub-sum', text: fmt.money(c.initial_amount) })))),
-      h('p', { class: 'muted tl-hint', text: t('gc.r.codes') })));
+      orderBtn, h('p', { class: 'muted tl-hint', text: t('gc.r.codes') })));
   }
 
   // ---- työkalupalkki ----

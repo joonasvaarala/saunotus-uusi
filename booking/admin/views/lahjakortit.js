@@ -3,6 +3,7 @@
 import { rpc, functionUrl } from '../sb.js';
 import { h, tabs as tabList } from '../ui.js';
 import { createGiftApi } from '../giftcards-api.js';
+import { createTalousApi } from '../talous-api.js';
 import { createVoucherApi } from '../vouchers-api.js';
 import { t, getLang, setLang, LANGS } from '../talous-i18n.js';
 import { navText } from '../nav-texts.js';
@@ -13,6 +14,7 @@ const TABS = [['omat', 'ui.admin.nav.giftcards_own'], ['lunastukset', 'ui.admin.
 
 export async function render({ ctx, query }) {
   const gift = createGiftApi({ rpc, io: { functionUrl } });
+  const pay = createTalousApi({ rpc, io: { functionUrl } });   // maksulinkki heti kortin luonnin jälkeen (admin_create_payment_link)
   const vouchers = createVoucherApi({ rpc });
   const openOrder = (no) => { location.hash = `#/tilaukset?order=${encodeURIComponent(no)}`; };
   const asked = query.get('tab');
@@ -35,7 +37,7 @@ export async function render({ ctx, query }) {
       panels[k].hidden = !on;
     }
     if (id === 'omat' && !own) {
-      own = createGiftcardsTab({ api: null, gift, ctx, onOpenOrder: openOrder, searchFirst: true, initialSearch: (query.get('code') || '').trim(), browse: query.get('browse') === '1' });
+      own = createGiftcardsTab({ api: null, gift, pay, ctx, onOpenOrder: openOrder, searchFirst: true, initialSearch: (query.get('code') || '').trim(), browse: query.get('browse') === '1' });
       panels.omat.append(own.node);
       own.load();
       if (!query.get('code')) queueMicrotask(() => own.focusSearch());

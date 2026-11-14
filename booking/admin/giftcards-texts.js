@@ -57,6 +57,13 @@ export const GC_FI = {
   'gc.d.atTime': 'klo {time}', 'gc.d.delivered': 'Toimitettu {when}', 'gc.d.scheduled': 'Ajastettu {when}', 'gc.d.dlvWaiting': 'Odottaa lähetystä', 'gc.d.dlvStatus': 'Toimituksen tila', 'gc.row.delivered': 'Toimitettu', 'gc.row.scheduled': 'Ajastettu',
   'err.recipient_email_required': 'Anna saajan sähköpostiosoite – kortti lähetetään suoraan saajalle.', 'err.deliver_on_past': 'Valitse ajankohta tulevaisuudesta.', 'err.deliver_on_too_far': 'Ajankohta voi olla enintään {months} kk päässä.',
   'err.invalid_cover_message': 'Saateteksti on liian pitkä (enintään 1000 merkkiä).', 'err.invalid_deliver_on': 'Valitse toimituspäivä.', 'err.invalid_deliver_time': 'Anna kellonaika muodossa tt:mm.', 'err.invalid_delivery_to': 'Valitse, lähetetäänkö kortti ostajalle vai saajalle.',
+  // HALL-LAHJAKORTIT-01: puhelinmyynti kahdessa vaiheessa + maksulinkki sähköpostiin + kortin kieli
+  'gc.n.mode.link': 'Maksulinkki sähköpostiin', 'gc.n.linkHint': 'Kortti ja tilaus luodaan, ja maksulinkki lähtee heti ostajan sähköpostiin. Kortti aktivoituu kun asiakas on maksanut.',
+  'gc.n.locale': 'Kortin ja viestien kieli', 'gc.n.locale.fi': 'Suomi', 'gc.n.locale.en': 'Englanti', 'gc.n.localeHint': 'Kieli tallentuu korttiin: PDF ja sähköpostit lähtevät tällä kielellä.',
+  'gc.n.next': 'Seuraava: toimitus ja tervehdys', 'gc.n.back': 'Takaisin', 'gc.n.stepNo': 'Vaihe {n}/2: {title}', 'gc.n.step1': 'Kortti ja maksu', 'gc.n.step2': 'Toimitus ja tervehdys',
+  'gc.r.openOrder': 'Avaa tilaus {no}', 'gc.r.link.url': 'Maksulinkki',
+  'gc.r.link.sent': 'Maksulinkki lähetetty osoitteeseen {email}.', 'gc.r.link.created': 'Maksulinkki luotu, mutta sähköpostia ei lähetetty. Kopioi linkki asiakkaalle tai lähetä se uudelleen.', 'gc.r.link.mock': 'Kokeilutila: maksulinkki näytetään, mutta mitään ei lähetetty.',
+  'gc.r.link.failed': 'Kortti ja tilaus on luotu, mutta maksulinkin luonti epäonnistui ({reason}). Älä luo korttia uudelleen: luo linkki uudelleen tästä.', 'gc.r.link.retry': 'Luo maksulinkki uudelleen', 'gc.r.link.resend': 'Lähetä linkki uudelleen',
 };
 export const GC_EN = {
   'tab.giftcards': 'Gift cards',
@@ -116,4 +123,11 @@ export const GC_EN = {
   'gc.d.atTime': 'at {time}', 'gc.d.delivered': 'Delivered {when}', 'gc.d.scheduled': 'Scheduled {when}', 'gc.d.dlvWaiting': 'Waiting to be sent', 'gc.d.dlvStatus': 'Delivery status', 'gc.row.delivered': 'Delivered', 'gc.row.scheduled': 'Scheduled',
   'err.recipient_email_required': 'Enter the recipient’s email address – the card is sent directly to them.', 'err.deliver_on_past': 'Please choose a time in the future.', 'err.deliver_on_too_far': 'The date can be at most {months} months ahead.',
   'err.invalid_cover_message': 'The cover message is too long (at most 1000 characters).', 'err.invalid_deliver_on': 'Please choose a date.', 'err.invalid_deliver_time': 'Enter the time as hh:mm.', 'err.invalid_delivery_to': 'Choose whether the card is sent to the buyer or to the recipient.',
+  // HALL-LAHJAKORTIT-01: phone sale in two steps + payment link by email + card language
+  'gc.n.mode.link': 'Payment link by email', 'gc.n.linkHint': 'The card and order are created and the payment link is emailed to the buyer right away. The card activates once the customer has paid.',
+  'gc.n.locale': 'Card and message language', 'gc.n.locale.fi': 'Finnish', 'gc.n.locale.en': 'English', 'gc.n.localeHint': 'The language is saved on the card: the PDF and emails are sent in this language.',
+  'gc.n.next': 'Next: delivery and greeting', 'gc.n.back': 'Back', 'gc.n.stepNo': 'Step {n}/2: {title}', 'gc.n.step1': 'Card and payment', 'gc.n.step2': 'Delivery and greeting',
+  'gc.r.openOrder': 'Open order {no}', 'gc.r.link.url': 'Payment link',
+  'gc.r.link.sent': 'Payment link sent to {email}.', 'gc.r.link.created': 'Payment link created, but no email was sent. Copy the link to the customer or send it again.', 'gc.r.link.mock': 'Trial mode: the payment link is shown but nothing was sent.',
+  'gc.r.link.failed': 'The card and order were created, but creating the payment link failed ({reason}). Do not create the card again: create the link again here.', 'gc.r.link.retry': 'Create payment link again', 'gc.r.link.resend': 'Send link again',
 };
