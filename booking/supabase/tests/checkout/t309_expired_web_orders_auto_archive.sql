@@ -45,7 +45,7 @@ declare
   u_adm uuid := test.mk_staff('adm@t309.example', 'admin');
   v jsonb; oA bigint; oB bigint; oC bigint; oD bigint; oE bigint; oG bigint; oNew bigint;
   noA bigint; nA_orders int; nA_pay int; v_cnt int; pk jsonb; it jsonb; r jsonb; v_pay bigint; v_amt numeric; v_ref text;
-  v_cap_before int; v_cap_after int;
+  v_cap_before int; v_cap_after int; oCC bigint; oM bigint; oRn bigint; cCC bigint; cM bigint; cR bigint; cG bigint; cA bigint;
 begin
   -- verkkokaupan maksutapa kuten tuotannossa: pito, kunnes maksettu (15 min)
   update booking.settings set value = '"hold_until_paid"'::jsonb where key = 'public_payment_mode';
@@ -106,12 +106,29 @@ begin
   perform booking.expired_web_orders_archive_sweep(200);
   perform pg_temp.ck((select archived_at is null from booking.orders where id = oC), 'B2: hallinnan kanava (admin) ei poistu');
 
-  -- C: asiakkaan itse perumana (ei vanhentunut) → EI
+  -- C: asiakas perui itse ennen maksua (public_cancel_booking, customer_cancelled_pending, 0 € maksettu) → KUULUU (Joonas 14.11. klo 11.40, kohta 3)
+  oCC := pg_temp.book(v_rule, d, 'cc@t309.example');
+  insert into booking.payments(order_id, method, provider, provider_ref, status, amount)
+  values (oCC, 'visma_pay', 'visma_pay', 'sauna-t309-cc', 'pending', (select total_gross from booking.orders where id = oCC));
+  select public_token::text into v_ref from booking.orders where id = oCC;
+  perform test.reset_rl(); perform test.anon('10.30.9.240');
+  v := booking.public_cancel_booking(v_ref::uuid);
+  perform test.logout();
+  perform pg_temp.ck((v ->> 'ok')::boolean and (select status = 'cancelled' and archived_at is null from booking.orders where id = oCC)
+                 and (select bool_and(cancel_reason = 'customer_cancelled_pending') from booking.reservations where order_id = oCC)
+                 and (select bool_and(status = 'cancelled') from booking.payments where order_id = oCC),
+                 'C0: asiakkaan peruutus toimii kuten ennen ' || v::text);
+  perform pg_temp.send_mails(oCC);
+  perform pg_temp.ck(booking._expired_web_order_archivable(oCC), 'C1: asiakkaan ennen maksua peruma kuuluu poistettaviin');
+  -- C2: hallinnan perumana (staff_cancelled) → EI
   oD := pg_temp.book(v_rule, d, 'd@t309.example');
-  update booking.reservations set status = 'cancelled', cancelled_at = now(), cancel_reason = 'customer_cancelled_pending' where order_id = oD;
+  update booking.reservations set status = 'cancelled', cancelled_at = now(), cancel_reason = 'staff_cancelled' where order_id = oD;
   update booking.orders set status = 'cancelled', cancelled_at = now() where id = oD;
-  perform booking.expired_web_orders_archive_sweep(200);
-  perform pg_temp.ck((select archived_at is null from booking.orders where id = oD), 'C1: asiakkaan peruma (customer_cancelled_pending) ei kuulu');
+  perform pg_temp.ck(not booking._expired_web_order_archivable(oD), 'C2: henkilökunnan peruma ei kuulu');
+  -- C3: peruma, jossa osa maksettu → EI
+  update booking.reservations set cancel_reason = 'customer_cancelled_pending' where order_id = oD;
+  insert into booking.payments(order_id, method, provider, status, amount, paid_at, refunded_amount) values (oD, 'card_terminal', 'manual', 'refunded', 5, now(), 5);
+  perform pg_temp.ck(not booking._expired_web_order_archivable(oD), 'C3: asiakkaan peruma, jossa maksu (myös hyvitetty) ei kuulu');
 
   -- D: maksu tullut (paid) → EI
   oE := pg_temp.book(v_rule, d, 'e@t309.example');
@@ -199,6 +216,70 @@ begin
   perform booking.expire_holds();
   perform pg_temp.ck((select archived_at is not null from booking.orders where id = oC) and (select archived_at is not null from booking.orders where id = oE),
                  'I2: expire_holds-ajo (cron) arkistoi');
+  perform pg_temp.ck((select archived_at is not null and archive_reason = 'auto:customer_cancelled_unpaid' and status = 'cancelled' and payment_status = 'unpaid'
+                        from booking.orders where id = oCC)
+                 and (select bool_and(hidden_at is not null) from booking.reservations where order_id = oCC)
+                 and exists (select 1 from booking.audit_log where action = 'ORDER_AUTO_ARCHIVED_EXPIRED' and row_pk = oCC::text and new_data ->> 'archive_reason' = 'auto:customer_cancelled_unpaid'),
+                 'C4: asiakkaan peruma arkistoitu (auto:customer_cancelled_unpaid) + audit');
+  perform pg_temp.ck((select archived_at is null from booking.orders where id = oD), 'C5: maksullinen peruma ei arkistoitunut');
+
+  -- L: asiakasrivit, joilla vain arkistoituja maksamattomia tilauksia, piiloon (kohta 4) ja takaisin näkyviin automaattisesti
+  select customer_id into cCC from booking.orders where id = oCC;
+  select customer_id into cA from booking.orders where id = oA;
+  select customer_id into cG from booking.orders where id = oG;
+  perform pg_temp.ck((select archived_at is not null and archive_reason = 'auto:only_archived_unpaid_orders' from booking.customers where id = cCC)
+                 and exists (select 1 from booking.audit_log where action = 'CUSTOMER_AUTO_ARCHIVED' and table_name = 'customers' and row_pk = cCC::text),
+                 'L1: keskeneräisestä kassakäynnistä syntynyt asiakas piilotettu + audit');
+  perform pg_temp.ck((select archived_at is null from booking.customers where id = cA) and (select archived_at is null from booking.customers where id = cG)
+                 and exists (select 1 from booking.audit_log where action = 'CUSTOMER_AUTO_UNARCHIVED' and row_pk = cG::text),
+                 'L2: myöhään maksanut asiakas (A Montonio, G lahjakortti) näkyy: piilotus purkautui automaattisesti');
+  v := pg_temp.run('user', $q$select coalesce(jsonb_agg(to_jsonb(x)), '[]'::jsonb) from booking.admin_list_customers('t309.example', 500, 0) x$q$, u_adm);
+  perform pg_temp.ck(not (v ? 'err') and not exists (select 1 from jsonb_array_elements(v) x where (x ->> 'id')::bigint = cCC)
+                 and exists (select 1 from jsonb_array_elements(v) x where (x ->> 'id')::bigint = cA)
+                 and exists (select 1 from jsonb_array_elements(v) x where (x ->> 'id')::bigint = (select customer_id from booking.orders where id = oB)),
+                 'L3: asiakaslista piilottaa vain keskeneräisen (cc), näyttää maksaneen (a) ja hallinnan tilauksen asiakkaan (b)');
+  v := pg_temp.run('user', $q$select booking.admin_search_customers('cc@t309', 8)$q$, u_adm);
+  perform pg_temp.ck(not (v ? 'err') and not exists (select 1 from jsonb_array_elements(v) x where (x ->> 'customer_id')::bigint = cCC), 'L4: asiakashaku piilottaa ' || v::text);
+  v := pg_temp.run('user', format('select booking.admin_get_customer(%s)', cCC), u_adm);
+  perform pg_temp.ck(not (v ? 'err') and (v -> 'customer' ->> 'id')::bigint = cCC or (not (v ? 'err') and (v ->> 'id')::bigint = cCC) or (not (v ? 'err') and v::text like '%cc@t309.example%'),
+                 'L5: asiakaskortti suoralla id:llä aukeaa edelleen');
+  -- markkinointilupa = merkityksellistä historiaa → ei piiloon
+  oM := pg_temp.book(v_rule, d, 'm@t309.example');
+  select customer_id into cM from booking.orders where id = oM;
+  update booking.customers set marketing_consent = true, marketing_consent_at = now() where id = cM;
+  perform pg_temp.expire(oM); perform booking.expire_holds(); perform pg_temp.send_mails(oM);
+  v := booking.expired_web_orders_archive_sweep(200);
+  perform pg_temp.ck((select archived_at is not null from booking.orders where id = oM) and (select archived_at is null from booking.customers where id = cM),
+                 'L6: tilaus piiloon, mutta markkinointiluvan antanut asiakas jää näkyviin ' || v::text);
+  -- muistiinpano = merkityksellistä → ei piiloon; tyhjennys → piiloon
+  oRn := pg_temp.book(v_rule, d, 'r@t309.example');
+  select customer_id into cR from booking.orders where id = oRn;
+  update booking.customers set notes = 'kanta-asiakas' where id = cR;
+  perform pg_temp.expire(oRn); perform booking.expire_holds(); perform pg_temp.send_mails(oRn);
+  perform booking.expired_web_orders_archive_sweep(200);
+  perform pg_temp.ck((select archived_at is null from booking.customers where id = cR), 'L7: muistiinpanollinen asiakas jää näkyviin');
+  update booking.customers set notes = null where id = cR;
+  perform booking.expired_web_orders_archive_sweep(200);
+  perform pg_temp.ck((select archived_at is not null from booking.customers where id = cR), 'L8: ilman muistiinpanoa piiloon');
+  -- uusi tilaus samalla sähköpostilla → sama asiakas näkyy HETI (ilman sweepiä), sweep purkaa merkinnän
+  update booking.settings set value = 'true'::jsonb where key = 'expired_unpaid_auto_archive_paused';
+  oNew := pg_temp.book(v_rule, d, 'cc@t309.example');
+  perform pg_temp.ck((select customer_id from booking.orders where id = oNew) = cCC, 'L9: uusi tilaus samalle asiakasriville');
+  v := pg_temp.run('user', $q$select coalesce(jsonb_agg(to_jsonb(x)), '[]'::jsonb) from booking.admin_list_customers('cc@t309', 50, 0) x$q$, u_adm);
+  perform pg_temp.ck(exists (select 1 from jsonb_array_elements(v) x where (x ->> 'id')::bigint = cCC), 'L10: asiakas näkyy listassa heti uuden tilauksen jälkeen');
+  v := pg_temp.run('user', $q$select booking.admin_search_customers('cc@t309', 8)$q$, u_adm);
+  perform pg_temp.ck(exists (select 1 from jsonb_array_elements(v) x where (x ->> 'customer_id')::bigint = cCC), 'L11: asiakas löytyy haulla heti');
+  v := booking.expired_web_orders_archive_sweep(200);
+  perform pg_temp.ck((v ->> 'paused')::boolean and (select archived_at is null from booking.customers where id = cCC)
+                 and exists (select 1 from booking.audit_log where action = 'CUSTOMER_AUTO_UNARCHIVED' and row_pk = cCC::text),
+                 'L12: palautus näkyviin toimii myös tauolla + audit ' || v::text);
+  -- tauolla ei piiloteta uusia asiakkaita
+  update booking.orders set archived_at = now(), archive_reason = 'test', status = 'cancelled' where id = oNew;
+  v := booking.expired_web_orders_archive_sweep(200);
+  perform pg_temp.ck((select archived_at is null from booking.customers where id = cCC), 'L13: tauolla asiakasta ei piiloteta ' || v::text);
+  update booking.settings set value = 'false'::jsonb where key = 'expired_unpaid_auto_archive_paused';
+  -- kertaluonteinen: rivimäärät säilyvät (ei DELETEä asiakkaille)
+  perform pg_temp.ck((select count(*) from booking.customers where id in (cCC, cA, cG, cM, cR)) = 5, 'L14: asiakasrivejä ei poisteta');
 
   -- J: hallinnan asiakaskortti ei näytä poistettua maksamatonta tilausta (myöhään maksettu näkyy)
   v := pg_temp.run('user', format('select booking.admin_get_customer(%s)', (select customer_id from booking.orders where id = oE)), u_adm);
@@ -216,6 +297,8 @@ begin
   perform pg_temp.ck(not (v ? 'err') and (v ->> 'ok')::boolean, 'K3: service_role voi ajaa ' || v::text);
   v := pg_temp.run('anon', format('select to_jsonb(booking._expired_web_order_archivable(%s))', oE), null, '10.30.9.252');
   perform pg_temp.ck(v ? 'err', 'K4: anon ei voi kutsua apufunktiota ' || v::text);
+  v := pg_temp.run('user', format('select to_jsonb(booking._customer_archivable(%s))', cCC), u_adm);
+  perform pg_temp.ck(v ? 'err', 'K5: authenticated ei voi kutsua _customer_archivable ' || v::text);
 end $t$;
 select 'RESULT ' || case when ok then 'ok' else 'NOT OK' end || ' - ' || label from t309_r;
 select 'SUMMARY ' || count(*) filter (where not ok) || ' failed / ' || count(*) from t309_r;

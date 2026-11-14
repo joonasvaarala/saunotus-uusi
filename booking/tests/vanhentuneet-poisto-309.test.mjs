@@ -63,7 +63,7 @@ const rb = read(`booking/supabase/rollbacks/${rbName}`);
 
 test('booking_309: rajaus vain verkkokaupan asiakkaan omiin, maksuttomiin, vanhentuneisiin', () => {
   assert.match(mig, /o\.source_channel = 'web' and o\.created_by is null/);
-  assert.match(mig, /r\.cancel_reason is distinct from 'hold_expired'/);
+  assert.match(mig, /r\.cancel_reason not in \('hold_expired', 'customer_cancelled_pending'\)/, 'vanhentuneet + asiakkaan ennen maksua perumat (Joonas 14.11. klo 11.40)');
   assert.match(mig, /o\.status = 'expired' and not exists \(select 1 from booking\.reservations/);
   assert.match(mig, /p\.status not in \('cancelled', 'failed'\)/);
   for (const t of ['receipts', 'refunds', 'accounting_outbox', 'invoices', 'annual_cards', 'training_participants', 'voucher_claims', 'vc_difference_payments', 'gift_card_ledger', 'email_outbox']) {
@@ -76,7 +76,8 @@ test('booking_309: ei fyysistä poistoa, ei rahaa, ei viestejä, ei public-skeem
   assert.doesNotMatch(mig.replace(/^--.*$/gm, ''), /delete\s+from\s+booking\.(orders|payments|reservations)/i);
   assert.doesNotMatch(mig, /public\./);
   assert.doesNotMatch(mig.replace(/^--.*$/gm, ''), /_enqueue_email|_enqueue_unpaid_booking_email/);
-  assert.match(mig, /archive_reason = 'auto:expired_unpaid'/);
+  assert.match(mig, /then 'auto:customer_cancelled_unpaid' else 'auto:expired_unpaid' end/);
+  assert.match(mig, /archive_reason = v_reason/);
   assert.match(mig, /'ORDER_AUTO_ARCHIVED_EXPIRED'/);
   assert.match(mig, /'late_paid_archived'/);
   assert.match(mig, /expired_unpaid_auto_archive_paused', 'false'::jsonb/);
@@ -86,4 +87,25 @@ test('booking_309: ei fyysistä poistoa, ei rahaa, ei viestejä, ei public-skeem
   assert.match(mig, /exception when others then\s+raise warning 'booking_309/, 'sweep-virhe ei kaada expire_holdsia');
   assert.match(rb, /drop function if exists booking\.expired_web_orders_archive_sweep\(integer\)/);
   assert.match(rb, /archived_at = null/);
+});
+
+test('booking_309 kohta 4: keskeneräisistä kassakäynneistä syntyneet asiakkaat piiloon, palautuvat automaattisesti', () => {
+  const body = mig.replace(/^--.*$/gm, '');
+  assert.doesNotMatch(body, /delete\s+from\s+booking\.customers/i, 'asiakasrivejä ei poisteta');
+  assert.match(mig, /alter table booking\.customers add column if not exists archived_at timestamptz/);
+  assert.match(mig, /create or replace function booking\._customer_archivable\(p_customer_id bigint\)/);
+  for (const t of ['annual_cards', 'gift_cards', 'invoice_customers', 'customer_merge_log', 'marketing_consent_events', 'campaign_sends', 'marketing_segment_members', 'waitlist_entries', 'voucher_claims', 'training_participants']) {
+    assert.ok(/_customer_archivable[\s\S]*\$\$;/.exec(mig)[0].includes(`booking.${t}`), 'merkityksellinen historia: ' + t);
+  }
+  assert.match(mig, /o\.customer_id = c\.id and o\.archived_at is null/, 'yksikin näkyvä tilaus pitää asiakkaan näkyvissä');
+  // listat tarkistavat ehdon aina uudelleen → uusi tilaus/maksu palauttaa näkyviin heti
+  const hide = /and \(c\.archived_at is null or not booking\._customer_archivable\(c\.id\)\)/g;
+  assert.equal((mig.match(hide) || []).length, 2, 'admin_list_customers + admin_search_customers');
+  assert.match(mig, /'CUSTOMER_AUTO_ARCHIVED'/);
+  assert.match(mig, /'CUSTOMER_AUTO_UNARCHIVED'/);
+  for (const m of ['1ffba8df04ac14a996400bc97182ec21', '6ab4f8a588a792ca3af0614a20ceb659', 'e945c67903c5091e418131c16e667c04']) assert.ok(mig.includes(m), 'esiehto ' + m);
+  assert.match(mig, /revoke all on function booking\._customer_archivable\(bigint\) from public, anon, authenticated/);
+  assert.match(rb, /drop column if exists archived_at, drop column if exists archive_reason/);
+  assert.match(rb, /drop function if exists booking\._customer_archivable\(bigint\)/);
+  assert.ok(rb.includes("archive_reason in ('auto:expired_unpaid', 'auto:customer_cancelled_unpaid')"));
 });
