@@ -64,6 +64,7 @@ export const NAV_TEXTS = {
     'ui.admin.nav.gifts_codes': 'Lahjakortit ja koodit',
     'ui.admin.nav.offering': 'Tarjonta',
     'ui.admin.nav.pos_quick': 'Kassa',
+    'ui.admin.nav.giftcards_settings': 'Asetukset',
   },
   en: {
     'ui.admin.nav.orders': 'Orders',
@@ -117,6 +118,7 @@ export const NAV_TEXTS = {
     'ui.admin.nav.gifts_codes': 'Gift cards and codes',
     'ui.admin.nav.offering': 'Offering',
     'ui.admin.nav.pos_quick': 'Till',
+    'ui.admin.nav.giftcards_settings': 'Settings',
   },
 };
 

@@ -11,7 +11,8 @@ import { loadPosTexts, posText } from '../pos-texts.js';
 import { loadProductTexts, productText } from '../product-texts.js';
 import { loadRichTexts, richText } from '../rich-texts.js';
 import { mountRichFields, syncRichFields } from '../rich-editor.js';
-import { settingsHref } from '../settings-tabs.js';
+import { renderQrPanel } from '../qr-panel.js';
+import { loadSettingsTexts, settingsText } from '../settings-texts.js';
 import { looksLikeAlcohol } from '../pos-logic.js';
 import { loadEventsTexts, evText } from '../events-texts.js';
 import { copyArgs, copyName } from '../events-logic.js';
@@ -179,7 +180,7 @@ export async function render({ ctx, refs, reload, query }) {
       h('p', { class: 'muted', text: productText('pos_hint') }),
       h('a', { class: 'btn', href: '#/pikakassa', 'data-testid': 'product-open-pos', text: productText('link_pos'), onclick: () => d?.close() }),
       h('p', { class: 'muted', text: productText('qr_hint') }),
-      h('a', { class: 'btn', href: settingsHref('qr'), 'data-testid': 'product-open-qr', text: productText('link_qr'), onclick: () => d?.close() })) : null;
+      h('a', { class: 'btn', href: '#/tuotteet?qr=1', 'data-testid': 'product-open-qr', text: productText('link_qr'), onclick: () => d?.close() })) : null;
     // booking_158: tuotteen kopio (admin_product_copy): 'Kopio: nimi', uusi slug palvelimelta, piilotettu eikä myynnissä; avataan heti muokattavaksi
     const copyBtn = isAdmin ? h('div', { class: 'row wrap' }, h('button', { type: 'button', class: 'btn', 'data-testid': 'product-copy', text: evText('ui.admin.product.copy'), onclick: () => copyProduct(p, d) })) : null;
     const suggested = await productSuggestionsEditor({ product: p, all, canEdit: isAdmin && ctx.role === 'admin' });
@@ -238,9 +239,11 @@ export async function render({ ctx, refs, reload, query }) {
   const openId = Number(q0.get('muokkaa')) || null;
   if (openId) { const op = all.find((x) => x.id === openId); if (op) setTimeout(() => edit(op), 0); }
   const addonsSection = await addonsAdmin({ ctx });
+  // HALL-ASETUKSET-01: QR-tulostus on tuotteen ominaisuus, ei asetus. Osio avautuu osoitteesta #/tuotteet?qr=1 ja latautuu vasta avattaessa.
+  const qrSection = await qrPrintSection({ openNow: query?.get?.('qr') === '1' });
   const optionsSection = await productOptionsAdmin({ ctx });   // tuotevalinnat (booking_50)
   const addBtn = isAdmin ? h('button', { type: 'button', class: 'btn primary prod-add', 'data-testid': 'product-add', text: productText('add'), onclick: () => createProduct() }) : null;
-  return [h('div', { class: 'row between wrap prod-head' }, h('h1', { text: 'Tuotteet' }), addBtn), h('p', { class: 'muted', text: isAdmin ? 'Tuotetiedot tallentuvat yhteiseen luetteloon (sivusto ja botti käyttävät samaa totuutta). Muutokset kirjataan lokiin.' : 'Näet tuotteet; hintojen ja tuotteiden muokkaus vaatii ylläpitäjän (manager/admin) oikeudet.' }), filters, count, list, optionsSection, addonsSection];
+  return [h('div', { class: 'row between wrap prod-head' }, h('h1', { text: 'Tuotteet' }), addBtn), h('p', { class: 'muted', text: isAdmin ? 'Tuotetiedot tallentuvat yhteiseen luetteloon (sivusto ja botti käyttävät samaa totuutta). Muutokset kirjataan lokiin.' : 'Näet tuotteet; hintojen ja tuotteiden muokkaus vaatii ylläpitäjän (manager/admin) oikeudet.' }), filters, count, list, qrSection, optionsSection, addonsSection];
 }
 
 // ---- tuotekuva: esikatselu, lataus, alt-teksti, poisto ----
@@ -284,4 +287,21 @@ function imageBox(p, c, canEdit, done) {
       field('Kuvan alt-teksti (valinnainen)', alt, 'Kuvaus ruudunlukijalle; jos tyhjä, käytetään tuotteen nimeä.'),
       h('p', { class: 'muted', text: `JPEG, PNG tai WebP, enintään ${IMG_MAX_INPUT / 1048576} Mt. Kuva pienennetään automaattisesti (enintään 1600 px) ja tallennetaan julkiseen kuvakansioon.` })] : h('p', { class: 'muted', text: 'Kuvan vaihto vaatii ylläpitäjän (manager/admin) oikeudet.' }),
     status);
+}
+
+async function qrPrintSection({ openNow }) {
+  await loadSettingsTexts(rpc);
+  const body = h('div', { class: 'stack', 'data-testid': 'qr-print-body' });
+  const box = h('details', { class: 'card set-fold', id: 'qr-print', 'data-testid': 'qr-print', open: openNow || null },
+    h('summary', {}, h('h2', { text: settingsText('ui.admin.qr.section_title') })),
+    h('p', { class: 'muted', text: settingsText('ui.admin.qr.section_help') }), body);
+  let loaded = false;
+  const load = async () => {
+    if (loaded) return;
+    loaded = true;
+    try { body.replaceChildren(await renderQrPanel()); } catch { loaded = false; body.replaceChildren(h('p', { class: 'err', role: 'alert', text: settingsText('ui.admin.settings.load_failed') })); }
+  };
+  box.addEventListener('toggle', () => { if (box.open) load(); });
+  if (openNow) { load(); setTimeout(() => box.scrollIntoView?.({ block: 'start' }), 0); }
+  return box;
 }

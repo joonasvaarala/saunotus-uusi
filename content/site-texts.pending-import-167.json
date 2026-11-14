@@ -1,0 +1,362 @@
+[
+  {
+    "key": "ui.admin.settings.tab_maksut",
+    "lang": "fi",
+    "text": "Maksut ja laskutus",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASETUKSET-01: asetukset 10 välilehdestä 4:ään, yksi tallennuspalkki, siirrot asian omaan näkymään"
+  },
+  {
+    "key": "ui.admin.settings.tab_maksut",
+    "lang": "en",
+    "text": "Payments and invoicing",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASETUKSET-01: asetukset 10 välilehdestä 4:ään, yksi tallennuspalkki, siirrot asian omaan näkymään"
+  },
+  {
+    "key": "ui.admin.settings.tab_jarjestelma",
+    "lang": "fi",
+    "text": "Järjestelmä",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASETUKSET-01: asetukset 10 välilehdestä 4:ään, yksi tallennuspalkki, siirrot asian omaan näkymään"
+  },
+  {
+    "key": "ui.admin.settings.tab_jarjestelma",
+    "lang": "en",
+    "text": "System",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASETUKSET-01: asetukset 10 välilehdestä 4:ään, yksi tallennuspalkki, siirrot asian omaan näkymään"
+  },
+  {
+    "key": "ui.admin.settings.bar_one",
+    "lang": "fi",
+    "text": "1 muutos",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASETUKSET-01: asetukset 10 välilehdestä 4:ään, yksi tallennuspalkki, siirrot asian omaan näkymään"
+  },
+  {
+    "key": "ui.admin.settings.bar_one",
+    "lang": "en",
+    "text": "1 change",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASETUKSET-01: asetukset 10 välilehdestä 4:ään, yksi tallennuspalkki, siirrot asian omaan näkymään"
+  },
+  {
+    "key": "ui.admin.settings.bar_many",
+    "lang": "fi",
+    "text": "muutosta",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASETUKSET-01: asetukset 10 välilehdestä 4:ään, yksi tallennuspalkki, siirrot asian omaan näkymään"
+  },
+  {
+    "key": "ui.admin.settings.bar_many",
+    "lang": "en",
+    "text": "changes",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASETUKSET-01: asetukset 10 välilehdestä 4:ään, yksi tallennuspalkki, siirrot asian omaan näkymään"
+  },
+  {
+    "key": "ui.admin.settings.discard",
+    "lang": "fi",
+    "text": "Hylkää",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASETUKSET-01: asetukset 10 välilehdestä 4:ään, yksi tallennuspalkki, siirrot asian omaan näkymään"
+  },
+  {
+    "key": "ui.admin.settings.discard",
+    "lang": "en",
+    "text": "Discard",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASETUKSET-01: asetukset 10 välilehdestä 4:ään, yksi tallennuspalkki, siirrot asian omaan näkymään"
+  },
+  {
+    "key": "ui.admin.settings.moved",
+    "lang": "fi",
+    "text": "Tämä asetus on siirretty. Avataan uusi paikka…",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASETUKSET-01: asetukset 10 välilehdestä 4:ään, yksi tallennuspalkki, siirrot asian omaan näkymään"
+  },
+  {
+    "key": "ui.admin.settings.moved",
+    "lang": "en",
+    "text": "This setting has moved. Opening the new place…",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASETUKSET-01: asetukset 10 välilehdestä 4:ään, yksi tallennuspalkki, siirrot asian omaan näkymään"
+  },
+  {
+    "key": "ui.admin.settings.biz_group_public",
+    "lang": "fi",
+    "text": "Näkyy asiakkaalle",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASETUKSET-01: asetukset 10 välilehdestä 4:ään, yksi tallennuspalkki, siirrot asian omaan näkymään"
+  },
+  {
+    "key": "ui.admin.settings.biz_group_public",
+    "lang": "en",
+    "text": "Shown to customers",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASETUKSET-01: asetukset 10 välilehdestä 4:ään, yksi tallennuspalkki, siirrot asian omaan näkymään"
+  },
+  {
+    "key": "ui.admin.settings.biz_group_official",
+    "lang": "fi",
+    "text": "Viralliset tiedot",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASETUKSET-01: asetukset 10 välilehdestä 4:ään, yksi tallennuspalkki, siirrot asian omaan näkymään"
+  },
+  {
+    "key": "ui.admin.settings.biz_group_official",
+    "lang": "en",
+    "text": "Official details",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASETUKSET-01: asetukset 10 välilehdestä 4:ään, yksi tallennuspalkki, siirrot asian omaan näkymään"
+  },
+  {
+    "key": "ui.admin.settings.hold_hidden_note",
+    "lang": "fi",
+    "text": "Maksun pitoajat näkyvät vain, kun verkkomaksun tila on \"Pidä kunnes maksettu\". Nykyisessä tilassa ne eivät vaikuta mihinkään.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASETUKSET-01: asetukset 10 välilehdestä 4:ään, yksi tallennuspalkki, siirrot asian omaan näkymään"
+  },
+  {
+    "key": "ui.admin.settings.hold_hidden_note",
+    "lang": "en",
+    "text": "Payment hold times are shown only when online payment is set to \"Hold until paid\". In the current mode they have no effect.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASETUKSET-01: asetukset 10 välilehdestä 4:ään, yksi tallennuspalkki, siirrot asian omaan näkymään"
+  },
+  {
+    "key": "ui.admin.settings.sys_lead",
+    "lang": "fi",
+    "text": "Vain pääkäyttäjälle. Osiot ovat kiinni, kunnes avaat ne. Tilat luetaan järjestelmästä, eikä niitä kytketä tältä sivulta.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASETUKSET-01: asetukset 10 välilehdestä 4:ään, yksi tallennuspalkki, siirrot asian omaan näkymään"
+  },
+  {
+    "key": "ui.admin.settings.sys_lead",
+    "lang": "en",
+    "text": "Admins only. Sections stay closed until you open them. Statuses are read from the system and are not switched from this page.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASETUKSET-01: asetukset 10 välilehdestä 4:ään, yksi tallennuspalkki, siirrot asian omaan näkymään"
+  },
+  {
+    "key": "ui.admin.settings.sys_status_title",
+    "lang": "fi",
+    "text": "Yhteyksien ja kytkimien tilat",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASETUKSET-01: asetukset 10 välilehdestä 4:ään, yksi tallennuspalkki, siirrot asian omaan näkymään"
+  },
+  {
+    "key": "ui.admin.settings.sys_status_title",
+    "lang": "en",
+    "text": "Connection and switch statuses",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASETUKSET-01: asetukset 10 välilehdestä 4:ään, yksi tallennuspalkki, siirrot asian omaan näkymään"
+  },
+  {
+    "key": "ui.admin.settings.sys_calendar_title",
+    "lang": "fi",
+    "text": "Google-kalenterivienti",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASETUKSET-01: asetukset 10 välilehdestä 4:ään, yksi tallennuspalkki, siirrot asian omaan näkymään"
+  },
+  {
+    "key": "ui.admin.settings.sys_calendar_title",
+    "lang": "en",
+    "text": "Google calendar export",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASETUKSET-01: asetukset 10 välilehdestä 4:ään, yksi tallennuspalkki, siirrot asian omaan näkymään"
+  },
+  {
+    "key": "ui.admin.settings.mail_sender_note",
+    "lang": "fi",
+    "text": "Sähköpostin lähettäjä ja tarjouspyyntöjen ilmoitukset. Ajastettujen viestien kytkin on tämän sivun yläosassa.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASETUKSET-01: asetukset 10 välilehdestä 4:ään, yksi tallennuspalkki, siirrot asian omaan näkymään"
+  },
+  {
+    "key": "ui.admin.settings.mail_sender_note",
+    "lang": "en",
+    "text": "The email sender and quote request notifications. The switch for scheduled messages is at the top of this page.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASETUKSET-01: asetukset 10 välilehdestä 4:ään, yksi tallennuspalkki, siirrot asian omaan näkymään"
+  },
+  {
+    "key": "ui.admin.settings.bill_help",
+    "lang": "fi",
+    "text": "Tili saa olla tyhjä, kunnes se on tiedossa. Kuitin nimi ja ALV tulevat Yleiset-välilehden yritystiedoista.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASETUKSET-01: asetukset 10 välilehdestä 4:ään, yksi tallennuspalkki, siirrot asian omaan näkymään"
+  },
+  {
+    "key": "ui.admin.settings.bill_help",
+    "lang": "en",
+    "text": "The account can stay empty until it is known. The receipt name and VAT come from the company details on the General tab.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASETUKSET-01: asetukset 10 välilehdestä 4:ään, yksi tallennuspalkki, siirrot asian omaan näkymään"
+  },
+  {
+    "key": "ui.admin.qr.section_title",
+    "lang": "fi",
+    "text": "QR-koodin tulostus",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASETUKSET-01: asetukset 10 välilehdestä 4:ään, yksi tallennuspalkki, siirrot asian omaan näkymään"
+  },
+  {
+    "key": "ui.admin.qr.section_title",
+    "lang": "en",
+    "text": "QR code printing",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASETUKSET-01: asetukset 10 välilehdestä 4:ään, yksi tallennuspalkki, siirrot asian omaan näkymään"
+  },
+  {
+    "key": "ui.admin.qr.section_help",
+    "lang": "fi",
+    "text": "Tulostettava QR-koodi tuotteelle. Se ei ole asetus. Näkyy myös henkilökunnalle, joka käyttää pikakassaa.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASETUKSET-01: asetukset 10 välilehdestä 4:ään, yksi tallennuspalkki, siirrot asian omaan näkymään"
+  },
+  {
+    "key": "ui.admin.qr.section_help",
+    "lang": "en",
+    "text": "A printable QR code for a product. It is not a setting. Also visible to staff who use the quick till.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASETUKSET-01: asetukset 10 välilehdestä 4:ään, yksi tallennuspalkki, siirrot asian omaan näkymään"
+  },
+  {
+    "key": "ui.admin.nav.giftcards_settings",
+    "lang": "fi",
+    "text": "Asetukset",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASETUKSET-01: asetukset 10 välilehdestä 4:ään, yksi tallennuspalkki, siirrot asian omaan näkymään"
+  },
+  {
+    "key": "ui.admin.nav.giftcards_settings",
+    "lang": "en",
+    "text": "Settings",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASETUKSET-01: asetukset 10 välilehdestä 4:ään, yksi tallennuspalkki, siirrot asian omaan näkymään"
+  },
+  {
+    "key": "ui.admin.product.qr_hint",
+    "lang": "fi",
+    "text": "QR-koodi tehdään tämän sivun osiossa QR-koodin tulostus.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASETUKSET-01: asetukset 10 välilehdestä 4:ään, yksi tallennuspalkki, siirrot asian omaan näkymään"
+  },
+  {
+    "key": "ui.admin.product.qr_hint",
+    "lang": "en",
+    "text": "The QR code is created in the QR code printing section of this page.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASETUKSET-01: asetukset 10 välilehdestä 4:ään, yksi tallennuspalkki, siirrot asian omaan näkymään"
+  }
+]

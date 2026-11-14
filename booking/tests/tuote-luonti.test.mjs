@@ -13,6 +13,7 @@ const migration = read('../supabase/migrations/20261019081000_booking_111_admin_
 const rollback = read('../supabase/rollbacks/20261019081000_booking_111_ROLLBACK.sql');
 const sqlTest = read('../supabase/tests/products/t111_admin_product_create.sql');
 const productsSrc = read('../admin/views/products.js');
+const pending167 = JSON.parse(read('../../content/site-texts.pending-import-167.json'));
 const css = read('../admin/admin.css');
 const pages = read('../../.github/workflows/pages.yml');
 
@@ -223,7 +224,8 @@ test('pending-import-19 + 56 vastaa sanakirjaa, FI+EN, normal, ilman hintoja', a
     assert.deepEqual(row.placeholders, []);
     assert.match(row.key, /^ui\.admin\.product\./);
     assert.ok(row.lang === 'fi' || row.lang === 'en');
-    assert.equal(row.text, PRODUCT_TEXTS[row.lang][row.key]);
+    const newer = pending167.find((r) => r.key === row.key && r.lang === row.lang);   // HALL-ASETUKSET-01 päivittää qr_hint
+    assert.equal(newer ? newer.text : row.text, PRODUCT_TEXTS[row.lang][row.key]);
     assert.doesNotMatch(row.text, /\d|€|@|https?:|www\./);
     keys.add(`${row.key}|${row.lang}`);
   }
@@ -363,7 +365,7 @@ test('lisää tuote avaa tyhjän lomakkeen ja luonnin jälkeen muokkauksen', asy
     assert.equal(Object.hasOwn(call.args.p_data, 'shop_visible'), false);
     assert.equal(q(document.body, 'product-create-form'), null);
     assert.equal(q(document.body, 'product-open-pos').getAttribute('href'), '#/pikakassa');
-    assert.equal(q(document.body, 'product-open-qr').getAttribute('href'), '#/asetukset/qr');
+    assert.equal(q(document.body, 'product-open-qr').getAttribute('href'), '#/tuotteet?qr=1');
     assert.match(document.body.textContent, /Näytä pikakassassa/);
     assert.match(document.getElementById('toast').textContent, /Tuote luotu/);
     assert.equal(reloaded, 1);

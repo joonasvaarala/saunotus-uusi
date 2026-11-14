@@ -10,6 +10,7 @@ import { SETTINGS_TEXTS } from '../admin/settings-texts.js';
 const read = (rel) => readFileSync(new URL(rel, import.meta.url), 'utf8');
 const pending31 = JSON.parse(read('../../content/site-texts.pending-import-31.json'));
 const pending109 = JSON.parse(read('../../content/site-texts.pending-import-109.json'));
+const pending167 = JSON.parse(read('../../content/site-texts.pending-import-167.json'));
 const older = ['12', '16', '24', '29'].flatMap((n) => JSON.parse(read(`../../content/site-texts.pending-import-${n}.json`)));
 
 const seller = () => {
@@ -101,7 +102,7 @@ test('pending-import-31: uudet asetustekstit, FI+EN, ei päällekkäin', () => {
     assert.equal(taken.has(`${row.key}|${row.lang}`), false);
     assert.equal(seen.has(`${row.key}|${row.lang}`), false);
     seen.add(`${row.key}|${row.lang}`);
-    const newer = pending109.find((r) => r.key === row.key && r.lang === row.lang);
+    const newer = pending167.find((r) => r.key === row.key && r.lang === row.lang) || pending109.find((r) => r.key === row.key && r.lang === row.lang);
     const live = SETTINGS_TEXTS[row.lang][row.key];
     if (newer) assert.equal(live, newer.text);
     else if (live !== undefined) assert.equal(live, row.text);
@@ -109,7 +110,7 @@ test('pending-import-31: uudet asetustekstit, FI+EN, ei päällekkäin', () => {
   for (const lang of ['fi', 'en']) {
     for (const [key, text] of Object.entries(SETTINGS_TEXTS[lang])) {
       if (!key.startsWith('ui.admin.settings.') && !key.startsWith('ui.admin.qr.')) continue;
-      const row = pending109.find((r) => r.key === key && r.lang === lang) || pending31.find((r) => r.key === key && r.lang === lang) || older.find((r) => r.key === key && r.lang === lang);
+      const row = pending167.find((r) => r.key === key && r.lang === lang) || pending109.find((r) => r.key === key && r.lang === lang) || pending31.find((r) => r.key === key && r.lang === lang) || older.find((r) => r.key === key && r.lang === lang);
       assert.ok(row, key + ' ' + lang);
       assert.equal(row.text, text);
     }
