@@ -1,29 +1,48 @@
-// Asetusten välilehdet. Puhdas moduuli: ei DOM:ia.
-// settings.edit näkee osiot. Tekninen vain roolille admin. pos.use tai settings.edit näkee QR-tulostuksen.
+// Asetusten välilehdet (HALL-ASETUKSET-01). Puhdas moduuli: ei DOM:ia.
+// Neljä välilehteä: Yleiset, Varaukset, Maksut ja laskutus, Järjestelmä (vain admin). Käyttäjät on oma välilehtensä asetusryhmässä (#/kayttajat).
+// Vanhat välilehtiosoitteet (kirjanmerkit) ohjautuvat uuteen paikkaan: LEGACY_TABS.
 import { parseAdminHash } from './reservation-query.js';
 
-export const TAB_ORDER = ['etusivu', 'yritys', 'varaukset', 'maksut', 'sahkoposti', 'lahjakortit', 'laskut', 'yhteydet', 'tekninen', 'qr'];
+export const TAB_ORDER = ['yleiset', 'varaukset', 'maksut', 'jarjestelma'];
+
+/** Vanha välilehti → uusi välilehti (tab) tai toinen näkymä (href). Vain luku: ei kirjoita mitään. */
+export const LEGACY_TABS = {
+  etusivu: { tab: 'yleiset' },
+  yritys: { tab: 'yleiset' },
+  laskut: { tab: 'maksut' },
+  yhteydet: { tab: 'jarjestelma' },
+  tekninen: { tab: 'jarjestelma' },
+  sahkoposti: { href: '#/viestit' },
+  lahjakortit: { href: '#/lahjakortit?tab=omat' },
+  qr: { href: '#/tuotteet?qr=1' },
+};
 
 export function visibleSettingTabs({ can, role } = {}) {
   const allow = typeof can === 'function' ? can : () => false;
-  const seeSettings = allow('settings.edit');
-  const seeQr = allow('pos.use') || seeSettings;
-  return TAB_ORDER.filter((id) => {
-    if (id === 'qr') return seeQr;
-    if (!seeSettings) return false;
-    if (id === 'tekninen') return role === 'admin';
-    return true;
-  });
+  if (!allow('settings.edit')) return [];
+  return TAB_ORDER.filter((id) => id !== 'jarjestelma' || role === 'admin');
 }
 
 export function settingsHref(tab) {
   return `#/asetukset/${tab}`;
 }
 
+function idFromHash(hash) {
+  const { path, rest } = parseAdminHash(hash);
+  return path === 'asetukset' ? String(rest || '').split('/')[0] : '';
+}
+
+/** Vanhan välilehden uusi kohde tai null. */
+export function legacyTarget(hash) {
+  const id = idFromHash(hash);
+  return Object.prototype.hasOwnProperty.call(LEGACY_TABS, id) ? LEGACY_TABS[id] : null;
+}
+
 export function tabFromHash(hash, tabs) {
   const list = tabs || [];
-  const { path, rest } = parseAdminHash(hash);
-  const id = path === 'asetukset' ? String(rest || '').split('/')[0] : '';
+  const id = idFromHash(hash);
   if (list.includes(id)) return id;
+  const legacy = Object.prototype.hasOwnProperty.call(LEGACY_TABS, id) ? LEGACY_TABS[id].tab : null;
+  if (legacy && list.includes(legacy)) return legacy;
   return list[0] || '';
 }

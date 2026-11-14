@@ -471,3 +471,29 @@ export function exampleBundle() {
     gift_packages: [{ code: 'open', name: 'Avoin lahjakortti', valid_months: 6 }],
   };
 }
+
+// HALL-ASETUKSET-01: yksi tallennuspalkki. Kenttä- ja osiotason muutokset lasketaan tallennettavista arvoista.
+function leaves(value, prefix, out) {
+  if (value !== null && typeof value === 'object' && !Array.isArray(value)) {
+    for (const [k, v] of Object.entries(value)) leaves(v, prefix ? `${prefix}.${k}` : k, out);
+  } else out.set(prefix, JSON.stringify(value ?? null));
+  return out;
+}
+/** Montako kenttää eroaa lähtötilanteesta (kenttiä, ei osioita). */
+export function diffCount(before, after) {
+  const a = leaves(before, '', new Map());
+  const b = leaves(after, '', new Map());
+  let n = 0;
+  for (const k of new Set([...a.keys(), ...b.keys()])) if (a.get(k) !== b.get(k)) n += 1;
+  return n;
+}
+/** sections: [{ id, base, now }] → muuttuneet osiot ja kenttien kokonaismäärä. */
+export function dirtySections(sections) {
+  const dirty = [];
+  let count = 0;
+  for (const sec of sections || []) {
+    const n = diffCount(sec.base, sec.now);
+    if (n > 0) { dirty.push(sec.id); count += n; }
+  }
+  return { dirty, count };
+}
