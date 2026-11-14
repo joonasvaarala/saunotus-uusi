@@ -1,6 +1,6 @@
 // bot-gateway: Oton botin kapea yhdyskäytävä (koodari_otto.md §1–3). Ydin ilman Supabasea ja ilman Denon palvelinta.
 // Kaikki tietokantatyö tehdään public.botgw_call -funktiossa (botgw.call, migraatiot 20261025145539 + 20261025151402,
-// uutiskirjeluonnokset 20261114233500_booking_315):
+// uutiskirjeluonnokset 20261114214038_booking_315):
 // henkilö tulee avainriviltä, scopet, rajat, idempotenssi, validoinnit, vuoromuutokset (shift_apply_change -> shift_outbox)
 // ja kirjaukset (shift_change_log, audit_log, botgw.call_log). Tämä ydin tekee vain:
 //   * kytkin BOTGW_DISABLED=1 -> 503 (tietokantaa ei kutsuta)

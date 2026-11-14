@@ -88,4 +88,4 @@ Ei lähetystä, ajastusta (`suggested_send_at`), esikatselua/testilähetystä, t
   - vain tila `draft` muokattavissa: previewed/sent → 403 `not_editable: …`; väärä versio → 400 `version_conflict: …`;
     sisältövirhe → 400 `invalid_newsletter: …`; ajastus/tila/muu kenttä → 400 `unknown_arg:*` (edge) tai 403 `field_not_editable` (tietokanta).
 - 16 kB runkoraja: pitkät FI+EN-rungot tallennetaan kahdessa kutsussa (luonti, sitten muokkaus).
-- Rollback: `rollbacks/20261114233500_booking_315_ROLLBACK.sql`; edge tuntee toiminnot, tietokanta vastaa silloin `unknown_action`.
+- Rollback: `rollbacks/20261114214038_booking_315_ROLLBACK.sql`; edge tuntee toiminnot, tietokanta vastaa silloin `unknown_action`.

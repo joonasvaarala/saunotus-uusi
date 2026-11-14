@@ -4,8 +4,8 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 
 const root = new URL("../supabase/", import.meta.url);
-const mig = readFileSync(new URL("migrations/20261114233500_booking_315_botgw_newsletter_draft.sql", root), "utf8");
-const rb = readFileSync(new URL("rollbacks/20261114233500_booking_315_ROLLBACK.sql", root), "utf8");
+const mig = readFileSync(new URL("migrations/20261114214038_booking_315_botgw_newsletter_draft.sql", root), "utf8");
+const rb = readFileSync(new URL("rollbacks/20261114214038_booking_315_ROLLBACK.sql", root), "utf8");
 const core = readFileSync(new URL("functions/bot-gateway/core.ts", root), "utf8");
 const OLD = "76ffcbde693f2adb88fa217dd78d20df";
 const NEW = "844fa36b3dbeaff91fca60d3ea3291d3";

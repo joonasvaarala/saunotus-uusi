@@ -8,7 +8,7 @@
 --   * otto-grok-bot saa scopen newsletter.draft (botgw.bot_clients.scopes).
 -- Lisäksi tarkistus bot_clients_scopes_known saa arvon newsletter.draft (ennen md5 1b68a01fef0cc4811747b52a613dddc5).
 -- Ennakkoehto: botgw.call md5 = 76ffcbde693f2adb88fa217dd78d20df (tuotannon nykyinen). Jälkeen: md5 = 844fa36b3dbeaff91fca60d3ea3291d3.
--- Rollback: booking/supabase/rollbacks/20261114233500_booking_315_ROLLBACK.sql
+-- Rollback: booking/supabase/rollbacks/20261114214038_booking_315_ROLLBACK.sql
 set local lock_timeout = '5s';
 
 do $pre$
