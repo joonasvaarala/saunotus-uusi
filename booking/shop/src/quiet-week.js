@@ -91,13 +91,16 @@ if (cfg && globalThis.document && window.BOOKING_CONFIG?.url) {
   const grids = [...document.querySelectorAll('.vk[data-vk]')];
   const eventLists = [...document.querySelectorAll('ul.events[data-live-events]')];
   const lang = cfg.lang === 'en' ? 'en' : 'fi';
-  for (const g of grids) mountWeekGrid(g, { rpc, lang, shopHref: cfg.shopHref });
+  // Yksi yhteinen public_events + public_catalog -haku viikko-ohjelmalle ja tapahtumakorteille (ei kahta samaa kutsua).
+  const today = new Date().toLocaleDateString('sv-SE', { timeZone: TZ });
+  let sharedP = null;
+  const shared = () => (sharedP ||= Promise.all([
+    rpc('public_events', { p_from: today, p_channel: 'shop' }).catch(() => null),
+    rpc('public_catalog', {}).then((rows) => (Array.isArray(rows) ? rows : [])).catch(() => null),
+  ]).then(([events, catalog]) => ({ events, catalog })));
+  for (const g of grids) mountWeekGrid(g, { rpc, lang, shopHref: cfg.shopHref, shared });
   if (eventLists.length) {
-    const today = new Date().toLocaleDateString('sv-SE', { timeZone: TZ });
-    Promise.all([
-      rpc('public_events', { p_from: today, p_channel: 'shop' }).catch(() => null),
-      rpc('public_catalog', {}).then((rows) => (Array.isArray(rows) ? rows : [])).catch(() => null),
-    ]).then(([events, catalog]) => {
+    shared().then(({ events, catalog }) => {
       if (events != null && (Array.isArray(events) || typeof events === 'string')) {
         const imageBase = `${String(window.BOOKING_CONFIG.url).replace(/\/$/, '')}/storage/v1/object/public/product-images/`;
         for (const ul of eventLists) applyEventCards(ul, events, { lang: cfg.lang, shopHref: cfg.shopHref, now: Date.now(), reserve: ul.dataset.reserve || '', imageBase });

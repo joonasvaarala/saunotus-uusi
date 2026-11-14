@@ -15,7 +15,7 @@ export const OWN_SLUG = 'oma-saunavuoro';
 export const JALKIL_SLUG = 'jalkiloylyt';
 /** Viikkoja eteenpäin, joille voi selata (varausikkuna on selvästi tätä pidempi). */
 export const MAX_WEEKS_AHEAD = 8;
-/** Hoitojen varausikkuna päivinä (treatments.js POLICY.horizonDays / public_settings). Sen jälkeisille päiville hoitoja ei haeta. */
+/** Hoitojen varausikkuna päivinä VARALLA (sama kuin treatments.js POLICY.horizonDays). Oikea ikkuna tulee public_settings.public_treatment_horizon_days -arvosta (horizonDays(settings)); sen jälkeisille päiville hoitoja ei haeta. */
 export const CARE_HORIZON_DAYS = 14;
 
 export const weekStartOf = (ds) => addDaysIso(ds, 1 - weekdayIso(ds));
@@ -24,9 +24,14 @@ export function isoWeekNumber(ds) {
   d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
   return Math.ceil(((d - Date.UTC(d.getUTCFullYear(), 0, 1)) / 864e5 + 1) / 7);
 }
-/** 16.–22.11. (sama kuukausi) tai 30.11.–6.12. */
-export function weekRange(start) {
+const EN_MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+/** FI: 16.–22.11. (sama kuukausi) tai 30.11.–6.12. EN: 16–22 Nov tai 30 Nov–6 Dec. */
+export function weekRange(start, lang = 'fi') {
   const end = addDaysIso(start, 6);
+  if (lang === 'en') {
+    const m = (ds) => EN_MONTHS[+ds.slice(5, 7) - 1];
+    return start.slice(5, 7) === end.slice(5, 7) ? `${+start.slice(8)}–${+end.slice(8)} ${m(end)}` : `${+start.slice(8)} ${m(start)}–${+end.slice(8)} ${m(end)}`;
+  }
   const a = `${+start.slice(8)}.${+start.slice(5, 7)}.`, b = `${+end.slice(8)}.${+end.slice(5, 7)}.`;
   return start.slice(5, 7) === end.slice(5, 7) ? `${+start.slice(8)}.–${b}` : `${a}–${b}`;
 }
@@ -99,10 +104,13 @@ export function buildWeek({ start, today, now, rows = null, catalog = null, care
     const ownRows = mine.filter((x) => x.info.slug === OWN_SLUG);
     let own = null;
     const ownFree = ownRows.filter((x) => x.r.status === 'available' && Number.isFinite(+x.r.base_price));
+    // Oman vuoron kestohaarukka (minuutteina): päivän varattavat oma-saunavuoro-rivit + varattava tunnin vuoro (1 h omana vuorona). Yleisten vuorojen riville tunnin vuoroa ei tuoda.
+    const mins = (r) => Math.round((Date.parse(r.ends_at) - Date.parse(r.starts_at)) / 6e4);
+    const ownLens = [...ownFree, ...mine.filter((x) => x.info.slug === 'tunnin-vuoro' && x.r.status === 'available')].map((x) => mins(x.r)).filter((n) => Number.isFinite(n) && n > 0);
     if (ownFree.length) {
       const cand = ownFree.map((x) => { const o = offerForSlot(offers, { ...x.r, product_id: x.r.product_id }); return { eff: o ? +o.discounted_price : +x.r.base_price, o, base: +x.r.base_price }; }).sort((a, b) => a.eff - b.eff)[0];
-      own = { href: hrefs.product(OWN_SLUG, date), price: money(cand.eff, lang), was: cand.o ? money(cand.base, lang) : '', pct: cand.o ? pctOf(cand.o.percent, lang) : '', full: false };
-    } else if (ownRows.length) own = { href: hrefs.product(OWN_SLUG, date), price: '', was: '', pct: '', full: true };
+      own = { href: hrefs.product(OWN_SLUG, date), price: money(cand.eff, lang), was: cand.o ? money(cand.base, lang) : '', pct: cand.o ? pctOf(cand.o.percent, lang) : '', full: false, durMin: ownLens.length ? Math.min(...ownLens) : null, durMax: ownLens.length ? Math.max(...ownLens) : null };
+    } else if (ownRows.length) own = { href: hrefs.product(OWN_SLUG, date), price: '', was: '', pct: '', full: true, durMin: null, durMax: null };
 
     // Jälkilöylyt
     const after = mine.filter((x) => +x.r.product_id === JALKIL_ID || x.info.slug === JALKIL_SLUG).sort((a, b) => Date.parse(a.r.starts_at) - Date.parse(b.r.starts_at) || +a.r.rule_id - +b.r.rule_id)
@@ -151,7 +159,7 @@ export function buildWeek({ start, today, now, rows = null, catalog = null, care
   const todayIdx = dates.indexOf(today);
   const cur = weekStartOf(today);
   return {
-    start, end, week: isoWeekNumber(start), range: weekRange(start), todayIdx, days, hasEvents,
+    start, end, week: isoWeekNumber(start), range: weekRange(start, lang), todayIdx, days, hasEvents,
     careLater: care != null && start > horizonEnd,
     nav: { prev: start > cur, next: start < addDaysIso(cur, 7 * MAX_WEEKS_AHEAD), now: start !== cur },
     hint: eventHint(events, { after: end, now, lang, hrefs, catalog }), error: false,
@@ -171,7 +179,7 @@ export function eventHint(events, { after, now, lang = 'fi', hrefs, catalog = nu
       .sort((a, b) => String(a.starts_at).localeCompare(String(b.starts_at)));
     if (!occ.length) continue;
     out.push({
-      at: occ[0].starts_at, name: eventDisplayName({ slug: ev.slug, productId: ev.product_id, name: ev.name, nameEn: ev.name_en }, catalog, lang),
+      at: occ[0].starts_at, name: careName(eventDisplayName({ slug: ev.slug, productId: ev.product_id, name: ev.name, nameEn: ev.name_en }, catalog, lang)),
       when: cardDates(occ[0], lang, now), href: hrefs.eventOpen(ev.slug), full: eventIsFull({ occurrences: occ }),
     });
   }

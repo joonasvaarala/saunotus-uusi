@@ -3,6 +3,7 @@
 // Paikkamerkki {{var:n}} (ja ale-tekstien {{var:pct}}, {{var:was}}, {{var:now}}) muutetaan muotoon {n} buildissa; selain täyttää arvon (week-grid-view.js).
 export const WEEK_GRID_TEXTS = Object.freeze({
   'ui.site.vk_title': { prop: 'title', fi: 'Tällä viikolla saunassa', en: 'This week at the sauna' },
+  'ui.site.vk_title_week': { prop: 'titleWeek', fi: 'Viikko {{var:n}} saunassa', en: 'Week {{var:n}} at the sauna' },
   'ui.site.vk_prev': { prop: 'prev', fi: 'Edellinen viikko', en: 'Previous week' },
   'ui.site.vk_next': { prop: 'next', fi: 'Seuraava viikko', en: 'Next week' },
   'ui.site.vk_week': { prop: 'week', fi: 'Viikko', en: 'Week' },
@@ -18,6 +19,8 @@ export const WEEK_GRID_TEXTS = Object.freeze({
   'ui.site.vk_none_public': { prop: 'none', fi: 'Ei yleisiä vuoroja', en: 'No public sessions' },
   'ui.site.vk_own_name': { prop: 'own', fi: 'Oma saunavuoro', en: 'Private sauna session' },
   'ui.site.vk_from': { prop: 'from', fi: 'alk.', en: 'from' },
+  'ui.site.vk_own_dur_range': { prop: 'durRange', fi: '{{var:a}}–{{var:b}} h', en: '{{var:a}}–{{var:b}} h' },
+  'ui.site.vk_own_dur_one': { prop: 'durOne', fi: '{{var:n}} h', en: '{{var:n}} h' },
   'ui.site.vk_after': { prop: 'after', fi: 'Jälkilöylyt', en: 'After Session Sauna' },
   'ui.site.vk_per_person': { prop: 'per', fi: '/ hlö', en: '/ person' },
   'ui.site.vk_full': { prop: 'full', fi: 'Täynnä', en: 'Full' },
@@ -29,7 +32,7 @@ export const WEEK_GRID_TEXTS = Object.freeze({
   'ui.site.vk_events_next': { prop: 'evNext', fi: 'Seuraavaksi', en: 'Next up:' },
   'ui.site.vk_events_and': { prop: 'evAnd', fi: 'ja', en: 'and' },
   'ui.site.vk_events_full': { prop: 'evFull', fi: 'täynnä, jonoon', en: 'full, join the waitlist' },
-  'ui.site.vk_training': { prop: 'training', fi: 'Koulutukset', en: 'Trainings' },
+  'ui.site.vk_training': { prop: 'training', fi: 'Koulutukset', en: 'Sauna training' },
   'ui.site.vk_all_sessions': { prop: 'all', fi: 'Kaikki vuorot →', en: 'All sessions →' },
   'ui.site.vk_error': { prop: 'error', fi: 'Viikon vapaita aikoja ei saatu haettua. Yritä hetken päästä uudelleen.', en: 'Could not load the free times for this week. Please try again in a moment.' },
 });

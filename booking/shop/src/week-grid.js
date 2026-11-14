@@ -1,7 +1,7 @@
 // Viikko-ohjelman ajonaikainen ohjaus (etusivu + saunavuorot): hakee julkiset RPC:t viikko kerrallaan, rakentaa mallin (week-grid-logic.js)
 // ja piirtää sen (week-grid-view.js, createElement + textContent). Viikkoja selataan nuolilla; mobiilissa päivänauha valitsee yhden päivän.
-// Haut: public_availability_all, public_quiet_offers (≤ 14 pv), public_events, public_catalog ja hoidoille public_treatment_availability
-// (treatments.js, ≤ 14 pv:n varausikkuna). Hakuvirhe ei riko sivua: staattinen varaversio jää, tai viikko piirretään ilman puuttuvaa osaa.
+// Haut: public_availability_all, public_quiet_offers (≤ 14 pv), public_events, public_catalog, public_settings (hoitojen varausikkuna
+// public_treatment_horizon_days, nyt 90 pv) ja hoidoille public_treatment_availability (treatments.js, rajattu näkyvän viikon ja ikkunan leikkaukseen). Hakuvirhe ei riko sivua: staattinen varaversio jää, tai viikko piirretään ilman puuttuvaa osaa.
 import { addDaysIso, quietWindow } from './quiet-offers-logic.js';
 import { buildWeek, clampWeek, weekStartOf, CARE_HORIZON_DAYS, careEntry } from './week-grid-logic.js';
 import { weekGridTree, toDom } from './week-grid-view.js';
@@ -28,11 +28,11 @@ export async function loadCare(catalog, from, to) {
 }
 
 /** Viikon haut. Kaikki osat ovat valinnaisia: null = ei saatu. */
-export async function loadWeek(start, { rpc, today, catalog, loadCareFn = loadCare }) {
+export async function loadWeek(start, { rpc, today, catalog, horizon = CARE_HORIZON_DAYS, loadCareFn = loadCare }) {
   const from = start < today ? today : start, to = addDaysIso(start, 6);
   const qEnd = quietWindow(today);
   const offerFrom = from, offerTo = to < qEnd ? to : qEnd;
-  const careEnd = addDaysIso(today, CARE_HORIZON_DAYS - 1), careTo = to < careEnd ? to : careEnd;
+  const careEnd = addDaysIso(today, horizon - 1), careTo = to < careEnd ? to : careEnd;
   const [rows, offers, care] = await Promise.all([
     to < today ? Promise.resolve([]) : rpc('public_availability_all', { p_from: from, p_to: to, p_audience: 'consumer' }).then((r) => (Array.isArray(r) ? r : null)).catch(() => null),
     offerFrom <= offerTo ? rpc('public_quiet_offers', { p_from: offerFrom, p_to: offerTo, p_audience: 'consumer' }).then((r) => (Array.isArray(r) ? r : [])).catch(() => []) : Promise.resolve([]),
@@ -41,7 +41,13 @@ export async function loadWeek(start, { rpc, today, catalog, loadCareFn = loadCa
   return { rows, offers, care };
 }
 
-export function mountWeekGrid(root, { rpc, lang = 'fi', shopHref = '', now = () => Date.now(), loadCareFn } = {}) {
+/** Hoitojen varausikkuna päivinä public_settingsistä (treatments.js horizonDays; POLICY.horizonDays vain varalla). */
+export async function careHorizon(settings) {
+  try { return (await import('./treatments.js')).horizonDays(settings); } catch { return CARE_HORIZON_DAYS; }
+}
+
+/** shared: valinnainen () => Promise<{ events, catalog }>; sivun muu skripti (quiet-week.js) jakaa saman haun, jolloin katalogia ja tapahtumia ei haeta kahdesti. */
+export function mountWeekGrid(root, { rpc, lang = 'fi', shopHref = '', now = () => Date.now(), loadCareFn, shared: sharedFetch } = {}) {
   const doc = root.ownerDocument;
   let T, opts;
   try { T = JSON.parse(root.dataset.vkTexts || ''); opts = JSON.parse(root.dataset.vkOpts || '{}'); } catch { return null; }
@@ -50,15 +56,18 @@ export function mountWeekGrid(root, { rpc, lang = 'fi', shopHref = '', now = () 
   const todayOf = () => new Date(now()).toLocaleDateString('sv-SE', { timeZone: 'Europe/Helsinki' });
   const today = todayOf();
   const cache = new Map();
-  let shared = null;   // { catalog, events }
+  let shared = null;   // { catalog, events, horizon }
   let start = weekStartOf(today), sel = null, token = 0;
 
   const fetchShared = () => (shared ||= Promise.all([
-    rpc('public_events', { p_from: today, p_channel: 'shop' }).catch(() => null),
-    rpc('public_catalog', {}).then((r) => (Array.isArray(r) ? r : null)).catch(() => null),
-  ]).then(([events, catalog]) => ({ events, catalog })));
+    sharedFetch ? sharedFetch().then(({ events, catalog }) => [events, Array.isArray(catalog) ? catalog : null]).catch(() => [null, null]) : Promise.all([
+      rpc('public_events', { p_from: today, p_channel: 'shop' }).catch(() => null),
+      rpc('public_catalog', {}).then((r) => (Array.isArray(r) ? r : null)).catch(() => null),
+    ]),
+    rpc('public_settings', {}).catch(() => null).then(careHorizon),
+  ]).then(([[events, catalog], horizon]) => ({ events, catalog, horizon })));
   const fetchWeek = (s) => {
-    if (!cache.has(s)) cache.set(s, fetchShared().then(({ catalog }) => loadWeek(s, { rpc, today, catalog, loadCareFn })));
+    if (!cache.has(s)) cache.set(s, fetchShared().then(({ catalog, horizon }) => loadWeek(s, { rpc, today, catalog, horizon, loadCareFn })));
     return cache.get(s);
   };
 
@@ -75,11 +84,11 @@ export function mountWeekGrid(root, { rpc, lang = 'fi', shopHref = '', now = () 
     const my = ++token;
     root.setAttribute('aria-busy', 'true');
     root.classList.add('is-loading');
-    const [{ events, catalog }, data] = await Promise.all([fetchShared(), fetchWeek(s)]);
+    const [{ events, catalog, horizon }, data] = await Promise.all([fetchShared(), fetchWeek(s)]);
     if (my !== token) return;
     const failed = data.rows == null;
     if (failed && s === weekStartOf(today) && !root.dataset.vkLive) { root.classList.remove('is-loading'); root.classList.add('is-js'); root.removeAttribute('aria-busy'); return; }   // ensimmäinen haku kaatui: staattinen varaversio jää
-    const model = buildWeek({ start: s, today, now: now(), rows: data.rows, catalog, care: data.care, events, offers: data.offers, lang, hrefs });
+    const model = buildWeek({ start: s, today, now: now(), rows: data.rows, catalog, care: data.care, events, offers: data.offers, lang, hrefs, careHorizon: horizon });
     model.error = failed;
     root.dataset.vkLive = '1';
     start = s;

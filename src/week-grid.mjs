@@ -10,12 +10,14 @@ import { weekGridTree, toHtml } from '../booking/shop/src/week-grid-view.js';
 import { HIDDEN_PUBLIC_SLUGS, HIDDEN_CARE_SLUGS } from '../booking/shop/src/week-grid-logic.js';
 
 const quiet = { warn: () => {} };
-export const TRAINING_URL = 'https://saunakoulutus.fi';
+/** Koulutukset-linkki kielen mukaan (Joonas t1776u): FI saunakoulutus.fi, EN saunahealer.com. */
+export const TRAINING_URLS = Object.freeze({ fi: 'https://saunakoulutus.fi', en: 'https://saunahealer.com' });
+export const trainingUrl = (lang) => TRAINING_URLS[lang] || TRAINING_URLS.fi;
 
 export function gridTexts(lang) {
   const u = site.ui[lang];
   const tokens = (t) => String(t).replace(/\{\{var:(\w+)\}\}/g, '{$1}');
-  return weekGridTexts((key, def) => tx(key, lang, { fallback: tokens(def[lang] ?? def.fi), vars: { n: '{n}' }, log: quiet }), {
+  return weekGridTexts((key, def) => tx(key, lang, { fallback: tokens(def[lang] ?? def.fi), vars: { n: '{n}', a: '{a}', b: '{b}' }, log: quiet }), {
     lang, daysLong: u.daysLong, today: u.today, newTab: u.openNewTab,
     quietBadge: quietSiteText('ui.site.quiet_badge', lang), quietSr: quietSiteText('ui.site.quiet_sr', lang),
   });
@@ -45,7 +47,7 @@ function staticModel(lang) {
 /** opt: { heading: true → kicker + otsikko (etusivu), links: { all } (etusivu), moreHref }. */
 export function weekGrid(lang, opt = {}) {
   const u = site.ui[lang], T = gridTexts(lang);
-  const o = { heading: opt.heading ? { kicker: u.weekKicker, title: T.title } : null, links: opt.links ? { training: TRAINING_URL, all: opt.links.all } : null };
+  const o = { heading: opt.heading ? { kicker: u.weekKicker, title: T.title } : null, links: opt.links ? { training: trainingUrl(lang), all: opt.links.all } : null };
   // data-quiet-week: build lisää kaupan skriptin (quiet-week.js) sivulle. data-vk-texts = koko tekstisanakirja (myös ale-tekstit) selaimelle.
   const root = `<div class="vk" data-vk data-quiet-week data-vk-opts="${e(JSON.stringify(o))}" data-vk-texts="${e(JSON.stringify(T))}">`;
   return `${root}${weekGridTree(staticModel(lang), T, o).map(toHtml).join('')}</div>`;
