@@ -10,6 +10,7 @@ import { resolveAdminPath, legacyFinanceGiftTarget, compactIdentity, toggleMobil
 import { setupQuickSearch } from './quick-search.js';
 import { loadNavTexts, navText } from './nav-texts.js';
 import { reviewAttentionCount } from './review-logic.js';
+import { loadOpenPaymentCounts, OPEN_PAYMENTS_EVENT } from './open-payments-logic.js';
 import { VCR_RPC } from './voucher-redeem-logic.js';
 import { startHallintaPwa } from './pwa.js';
 import { getVersionController, startHallintaVersionWatch } from './version-check.js';
@@ -243,9 +244,11 @@ async function refreshReviewBadge() {
   const link = $('quick-review');
   if (!el || !link) return;
   try {
-    const [list, vouchers] = await Promise.all([
+    // HALL-AVOIMET-01: myös toimenpidettä vaativat maksulinkit ja hyvitykset (palvelimen koko määrä, oikeuksien mukaan)
+    const [list, vouchers, open] = await Promise.all([
       rpc('admin_review_list').catch(() => null),
       rpc(VCR_RPC.unredeemed, { p_limit: 1 }).catch(() => null),
+      loadOpenPaymentCounts(rpc, (p) => ctx.can(p), ctx.role).catch(() => ({ total: 0 })),
     ]);
     let voucherN = 0;
     if (vouchers && typeof vouchers === 'object') {
@@ -254,7 +257,7 @@ async function refreshReviewBadge() {
         voucherN = Object.values(vouchers.counts || {}).reduce((s, n) => s + (Number(n) || 0), 0);
       }
     }
-    const n = reviewAttentionCount(list || {}, voucherN);
+    const n = reviewAttentionCount(list || {}, voucherN + open.total);
     if (n > 0) {
       el.textContent = String(n);
       el.hidden = false;
@@ -268,6 +271,9 @@ async function refreshReviewBadge() {
     el.hidden = true;
   }
 }
+
+// Avoimet maksut -näkymän toimenpide (uudelleenlähetys, kuittaus, hyvityksen kirjaus) päivittää Tarkista-merkin heti.
+window.addEventListener(OPEN_PAYMENTS_EVENT, () => { void refreshReviewBadge(); });
 
 function paintTopBarTexts() {
   const tn = (k) => navText(`ui.admin.nav.${k}`);
