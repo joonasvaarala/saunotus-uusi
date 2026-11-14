@@ -1,0 +1,606 @@
+[
+  {
+    "key": "ui.site.vk_title",
+    "lang": "fi",
+    "text": "Tällä viikolla saunassa",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "Etusivun viikko-ohjelman uudistus (backlog 82, Joonas t1768u + t1769u): uusi avain, FI+EN. Sama kuin koodin varateksti (booking/shop/src/week-grid-texts.js). Käyttö: etusivu ja saunavuorot-sivu (src/week-grid.mjs)."
+  },
+  {
+    "key": "ui.site.vk_title",
+    "lang": "en",
+    "text": "This week at the sauna",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "Etusivun viikko-ohjelman uudistus (backlog 82, Joonas t1768u + t1769u): uusi avain, FI+EN. Sama kuin koodin varateksti (booking/shop/src/week-grid-texts.js). Käyttö: etusivu ja saunavuorot-sivu (src/week-grid.mjs)."
+  },
+  {
+    "key": "ui.site.vk_prev",
+    "lang": "fi",
+    "text": "Edellinen viikko",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "Etusivun viikko-ohjelman uudistus (backlog 82, Joonas t1768u + t1769u): uusi avain, FI+EN. Sama kuin koodin varateksti (booking/shop/src/week-grid-texts.js). Käyttö: etusivu ja saunavuorot-sivu (src/week-grid.mjs)."
+  },
+  {
+    "key": "ui.site.vk_prev",
+    "lang": "en",
+    "text": "Previous week",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "Etusivun viikko-ohjelman uudistus (backlog 82, Joonas t1768u + t1769u): uusi avain, FI+EN. Sama kuin koodin varateksti (booking/shop/src/week-grid-texts.js). Käyttö: etusivu ja saunavuorot-sivu (src/week-grid.mjs)."
+  },
+  {
+    "key": "ui.site.vk_next",
+    "lang": "fi",
+    "text": "Seuraava viikko",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "Etusivun viikko-ohjelman uudistus (backlog 82, Joonas t1768u + t1769u): uusi avain, FI+EN. Sama kuin koodin varateksti (booking/shop/src/week-grid-texts.js). Käyttö: etusivu ja saunavuorot-sivu (src/week-grid.mjs)."
+  },
+  {
+    "key": "ui.site.vk_next",
+    "lang": "en",
+    "text": "Next week",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "Etusivun viikko-ohjelman uudistus (backlog 82, Joonas t1768u + t1769u): uusi avain, FI+EN. Sama kuin koodin varateksti (booking/shop/src/week-grid-texts.js). Käyttö: etusivu ja saunavuorot-sivu (src/week-grid.mjs)."
+  },
+  {
+    "key": "ui.site.vk_week",
+    "lang": "fi",
+    "text": "Viikko",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "Etusivun viikko-ohjelman uudistus (backlog 82, Joonas t1768u + t1769u): uusi avain, FI+EN. Sama kuin koodin varateksti (booking/shop/src/week-grid-texts.js). Käyttö: etusivu ja saunavuorot-sivu (src/week-grid.mjs)."
+  },
+  {
+    "key": "ui.site.vk_week",
+    "lang": "en",
+    "text": "Week",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "Etusivun viikko-ohjelman uudistus (backlog 82, Joonas t1768u + t1769u): uusi avain, FI+EN. Sama kuin koodin varateksti (booking/shop/src/week-grid-texts.js). Käyttö: etusivu ja saunavuorot-sivu (src/week-grid.mjs)."
+  },
+  {
+    "key": "ui.site.vk_now",
+    "lang": "fi",
+    "text": "Tämä viikko",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "Etusivun viikko-ohjelman uudistus (backlog 82, Joonas t1768u + t1769u): uusi avain, FI+EN. Sama kuin koodin varateksti (booking/shop/src/week-grid-texts.js). Käyttö: etusivu ja saunavuorot-sivu (src/week-grid.mjs)."
+  },
+  {
+    "key": "ui.site.vk_now",
+    "lang": "en",
+    "text": "This week",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "Etusivun viikko-ohjelman uudistus (backlog 82, Joonas t1768u + t1769u): uusi avain, FI+EN. Sama kuin koodin varateksti (booking/shop/src/week-grid-texts.js). Käyttö: etusivu ja saunavuorot-sivu (src/week-grid.mjs)."
+  },
+  {
+    "key": "ui.site.vk_week_nav",
+    "lang": "fi",
+    "text": "Valitse viikko ja päivä",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "Etusivun viikko-ohjelman uudistus (backlog 82, Joonas t1768u + t1769u): uusi avain, FI+EN. Sama kuin koodin varateksti (booking/shop/src/week-grid-texts.js). Käyttö: etusivu ja saunavuorot-sivu (src/week-grid.mjs)."
+  },
+  {
+    "key": "ui.site.vk_week_nav",
+    "lang": "en",
+    "text": "Choose week and day",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "Etusivun viikko-ohjelman uudistus (backlog 82, Joonas t1768u + t1769u): uusi avain, FI+EN. Sama kuin koodin varateksti (booking/shop/src/week-grid-texts.js). Käyttö: etusivu ja saunavuorot-sivu (src/week-grid.mjs)."
+  },
+  {
+    "key": "ui.site.vk_lane_public",
+    "lang": "fi",
+    "text": "Yleiset vuorot",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "Etusivun viikko-ohjelman uudistus (backlog 82, Joonas t1768u + t1769u): uusi avain, FI+EN. Sama kuin koodin varateksti (booking/shop/src/week-grid-texts.js). Käyttö: etusivu ja saunavuorot-sivu (src/week-grid.mjs)."
+  },
+  {
+    "key": "ui.site.vk_lane_public",
+    "lang": "en",
+    "text": "Public sessions",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "Etusivun viikko-ohjelman uudistus (backlog 82, Joonas t1768u + t1769u): uusi avain, FI+EN. Sama kuin koodin varateksti (booking/shop/src/week-grid-texts.js). Käyttö: etusivu ja saunavuorot-sivu (src/week-grid.mjs)."
+  },
+  {
+    "key": "ui.site.vk_lane_public_note",
+    "lang": "fi",
+    "text": "Tule muiden joukkoon. Hinta / hlö.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "Etusivun viikko-ohjelman uudistus (backlog 82, Joonas t1768u + t1769u): uusi avain, FI+EN. Sama kuin koodin varateksti (booking/shop/src/week-grid-texts.js). Käyttö: etusivu ja saunavuorot-sivu (src/week-grid.mjs)."
+  },
+  {
+    "key": "ui.site.vk_lane_public_note",
+    "lang": "en",
+    "text": "Join other guests. Price per person.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "Etusivun viikko-ohjelman uudistus (backlog 82, Joonas t1768u + t1769u): uusi avain, FI+EN. Sama kuin koodin varateksti (booking/shop/src/week-grid-texts.js). Käyttö: etusivu ja saunavuorot-sivu (src/week-grid.mjs)."
+  },
+  {
+    "key": "ui.site.vk_lane_own",
+    "lang": "fi",
+    "text": "Oma sauna",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "Etusivun viikko-ohjelman uudistus (backlog 82, Joonas t1768u + t1769u): uusi avain, FI+EN. Sama kuin koodin varateksti (booking/shop/src/week-grid-texts.js). Käyttö: etusivu ja saunavuorot-sivu (src/week-grid.mjs)."
+  },
+  {
+    "key": "ui.site.vk_lane_own",
+    "lang": "en",
+    "text": "Private sauna",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "Etusivun viikko-ohjelman uudistus (backlog 82, Joonas t1768u + t1769u): uusi avain, FI+EN. Sama kuin koodin varateksti (booking/shop/src/week-grid-texts.js). Käyttö: etusivu ja saunavuorot-sivu (src/week-grid.mjs)."
+  },
+  {
+    "key": "ui.site.vk_lane_own_note",
+    "lang": "fi",
+    "text": "Koko sauna teille. Hinta / seurue.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "Etusivun viikko-ohjelman uudistus (backlog 82, Joonas t1768u + t1769u): uusi avain, FI+EN. Sama kuin koodin varateksti (booking/shop/src/week-grid-texts.js). Käyttö: etusivu ja saunavuorot-sivu (src/week-grid.mjs)."
+  },
+  {
+    "key": "ui.site.vk_lane_own_note",
+    "lang": "en",
+    "text": "The whole sauna for your group. Price per group.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "Etusivun viikko-ohjelman uudistus (backlog 82, Joonas t1768u + t1769u): uusi avain, FI+EN. Sama kuin koodin varateksti (booking/shop/src/week-grid-texts.js). Käyttö: etusivu ja saunavuorot-sivu (src/week-grid.mjs)."
+  },
+  {
+    "key": "ui.site.vk_lane_care",
+    "lang": "fi",
+    "text": "Hoidot ja rituaalit",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "Etusivun viikko-ohjelman uudistus (backlog 82, Joonas t1768u + t1769u): uusi avain, FI+EN. Sama kuin koodin varateksti (booking/shop/src/week-grid-texts.js). Käyttö: etusivu ja saunavuorot-sivu (src/week-grid.mjs)."
+  },
+  {
+    "key": "ui.site.vk_lane_care",
+    "lang": "en",
+    "text": "Treatments and rituals",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "Etusivun viikko-ohjelman uudistus (backlog 82, Joonas t1768u + t1769u): uusi avain, FI+EN. Sama kuin koodin varateksti (booking/shop/src/week-grid-texts.js). Käyttö: etusivu ja saunavuorot-sivu (src/week-grid.mjs)."
+  },
+  {
+    "key": "ui.site.vk_lane_care_note",
+    "lang": "fi",
+    "text": "Valitse vapaa alkuaika varauksessa.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "Etusivun viikko-ohjelman uudistus (backlog 82, Joonas t1768u + t1769u): uusi avain, FI+EN. Sama kuin koodin varateksti (booking/shop/src/week-grid-texts.js). Käyttö: etusivu ja saunavuorot-sivu (src/week-grid.mjs)."
+  },
+  {
+    "key": "ui.site.vk_lane_care_note",
+    "lang": "en",
+    "text": "Choose a free start time when booking.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "Etusivun viikko-ohjelman uudistus (backlog 82, Joonas t1768u + t1769u): uusi avain, FI+EN. Sama kuin koodin varateksti (booking/shop/src/week-grid-texts.js). Käyttö: etusivu ja saunavuorot-sivu (src/week-grid.mjs)."
+  },
+  {
+    "key": "ui.site.vk_care_later",
+    "lang": "fi",
+    "text": "Hoitojen ajat avautuvat lähempänä ajankohtaa.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "Etusivun viikko-ohjelman uudistus (backlog 82, Joonas t1768u + t1769u): uusi avain, FI+EN. Sama kuin koodin varateksti (booking/shop/src/week-grid-texts.js). Käyttö: etusivu ja saunavuorot-sivu (src/week-grid.mjs)."
+  },
+  {
+    "key": "ui.site.vk_care_later",
+    "lang": "en",
+    "text": "Treatment times open closer to the date.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "Etusivun viikko-ohjelman uudistus (backlog 82, Joonas t1768u + t1769u): uusi avain, FI+EN. Sama kuin koodin varateksti (booking/shop/src/week-grid-texts.js). Käyttö: etusivu ja saunavuorot-sivu (src/week-grid.mjs)."
+  },
+  {
+    "key": "ui.site.vk_none_public",
+    "lang": "fi",
+    "text": "Ei yleisiä vuoroja",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "Etusivun viikko-ohjelman uudistus (backlog 82, Joonas t1768u + t1769u): uusi avain, FI+EN. Sama kuin koodin varateksti (booking/shop/src/week-grid-texts.js). Käyttö: etusivu ja saunavuorot-sivu (src/week-grid.mjs)."
+  },
+  {
+    "key": "ui.site.vk_none_public",
+    "lang": "en",
+    "text": "No public sessions",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "Etusivun viikko-ohjelman uudistus (backlog 82, Joonas t1768u + t1769u): uusi avain, FI+EN. Sama kuin koodin varateksti (booking/shop/src/week-grid-texts.js). Käyttö: etusivu ja saunavuorot-sivu (src/week-grid.mjs)."
+  },
+  {
+    "key": "ui.site.vk_own_name",
+    "lang": "fi",
+    "text": "Oma saunavuoro",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "Etusivun viikko-ohjelman uudistus (backlog 82, Joonas t1768u + t1769u): uusi avain, FI+EN. Sama kuin koodin varateksti (booking/shop/src/week-grid-texts.js). Käyttö: etusivu ja saunavuorot-sivu (src/week-grid.mjs)."
+  },
+  {
+    "key": "ui.site.vk_own_name",
+    "lang": "en",
+    "text": "Private sauna session",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "Etusivun viikko-ohjelman uudistus (backlog 82, Joonas t1768u + t1769u): uusi avain, FI+EN. Sama kuin koodin varateksti (booking/shop/src/week-grid-texts.js). Käyttö: etusivu ja saunavuorot-sivu (src/week-grid.mjs)."
+  },
+  {
+    "key": "ui.site.vk_from",
+    "lang": "fi",
+    "text": "alk.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "Etusivun viikko-ohjelman uudistus (backlog 82, Joonas t1768u + t1769u): uusi avain, FI+EN. Sama kuin koodin varateksti (booking/shop/src/week-grid-texts.js). Käyttö: etusivu ja saunavuorot-sivu (src/week-grid.mjs)."
+  },
+  {
+    "key": "ui.site.vk_from",
+    "lang": "en",
+    "text": "from",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "Etusivun viikko-ohjelman uudistus (backlog 82, Joonas t1768u + t1769u): uusi avain, FI+EN. Sama kuin koodin varateksti (booking/shop/src/week-grid-texts.js). Käyttö: etusivu ja saunavuorot-sivu (src/week-grid.mjs)."
+  },
+  {
+    "key": "ui.site.vk_after",
+    "lang": "fi",
+    "text": "Jälkilöylyt",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "Etusivun viikko-ohjelman uudistus (backlog 82, Joonas t1768u + t1769u): uusi avain, FI+EN. Sama kuin koodin varateksti (booking/shop/src/week-grid-texts.js). Käyttö: etusivu ja saunavuorot-sivu (src/week-grid.mjs)."
+  },
+  {
+    "key": "ui.site.vk_after",
+    "lang": "en",
+    "text": "After Session Sauna",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "Etusivun viikko-ohjelman uudistus (backlog 82, Joonas t1768u + t1769u): uusi avain, FI+EN. Sama kuin koodin varateksti (booking/shop/src/week-grid-texts.js). Käyttö: etusivu ja saunavuorot-sivu (src/week-grid.mjs)."
+  },
+  {
+    "key": "ui.site.vk_per_person",
+    "lang": "fi",
+    "text": "/ hlö",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "Etusivun viikko-ohjelman uudistus (backlog 82, Joonas t1768u + t1769u): uusi avain, FI+EN. Sama kuin koodin varateksti (booking/shop/src/week-grid-texts.js). Käyttö: etusivu ja saunavuorot-sivu (src/week-grid.mjs)."
+  },
+  {
+    "key": "ui.site.vk_per_person",
+    "lang": "en",
+    "text": "/ person",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "Etusivun viikko-ohjelman uudistus (backlog 82, Joonas t1768u + t1769u): uusi avain, FI+EN. Sama kuin koodin varateksti (booking/shop/src/week-grid-texts.js). Käyttö: etusivu ja saunavuorot-sivu (src/week-grid.mjs)."
+  },
+  {
+    "key": "ui.site.vk_full",
+    "lang": "fi",
+    "text": "Täynnä",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "Etusivun viikko-ohjelman uudistus (backlog 82, Joonas t1768u + t1769u): uusi avain, FI+EN. Sama kuin koodin varateksti (booking/shop/src/week-grid-texts.js). Käyttö: etusivu ja saunavuorot-sivu (src/week-grid.mjs)."
+  },
+  {
+    "key": "ui.site.vk_full",
+    "lang": "en",
+    "text": "Full",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "Etusivun viikko-ohjelman uudistus (backlog 82, Joonas t1768u + t1769u): uusi avain, FI+EN. Sama kuin koodin varateksti (booking/shop/src/week-grid-texts.js). Käyttö: etusivu ja saunavuorot-sivu (src/week-grid.mjs)."
+  },
+  {
+    "key": "ui.site.vk_left_one",
+    "lang": "fi",
+    "text": "1 paikka jäljellä",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "Etusivun viikko-ohjelman uudistus (backlog 82, Joonas t1768u + t1769u): uusi avain, FI+EN. Sama kuin koodin varateksti (booking/shop/src/week-grid-texts.js). Käyttö: etusivu ja saunavuorot-sivu (src/week-grid.mjs)."
+  },
+  {
+    "key": "ui.site.vk_left_one",
+    "lang": "en",
+    "text": "1 spot left",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "Etusivun viikko-ohjelman uudistus (backlog 82, Joonas t1768u + t1769u): uusi avain, FI+EN. Sama kuin koodin varateksti (booking/shop/src/week-grid-texts.js). Käyttö: etusivu ja saunavuorot-sivu (src/week-grid.mjs)."
+  },
+  {
+    "key": "ui.site.vk_left_many",
+    "lang": "fi",
+    "text": "{{var:n}} paikkaa jäljellä",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [
+      "{{var:n}}"
+    ],
+    "reason": "Etusivun viikko-ohjelman uudistus (backlog 82, Joonas t1768u + t1769u): uusi avain, FI+EN. Sama kuin koodin varateksti (booking/shop/src/week-grid-texts.js). Käyttö: etusivu ja saunavuorot-sivu (src/week-grid.mjs)."
+  },
+  {
+    "key": "ui.site.vk_left_many",
+    "lang": "en",
+    "text": "{{var:n}} spots left",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [
+      "{{var:n}}"
+    ],
+    "reason": "Etusivun viikko-ohjelman uudistus (backlog 82, Joonas t1768u + t1769u): uusi avain, FI+EN. Sama kuin koodin varateksti (booking/shop/src/week-grid-texts.js). Käyttö: etusivu ja saunavuorot-sivu (src/week-grid.mjs)."
+  },
+  {
+    "key": "ui.site.vk_event_tag",
+    "lang": "fi",
+    "text": "Tapahtuma",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "Etusivun viikko-ohjelman uudistus (backlog 82, Joonas t1768u + t1769u): uusi avain, FI+EN. Sama kuin koodin varateksti (booking/shop/src/week-grid-texts.js). Käyttö: etusivu ja saunavuorot-sivu (src/week-grid.mjs)."
+  },
+  {
+    "key": "ui.site.vk_event_tag",
+    "lang": "en",
+    "text": "Event",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "Etusivun viikko-ohjelman uudistus (backlog 82, Joonas t1768u + t1769u): uusi avain, FI+EN. Sama kuin koodin varateksti (booking/shop/src/week-grid-texts.js). Käyttö: etusivu ja saunavuorot-sivu (src/week-grid.mjs)."
+  },
+  {
+    "key": "ui.site.vk_events_label",
+    "lang": "fi",
+    "text": "Tapahtumat:",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "Etusivun viikko-ohjelman uudistus (backlog 82, Joonas t1768u + t1769u): uusi avain, FI+EN. Sama kuin koodin varateksti (booking/shop/src/week-grid-texts.js). Käyttö: etusivu ja saunavuorot-sivu (src/week-grid.mjs)."
+  },
+  {
+    "key": "ui.site.vk_events_label",
+    "lang": "en",
+    "text": "Events:",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "Etusivun viikko-ohjelman uudistus (backlog 82, Joonas t1768u + t1769u): uusi avain, FI+EN. Sama kuin koodin varateksti (booking/shop/src/week-grid-texts.js). Käyttö: etusivu ja saunavuorot-sivu (src/week-grid.mjs)."
+  },
+  {
+    "key": "ui.site.vk_events_none",
+    "lang": "fi",
+    "text": "ei tällä viikolla.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "Etusivun viikko-ohjelman uudistus (backlog 82, Joonas t1768u + t1769u): uusi avain, FI+EN. Sama kuin koodin varateksti (booking/shop/src/week-grid-texts.js). Käyttö: etusivu ja saunavuorot-sivu (src/week-grid.mjs)."
+  },
+  {
+    "key": "ui.site.vk_events_none",
+    "lang": "en",
+    "text": "none this week.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "Etusivun viikko-ohjelman uudistus (backlog 82, Joonas t1768u + t1769u): uusi avain, FI+EN. Sama kuin koodin varateksti (booking/shop/src/week-grid-texts.js). Käyttö: etusivu ja saunavuorot-sivu (src/week-grid.mjs)."
+  },
+  {
+    "key": "ui.site.vk_events_next",
+    "lang": "fi",
+    "text": "Seuraavaksi",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "Etusivun viikko-ohjelman uudistus (backlog 82, Joonas t1768u + t1769u): uusi avain, FI+EN. Sama kuin koodin varateksti (booking/shop/src/week-grid-texts.js). Käyttö: etusivu ja saunavuorot-sivu (src/week-grid.mjs)."
+  },
+  {
+    "key": "ui.site.vk_events_next",
+    "lang": "en",
+    "text": "Next up:",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "Etusivun viikko-ohjelman uudistus (backlog 82, Joonas t1768u + t1769u): uusi avain, FI+EN. Sama kuin koodin varateksti (booking/shop/src/week-grid-texts.js). Käyttö: etusivu ja saunavuorot-sivu (src/week-grid.mjs)."
+  },
+  {
+    "key": "ui.site.vk_events_and",
+    "lang": "fi",
+    "text": "ja",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "Etusivun viikko-ohjelman uudistus (backlog 82, Joonas t1768u + t1769u): uusi avain, FI+EN. Sama kuin koodin varateksti (booking/shop/src/week-grid-texts.js). Käyttö: etusivu ja saunavuorot-sivu (src/week-grid.mjs)."
+  },
+  {
+    "key": "ui.site.vk_events_and",
+    "lang": "en",
+    "text": "and",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "Etusivun viikko-ohjelman uudistus (backlog 82, Joonas t1768u + t1769u): uusi avain, FI+EN. Sama kuin koodin varateksti (booking/shop/src/week-grid-texts.js). Käyttö: etusivu ja saunavuorot-sivu (src/week-grid.mjs)."
+  },
+  {
+    "key": "ui.site.vk_events_full",
+    "lang": "fi",
+    "text": "täynnä, jonoon",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "Etusivun viikko-ohjelman uudistus (backlog 82, Joonas t1768u + t1769u): uusi avain, FI+EN. Sama kuin koodin varateksti (booking/shop/src/week-grid-texts.js). Käyttö: etusivu ja saunavuorot-sivu (src/week-grid.mjs)."
+  },
+  {
+    "key": "ui.site.vk_events_full",
+    "lang": "en",
+    "text": "full, join the waitlist",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "Etusivun viikko-ohjelman uudistus (backlog 82, Joonas t1768u + t1769u): uusi avain, FI+EN. Sama kuin koodin varateksti (booking/shop/src/week-grid-texts.js). Käyttö: etusivu ja saunavuorot-sivu (src/week-grid.mjs)."
+  },
+  {
+    "key": "ui.site.vk_training",
+    "lang": "fi",
+    "text": "Koulutukset",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "Etusivun viikko-ohjelman uudistus (backlog 82, Joonas t1768u + t1769u): uusi avain, FI+EN. Sama kuin koodin varateksti (booking/shop/src/week-grid-texts.js). Käyttö: etusivu ja saunavuorot-sivu (src/week-grid.mjs)."
+  },
+  {
+    "key": "ui.site.vk_training",
+    "lang": "en",
+    "text": "Trainings",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "Etusivun viikko-ohjelman uudistus (backlog 82, Joonas t1768u + t1769u): uusi avain, FI+EN. Sama kuin koodin varateksti (booking/shop/src/week-grid-texts.js). Käyttö: etusivu ja saunavuorot-sivu (src/week-grid.mjs)."
+  },
+  {
+    "key": "ui.site.vk_all_sessions",
+    "lang": "fi",
+    "text": "Kaikki vuorot →",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "Etusivun viikko-ohjelman uudistus (backlog 82, Joonas t1768u + t1769u): uusi avain, FI+EN. Sama kuin koodin varateksti (booking/shop/src/week-grid-texts.js). Käyttö: etusivu ja saunavuorot-sivu (src/week-grid.mjs)."
+  },
+  {
+    "key": "ui.site.vk_all_sessions",
+    "lang": "en",
+    "text": "All sessions →",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "Etusivun viikko-ohjelman uudistus (backlog 82, Joonas t1768u + t1769u): uusi avain, FI+EN. Sama kuin koodin varateksti (booking/shop/src/week-grid-texts.js). Käyttö: etusivu ja saunavuorot-sivu (src/week-grid.mjs)."
+  },
+  {
+    "key": "ui.site.vk_error",
+    "lang": "fi",
+    "text": "Viikon vapaita aikoja ei saatu haettua. Yritä hetken päästä uudelleen.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Etusivun viikko-ohjelman uudistus (backlog 82, Joonas t1768u + t1769u): uusi avain, FI+EN. Sama kuin koodin varateksti (booking/shop/src/week-grid-texts.js). Käyttö: etusivu ja saunavuorot-sivu (src/week-grid.mjs)."
+  },
+  {
+    "key": "ui.site.vk_error",
+    "lang": "en",
+    "text": "Could not load the free times for this week. Please try again in a moment.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Etusivun viikko-ohjelman uudistus (backlog 82, Joonas t1768u + t1769u): uusi avain, FI+EN. Sama kuin koodin varateksti (booking/shop/src/week-grid-texts.js). Käyttö: etusivu ja saunavuorot-sivu (src/week-grid.mjs)."
+  }
+]
