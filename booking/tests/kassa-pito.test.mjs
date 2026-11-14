@@ -59,7 +59,7 @@ test('järjestys + kompakti banneri: otsikko + tilabadge → pitopaneeli → tii
   assert.ok(shop.includes('dl.after(secEl)'), 'vahvistussivu: maksuosio yhteenvedon alle');
   assert.equal((shop.match(/dl\.dataset\.testid = 'conf-summary'/g) || []).length, 1, 'vahvistussivun yhteenveto rakennetaan vain kerran (ei duplikaattia)');
   assert.ok(/head, holdEl, closedEl, resv, additions, optSec, lines, pay, giftCards, claimBox,/.test(ord), 'tilaussivu: pitopaneeli → peruutusviesti → varaus + maksamaton lisäys + summat → maksuosio (booking_131: maksuosio ennen lahjakortteja)');
-  assert.ok(ui.includes("class: kind === 'awaiting' ? 'sr-only' : ''"), 'awaiting: "Maksa varaus vahvistaaksesi" -otsikko vain ruudunlukijalle (toisto h2:n ja tilabadgen kanssa)');
+  assert.ok(ui.includes("class: kind === 'awaiting' || !titleVisible ? 'sr-only' : ''"), 'awaiting: "Maksa varaus vahvistaaksesi" -otsikko vain ruudunlukijalle (toisto h2:n ja tilabadgen kanssa)');
   assert.ok(css.includes('.bk-hold-awaiting{display:flex'), 'kompakti banneri (lause + laskuri samalla rivillä)');
   assert.equal(ht('fi', 'summary.remaining'), 'Maksettavaa jäljellä'); assert.equal(ht('en', 'summary.remaining'), 'Amount left to pay');
 });
@@ -68,7 +68,7 @@ test('tekstit: 15 min -maksuohje (Joonaksen teksti), otsikko "Varauksesi odottaa
   assert.equal(ht('en', 'mustPay', { minutes: 15 }), 'The booking must be paid within 15 minutes, otherwise it is cancelled and your spot is released.');
   assert.equal(ht('fi', 'h2.awaiting'), 'Varauksesi odottaa maksua'); assert.equal(ht('en', 'h2.awaiting'), 'Your booking is awaiting payment');
   assert.ok(/testi/i.test(ht('fi', 'payLater.btn')) && /test/i.test(ht('en', 'payLater.btn')));
-  assert.ok(src('../shop/src/shop.js').includes("'h2.awaiting'"), 'otsikko pitotilassa');
+  assert.ok(!src('../shop/src/shop.js').includes("'h2.awaiting'"), 'KAUPPA-VAHVISTUS-01: toistava H2 poistettu, sivun H1 + tilamerkki riittävät');
 });
 test('tilaussivu: peruttu ja vanhentunut varaus kertoo peruutuksesta ja linkittää uuteen varaukseen (site_texts, ei kovakoodattua lausetta)', () => {
   const ord = src('../shop/src/order.js');
