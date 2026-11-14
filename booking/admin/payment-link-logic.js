@@ -30,3 +30,15 @@ export function linkSubmitOnce(read, send) {
     catch (err) { sent = false; throw err; }
   };
 }
+
+/** HALL-TILAUS-03: maksulinkin vastaanottaja (admin_get_order: customer.email; vanhat polut: email). Ei osoitetta → null. */
+export function paymentLinkEmail(order) {
+  const e = String(order?.customer?.email ?? order?.email ?? '').trim();
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e) ? e : null;
+}
+
+/** Lähetyksen tulos ilmoitukseksi: { key, tone }. sendEmail = käyttäjä valitsi lähetyksen; email_queued tulee palvelimelta. */
+export function paymentLinkOutcome(res, sendEmail) {
+  if (!sendEmail) return { key: 'link.createdOnly', tone: 'ok' };
+  return res?.email_queued ? { key: 'link.sentTo', tone: 'ok' } : { key: 'link.sendFailed', tone: 'warn' };
+}

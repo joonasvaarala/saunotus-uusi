@@ -48,10 +48,10 @@ test('FI/EN-tekstiavaimet ja XSS: tuotenimi ei päädy innerHTML:ään',()=>{
   assert.match(src('booking/admin/views/order-add.js'),/h\('span', \{ text: x\.name/);
   assert.doesNotMatch(src('booking/admin/views/order-add.js'),/innerHTML|insertAdjacentHTML|eval\(/);
 });
-test('ei lähetyksiä lisäostossa eikä maksulinkissä',()=>{
+test('ei lähetyksiä lisäostossa; maksulinkki lähtee vain käyttäjän valinnasta (HALL-TILAUS-03)',()=>{
   const code=src('booking/admin/views/order-add.js');
   assert.match(code,/addToOrder\(\{[^}]*sendEmail: false/s);
-  assert.match(code,/createPaymentLink\(\{[^}]*sendEmail: false/s);
+  assert.match(code,/const sendEmail = mail\.wants\(fd\);[\s\S]*createPaymentLink\(\{[^}]*sendEmail,/);
   assert.doesNotMatch(code,/sendEmail:\s*true|p_send_email:\s*true/);
 });
 test('tilausrivin painike, suora admin-haku, kytkin ja fallback',()=>{

@@ -178,7 +178,7 @@ test('UI04: takarajaohjaimen alkuvalinta on pois ja kentän päiväraja 60', () 
   assert.match(control, /disabled: true/);
   assert.match(control, /linkDeadlineControl/);
   assert.match(orderAdd, /deadline\.read\(fd\)/);
-  assert.match(orderAdd, /createPaymentLink\(\{[^}]*sendEmail: false/s);
+  assert.match(orderAdd, /createPaymentLink\(\{[^}]*sendEmail,/s);   // HALL-TILAUS-03: sähköposti valinnan mukaan (linkEmailControl)
   assert.match(orders, /deadline\.read\(fd\)/);
   assert.match(orders, /linkSubmitOnce/);
   assert.doesNotMatch(src, /max:\s*90|value:\s*14,\s*required:\s*true|\|\| 14\)/);
