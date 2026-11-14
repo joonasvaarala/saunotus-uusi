@@ -25,7 +25,7 @@ import { helsinkiIso } from '../ui.js';
 import { memoText } from '../day-memos-texts.js';
 import { stepper } from '../stepper.js';
 import { icon } from '../icons.js';
-import { h, dialog, toast, run, fmtDay, fmtTime, fmtDT, money, statusBadge, payBadge, sourceBadge, isJohku, field, badge, empty, errMsg } from '../ui.js';
+import { h, dialog, toast, run, fmtDay, fmtTime, timeValue, fmtDT, money, statusBadge, payBadge, sourceBadge, isJohku, field, badge, empty, errMsg } from '../ui.js';
 import { formatWhenRange, spansDays } from '../when-range.js';
 import { legsList, resName, resourceBadges, hasLegs } from './legs.js';
 import { missingOpen, grantButton } from './therapist.js';
@@ -648,12 +648,12 @@ export function changeDialog(r, onChange, order = null, can = () => false) {
   const sessionsBox = h('div', { class: 'stack' });
   const warnBox = h('div', { class: 'nb-warn', role: 'status', hidden: true, 'data-testid': 'move-warning' });
   const pst = stepper({ label: 'Henkilömäärä', value: r.persons, min: 1, max: staffPersonsMax({ min_persons: 1 }), size: 'lg', onChange: () => paintMove() }); const persons = pst.input;
-  const timeIn = h('input', { type: 'time', step: '300', value: fmtTime(r.starts_at), 'data-testid': 'move-time', 'aria-label': bookingText('off_time') });
+  const timeIn = h('input', { type: 'time', step: '300', value: timeValue(r.starts_at), 'data-testid': 'move-time', 'aria-label': bookingText('off_time') });
   const dateIn = h('input', { type: 'date', value: st.date, onchange: (e) => { st.date = e.target.value; st.session = null; load(); } });
   function paintMove() {
     const base = st.session || (st.slots && !st.slots.length ? { status: 'off_schedule', off_schedule: true, off_code: 'no_session', mode: r.mode, blocked: (st.blocks || []).some((b) => b.starts_at < `${st.date}T23:59` && b.ends_at > `${st.date}T00:00`) } : null);
     const notices = base ? bookingNotices(base, +persons.value || r.persons) : [];
-    if (base?.off_schedule && timeIn.value && timeIn.value !== fmtTime(r.starts_at)) notices.push({ kind: 'off', code: 'outside_hours' });
+    if (base?.off_schedule && timeIn.value && timeIn.value !== timeValue(r.starts_at)) notices.push({ kind: 'off', code: 'outside_hours' });
     const seen = new Set();
     const uniq = notices.filter((n) => { const k = n.kind + n.code; if (seen.has(k)) return false; seen.add(k); return true; });
     const shown = bookingAction(uniq, isAdmin).shown;
@@ -689,7 +689,7 @@ export function changeDialog(r, onChange, order = null, can = () => false) {
   timeIn.addEventListener('input', () => paintMove());
   const f = h('form', { class: 'stack', onsubmit: (ev) => { ev.preventDefault(); run(f.querySelector('button[type=submit]'), async () => {
     const notices = paintMove();
-    const custom = !st.session && timeIn.value && (st.date !== day(r.starts_at) || timeIn.value !== fmtTime(r.starts_at));
+    const custom = !st.session && timeIn.value && (st.date !== day(r.starts_at) || timeIn.value !== timeValue(r.starts_at));
     const args = { p_reservation_id: r.reservation_id, p_persons: +persons.value !== r.persons ? +persons.value : null };
     if (st.session) { args.p_rule_id = st.session.rule_id; args.p_date = st.date; }
     else if (custom && r.rule_id) {

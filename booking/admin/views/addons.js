@@ -1,7 +1,7 @@
 // Lisäpalvelut: (1) valitsin varauslomakkeille (määrä per lisäpalvelu, enintään henkilömäärä × max/henkilö, korkeintaan 99),
 // (2) ylläpito (nimi, kuvaus, hinta, ALV, vuorotyypit, aktiivisuus; oikeus catalog.edit kuten tuotetiedoissa).
 import { rpc } from '../sb.js';
-import { h, dialog, field, toast, run, money, badge, empty } from '../ui.js';
+import { h, dialog, field, toast, run, money, badge, empty, vatText } from '../ui.js';
 import { icon } from '../icons.js';
 import { stepper } from '../stepper.js';
 import { addonLimit } from '../nb-logic.js';
@@ -63,7 +63,7 @@ export async function addonsAdmin({ ctx }) {
     const rows = await rpc('admin_list_addons');
     const list = h('div', { class: 'list' }, rows.length ? rows.map((a) => h('button', { type: 'button', class: 'listrow', onclick: () => edit(a) },
       h('span', { class: 'what' }, h('strong', { text: a.name }), h('small', { text: ` ${(a.applies_modes || []).map((m) => MODE_LABEL[m]).join(', ')} · max ${a.max_per_person} / hlö` })),
-      h('span', { class: 'meta' }, a.active ? badge('ok', 'Käytössä') : badge('muted', 'Piilotettu'), h('strong', { text: money(a.price) }), h('small', { text: `ALV ${a.vat_rate} %` })))) : [empty('Ei lisäpalveluita.')]);
+      h('span', { class: 'meta' }, a.active ? badge('ok', 'Käytössä') : badge('muted', 'Piilotettu'), h('strong', { text: money(a.price) }), h('small', { text: `ALV ${vatText(a.vat_rate)}` })))) : [empty('Ei lisäpalveluita.')]);
     wrap.replaceChildren(h('div', { class: 'row between' }, h('h2', { id: 'addons-h' }, icon('leaf', 22), ' Lisäpalvelut'), can ? h('button', { type: 'button', class: 'btn sm', onclick: () => edit(null) }, 'Lisää lisäpalvelu') : null),
       h('p', { class: 'muted', text: can ? 'Lisäpalvelut näkyvät varauslomakkeilla (verkkokauppa ja hallinta) ja päivänäkymän valmisteluyhteenvedossa. Hinnat sisältävät ALV:n; hinnan muutos koskee vain uusia tilauksia.' : 'Näet lisäpalvelut; muokkaus vaatii ylläpitäjän (manager/admin) oikeudet.' }), list);
   }

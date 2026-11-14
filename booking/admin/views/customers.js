@@ -4,7 +4,7 @@ import { customerForm, validBusinessId, normBusinessId } from './customerform.js
 import { navText } from '../nav-texts.js';
 import { normalizeCode } from '../../shop/src/discount-code-logic.js';
 import { amText, loadAmTexts, amCreatedMessage } from '../annual-manage-texts.js';
-import { h, fmtDT, fmtDate, todayHel, addDays, money, dialog, field, toast, run, empty, payBadge, statusBadge, badge } from '../ui.js';
+import { h, fmtDT, fmtDate, todayHel, addDays, money, dialog, field, toast, run, empty, payBadge, statusBadge, badge, countText } from '../ui.js';
 import { openOrderCard } from './order-card.js';
 import { openOrderView } from '../order-open.js';
 
@@ -19,7 +19,7 @@ export async function render({ ctx, reload, query = new URLSearchParams(), rest 
     for (const c of rows) list.append(h('button', { type: 'button', class: 'listrow', 'data-testid': 'customer-row', onclick: () => { location.hash = `#/asiakkaat/${c.id}`; } },
       h('span', { class: 'what' }, h('strong', { text: c.customer_kind === 'company' && c.company ? c.company : c.name }), h('small', { text: ` ${c.customer_kind === 'company' ? `${c.business_id || ''} · ${c.name} · ` : ''}${c.email || ''}${c.phone ? ' · ' + c.phone : ''}` })),
       h('span', { class: 'meta' }, c.customer_kind === 'company' ? badge('warn', 'Yritys') : badge('muted', 'Yksityinen'), c.customer_type === 'annual_card' ? badge('warn', 'Vuosikortti') : null, c.marketing_consent ? badge('ok', 'Markkinointi sallittu') : badge('muted', 'Ei markkinointia'), h('small', { text: `${c.orders_count} tilausta${c.last_visit ? ' · viimeksi ' + fmtDate(c.last_visit) : ''}` }))));
-    offset += rows.length; count.textContent = `${Math.min(offset, total)} / ${total} asiakasta`;
+    offset += rows.length; count.textContent = `${Math.min(offset, total)} / ${countText(total, 'asiakas', 'asiakasta')}`;
     more.replaceChildren(offset < total ? h('button', { class: 'btn ghost', type: 'button', onclick: () => load(false) }, 'Näytä lisää') : '');
   }
   async function card(id, after = () => load(true)) {
@@ -88,7 +88,7 @@ export async function render({ ctx, reload, query = new URLSearchParams(), rest 
             if (!confirm('Perutaanko vuosikortti?')) return;
             const cancelFuture = confirm('Perutaanko myös kortin tulevat varaukset? (OK = peru, Peruuta = säilytä)');
             const r = await rpc('admin_revoke_annual_card', { p_id: a.id, p_cancel_future: cancelFuture });
-            toast(`Vuosikortti peruttu${r.cancelled ? `, ${r.cancelled} varausta peruttu` : ''}`); document.querySelector('dialog')?.close(); load(true); }) }, 'Peru kortti') : null)))) : empty('Ei vuosikorttia.'),
+            toast(`Vuosikortti peruttu${r.cancelled ? `, ${countText(r.cancelled, 'varaus', 'varausta')} peruttu` : ''}`); document.querySelector('dialog')?.close(); load(true); }) }, 'Peru kortti') : null)))) : empty('Ei vuosikorttia.'),
       can ? grant : null);
   }
   // v3 (PR 1): #/asiakkaat/<id> = asiakasnäkymä (views/customer-view.js); Muokkaa avaa nykyisen asiakaskortin, tallennus piirtää näkymän uudelleen.

@@ -7,7 +7,7 @@
 export const PERIODS = [['all', 'Kaikki ajat'], ['upcoming', 'Tulevat'], ['past', 'Menneet'], ['month', 'Tämä kuukausi'], ['custom', 'Oma ajanjakso']];
 export const SOURCE_FILTERS = [['', 'Kaikki'], ['native', 'Uudet'], ['johku', 'Johku']];
 import { rpc } from '../sb.js';
-import { h, fmtDate, fmtTime, todayHel, addDays, dayStartIso, statusBadge, payBadge, sourceBadge, money, field, empty, errMsg, STATUS } from '../ui.js';
+import { h, fmtDate, fmtTime, todayHel, addDays, dayStartIso, statusBadge, payBadge, sourceBadge, money, field, empty, errMsg, STATUS, countText } from '../ui.js';
 import { formatWhenRange, spansDays } from '../when-range.js';
 import { filterDrawer } from '../filter-drawer.js';
 import { reservationDialog } from './shared.js';
@@ -99,7 +99,7 @@ export async function render({ ctx, refs, reload, query, routePath = 'varaukset'
       const target = rows.find((row) => String(row.reservation_id) === String(f.id));
       if (target) { openedDeepLink = true; if (!openOrderView(target.order_no, { replace: true })) reservationDialog(target, { methods: refs.methods, onChange: () => load(true), refs, can: ctx.can, role: ctx.role }); }
     }
-    offset += rows.length; count.textContent = `${Math.min(offset, total)} / ${total} varausta · ${periodLabel()}${f.treatment === TREATMENT_UNASSIGNED ? ` · ${optionText('ui.admin.options.filter_unassigned')}` : ''}`;
+    offset += rows.length; count.textContent = `${Math.min(offset, total)} / ${countText(total, 'varaus', 'varausta')} · ${periodLabel()}${f.treatment === TREATMENT_UNASSIGNED ? ` · ${optionText('ui.admin.options.filter_unassigned')}` : ''}`;
     more.replaceChildren(offset < total ? h('button', { type: 'button', class: 'btn ghost', onclick: () => load(false) }, 'Näytä lisää') : '');
     paintActive();
   }

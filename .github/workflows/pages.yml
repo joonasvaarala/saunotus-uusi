@@ -188,6 +188,8 @@ jobs:
       - run: node --test booking/tests/ux-vaihe0.test.mjs
       # YHT-08: kokeilutila kattaa Resurssit, Kalenterisulut, Käyttäjät ja asiakasnäkymän (views-mock.js)
       - run: node --test booking/tests/kokeilutila-kattavuus.test.mjs
+      # YHT-04/05: hallinnan kellonajat kuten kaupassa (16.00), ALV 25,5 %, monikot, tilasanasto
+      - run: node --test booking/tests/muodot-sanasto.test.mjs
       # edge-funktioiden Deno-testit: PDF:t samat tavut kuin ennen tekstisiirtoa, tekstihaku (_shared/site_texts.ts), MobilePay-virhetekstit
       # bot-gateway (Oton botin yhdyskäytävä, koodari_otto.md): mock-rpc, kytkin, 16 kB raja, virhemappaus (BG429 -> 429), log_failure, ei avainta/tiivistettä/args-sisältöä lokiin
       - uses: denoland/setup-deno@v2

@@ -283,7 +283,7 @@ test('kuukausi: siru, ruutu ja näppäimistö avaavat päivän; harmaa päivä s
   assert.equal(btn.disabled, false);
   assert.equal(btn.getAttribute('role'), null);
   assert.match(btn.getAttribute('aria-label'), new RegExp(fmtLong(other).replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
-  assert.match(btn.getAttribute('aria-label'), /1 työvuoroa, 1 varausta/);
+  assert.match(btn.getAttribute('aria-label'), /1 työvuoro, 1 varaus/);
   assert.equal(btn.getAttribute('aria-pressed'), 'false');
   assert.equal(cell.querySelector('.cal-num').getAttribute('aria-hidden'), 'true');
   assert.equal(cell.querySelector('.n').textContent, String(+other.slice(8)));
@@ -363,7 +363,7 @@ test('koulutukset: suodatin oletuksena päällä, kuukausisiru nimi + tila, yksi
   await flush();
   const det = root.querySelector('[data-testid="calendar-trainings"]');
   assert.ok(det);
-  assert.match(det.textContent, /09:00–16:00 · Rauni/);
+  assert.match(det.textContent, /9\.00–16\.00 · Rauni/);
   assert.match(det.textContent, /1\. viikonloppu/);
   assert.equal(det.querySelector('a').getAttribute('href'), '#/koulutukset?tapahtuma=120&kerta=117');
   assert.equal(root.querySelector('[data-testid="calendar-space-blocks"]'), null);
@@ -382,7 +382,7 @@ test('koulutukset viikossa ja fallback, jos haku epäonnistuu', async () => {
   const item = day(root, other).querySelector('.cal-item.training');
   assert.ok(item);
   assert.match(item.textContent, /Saunottajakoulutus 2027/);
-  assert.match(item.textContent, /09:00–16:00/);
+  assert.match(item.textContent, /9\.00–16\.00/);
   assert.match(item.textContent, /Rauni/);
   SB.setRpcOverride((name, args) => name === 'admin_event_list' ? Promise.reject(Object.assign(new Error('x'), { code: 'PGRST202' })) : rpc(name, args));
   document.body.replaceChildren();

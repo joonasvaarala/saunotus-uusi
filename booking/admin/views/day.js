@@ -1,6 +1,6 @@
 // Päivänäkymä: vuorot kapasiteetteineen + varaukset vuoroittain + tapahtumat osallistujineen + päivän tuotto + sulut.
 import { rpc } from '../sb.js';
-import { h, fmtDay, fmtTime, todayHel, addDays, dayStartIso, statusBadge, payBadge, sourceBadge, badge, toast, run, dialog, field, fmtDT, empty, money } from '../ui.js';
+import { h, fmtDay, fmtTime, todayHel, addDays, dayStartIso, statusBadge, payBadge, sourceBadge, badge, toast, run, dialog, field, fmtDT, empty, money, countText } from '../ui.js';
 import { formatWhenRange, spansDays } from '../when-range.js';
 import { reservationDialog } from './shared.js';
 import { openOrderView } from '../order-open.js';
@@ -206,5 +206,5 @@ export async function render({ ctx, refs, reload, query }) {
     DAY_VIEW_SHOW_DAY_NOTES ? dayNotesCard({ date, dayNotes: memos?.day_notes || [], can: ctx.can, reload }) : null, prepBox,
     h('div', { class: 'daygrid day-view' }, timeline.length ? timeline : empty('Ei vuoroja tälle päivälle.')),
     inactive.length ? h('details', { class: 'card inactive-res', 'data-testid': 'inactive-res' }, h('summary', { text: `Peruutetut ja päättyneet varaukset (${inactive.length})` }), h('ul', { class: 'reslist' }, inactive.map(resRow))) : null,
-    h('p', { class: 'muted', text: `${active.length} aktiivista varausta, ${sumPersons(active)} henkilöä yhteensä.` }), blocks];
+    h('p', { class: 'muted', text: `${countText(active.length, 'aktiivinen varaus', 'aktiivista varausta')}, ${countText(sumPersons(active), 'henkilö', 'henkilöä')} yhteensä.` }), blocks];
 }
