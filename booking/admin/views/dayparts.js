@@ -3,7 +3,14 @@ import { rpc } from '../sb.js';
 import { icon } from '../icons.js';
 import { h, toast, errMsg, dayStartIso, addDays } from '../ui.js';
 import { roleLabel, shiftClass, NO_ASSIGNEE } from './calendar.js';
+import { sessionFill } from '../day-logic.js';
+import { dayText } from '../day-texts.js';
 import { memoText } from '../day-memos-texts.js';
+
+// ---- vuorokortin otsikko: tyyppi tekstinä ja täyttöaste ----
+// HALL-PAIVA-01: yleinen/yksityinen ei saa näkyä vain reunan värinä; yleisellä vuorolla "6/10" (varatut / enimmäishenkilömäärä, max_persons tulee admin_day_viewn sessions-riveiltä).
+export { sessionFill };
+export const sessionKindText = (mode) => dayText(mode === 'exclusive' ? 'ui.admin.day.kind_exclusive' : 'ui.admin.day.kind_shared');
 
 // ---- kapasiteettinappi ----
 // Vapaana-nappi vie suoraan Uusi varaus -lomakkeelle (päivä, vuoro ja alkamisaika esivalittuina: ?d=…&r=<rule_id>&t=<alkamisaika>).

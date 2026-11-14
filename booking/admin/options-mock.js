@@ -606,7 +606,9 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
     admin_ui_texts: () => handlers.public_get_site_texts(),
     admin_day_view: (a) => {
       const rs = st.reservations.filter((r) => r.starts_at >= helIso(a.p_date, '00:00') && r.starts_at < helIso(addDays(a.p_date, 1), '00:00'));
-      return { date: a.p_date, sessions: [], blocks: [], prep: [], addon_totals: [],
+      // HALL-PAIVA-01: yksi yleinen (10 hlö) ja yksi yksityinen vuoro, jotta tyyppimerkki ja täyttöaste näkyvät kokeilutilassa.
+      const sess = (rule_id, product_id, label, mode, from, to, remaining, max_persons) => ({ rule_id, product_id, label, mode, session_date: a.p_date, starts_at: helIso(a.p_date, from), ends_at: helIso(a.p_date, to), status: remaining > 0 ? 'available' : 'full', remaining, min_persons: 1, max_persons });
+      return { date: a.p_date, sessions: [sess(9001, 3, 'Yleinen saunavuoro', 'shared', '18:00', '20:00', 6, 10), sess(9002, 8, 'Yksityisvuoro', 'exclusive', '20:30', '22:30', 6, 6)], blocks: [], prep: [], addon_totals: [],
         reservations: rs.map((r) => ({ reservation_id: r.reservation_id, order_id: r.order_id, order_no: r.order_no, status: r.status, payment_status: r.payment_status, product_name: r.product_name, mode: r.mode, starts_at: r.starts_at, ends_at: r.ends_at, persons: r.persons,
           customer_name: r.customer_name, customer_phone: r.customer_phone, source: 'native', external_id: null, customer_kind: 'private', company: null, space_code: r.space_code, lifecycle: r.lifecycle, quota_exempt: false, override_reason: null,
           therapist_missing: false, therapist_missing_open: false, notes: r.notes, legs: r.legs, addons: (r.mock_addons || []).map((x) => ({ ...x })), option: optJson(r.option_id), option_missing: missing(r) })) };

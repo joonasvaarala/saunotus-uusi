@@ -5,7 +5,7 @@ import { formatWhenRange, spansDays } from '../when-range.js';
 import { reservationDialog } from './shared.js';
 import { openOrderView } from '../order-open.js';
 import { icon } from '../icons.js';
-import { capacityButton, arrivalButton, addonItems, shiftsBar, prepCard } from './dayparts.js';
+import { sessionKindText, sessionFill, capacityButton, arrivalButton, addonItems, shiftsBar, prepCard } from './dayparts.js';
 import { legsList, resourceBadges, spaceBadge } from './legs.js';
 import { optionBadge, optionReminder } from '../options.js';
 import { blockList, blockDialog } from './blocks.js';
@@ -114,7 +114,15 @@ export async function render({ ctx, refs, reload, query }) {
   const codes = new Map((addonList || []).map((a) => [a.id, a.code]));
   const go = (d) => { location.hash = `#/?d=${d}`; };
   const intent = (d) => { let done = false; const f = () => { if (!done) { done = true; prefetchDay(d); } }; return { onpointerenter: f, onfocus: f, ontouchstart: f }; };
-  const toolbar = h('div', { class: 'toolbar' },
+  // HALL-PAIVA-01: Sulut-osio on työkalurivin painike (lista ja lisäys ikkunassa); "+ Uusi varaus" vain yläpalkissa.
+  const nBlocks = (view.blocks || []).length;
+  const blocksBtn = h('button', { class: 'btn ghost sm', type: 'button', 'data-testid': 'day-blocks-btn', text: nBlocks ? `${dayText('ui.admin.day.blocks_title')} (${nBlocks})` : dayText('ui.admin.day.blocks_title'), title: countText(nBlocks, 'sulku', 'sulkua'), onclick: () => {
+    let dlg = null;
+    const content = h('section', { 'data-testid': 'day-blocks' }, blockList(view.blocks, refs, () => { dlg?.close(); reload(); }, 'Ei sulkuja.'),
+      h('button', { type: 'button', class: 'btn ghost sm', onclick: () => { dlg?.close(); blockDialog(date, refs, reload); } }, '+ Lisää sulku'));
+    dlg = dialog(dayText('ui.admin.day.blocks_title'), content);
+  } });
+  const toolbar = h('div', { class: 'toolbar daytools', 'data-testid': 'day-tools' },
     h('button', { class: 'btn ghost', type: 'button', 'aria-label': 'Edellinen päivä', onclick: () => go(addDays(date, -1)), ...intent(addDays(date, -1)) }, '‹'),
     h('input', { type: 'date', value: date, 'aria-label': 'Päivä', onchange: (e) => e.target.value && go(e.target.value) }),
     h('button', { class: 'btn ghost', type: 'button', 'aria-label': 'Seuraava päivä', onclick: () => go(addDays(date, 1)), ...intent(addDays(date, 1)) }, '›'),
@@ -125,7 +133,7 @@ export async function render({ ctx, refs, reload, query }) {
         if (next) go(next); else toast(memoText('ui.admin.day_memos.next_own_shift_none'));
       } catch { toast(memoText('ui.admin.day_memos.next_own_shift_failed'), 'err'); } finally { b.disabled = false; }
     } }),
-    h('a', { class: 'btn primary sm', href: `#/uusi?d=${date}`, text: '+ Uusi varaus' }));
+    blocksBtn);
   const rows = resv || [];
   // Lisäpalvelut: varauskohtaiset (view.reservations), vuorokohtainen "valmistele" (view.prep) ja päivän summat (view.addon_totals)
   const dv = new Map((view.reservations || []).map((r) => [r.reservation_id, r]));
@@ -157,7 +165,8 @@ export async function render({ ctx, refs, reload, query }) {
     const cap = capacityButton(s, date, mine.length > 0);
     return h('section', { class: `card session ${s.mode}`, 'data-testid': 'session', 'data-start': s.starts_at },
       h('header', {}, h('strong', { class: 'time', text: spansDays(s.starts_at, s.ends_at) ? formatWhenRange(s.starts_at, s.ends_at, dayLang() === 'en' ? 'en' : 'fi') : `${fmtTime(s.starts_at)}–${fmtTime(s.ends_at)}` }), h('span', { class: 'ttl', text: prod?.name || s.label }),
-        h('span', { class: 'hdr-right' }, h('span', { class: 'cnt', 'data-testid': 'session-persons', text: s.mode === 'exclusive' && !booked ? '' : `${booked} hlö` }), cap)),
+        h('span', { class: `badge kind kind-${s.mode}`, 'data-testid': 'session-kind', text: sessionKindText(s.mode) }),
+        h('span', { class: 'hdr-right' }, h('span', { class: 'cnt', 'data-testid': 'session-persons', text: sessionFill(s, booked) }), cap)),
       mine.length ? h('ul', { class: 'reslist' }, mine.map(resRow)) : null);
   };
   const slotCard = (list) => { const r0 = list[0];
@@ -197,14 +206,13 @@ export async function render({ ctx, refs, reload, query }) {
     rev.showPending ? h('p', { class: 'muted dayrev-note', 'data-testid': 'day-revenue-pending', text: dayText('ui.admin.day.revenue_pending', { amount: money(rev.pending_gross) }) }) : null,
     rev.showUnpaid ? h('p', { class: 'muted dayrev-note', 'data-testid': 'day-revenue-unpaid', text: dayText('ui.admin.day.revenue_unpaid', { amount: money(rev.unpaid_gross) }) }) : null);
   const inactive = rows.filter((r) => !ACTIVE.includes(r.status));
-  const blocks = h('section', { class: 'card', 'data-testid': 'day-blocks' }, h('h3', { text: 'Sulut' }), blockList(view.blocks, refs, reload, 'Ei sulkuja.'),
-    h('button', { type: 'button', class: 'btn ghost sm', onclick: () => blockDialog(date, refs, reload) }, '+ Lisää sulku'));
   const prepBox = prepCard({ totals: view.addon_totals, prep: view.prep, persons: sumPersons(active), bookings: active.length, codes });
   return [h('h1', { text: fmtDay(`${date}T12:00:00Z`) }),
-    DAY_VIEW_SHOW_ANNOUNCEMENTS ? bulletinCard({ date, bulletins: memos?.bulletins || [], can: ctx.can, reload }) : null,
-    revenue, shifts, optNote, toolbar,
-    DAY_VIEW_SHOW_DAY_NOTES ? dayNotesCard({ date, dayNotes: memos?.day_notes || [], can: ctx.can, reload }) : null, prepBox,
-    h('div', { class: 'daygrid day-view' }, timeline.length ? timeline : empty('Ei vuoroja tälle päivälle.')),
-    inactive.length ? h('details', { class: 'card inactive-res', 'data-testid': 'inactive-res' }, h('summary', { text: `Peruutetut ja päättyneet varaukset (${inactive.length})` }), h('ul', { class: 'reslist' }, inactive.map(resRow))) : null,
-    h('p', { class: 'muted', text: `${countText(active.length, 'aktiivinen varaus', 'aktiivista varausta')}, ${countText(sumPersons(active), 'henkilö', 'henkilöä')} yhteensä.` }), blocks];
+    h('div', { class: 'daycol' },
+      toolbar,
+      DAY_VIEW_SHOW_ANNOUNCEMENTS ? bulletinCard({ date, bulletins: memos?.bulletins || [], can: ctx.can, reload }) : null,
+      revenue, shifts, optNote,
+      DAY_VIEW_SHOW_DAY_NOTES ? dayNotesCard({ date, dayNotes: memos?.day_notes || [], can: ctx.can, reload }) : null, prepBox,
+      h('div', { class: 'daygrid day-view' }, timeline.length ? timeline : empty('Ei vuoroja tälle päivälle.')),
+      inactive.length ? h('details', { class: 'card inactive-res', 'data-testid': 'inactive-res' }, h('summary', { text: `Peruutetut ja päättyneet varaukset (${inactive.length})` }), h('ul', { class: 'reslist' }, inactive.map(resRow))) : null)];
 }
