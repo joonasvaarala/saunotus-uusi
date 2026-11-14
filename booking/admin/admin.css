@@ -855,7 +855,8 @@ html.pos-modal-open,body.pos-modal-open{overflow:hidden}
 @media(max-width:480px){.rich-field .rich-toolbar.ql-toolbar.ql-snow{gap:2px 1px;padding:3px}.rich-field .rich-toolbar.ql-toolbar.ql-snow button{width:30px;height:38px;padding:9px 5px}}
 @media(max-width:350px){.rich-field .rich-toolbar.ql-toolbar.ql-snow .ql-formats:last-child{display:none}}  /* kumoa/tee uudelleen vain, jos mahtuvat */
 @media(min-width:700px){.pos-grid{grid-template-columns:repeat(3,1fr)}}
-@media(min-width:800px){.pos-layout{grid-template-columns:minmax(0,1fr) 280px}.pos-side{position:sticky;top:72px;bottom:auto}}
+@media(min-width:800px){.pos-layout{grid-template-columns:minmax(0,1fr) 300px}.pos-side{position:sticky;top:72px;bottom:auto;max-height:calc(100dvh - 88px);overflow:auto}.pos-side .pos-panel{margin-top:0}.pos-cart-title{margin:0;font-size:18px;color:var(--green)}.pos-side .pos-line{padding:6px}}
+@media(min-width:1000px){.pos-grid{grid-template-columns:repeat(4,1fr)}}   /* HALL-KASSA-01 */
 .set-page .card h2{margin:0 0 6px}
 .set-page .card h3{margin:14px 0 6px}
 .set-page .warnbox{background:var(--warnbg);border:1px solid rgba(107,75,0,.35);border-radius:12px;padding:12px 14px;color:var(--ink)}
