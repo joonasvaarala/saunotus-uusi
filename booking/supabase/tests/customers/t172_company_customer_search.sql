@@ -80,9 +80,9 @@ grant execute on all functions in schema pg_temp to public;
 
 -- ===== A rakenne
 select pg_temp.ck(md5(pg_get_functiondef('booking.admin_search_invoice_customers(text,integer)'::regprocedure)) = '0b6a95a0bb492fe96632c719ff72e42c', 'A1 admin_search_invoice_customers = booking_172');
-select pg_temp.ck(md5(pg_get_functiondef('booking.admin_search_customers(text,integer)'::regprocedure)) = '6ab4f8a588a792ca3af0614a20ceb659', 'A2 admin_search_customers md5');
+select pg_temp.ck(md5(pg_get_functiondef('booking.admin_search_customers(text,integer)'::regprocedure)) in ('6ab4f8a588a792ca3af0614a20ceb659', 'de91542b1533844550951c154bfc84d9'), 'A2 admin_search_customers md5 (172 tai booking_309)');
 select pg_temp.ck(md5(pg_get_functiondef('booking._order_company_hits(text,integer)'::regprocedure)) = '007c407a3fb71e6ee9098796ca34f57c', 'A3 _order_company_hits md5');
-select pg_temp.ck(md5(pg_get_functiondef('booking.admin_list_customers(text,integer,integer)'::regprocedure)) = '1ffba8df04ac14a996400bc97182ec21', 'A4 admin_list_customers ennallaan (md5)');
+select pg_temp.ck(md5(pg_get_functiondef('booking.admin_list_customers(text,integer,integer)'::regprocedure)) in ('1ffba8df04ac14a996400bc97182ec21', '33ad761dd85cb6a7f40628ac58dbeb52'), 'A4 admin_list_customers ennallaan (md5; 172 tai booking_309)');
 select pg_temp.ck(has_function_privilege('authenticated', 'booking.admin_search_customers(text,integer)', 'execute'), 'A5 authenticated saa kutsua admin_search_customers');
 select pg_temp.ck(not has_function_privilege('anon', 'booking.admin_search_customers(text,integer)', 'execute'), 'A6 anon ei admin_search_customers');
 select pg_temp.ck(not has_function_privilege('authenticated', 'booking._order_company_hits(text,integer)', 'execute')

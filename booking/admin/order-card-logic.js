@@ -14,6 +14,9 @@ const num = (v) => { const n = Number(v); return Number.isFinite(n) ? n : 0; };
  */
 export function cardPaymentStatus(order = null, reservation = null) {
   const b = order?.balance;
+  // Peruttu / vanhentunut tilaus ilman yhtään maksua: "Ei maksettavaa", ei "Maksettu" eikä vanhentunutta "Maksu kesken" (#15210, 14.11.2026)
+  const deadOrder = ['cancelled', 'expired'].includes(order?.status);
+  const none = (total) => ({ kind: 'free', amount: 0, paid: 0, refunded: 0, total, pending: 0, badgeClass: 'muted', label: 'free' });
   const hasBalance = !!(b && (b.total != null || b.unpaid != null || b.paid != null));
   if (hasBalance) {
     const unpaid = num(b.unpaid);
@@ -41,11 +44,13 @@ export function cardPaymentStatus(order = null, reservation = null) {
     if (pending > EPS && paid <= EPS) {
       return { kind: 'pending', amount: pending, paid, refunded, total, pending, badgeClass: 'warn', label: 'pending' };
     }
+    if (deadOrder && paid <= EPS) return none(total);
     // 0 €:n tilaus (esim. yleinen vuoro vuosikortilla): ei "Maksettu 0,00 €" vaan "Ei maksettavaa" (Joonas 11.11.2026)
     if (total <= EPS && paid <= EPS) return { kind: 'free', amount: 0, paid, refunded, total, pending, badgeClass: 'muted', label: 'free' };
     return { kind: 'paid', amount: paid || total, paid, refunded, total, pending, badgeClass: 'ok', label: 'paid' };
   }
   const ps = order?.payment_status || reservation?.payment_status || null;
+  if (deadOrder && ['unpaid', 'pending', 'failed'].includes(ps)) return none(order?.total != null ? num(order.total) : 0);
   const map = {
     unpaid: { kind: 'unpaid', badgeClass: 'err', label: 'unpaid' },
     pending: { kind: 'pending', badgeClass: 'warn', label: 'pending' },

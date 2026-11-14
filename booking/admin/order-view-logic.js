@@ -100,7 +100,10 @@ export function paymentState(m) {
   }
   if (m.locked) return 'invoiced';
   if (m.balance.refunded > EPS && m.balance.paid - m.balance.refunded <= EPS) return 'refunded';
-  return m.balance.total > EPS || m.balance.paid > EPS ? 'paid' : 'none';
+  if (m.balance.paid > EPS) return 'paid';
+  // Peruttu / vanhentunut tilaus, jolle ei tullut yhtään maksua: ei "Maksettu"-merkkiä (#15210, 14.11.2026: "Vanhentunut" + "Maksettu" + "Ei maksettavaa")
+  if (['cancelled', 'expired'].includes(m.status)) return 'none';
+  return m.balance.total > EPS ? 'paid' : 'none';
 }
 
 /** Tilauksen varaustila otsikon merkkiin: yhden varauksen tila, monivarauksessa vallitseva voimassa oleva tila. */
