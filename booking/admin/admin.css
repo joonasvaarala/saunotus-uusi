@@ -1437,6 +1437,7 @@ body.shot #shell .nav .lbl{display:inline}
 .ov-paybox-value{font-size:26px;line-height:1.15;font-weight:700;color:var(--amt-c);font-variant-numeric:tabular-nums;letter-spacing:-.01em;margin-left:auto}
 .ov-paybox.tone-muted .ov-paybox-value{color:var(--ink)}
 .ov-kv{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;margin:0;font-size:14px}.ov-kv dt{color:var(--muted)}.ov-kv dd{margin:0;text-align:right}
+.ov-methods{list-style:none;margin:0;padding:0;display:grid;gap:2px}.ov-method{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:0 8px}.ov-method-ref{flex-basis:100%;font-size:13px}
 .ov-stack{display:grid;gap:8px}
 .ov-bd{width:100%;border-collapse:collapse;font-size:14px}.ov-bd td,.ov-bd th{padding:4px 0;text-align:left;font-weight:400}.ov-bd .r{text-align:right}
 .ov-bd tr.is-child td:first-child{padding-left:14px}.ov-bd tr.is-off td{text-decoration:line-through;color:var(--muted)}

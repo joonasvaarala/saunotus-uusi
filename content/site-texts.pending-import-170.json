@@ -1,0 +1,66 @@
+[
+  {
+    "key": "ui.admin.order_view.pay_method",
+    "lang": "fi",
+    "text": "Maksutapa",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Hallinnan tilausnäkymän maksukortti: maksutavat omilla summillaan, sekamaksussa useampi rivi (Joonas 14.11.2026); sama kuin koodin oletus"
+  },
+  {
+    "key": "ui.admin.order_view.pay_method",
+    "lang": "en",
+    "text": "Payment method",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Hallinnan tilausnäkymän maksukortti: maksutavat omilla summillaan, sekamaksussa useampi rivi (Joonas 14.11.2026); sama kuin koodin oletus"
+  },
+  {
+    "key": "ui.admin.order_view.pay_methods",
+    "lang": "fi",
+    "text": "Maksutavat",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Hallinnan tilausnäkymän maksukortti: maksutavat omilla summillaan, sekamaksussa useampi rivi (Joonas 14.11.2026); sama kuin koodin oletus"
+  },
+  {
+    "key": "ui.admin.order_view.pay_methods",
+    "lang": "en",
+    "text": "Payment methods",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "Hallinnan tilausnäkymän maksukortti: maksutavat omilla summillaan, sekamaksussa useampi rivi (Joonas 14.11.2026); sama kuin koodin oletus"
+  },
+  {
+    "key": "ui.admin.order_view.pay_method_refunded",
+    "lang": "fi",
+    "text": "josta hyvitetty {{var:amount}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [
+      "{{var:amount}}"
+    ],
+    "reason": "Hallinnan tilausnäkymän maksukortti: maksutavat omilla summillaan, sekamaksussa useampi rivi (Joonas 14.11.2026); sama kuin koodin oletus"
+  },
+  {
+    "key": "ui.admin.order_view.pay_method_refunded",
+    "lang": "en",
+    "text": "of which refunded {{var:amount}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [
+      "{{var:amount}}"
+    ],
+    "reason": "Hallinnan tilausnäkymän maksukortti: maksutavat omilla summillaan, sekamaksussa useampi rivi (Joonas 14.11.2026); sama kuin koodin oletus"
+  }
+]

@@ -14,6 +14,7 @@ import { generatedAnnualCardCode, generatedDiscountCode, normalizeCode } from '.
 import { paylinkWatchHandlers } from './paylink-watch-mock.js';
 import { viewsMockHandlers } from './views-mock.js';   // YHT-08: Resurssit, Kalenterisulut, Käyttäjät, asiakasnäkymä
 const MOCK_COMPANY_ORDER_NO = 7002;   // HALL-TILAUS-01: yritystilaus + peruutuspyyntö kokeilutilassa
+const MOCK_MIXED_PAY_ORDER_NO = 7001;   // maksutavat: sekamaksu (lahjakortti + verkkomaksu) ja peruttu verkkomaksu, joka ei kuulu erittelyyn
 import { refundWatchHandlers } from './refund-watch-mock.js';
 const TZ = 'Europe/Helsinki';
 const todayHel = (now = new Date()) => now.toLocaleDateString('sv-SE', { timeZone: TZ });
@@ -629,11 +630,21 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
       const r = st.reservations.find((x) => x.order_id === a.p_order_id); if (!r) throw err('not_found', 'Tilausta ei löydy');
       const total = Number(r.total_gross) || 0;
       const paid = r.payment_status === 'paid' ? total : 0;
+      // Maksurivit kuten admin_get_order: maksettu tilaus = yksi verkkomaksu; MOCK_MIXED_PAY_ORDER_NO = lahjakortti + verkkomaksu (+ peruttu yritys).
+      const mockPayments = (o, sum) => {
+        if (!(sum > 0)) return [];
+        const at = o.created_at, id = o.order_id * 10;
+        const online = (pid, amount, status = 'paid') => ({ id: pid, method: 'montonio', provider: 'montonio', status, amount, paid_at: status === 'paid' ? at : null, refunded_amount: 0, note: 'Verkkomaksu', created_at: at, lines: [], receipts: [], refunds: [] });
+        if (o.order_no !== MOCK_MIXED_PAY_ORDER_NO) return [online(id + 1, sum)];
+        const gift = Math.min(20, Math.round(sum * 50) / 100);
+        return [{ id: id + 1, method: 'gift_card', provider: 'manual', status: 'paid', amount: gift, paid_at: at, refunded_amount: 0, note: 'Lahjakortti …K7Q2 | Verkkokauppa', created_at: at, lines: [], receipts: [], refunds: [] },
+          online(id + 2, Math.round((sum - gift) * 100) / 100, 'cancelled'), online(id + 3, Math.round((sum - gift) * 100) / 100)];
+      };
       const unpaid = r.payment_status === 'paid' ? 0 : total;
       return { order_id: r.order_id, order_no: r.order_no, status: r.order_status, payment_status: r.payment_status, total, source_channel: 'web', created_at: r.created_at, customer_kind: 'private', billing: null, invoice_reference: null,
         customer: { id: r.customer_id, name: r.customer_name, email: r.customer_email, phone: r.customer_phone },
         reservations: [{ id: r.reservation_id, item_id: r.reservation_id * 10, status: r.status, product_name: r.product_name, mode: r.mode, starts_at: r.starts_at, ends_at: r.ends_at, persons: r.persons, notes: r.notes, item_total: total, product_id: r.product_id,
-          option: optJson(r.option_id), option_choices: choicesJson(r.product_id), option_missing: missing(r), addons: (r.mock_addons || []).map((x) => ({ ...x })) }], items: mockOrderItems(r), payments: [],
+          option: optJson(r.option_id), option_choices: choicesJson(r.product_id), option_missing: missing(r), addons: (r.mock_addons || []).map((x) => ({ ...x })) }], items: mockOrderItems(r), payments: mockPayments(r, paid),
         balance: { total, paid, refunded: 0, pending_link: 0, unpaid, unpaid_unlinked: unpaid, net_paid: paid },
         is_native: r.source !== 'johku', staff_can_add: r.source !== 'johku' && ['confirmed', 'completed'].includes(r.order_status),
         // HALL-TILAUS-01: toinen esimerkkitilaus on yritystilaus, jolla on avoin peruutuspyyntö → tilausnäkymän osiot nähtävissä kokeilutilassa

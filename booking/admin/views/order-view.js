@@ -36,6 +36,7 @@ import { billingMethodText } from '../billing-method-texts.js';
 import { processOnlineRefunds } from './refund-cancel.js';
 import { confirmAsk } from '../confirm.js';
 import { overflowMenu } from './overflow-menu.js';
+import { methodLabel } from './talous-ui.js';
 
 const list = (...n) => n.flat(Infinity).filter((x) => x != null && x !== false);
 const money = (n) => fmt.money(n);
@@ -278,11 +279,20 @@ export function amountBox(d, { meta = true, testid = 'ov-paybox', amountTestid =
       d.amount != null ? h('strong', { class: 'ov-paybox-value', 'data-testid': amountTestid, text: money(d.amount) }) : null));
 }
 
+// Maksutavat omilla summillaan (sekamaksu = useampi rivi); hyvitetty osuus suluissa saman tavan perässä.
+function paymentMethodsList(methods) {
+  return h('ul', { class: 'ov-methods', 'data-testid': 'ov-pay-methods' }, methods.map((x) => h('li', { class: 'ov-method', 'data-testid': 'ov-pay-method', 'data-method': x.method },
+    h('span', { class: 'ov-method-name', text: [methodLabel(x.method), x.code].filter(Boolean).join(' ') }),
+    h('span', { class: 'ov-method-sum', text: money(x.amount) }),
+    x.refunded > 0.004 ? h('span', { class: 'ov-method-ref muted', 'data-testid': 'ov-pay-method-refunded', text: ov('order_view.pay_method_refunded', { amount: money(x.refunded) }) }) : null)));
+}
+
 function paymentCard(m, env, runner) {
   const box = paymentBox(m, { can: env.ctx.can });
   const rows = [
     ['order_view.pay_total', money(box.total)],
     box.display?.state === 'none' && box.paid <= 0.004 ? null : ['order_view.pay_paid', money(box.paid)],   // 0 €:n tilaus: ei "Maksettu 0,00 €" -riviä
+    box.methods.length ? [box.methods.length > 1 ? 'order_view.pay_methods' : 'order_view.pay_method', paymentMethodsList(box.methods)] : null,   // maksutavat: summa = Maksettu (vain maksetut)
     box.refunded > 0.004 ? ['order_view.pay_refunded', money(box.refunded)] : null,
     box.pendingRefund > 0.004 ? ['order_view.amt.refund_pending', money(box.pendingRefund)] : null,   // keskeneräinen hyvitys (requested/processing)
     box.giftCard > 0.004 ? ['order_view.pay_gift', money(box.giftCard)] : null,
@@ -298,7 +308,7 @@ function paymentCard(m, env, runner) {
     !box.locked && box.actions.refund && !(box.refundCovered > 0.004 && m.overpaid <= 0.004) ? h('button', { type: 'button', class: 'btn ghost ov-wide', 'data-testid': 'ov-pay-refund', text: ov('order_view.more_refund'), onclick: () => runner.refund(m) }) : null);
   return sec(ov('order_view.sec.payment'), 'ov-payment',
     amountBox(box.display, { meta: false, testid: 'ov-pay-box', amountTestid: 'ov-pay-amount' }),
-    h('dl', { class: 'ov-kv' }, rows.map(([k, v]) => [h('dt', { text: ov(k) }), h('dd', { text: v })])),
+    h('dl', { class: 'ov-kv' }, rows.map(([k, v]) => [h('dt', { text: ov(k) }), typeof v === 'string' ? h('dd', { text: v }) : h('dd', {}, v)])),
     btns.length ? h('div', { class: 'ov-stack' }, btns) : null,
     refundRetryList(m, env, runner),
     h('div', { class: 'ov-stack', 'data-slot': 'ov-over', 'data-testid': 'ov-over-slot' }),   // PR 3: "Hyvitä ylisuoritus…" lisätään asynkronisesti, kun palvelin sallii

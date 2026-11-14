@@ -250,7 +250,35 @@ export function paymentBox(m, { can = can0 } = {}) {
     pendingRefund: num(m.pending_refund), refundCovered: num(m.refund_covered),
     giftCard: payments.filter((p) => p.kind === 'gift_card' && isPaidStatus(p.status)).reduce((s, p) => s + num(p.amount) - num(p.refunded_amount), 0),
     partner: payments.filter((p) => p.kind === 'partner' && isPaidStatus(p.status)).reduce((s, p) => s + num(p.amount) - num(p.refunded_amount), 0),
+    methods: paymentMethodSplit(m.payments),
   };
+}
+
+/**
+ * Maksutapojen erittely maksukortille (Joonas 14.11.2026). Sama rajaus kuin palvelimen _order_balance.paid:
+ * mukana vain maksetut (paid, partially_refunded, refunded) maksut bruttosummalla; peruttu, epäonnistunut ja
+ * kesken oleva (maksulinkki, lasku, maksa myöhemmin) eivät ole erittelyssä, joten summa = Maksettu-rivi.
+ * Hyvitetty osuus kulkee maksutavan mukana (refunded). Lahjakortin ja kumppanikoodin peitetty koodi luetaan
+ * maksun muistiinpanosta ("Lahjakortti …AB12 | Verkkokauppa"). Sama tapa + koodi yhdistetään yhdeksi riviksi.
+ */
+export function paymentCode(p) {
+  const kind = paymentKind(p);
+  if (kind !== 'gift_card' && kind !== 'partner') return null;
+  const m = /…\s*([A-Za-z0-9][A-Za-z0-9-]*)/.exec(String(p?.note || ''));
+  return m ? `…${m[1]}` : null;
+}
+export function paymentMethodSplit(payments) {
+  const out = new Map();
+  for (const p of (payments || []).filter((x) => isPaidStatus(x?.status)).sort((a, b) => num(a.id) - num(b.id))) {
+    const method = p.method || (p.provider && p.provider !== 'manual' ? p.provider : 'other');
+    const code = paymentCode(p);
+    const key = `${method}|${code || ''}`;
+    const row = out.get(key) || { key, method, kind: paymentKind(p), code, amount: 0, refunded: 0 };
+    row.amount = round2(row.amount + num(p.amount));
+    row.refunded = round2(row.refunded + num(p.refunded_amount));
+    out.set(key, row);
+  }
+  return [...out.values()];
 }
 
 /**
