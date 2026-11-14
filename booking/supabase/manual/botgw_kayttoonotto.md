@@ -75,3 +75,17 @@ Uudet toiminnot ACTIONS-listassa: `backlog_claim {item_id, note ≤1000}`, `back
 Huom: rungon 16 kB raja rajaa own_absence_syncin käytännössä noin 240 tapahtumaan (ISO-ajat ilman sekunteja, lyhyt ref);
 300 tapahtumaa ei mahdu yhteen kutsuun → 413. Otto jakaa synkan useampaan väliin (from/to), tai raja nostetaan erikseen.
 Deploy kuten yllä (BOTGW_DISABLED=1 pysyy), `supabase functions deploy bot-gateway --no-verify-jwt`.
+
+## Uutiskirjeluonnokset (booking_315, Joonas 14.11.2026, Bottiavustus t1761u)
+Scope `newsletter.draft` (myönnetään otto-grok-botille migraatiossa). Botti saa VAIN luonnokset: luoda, muokata, lukea.
+Ei lähetystä, ajastusta (`suggested_send_at`), esikatselua/testilähetystä, tilan muutosta eikä kytkimiä/lippuja – niille ei ole toimintoa.
+- `newsletter_list {state?: draft|previewed|sent}` → lista (uusin ensin, ≤ 100) `{id, state, version, editable, subject_fi, subject_en, segment, language, suggested_send_at, created_at, updated_at}`; ei runkoja.
+- `newsletter_get {id}` → `{id, state, version, editable, subject_fi, subject_en, body_fi, body_en, style, segment, language, suggested_send_at, created_at, updated_at}`; 404 jos puuttuu.
+- `newsletter_save` (kirjoitus: 20/min ja 300/vrk yhteiset rajat, idempotentti `request_id`)
+  - uusi: `{subject_fi, subject_en ≤200, body_fi, body_en ≤16000, style {layout: letter|editorial, …}, segment, language?}`
+  - muokkaus: `{id, version, …vähintään yksi kenttä}` (puuttuvat kentät säilyvät)
+  - → `{ok, id, state:"draft", version, created, updated_at}`
+  - vain tila `draft` muokattavissa: previewed/sent → 403 `not_editable: …`; väärä versio → 400 `version_conflict: …`;
+    sisältövirhe → 400 `invalid_newsletter: …`; ajastus/tila/muu kenttä → 400 `unknown_arg:*` (edge) tai 403 `field_not_editable` (tietokanta).
+- 16 kB runkoraja: pitkät FI+EN-rungot tallennetaan kahdessa kutsussa (luonti, sitten muokkaus).
+- Rollback: `rollbacks/20261114214038_booking_315_ROLLBACK.sql`; edge tuntee toiminnot, tietokanta vastaa silloin `unknown_action`.
