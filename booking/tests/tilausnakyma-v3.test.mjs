@@ -40,12 +40,12 @@ test('Saapunut näkyy VAIN varauspäivänä ja vain vahvistetulle (t40u)', () =>
   assert.equal(L.canMarkArrived(res({ starts_at: TODAY, status: 'no_show' }), NOW), false);
 });
 
-test('varausrivin toiminnot tilan, päivän ja oikeuden mukaan; Ei saapunut ei ole koskaan toiminto', () => {
+test('varausrivin toiminnot tilan, päivän ja oikeuden mukaan; Ei saapunut vahvistetulle varauspäivästä alkaen (HALL-TILAUS-01)', () => {
   const m = model({ reservations: [res({ starts_at: TODAY, persons: 1, space_code: 'rauni', option_choices: [{ code: 'a' }] })], reservation_meta: [{ id: 1, space_code: 'rauni', rule_id: 9 }] });
   const r = m.reservations[0];
   const acts = L.reservationRowActions(r, m, { can: MANAGER, now: NOW });
-  assert.deepEqual(acts, ['arrive', 'change', 'option', 'addons', 'move', 'cancel']);
-  assert.ok(!acts.includes('noShow'));
+  assert.deepEqual(acts, ['arrive', 'change', 'option', 'addons', 'move', 'noShow', 'cancel']);
+  assert.ok(acts.includes('noShow'), 'HALL-TILAUS-01: Ei saapunut palautettu (vanhan kortin ehto)');
   const fut = model();
   assert.deepEqual(L.reservationRowActions(fut.reservations[0], fut, { can: MANAGER, now: NOW }), ['change', 'addons', 'cancel'], 'tulevalle ei saapumista');
   assert.deepEqual(L.reservationRowActions(fut.reservations[0], fut, { can: () => false, now: NOW }), [], 'ilman bookings.manage ei mitään');
@@ -254,7 +254,7 @@ test('näkymät: ei kovakoodattuja värejä, ei emojeja; poistolle paikka; logii
   }
   const view = read('booking/admin/views/order-view.js');
   assert.match(view, /'data-slot': 'order-delete'/, 'PR #334:n poistolle jätetty paikka');
-  assert.doesNotMatch(view, /from '\.\/order-card-delete/, 'poisto ei kuulu PR 1:een');
+  assert.match(view, /from '\.\/order-card-delete\.js'/, 'HALL-TILAUS-01: poisto kytketty paikkaan');
   for (const rpcName of ['admin_set_reservation_status', 'admin_set_reservation_option', 'admin_set_reservation_addons', 'admin_move_reservation_space', 'admin_set_reservation_note', 'admin_order_history', 'admin_order_lookup']) assert.match(view, new RegExp(`'${rpcName}'`), rpcName);
   assert.match(read('booking/admin/views/order-card.js'), /export function changeDialog/);
   const flow = read('booking/admin/views/order-cancel-flow.js');
@@ -293,7 +293,7 @@ test('peruutus: koko tilauksen ei-atominen keskeytys jää näkyviin dialogiin; 
   const view = read('booking/admin/views/order-view.js');
   assert.match(view, /refundTargets\(m, o\.payments, \{ can: ctx\.can \}\)/, 'Hyvitä maksu -dialogi saa vain refundable_by_payment-maksut (refundTargets → paymentBox.refundable, ks. tilausnakyma-hyvitys-15149)');
   assert.match(view, /'data-slot': 'order-delete'/);
-  assert.doesNotMatch(view, /import[^;]*order-card-delete|['"]admin_order_delete/, 'PR 1 ei riipu poistomoduulista eikä poisto-RPC:stä');
+  assert.doesNotMatch(view, /['"]admin_order_delete/, 'poisto vain talous-API:n ja order-card-delete.js:n kautta (ei suoraa RPC-nimeä)');
   assert.doesNotMatch(view, /Verkkokauppa|Paikan päällä/, 'kanavan nimet talous-texts.js:stä');
 });
 

@@ -13,6 +13,7 @@ import { createEventsMock, EVENT_MOCK_RESOURCES } from './events-mock.js';
 import { generatedAnnualCardCode, generatedDiscountCode, normalizeCode } from '../shop/src/discount-code-logic.js';
 import { paylinkWatchHandlers } from './paylink-watch-mock.js';
 import { viewsMockHandlers } from './views-mock.js';   // YHT-08: Resurssit, Kalenterisulut, Käyttäjät, asiakasnäkymä
+const MOCK_COMPANY_ORDER_NO = 7002;   // HALL-TILAUS-01: yritystilaus + peruutuspyyntö kokeilutilassa
 import { refundWatchHandlers } from './refund-watch-mock.js';
 const TZ = 'Europe/Helsinki';
 const todayHel = (now = new Date()) => now.toLocaleDateString('sv-SE', { timeZone: TZ });
@@ -632,7 +633,11 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
         reservations: [{ id: r.reservation_id, item_id: r.reservation_id * 10, status: r.status, product_name: r.product_name, mode: r.mode, starts_at: r.starts_at, ends_at: r.ends_at, persons: r.persons, notes: r.notes, item_total: total, product_id: r.product_id,
           option: optJson(r.option_id), option_choices: choicesJson(r.product_id), option_missing: missing(r), addons: (r.mock_addons || []).map((x) => ({ ...x })) }], items: mockOrderItems(r), payments: [],
         balance: { total, paid, refunded: 0, pending_link: 0, unpaid, unpaid_unlinked: unpaid, net_paid: paid },
-        is_native: r.source !== 'johku', staff_can_add: r.source !== 'johku' && ['confirmed', 'completed'].includes(r.order_status) };
+        is_native: r.source !== 'johku', staff_can_add: r.source !== 'johku' && ['confirmed', 'completed'].includes(r.order_status),
+        // HALL-TILAUS-01: toinen esimerkkitilaus on yritystilaus, jolla on avoin peruutuspyyntö → tilausnäkymän osiot nähtävissä kokeilutilassa
+        ...(r.order_no === MOCK_COMPANY_ORDER_NO ? { customer_kind: 'company', invoice_reference: 'PO-4471',
+          billing: { company: 'Esimerkki Oy', business_id: '1234567-8', street: 'Testikatu 1', zip: '00100', city: 'Helsinki', invoice_method: 'einvoice', einvoice_address: '003712345678', einvoice_operator: 'OKOYFIHH', contact_name: r.customer_name, contact_email: r.customer_email },
+          requests: [{ id: 1, kind: 'cancel', status: 'open', reason: 'Asiakas sairastui.', created_at: r.created_at }] } : {}) };
     },
     admin_set_reservation_option: (a) => {
       need('bookings.manage');

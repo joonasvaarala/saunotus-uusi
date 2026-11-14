@@ -193,6 +193,8 @@ jobs:
       - run: node --test booking/tests/dialogit-yht06.test.mjs
       # YHT-02/03: yhteiset perusosat ja välilehdet
       - run: node --test booking/tests/komponentit-valilehdet.test.mjs
+      # HALL-TILAUS-01: vanhan kortin toiminnot uudessa tilausnäkymässä
+      - run: node --test booking/tests/tilausnakyma-palautetut.test.mjs
       # edge-funktioiden Deno-testit: PDF:t samat tavut kuin ennen tekstisiirtoa, tekstihaku (_shared/site_texts.ts), MobilePay-virhetekstit
       # bot-gateway (Oton botin yhdyskäytävä, koodari_otto.md): mock-rpc, kytkin, 16 kB raja, virhemappaus (BG429 -> 429), log_failure, ei avainta/tiivistettä/args-sisältöä lokiin
       - uses: denoland/setup-deno@v2

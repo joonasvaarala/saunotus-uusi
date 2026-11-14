@@ -2,7 +2,8 @@
 // Data: admin_get_order (booking_278: invoice, overpaid, refundable_by_payment, voucher_claims, reservation_meta) ja laiskasti
 // admin_order_history (muutoshistoria). Kaikki kirjoitukset nykyisillä RPC:illä; palvelin päättää oikeudet ja lukot, tämä vain näyttää.
 // Logiikka: ../order-view-logic.js. Tekstit: ../order-view-texts.js (ui.admin.order_view.*). Peruutus: ./order-cancel-flow.js.
-// Poisto (PR #334, order-card-delete.js) EI kuulu tähän: vaarallinen alue jättää sille paikan [data-slot=order-delete].
+// HALL-TILAUS-01: poisto (order-card-delete.js) täyttää paikan [data-slot=order-delete]; Ei saapunut, peruutuspyyntö, yrityksen laskutustiedot,
+// vuosikortti ja keskeneräisen hyvityksen uudelleenyritys kuten vanhassa kortissa, samoilla RPC:illä ja oikeuksilla.
 import { rpc as sbRpc, fn as sbFn, select as dbSelect, functionUrl, fnBlob } from '../sb.js';
 import { h, dialog, toast, run, errMsg, field } from '../ui.js';
 import { icon } from '../icons.js';
@@ -25,8 +26,15 @@ import { ov, loadOvTexts } from '../order-view-texts.js';
 import { loadOrderTexts, orderText } from '../orders-texts.js';
 import {
   orderModel, orderBadges, reservationRowActions, reservationBadge, reservationWhen, paymentBox, nextStep, primaryActions, refundTargets, refundSuggestion,
-  moreMenu, collectNotes, buildTimeline, helDay, isWide, placeOverflowMenu,
+  moreMenu, collectNotes, buildTimeline, helDay, isWide, placeOverflowMenu, openCancelRequest, openRefundRows,
 } from '../order-view-logic.js';
+import { orderDeleteBlock } from './order-card-delete.js';
+import { loadDeleteTexts } from '../order-delete-texts.js';
+import { annualCardPanel } from './annual-card-panel.js';
+import { acText, loadAcTexts } from '../annual-card-texts.js';
+import { billingMethodText } from '../billing-method-texts.js';
+import { processOnlineRefunds } from './refund-cancel.js';
+import { confirmAsk } from '../confirm.js';
 
 const list = (...n) => n.flat(Infinity).filter((x) => x != null && x !== false);
 const money = (n) => fmt.money(n);
@@ -103,6 +111,15 @@ export function createActionRunner(env) {
     },
     openCustomer(m) { if (m.customer?.id) location.hash = `#/asiakkaat/${m.customer.id}`; },
     cancel(m, a = {}) { openCancelFlow({ model: m, reservationId: a.reservation_id || null, ctx, rpc, api: env.api, onDone: done }); },
+    // HALL-TILAUS-01: Ei saapunut (admin_set_reservation_status no_show), vahvistus ensin; samat tekstit kuin vanhassa kortissa
+    async noShow(m, a) {
+      if (!(await confirmAsk(orderText('ui.admin.res.no_show_text'), { title: orderText('ui.admin.res.no_show_title'), yes: orderText('ui.admin.res.no_show_submit') }))) return;
+      try { await status(a.reservation_id, 'no_show'); toast(ov('order_view.status.no_show')); done(); } catch (e) { toast(errMsg(e), 'err'); }
+    },
+    async retryRefund(m, row) {
+      try { await processOnlineRefunds(env.api, [{ status: 'requested', provider: row.payment.provider, refund_id: row.refund.id }]); } catch (e) { toast(errMsg(e), 'err'); }
+      done();
+    },
   };
 }
 
@@ -147,6 +164,7 @@ function reservationRow(r, m, env, runner, now) {
   if (actions.includes('option')) (m.reservations.length > 1 ? extra : rowBtns).push(['option', ov('order_view.act.option'), () => openOption(r, env)]);
   if (actions.includes('addons')) (m.reservations.length > 1 ? extra : rowBtns).push(['addons', ov('order_view.act.addons'), () => openAddons(r, m, env)]);
   if (actions.includes('move')) extra.push(['move', ov('order_view.act.move', { space: resName(refs, moveTarget({ ...r, reservation_id: r.id }, ctx.can)) }), () => openMove(r, env)]);
+  if (actions.includes('noShow')) extra.push(['noShow', `${ov('order_view.status.no_show')}…`, () => runner.noShow(m, { reservation_id: r.id })]);
   if (actions.includes('cancel') && m.reservations.length > 1) extra.push(['cancel', ov('order_view.act.cancel'), () => runner.cancel(m, { reservation_id: r.id })]);
   const fixed = rowBtns.map((x) => (Array.isArray(x) ? btn(x[0], x[1], x[2]) : x));
   const menu = extra.length ? overflowMenu(extra, ov('order_view.act.row_more'), 'ov-row-more', { prefer: 'start' }) : null;
@@ -315,6 +333,7 @@ function paymentCard(m, env, runner) {
     amountBox(box.display, { meta: false, testid: 'ov-pay-box', amountTestid: 'ov-pay-amount' }),
     h('dl', { class: 'ov-kv' }, rows.map(([k, v]) => [h('dt', { text: ov(k) }), h('dd', { text: v })])),
     btns.length ? h('div', { class: 'ov-stack' }, btns) : null,
+    refundRetryList(m, env, runner),
     h('div', { class: 'ov-stack', 'data-slot': 'ov-over', 'data-testid': 'ov-over-slot' }),   // PR 3: "Hyvitä ylisuoritus…" lisätään asynkronisesti, kun palvelin sallii
     box.locked ? h('p', { class: 'muted ov-small', 'data-testid': 'ov-pay-locked', text: ov('order_view.pay_locked_note') }) : null,
     !box.locked && box.actions.sendLink && (box.openLink || box.linkSentAt) ? h('p', { class: 'muted ov-small', text: ov('order_view.pay_link_hint') }) : null);
@@ -374,10 +393,56 @@ function timelineCard(m, env) {
   return sec(ov('order_view.sec.timeline'), 'ov-timeline-card', ul, h('div', {}, more, status));
 }
 
+/** HALL-TILAUS-01: asiakkaan avoin peruutuspyyntö huomiopalkkina (vanhassa kortissa muistiinpanoissa). */
+function cancelRequestBar(m) {
+  const rq = openCancelRequest(m);
+  if (!rq) return null;
+  return h('div', { class: 'ov-next ov-next-problem', role: 'alert', 'data-testid': 'ov-cancel-request' },
+    h('span', { class: 'ov-next-ico', 'aria-hidden': 'true', text: '!' }),
+    h('div', { class: 'grow' }, h('strong', { text: tt('order.cancelRequest') }),
+      rq.reason ? h('p', { class: 'ov-small', text: rq.reason }) : null,
+      rq.created_at ? h('p', { class: 'muted ov-small', text: fmt.dt(rq.created_at) }) : null));
+}
+
+/** HALL-TILAUS-01: yritystilauksen laskutustiedot (verkkolaskuosoite, välittäjä, viite) kuten vanhassa kortissa. */
+function billingCard(m) {
+  const raw = m.raw || {};
+  if ((raw.customer_kind || m.customer_kind) !== 'company' || !raw.billing) return null;
+  const x = raw.billing;
+  const method = x.invoice_method || raw.billing_method || null;
+  const online = method === 'online';
+  const rows = [
+    ['Yritys', x.company], ['Y-tunnus', x.business_id],
+    ['Osoite', [x.street, [x.zip, x.city].filter(Boolean).join(' ')].filter(Boolean).join(', ')],
+    method ? [billingMethodText('label'), billingMethodText(method)] : null,
+    online ? null : ['Verkkolasku', x.einvoice_address && [x.einvoice_address, x.einvoice_operator].filter(Boolean).join(' / ')],
+    ['Viite', raw.invoice_reference],
+    ['Yhteyshenkilö', [x.contact_name, x.contact_email, x.contact_phone].filter(Boolean).join(' · ')],
+  ].filter((r) => r && r[1]);
+  return sec(online ? billingMethodText('company_details') : 'Yritysasiakas – laskutustiedot', 'ov-billing',
+    h('dl', { class: 'ov-kv' }, rows.map(([k, v]) => [h('dt', { text: k }), h('dd', { text: v })])));
+}
+
+/** HALL-TILAUS-01: vuosikortin paikka (täytetään asynkronisesti, piilossa kunnes tilauksella on kortti). */
+function annualCard() {
+  return h('section', { class: 'ov-card', 'data-slot': 'ov-annual', 'data-testid': 'ov-annual', hidden: true });
+}
+
+/** HALL-TILAUS-01: keskeneräiset verkkohyvitykset ja "Käsittele uudelleen" (sama ehto kuin vanhassa kortissa). */
+function refundRetryList(m, env, runner) {
+  const rows = openRefundRows(normOrder(m.raw).payments, { can: env.ctx.can, mock: !!env.api?.isMock?.('refund') });
+  if (!rows.length) return null;
+  return h('ul', { class: 'tl-refunds', 'data-testid': 'ov-open-refunds' }, rows.map((row) => h('li', { 'data-testid': 'ov-open-refund', 'data-status': row.refund.status },
+    h('span', { class: `badge ${row.refund.status === 'failed' ? 'st-cancelled' : 'st-pending'}`, text: tt(row.refund.status === 'failed' ? 'refund.failed' : 'refund.pending') }), ' ',
+    h('span', { text: `${money(row.refund.amount)}${row.refund.reason ? ` · ${row.refund.reason}` : ''}` }),
+    row.canRetry ? [' ', h('button', { type: 'button', class: 'btn sm', 'data-testid': 'ov-refund-retry', text: tt('refund.retry'),
+      onclick: (e) => run(e.currentTarget, () => runner.retryRefund(m, row)) })] : null)));
+}
+
 function dangerCard(m, env, runner) {
   const active = m.active || [];
   const canBook = env.ctx.can('bookings.manage');
-  const slot = h('div', { 'data-slot': 'order-delete', 'data-testid': 'ov-delete-slot' });   // PR #334 (order-card-delete.js) kytkee poiston tähän
+  const slot = h('div', { 'data-slot': 'order-delete', 'data-testid': 'ov-delete-slot' });   // HALL-TILAUS-01: täytetään hydrateDelete():ssa
   const cancel = canBook && active.length ? h('button', { type: 'button', class: 'btn danger-ghost sm', 'data-testid': 'ov-cancel', text: ov(active.length > 1 ? 'order_view.danger_cancel_multi' : 'order_view.danger_cancel'), onclick: () => runner.cancel(m) }) : null;
   if (!cancel && !slot) return null;
   return h('section', { class: 'ov-card ov-danger', 'data-testid': 'ov-danger' }, h('h2', { class: 'ov-h', text: ov('order_view.sec.danger') }),
@@ -499,13 +564,36 @@ export async function renderOrderView({ ctx, refs, rpc = sbRpc, orderNo = null, 
     const resHead = h('div', { class: 'row between' }, h('h2', { class: 'ov-h', text: m.reservations.length > 1 ? ov('order_view.sec.reservations', { n: m.reservations.length }) : ov('order_view.sec.reservation') }),
       canAddRes ? h('button', { type: 'button', class: 'linkish', 'data-testid': 'ov-add-purchase', text: ov('order_view.act.add_purchase'), onclick: () => runner.addPurchase(m) }) : null);
     const resCard = sec(resHead, 'ov-reservations', ...(m.reservations.length ? m.reservations.map((r) => reservationRow(r, m, env, runner, at)) : [h('p', { class: 'muted', text: ov('order_view.no_reservations') })]));
-    const mainCol = h('div', { class: 'ov-main' }, nextStepBar(m, env, runner, at), resCard, m.reservations.length > 1 ? null : breakdownCard(m), timelineCard(m, env));
-    const side = h('aside', { class: 'ov-side' }, paymentCard(m, env, runner), customerCard(m, env), notesCard(m, env), dangerCard(m, env, runner));
+    const mainCol = h('div', { class: 'ov-main' }, cancelRequestBar(m), nextStepBar(m, env, runner, at), resCard, m.reservations.length > 1 ? null : breakdownCard(m), timelineCard(m, env));
+    const side = h('aside', { class: 'ov-side' }, paymentCard(m, env, runner), customerCard(m, env), billingCard(m), annualCard(m, env), notesCard(m, env), dangerCard(m, env, runner));
     const bar = mobileBar(m, env, runner, at);
     root.replaceChildren(...list(backLink(m), head, h('div', { class: 'ov-grid' }, mainCol, side), bar));
     root.classList.toggle('has-bar', !!bar);
     root.dataset.orderId = m.order_id; root.dataset.orderNo = m.order_no;
     hydrateOverpayment(m);
+    hydrateDelete(m);
+    hydrateAnnual(m);
+  }
+  // HALL-TILAUS-01: maksamattoman tilauksen poisto (booking_279 admin_order_delete_check → orderDeleteBlock). Puuttuva RPC / virhe → ei mitään.
+  async function hydrateDelete(m) {
+    const slot = root.querySelector('[data-slot=order-delete]');
+    if (!slot || !talousApi.orderDeleteCheck) return;
+    let check = null;
+    try { [check] = await Promise.all([talousApi.orderDeleteCheck(m.order_id), loadDeleteTexts(rpc)]); } catch { check = null; }
+    if (!slot.isConnected || String(root.dataset.orderId) !== String(m.order_id)) return;
+    const node = orderDeleteBlock({ api: talousApi, order: normOrder(m.raw), check, onDeleted: () => { location.hash = back?.href || '#/tilaukset'; }, onRecheck: () => load() });
+    if (node) slot.replaceChildren(node);
+  }
+  // HALL-TILAUS-01: tilauksen vuosikortti ja koodin sähköpostin tila (booking_146 admin_annual_card_for_order)
+  async function hydrateAnnual(m) {
+    const slot = root.querySelector('[data-slot=ov-annual]');
+    if (!slot || !talousApi.annualCardForOrder) return;
+    try {
+      const [info] = await Promise.all([talousApi.annualCardForOrder(m.order_id), loadAcTexts(rpc).catch(() => {})]);
+      if (!info || !slot.isConnected || String(root.dataset.orderId) !== String(m.order_id)) return;
+      const panel = annualCardPanel(info);
+      if (panel) { slot.replaceChildren(h('div', { class: 'ov-card-head' }, h('h2', { class: 'ov-h', text: acText('ui.admin.annual_card.title') })), panel); slot.hidden = false; }
+    } catch { /* ei vuosikorttia tai RPC puuttuu */ }
   }
   // booking_283 (PR 3): ylisuorituksen hyvitysnappi vain kun palvelimen lippu, oikeus ja ylisuoritus täsmäävät (muuten ei nappia, vanha hyvitys ennallaan)
   function hydrateOverpayment(m) {

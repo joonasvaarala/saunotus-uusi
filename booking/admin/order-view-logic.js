@@ -3,7 +3,7 @@
 // Palvelin päättää oikeudet ja lukot: tämä tiedosto vain piilottaa sen, mitä palvelin ei salli, ja kertoo syyn.
 // Määrittely: /tilausnakyma-luonnos/v3/toteutusmaarittely.md §1–§3 (Joonas t38u–t42u, 11.11.2026).
 import { orderInvoiceLocked } from './addon-lock-logic.js';
-import { moveTarget, addonsEditable } from './reservation-dialog-logic.js';
+import { moveTarget, addonsEditable, arrivalActionsAllowed } from './reservation-dialog-logic.js';
 import { pendingRefundTotal, paymentRefundLeft } from './refund-pending.js';
 
 const EPS = 0.005;
@@ -135,8 +135,8 @@ const can0 = () => false;
 const canFn = (can) => (typeof can === 'function' ? can : can0);
 
 /**
- * Varausrivin toiminnot (§2). Palauttaa avaimet: confirm, arrive, change, option, addons, move, cancel.
- * Ei-saapunut ei ole koskaan toiminto (vain tilamerkki), eikä tulevalle varaukselle näytetä saapumiseen liittyvää.
+ * Varausrivin toiminnot (§2). Palauttaa avaimet: confirm, arrive, change, option, addons, move, noShow, cancel.
+ * HALL-TILAUS-01: "Ei saapunut" (noShow) vahvistetulle varaukselle varauspäivästä alkaen (sama ehto kuin vanhassa kortissa); tulevalle ei.
  */
 export function reservationRowActions(r, m, { can = can0, now = new Date() } = {}) {
   const c = canFn(can);
@@ -150,6 +150,7 @@ export function reservationRowActions(r, m, { can = can0, now = new Date() } = {
   if (booking && live && ((r.option_choices || []).length > 0)) out.push('option');
   if (booking && live && !m?.locked && m?.is_native !== false && ((r.addons || []).length ? addonsEditable(m?.raw, r.id) || !!m?.staff_can_add : !!m?.staff_can_add)) out.push('addons');
   if (booking && live && moveTarget({ ...r, reservation_id: r.id }, c)) out.push('move');
+  if (booking && arrivalActionsAllowed(r, now)) out.push('noShow');
   if (booking && ACTIVE.includes(r?.status)) out.push('cancel');
   return out;
 }
@@ -610,4 +611,14 @@ export function placeOverflowMenu(anchor, menuSize, viewport, { margin = 8, gap 
   }
   if (!Number.isFinite(top)) top = margin;
   return { left, top, width, maxWidth };
+}
+
+/** HALL-TILAUS-01: asiakkaan avoin peruutuspyyntö (admin_get_order.requests). */
+export const openCancelRequest = (m) => (m?.requests || []).find((x) => x?.status === 'open' && (!x.kind || x.kind === 'cancel')) || null;
+/** Keskeneräiset hyvitykset maksuittain (requested/processing/failed) ja voiko niitä yrittää uudelleen tästä (sama ehto kuin vanhassa kortissa). */
+export const RETRY_PROVIDERS = ['mobilepay', 'visma_pay', 'montonio', 'checkoutx'];
+export function openRefundRows(payments, { can = can0, mock = false } = {}) {
+  const c = canFn(can);
+  return (payments || []).flatMap((p) => (p.refunds || []).filter((x) => ['requested', 'processing', 'failed'].includes(x.status))
+    .map((rf) => ({ payment: p, refund: rf, canRetry: !mock && rf.status !== 'failed' && RETRY_PROVIDERS.includes(p.provider) && !!c('payments.refund') })));
 }
