@@ -5,6 +5,7 @@ import { navText } from './nav-texts.js';
 // any: sama oikeuslista kuin entisellä nav-kohdalla. Puuttuva any = kaikille henkilökunnalle.
 // HALL-KUORI-01: yhdeksän pääkohtaa työn mukaan, enintään kaksi tasoa. Pikakassa on yläpalkin pikatoiminto (#/pikakassa), ei ryhmän välilehti.
 // Ryhmä aukeaa tärkeimpään välilehteensä (ensimmäinen sallittu). Vanhat ryhmäosoitteet: LEGACY_GROUP_PATHS.
+// Koulutukset (#/koulutukset) on oma pääkohtansa admin.js:n ROUTES-listassa (Joonas 14.11.2026), ei Tarjonta-välilehti.
 export const NAV_GROUPS = [
   { id: 'gifts', path: 'lahjakortit', labelKey: 'ui.admin.nav.gifts_codes', tabs: [
     { id: 'lahjakortit', path: 'lahjakortit', labelKey: 'ui.admin.nav.giftcards', view: 'lahjakortit', any: ['giftcards.manage'] },
@@ -13,7 +14,6 @@ export const NAV_GROUPS = [
   { id: 'offering', path: 'tarjonta', labelKey: 'ui.admin.nav.offering', tabs: [
     { id: 'tuotteet', path: 'tuotteet', labelKey: 'ui.admin.nav.products', view: 'products' },
     { id: 'tapahtumat', path: 'tapahtumat', labelKey: 'ui.admin.nav.events', view: 'events' },
-    { id: 'koulutukset', path: 'koulutukset', labelKey: 'ui.admin.nav.trainings', view: 'koulutukset' },
     { id: 'hiljaiset-ajat', path: 'hiljaiset-ajat', labelKey: 'ui.admin.nav.quiet_hours', view: 'quiet', any: ['catalog.edit', 'settings.edit'] },
     { id: 'resurssit', path: 'resurssit', labelKey: 'ui.admin.nav.resources', view: 'resources' },
     { id: 'sulkukalenterit', path: 'sulkukalenterit', labelKey: 'ui.admin.nav.closures', view: 'closures', any: ['blocks.manage'] },

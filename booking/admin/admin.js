@@ -66,6 +66,7 @@ const ROUTES = [
   { path: 'asiakkaat', label: 'Asiakkaat', icon: 'users', mod: () => loadView('customers') },
   { path: 'lahjakortit', label: 'Lahjakortit ja koodit', labelFn: () => navText('ui.admin.nav.gifts_codes'), icon: 'gift', groupId: 'gifts', mod: () => loadView('nav-group') },
   { path: 'tarjonta', label: 'Tarjonta', labelFn: () => navText('ui.admin.nav.offering'), icon: 'tag', groupId: 'offering', mod: () => loadView('nav-group') },
+  { path: 'koulutukset', label: 'Koulutukset', labelFn: () => navText('ui.admin.nav.trainings'), icon: 'school', mod: () => loadView('koulutukset') },   // Joonas 14.11.2026 (t1752u): taas oma pääkohta (Lauran työtila), ei Tarjonta-välilehti
   { path: 'talous', label: 'Talous', labelFn: () => navText('ui.admin.nav.finance'), icon: 'euro', groupId: 'cash', mod: () => loadView('nav-group') },
   { path: 'viestit', label: 'Viestit', icon: 'mail', any: ['messages.edit'], mod: () => loadView('messages') },
   { path: 'asetukset', label: 'Asetukset', labelFn: () => navText('ui.admin.nav.settings'), icon: 'sliders', groupId: 'settings', mod: () => loadView('nav-group') },

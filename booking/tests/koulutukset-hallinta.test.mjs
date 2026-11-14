@@ -86,10 +86,11 @@ test('Verkossa-merkki: koulutus suoralla linkillä on verkossa, booking_url ei v
   assert.doesNotMatch(read('booking/admin/views/products.js').split('export const isOnline')[1].split('\n};')[0], /booking_url/);
 });
 
-test('päänavigaatio: Koulutukset Tarjonta-ryhmän välilehtenä Tapahtumien jälkeen (HALL-KUORI-01), tekstit FI+EN', () => {
+test('päänavigaatio: Koulutukset omana pääkohtana Tarjonnan jälkeen (Joonas 14.11.2026), ei Tarjonta-välilehteä, tekstit FI+EN', () => {
   const nav = read('booking/admin/admin-navigation.js');
-  assert.match(nav, /id: 'tapahtumat', path: 'tapahtumat'[^\n]*\n\s*\{ id: 'koulutukset', path: 'koulutukset', labelKey: 'ui\.admin\.nav\.trainings', view: 'koulutukset' \}/);
-  assert.deepEqual(resolveAdminPath('koulutukset'), { path: 'tarjonta', legacyReservations: false, groupId: 'offering', tabId: 'koulutukset' });
+  assert.doesNotMatch(nav, /\{ id: 'koulutukset', path: 'koulutukset'/);
+  assert.match(read('booking/admin/admin.js'), /path: 'tarjonta'[^\n]*\n\s*\{ path: 'koulutukset', label: 'Koulutukset', labelFn: \(\) => navText\('ui\.admin\.nav\.trainings'\), icon: 'school', mod: \(\) => loadView\('koulutukset'\) \}/);
+  assert.deepEqual(resolveAdminPath('koulutukset'), { path: 'koulutukset', legacyReservations: false, groupId: null, tabId: null });
   assert.equal(NAV_TEXTS.fi['ui.admin.nav.trainings'], 'Koulutukset');
   assert.equal(NAV_TEXTS.en['ui.admin.nav.trainings'], 'Trainings');
   assert.ok(ICONS.school);
