@@ -24,6 +24,7 @@ const MOCK_SB = `export async function rpc(name, a = {}) {
   if (name === 'public_availability_all') return (m.rows || []).filter((r) => r.session_date >= a.p_from && r.session_date <= a.p_to);
   if (name === 'public_quiet_offers') return m.offers || [];
   if (name === 'public_events') return m.events || [];
+  if (name === 'public_settings') return m.settings || { public_treatment_horizon_days: 90 };
   if (name === 'public_catalog') return m.catalog || [];
   if (name === 'public_treatment_availability') return (m.treat || []).filter((r) => r.product_id === a.p_product_id && r.session_date >= a.p_from && r.session_date <= a.p_to);
   throw new Error('tuntematon rpc ' + name);

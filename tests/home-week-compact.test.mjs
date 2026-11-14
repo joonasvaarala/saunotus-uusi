@@ -3,7 +3,7 @@
 // ei tiivis/laaja-nappia, ei sivuttaista ylivuotoa eikä päällekkäisyyttä 360/390/430 px:ssä. Data on mockattu (tests/week-browser-harness.mjs).
 import test, { before, after } from 'node:test';
 import assert from 'node:assert/strict';
-import { startSite, weekMock, hit } from './week-browser-harness.mjs';
+import { startSite, weekMock, hit, ut } from './week-browser-harness.mjs';
 
 let site;
 before(async () => { site = await startSite({ port: 4421, tag: 'week-compact' }); });
@@ -81,7 +81,7 @@ test('työpöytä 1280: 7 saraketta, kolme palveluriviä samoilla korkeuksilla, 
 });
 
 test('viikkonavigointi: nuolet, Tämä viikko, ei menneisiin viikkoihin, hoidot vain varausikkunassa', async () => {
-  const page = await site.open(1280, '/saunavuorot/', weekMock());
+  const page = await site.open(1280, '/saunavuorot/', { ...weekMock(), settings: { public_treatment_horizon_days: 14 } });
   const label = () => page.locator('.vk .vk-wk').innerText();
   assert.match(await label(), /Viikko 47\s+16\.–22\.11\./i);
   assert.ok(await page.locator('[data-vk-nav="prev"]').isDisabled(), 'ei edelliseen viikkoon');
@@ -96,10 +96,11 @@ test('viikkonavigointi: nuolet, Tämä viikko, ei menneisiin viikkoihin, hoidot 
   assert.match(await page.locator('.vk-day[data-vk-day="3"] .vk-pubc').innerText(), /16\.00–19\.00[\s\S]*29\s?€/);
   const calls = await page.evaluate(() => globalThis.__RPC.filter((c) => c.name === 'public_availability_all').map((c) => [c.args.p_from, c.args.p_to]));
   assert.deepEqual(calls, [['2026-11-16', '2026-11-22'], ['2026-11-23', '2026-11-29']]);
-  // seuraava viikko: hoitojen varausikkuna (14 pv) ylittyy → ei hoitohakuja, selite
+  // seuraava viikko: public_settings antaa ikkunaksi 14 pv → viikko 49 ylittää sen: ei hoitohakuja, selite
   await page.click('[data-vk-nav="next"]');
   await page.waitForFunction(() => /Viikko 49/.test(document.querySelector('.vk .vk-wk')?.textContent || ''));
   assert.match(await page.locator('.vk .vk-careh').innerText(), /avautuvat lähempänä/);
+  assert.match(await page.locator('.vk-day[data-vk-day="4"] .vk-carec').innerText(), /Perinnesaunotusilta/, 'tapahtuma näkyy, vaikka hoitoikkuna on ohitettu');
   const treatCalls = await page.evaluate(() => globalThis.__RPC.filter((c) => c.name === 'public_treatment_availability').map((c) => c.args.p_from));
   assert.ok(treatCalls.every((f) => f < '2026-11-30'), `hoitohaku ikkunan ulkopuolelle: ${treatCalls}`);
   await page.click('[data-vk-nav="now"]');
@@ -107,6 +108,52 @@ test('viikkonavigointi: nuolet, Tämä viikko, ei menneisiin viikkoihin, hoidot 
   assert.equal(await page.locator('[data-vk-nav="now"]').count(), 0);
   assert.ok(await page.locator('[data-vk-nav="prev"]').isDisabled());
   await page.close();
+});
+
+test('hoitoikkuna 90 pv (public_settings): viikko 30.11.–6.12. näyttää hoidot ja tapahtuman samassa solussa', async () => {
+  const m = weekMock();
+  const D = (n) => `2026-12-${String(n).padStart(2, '0')}`;
+  m.treat.push({ product_id: 10, session_date: D(1), starts_at: ut(D(1), '16:00'), ends_at: ut(D(1), '17:00'), status: 'available', total: 99 });
+  m.treat.push({ product_id: 10, session_date: D(4), starts_at: ut(D(4), '16:00'), ends_at: ut(D(4), '17:00'), status: 'available', total: 99 });
+  m.settings = { public_treatment_horizon_days: 90 };
+  const page = await site.open(1280, '/saunavuorot/', m);
+  await page.click('[data-vk-nav="next"]');
+  await page.waitForFunction(() => /Viikko 48/.test(document.querySelector('.vk .vk-wk')?.textContent || ''));
+  await page.click('[data-vk-nav="next"]');
+  await page.waitForFunction(() => /Viikko 49\s+30\.11\.–6\.12\./.test(document.querySelector('.vk .vk-wk')?.textContent || ''));
+  assert.doesNotMatch(await page.locator('.vk .vk-careh').innerText(), /avautuvat lähempänä/);
+  assert.match(await page.locator('.vk-day[data-vk-day="1"] .vk-carec').innerText(), /Saunahoito/);
+  const fri = await page.locator('.vk-day[data-vk-day="4"] .vk-carec').innerText();
+  assert.match(fri, /Saunahoito/);
+  assert.match(fri, /Perinnesaunotusilta/);
+  assert.equal(await page.locator('.vk .vk-sec-title, .vk h2.sec-title').count(), 0, 'saunavuorot-sivulla ei otsikkoa');
+  await page.close();
+  const home = await site.open(1280, '/', m);
+  assert.match(await home.locator('.vk h2.sec-title').innerText(), /Tällä viikolla saunassa/);
+  await home.click('[data-vk-nav="next"]');
+  await home.waitForFunction(() => /Viikko 48/.test(document.querySelector('.vk h2.sec-title')?.textContent || ''));
+  assert.match(await home.locator('.vk h2.sec-title').innerText(), /Viikko 48 saunassa/);
+  await home.click('[data-vk-nav="now"]');
+  await home.waitForFunction(() => /Tällä viikolla saunassa/.test(document.querySelector('.vk h2.sec-title')?.textContent || ''));
+  const rpcs = await home.evaluate(() => globalThis.__RPC.map((c) => c.name));
+  assert.equal(rpcs.filter((n) => n === 'public_catalog').length, 1, 'katalogi haetaan kerran');
+  assert.equal(rpcs.filter((n) => n === 'public_events').length, 1, 'tapahtumat haetaan kerran');
+  await home.close();
+});
+
+test('EN: viikkoväli englanniksi, Sauna training -linkki saunahealer.com', async () => {
+  const en = await site.open(1280, '/en/', weekMock());
+  assert.match(await en.locator('.vk .vk-wk').innerText(), /Week 47\s+16–22 Nov/i);
+  assert.equal(await en.locator('.vk a[href="https://saunahealer.com"]').count(), 1);
+  assert.equal(await en.locator('.vk a[href="https://saunakoulutus.fi"]').count(), 0);
+  assert.match(await en.locator('.vk a[href="https://saunahealer.com"]').innerText(), /Sauna training/i);
+  await en.click('[data-vk-nav="next"]');
+  await en.waitForFunction(() => /Week 48/.test(document.querySelector('.vk .vk-wk')?.textContent || ''));
+  await en.click('[data-vk-nav="next"]');
+  await en.waitForFunction(() => /Week 49/.test(document.querySelector('.vk .vk-wk')?.textContent || ''));
+  assert.match(await en.locator('.vk .vk-wk').innerText(), /Week 49\s+30 Nov–6 Dec/i);
+  assert.match(await en.locator('.vk h2.sec-title').innerText(), /Week 49 at the sauna/);
+  await en.close();
 });
 
 test('viikon tapahtumavihje: ei tapahtumia → seuraavat tapahtumat alareunassa, ei erillistä tapahtumariviä', async () => {

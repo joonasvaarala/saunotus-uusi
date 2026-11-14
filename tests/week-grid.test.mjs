@@ -2,12 +2,15 @@
 // rakennusvaiheen varaversio (src/week-grid.mjs) ja tuonti 171. Ei verkkoa, ei kantaa: kaikki data on tässä tiedostossa.
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
-import { buildWeek, careName, weekStartOf, isoWeekNumber, weekRange, clampWeek, eventHint, careEntry, MAX_WEEKS_AHEAD } from '../booking/shop/src/week-grid-logic.js';
-import { weekGridTree, toHtml, h } from '../booking/shop/src/week-grid-view.js';
+import { readFileSync, cpSync, mkdtempSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { pathToFileURL } from 'node:url';
+import { buildWeek, careName, CARE_HORIZON_DAYS, weekStartOf, isoWeekNumber, weekRange, clampWeek, eventHint, careEntry, MAX_WEEKS_AHEAD } from '../booking/shop/src/week-grid-logic.js';
+import { weekGridTree, toHtml, h, ownDuration, headingTitle } from '../booking/shop/src/week-grid-view.js';
 import { WEEK_GRID_TEXTS } from '../booking/shop/src/week-grid-texts.js';
-import { shopHrefs } from '../booking/shop/src/week-grid.js';
-import { weekGrid, gridTexts } from '../src/week-grid.mjs';
+import { shopHrefs, loadWeek } from '../booking/shop/src/week-grid.js';
+import { weekGrid, gridTexts, trainingUrl } from '../src/week-grid.mjs';
 
 const START = '2026-11-16';                     // maanantai, viikko 47
 const TODAY = '2026-11-16';
@@ -58,6 +61,9 @@ test('viikon apurit: maanantai, ISO-viikko, väli ja selausrajat', () => {
   assert.equal(isoWeekNumber('2026-11-16'), 47);
   assert.equal(weekRange('2026-11-16'), '16.–22.11.');
   assert.equal(weekRange('2026-11-30'), '30.11.–6.12.');
+  assert.equal(weekRange('2026-11-16', 'en'), '16–22 Nov');
+  assert.equal(weekRange('2026-11-30', 'en'), '30 Nov–6 Dec');
+  assert.equal(week({ lang: 'en' }).range, '16–22 Nov');
   assert.equal(clampWeek('2026-11-09', TODAY), '2026-11-16');
   assert.equal(clampWeek('2027-06-07', TODAY), `2027-01-11`.replace('2027-01-11', new Date(Date.parse('2026-11-16T12:00:00Z') + 7 * MAX_WEEKS_AHEAD * 864e5).toISOString().slice(0, 10)));
   const m = week();
@@ -254,4 +260,158 @@ test('tyylit: ei vanhoja .week/.sess-sääntöjä, ei tiivis/laaja-valitsinta; v
   assert.doesNotMatch(css, /\.week-more|\.week-soon|\.week\.soon|\.week>li|\.sess\b/);
   assert.match(css, /@media \(min-width:900px\)\{[\s\S]*?\.vk-days\{display:grid;grid-template-columns:150px repeat\(7,minmax\(0,1fr\)\)/);
   assert.match(css, /\.vk\.is-js \.vk-day:not\(\.is-on\)\{display:none\}/);
+});
+
+// ---- PR #386: korjaukset ----
+const evDec = [ev('perinnesaunotusilta', 'Perinnesaunotusilta (la & su)', [occ('2026-12-04', '17:00', '18:30')]), ev('sipoonjoen-joulusauna', 'Sipoonjoen joulusauna', [occ('2026-12-19', '14:00', '16:00')])];
+
+test('hoitoikkuna tulee asetuksesta: 90 pv → viikko 30.11. näyttää hoidot, oletus 14 pv piilottaa vain varalla', () => {
+  assert.equal(CARE_HORIZON_DAYS, 14, 'vara-arvo');
+  const careDec = [careEntry({ id: 10, slug: 'saunahoito-2', name: 'Saunahoito' }, new Map([['2026-12-01', [{}]], ['2026-12-05', [{}]]]))];
+  const wk = { start: '2026-11-30', care: careDec, rows: [] };
+  const m90 = week({ ...wk, careHorizon: 90 });
+  assert.equal(m90.careLater, false);
+  assert.deepEqual(day(m90, '2026-12-01').care.map((c) => c.name), ['Saunahoito']);
+  assert.deepEqual(day(m90, '2026-12-05').care.map((c) => c.name), ['Saunahoito']);
+  assert.equal(week({ ...wk, careHorizon: 14, care: [] }).careLater, true, 'ikkuna 14 pv: viikko 30.11. ulkopuolella');
+  assert.equal(week({ start: '2027-02-15', care: [], careHorizon: 90 }).careLater, true, 'ikkunan ulkopuolella myös 90 pv:llä');
+  assert.equal(week({ start: '2026-11-30', care: null, careHorizon: 90 }).careLater, false, 'haku epäonnistui → ei "avautuu lähempänä" -tekstiä');
+});
+
+test('tapahtumat näkyvät aina Hoidot ja rituaalit -solussa, myös kun careLater on tosi tai hoitoja ei ole', () => {
+  const later = week({ start: '2026-11-30', care: [], careHorizon: 14, events: evDec });
+  assert.equal(later.careLater, true);
+  assert.deepEqual(day(later, '2026-12-04').events.map((x) => x.name), ['Perinnesaunotusilta (la & su)']);
+  assert.equal(later.hasEvents, true);
+  const html = weekGridTree(later, T, {}).map(toHtml).join('');
+  const care = html.slice(html.indexOf('vk-carec'));
+  assert.match(html, /Hoitojen ajat avautuvat lähempänä/, 'selite palvelurivin otsikossa');
+  assert.match(care, /vk-evt/);
+  assert.match(care, /Perinnesaunotusilta/);
+  assert.equal((html.match(/vk-evt/g) || []).length > 0, true);
+  // sama viikko, ikkuna 90: hoito + tapahtuma samassa solussa
+  const careFri = [careEntry({ id: 10, slug: 'saunahoito-2', name: 'Saunahoito' }, new Map([['2026-12-04', [{}]]]))];
+  const both = week({ start: '2026-11-30', care: careFri, careHorizon: 90, events: evDec });
+  const bothHtml = weekGridTree(both, T, {}).map(toHtml).join('');
+  assert.match(bothHtml, /vk-cl[^>]*>Saunahoito/);
+  assert.match(bothHtml, /vk-evt/);
+  assert.doesNotMatch(bothHtml, /Hoitojen ajat avautuvat/);
+  // joulusauna 19.12.: viikko 14.–20.12. ikkunan ulkopuolella (14 pv), tapahtuma silti näkyvissä
+  const xmas = week({ start: '2026-12-14', care: [], careHorizon: 14, events: evDec });
+  assert.deepEqual(day(xmas, '2026-12-19').events.map((x) => x.name), ['Sipoonjoen joulusauna']);
+});
+
+test('loadWeek: hoitohaku rajataan näkyvään viikkoon, tähän päivään ja asetusten ikkunaan', async () => {
+  const careCalls = [];
+  const loadCareFn = async (cat, from, to) => { careCalls.push([from, to]); return []; };
+  const rpc = async () => [];
+  const cat = [{ id: 10 }];
+  // ikkuna 90: viikko 30.11.–6.12. haetaan kokonaan
+  await loadWeek('2026-11-30', { rpc, today: TODAY, catalog: cat, horizon: 90, loadCareFn });
+  assert.deepEqual(careCalls.pop(), ['2026-11-30', '2026-12-06']);
+  // kuluva viikko alkaa tänään (ei menneitä päiviä)
+  await loadWeek('2026-11-16', { rpc, today: '2026-11-18', catalog: cat, horizon: 90, loadCareFn });
+  assert.deepEqual(careCalls.pop(), ['2026-11-18', '2026-11-22']);
+  // ikkuna loppuu kesken viikon: 14 pv tästä päivästä = 16.11.–29.11.; viikko 23.–29.11. kokonaan, 30.11. ei haeta
+  await loadWeek('2026-11-23', { rpc, today: TODAY, catalog: cat, horizon: 14, loadCareFn });
+  assert.deepEqual(careCalls.pop(), ['2026-11-23', '2026-11-29']);
+  const r = await loadWeek('2026-11-30', { rpc, today: TODAY, catalog: cat, horizon: 14, loadCareFn });
+  assert.equal(careCalls.length, 0, 'ikkunan ulkopuolella ei hoitohakua');
+  assert.deepEqual(r.care, [], 'ei hakua = tyhjä, ei virhe');
+  // ikkuna leikkaa viikon: 20 pv → 16.11.–5.12.; viikko 30.11. haetaan 30.11.–5.12.
+  await loadWeek('2026-11-30', { rpc, today: TODAY, catalog: cat, horizon: 20, loadCareFn });
+  assert.deepEqual(careCalls.pop(), ['2026-11-30', '2026-12-05']);
+});
+
+test('careHorizon: public_settings.public_treatment_horizon_days (90), varalla 14', async () => {
+  // week-grid.js tuo treatments.js:n dynaamisesti, ja se tuo ./sb.js:n (kopioidaan buildissa) → väliaikainen kopio, sb.js tilalla tynkä
+  const dir = join(mkdtempSync(join(process.env.TMPDIR || tmpdir(), 'vk-horizon-')), 'shop');
+  cpSync(new URL('../booking/shop/src', import.meta.url).pathname, dir, { recursive: true });
+  writeFileSync(join(dir, 'sb.js'), 'export class ApiError extends Error {}\nexport async function rpc() { return null; }\n');
+  const W = await import(pathToFileURL(join(dir, 'week-grid.js')));
+  assert.equal(await W.careHorizon({ public_treatment_horizon_days: 90 }), 90);
+  assert.equal(await W.careHorizon(null), 14);
+  assert.equal(await W.careHorizon({}), 14);
+});
+
+test('jälkilöyly täynnä: sana «Täynnä» näkyy (FI) / «Full» (EN), aika ja hinta yliviivataan tyylillä', () => {
+  const m = week();
+  const html = weekGridTree(m, T, {}).map(toHtml).join('');
+  assert.match(html, /vk-line is-full[^>]*>[\s\S]*?<span class="vk-lf">Täynnä<\/span>/);
+  assert.equal((html.match(/class="vk-lf"/g) || []).length, 1, 'vain täydelle riville');
+  assert.doesNotMatch(html.match(/class="vk-line is-quiet"[^]*?<\/a>/)[0], /vk-lf/);
+  const en = weekGridTree(week({ lang: 'en' }), gridTexts('en'), {}).map(toHtml).join('');
+  assert.match(en, /<span class="vk-lf">Full<\/span>/);
+  const css = readFileSync(new URL('../src/styles.css', import.meta.url), 'utf8');
+  assert.match(css, /\.vk-lf\{/);
+});
+
+test('otsikko: kuluvalla viikolla perusotsikko, muilla viikoilla viikkonumero (FI + EN)', () => {
+  const hd = { kicker: 'K', title: T.title };
+  assert.equal(headingTitle(week(), T, hd), 'Tällä viikolla saunassa');
+  const next = week({ start: '2026-11-30' });
+  assert.equal(headingTitle(next, T, hd), 'Viikko 49 saunassa');
+  assert.equal(headingTitle(week({ start: '2026-11-30', lang: 'en' }), gridTexts('en'), { title: gridTexts('en').title }), 'Week 49 at the sauna');
+  assert.equal(headingTitle({ week: null, nav: { now: false } }, T, hd), T.title, 'staattinen varaversio');
+  const html = weekGridTree(next, T, { heading: hd }).map(toHtml).join('');
+  assert.match(html, /<h2 class="sec-title">Viikko 49 saunassa<\/h2>/);
+  assert.match(weekGridTree(week(), T, { heading: hd }).map(toHtml).join(''), /<h2 class="sec-title">Tällä viikolla saunassa<\/h2>/);
+  assert.equal(gridTexts('en').training, 'Sauna training');
+  assert.equal(gridTexts('en').titleWeek, 'Week {n} at the sauna');
+});
+
+test('EN-viikkoväli näkyy navigaatiossa (16–22 Nov, 30 Nov–6 Dec)', () => {
+  const en = gridTexts('en');
+  const html = weekGridTree(week({ lang: 'en', start: '2026-11-30' }), en, {}).map(toHtml).join('');
+  assert.match(html, /Week 49<\/b> 30 Nov–6 Dec/);
+  assert.doesNotMatch(html, /Week 49<\/b> 30\.11/);
+});
+
+test('oman vuoron kesto: haarukka (1–7 h), yksi pituus (2 h), tunnin vuoro mukaan haarukkaan mutta ei yleisiin', () => {
+  const d = (n) => `2026-11-${n}`;
+  const own = (date, s, e) => row('oma-saunavuoro', 'private_sauna', 25, date, s, e, { base_price: 250 });
+  const hour = row('tunnin-vuoro', 'public_sauna', 6, d(17), '10:00', '11:00', { unit_price: 18 });
+  const rr = [own(d(17), '12:00', '19:00'), hour, own(d(18), '13:00', '15:00'), own(d(19), '10:00', '11:30'), own(d(19), '12:00', '14:00')];
+  const m = week({ rows: rr });
+  const a = day(m, d(17)).own, b = day(m, d(18)).own, c = day(m, d(19)).own;
+  assert.deepEqual([a.durMin, a.durMax], [60, 420], 'tunnin vuoro (1 h) + 7 h');
+  assert.deepEqual([b.durMin, b.durMax], [120, 120]);
+  assert.equal(ownDuration(a, T), '1–7 h');
+  assert.equal(ownDuration(b, T), '2 h');
+  assert.equal(ownDuration(c, T), '1,5–2 h', 'FI desimaalipilkku');
+  assert.equal(ownDuration(c, gridTexts('en')), '1.5–2 h');
+  assert.ok(!day(m, d(17)).public.some((g) => g.slug === 'tunnin-vuoro'), 'tunnin vuoroa ei yleisten vuorojen rivillä');
+  const html = weekGridTree(m, T, {}).map(toHtml).join('');
+  assert.match(html, /alk\.\s*<b>250\s€<\/b>\s·\s1–7\sh/);
+  assert.match(html, /alk\.\s*<b>250\s€<\/b>\s·\s2\sh/);
+  const en = weekGridTree(week({ rows: rr, lang: 'en' }), gridTexts('en'), {}).map(toHtml).join('');
+  assert.match(en, /from\s*<b>€250<\/b> · 1–7\sh/);
+  // täynnä oleva oma vuoro: ei kestoa; ei kestoa jos kaikki pituudet puuttuvat
+  assert.equal(ownDuration({ durMin: null, durMax: null }, T), '');
+  assert.equal(day(week(), '2026-11-22').own.durMin, null, 'täynnä: ei kestoa');
+  assert.doesNotMatch(weekGridTree(week(), T, {}).map(toHtml).join('').match(/vk-oma is-full[^]*?<\/a>/)[0], / h</);
+});
+
+test('Koulutukset-linkki: FI saunakoulutus.fi, EN saunahealer.com', () => {
+  assert.equal(trainingUrl('fi'), 'https://saunakoulutus.fi');
+  assert.equal(trainingUrl('en'), 'https://saunahealer.com');
+  const fi = weekGrid('fi', { heading: true, links: { all: '/x/' } });
+  const en = weekGrid('en', { heading: true, links: { all: '/x/' } });
+  assert.match(fi, /<a class="btn light sm" href="https:\/\/saunakoulutus\.fi" rel="noopener">Koulutukset →<\/a>/);
+  assert.match(en, /<a class="btn light sm" href="https:\/\/saunahealer\.com" rel="noopener">Sauna training →<\/a>/);
+  assert.doesNotMatch(en, /saunakoulutus\.fi/);
+  assert.doesNotMatch(fi, /saunahealer\.com/);
+});
+
+test('tapahtumavihje: nimen sulkuosa pois', () => {
+  const hint = week({ start: '2026-11-30', care: [], careHorizon: 14, events: [ev('perinnesaunotusilta', 'Perinnesaunotusilta (la & su, rajoitettu)', [occ('2026-12-12', '17:00', '18:30')])] }).hint;
+  assert.equal(hint[0].name, 'Perinnesaunotusilta');
+});
+
+test('tyylit: viikko-ohjelman virhe- ja vähissä-värit käyttävät --danger-tokenia, ei kovakoodattua heksaa', () => {
+  const css = readFileSync(new URL('../src/styles.css', import.meta.url), 'utf8');
+  const vk = css.split('\n').filter((l) => /^\.vk-(low|chip\.is-low|error)\b/.test(l)).join('\n');
+  assert.match(vk, /\.vk-low\{color:var\(--danger\)/);
+  assert.match(vk, /\.vk-error\{[^}]*color:var\(--danger\)/);
+  assert.doesNotMatch(vk, /#9a4b1f|#c98a5a/i);
 });
