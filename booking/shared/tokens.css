@@ -1,0 +1,55 @@
+/* Yhteiset tokenit: sivusto, kauppa ja hallinta (UX-uudistus, YHT-01). Lähde: docs/mockups/uudistus/tokens.css.
+   Hallinta lataa tämän ennen admin.css:ää. Sivusto ja kauppa eivät vielä upota tätä (ei käyttäjiä, turhia tavuja
+   jokaisella sivulla); lisätään src/render.mjs:ään vasta, kun sivuston tyylit käyttävät tokeneita. build-pages kopioi tiedoston hallinnan hakemistoon. Vain --c-*, --f-*, --fs-*, --sp-*, --r-*,
+   --shadow-*, --focus ja --tap; vanhat muuttujat (--green, --gold, --ink …) pysyvät toistaiseksi omissa tiedostoissaan, ja
+   booking/tests/tokenit.test.mjs vartioi, ettei niiden arvo eroa tokenista. */
+:root {
+  /* Värit: teksti */
+  --c-ink: #2F2923;          /* otsikot */
+  --c-text: #4F443A;         /* leipäteksti */
+  --c-muted: #6B5E52;        /* toissijainen, ≥ 4,5:1 taustaa vasten */
+  /* Värit: brändi */
+  --c-brand: #2B3A30;        /* ensisijainen painike, yläpalkki, valinta */
+  --c-brand-2: #3C5143;      /* hover */
+  --c-accent: #7A5530;       /* linkit, fokus */
+  --c-gold-1: #D1A56F;       /* vain sivuston markkinointi-CTA */
+  --c-gold-2: #A87B45;
+  --c-gold-ink: #1C1209;
+  /* Värit: pinnat */
+  --c-bg: #F4EFE7;
+  --c-surface: #FFFFFF;      /* hallinnan kortit */
+  --c-surface-2: #FAF7F1;    /* sivuston kortit */
+  --c-tint: #F3ECE1;
+  --c-line: rgba(63, 53, 44, .18);
+  --c-field: #8B7F73;        /* kenttien reunus, ≥ 3:1 */
+  /* Värit: tilat (teksti / tausta) */
+  --c-ok: #1D4D2B;      --c-ok-bg: #E8F3EA;
+  --c-warn: #6B4B00;    --c-warn-bg: #FDF1D8;
+  --c-danger: #7B1D12;  --c-danger-bg: #FBEAEA;
+  --c-info: #2B3A30;    --c-info-bg: #E4EBE5;
+  --c-neutral: #4F443A; --c-neutral-bg: #EFEAE3;
+
+  /* Kirjasimet */
+  --f-ui: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;   /* hallinta */
+  --f-head: "Cormorant Garamond", Georgia, "Times New Roman", serif;   /* sivuston ja kaupan otsikot: yksi serif */
+  --f-body: "Lato", Arial, sans-serif;                                 /* sivuston ja kaupan leipä */
+  --f-label: "Montserrat", Arial, sans-serif;                          /* pienet versaaliotsikot ja sivuston painikkeet */
+
+  /* Kokoasteikko (hallinta: 6 kokoa nykyisen 38:n sijaan) */
+  --fs-xs: 12px; --fs-sm: 14px; --fs-md: 16px; --fs-lg: 18px; --fs-xl: 22px; --fs-2xl: 28px;
+
+  /* Välistys 4 px:n askelin */
+  --sp-1: 4px; --sp-2: 8px; --sp-3: 12px; --sp-4: 16px; --sp-5: 20px; --sp-6: 24px; --sp-7: 32px; --sp-8: 48px;
+
+  /* Muoto */
+  --r-sm: 6px;    /* merkit */
+  --r-md: 10px;   /* painikkeet, kentät */
+  --r-lg: 14px;   /* kortit */
+  --r-pill: 999px;/* vain suodatinsirut */
+  --shadow-card: 0 1px 2px rgba(47, 41, 35, .06), 0 2px 8px rgba(47, 41, 35, .05);
+  --shadow-pop: 0 12px 32px rgba(47, 41, 35, .18);
+  --focus: 3px solid var(--c-accent);
+
+  /* Murtokohdat (dokumentointia varten; CSS-muuttujat eivät toimi @media-ehdoissa): 600 puhelin, 900 tabletti, 1200 leveä */
+  --tap: 44px;    /* kosketuskohteen vähimmäiskoko */
+}

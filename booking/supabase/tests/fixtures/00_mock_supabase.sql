@@ -58,6 +58,13 @@ begin
   delete from cron.job where jobname = p_jobname;
   return found;
 end $$;
+-- booking_305: oikean pg_cronin tapaan myös jobid-versio (cron.unschedule(j.jobid) from cron.job ...).
+create or replace function cron.unschedule(p_jobid bigint) returns boolean
+language plpgsql as $$
+begin
+  delete from cron.job where jobid = p_jobid;
+  return found;
+end $$;
 
 -- vault-mock: SQL-funktiot (esim. booking._cron_secret_ok) viittaavat tauluun luontihetkellä.
 create schema if not exists vault;
