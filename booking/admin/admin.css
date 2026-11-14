@@ -1533,3 +1533,35 @@ body.shot #shell .nav .lbl{display:inline}
 .ov-switch input:checked+i::after{left:22px}
 .ov-switch input:focus-visible+i{outline:3px solid var(--gold);outline-offset:2px}
 .ov-switch input:disabled+i{opacity:.55}
+
+/* HALL-TUOTTEET-01: tuote-editori omana näkymänä (#/tuotteet/<id>): työpöydällä lista + sivupaneeli, kapealla vain editori */
+a.listrow{text-decoration:none}
+.listrow[aria-current=true]{border-color:var(--green);box-shadow:inset 3px 0 0 var(--green)}
+.prodlayout{display:grid;gap:16px;align-items:start}
+.prodlist-col,.prodpanel-host{min-width:0}
+@media(min-width:62.5em){
+  .prodlayout.editing{grid-template-columns:minmax(300px,380px) minmax(0,1fr)}
+  .prodlayout.editing .listrow:not(.rescard){grid-template-columns:1fr}
+  .prodlayout.editing .prodpanel-host{position:sticky;top:8px}
+}
+@media(max-width:62.4375em){.prodlayout.editing .prodlist-col,.prodlayout.editing~.prodextras{display:none}}
+.prodextras{display:grid;gap:16px;margin-top:16px}
+.prodpanel{padding:0;overflow:visible}
+.prodpanel-head{padding:12px 16px;gap:10px;border-bottom:1px solid var(--line)}
+.prodpanel-head h2{margin:0;overflow-wrap:anywhere}
+.prodpanel>.tl-tabs{margin:0;padding:0 8px}
+.prodtabpanel{padding:14px 16px 20px;min-width:0}
+.prodtabpanel[hidden]{display:none}
+.tl-tabbtn[data-dirty=true]::after{content:"";display:inline-block;width:8px;height:8px;margin-left:6px;border-radius:50%;background:var(--gold);vertical-align:middle}
+.prodsavebar{position:sticky;bottom:0;z-index:2;display:grid;gap:6px;padding:10px 16px;background:var(--card);border-top:1px solid var(--line);border-radius:0 0 10px 10px}
+.prodsavebar .row{justify-content:flex-end;flex-wrap:nowrap}.prodsavebar .prodsave-status{min-width:0}
+.prodsave-status{margin:0;color:var(--muted)}
+.prodsave-status.is-dirty{color:var(--text);font-weight:600}
+.prodsave-result{margin:0;padding:8px 10px;border-radius:8px;overflow-wrap:anywhere}
+.prodsave-result.ok{background:var(--okbg);color:var(--ok)}
+.prodsave-result.warn{background:var(--warnbg)}
+.prodsave-result.err{background:var(--errbg);color:var(--err)}
+.prodsave-result[hidden]{display:none}
+.prodsavebar .btn{min-height:44px}
+@media(max-width:35em){.prodsavebar .row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px}.prodsavebar .prodsave-status{grid-column:1/-1}.prodsavebar .btn{width:100%}.prodpanel-head .btn{min-height:44px}}
+.prodtabpanel [aria-invalid=true]{border-color:var(--err);outline-color:var(--err)}

@@ -8,7 +8,8 @@ function strings(rows) {
   return key=>index.get(`ui.upsell.${key}`)||'';
 }
 
-export async function productSuggestionsEditor({ product, all, canEdit }) {
+// embedded: tuote-editorin Tallenna muutokset -palkki tallentaa (oma Tallenna-painike piilotetaan); node.editorApi = { snapshot(), save(), reset() }.
+export async function productSuggestionsEditor({ product, all, canEdit, embedded = false }) {
   const [txt, old, addonsRaw] = await Promise.all([
     getSiteTexts(rpc).catch(()=>null),rpc('admin_get_product_suggestions',{p_product_id:product.id}).catch(()=>null),
     rpc('admin_list_addons').catch(()=>[])
@@ -17,7 +18,9 @@ export async function productSuggestionsEditor({ product, all, canEdit }) {
   if(!t('admin_title') || !Array.isArray(old)) return null;
   const addons=Array.isArray(addonsRaw)?addonsRaw:Array.isArray(addonsRaw?.addons)?addonsRaw.addons:[];
   const candidateProducts=(all||[]).filter(p=>p.id!==product.id&&p.active&&p.config?.bookable&&p.config?.public_slots);
-  const state=(Array.isArray(old)?old:[]).map(x=>({product_id:x.product_id,addon_id:x.addon_id,enabled:x.enabled}));
+  const initial=(Array.isArray(old)?old:[]).map(x=>({product_id:x.product_id,addon_id:x.addon_id,enabled:x.enabled}));
+  const state=initial.map(x=>({...x}));
+  const snap=()=>JSON.stringify(state.map(x=>[x.product_id||null,x.addon_id||null,x.enabled!==false]));
   const form=h('form',{class:'box stack','data-testid':'product-suggestions-form'});
   const list=h('div',{class:'stack'});
   const feedback=h('p',{role:'status','aria-live':'polite'});
@@ -42,14 +45,15 @@ export async function productSuggestionsEditor({ product, all, canEdit }) {
     const [kind,id]=free.value.split(':');state.push({product_id:kind==='p'?+id:null,addon_id:kind==='a'?+id:null,enabled:true});paint();add.disabled=state.length>=3;
   }});
   form.append(h('h3',{text:t('admin_title')}),h('p',{class:'muted',text:t('admin_help')}),list,
-    h('div',{class:'row wrap'},add,h('button',{type:'submit',class:'btn primary',text:t('admin_save'),disabled:!canEdit})),feedback);
-  form.addEventListener('submit',e=>{e.preventDefault();
+    h('div',{class:'row wrap'},add,embedded?null:h('button',{type:'submit',class:'btn primary',text:t('admin_save'),disabled:!canEdit})),feedback);
+  const save=async()=>{
     const ids=state.map(s=>s.product_id?`p:${s.product_id}`:`a:${s.addon_id}`);
-    if(new Set(ids).size!==ids.length){feedback.textContent=t('admin_duplicate');return;}
-    run(form.querySelector('button[type=submit]'),async()=>{
-      await rpc('admin_set_product_suggestions',{p_product_id:product.id,p_items:state});
-      feedback.textContent=t('admin_saved');toast(t('admin_saved'));
-    });
+    if(new Set(ids).size!==ids.length){feedback.textContent=t('admin_duplicate');throw Object.assign(new Error(t('admin_duplicate')),{code:'duplicate_upsell'});}
+    await rpc('admin_set_product_suggestions',{p_product_id:product.id,p_items:state});
+    feedback.textContent=t('admin_saved');
+  };
+  form.addEventListener('submit',e=>{e.preventDefault();
+    run(form.querySelector('button[type=submit]'),async()=>{ try{ await save(); toast(t('admin_saved')); }catch(err){ if(err?.code==='duplicate_upsell')return; throw err; } });
   });
   paint();add.disabled=state.length>=3;
   const report=h('div',{class:'box stack'},h('h3',{text:t('report_title')}));
@@ -65,5 +69,7 @@ export async function productSuggestionsEditor({ product, all, canEdit }) {
     }catch{table.textContent=t('report_error');}finally{btn.disabled=false;}
   }});
   report.append(btn,table);
-  return h('div',{class:'stack'},form,report);
+  const root=h('div',{class:'stack'},form,report);
+  root.editorApi={snapshot:snap,save,reset:()=>{state.splice(0,state.length,...initial.map(x=>({...x})));paint();add.disabled=state.length>=3;feedback.textContent='';},rebase:()=>{initial.splice(0,initial.length,...state.map(x=>({...x})));}};
+  return root;
 }
