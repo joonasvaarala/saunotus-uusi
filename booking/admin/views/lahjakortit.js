@@ -9,18 +9,22 @@ import { t, getLang, setLang, LANGS } from '../talous-i18n.js';
 import { navText } from '../nav-texts.js';
 import { createGiftcardsTab } from './talous-giftcards.js';
 import { createVouchersTab } from './talous-vouchers.js';
+import { giftSettingsPanel } from '../settings-cards.js';
 
-const TABS = [['omat', 'ui.admin.nav.giftcards_own'], ['lunastukset', 'ui.admin.nav.giftcards_claims']];
+const BASE_TABS = [['omat', 'ui.admin.nav.giftcards_own'], ['lunastukset', 'ui.admin.nav.giftcards_claims']];
+// HALL-ASETUKSET-01: lahjakorttien kytkimet ja rajat asuvat täällä (settings.edit), ei enää Asetuksissa.
+const SETTINGS_TAB = ['asetukset', 'ui.admin.nav.giftcards_settings'];
 
 export async function render({ ctx, query }) {
   const gift = createGiftApi({ rpc, io: { functionUrl } });
   const pay = createTalousApi({ rpc, io: { functionUrl } });   // maksulinkki heti kortin luonnin jälkeen (admin_create_payment_link)
   const vouchers = createVoucherApi({ rpc });
   const openOrder = (no) => { location.hash = `#/tilaukset?order=${encodeURIComponent(no)}`; };
+  const TABS = ctx.can('settings.edit') ? [...BASE_TABS, SETTINGS_TAB] : BASE_TABS;
   const asked = query.get('tab');
-  let tab = asked === 'vouchers' || asked === 'lunastukset' ? 'lunastukset' : 'omat';
+  let tab = asked === 'vouchers' || asked === 'lunastukset' ? 'lunastukset' : asked === 'asetukset' && ctx.can('settings.edit') ? 'asetukset' : 'omat';
   const panels = {}, buttons = {};
-  let own = null, claims = null;
+  let own = null, claims = null, gsettings = null;
   function hrefFor(id) {
     const q = new URLSearchParams(location.hash.split('?')[1] || '');
     q.set('tab', id);
@@ -46,6 +50,10 @@ export async function render({ ctx, query }) {
       claims = createVouchersTab({ api: null, vouchers, ctx, onOpenOrder: openOrder });
       panels.lunastukset.append(claims.node);
       claims.load();
+    }
+    if (id === 'asetukset' && !gsettings) {
+      gsettings = true;
+      giftSettingsPanel({ reload: () => { gsettings = null; panels.asetukset.replaceChildren(); select('asetukset'); } }).then((node) => { gsettings = node; panels.asetukset.replaceChildren(node); });
     }
     const q = new URLSearchParams(location.hash.split('?')[1] || '');
     if (q.get('tab') !== id) history.replaceState(null, '', hrefFor(id));

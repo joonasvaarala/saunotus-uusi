@@ -25,7 +25,7 @@ export const NAV_GROUPS = [
     { id: 'laskut', path: 'laskut', labelKey: 'ui.admin.nav.invoices', view: 'invoices', any: ['invoices.manage'] },
   ] },
   { id: 'settings', path: 'asetukset', labelKey: 'ui.admin.nav.settings', tabs: [
-    { id: 'asetukset', path: 'asetukset', labelKey: 'ui.admin.nav.settings', view: 'settings', any: ['settings.edit', 'pos.use'] },
+    { id: 'asetukset', path: 'asetukset', labelKey: 'ui.admin.nav.settings', view: 'settings', any: ['settings.edit'] },
     { id: 'kayttajat', path: 'kayttajat', labelKey: 'ui.admin.nav.users', view: 'users', any: ['staff.manage'] },
   ] },
 ];
