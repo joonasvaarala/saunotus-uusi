@@ -292,6 +292,8 @@ test('jälkilöylyt: ale osuu samaan vuoroon (tuote, sääntö, päivä)', () =>
   assert.equal(L.offerForSlot([offer, { percent: 0 }], slot)?.percent, 20);
   assert.equal(L.offerForSlot([offer], { ...slot, session_date: '2026-10-29' }), null);
   assert.equal(L.offerForSlot([offer], { ...slot, rule_id: 23 }), null);
+  assert.equal(L.offerForSlot([offer], { ...slot, starts_at: '2026-10-28T19:00:00Z' }), null, 'eri alkuaika samalla säännöllä ja päivällä ei saa ale-hintaa');
+  assert.equal(L.offerForSlot([offer], { ...slot, starts_at: '2026-10-28T17:00:00.000Z' })?.percent, 20, 'sama alkuhetki eri kirjoitusasulla');
 });
 test('hallinta: reitti Hiljaiset ajat (catalog.edit / settings.edit) alennuskoodien jälkeen; CI ajaa tämän testin', () => {
   const nav = rd('booking/admin/admin-navigation.js');

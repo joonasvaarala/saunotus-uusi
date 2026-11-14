@@ -112,9 +112,12 @@ export function createQuietOfferCache({ rpc, now = () => Date.now(), audience = 
 /** Savusaunan jälkilöylyt (kb 26). Viikko-ohjelma näyttää vain tämän tuotteen vapaat vuorot. */
 export const JALKIL_ID = 26;
 
-/** Saman vuoron hiljaisen ajan tarjous, jos palvelin sellaisen antoi. */
+// starts_at-vertailu: sama alkuhetki (ms). Jos jommallakummalla puuttuu alkuaika, vertaillaan vain tuotteen, säännön ja päivän mukaan (vanha käytös).
+const sameStart = (o, slot) => { const a = Date.parse(o.starts_at), b = Date.parse(slot.starts_at); return !Number.isFinite(a) || !Number.isFinite(b) || a === b; };
+
+/** Saman vuoron hiljaisen ajan tarjous, jos palvelin sellaisen antoi (tuote, sääntö, päivä ja alkuaika). */
 export function offerForSlot(offers, slot) {
-  return (offers || []).find((o) => validOffer(o) && +o.product_id === +slot.product_id && +o.rule_id === +slot.rule_id && o.session_date === slot.session_date) || null;
+  return (offers || []).find((o) => validOffer(o) && +o.product_id === +slot.product_id && +o.rule_id === +slot.rule_id && o.session_date === slot.session_date && sameStart(o, slot)) || null;
 }
 
 export const weekdayIso = (ds) => { if (!/^\d{4}-\d\d-\d\d$/.test(ds || '')) return null; const d = new Date(`${ds}T12:00:00Z`); return Number.isNaN(+d) ? null : (d.getUTCDay() || 7); };

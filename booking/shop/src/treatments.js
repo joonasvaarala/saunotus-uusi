@@ -171,14 +171,15 @@ export const priceFor = (p, n) => {
 const cache = new Map();
 export const clearCache = () => cache.clear();
 const addDay = (ds, n) => { const d = new Date(`${ds}T12:00:00Z`); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); };
-// Palvelin sallii vain yhden raskaan haun kerrallaan (rinnakkaiset haut → 'busy'): kaikki haut jonotetaan, 'busy' yritetään kerran uudelleen.
+// Palvelin sallii vain yhden raskaan haun kerrallaan (rinnakkaiset haut → 'busy'): kaikki haut jonotetaan, 'busy' yritetään uudelleen (enintään 3 kertaa).
+// Vain yksi raskas haku kerrallaan: vapautuva paikka siirretään suoraan jonon seuraavalle (ei välitilaa, jossa uusi kutsu ehtisi väliin).
 let activeRequests = 0;
 const requestWaiters = [];
 const concurrent = async (fn) => {
-  if (activeRequests >= 2) await new Promise((resolve) => requestWaiters.push(resolve));
-  activeRequests++;
+  if (activeRequests >= 1) await new Promise((resolve) => requestWaiters.push(resolve));
+  else activeRequests++;
   try { return await fn(); }
-  finally { activeRequests--; requestWaiters.shift()?.(); }
+  finally { const next = requestWaiters.shift(); if (next) next(); else activeRequests--; }
 };
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const callAvailability = (p, persons, from, to) => concurrent(async () => {
