@@ -242,8 +242,8 @@ test('ryhmät: vanhat osoitteet avaavat oikean välilehden, oikeus rajaa välile
   const settings = navGroupById('settings');
   assert.deepEqual(visibleGroupTabs(settings, can(['staff.manage'])).map((t) => t.id), ['kayttajat']);
   assert.deepEqual(visibleGroupTabs(settings, can(['pos.use'])).map((t) => t.id), ['asetukset']);
-  assert.match(src('admin/views/nav-group.js'), /data-testid': `nav-group-tab-\$\{tab\.id\}`/);
-  assert.match(src('admin/views/nav-group.js'), /const next = `#\/\$\{tab\.path\}`/);
+  assert.match(src('admin/views/nav-group.js'), /testid: `nav-group-tab-\$\{tab\.id\}`/);   // YHT-03: ui.js tabs()
+  assert.match(src('admin/views/nav-group.js'), /href: `#\/\$\{tab\.path\}`/);
 });
 
 test('pikahaku: suurennuslasin napautus ei ole ulkopuolinen klikkaus', () => {

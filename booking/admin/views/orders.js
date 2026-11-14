@@ -1,5 +1,5 @@
 // Tilaukset ja Varaukset saman päänavigaation alla; Talous säilyy vanhoille maksu- ja lahjakorttilinkeille.
-import { h } from '../ui.js';
+import { h, tabs as tabList } from '../ui.js';
 import { rpc, select as dbSelect, functionUrl, fnBlob, fn } from '../sb.js';
 import { createTalousApi } from '../talous-api.js';
 import { createGiftApi } from '../giftcards-api.js';
@@ -32,18 +32,14 @@ export async function render({ ctx, refs, reload, query, rest = '', legacyReserv
   const panels = new Map(), buttons = new Map();
   let active = null, sequence = 0;
   const heading = h('h1', { text: navText(canOrders ? 'ui.admin.nav.orders' : 'ui.admin.nav.reservations') });
-  const tabs = h('div', { class: 'tl-tabs', role: 'tablist', 'aria-label': navText('ui.admin.nav.orders_tabs'), hidden: options.length < 2 });
+  const tabs = tabList({ label: navText('ui.admin.nav.orders_tabs'), idPrefix: 'orders-tab', hidden: options.length < 2, selected: null,
+    onSelect: (key, focus) => selectTab(key, true, focus),
+    items: options.map(([key, label]) => ({ id: key, text: label, controls: `orders-panel-${key}`, testid: `orders-tab-${key}` })) });
   const host = h('div', { class: 'orders-workspace', 'data-testid': 'orders-workspace' }, heading, tabs);
-  for (const [key, label] of options) {
-    const b = h('button', { type: 'button', role: 'tab', class: 'tl-tabbtn', id: `orders-tab-${key}`, 'aria-controls': `orders-panel-${key}`,
-      'data-testid': `orders-tab-${key}`, onclick: () => selectTab(key, true),
-      onkeydown: (e) => {
-        const i = options.findIndex(([k]) => k === key);
-        const j = { ArrowRight: i + 1, ArrowLeft: i - 1, Home: 0, End: options.length - 1 }[e.key];
-        if (j != null) { e.preventDefault(); selectTab(options[(j + options.length) % options.length][0], true, true); }
-      } }, label);
+  for (const [key] of options) {
+    const b = tabs.button(key);
     const panel = h('section', { class: 'orders-panel', role: 'tabpanel', id: `orders-panel-${key}`, 'aria-labelledby': b.id, hidden: true });
-    buttons.set(key, b); panels.set(key, panel); tabs.append(b); host.append(panel);
+    buttons.set(key, b); panels.set(key, panel); host.append(panel);
   }
   async function selectTab(key, sync, focus = false) {
     if (!panels.has(key)) return;

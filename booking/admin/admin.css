@@ -479,9 +479,12 @@ input[aria-invalid=true],select[aria-invalid=true],textarea[aria-invalid=true]{b
 .tl-lang{min-width:48px;min-height:44px;border:0;background:#fff;color:var(--green);font:600 14px/1 inherit;font-family:inherit;cursor:pointer}
 .tl-lang[aria-pressed=true]{background:var(--green);color:#fff}
 .tl-banner{background:#EDE3D0;border:1px solid rgba(122,85,48,.55);color:#3d2f1f;border-radius:10px;padding:10px 12px;margin:10px 0;font-size:14px}
-.tl-tabs{display:flex;gap:4px;border-bottom:2px solid var(--line);margin:12px 0 14px}
-.tl-tabbtn{flex:1 1 0;min-width:0;min-height:44px;padding:8px 6px;border:0;background:transparent;color:var(--muted);font:600 15px/1.2 inherit;font-family:inherit;cursor:pointer;border-radius:8px 8px 0 0}
+.tl-tabs{display:flex;gap:4px;border-bottom:2px solid var(--line);margin:12px 0 14px;overflow-x:auto;scrollbar-width:thin}
+.tl-tabbtn{flex:1 0 auto;min-width:0;white-space:nowrap;min-height:44px;padding:8px 6px;border:0;background:transparent;color:var(--muted);font:600 15px/1.2 inherit;font-family:inherit;cursor:pointer;border-radius:8px 8px 0 0}
 .tl-tabbtn[aria-selected=true]{color:var(--green);font-weight:700;box-shadow:inset 0 -3px 0 var(--green);background:rgba(43,58,48,.06)}
+a.tl-tabbtn{display:inline-flex;align-items:center;justify-content:center;text-decoration:none}   /* YHT-03: linkkivälilehdet samannäköisiksi */
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+.skel{padding:14px 0;max-width:520px}
 .tl-toolbar{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;align-items:end;margin:0 0 10px}
 .tl-toolbar .tl-search,.tl-toolbar .tl-hint{grid-column:1/-1}.tl-toolbar .btn{width:100%}
 .filter-drawer{display:grid;gap:10px}
@@ -694,7 +697,8 @@ input[aria-invalid=true],select[aria-invalid=true],textarea[aria-invalid=true]{b
 .tl-vc-unknown{padding:10px 12px;background:#EDE3D0;border:1px dashed rgba(43,58,48,.55);border-radius:10px}.tl-vc-unknown[hidden]{display:none}.tl-vc-unknown p{margin:0}
 .tl-row[data-stale="1"]{border-color:rgba(107,75,0,.55)}
 /* 5 välilehteä: kapealla näytöllä kaksi riviä (3+2), sana ei katkea kesken */
-@media(max-width:560px){.tl-tabs:has(>.tl-tabbtn:nth-child(5)){flex-wrap:wrap;gap:2px 4px;border-bottom:0}.tl-tabs:has(>.tl-tabbtn:nth-child(5)) .tl-tabbtn{flex:1 1 30%;border-bottom:2px solid var(--line);overflow-wrap:normal;hyphens:none}.tl-tabs:has(>.tl-tabbtn:nth-child(5)) .tl-tabbtn[aria-selected=true]{border-bottom-color:var(--green);box-shadow:none}}
+/* YHT-03: kapealla näytöllä välilehdet vierivät vaakasuunnassa (ei päällekkäin, ei kahdelle riville) */
+@media(max-width:560px){.tl-tabs{overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:none}.tl-tabs::-webkit-scrollbar{display:none}.tl-tabs>.tl-tabbtn{flex:0 0 auto;padding:8px 12px;white-space:nowrap}}
 
 /* Pikakassa: isot kosketuskohteet, puhelin 2 saraketta, tabletti 3, yhteissumma vieressä */
 .pos-layout{display:grid;gap:12px;align-items:start}
@@ -755,9 +759,6 @@ input[aria-invalid=true],select[aria-invalid=true],textarea[aria-invalid=true]{b
 html.pos-modal-open,body.pos-modal-open{overflow:hidden}
 @media(min-width:700px){.pos-overlay{align-items:center;padding:20px}.pos-dialog{width:min(480px,100%);border-radius:16px;padding:8px 16px 18px}}
 .pos-editor .btn,.qr-hit,.qr-create{min-height:52px}
-.set-tabs{display:flex;gap:8px;overflow-x:auto;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch;padding:4px 0 10px;margin:0 0 12px}
-.set-tab{flex:0 0 auto;min-height:48px;padding:10px 14px;border-radius:999px;border:1px solid var(--line);background:#fff;color:var(--ink);font:600 15px/1.2 inherit;text-decoration:none;display:inline-flex;align-items:center}
-.set-tab[aria-selected=true]{background:var(--green);color:#fff;border-color:var(--green)}
 .qr-hit{width:100%;display:flex;gap:8px;align-items:center;justify-content:flex-start;text-align:left}
 .qr-hit.is-on{background:var(--green);color:#fff;border-color:var(--green)}
 .qr-row{display:flex;gap:8px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:10px;padding:8px}
@@ -1269,7 +1270,6 @@ body.shot #shell .nav .lbl{display:inline}
 .training-done { color: var(--green); }
 .training-todo { color: var(--gold); }
 .training-work .tl-tabbtn { text-decoration: none; min-height: 48px; padding: .8rem 1.2rem; display: inline-flex; align-items: center; }
-.training-work .tl-tabbtn.active { color: var(--card); background: var(--green); border-radius: .5rem; }
 .training-tabs { flex-wrap: wrap; gap: .5rem; }
 .training-panel { background: var(--card); border: 1px solid var(--line); border-radius: 12px; }
 .training-people td { vertical-align: top; }
@@ -1455,3 +1455,4 @@ body.shot #shell .nav .lbl{display:inline}
 .ov-crow-no{grid-area:no;color:var(--ink)}.ov-crow-when{grid-area:when;font-size:14px}.ov-crow-what{grid-area:what;font-size:14px}.ov-crow-badges{grid-area:badges;display:flex;gap:6px;flex-wrap:wrap}.ov-crow-sum{grid-area:sum;text-align:right;font-weight:600}
 @media(min-width:62.5em){.ov-crow{grid-template-columns:70px 170px minmax(0,1fr) auto 90px;grid-template-areas:"no when what badges sum"}}
 .ov-gifts{margin:0;padding-left:18px;font-size:13px}
+.view-title{margin-top:0}.row>.view-title,.ov-title>.view-title,.prod-head>.view-title,.tl-top>.view-title,.nb-top>.view-title{margin:0}   /* YHT-03: ryhmän sisällä näkymän H1 → H2 */

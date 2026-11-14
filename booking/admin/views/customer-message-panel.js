@@ -1,7 +1,7 @@
 // booking_257/258: Hallinnan Viestit-sivun «Viesti asiakkaalle» -välilehti.
 // booking_258: tuotevalinta vain valitun päivän/välin varatuista/myydyistä (ei katalogia).
 import { rpc } from '../sb.js';
-import { h, field, toast, run } from '../ui.js';
+import { h, field, toast, run, tabs as tabList } from '../ui.js';
 import { customerMessageText as T } from '../customer-message-texts.js';
 import { newsletterText } from '../newsletter-texts.js';
 import {
@@ -33,11 +33,12 @@ function tabHref(id) {
 }
 
 export function messagesTabBar(active) {
-  return h('nav', { class: 'tl-tabs', 'aria-label': 'Viestit' },
-    h('a', { href: tabHref('pohjat'), class: `tl-tabbtn${active === 'pohjat' ? ' active' : ''}`, 'data-testid': 'messages-tab-pohjat', text: T('ui.admin.customer_message.tab_templates') }),
-    h('a', { href: tabHref('asiakkaalle'), class: `tl-tabbtn${active === 'asiakkaalle' ? ' active' : ''}`, 'data-testid': 'messages-tab-asiakkaalle', text: T('ui.admin.customer_message.tab') }),
-    h('a', { href: tabHref('uutiskirje'), class: `tl-tabbtn${active === 'uutiskirje' ? ' active' : ''}`, 'data-testid': 'messages-tab-uutiskirje', text: newsletterText('tab') }),
-  );
+  return tabList({ label: 'Viestit', idPrefix: 'messages-tab', selected: active,   // YHT-03: yhteinen välilehtikomponentti (ennen pelkkä active-luokka)
+    items: [
+      { id: 'pohjat', text: T('ui.admin.customer_message.tab_templates'), href: tabHref('pohjat'), testid: 'messages-tab-pohjat' },
+      { id: 'asiakkaalle', text: T('ui.admin.customer_message.tab'), href: tabHref('asiakkaalle'), testid: 'messages-tab-asiakkaalle' },
+      { id: 'uutiskirje', text: newsletterText('tab'), href: tabHref('uutiskirje'), testid: 'messages-tab-uutiskirje' },
+    ] });
 }
 
 export function currentMessagesTab() {

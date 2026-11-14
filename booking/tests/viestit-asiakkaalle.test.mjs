@@ -134,7 +134,7 @@ test('migraatio 257/258, rollback ja hallinta', () => {
   assert.match(trainingMig, /admin_training_message_send/);
   assert.match(messagesJs, /currentMessagesTab/);
   assert.match(messagesJs, /renderCustomerMessagePanel/);
-  assert.match(panelJs, /data-testid': 'messages-tab-asiakkaalle'/);
+  assert.match(panelJs, /testid: 'messages-tab-asiakkaalle'/);   // YHT-03: ui.js tabs()
   assert.match(panelJs, /admin_customer_message_products/);
   assert.match(panelJs, /admin_customer_message_send/);
   assert.match(panelJs, /productFetchSeq/);

@@ -2,7 +2,7 @@
 // Maksun live-tila, Procountor ja sähköpostin vastaanottajarajaus ovat vain tilaa.
 // QR-tulostus: pos.use tai settings.edit. Tekninen välilehti vain roolille admin.
 import { rpc } from '../sb.js';
-import { h, field, toast, run, badge, todayHel } from '../ui.js';
+import { h, field, toast, run, badge, todayHel, tabs as tabList } from '../ui.js';
 import { loadProcountorTexts, procountorText } from '../procountor-texts.js';
 import { loadCalendarExportTexts } from '../calendar-export-texts.js';
 import { loadSettingsTexts, settingsText as st } from '../settings-texts.js';
@@ -472,15 +472,12 @@ export async function render({ ctx, rest, reload }) {
   else if (tab === 'yhteydet') panel = connectionsPanel(bundle, procountor, procountorFailed, editor, isAdmin, reload);
   else if (tab === 'tekninen') panel = technicalPanel(bundle, reload);
 
-  const tablist = h('div', { class: 'set-tabs set-noprint', role: 'tablist', 'aria-label': tx('tabs'), 'data-testid': 'settings-tabs' },
-    ...tabs.map((id) => h('a', {
-      href: settingsHref(id), role: 'tab', class: 'set-tab', 'data-testid': `tab-${id}`,
-      'aria-selected': id === tab ? 'true' : 'false', id: `set-tab-${id}`,
-    }, tx(`tab_${id}`))));
+  const tablist = tabList({ label: tx('tabs'), cls: 'set-noprint', testid: 'settings-tabs', idPrefix: 'set-tab', selected: tab,
+    items: tabs.map((id) => ({ id, text: tx(`tab_${id}`), href: settingsHref(id), controls: 'settings-panel', testid: `tab-${id}` })) });
 
   return h('div', { class: 'set-page' },
     h('h1', { class: 'set-noprint', text: tx('title') }),
     seeSettings || tabs.every((id) => id === 'qr') ? null : h('p', { class: 'muted set-noprint', text: tx('readonly') }),
     tablist,
-    h('div', { role: 'tabpanel', 'aria-labelledby': `set-tab-${tab}`, 'data-testid': 'settings-panel' }, panel));
+    h('div', { role: 'tabpanel', id: 'settings-panel', 'aria-labelledby': `set-tab-${tab}`, 'data-testid': 'settings-panel' }, panel));
 }
