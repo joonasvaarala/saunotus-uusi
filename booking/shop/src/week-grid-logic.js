@@ -71,6 +71,7 @@ function resolver(catalog) {
  */
 export function buildWeek({ start, today, now, rows = null, catalog = null, care = null, events = null, offers = null, lang = 'fi', hrefs, careHorizon = CARE_HORIZON_DAYS } = {}) {
   const dates = Array.from({ length: 7 }, (_, i) => addDaysIso(start, i));
+  const horizonEnd = addDaysIso(today, careHorizon - 1);
   const resolve = resolver(catalog);
   const name = (r, info) => catalogDisplayName(info.cat, lang) || (lang === 'en' && r.name_en) || r.name || info.slug;
   const list = Array.isArray(rows) ? rows : [];
@@ -88,7 +89,7 @@ export function buildWeek({ start, today, now, rows = null, catalog = null, care
       const low = (x) => (x.r.status === 'available' && Number.isFinite(+x.r.remaining) && +x.r.remaining <= 3 ? +x.r.remaining : null);
       const href = hrefs.product(slug, date);
       const g = {
-        slug, name: name(first, xs[0].info), href,
+        slug, name: careName(name(first, xs[0].info)), href,
         time: rangeLabel(first.starts_at, last, lang), price: money(first.unit_price ?? first.base_price, lang),
         dur: '', low: null, full: !free.length, chips: [],
       };
@@ -125,7 +126,8 @@ export function buildWeek({ start, today, now, rows = null, catalog = null, care
 
     const careList = (Array.isArray(care) ? care : []).filter((c) => c && c.days?.has(date) && !HIDDEN_CARE_SLUGS.includes(c.slug))
       .map((c) => ({ name: careName(catalogDisplayName(c, lang) || c.name), href: hrefs.care(c.slug, date) }));
-    return { wd: i + 1, date, past: date < today, public: pub, publicNone: Array.isArray(rows) && !pub.length && date >= today, own, after, care: careList, events: [] };
+    const careErr = care == null && date >= today && date <= horizonEnd;   // hoitohaku epäonnistui: solussa lyhyt teksti viivojen sijaan
+    return { wd: i + 1, date, past: date < today, public: pub, publicNone: Array.isArray(rows) && !pub.length && date >= today, own, after, care: careList, careErr, events: [] };
   });
 
   // Tapahtumat samaan soluun kuin hoidot
@@ -155,7 +157,6 @@ export function buildWeek({ start, today, now, rows = null, catalog = null, care
   }
   for (const d of days) d.events.sort((a, b) => a.times[0]?.localeCompare(b.times[0] || '', 'fi') || a.name.localeCompare(b.name, 'fi'));
 
-  const horizonEnd = addDaysIso(today, careHorizon - 1);
   const todayIdx = dates.indexOf(today);
   const cur = weekStartOf(today);
   return {

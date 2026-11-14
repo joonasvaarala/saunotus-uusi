@@ -676,5 +676,25 @@
     "max_len": 200,
     "placeholders": [],
     "reason": "Etusivun viikko-ohjelman uudistus (backlog 82, Joonas t1768u + t1769u): uusi avain, FI+EN. Sama kuin koodin varateksti (booking/shop/src/week-grid-texts.js). Käyttö: etusivu ja saunavuorot-sivu (src/week-grid.mjs)."
+  },
+  {
+    "key": "ui.site.vk_care_error",
+    "lang": "fi",
+    "text": "Hoitojen aikoja ei saatu haettua. Yritä hetken päästä uudelleen.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Etusivun viikko-ohjelman uudistus (backlog 82, Joonas t1768u + t1769u): uusi avain, FI+EN. Sama kuin koodin varateksti (booking/shop/src/week-grid-texts.js). Käyttö: etusivu ja saunavuorot-sivu (src/week-grid.mjs)."
+  },
+  {
+    "key": "ui.site.vk_care_error",
+    "lang": "en",
+    "text": "Could not load treatment times. Please try again in a moment.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Etusivun viikko-ohjelman uudistus (backlog 82, Joonas t1768u + t1769u): uusi avain, FI+EN. Sama kuin koodin varateksti (booking/shop/src/week-grid-texts.js). Käyttö: etusivu ja saunavuorot-sivu (src/week-grid.mjs)."
   }
 ]

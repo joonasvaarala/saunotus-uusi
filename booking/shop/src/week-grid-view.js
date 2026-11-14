@@ -36,7 +36,9 @@ const link = (cls, href, label, ...c) => h('a', { class: cls, href, target: '_bl
 const nbsp = (s) => String(s).replace(/ /g, ' ');
 
 const dayShort = (T, i) => String(T.daysLong[i]).slice(0, T.lang === 'en' ? 3 : 2);
-const dayMonth = (ds) => (ds ? `${+ds.slice(8)}.${+ds.slice(5, 7)}.` : '');
+const EN_MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+/** FI 16.11., EN 16 Nov. */
+export const dayMonth = (ds, lang = 'fi') => (ds ? (lang === 'en' ? `${+ds.slice(8)} ${EN_MONTHS[+ds.slice(5, 7) - 1]}` : `${+ds.slice(8)}.${+ds.slice(5, 7)}.`) : '');
 
 function publicGroup(g, T, dayName) {
   const meta = [g.price ? [h('b', {}, nbsp(g.price)), ` ${T.per}`] : '', g.dur ? `${g.price ? ' · ' : ''}${g.dur}` : '', g.low != null ? [' · ', h('span', { class: 'vk-low' }, g.low === 1 ? T.leftOne : fillText(T.leftMany, { n: g.low }))] : '', g.full ? ` · ${T.full}` : ''];
@@ -89,6 +91,7 @@ function ownBlock(day, T, dayName) {
 // Tapahtumat näytetään aina (myös kun hoitoja ei ole tai viikko on hoitoikkunan ulkopuolella); «hoitojen ajat avautuvat» -teksti on vain palvelurivin otsikossa.
 function careBlock(day, T, dayName) {
   const out = [];
+  if (day.careErr && !day.care.length) out.push(h('p', { class: 'vk-care-err', role: 'status' }, T.careError));
   if (day.care.length) {
     out.push(h('ul', { class: 'vk-care' }, day.care.map((c) => h('li', {}, link('vk-cl', c.href, `${c.name}, ${dayName} ${T.newTab}`, c.name)))));
   }
@@ -115,10 +118,10 @@ function dayColumn(day, i, T, model, sel) {
   const care = careBlock(day, T, dayName);
   const cell = (k, label, dot, body, empty) => h('div', { class: `vk-cell vk-${k}c${empty ? ' empty' : ''}` }, h('h4', { class: 'vk-lh' }, h('i', { class: dot, 'aria-hidden': 'true' }), label), body);
   return h('li', { class: `vk-day${i >= 5 ? ' we' : ''}${today ? ' is-today' : ''}${day.past ? ' is-past' : ''}${sel === i ? ' is-on' : ''}`, 'data-vk-day': i, ...(today ? { 'aria-current': 'date' } : {}) },
-    h('h3', { class: 'vk-dh' }, h('span', {}, T.daysLong[i]), day.date ? h('b', {}, dayMonth(day.date)) : null, today ? h('em', { class: 'vk-today' }, T.today) : null),
+    h('h3', { class: 'vk-dh' }, h('span', {}, T.daysLong[i]), day.date ? h('b', {}, dayMonth(day.date, T.lang)) : null, today ? h('em', { class: 'vk-today' }, T.today) : null),
     cell('pub', T.laneP, 'pub', pubCell, !day.public.length),
     cell('priv', T.laneO, 'priv', own || h('span', { class: 'vk-dash', 'aria-hidden': 'true' }, '–'), !own),
-    cell('care', T.laneC, 'treat', care, !day.care.length && !day.events.length));
+    cell('care', T.laneC, 'treat', care, !day.care.length && !day.events.length && !day.careErr));
 }
 
 /** Otsikko: kuluvalla viikolla (ja staattisessa varaversiossa) perusotsikko, muilla viikoilla viikkonumero. */
@@ -136,7 +139,7 @@ export function weekGridTree(model, T, opt = {}) {
   const head = h('div', { class: 'vk-head' }, hd ? h('header', {}, hd.kicker ? h('p', { class: 'kicker' }, hd.kicker) : null, h('h2', { class: 'sec-title' }, headingTitle(model, T, hd))) : null, nav);
   const strip = h('div', { class: 'vk-strip', role: 'group', 'aria-label': T.weekNav }, model.days.map((d, i) => h('button', {
     type: 'button', class: `vk-tab${i === sel ? ' is-on' : ''}${i === model.todayIdx ? ' is-today' : ''}`, 'data-vk-pick': i, disabled: d.past ? true : null, 'aria-pressed': i === sel ? 'true' : 'false',
-    'aria-label': `${T.daysLong[i]} ${dayMonth(d.date)}`.trim(),
+    'aria-label': `${T.daysLong[i]} ${dayMonth(d.date, T.lang)}`.trim(),
   }, h('span', { 'aria-hidden': 'true' }, dayShort(T, i)), h('b', { 'aria-hidden': 'true' }, d.date ? String(+d.date.slice(8)) : ''),
   h('i', { class: 'vk-dots', 'aria-hidden': 'true' }, [d.public.length && 'pub', (d.own || d.after.length) && 'priv', (d.care.length || d.events.length) && 'treat'].filter(Boolean).map((k) => h('em', { class: k }))))));
   const lanes = h('div', { class: 'vk-lanes', 'aria-hidden': 'true' }, h('div', { class: 'vk-corner' }),

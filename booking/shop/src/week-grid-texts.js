@@ -16,6 +16,7 @@ export const WEEK_GRID_TEXTS = Object.freeze({
   'ui.site.vk_lane_care': { prop: 'laneC', fi: 'Hoidot ja rituaalit', en: 'Treatments and rituals' },
   'ui.site.vk_lane_care_note': { prop: 'noteC', fi: 'Valitse vapaa alkuaika varauksessa.', en: 'Choose a free start time when booking.' },
   'ui.site.vk_care_later': { prop: 'careLater', fi: 'Hoitojen ajat avautuvat lähempänä ajankohtaa.', en: 'Treatment times open closer to the date.' },
+  'ui.site.vk_care_error': { prop: 'careError', fi: 'Hoitojen aikoja ei saatu haettua. Yritä hetken päästä uudelleen.', en: 'Could not load treatment times. Please try again in a moment.' },
   'ui.site.vk_none_public': { prop: 'none', fi: 'Ei yleisiä vuoroja', en: 'No public sessions' },
   'ui.site.vk_own_name': { prop: 'own', fi: 'Oma saunavuoro', en: 'Private sauna session' },
   'ui.site.vk_from': { prop: 'from', fi: 'alk.', en: 'from' },

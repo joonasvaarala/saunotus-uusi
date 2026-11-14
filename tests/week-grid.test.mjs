@@ -438,3 +438,135 @@ test('tyylit: viikko-ohjelman nimet tavuttuvat sanarajoilla (hyphens:auto), ei a
   assert.match(weekGrid('fi'), /<div class="vk" data-vk data-quiet-week lang="fi" /);
   assert.match(weekGrid('en'), /<div class="vk" data-vk data-quiet-week lang="en" /);
 });
+
+// ---- PR #386 jatkohuomiot ----
+// Kevyt DOM-tynkä mountWeekGrid-testeihin (ei jsdomia): kerää elementit ja tekstit.
+function fakeRoot(texts) {
+  const mk = (t) => ({ t, className: '', attrs: {}, children: [], append(c) { this.children.push(c); }, setAttribute(k, v) { this.attrs[k] = v; }, focus() {}, nodeType: 1 });
+  const doc = { createElement: mk, createTextNode: (s) => ({ text: s }) };
+  const listeners = {};
+  const root = {
+    ownerDocument: doc, dataset: { vkTexts: JSON.stringify(texts), vkOpts: '{}' }, attrs: { lang: 'fi' }, nodes: [],
+    getAttribute(k) { return this.attrs[k] ?? null; }, setAttribute(k, v) { this.attrs[k] = v; }, removeAttribute(k) { delete this.attrs[k]; },
+    classList: { add() {}, remove() {}, toggle() {} }, addEventListener(ev, fn) { listeners[ev] = fn; }, contains: () => true,
+    replaceChildren(...n) { this.nodes = n; }, querySelector: () => null, querySelectorAll: () => [],
+    click(kind) { listeners.click({ target: { closest: () => ({ dataset: { vkNav: kind } }) } }); },
+    text() { const w = (n) => (n.text != null ? n.text : (n.children || []).map(w).join(' ')); return this.nodes.map(w).join(' '); },
+  };
+  return root;
+}
+const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+const mountRpc = (calls) => async (name, args) => { calls.push([name, args?.p_from]); return name === 'public_availability_all' ? [] : name === 'public_settings' ? null : []; };
+
+test('viikkoselaus: debounce, nopea selaus hakee vain viimeisen viikon', async () => {
+  const { mountWeekGrid } = await import('../booking/shop/src/week-grid.js');
+  const calls = [];
+  const root = fakeRoot(gridTexts('fi'));
+  const vk = mountWeekGrid(root, { rpc: mountRpc(calls), now: () => NOW, debounceMs: 30, loadCareFn: async () => [], shared: async () => ({ events: [], catalog: [{ id: 10 }] }) });
+  await wait(60);
+  const weekCalls = () => calls.filter((c) => c[0] === 'public_availability_all').length;
+  assert.equal(weekCalls(), 1);
+  root.click('next'); root.click('next'); root.click('prev'); root.click('next');
+  await wait(10);
+  assert.equal(weekCalls(), 1, 'ei hakua ennen viivettä');
+  await wait(80);
+  assert.equal(weekCalls(), 2, 'yksi haku neljästä klikkauksesta');
+  assert.equal(vk.start, '2026-11-30', 'next+next+prev+next = +2 viikkoa');
+});
+
+test('viikkoselaus: hoitohaun virhe → virheteksti hoitorivillä, tapahtumat jäävät, tulosta ei jäädä välimuistiin', async () => {
+  const { mountWeekGrid } = await import('../booking/shop/src/week-grid.js');
+  const calls = [];
+  let careOk = false;
+  const loadCareFn = async () => (careOk ? [careEntry({ id: 10, slug: 'saunahoito-2', name: 'Saunahoito' }, new Map([['2026-11-24', [{}]]]))] : null);
+  const evt = [{ category: 'event', slug: 'ilta', name: 'Ilta', price: 20, occurrences: [{ status: 'available', starts_at: ut('2026-11-24', '18:00'), ends_at: ut('2026-11-24', '21:00') }] }];
+  const root = fakeRoot(gridTexts('fi'));
+  mountWeekGrid(root, { rpc: mountRpc(calls), now: () => NOW, debounceMs: 0, loadCareFn, shared: async () => ({ events: evt, catalog: [{ id: 10 }] }) });
+  await wait(30);
+  assert.match(root.text(), /Hoitojen aikoja ei saatu haettua/);
+  root.click('next'); await wait(30);
+  assert.match(root.text(), /Hoitojen aikoja ei saatu haettua/);
+  assert.match(root.text(), /Ilta/, 'tapahtuma näkyy samassa solussa');
+  careOk = true;
+  root.click('prev'); await wait(30);
+  root.click('next'); await wait(30);
+  assert.doesNotMatch(root.text(), /Hoitojen aikoja ei saatu haettua/, 'epäonnistunutta viikkoa haettiin uudelleen');
+  assert.match(root.text(), /Saunahoito/);
+});
+
+test('buildWeek: careErr vain kun hoitohaku puuttuu ja päivä on ikkunassa; vk_care_error FI+EN koodissa ja tuonnissa 171', () => {
+  const failed = week({ care: null });
+  assert.equal(day(failed, '2026-11-17').careErr, true);
+  const html = weekGridTree(failed, T, {}).map(toHtml).join('');
+  assert.match(html, /class="vk-care-err"[^>]*>Hoitojen aikoja ei saatu haettua\. Yritä hetken päästä uudelleen\./);
+  assert.equal(day(week({ care: [] }), '2026-11-17').careErr, false);
+  assert.equal(day(week({ start: '2026-11-30', care: null }), '2026-12-01').careErr, false, 'ikkunan ulkopuolella ei virhettä');
+  const imp = JSON.parse(readFileSync(new URL('../content/site-texts.pending-import-171.json', import.meta.url), 'utf8')).filter((x) => x.key === 'ui.site.vk_care_error');
+  assert.deepEqual(imp.map((x) => x.lang).sort(), ['en', 'fi']);
+  const d = WEEK_GRID_TEXTS['ui.site.vk_care_error'];
+  assert.equal(imp.find((x) => x.lang === 'fi').text, d.fi);
+  assert.equal(imp.find((x) => x.lang === 'en').text, d.en);
+});
+
+test('loadCare: rate_limited / busy yritetään uudelleen, muu virhe ei', async () => {
+  const dir = join(mkdtempSync(join(process.env.TMPDIR || tmpdir(), 'vk-retry-')), 'shop');
+  cpSync(new URL('../booking/shop/src', import.meta.url).pathname, dir, { recursive: true });
+  writeFileSync(join(dir, 'sb.js'), 'export class ApiError extends Error {}\nexport async function rpc(n) { return globalThis.__vkRpc(n); }\n');
+  const W = await import(pathToFileURL(join(dir, 'week-grid.js')));
+  const cat = [{ id: 10, slug: 'saunahoito-2', name: 'Saunahoito', booking_kind: 'slots' }];
+  const waits = [];
+  const wait_ = async (ms) => { waits.push(ms); };
+  for (const code of ['rate_limited', 'busy']) {
+    let n = 0;
+    globalThis.__vkRpc = async () => { if (n++ < 2) throw Object.assign(new Error(code), { code }); return [{ session_date: '2026-11-17', starts_at: ut('2026-11-17', '12:00'), ends_at: ut('2026-11-17', '13:00'), status: 'available', total: 50 }]; };
+    waits.length = 0;
+    const r = await W.loadCare(cat, `2026-11-1${code === 'busy' ? 7 : 6}`, '2026-11-22', { retryMs: 5, wait: wait_ });
+    assert.equal(r?.length, 1, `${code}: onnistui uudelleenyrityksen jälkeen`);
+    assert.ok(r[0].days.has('2026-11-17'));
+    if (code === 'rate_limited') assert.equal(waits.length, 2, 'rate_limited: ulompi uudelleenyritys odottaa');   // busy: treatments.js yrittää itse
+  }
+  const cat2 = [{ ...cat[0], id: 11 }], cat3 = [{ ...cat[0], id: 12 }];   // treatments.js:n välimuisti on tuotekohtainen
+  let m = 0;
+  globalThis.__vkRpc = async () => { m++; throw Object.assign(new Error('x'), { code: 'bad_range' }); };
+  assert.equal(await W.loadCare(cat2, '2026-11-20', '2026-11-22', { retryMs: 5, wait: wait_ }), null);
+  assert.equal(m, 1, 'ei uudelleenyritystä muulle virheelle');
+  m = 0;
+  globalThis.__vkRpc = async () => { m++; throw Object.assign(new Error('x'), { code: 'rate_limited' }); };
+  assert.equal(await W.loadCare(cat3, '2026-11-21', '2026-11-22', { retryMs: 5, wait: wait_ }), null);
+  assert.equal(m, 3, 'enintään 2 uudelleenyritystä');
+});
+
+test('päiväsolun päivämäärä: FI 16.11., EN 16 Nov, vuodenvaihde, aria-label', () => {
+  const fi = weekGridTree(week({ start: '2026-12-28' }), T, {}).map(toHtml).join('');
+  const en = weekGridTree(week({ start: '2026-12-28', lang: 'en' }), gridTexts('en'), {}).map(toHtml).join('');
+  assert.match(fi, /<b>28\.12\.<\/b>/);
+  assert.match(fi, /<b>1\.1\.<\/b>/);
+  assert.match(fi, /aria-label="Maanantai 28\.12\."/);
+  assert.match(en, /<b>28 Dec<\/b>/);
+  assert.match(en, /<b>1 Jan<\/b>/);
+  assert.match(en, /aria-label="Monday 28 Dec"/);
+  assert.doesNotMatch(en, /<b>28\.12\.<\/b>/);
+  const en16 = weekGridTree(week({ lang: 'en' }), gridTexts('en'), {}).map(toHtml).join('');
+  assert.match(en16, /<b>16 Nov<\/b>/);
+});
+
+test('yleisen vuoron nimestä sulkuosa pois (FI ja EN), nimi ilman sulkuja ennallaan', () => {
+  const cat2 = [{ id: 5, slug: 'turvetorstai', name: 'Turvetorstai (to)', name_en: 'Peat Thursday (Turvetorstai)', category: 'public_sauna' }, ...catalog.filter((c) => c.id !== 5)];
+  const r = [row('turvetorstai', 'public_sauna', 5, '2026-11-19', '16:00', '19:00', { unit_price: 35, name: 'Turvetorstai (to)', name_en: 'Peat Thursday (Turvetorstai)' }), row('yleinensauna', 'public_sauna', 1, '2026-11-20', '16:00', '19:00', { unit_price: 29 })];
+  const en = buildWeek({ start: START, today: TODAY, now: NOW, rows: r, catalog: null, care: [], events: [], offers: [], lang: 'en', hrefs: shopHrefs('/'), careHorizon: 90 });
+  assert.deepEqual(day(en, '2026-11-19').public.map((x) => x.name), ['Peat Thursday']);
+  const fi = buildWeek({ start: START, today: TODAY, now: NOW, rows: r, catalog: null, care: [], events: [], offers: [], lang: 'fi', hrefs: shopHrefs('/'), careHorizon: 90 });
+  assert.deepEqual(day(fi, '2026-11-19').public.map((x) => x.name), ['Turvetorstai']);
+  assert.ok(cat2.length);
+  assert.equal(careName('Peat Thursday (Turvetorstai)'), 'Peat Thursday');
+  assert.equal(careName('Public Sauna Session'), 'Public Sauna Session');
+});
+
+test('päävalikko ja alatunniste: Training-linkki kielen mukaan (FI saunakoulutus.fi, EN saunahealer.com), ei ristiin', async () => {
+  const { layout } = await import('../src/render.mjs');
+  const page = (lang) => layout({ lang, key: 'home', meta: { title: 't', description: 'd' }, body: '<main></main>' });
+  const links = (html) => [...html.matchAll(/href="(https:\/\/saunakoulutus\.fi|https:\/\/saunahealer\.com)[^"]*"/g)].map((m) => m[1]);
+  const fi = page('fi'), en = page('en');
+  assert.ok(links(fi).length >= 2 && links(fi).every((u) => u === 'https://saunakoulutus.fi'), 'FI nav + footer');
+  assert.ok(links(en).length >= 2 && links(en).every((u) => u === 'https://saunahealer.com'), 'EN nav + footer');
+});

@@ -11,7 +11,7 @@ import { itemLines } from '../booking/shop/src/gift-logic.js';
 import { gtText } from '../booking/shop/src/gift-texts.js';
 import { privacyAnalyticsHtml, policyHasAnalyticsSection } from './privacy-analytics.mjs';
 import { policyText, privacyDocFor, linkContacts } from './policy-lang.mjs';
-import { weekGrid } from './week-grid.mjs';
+import { weekGrid, trainingUrl } from './week-grid.mjs';
 import { experienceHtml, traditionHtml, infoStrip, companyStrip, homeText, homeBookCta } from './home-front.mjs';
 import { treatmentsBody } from './treatments-page.mjs';
 import { faqFor, policyFor, eventTimeFor } from './kb-en.mjs';
@@ -284,7 +284,7 @@ export function layout({ lang, key, meta, body, preload = '', robotsOnly = false
   const switchHref = seo?.switchHref ?? (alt_[o] ? href(alt_[o]) : pageHref('home', o));
   const an = articlesNav(lang);
   const nav = u.nav.map(([k, label]) => {
-    const h = k === 'training' ? site.trainingUrl : pageHref(k, lang);
+    const h = k === 'training' ? trainingUrl(lang) : pageHref(k, lang);
     return `<a href="${e(h)}"${k === 'training' ? ' rel="noopener"' : ''}${k === key ? ' aria-current="page"' : ''}>${e(label)}${k === 'training' ? NEW(lang) : ''}</a>`;
   }).join('') + (an ? `<a href="${e(an.href)}"${seo?.navCurrent === 'articles' ? ' aria-current="page"' : ''}>${e(an.label)}</a>` : '');
   const bookHref = pageHref('book', lang);
@@ -323,7 +323,7 @@ ${body}
 <footer class="site-footer"><div class="wrap">
 <div class="fgrid">
 <div class="fbrand"><img src="${href('/img/favicon.svg')}" width="34" height="47" alt="" loading="lazy"><div><b>SAUNOTUS</b><small>${e(u.brandTitle)}</small><p>${e(u.footerTag)}</p>${footerHours(lang)}</div></div>
-<div><h2>${e(u.footerServices)}</h2><ul><li><a href="${fl('sauna', lang)}">${e(u.nav[0][1])}</a></li><li><a href="${fl('treatments', lang)}">${e(u.nav[1][1])}</a></li><li><a href="${fl('gift', lang)}">${e(u.nav[3][1])}</a></li>${an ? `<li><a href="${e(an.href)}">${e(an.label)}</a></li>` : ''}<li><a href="${fl('companies', lang)}">${e(u.companies)}</a></li><li><a href="${e(site.trainingUrl)}" rel="noopener">${e(u.nav[2][1])}${NEW(lang)}</a></li><li><a href="${fl('book', lang)}">${e(u.bookFull)}</a></li></ul></div>
+<div><h2>${e(u.footerServices)}</h2><ul><li><a href="${fl('sauna', lang)}">${e(u.nav[0][1])}</a></li><li><a href="${fl('treatments', lang)}">${e(u.nav[1][1])}</a></li><li><a href="${fl('gift', lang)}">${e(u.nav[3][1])}</a></li>${an ? `<li><a href="${e(an.href)}">${e(an.label)}</a></li>` : ''}<li><a href="${fl('companies', lang)}">${e(u.companies)}</a></li><li><a href="${e(trainingUrl(lang))}" rel="noopener">${e(u.nav[2][1])}${NEW(lang)}</a></li><li><a href="${fl('book', lang)}">${e(u.bookFull)}</a></li></ul></div>
 <div><h2>${e(u.footerInfo)}</h2><ul>${u.infoLinks.map(([id, l]) => `<li><a href="${pageHref('info', lang, id)}">${e(l)}</a></li>`).join('')}</ul></div>
 <div><h2>${e(u.footerContact)}</h2><ul><li><address style="all:unset">${e(site.contact.street)}<br>${e(site.contact.postal)} ${e(site.contact.city)}</address></li><li><a href="tel:${site.contact.phoneTel}">${e(phoneDisplay(lang))}</a></li><li><a href="mailto:${site.contact.email}">${e(site.contact.email)}</a></li><li><a href="${e(site.contact.mapsUrl)}" rel="noopener">${e(ui(lang).directions)}${NEW(lang)}</a></li>${site.social.map((s) => `<li><a href="${e(s.url)}" rel="noopener">${e(s.name)}${NEW(lang)}</a></li>`).join('')}</ul></div>
 </div>

@@ -15,14 +15,23 @@ export const shopHrefs = (base) => ({
   eventOpen: (slug) => `${base}#/tuote/${enc(slug)}`,
 });
 
-/** Hoitotuotteiden vapaat päivät viikolle. Virhe yhdessä tuotteessa ei estä muita; kaikki epäonnistuvat → null. */
-export async function loadCare(catalog, from, to) {
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+const errCode = (e) => e?.code || e?.details?.code || null;
+export const CARE_RETRY_MS = 1200;
+/** Hoitotuotteiden vapaat päivät viikolle. rate_limited / busy yritetään uudelleen (enintään 2 kertaa, treatments.js yrittää busy-tilannetta jo itse).
+ *  Virhe yhdessä tuotteessa ei estä muita; kaikki epäonnistuvat → null. */
+export async function loadCare(catalog, from, to, { retryMs = CARE_RETRY_MS, wait = sleep } = {}) {
   const T = await import('./treatments.js');
   const list = T.splitCatalog(catalog, new Map()).treatments.filter(T.isListed);
   if (!list.length) return [];
   let ok = 0;
   const out = await Promise.all(list.map(async (p) => {
-    try { const byDay = await T.loadAvailability(p, 1, from, to); ok++; return careEntry(p, byDay); } catch { return null; }
+    for (let tries = 0; ; tries++) {
+      try { const byDay = await T.loadAvailability(p, 1, from, to); ok++; return careEntry(p, byDay); } catch (e) {
+        if (!T.isRetryable(errCode(e)) || tries >= 2) return null;
+        await wait(retryMs * (tries + 1));
+      }
+    }
   }));
   return ok ? out.filter(Boolean) : null;
 }
@@ -47,7 +56,8 @@ export async function careHorizon(settings) {
 }
 
 /** shared: valinnainen () => Promise<{ events, catalog }>; sivun muu skripti (quiet-week.js) jakaa saman haun, jolloin katalogia ja tapahtumia ei haeta kahdesti. */
-export function mountWeekGrid(root, { rpc, lang = 'fi', shopHref = '', now = () => Date.now(), loadCareFn, shared: sharedFetch } = {}) {
+export const NAV_DEBOUNCE_MS = 250;
+export function mountWeekGrid(root, { rpc, lang = 'fi', shopHref = '', now = () => Date.now(), loadCareFn, shared: sharedFetch, debounceMs = NAV_DEBOUNCE_MS } = {}) {
   const doc = root.ownerDocument;
   if (!root.getAttribute('lang')) root.setAttribute('lang', lang);   // tavutus (hyphens:auto) sivun kielen mukaan
   let T, opts;
@@ -58,7 +68,7 @@ export function mountWeekGrid(root, { rpc, lang = 'fi', shopHref = '', now = () 
   const today = todayOf();
   const cache = new Map();
   let shared = null;   // { catalog, events, horizon }
-  let start = weekStartOf(today), sel = null, token = 0;
+  let start = weekStartOf(today), sel = null, token = 0, target = null, timer = null, focusKind = null;
 
   const fetchShared = () => (shared ||= Promise.all([
     sharedFetch ? sharedFetch().then(({ events, catalog }) => [events, Array.isArray(catalog) ? catalog : null]).catch(() => [null, null]) : Promise.all([
@@ -68,7 +78,12 @@ export function mountWeekGrid(root, { rpc, lang = 'fi', shopHref = '', now = () 
     rpc('public_settings', {}).catch(() => null).then(careHorizon),
   ]).then(([[events, catalog], horizon]) => ({ events, catalog, horizon })));
   const fetchWeek = (s) => {
-    if (!cache.has(s)) cache.set(s, fetchShared().then(({ catalog, horizon }) => loadWeek(s, { rpc, today, catalog, horizon, loadCareFn })));
+    if (!cache.has(s)) {
+      const pr = fetchShared().then(({ catalog, horizon }) => loadWeek(s, { rpc, today, catalog, horizon, loadCareFn }));
+      cache.set(s, pr);
+      // Puutteellista tulosta (hoidot tai viikon rivit puuttuvat) ei jätetä pysyvästi välimuistiin: seuraava näyttökerta hakee uudelleen.
+      pr.then((d) => { if ((d.care == null || d.rows == null) && cache.get(s) === pr) cache.delete(s); }, () => { if (cache.get(s) === pr) cache.delete(s); });
+    }
     return cache.get(s);
   };
 
@@ -105,10 +120,12 @@ export function mountWeekGrid(root, { rpc, lang = 'fi', shopHref = '', now = () 
       root.querySelectorAll('.vk-tab').forEach((b) => { const on = +b.dataset.vkPick === sel; b.classList.toggle('is-on', on); b.setAttribute('aria-pressed', String(on)); });
       return;
     }
+    // Viikkoselaus viivästetään: nopea selaus hakee vain viimeisen viikon (väliviikoille ei lähetä hoitohakua).
     const kind = t.dataset.vkNav;
-    if (kind === 'now') { sel = null; show(weekStartOf(today), 'next'); return; }
-    const next = clampWeek(addDaysIso(start, kind === 'next' ? 7 : -7), today);
-    if (next !== start) show(next, kind);
+    if (kind === 'now') target = weekStartOf(today), focusKind = 'next', sel = null;
+    else { target = clampWeek(addDaysIso(target ?? start, kind === 'next' ? 7 : -7), today); focusKind = kind; }
+    clearTimeout(timer);
+    timer = setTimeout(() => { const s = target; target = null; timer = null; if (s !== start || kind === 'now') show(s, focusKind); }, debounceMs);
   });
   show(start, null);
   return { show, get start() { return start; } };
