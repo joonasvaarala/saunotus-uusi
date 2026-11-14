@@ -57,7 +57,7 @@ test('lahjakortin lisääminen vierittää renderCart-kutsun jälkeen #gc-cart-l
   const addLine = text.slice(text.indexOf('const addLine ='), text.indexOf('const tile ='));
   assert.match(addLine, /lines\.push\([\s\S]*?renderCart\(\); revealForm\(cartHost, cartHost\.querySelector\('legend'\)\)/);
   assert.match(text, /revealIfHidden\(out\);/);
-  assert.match(text, /revealIfHidden\(firstBad\)/);
+  assert.match(text, /formErr\.show\(items\)/);   // KAUPPA-KASSA-02: virhekoonti + fokus yhteisellä apurilla (form-errors.js)
   const qty = text.slice(text.indexOf('const setQty ='), text.indexOf('const stepper ='));
   assert.doesNotMatch(qty, /revealForm|revealIfHidden|scrollIntoView/);
 });

@@ -260,8 +260,7 @@ export function createTreatmentViews(c) {
     const form = h('form', { class: 'bk-form', novalidate: true, onsubmit: (ev) => {
       ev.preventDefault(); msg.replaceChildren();
       if (!O.optionOk(p, opt)) { optP.setError(ot['err.option_required']); optP.focus(); return; }
-      const cust = cf.read(form, msg); if (!cust) return;
-      if (!terms.checked) { msg.append(errorBox(t.acceptTermsErr)); terms.focus(); return; }
+      const cust = cf.read(form, msg, terms.checked ? [] : [{ el: terms, msg: t.acceptTermsErr }]); if (!cust) return;
       review(cust, (new FormData(form).get('note') || '').trim());
     } }, optP ? optP.node : null, ap ? ap.node : null, cf.node, legal.nodes, msg, payBar.node);
     form.addEventListener('input', () => msg.replaceChildren());

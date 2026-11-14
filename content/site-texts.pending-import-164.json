@@ -1,0 +1,302 @@
+[
+  {
+    "key": "ui.shop.err_summary_title",
+    "lang": "fi",
+    "text": "Tarkista nämä tiedot",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "KAUPPA-KASSA-02: lomakevirheet kenttäkohtaisiksi (virhekoonti, pakollisuusmerkintä, oma viesti sähköpostille, puhelimelle, y-tunnukselle ja OVT:lle)"
+  },
+  {
+    "key": "ui.shop.err_summary_title",
+    "lang": "en",
+    "text": "Please check these details",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "KAUPPA-KASSA-02: lomakevirheet kenttäkohtaisiksi (virhekoonti, pakollisuusmerkintä, oma viesti sähköpostille, puhelimelle, y-tunnukselle ja OVT:lle)"
+  },
+  {
+    "key": "ui.shop.required_note",
+    "lang": "fi",
+    "text": "Tähdellä (*) merkityt kentät ovat pakollisia.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "KAUPPA-KASSA-02: lomakevirheet kenttäkohtaisiksi (virhekoonti, pakollisuusmerkintä, oma viesti sähköpostille, puhelimelle, y-tunnukselle ja OVT:lle)"
+  },
+  {
+    "key": "ui.shop.required_note",
+    "lang": "en",
+    "text": "Fields marked with * are required.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "KAUPPA-KASSA-02: lomakevirheet kenttäkohtaisiksi (virhekoonti, pakollisuusmerkintä, oma viesti sähköpostille, puhelimelle, y-tunnukselle ja OVT:lle)"
+  },
+  {
+    "key": "ui.shop.req_name",
+    "lang": "fi",
+    "text": "Kirjoita nimi.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "KAUPPA-KASSA-02: lomakevirheet kenttäkohtaisiksi (virhekoonti, pakollisuusmerkintä, oma viesti sähköpostille, puhelimelle, y-tunnukselle ja OVT:lle)"
+  },
+  {
+    "key": "ui.shop.req_name",
+    "lang": "en",
+    "text": "Please enter a name.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "KAUPPA-KASSA-02: lomakevirheet kenttäkohtaisiksi (virhekoonti, pakollisuusmerkintä, oma viesti sähköpostille, puhelimelle, y-tunnukselle ja OVT:lle)"
+  },
+  {
+    "key": "ui.shop.req_email",
+    "lang": "fi",
+    "text": "Kirjoita sähköpostiosoite.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "KAUPPA-KASSA-02: lomakevirheet kenttäkohtaisiksi (virhekoonti, pakollisuusmerkintä, oma viesti sähköpostille, puhelimelle, y-tunnukselle ja OVT:lle)"
+  },
+  {
+    "key": "ui.shop.req_email",
+    "lang": "en",
+    "text": "Please enter an email address.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "KAUPPA-KASSA-02: lomakevirheet kenttäkohtaisiksi (virhekoonti, pakollisuusmerkintä, oma viesti sähköpostille, puhelimelle, y-tunnukselle ja OVT:lle)"
+  },
+  {
+    "key": "ui.shop.invalid_email",
+    "lang": "fi",
+    "text": "Tarkista sähköpostiosoite, esimerkiksi nimi@esimerkki.fi.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "KAUPPA-KASSA-02: lomakevirheet kenttäkohtaisiksi (virhekoonti, pakollisuusmerkintä, oma viesti sähköpostille, puhelimelle, y-tunnukselle ja OVT:lle)"
+  },
+  {
+    "key": "ui.shop.invalid_email",
+    "lang": "en",
+    "text": "Please check the email address, for example name@example.com.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "KAUPPA-KASSA-02: lomakevirheet kenttäkohtaisiksi (virhekoonti, pakollisuusmerkintä, oma viesti sähköpostille, puhelimelle, y-tunnukselle ja OVT:lle)"
+  },
+  {
+    "key": "ui.shop.req_phone",
+    "lang": "fi",
+    "text": "Kirjoita puhelinnumero.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "KAUPPA-KASSA-02: lomakevirheet kenttäkohtaisiksi (virhekoonti, pakollisuusmerkintä, oma viesti sähköpostille, puhelimelle, y-tunnukselle ja OVT:lle)"
+  },
+  {
+    "key": "ui.shop.req_phone",
+    "lang": "en",
+    "text": "Please enter a phone number.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "KAUPPA-KASSA-02: lomakevirheet kenttäkohtaisiksi (virhekoonti, pakollisuusmerkintä, oma viesti sähköpostille, puhelimelle, y-tunnukselle ja OVT:lle)"
+  },
+  {
+    "key": "ui.shop.invalid_phone",
+    "lang": "fi",
+    "text": "Tarkista puhelinnumero. Käytä numeroita, välilyöntejä ja tarvittaessa +-merkkiä (esim. 040 123 4567).",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "KAUPPA-KASSA-02: lomakevirheet kenttäkohtaisiksi (virhekoonti, pakollisuusmerkintä, oma viesti sähköpostille, puhelimelle, y-tunnukselle ja OVT:lle)"
+  },
+  {
+    "key": "ui.shop.invalid_phone",
+    "lang": "en",
+    "text": "Please check the phone number. Use digits, spaces and, if needed, a + sign (e.g. +358 40 123 4567).",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "KAUPPA-KASSA-02: lomakevirheet kenttäkohtaisiksi (virhekoonti, pakollisuusmerkintä, oma viesti sähköpostille, puhelimelle, y-tunnukselle ja OVT:lle)"
+  },
+  {
+    "key": "ui.shop.req_company_name",
+    "lang": "fi",
+    "text": "Kirjoita yrityksen nimi.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "KAUPPA-KASSA-02: lomakevirheet kenttäkohtaisiksi (virhekoonti, pakollisuusmerkintä, oma viesti sähköpostille, puhelimelle, y-tunnukselle ja OVT:lle)"
+  },
+  {
+    "key": "ui.shop.req_company_name",
+    "lang": "en",
+    "text": "Please enter the company name.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "KAUPPA-KASSA-02: lomakevirheet kenttäkohtaisiksi (virhekoonti, pakollisuusmerkintä, oma viesti sähköpostille, puhelimelle, y-tunnukselle ja OVT:lle)"
+  },
+  {
+    "key": "ui.shop.req_business_id",
+    "lang": "fi",
+    "text": "Kirjoita y-tunnus, esimerkiksi 1234567-8.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "KAUPPA-KASSA-02: lomakevirheet kenttäkohtaisiksi (virhekoonti, pakollisuusmerkintä, oma viesti sähköpostille, puhelimelle, y-tunnukselle ja OVT:lle)"
+  },
+  {
+    "key": "ui.shop.req_business_id",
+    "lang": "en",
+    "text": "Please enter the business ID, for example 1234567-8.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "KAUPPA-KASSA-02: lomakevirheet kenttäkohtaisiksi (virhekoonti, pakollisuusmerkintä, oma viesti sähköpostille, puhelimelle, y-tunnukselle ja OVT:lle)"
+  },
+  {
+    "key": "ui.shop.req_street",
+    "lang": "fi",
+    "text": "Kirjoita katuosoite.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "KAUPPA-KASSA-02: lomakevirheet kenttäkohtaisiksi (virhekoonti, pakollisuusmerkintä, oma viesti sähköpostille, puhelimelle, y-tunnukselle ja OVT:lle)"
+  },
+  {
+    "key": "ui.shop.req_street",
+    "lang": "en",
+    "text": "Please enter the street address.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "KAUPPA-KASSA-02: lomakevirheet kenttäkohtaisiksi (virhekoonti, pakollisuusmerkintä, oma viesti sähköpostille, puhelimelle, y-tunnukselle ja OVT:lle)"
+  },
+  {
+    "key": "ui.shop.req_zip",
+    "lang": "fi",
+    "text": "Kirjoita postinumero (5 numeroa).",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "KAUPPA-KASSA-02: lomakevirheet kenttäkohtaisiksi (virhekoonti, pakollisuusmerkintä, oma viesti sähköpostille, puhelimelle, y-tunnukselle ja OVT:lle)"
+  },
+  {
+    "key": "ui.shop.req_zip",
+    "lang": "en",
+    "text": "Please enter the postcode (5 digits).",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "KAUPPA-KASSA-02: lomakevirheet kenttäkohtaisiksi (virhekoonti, pakollisuusmerkintä, oma viesti sähköpostille, puhelimelle, y-tunnukselle ja OVT:lle)"
+  },
+  {
+    "key": "ui.shop.req_city",
+    "lang": "fi",
+    "text": "Kirjoita postitoimipaikka.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "KAUPPA-KASSA-02: lomakevirheet kenttäkohtaisiksi (virhekoonti, pakollisuusmerkintä, oma viesti sähköpostille, puhelimelle, y-tunnukselle ja OVT:lle)"
+  },
+  {
+    "key": "ui.shop.req_city",
+    "lang": "en",
+    "text": "Please enter the city.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "KAUPPA-KASSA-02: lomakevirheet kenttäkohtaisiksi (virhekoonti, pakollisuusmerkintä, oma viesti sähköpostille, puhelimelle, y-tunnukselle ja OVT:lle)"
+  },
+  {
+    "key": "ui.shop.req_ovt",
+    "lang": "fi",
+    "text": "Kirjoita verkkolaskuosoite (OVT-tunnus).",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "KAUPPA-KASSA-02: lomakevirheet kenttäkohtaisiksi (virhekoonti, pakollisuusmerkintä, oma viesti sähköpostille, puhelimelle, y-tunnukselle ja OVT:lle)"
+  },
+  {
+    "key": "ui.shop.req_ovt",
+    "lang": "en",
+    "text": "Please enter the e-invoice address (OVT).",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "KAUPPA-KASSA-02: lomakevirheet kenttäkohtaisiksi (virhekoonti, pakollisuusmerkintä, oma viesti sähköpostille, puhelimelle, y-tunnukselle ja OVT:lle)"
+  },
+  {
+    "key": "ui.shop.req_operator",
+    "lang": "fi",
+    "text": "Kirjoita operaattorin välittäjätunnus.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "KAUPPA-KASSA-02: lomakevirheet kenttäkohtaisiksi (virhekoonti, pakollisuusmerkintä, oma viesti sähköpostille, puhelimelle, y-tunnukselle ja OVT:lle)"
+  },
+  {
+    "key": "ui.shop.req_operator",
+    "lang": "en",
+    "text": "Please enter the operator ID.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "KAUPPA-KASSA-02: lomakevirheet kenttäkohtaisiksi (virhekoonti, pakollisuusmerkintä, oma viesti sähköpostille, puhelimelle, y-tunnukselle ja OVT:lle)"
+  },
+  {
+    "key": "ui.shop.invalid_operator",
+    "lang": "fi",
+    "text": "Tarkista välittäjätunnus: 3–35 kirjainta tai numeroa.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "KAUPPA-KASSA-02: lomakevirheet kenttäkohtaisiksi (virhekoonti, pakollisuusmerkintä, oma viesti sähköpostille, puhelimelle, y-tunnukselle ja OVT:lle)"
+  },
+  {
+    "key": "ui.shop.invalid_operator",
+    "lang": "en",
+    "text": "Please check the operator ID: 3–35 letters or digits.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "KAUPPA-KASSA-02: lomakevirheet kenttäkohtaisiksi (virhekoonti, pakollisuusmerkintä, oma viesti sähköpostille, puhelimelle, y-tunnukselle ja OVT:lle)"
+  }
+]
