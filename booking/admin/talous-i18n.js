@@ -29,7 +29,8 @@ export const fmt = {
   int: (n) => nf({ maximumFractionDigits: 0 }).format(+n || 0),
   pct: (n) => `${nf({ maximumFractionDigits: 2 }).format(+n || 0)} %`,
   date: (iso) => (iso ? df({ day: 'numeric', month: 'numeric', year: 'numeric' }).format(new Date(iso.length === 10 ? `${iso}T12:00:00Z` : iso)) : '–'),
-  time: (iso) => df({ hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).format(new Date(iso)).replace('.', ':'),
+  // YHT-05: kuten kaupan clock.js: FI "16.00" / "9.30", EN "16:00" / "9:30"
+  time: (iso) => { const p = df({ hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).formatToParts(new Date(iso)); return `${Number(p.find((x) => x.type === 'hour').value)}${lang === 'en' ? ':' : '.'}${p.find((x) => x.type === 'minute').value}`; },
   dt: (iso) => (iso ? `${fmt.date(iso)} ${fmt.time(iso)}` : '–'),
   month: (ym) => df({ month: 'long', year: 'numeric' }).format(new Date(`${ym}-15T12:00:00Z`)),
 };

@@ -75,8 +75,8 @@ test('aikajana: sama kuin kaupassa (rituaali 20 · tauko 10 · savusauna 90 = 12
 });
 test('timelineSlots: kellonajat Helsingin ajassa (kesä- ja talviaika)', () => {
   const f = (iso) => TL.timelineSlots(7, iso).map((x) => `${x.key} ${x.from}–${x.to}`);
-  assert.deepEqual(f('2026-10-18T13:30:00Z'), ['ritual 16:30–16:50', 'break 16:50–17:00', 'smoke 17:00–18:30'], 'EEST (UTC+3)');
-  assert.deepEqual(f('2026-10-25T14:00:00Z'), ['ritual 16:00–16:20', 'break 16:20–16:30', 'smoke 16:30–18:00'], 'EET (UTC+2)');
+  assert.deepEqual(f('2026-10-18T13:30:00Z'), ['ritual 16.30–16.50', 'break 16.50–17.00', 'smoke 17.00–18.30'], 'EEST (UTC+3)');
+  assert.deepEqual(f('2026-10-25T14:00:00Z'), ['ritual 16.00–16.20', 'break 16.20–16.30', 'smoke 16.30–18.00'], 'EET (UTC+2)');
   assert.deepEqual(TL.timelineSlots(7, null), []);
 });
 test('fmtDuration', () => {
@@ -103,7 +103,7 @@ test('mock: kb 7 saatavuus – vain la/su, alkuajat 16:00/16:30/17:00, kesto ja 
   assert.deepEqual(days, ['2026-10-25', '2026-10-31', '2026-11-01', '2026-11-07'], 'su 25.10., la 31.10., su 1.11., la 7.11.');
   assert.deepEqual(rows.filter((r) => r.session_date === '2026-10-25').map((r) => r.starts_at), [helIso('2026-10-25', '16:00'), helIso('2026-10-25', '16:30'), helIso('2026-10-25', '17:00')]);
   for (const r of rows) { assert.equal(r.duration_minutes, 120); assert.equal(new Date(r.ends_at) - new Date(r.starts_at), 120 * 60e3); assert.equal(r.total, 147); assert.equal(r.persons, 3); assert.equal(r.status, 'available'); }
-  assert.deepEqual(TL.timelineSlots(7, rows[0].starts_at).map((x) => `${x.from}–${x.to}`), ['16:00–16:20', '16:20–16:30', '16:30–18:00']);
+  assert.deepEqual(TL.timelineSlots(7, rows[0].starts_at).map((x) => `${x.from}–${x.to}`), ['16.00–16.20', '16.20–16.30', '16.30–18.00']);
 });
 test('mock: muut slots-tuotteet ennallaan (kb 10: 90 min; arkipäivät mukana), tuntematon tuote → tyhjä; vaatii bookings.manage', async () => {
   const m = mock();

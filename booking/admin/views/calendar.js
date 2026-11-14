@@ -4,7 +4,7 @@
 // Koulutukset ja niiden tilavaraukset: admin_event_list('training', menneet mukana) kerran näkymää kohden (sama data kuin Koulutukset-työkalussa).
 // Jos haku epäonnistuu, muu kalenteri näytetään ja koulutuksista kerrotaan huomautuksella. Suodattimet: Työvuorot, Varaukset, Koulutukset (oletuksena kaikki päällä).
 import { rpc } from '../sb.js';
-import { h, fmtTime, todayHel, addDays, dayStartIso, errMsg, statusBadge, badge, empty } from '../ui.js';
+import { h, fmtTime, todayHel, addDays, dayStartIso, errMsg, statusBadge, badge, empty, countText } from '../ui.js';
 import { reservationDialog } from './shared.js';
 import { openOrderView } from '../order-open.js';
 import { loadTrainingTexts, trainingText as T } from '../training-texts.js';
@@ -112,11 +112,11 @@ export async function render({ ctx, refs, reload }) {
       const persons = nb.reduce((a, r) => a + (r.persons || 0), 0);
       const items = state.mode === 'week'
         ? h('ul', { class: 'cal-list' }, ...nt.map((t) => trainingItem(t)), ...(sh.get(ds) || []).map(shiftItem), ...nb.slice().sort((a, c) => a.starts_at.localeCompare(c.starts_at)).map(bookingItem), ...(blocked.get(ds) || []).map(blockItem))
-        : h('span', { class: 'cal-chips' }, ns ? h('span', { class: 'chip shift', title: `${ns} työvuoroa` }, h('b', { text: String(ns) }), h('span', { class: 'lbl', text: ' vuoroa' })) : null, nb.length ? h('span', { class: 'chip booking', title: `${nb.length} varausta, ${persons} henkilöä` }, h('b', { text: String(nb.length) }), h('span', { class: 'lbl', text: ` var. · ${persons} hlö` })) : null);
+        : h('span', { class: 'cal-chips' }, ns ? h('span', { class: 'chip shift', title: countText(ns, 'työvuoro', 'työvuoroa') }, h('b', { text: String(ns) }), h('span', { class: 'lbl', text: ' vuoroa' })) : null, nb.length ? h('span', { class: 'chip booking', title: `${nb.length} varausta, ${persons} henkilöä` }, h('b', { text: String(nb.length) }), h('span', { class: 'lbl', text: ` var. · ${persons} hlö` })) : null);
       if (state.mode === 'month') for (const t of nt) items.append(h('span', { class: 'chip training', title: [t.name, trainingSpacesTxt(t)].filter(Boolean).join(' · ') }, h('span', { class: `tn${t.space_names.length ? ' has-space' : ''}`, text: t.name }), t.space_names.length ? [h('span', { class: 'ts', text: trainingSpacesTxt(t) }), h('span', { class: 'tsm', 'aria-hidden': 'true', text: t.space_names.map(spaceMini).join(' ') })] : null));
       const blockCount = (blocked.get(ds) || []).length;
       if (blockCount && state.mode === 'month') items.append(h('span', { class: 'chip training-cal-block', text: `${T('spaces')}: ${blockCount}` }));
-      const label = `${fmtLong(ds)}: ${ns} työvuoroa, ${nb.length} varausta, ${T('spaces')}: ${blockCount}${nt.length ? `, ${T('cal_heading')}: ${nt.map((t) => [t.name, trainingSpacesTxt(t)].filter(Boolean).join(' – ')).join('; ')}` : ''}`;
+      const label = `${fmtLong(ds)}: ${countText(ns, 'työvuoro', 'työvuoroa')}, ${countText(nb.length, 'varaus', 'varausta')}, ${T('spaces')}: ${blockCount}${nt.length ? `, ${T('cal_heading')}: ${nt.map((t) => [t.name, trainingSpacesTxt(t)].filter(Boolean).join(' – ')).join('; ')}` : ''}`;
       const opener = h('button', {
         type: 'button', class: 'cal-dnum', 'aria-label': label, 'aria-pressed': ds === state.sel ? 'true' : 'false',
         onclick: (ev) => { ev.stopPropagation(); openDay(ds); },

@@ -9,7 +9,7 @@ import { stepper } from '../stepper.js';
 import { availabilityPanel, isSlotProduct } from './availability.js';
 import { resName, catLabel } from './legs.js';
 import { loadOptionConfig, configLabel, optionPicker, optErr, optName, ot } from '../options.js';
-import { h, field, toast, run, fmtDay, fmtTime, money, todayHel, helsinkiIso, errMsg, dayStartIso, addDays, fmtDT, revealSection, revealIfHidden } from '../ui.js';
+import { h, field, toast, run, fmtDay, fmtTime, timeValue, money, todayHel, helsinkiIso, errMsg, dayStartIso, addDays, fmtDT, revealSection, revealIfHidden } from '../ui.js';
 import { loadBookingTexts, bookingText, noticeText } from '../booking-texts.js';
 import { confirmDialog } from '../confirm.js';
 import { capacityNotice, scheduleNotice, bookingAction } from '../nb-logic.js';
@@ -96,7 +96,7 @@ export async function render({ ctx, refs, query, kind }) {
   // saatavuus (migraatio 25): hoidot ja rituaali näyttävät vapaat ajat; muut tuotteet ja Vanha varaus syöttävät ajan käsin
   let availFrom = date.value; let availTimer = null;
   const avail = old ? null : availabilityPanel({ getQuery: () => (isSlotProduct(st.product) ? { productId: st.product.id, from: availFrom, persons: +persons.value || 1, override: canOverride && ovr.checked, reason: ovrReason.value } : null),
-    onPick: (r) => { date.value = r.session_date; time.value = fmtTime(r.starts_at); errBox.hidden = true; sync(false); const next = f.querySelector('[name=date]')?.closest('.row') || f; revealSection(next); } });
+    onPick: (r) => { date.value = r.session_date; time.value = timeValue(r.starts_at); errBox.hidden = true; sync(false); const next = f.querySelector('[name=date]')?.closest('.row') || f; revealSection(next); } });
   if (avail) avail.node.hidden = true;
   const loadAvail = () => { if (!avail) return; avail.node.hidden = !isSlotProduct(st.product); avail.load(); };
   const reloadSoon = () => { clearTimeout(availTimer); availTimer = setTimeout(loadAvail, 400); };
@@ -136,7 +136,7 @@ export async function render({ ctx, refs, query, kind }) {
     if (reload) loadAvail();
   };
   for (const el of [prodSel, time]) el.addEventListener('change', () => sync(el === prodSel)); time.addEventListener('input', () => sync(false));
-  time.addEventListener('input', () => { if (avail?.selected && fmtTime(avail.selected.starts_at) !== time.value) avail.clearSelection(); });
+  time.addEventListener('input', () => { if (avail?.selected && timeValue(avail.selected.starts_at) !== time.value) avail.clearSelection(); });
   persons.addEventListener('input', () => { picker.sync(); reloadSoon(); }); date.addEventListener('change', () => { if (st.product) loadParents(st.product); availFrom = date.value || todayHel(); avail?.clearSelection(); loadAvail(); });
   if (avail) { ovr.addEventListener('change', loadAvail); ovrReason.addEventListener('change', loadAvail); }
 

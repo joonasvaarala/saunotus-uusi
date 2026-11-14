@@ -5,7 +5,7 @@ import { prepareImage, IMG_TYPES, IMG_MAX_INPUT } from './productimage.js';
 import { addonsAdmin } from './addons.js';
 import { productSuggestionsEditor } from './product-suggestions.js';
 import { productOptionsAdmin } from './productoptions.js';
-import { h, dialog, field, toast, run, money, badge } from '../ui.js';
+import { h, dialog, field, toast, run, money, badge, vatText, countText } from '../ui.js';
 import { filterDrawer } from '../filter-drawer.js';
 import { loadPosTexts, posText } from '../pos-texts.js';
 import { loadProductTexts, productText } from '../product-texts.js';
@@ -54,7 +54,7 @@ export async function render({ ctx, refs, reload, query }) {
   const rowOf = (p) => { const c = p.config;
     return h('button', { type: 'button', class: 'listrow', onclick: () => edit(p) },
       h('span', { class: 'what' }, c?.image_path ? h('img', { class: 'pthumb', src: storageUrl('product-images', c.image_path), alt: '', width: 40, height: 40, loading: 'lazy' }) : null, h('strong', { text: p.name }), h('small', { text: ` ${catLabel(p.category)}` })),
-      h('span', { class: 'meta' }, isOnline(p) ? badge('ok', 'Verkossa') : badge('muted', 'Ei verkossa'), c?.pos_enabled ? badge('ok', posText('badge_pos')) : null, c?.fridge_sale ? badge('ok', posText('badge_qr')) : null, !p.active ? badge('err', 'Piilotettu') : null, h('strong', { text: money(p.price) }), h('small', { text: `ALV ${p.vat_rate} %` }))); };
+      h('span', { class: 'meta' }, isOnline(p) ? badge('ok', 'Verkossa') : badge('muted', 'Ei verkossa'), c?.pos_enabled ? badge('ok', posText('badge_pos')) : null, c?.fridge_sale ? badge('ok', posText('badge_qr')) : null, !p.active ? badge('err', 'Piilotettu') : null, h('strong', { text: money(p.price) }), h('small', { text: `ALV ${vatText(p.vat_rate)}` }))); };
 
   // ---- suodattimet (clientissä: lista on jo ladattu, ei uusia RPC-kutsuja); tila säilyy URL:ssa (#/tuotteet?nakyvyys=…&kategoria=…&haku=…) ----
   const all = refs.products;
@@ -100,7 +100,7 @@ export async function render({ ctx, refs, reload, query }) {
     for (const [v] of VISIBILITY) setLabel(`vis:${v}`, all.filter((p) => matchSearch(p) && matchCat(p) && (!v || (v === 'online') === isOnline(p))).length);
     for (const [c] of catOpts) setLabel(`cat:${c}`, all.filter((p) => matchSearch(p) && matchVis(p) && (!c || (p.category || '') === c)).length);
     list.replaceChildren(...(shown.length ? shown.map(rowOf) : [h('div', { class: 'empty prodempty' }, h('p', { text: 'Ei tuotteita valituilla suodattimilla.' }), active() ? h('button', { type: 'button', class: 'btn ghost', text: 'Tyhjennä suodattimet', onclick: () => clearBtn.click() }) : null)]));
-    count.replaceChildren(`${shown.length} / ${all.length} tuotetta`, active() ? ' · ' : '', active() ? clearBtn : '');
+    count.replaceChildren(`${shown.length} / ${countText(all.length, 'tuote', 'tuotetta')}`, active() ? ' · ' : '', active() ? clearBtn : '');
     syncUrl();
     drawer.refresh();
   }

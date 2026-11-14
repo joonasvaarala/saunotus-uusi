@@ -18,7 +18,16 @@ const TZ = 'Europe/Helsinki';
 const dtf = (o) => new Intl.DateTimeFormat('fi-FI', { timeZone: TZ, ...o });
 export const fmtDate = (iso) => dtf({ weekday: 'short', day: 'numeric', month: 'numeric', year: 'numeric' }).format(new Date(iso));
 export const fmtDay = (iso) => dtf({ weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).format(new Date(iso));
-export const fmtTime = (iso) => dtf({ hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).format(new Date(iso)).replace('.', ':');
+// YHT-05: sama kellonaikamuoto kuin kaupassa ja sivustolla (booking/shop/src/clock.js clockFromIso, FI "16.00", "9.30"). Ei tuoda kaupan moduulia,
+// jottei hallinnan ensilataus riipu /shop/src/-tiedostosta; booking/tests/muodot-sanasto.test.mjs vartioi, että tulos on sama.
+// <input type="time"> -arvo ja vertailu: aina "HH:MM" (Helsingin aika), ei näyttömuoto.
+export const timeValue = (iso) => dtf({ hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).format(new Date(iso)).replace('.', ':');
+export const fmtTime = (iso) => { const p = dtf({ hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).formatToParts(new Date(iso)); return `${Number(p.find((x) => x.type === 'hour').value)}.${p.find((x) => x.type === 'minute').value}`; };
+// YHT-05: ALV-prosentti suomalaisittain (25,5 %), rahat Intl-muodossa (money)
+export const vatText = (rate) => (rate == null || rate === '' ? '–' : `${new Intl.NumberFormat('fi-FI', { maximumFractionDigits: 2 }).format(+rate)} %`);
+// YHT-04: lukumäärä ja oikea muoto (1 varaus / 2 varausta)
+const FI_PLURAL = new Intl.PluralRules('fi-FI');
+export const countText = (n, one, other) => `${n} ${FI_PLURAL.select(Number(n)) === 'one' ? one : other}`;
 export const fmtDT = (iso) => (iso ? `${dtf({ day: 'numeric', month: 'numeric', year: 'numeric' }).format(new Date(iso))} ${fmtTime(iso)}` : '–');
 export const money = (n) => (n == null ? '–' : new Intl.NumberFormat('fi-FI', { style: 'currency', currency: 'EUR' }).format(+n));
 export const todayHel = () => new Date().toLocaleDateString('sv-SE', { timeZone: TZ });
@@ -33,7 +42,7 @@ export function helsinkiIso(local) {
 export const dayStartIso = (ds) => helsinkiIso(`${ds}T00:00`);
 
 export const STATUS = { confirmed: 'Vahvistettu', pending: 'Odottaa', cancelled: 'Peruttu', expired: 'Vanhentunut', completed: 'Toteutunut', no_show: 'Ei saapunut', draft: 'Luonnos' };
-export const PAY = { unpaid: 'Maksamatta', pending: 'Maksu kesken', paid: 'Maksettu', partially_paid: 'Osittain maksettu', refunded: 'Palautettu', partially_refunded: 'Osittain palautettu', failed: 'Epäonnistui', invoiced: 'Laskutettu' };
+export const PAY = { unpaid: 'Maksamatta', pending: 'Maksu kesken', paid: 'Maksettu', partially_paid: 'Osittain maksettu', refunded: 'Hyvitetty', partially_refunded: 'Osittain hyvitetty', failed: 'Epäonnistui', invoiced: 'Laskutettu' };
 export const badge = (kind, text) => h('span', { class: `badge ${kind}`, text });
 export const statusBadge = (s) => badge(`st-${s}`, STATUS[s] || s);
 export const payBadge = (s) => badge(`pay-${s}`, PAY[s] || s);
