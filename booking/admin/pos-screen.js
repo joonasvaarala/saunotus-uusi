@@ -3,6 +3,7 @@
 import { h, toast, money, errMsg } from './ui.js';
 import { icon } from './icons.js';
 import { loadPosTexts, posText as tx } from './pos-texts.js';
+import { getLang } from './talous-i18n.js';
 import { cartAdd, cartAddCustom, cartLineKey, cartSetQty, cartTotal, cartVatBreakdown, checkoutItems, parseEuroInput, validateCustomLine, posSheetTenders, tenderAvailable, joinUrl, posCandidates, filterProducts, tillEditorOpen, moveSort, validEmail, posCustomerHits } from './pos-logic.js';
 import { searchCustomers } from './customer-hits.js';
 import { qrSvgElement } from './qrsvg.js';
@@ -12,8 +13,11 @@ const MOCK = () => new URLSearchParams(location.search).get('mock') === '1';
 
 export async function renderPos({ ctx, rpc, fn }) {
   const store = (() => { try { return globalThis.localStorage || null; } catch { return null; } })();
-  const lang = 'fi';
-  const t = (k) => tx(k, lang);
+  // HALL-KASSA-01: kieli yhteisestä valinnasta (FI/EN-kytkin), luetaan joka haulla.
+  const t = (k) => tx(k, getLang());
+  // HALL-KASSA-01: ≥ 800 px kori on aina näkyvissä sivupaneelina.
+  const wideMq = (() => { try { return typeof globalThis.matchMedia === 'function' ? globalThis.matchMedia('(min-width:800px)') : null; } catch { return null; } })();
+  const isWide = () => !!wideMq?.matches;
   const canEdit = ctx.can('pos.use') || ctx.can('catalog.edit') || ctx.can('settings.edit');
   let catalog = [];
   let allProducts = [];
@@ -318,7 +322,8 @@ export async function renderPos({ ctx, rpc, fn }) {
       payError = '';
       draw();
       const items = checkoutItems(cart);
-      const res = await rpc('admin_pos_checkout', { p_items: items, p_locale: lang, p_email: mailTo });
+      // Asiakkaalle lähtevä viesti pysyy suomenkielisenä riippumatta hallinnan kielestä (maksuvirta ennallaan).
+      const res = await rpc('admin_pos_checkout', { p_items: items, p_locale: 'fi', p_email: mailTo });
       order = res;
       phase = 'paying';
       try {
@@ -704,25 +709,26 @@ export async function renderPos({ ctx, rpc, fn }) {
         h('strong', { class: 'pos-price', text: money(p.price) })));
     }
 
+    const wide = isWide();
     const lines = h('div', { class: 'pos-panel', 'data-testid': 'pos-panel' });
     const lineQty = cart.reduce((n, r) => n + r.quantity, 0);
-    lines.append(h('button', {
+    if (!wide) lines.append(h('button', {
       type: 'button', class: 'pos-lines-btn', 'data-testid': 'pos-lines',
       'aria-expanded': showLines ? 'true' : 'false',
-      'aria-label': `${t('lines')} ${lineQty}`,
+      'aria-label': `${t('cart')} ${lineQty}`,
       onclick: () => { showLines = !showLines; draw(); },
     },
-      h('span', { class: 'pos-lines-label', text: t('lines') }),
+      h('span', { class: 'pos-lines-label', text: t('cart') }),
       h('span', { class: 'pos-lines-count', text: String(lineQty) })));
-    if (showLines) {
+    if (showLines || wide) {
       if (!cart.length) lines.append(h('p', { class: 'muted', text: t('empty') }));
       for (const r of cart) {
         const key = cartLineKey(r);
         lines.append(h('div', { class: 'pos-line', 'data-testid': r.kind === 'custom' ? 'pos-custom-line' : 'pos-product-line' },
           h('span', { class: 'grow', text: r.name }),
-          h('button', { type: 'button', class: 'btn pos-step', 'aria-label': t('qty'), text: '−', onclick: () => { cart = cartSetQty(cart, key, r.quantity - 1); if (phase === 'paying') voidOpen(); draw(); } }),
+          h('button', { type: 'button', class: 'btn pos-step', 'aria-label': t('qty_less'), text: '−', onclick: () => { cart = cartSetQty(cart, key, r.quantity - 1); if (phase === 'paying') voidOpen(); draw(); } }),
           h('span', { class: 'pos-qty', text: String(r.quantity) }),
-          h('button', { type: 'button', class: 'btn pos-step', 'aria-label': t('qty'), text: '+', onclick: () => { cart = cartSetQty(cart, key, r.quantity + 1); if (phase === 'paying') voidOpen(); draw(); } }),
+          h('button', { type: 'button', class: 'btn pos-step', 'aria-label': t('qty_more'), text: '+', onclick: () => { cart = cartSetQty(cart, key, r.quantity + 1); if (phase === 'paying') voidOpen(); draw(); } }),
           h('strong', { text: money(r.unit_price * r.quantity) }),
           h('button', { type: 'button', class: 'btn ghost', text: t('remove'), onclick: () => { cart = cartSetQty(cart, key, 0); if (phase === 'paying') voidOpen(); draw(); } })));
       }
@@ -803,11 +809,13 @@ export async function renderPos({ ctx, rpc, fn }) {
             onclick: () => { customOpen = false; customError = ''; draw(); } })),
       );
     }
-    lines.append(customBox);
+    if (!wide) lines.append(customBox);
 
-    const side = h('aside', { class: 'pos-side', 'data-testid': 'pos-side' },
+    const side = h('aside', { class: 'pos-side', 'data-testid': 'pos-side' });
+    if (wide) side.append(h('h2', { class: 'pos-cart-title', text: t('cart') }), lines);
+    side.append(
       h('p', { class: 'pos-total-label', text: t('total') }),
-      h('p', { class: 'pos-total', 'data-testid': 'pos-total', text: money(order && phase !== 'cart' ? order.total : total) }));
+      h('p', { class: 'pos-total', 'data-testid': 'pos-total', 'aria-live': 'polite', 'aria-atomic': 'true', text: money(order && phase !== 'cart' ? order.total : total) }));
     if (phase === 'paid') {
       side.append(h('div', { class: 'pos-paid', 'data-testid': 'pos-paid' },
         h('p', { text: t('paid') }),
@@ -832,7 +840,7 @@ export async function renderPos({ ctx, rpc, fn }) {
 
     const kids = [
       h('h1', { text: t('title') }),
-      h('div', { class: 'pos-layout', 'data-testid': 'pos-layout' }, h('div', { class: 'pos-main' }, grid, lines), side),
+      h('div', { class: 'pos-layout', 'data-testid': 'pos-layout' }, h('div', { class: 'pos-main' }, grid, wide ? customBox : lines), side),
     ];
     if (tools) kids.push(tools);
     root.replaceChildren(...kids);
@@ -886,6 +894,15 @@ export async function renderPos({ ctx, rpc, fn }) {
   await load();
   await restoreCheckoutx();
   draw();
+  // Leveys ylittää 800 px tai alittaa sen (tabletin kääntö): piirretään uudelleen, ei kesken maksun.
+  if (wideMq?.addEventListener) {
+    let lastWide = isWide();
+    wideMq.addEventListener('change', () => {
+      if (!root.isConnected || lastWide === isWide()) return;
+      lastWide = isWide();
+      if (!payOpen) draw();
+    });
+  }
   // Tarkkailija vasta kun näkymä on kiinnitetty. load()in aikana root ei ole vielä sivulla,
   // ja irtoaminen silloin purkaisi kuuntelijan ennen kuin näkymä ehtii näkyviin.
   queueMicrotask(() => queueMicrotask(() => {

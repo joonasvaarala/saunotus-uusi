@@ -3,9 +3,16 @@
 // Maksupopupin uudet avaimet: pending-import-17 (POS_PAY_TEXTS). Sanakirja on varalla, kunnes tuonti on ajettu.
 // Maksulinkin sähköposti: pending-import-18 (POS_LINK_TEXTS). Allekirjoitus Tapio on email.payment_link.sign_name.
 // Asiakaskentän uusi otsikko ja vihje: pending-import-113 (POS_CUSTOMER_TEXTS). Vanhat ui.pos.email / email_help jäävät tuoduiksi.
+// HALL-KASSA-01: ui.pos.cart, ui.pos.qty_less, ui.pos.qty_more (tuonti: content/site-texts.pending-import-159.json).
 // public_get_site_texts peittää ui.pos.*-avaimet. Haku epäonnistuu tai rivi puuttuu → sanakirja.
 import { getLang } from './talous-i18n.js';
 import { getSiteTexts, clearSiteTextsCache } from './site-texts-cache.js';
+
+// HALL-KASSA-01: ostoskori ja määräpainikkeiden nimet (pending-import-159).
+export const POS_CART_TEXTS = {
+  fi: { 'cart': 'Ostoskori', 'qty_less': 'Vähennä', 'qty_more': 'Lisää' },
+  en: { 'cart': 'Cart', 'qty_less': 'Decrease', 'qty_more': 'Increase' },
+};
 
 export const POS_TEXTS = {
   fi: {
@@ -338,6 +345,6 @@ export function clearPosTextCache() {
 export function posText(key, lang = getLang()) {
   const live = db.get(`${PREFIX}${key}|${lang}`);
   if (live) return live;
-  return POS_TEXTS[lang]?.[key] || POS_EDIT_TEXTS[lang]?.[key] || POS_PAY_TEXTS[lang]?.[key] || POS_LINK_TEXTS[lang]?.[key] || POS_CUSTOMER_TEXTS[lang]?.[key] || POS_CUSTOM_TEXTS[lang]?.[key] || POS_CHECKOUTX_TEXTS[lang]?.[key]
-    || POS_TEXTS.fi[key] || POS_EDIT_TEXTS.fi[key] || POS_PAY_TEXTS.fi[key] || POS_LINK_TEXTS.fi[key] || POS_CUSTOMER_TEXTS.fi[key] || POS_CUSTOM_TEXTS.fi[key] || POS_CHECKOUTX_TEXTS.fi[key] || key;
+  return POS_TEXTS[lang]?.[key] || POS_EDIT_TEXTS[lang]?.[key] || POS_PAY_TEXTS[lang]?.[key] || POS_LINK_TEXTS[lang]?.[key] || POS_CUSTOMER_TEXTS[lang]?.[key] || POS_CUSTOM_TEXTS[lang]?.[key] || POS_CHECKOUTX_TEXTS[lang]?.[key] || POS_CART_TEXTS[lang]?.[key]
+    || POS_TEXTS.fi[key] || POS_EDIT_TEXTS.fi[key] || POS_PAY_TEXTS.fi[key] || POS_LINK_TEXTS.fi[key] || POS_CUSTOMER_TEXTS.fi[key] || POS_CUSTOM_TEXTS.fi[key] || POS_CHECKOUTX_TEXTS.fi[key] || POS_CART_TEXTS.fi[key] || key;
 }

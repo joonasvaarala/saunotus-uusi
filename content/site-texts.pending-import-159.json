@@ -1,0 +1,62 @@
+[
+  {
+    "key": "ui.pos.cart",
+    "lang": "fi",
+    "text": "Ostoskori",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-KASSA-01: pikakassan kori (Ostoskori) ja määräpainikkeiden omat nimet ruudunlukijalle"
+  },
+  {
+    "key": "ui.pos.cart",
+    "lang": "en",
+    "text": "Cart",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-KASSA-01: pikakassan kori (Ostoskori) ja määräpainikkeiden omat nimet ruudunlukijalle"
+  },
+  {
+    "key": "ui.pos.qty_less",
+    "lang": "fi",
+    "text": "Vähennä",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-KASSA-01: pikakassan kori (Ostoskori) ja määräpainikkeiden omat nimet ruudunlukijalle"
+  },
+  {
+    "key": "ui.pos.qty_less",
+    "lang": "en",
+    "text": "Decrease",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-KASSA-01: pikakassan kori (Ostoskori) ja määräpainikkeiden omat nimet ruudunlukijalle"
+  },
+  {
+    "key": "ui.pos.qty_more",
+    "lang": "fi",
+    "text": "Lisää",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-KASSA-01: pikakassan kori (Ostoskori) ja määräpainikkeiden omat nimet ruudunlukijalle"
+  },
+  {
+    "key": "ui.pos.qty_more",
+    "lang": "en",
+    "text": "Increase",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-KASSA-01: pikakassan kori (Ostoskori) ja määräpainikkeiden omat nimet ruudunlukijalle"
+  }
+]
