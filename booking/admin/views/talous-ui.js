@@ -3,6 +3,7 @@ import { h, badge, errMsg, toast, dialog } from '../ui.js';
 import { icon } from '../icons.js';
 import { t, fmt, has } from '../talous-i18n.js';
 import { FeatureNotReady } from '../talous-api.js';
+import { paymentLinkEmail, paymentLinkOutcome } from '../payment-link-logic.js';
 
 export const PAY = ['unpaid', 'pending', 'paid', 'partially_paid', 'refunded', 'partially_refunded', 'failed', 'invoiced'];
 export const PSTAT = ['pending', 'paid', 'partially_refunded', 'refunded', 'failed', 'cancelled'];
@@ -92,6 +93,25 @@ export function actionBtn({ key, label, ico, testid, extraDisabled = null, onCli
 }
 // Tulos-ilmoitus: mock-vastaus (res.mock) kertoo ettei mitään muutettu; oikea vastaus = onnistui
 export const doneToast = (res, rpcName) => (res?.mock ? toast(t('mock.done', { rpc: rpcName }), 'warn') : toast(t('done', { rpc: rpcName }), 'ok'));
+// HALL-TILAUS-03: maksulinkin sähköpostivalinta. Asiakkaalla on osoite → valinta oletuksena päällä ja osoite näkyy, painike "Lähetä linkki";
+// ei osoitetta → ei valintaa, painike "Luo linkki". report() kertoo, lähtikö viesti (palvelimen email_queued).
+export function linkEmailControl(order) {
+  const email = paymentLinkEmail(order);
+  const submitText = (on) => (on ? t('link.send') : t('link.submit'));
+  const nodes = email
+    ? h('label', { class: 'check' }, h('input', { type: 'checkbox', name: 'email', checked: true, 'data-testid': 'link-email',
+      onchange: (e) => { const b = e.target.form?.querySelector('button[type=submit]'); if (b) b.textContent = submitText(e.target.checked); } }), ` ${t('link.emailTo', { email })}`)
+    : h('p', { class: 'muted', 'data-testid': 'link-no-email', text: t('link.noEmail') });
+  return {
+    nodes, submit: submitText(!!email),
+    wants: (fd) => !!email && fd.get('email') === 'on',
+    report: (res, sent, rpcName) => {
+      if (res?.mock) return doneToast(res, rpcName);
+      const o = paymentLinkOutcome(res, sent);
+      toast(t(o.key, { email }), o.tone);
+    },
+  };
+}
 // Yksinkertainen vahvistus-/lomakedialogi mock-toimintoihin
 export function formDialog(title, fields, submitText, onSubmit) {
   const form = h('form', { class: 'stack', novalidate: true, onsubmit: async (ev) => {

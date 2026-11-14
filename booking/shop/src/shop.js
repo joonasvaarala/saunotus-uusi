@@ -17,7 +17,7 @@ import { daySlotsAvailableFirst } from './day-slot-order.js';
 import { indexShopEvents, missingEventProducts, ensureEventProduct, eventIsFull, eventWaitlistPath, byEventStart } from './event-full.js';
 import { loadProducts as loadTreatmentProducts, splitCatalog, isListed as treatmentListed, isTreatmentBooking, loadAvailability as loadTreatmentSlots, horizonDays as treatmentHorizon, timeToken as treatmentTimeToken, isRetryable as treatmentRetryable } from './treatments.js';
 import { pickCatalog } from './catalog-audience.js';
-import { heroShort, cardShort, fallbackDesc, leadShort } from './short-desc.js';
+import { heroShort, cardShort, fallbackDesc, leadShort, dayCardExcerpt } from './short-desc.js';
 import { createTreatmentViews } from './treatment-ui.js';
 import { cardMeta } from './card-meta.js';
 import { kindOf, chipsFor, DAY_KIND_ORDER, productsForAudience } from './catalog-kind.js';
@@ -32,8 +32,7 @@ import { ht, holdError, methodList } from './hold-texts.js';
 import { normCheckout, isHoldView, holdModeOf, giftWasUsed } from './hold-logic.js';
 import { holdPanel, additionHoldSection } from './hold-ui.js';
 import { normBusinessId, validBusinessId, normOvt, validOvt, validOperator } from './invoice-validate.js';
-import { isRichHtml } from './rich-text.js';
-import { visibleText, richHost } from './rich-view.js';
+import { richHost } from './rich-view.js';
 import { softenSpaces } from './text-spaces.js';
 import { revealForm, revealIfHidden, bookingJump } from './gift-ui.js';
 import { normalizeCode, quoteSignature, isAnnualQuote, isCodeError, codeFailText } from './discount-code-logic.js';
@@ -450,7 +449,7 @@ async function fillTreatments(box, results, ds, today, tmax, openSlug, onToggle,
 // tuotekortti (accordion): otsikkopainike → vain saatavilla olevat tuotteet; ajat näytetään vasta kun kortti avataan (yksi auki kerrallaan, tila URL:ssa ?tuote=<slug>)
 function prodCard(p, rs, ds, open, onToggle, treat = false) {
   const avail = rs.filter((x) => x.r.status === 'available'), fullOnly = !treat && fullyBooked(rs), id = `bk-pc-${p.id}`;
-  const rawDesc = pdesc(p) || '', desc = (isRichHtml(rawDesc) ? visibleText(rawDesc) : rawDesc).replace(/\s+/g, ' ').trim(), short = desc.length > 90 ? `${desc.slice(0, 90).replace(/\s+\S*$/, '')}…` : desc;
+  const short = dayCardExcerpt(p, S.lang, pdesc(p) || '', pname(p));   // KAUPPA-SELAUS-01: lyhyt kuvaus, varalla ote ilman alun otsikkoa
   const panel = h('div', { id: `${id}-panel`, class: 'bk-pc-panel', role: 'region', 'aria-labelledby': `${id}-btn`, hidden: open ? null : true },
     treat && tv.timelineText(p) ? h('p', { class: 'bk-note bk-pc-tl', text: tv.timelineText(p) }) : null,
     h('ul', { class: 'bk-slotlist' }, (treat ? rs : daySlotsAvailableFirst(rs)).map((x) => (treat ? treatItem(x, ds) : dayItem(x, ds)))),

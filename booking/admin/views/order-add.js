@@ -1,10 +1,10 @@
-// booking_182: jaettu tilausten lisäostojen ja maksulinkkien UI, ei viestien lähetystä.
+// booking_182: jaettu tilausten lisäostojen ja maksulinkkien UI. Maksulinkin voi lähettää asiakkaalle sähköpostilla (HALL-TILAUS-03, oletuksena päällä kun osoite on).
 // Palvelin laskee kaikkien muiden kuin custom-rivien hinnat.
 import { rpc } from '../sb.js';
 import { h, dialog, toast, errMsg, fmtTime } from '../ui.js';
 import { t, fmt, getLang } from '../talous-i18n.js';
 import { absLink, RPC } from '../talous-api.js';
-import { formDialog, doneToast } from './talous-ui.js';
+import { formDialog, doneToast, linkEmailControl } from './talous-ui.js';
 import { orderText as tx } from '../orders-texts.js';
 import { newPurchaseItem, afterAddChoices } from '../order-reservation-logic.js';
 import { linkValidityText, linkSubmitOnce } from '../payment-link-logic.js';
@@ -41,12 +41,14 @@ export function openOrderPaymentLink({ api, ctx, order, onDone }) {
   if (lockedStop(order)) return null;
   if (!ctx.can('payments.manage') || !order?.is_native || !(Number(order?.balance?.unpaid) > 0)) return null;
   const deadline = linkDeadlineControl();
+  const mail = linkEmailControl(order);
   return formDialog(tx('ui.admin.orders.link_created'), [
     h('p', { class: 'muted', text: tx('ui.admin.orders.link_only_uncovered') }),
-    h('p', { text: t('link.amount', { sum: fmt.money(order.balance.unpaid) }) }), deadline.nodes,
-  ], t('link.submit'), linkSubmitOnce((fd) => deadline.read(fd), async (expiresDays) => {
-    const result = await api.createPaymentLink({ orderId: order.order_id, sendEmail: false, expiresDays });
-    doneToast(result, RPC.createPaymentLink); onDone?.(result);
+    h('p', { text: t('link.amount', { sum: fmt.money(order.balance.unpaid) }) }), deadline.nodes, mail.nodes,
+  ], mail.submit, linkSubmitOnce((fd) => deadline.read(fd), async (expiresDays, fd) => {
+    const sendEmail = mail.wants(fd);
+    const result = await api.createPaymentLink({ orderId: order.order_id, sendEmail, expiresDays });
+    mail.report(result, sendEmail, RPC.createPaymentLink); onDone?.(result);
     setTimeout(() => showLinkResult({ result, order }), 0);
   }));
 }
