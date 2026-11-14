@@ -113,6 +113,24 @@ button.bk-cell:hover{filter:brightness(.97)}
 .bk-totalrow{font-size:20px;border-top:1px solid var(--line);padding-top:12px;margin:0 0 8px}
 .bk-total{font:600 30px var(--head);color:var(--ink)}
 .bk-pay{font-size:15px;color:var(--muted);margin:0}
+/* KAUPPA-KASSA-01: kassan alapalkki. Alle 900 px summa, maksuohje ja lähetysnappi pysyvät samassa näkymässä (sticky lomakkeen alareunassa);
+   ja ≥ 900 px summa ja ohje ovat sivupalkissa, joten palkissa on vain nappi. */
+.bk-paybar{margin-top:8px}
+.bk-bar-note,.bk-bar-sum{display:none}
+.bk-bar-row{display:block}
+@media(max-width:899px){
+  .bk-form .bk-paybar{position:sticky;bottom:0;z-index:5;margin:8px -4px 0;padding:10px 4px calc(10px + env(safe-area-inset-bottom,0px));background:var(--bg,#fff);border-top:1px solid var(--line);box-shadow:0 -6px 14px rgba(43,58,48,.10)}
+  .bk-bar-note{display:block;margin:0 0 8px;font-size:13px;line-height:1.35;color:var(--muted)}
+  .bk-bar-note[hidden]{display:none}
+  .bk-bar-row{display:flex;align-items:center;gap:12px}
+  .bk-bar-sum{display:block;margin:0;flex:0 0 auto;line-height:1.15}
+  .bk-bar-label{display:block;font:600 12px var(--label);text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+  .bk-bar-total{font:600 22px var(--head);color:var(--ink)}
+  .bk-bar-sum small{display:block;font-size:11px;color:var(--muted)}
+  .bk-form .bk-bar-row .btn{flex:1 1 auto;width:auto;min-width:0;padding:16px 12px}
+  /* Palkki ei peitä fokusoitua kenttää: selain vierittää kentän palkin yläpuolelle */
+  html:has(.bk-paybar){scroll-padding-bottom:150px}
+}
 /* vahvistus */
 .bk-conf{max-width:640px;margin-inline:auto;background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:26px}
 .bk-conf .bk-status{display:inline-block;font:600 13px var(--label);padding:8px 14px;border-radius:30px;background:#e8f3ea;color:#1d4d2b}

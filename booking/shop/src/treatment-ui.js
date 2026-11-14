@@ -16,6 +16,7 @@ import { customerInvoiceLock } from './invoice-lock.js';
 import { formPaysOnline } from './company-pay.js';
 import { clockFromIso, clockFromHm } from './clock.js';
 import { cardAnchor } from './card-link.js';
+import { createPayBar } from './pay-bar.js';
 
 export function createTreatmentViews(c) {
   const { moreInfo, h, t, S, state, money, fmt, hm, dayLong, pad2, todayHel, addDays, pname, pdesc, pimg, setHero, mount, focusTop, errorBox, phoneBox, bk, customerFields, legalFields, holdInfo = async () => ({ on: false, minutes: 15, extra: () => [] }), tx = () => null, confirmUrl = (tok) => `${S.confirmHref}#${tok}` } = c;
@@ -250,18 +251,19 @@ export function createTreatmentViews(c) {
       h('dt', { text: tr.time }), h('dd', { text: slot.end ? `${tm(slot.start)}–${tm(slot.end)}` : tm(slot.start) }), scheduleRows(p, slot.start), h('dt', { text: t.persons }), h('dd', { text: String(n) }), addonRows()].flat();   // .flat(): sisäkkäiset rivilistat (valitsin, aikataulu, lisäpalvelut) samaan tasoon
     const sumList = h('dl', { class: 'bk-sum' }, sumRows());
     const totalEl = h('strong', { class: 'bk-total', 'data-testid': 'sum-total', text: money(totalNow()) });
-    const refreshSum = () => { sumList.replaceChildren(...sumRows().flat(2).filter(Boolean)); totalEl.textContent = money(totalNow()); };
+    const refreshSum = () => { sumList.replaceChildren(...sumRows().flat(2).filter(Boolean)); totalEl.textContent = money(totalNow()); payBar.setTotal(totalNow()); };
     const optP = showOpt ? optPicker(p, { value: opt, required: needOpt, onChange: (code) => { opt = code; optDd.textContent = optText(); pickWhen.textContent = whenText(); } }) : null;
     const cf = customerFields(), legal = legalFields({ showCancel: true }), { terms, consent } = legal;
     const msg = h('div', { id: 'bk-msg' });
     const next = h('button', { type: 'submit', class: 'btn', text: tr.continueSummary });
+    const payBar = createPayBar({ h, t, money, submit: next });   // KAUPPA-KASSA-01: summa kiinteänä nappien vieressä alle 900 px
     const form = h('form', { class: 'bk-form', novalidate: true, onsubmit: (ev) => {
       ev.preventDefault(); msg.replaceChildren();
       if (!O.optionOk(p, opt)) { optP.setError(ot['err.option_required']); optP.focus(); return; }
       const cust = cf.read(form, msg); if (!cust) return;
       if (!terms.checked) { msg.append(errorBox(t.acceptTermsErr)); terms.focus(); return; }
       review(cust, (new FormData(form).get('note') || '').trim());
-    } }, optP ? optP.node : null, ap ? ap.node : null, cf.node, legal.nodes, msg, next);
+    } }, optP ? optP.node : null, ap ? ap.node : null, cf.node, legal.nodes, msg, payBar.node);
     form.addEventListener('input', () => msg.replaceChildren());
     const whenText = () => `${opt ? `${O.optName(O.findOption(p, opt), S.lang)} · ` : ''}${when(slot.start)}${slot.end ? `–${tm(slot.end)}` : ''} · ${n} ${t.person}`;
     const pickWhen = h('span', { class: 'bk-pick-when', text: whenText() });
@@ -271,6 +273,7 @@ export function createTreatmentViews(c) {
       pimg(p, 'pick-img', { alt: false, w: 160, hgt: 160 }),
       h('div', { class: 'bk-pick-main' }, h('strong', { class: 'bk-pick-name', text: pname(p) }), pickWhen),
       pickChange);
+    payBar.setTotal(totalNow());
     const aside = h('aside', { class: 'bk-aside', 'aria-label': t.summary }, h('h3', { text: t.summary }), sumList,
       h('p', { class: 'bk-totalrow' }, t.total + ': ', totalEl, ' ', h('small', { text: t.vatIncl })));
     const formView = h('div', { class: 'bk-checkout' }, form, aside);
