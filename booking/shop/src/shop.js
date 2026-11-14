@@ -53,6 +53,7 @@ import { cardAnchor } from './card-link.js';
 import { bindLangLinks, restoreDraft } from './lang-switch.js';
 import { confirmPageKind } from './confirm-heading.js';
 import { swimwearKey } from './product-layout.js';
+import { createPayBar } from './pay-bar.js';
 
 const S = window.BOOKING_SHOP;                   // build-aikainen konfiguraatio (kieli, polut, ei-verkossa-varattavat tuotteet)
 const t = T[S.lang] || T.fi;
@@ -961,6 +962,7 @@ async function viewCheckout(ruleId, ds, productId, via) {
   const annualOn = () => isAnnualQuote(code.quote);
   const locked = () => wlLock || annualOn();
   // booking_179: lisähoidon hinta tulee vasta valinnan jälkeen (ei esivalintaa). Paikkamerkki, kunnes osio on luotu.
+  let payBar = null;   // KAUPPA-KASSA-01: alapalkki (summa + maksuohje lähetysnapin vieressä), luodaan submitin jälkeen
   let upsellUI = { total: () => 0, items: () => [], hasSuggestedAddon: () => false, session: '', text: () => '', node: null, reset() {} };
   const upd = () => {
     if (annualOn()) { n = +code.quote.persons || 1; for (const a of addons) qty.set(a.id, 0); }
@@ -972,6 +974,7 @@ async function viewCheckout(ruleId, ds, productId, via) {
     const fresh = code.quote && code.sig === sig();
     const qv = quietCheckout({ quote: fresh ? code.quote : null, offer: annualOn() || (code.quote && !fresh) ? null : qOffer, sessionTotal: priceFor(s, n), discountBase: quietBase(s, n) });
     total.textContent = money((fresh ? +code.quote.total : priceFor(s, n) - (qv.source === 'quiet' ? qv.amount : 0) + addonsSum() + ritualSum()) + upsellUI.total());
+    payBar?.setTotal(total.textContent);
     qNote.hidden = qv.source !== 'quiet';
     sumList.replaceChildren(h('dt', { text: t.what }), h('dd', { text: pname(p) }), h('dt', { text: t.when }), h('dd', { text: shownWhen(s.starts_at, s.ends_at, `${dayLong(s.starts_at)}, ${hm(s.starts_at)}–${hm(s.ends_at)}`) }), h('dt', { text: t.persons }), h('dd', { text: String(n) }),
       ...addons.filter((a) => qty.get(a.id) > 0).flatMap((a) => [h('dt', { text: aname(a) }), h('dd', { text: `${qty.get(a.id)} × ${money(a.price)}` })]),
@@ -1014,6 +1017,7 @@ async function viewCheckout(ruleId, ds, productId, via) {
   const hm0 = holdModeOf(null, state.settings);   // oletus asetuksesta (vain luku); palvelimen public_checkout_payment_options päivittää alla
   const hmode = { on: false, minutes: hm0.minutes };   // uusi pitotila vain kun palvelin sanoo (hold_until_paid); asetus ohjaa vain vanhaa ohjetekstiä
   const submit = h('button', { type: 'submit', class: 'btn gold', 'data-testid': 'checkout-submit', text: hmode.on ? ht(S.lang, 'checkout.button') : t.book });
+  payBar = createPayBar({ h, t, money, submit });
   const legal = legalFields({ showCancel: true }), { terms, consent } = legal;
   // Ilmainen (vuosikortti tai 100 % koodi) → "Vahvista varaus"; muuten ennallaan.
   const free = () => !!code.quote && code.sig === sig() && +code.quote.total === 0;
@@ -1106,7 +1110,7 @@ async function viewCheckout(ruleId, ds, productId, via) {
     upsellUI.node,
     addonsBox,
     codeBox, legal.nodes,
-    msg, submit);
+    msg, payBar.node);
   form.addEventListener('input', () => msg.replaceChildren());   // vanha virheilmoitus pois kun käyttäjä korjaa tietoja
   // Lyhyt yhteenveto otsikon alla (tuote, päivä, kellonaika) + linkki takaisin valintaan (korvaa erillisen "Takaisin"-linkin):
   // päivänäkymästä tultaessa (?via=day) päivään ja avoimeen tuotteeseen, muuten tuotesivulle samalle päivälle. Tiedot samasta vuorodatasta kuin lomake.
@@ -1120,7 +1124,7 @@ async function viewCheckout(ruleId, ds, productId, via) {
   const payNote = h('p', { class: 'bk-pay', 'data-testid': 'checkout-paynote', text: hm0.legacy ? t.payHold(hmode.minutes) : t.payLater });
   const payExtra = h('div', { 'data-testid': 'checkout-hold-extra' });
   let holdSnap = null;
-  syncPay = () => {
+  const syncPayNote = () => {
     submitLabel();
     if (free()) { payNote.hidden = payExtra.hidden = true; return; }   // maksuton varaus: ei maksuohjetta
     payNote.hidden = false;
@@ -1140,6 +1144,8 @@ async function viewCheckout(ruleId, ds, productId, via) {
     if (hi?.onlineSite) payNote.textContent = hi.legacyHold ? `${t.payHold(hi.minutes)} ${pt(S.lang, 'checkoutHoldOnlinePay')}` : pt(S.lang, 'checkoutOnlinePaySite');
     else payNote.textContent = (hi?.legacyHold || hm0.legacy) ? t.payHold((hi && hi.minutes) || hmode.minutes) : t.payLater;
   };
+  // Sama maksuohje myös alapalkkiin (mobiili: summa ja pidon ehto samassa näkymässä kuin nappi); sivupalkin payNote on työpöydän ensisijainen paikka.
+  syncPay = () => { syncPayNote(); payBar.setNote(payNote.textContent, payNote.hidden); };
   holdInfo().then((hi) => {
     holdSnap = hi; hmode.on = hi.on; hmode.minutes = hi.minutes;
     syncPay();
