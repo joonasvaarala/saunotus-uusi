@@ -1,5 +1,6 @@
 // Hallinnan kuori: kirjautuminen (Supabase Auth), reititys (hash), roolien mukainen valikko. Näkymät ovat tiedostoissa views/*.js.
 import { signIn, signOut, getSession, onAuthChange, rpc, select, adoptSessionFromHash, setPassword, setRpcOverride, setMockSession } from './sb.js';
+import { startDayAutoRefresh, isEditingElement } from './day-refresh.js';
 import { h, toast, errMsg, todayHel, closeDialogs, skeleton } from './ui.js';
 import { icon } from './icons.js';
 import { loadFilterTexts } from './filter-texts.js';
@@ -138,6 +139,45 @@ async function route() {
     view.replaceChildren(e?.loadFailed ? loadErrorView() : h('p', { class: 'err pad', role: 'alert', text: errMsg(e) }));
   }
 }
+// HALL-PAIVA-04: vastaanoton tabletti. Päivänäkymä päivittyy hiljaa minuutin välein, kun välilehti on näkyvissä
+// eikä käyttäjä ole kesken (dialogi auki, kenttä kohdistettuna, saapumisen kirjaus kesken). Ei runkoa, ei vieritysmuutosta;
+// virhe jättää vanhan näkymän paikalleen ja yritetään uudelleen seuraavalla kierroksella.
+let dayRefreshBusy = false;
+let printing = false;
+async function refreshDaySilently() {
+  const { path, rest, query } = parseAdminHash(location.hash);
+  if (resolveAdminPath(path).path !== '' || lastPath !== '' || !dayModule) return;
+  dayRefreshBusy = true;
+  const seq = routeSeq;   // ei kasvateta: oikea reitinvaihto (routeSeq++) hylkää tämän tuloksen
+  try {
+    dayModule.clearDayBundleCache?.();
+    const view = $('view');
+    const out = await dayModule.render({ ctx, refs: ctx.refs, reload: () => { dayModule?.clearDayBundleCache?.(); route(); }, query, rest, loadView });
+    // Käyttäjä ehti navigoida, avata dialogin tai alkaa kirjoittaa: hylkää tulos.
+    if (seq !== routeSeq || lastPath !== '' || document.querySelector('dialog[open]') || isEditingElement(document.activeElement) || view.querySelector('[aria-busy="true"]')) return;
+    const openDetails = [...view.querySelectorAll('details')].map((d) => d.open);
+    const x = window.scrollX, y = window.scrollY;
+    view.replaceChildren(...[].concat(out).filter(Boolean));
+    [...view.querySelectorAll('details')].forEach((d, i) => { if (openDetails[i]) d.open = true; });
+    window.scrollTo(x, y);
+  } finally { dayRefreshBusy = false; }
+}
+const dayAutoRefresh = startDayAutoRefresh({
+  state: () => ({
+    onDayRoute: lastPath === '' && !!getSession() && !$('shell').hidden,
+    busy: dayRefreshBusy,
+    printing,
+    dialogOpen: !!document.querySelector('dialog[open]'),
+    editing: isEditingElement(document.activeElement),
+    pendingAction: !!$('view').querySelector('[aria-busy="true"]'),
+  }),
+  refresh: refreshDaySilently,
+});
+window.addEventListener('beforeprint', () => { printing = true; });
+window.addEventListener('afterprint', () => { printing = false; });
+window.addEventListener('hashchange', () => dayAutoRefresh.markFresh());
+if (MOCK) window.__dayAutoRefresh = dayAutoRefresh;   // kokeilutila/testit: tick(true) pakottaa kierroksen
+
 async function enter() {
   const s = getSession();
   $('login-screen').hidden = !!s; $('shell').hidden = !s;
