@@ -1,0 +1,860 @@
+[
+ {
+  "key": "ui.admin.product.desc_fi",
+  "lang": "fi",
+  "text": "Kuvaus (suomi)",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "HALL-TUOTTEET-01: tuote-editorin välilehdet, yksi Tallenna muutokset -palkki ja tallentamattomien muutosten varoitus (hallinnan tuotenäkymä)"
+ },
+ {
+  "key": "ui.admin.product.desc_en",
+  "lang": "fi",
+  "text": "Kuvaus (englanti)",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "HALL-TUOTTEET-01: tuote-editorin välilehdet, yksi Tallenna muutokset -palkki ja tallentamattomien muutosten varoitus (hallinnan tuotenäkymä)"
+ },
+ {
+  "key": "ui.admin.product.tab_basic",
+  "lang": "fi",
+  "text": "Perustiedot",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "HALL-TUOTTEET-01: tuote-editorin välilehdet, yksi Tallenna muutokset -palkki ja tallentamattomien muutosten varoitus (hallinnan tuotenäkymä)"
+ },
+ {
+  "key": "ui.admin.product.tab_prices",
+  "lang": "fi",
+  "text": "Hinnat",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "HALL-TUOTTEET-01: tuote-editorin välilehdet, yksi Tallenna muutokset -palkki ja tallentamattomien muutosten varoitus (hallinnan tuotenäkymä)"
+ },
+ {
+  "key": "ui.admin.product.tab_sales",
+  "lang": "fi",
+  "text": "Myynti ja näkyvyys",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "HALL-TUOTTEET-01: tuote-editorin välilehdet, yksi Tallenna muutokset -palkki ja tallentamattomien muutosten varoitus (hallinnan tuotenäkymä)"
+ },
+ {
+  "key": "ui.admin.product.tab_image",
+  "lang": "fi",
+  "text": "Kuva",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "HALL-TUOTTEET-01: tuote-editorin välilehdet, yksi Tallenna muutokset -palkki ja tallentamattomien muutosten varoitus (hallinnan tuotenäkymä)"
+ },
+ {
+  "key": "ui.admin.product.tab_options",
+  "lang": "fi",
+  "text": "Valinnat ja lisäpalvelut",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "HALL-TUOTTEET-01: tuote-editorin välilehdet, yksi Tallenna muutokset -palkki ja tallentamattomien muutosten varoitus (hallinnan tuotenäkymä)"
+ },
+ {
+  "key": "ui.admin.product.tab_upsell",
+  "lang": "fi",
+  "text": "Lisämyynti",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "HALL-TUOTTEET-01: tuote-editorin välilehdet, yksi Tallenna muutokset -palkki ja tallentamattomien muutosten varoitus (hallinnan tuotenäkymä)"
+ },
+ {
+  "key": "ui.admin.product.tabs_label",
+  "lang": "fi",
+  "text": "Tuotteen osiot",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "HALL-TUOTTEET-01: tuote-editorin välilehdet, yksi Tallenna muutokset -palkki ja tallentamattomien muutosten varoitus (hallinnan tuotenäkymä)"
+ },
+ {
+  "key": "ui.admin.product.back",
+  "lang": "fi",
+  "text": "Takaisin tuotteisiin",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "HALL-TUOTTEET-01: tuote-editorin välilehdet, yksi Tallenna muutokset -palkki ja tallentamattomien muutosten varoitus (hallinnan tuotenäkymä)"
+ },
+ {
+  "key": "ui.admin.product.save",
+  "lang": "fi",
+  "text": "Tallenna muutokset",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "HALL-TUOTTEET-01: tuote-editorin välilehdet, yksi Tallenna muutokset -palkki ja tallentamattomien muutosten varoitus (hallinnan tuotenäkymä)"
+ },
+ {
+  "key": "ui.admin.product.saving",
+  "lang": "fi",
+  "text": "Tallennetaan…",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "HALL-TUOTTEET-01: tuote-editorin välilehdet, yksi Tallenna muutokset -palkki ja tallentamattomien muutosten varoitus (hallinnan tuotenäkymä)"
+ },
+ {
+  "key": "ui.admin.product.discard",
+  "lang": "fi",
+  "text": "Hylkää muutokset",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "HALL-TUOTTEET-01: tuote-editorin välilehdet, yksi Tallenna muutokset -palkki ja tallentamattomien muutosten varoitus (hallinnan tuotenäkymä)"
+ },
+ {
+  "key": "ui.admin.product.clean",
+  "lang": "fi",
+  "text": "Ei tallentamattomia muutoksia.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "HALL-TUOTTEET-01: tuote-editorin välilehdet, yksi Tallenna muutokset -palkki ja tallentamattomien muutosten varoitus (hallinnan tuotenäkymä)"
+ },
+ {
+  "key": "ui.admin.product.dirty",
+  "lang": "fi",
+  "text": "Tallentamatta: {{var:tabs}}.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [
+   "{{var:tabs}}"
+  ],
+  "reason": "HALL-TUOTTEET-01: tuote-editorin välilehdet, yksi Tallenna muutokset -palkki ja tallentamattomien muutosten varoitus (hallinnan tuotenäkymä)"
+ },
+ {
+  "key": "ui.admin.product.saved_all",
+  "lang": "fi",
+  "text": "Muutokset tallennettu.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "HALL-TUOTTEET-01: tuote-editorin välilehdet, yksi Tallenna muutokset -palkki ja tallentamattomien muutosten varoitus (hallinnan tuotenäkymä)"
+ },
+ {
+  "key": "ui.admin.product.saved_part",
+  "lang": "fi",
+  "text": "Osa muutoksista tallentui ({{var:count}} osaa). Ei tallentunut: {{var:failed}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [
+   "{{var:count}}",
+   "{{var:failed}}"
+  ],
+  "reason": "HALL-TUOTTEET-01: tuote-editorin välilehdet, yksi Tallenna muutokset -palkki ja tallentamattomien muutosten varoitus (hallinnan tuotenäkymä)"
+ },
+ {
+  "key": "ui.admin.product.saved_none",
+  "lang": "fi",
+  "text": "Mikään ei tallentunut. {{var:failed}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [
+   "{{var:failed}}"
+  ],
+  "reason": "HALL-TUOTTEET-01: tuote-editorin välilehdet, yksi Tallenna muutokset -palkki ja tallentamattomien muutosten varoitus (hallinnan tuotenäkymä)"
+ },
+ {
+  "key": "ui.admin.product.save_invalid",
+  "lang": "fi",
+  "text": "Korjaa merkityt kentät ennen tallennusta.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "HALL-TUOTTEET-01: tuote-editorin välilehdet, yksi Tallenna muutokset -palkki ja tallentamattomien muutosten varoitus (hallinnan tuotenäkymä)"
+ },
+ {
+  "key": "ui.admin.product.step_product",
+  "lang": "fi",
+  "text": "Perustiedot ja hinta",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "HALL-TUOTTEET-01: tuote-editorin välilehdet, yksi Tallenna muutokset -palkki ja tallentamattomien muutosten varoitus (hallinnan tuotenäkymä)"
+ },
+ {
+  "key": "ui.admin.product.step_training",
+  "lang": "fi",
+  "text": "Koulutuksen hinnat ja lisävalinnat",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "HALL-TUOTTEET-01: tuote-editorin välilehdet, yksi Tallenna muutokset -palkki ja tallentamattomien muutosten varoitus (hallinnan tuotenäkymä)"
+ },
+ {
+  "key": "ui.admin.product.step_config",
+  "lang": "fi",
+  "text": "Myynti ja näkyvyys",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "HALL-TUOTTEET-01: tuote-editorin välilehdet, yksi Tallenna muutokset -palkki ja tallentamattomien muutosten varoitus (hallinnan tuotenäkymä)"
+ },
+ {
+  "key": "ui.admin.product.step_image",
+  "lang": "fi",
+  "text": "Kuva",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "HALL-TUOTTEET-01: tuote-editorin välilehdet, yksi Tallenna muutokset -palkki ja tallentamattomien muutosten varoitus (hallinnan tuotenäkymä)"
+ },
+ {
+  "key": "ui.admin.product.step_upsell",
+  "lang": "fi",
+  "text": "Lisämyynti",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "HALL-TUOTTEET-01: tuote-editorin välilehdet, yksi Tallenna muutokset -palkki ja tallentamattomien muutosten varoitus (hallinnan tuotenäkymä)"
+ },
+ {
+  "key": "ui.admin.product.step_variant",
+  "lang": "fi",
+  "text": "Hintavariantti {{var:name}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [
+   "{{var:name}}"
+  ],
+  "reason": "HALL-TUOTTEET-01: tuote-editorin välilehdet, yksi Tallenna muutokset -palkki ja tallentamattomien muutosten varoitus (hallinnan tuotenäkymä)"
+ },
+ {
+  "key": "ui.admin.product.leave_title",
+  "lang": "fi",
+  "text": "Tallentamattomia muutoksia",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "HALL-TUOTTEET-01: tuote-editorin välilehdet, yksi Tallenna muutokset -palkki ja tallentamattomien muutosten varoitus (hallinnan tuotenäkymä)"
+ },
+ {
+  "key": "ui.admin.product.leave_body",
+  "lang": "fi",
+  "text": "Tuotteessa on muutoksia, joita ei ole tallennettu. Jos poistut, ne häviävät.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "HALL-TUOTTEET-01: tuote-editorin välilehdet, yksi Tallenna muutokset -palkki ja tallentamattomien muutosten varoitus (hallinnan tuotenäkymä)"
+ },
+ {
+  "key": "ui.admin.product.leave_yes",
+  "lang": "fi",
+  "text": "Hylkää muutokset",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "HALL-TUOTTEET-01: tuote-editorin välilehdet, yksi Tallenna muutokset -palkki ja tallentamattomien muutosten varoitus (hallinnan tuotenäkymä)"
+ },
+ {
+  "key": "ui.admin.product.leave_no",
+  "lang": "fi",
+  "text": "Jatka muokkausta",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "HALL-TUOTTEET-01: tuote-editorin välilehdet, yksi Tallenna muutokset -palkki ja tallentamattomien muutosten varoitus (hallinnan tuotenäkymä)"
+ },
+ {
+  "key": "ui.admin.product.price_text_auto",
+  "lang": "fi",
+  "text": "Päivittyy hinnan mukana, kunnes muokkaat sitä itse.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "HALL-TUOTTEET-01: tuote-editorin välilehdet, yksi Tallenna muutokset -palkki ja tallentamattomien muutosten varoitus (hallinnan tuotenäkymä)"
+ },
+ {
+  "key": "ui.admin.product.price_text_manual",
+  "lang": "fi",
+  "text": "Muokattu käsin, joten se ei päivity hinnan mukana.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "HALL-TUOTTEET-01: tuote-editorin välilehdet, yksi Tallenna muutokset -palkki ja tallentamattomien muutosten varoitus (hallinnan tuotenäkymä)"
+ },
+ {
+  "key": "ui.admin.product.price_text_reset",
+  "lang": "fi",
+  "text": "Palauta teksti hinnasta",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "HALL-TUOTTEET-01: tuote-editorin välilehdet, yksi Tallenna muutokset -palkki ja tallentamattomien muutosten varoitus (hallinnan tuotenäkymä)"
+ },
+ {
+  "key": "ui.admin.product.price_text_stale",
+  "lang": "fi",
+  "text": "Hinta on muuttunut, mutta hintateksti on kirjoitettu käsin. Tarkista se ennen tallennusta.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "HALL-TUOTTEET-01: tuote-editorin välilehdet, yksi Tallenna muutokset -palkki ja tallentamattomien muutosten varoitus (hallinnan tuotenäkymä)"
+ },
+ {
+  "key": "ui.admin.product.err_name",
+  "lang": "fi",
+  "text": "Nimi ei voi olla tyhjä.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "HALL-TUOTTEET-01: tuote-editorin välilehdet, yksi Tallenna muutokset -palkki ja tallentamattomien muutosten varoitus (hallinnan tuotenäkymä)"
+ },
+ {
+  "key": "ui.admin.product.err_price",
+  "lang": "fi",
+  "text": "Anna hinta numerona, nolla tai suurempi.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "HALL-TUOTTEET-01: tuote-editorin välilehdet, yksi Tallenna muutokset -palkki ja tallentamattomien muutosten varoitus (hallinnan tuotenäkymä)"
+ },
+ {
+  "key": "ui.admin.product.err_vat",
+  "lang": "fi",
+  "text": "Valitse alv-prosentti.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "HALL-TUOTTEET-01: tuote-editorin välilehdet, yksi Tallenna muutokset -palkki ja tallentamattomien muutosten varoitus (hallinnan tuotenäkymä)"
+ },
+ {
+  "key": "ui.admin.product.err_number",
+  "lang": "fi",
+  "text": "Anna numero.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "HALL-TUOTTEET-01: tuote-editorin välilehdet, yksi Tallenna muutokset -palkki ja tallentamattomien muutosten varoitus (hallinnan tuotenäkymä)"
+ },
+ {
+  "key": "ui.admin.product.image_remove_pending",
+  "lang": "fi",
+  "text": "Kuva poistetaan, kun tallennat muutokset.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "HALL-TUOTTEET-01: tuote-editorin välilehdet, yksi Tallenna muutokset -palkki ja tallentamattomien muutosten varoitus (hallinnan tuotenäkymä)"
+ },
+ {
+  "key": "ui.admin.product.image_undo",
+  "lang": "fi",
+  "text": "Kumoa poisto",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "HALL-TUOTTEET-01: tuote-editorin välilehdet, yksi Tallenna muutokset -palkki ja tallentamattomien muutosten varoitus (hallinnan tuotenäkymä)"
+ },
+ {
+  "key": "ui.admin.product.image_pending",
+  "lang": "fi",
+  "text": "Valittu kuva tallentuu, kun tallennat muutokset.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "HALL-TUOTTEET-01: tuote-editorin välilehdet, yksi Tallenna muutokset -palkki ja tallentamattomien muutosten varoitus (hallinnan tuotenäkymä)"
+ },
+ {
+  "key": "ui.admin.product.options_note",
+  "lang": "fi",
+  "text": "Tuotevalinnat ja lisäpalvelut ovat yhteisiä kaikille tuotteille. Muokkaa niitä tämän sivun alaosan Tuotevalinnat- ja Lisäpalvelut-osioissa.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "HALL-TUOTTEET-01: tuote-editorin välilehdet, yksi Tallenna muutokset -palkki ja tallentamattomien muutosten varoitus (hallinnan tuotenäkymä)"
+ },
+ {
+  "key": "ui.admin.product.upsell_missing",
+  "lang": "fi",
+  "text": "Lisämyynnin asetukset eivät ole käytettävissä.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "HALL-TUOTTEET-01: tuote-editorin välilehdet, yksi Tallenna muutokset -palkki ja tallentamattomien muutosten varoitus (hallinnan tuotenäkymä)"
+ },
+ {
+  "key": "ui.admin.product.desc_fi",
+  "lang": "en",
+  "text": "Description in Finnish",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "HALL-TUOTTEET-01: tuote-editorin välilehdet, yksi Tallenna muutokset -palkki ja tallentamattomien muutosten varoitus (hallinnan tuotenäkymä)"
+ },
+ {
+  "key": "ui.admin.product.desc_en",
+  "lang": "en",
+  "text": "Description in English",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "HALL-TUOTTEET-01: tuote-editorin välilehdet, yksi Tallenna muutokset -palkki ja tallentamattomien muutosten varoitus (hallinnan tuotenäkymä)"
+ },
+ {
+  "key": "ui.admin.product.tab_basic",
+  "lang": "en",
+  "text": "Basic details",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "HALL-TUOTTEET-01: tuote-editorin välilehdet, yksi Tallenna muutokset -palkki ja tallentamattomien muutosten varoitus (hallinnan tuotenäkymä)"
+ },
+ {
+  "key": "ui.admin.product.tab_prices",
+  "lang": "en",
+  "text": "Prices",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "HALL-TUOTTEET-01: tuote-editorin välilehdet, yksi Tallenna muutokset -palkki ja tallentamattomien muutosten varoitus (hallinnan tuotenäkymä)"
+ },
+ {
+  "key": "ui.admin.product.tab_sales",
+  "lang": "en",
+  "text": "Sales and visibility",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "HALL-TUOTTEET-01: tuote-editorin välilehdet, yksi Tallenna muutokset -palkki ja tallentamattomien muutosten varoitus (hallinnan tuotenäkymä)"
+ },
+ {
+  "key": "ui.admin.product.tab_image",
+  "lang": "en",
+  "text": "Image",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "HALL-TUOTTEET-01: tuote-editorin välilehdet, yksi Tallenna muutokset -palkki ja tallentamattomien muutosten varoitus (hallinnan tuotenäkymä)"
+ },
+ {
+  "key": "ui.admin.product.tab_options",
+  "lang": "en",
+  "text": "Choices and extras",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "HALL-TUOTTEET-01: tuote-editorin välilehdet, yksi Tallenna muutokset -palkki ja tallentamattomien muutosten varoitus (hallinnan tuotenäkymä)"
+ },
+ {
+  "key": "ui.admin.product.tab_upsell",
+  "lang": "en",
+  "text": "Upsell",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "HALL-TUOTTEET-01: tuote-editorin välilehdet, yksi Tallenna muutokset -palkki ja tallentamattomien muutosten varoitus (hallinnan tuotenäkymä)"
+ },
+ {
+  "key": "ui.admin.product.tabs_label",
+  "lang": "en",
+  "text": "Product sections",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "HALL-TUOTTEET-01: tuote-editorin välilehdet, yksi Tallenna muutokset -palkki ja tallentamattomien muutosten varoitus (hallinnan tuotenäkymä)"
+ },
+ {
+  "key": "ui.admin.product.back",
+  "lang": "en",
+  "text": "Back to products",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "HALL-TUOTTEET-01: tuote-editorin välilehdet, yksi Tallenna muutokset -palkki ja tallentamattomien muutosten varoitus (hallinnan tuotenäkymä)"
+ },
+ {
+  "key": "ui.admin.product.save",
+  "lang": "en",
+  "text": "Save changes",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "HALL-TUOTTEET-01: tuote-editorin välilehdet, yksi Tallenna muutokset -palkki ja tallentamattomien muutosten varoitus (hallinnan tuotenäkymä)"
+ },
+ {
+  "key": "ui.admin.product.saving",
+  "lang": "en",
+  "text": "Saving…",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "HALL-TUOTTEET-01: tuote-editorin välilehdet, yksi Tallenna muutokset -palkki ja tallentamattomien muutosten varoitus (hallinnan tuotenäkymä)"
+ },
+ {
+  "key": "ui.admin.product.discard",
+  "lang": "en",
+  "text": "Discard changes",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "HALL-TUOTTEET-01: tuote-editorin välilehdet, yksi Tallenna muutokset -palkki ja tallentamattomien muutosten varoitus (hallinnan tuotenäkymä)"
+ },
+ {
+  "key": "ui.admin.product.clean",
+  "lang": "en",
+  "text": "No unsaved changes.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "HALL-TUOTTEET-01: tuote-editorin välilehdet, yksi Tallenna muutokset -palkki ja tallentamattomien muutosten varoitus (hallinnan tuotenäkymä)"
+ },
+ {
+  "key": "ui.admin.product.dirty",
+  "lang": "en",
+  "text": "Not saved: {{var:tabs}}.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [
+   "{{var:tabs}}"
+  ],
+  "reason": "HALL-TUOTTEET-01: tuote-editorin välilehdet, yksi Tallenna muutokset -palkki ja tallentamattomien muutosten varoitus (hallinnan tuotenäkymä)"
+ },
+ {
+  "key": "ui.admin.product.saved_all",
+  "lang": "en",
+  "text": "Changes saved.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "HALL-TUOTTEET-01: tuote-editorin välilehdet, yksi Tallenna muutokset -palkki ja tallentamattomien muutosten varoitus (hallinnan tuotenäkymä)"
+ },
+ {
+  "key": "ui.admin.product.saved_part",
+  "lang": "en",
+  "text": "Some changes were saved ({{var:count}} parts). Not saved: {{var:failed}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [
+   "{{var:count}}",
+   "{{var:failed}}"
+  ],
+  "reason": "HALL-TUOTTEET-01: tuote-editorin välilehdet, yksi Tallenna muutokset -palkki ja tallentamattomien muutosten varoitus (hallinnan tuotenäkymä)"
+ },
+ {
+  "key": "ui.admin.product.saved_none",
+  "lang": "en",
+  "text": "Nothing was saved. {{var:failed}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [
+   "{{var:failed}}"
+  ],
+  "reason": "HALL-TUOTTEET-01: tuote-editorin välilehdet, yksi Tallenna muutokset -palkki ja tallentamattomien muutosten varoitus (hallinnan tuotenäkymä)"
+ },
+ {
+  "key": "ui.admin.product.save_invalid",
+  "lang": "en",
+  "text": "Fix the marked fields before saving.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "HALL-TUOTTEET-01: tuote-editorin välilehdet, yksi Tallenna muutokset -palkki ja tallentamattomien muutosten varoitus (hallinnan tuotenäkymä)"
+ },
+ {
+  "key": "ui.admin.product.step_product",
+  "lang": "en",
+  "text": "Basic details and price",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "HALL-TUOTTEET-01: tuote-editorin välilehdet, yksi Tallenna muutokset -palkki ja tallentamattomien muutosten varoitus (hallinnan tuotenäkymä)"
+ },
+ {
+  "key": "ui.admin.product.step_training",
+  "lang": "en",
+  "text": "Training prices and extra choices",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "HALL-TUOTTEET-01: tuote-editorin välilehdet, yksi Tallenna muutokset -palkki ja tallentamattomien muutosten varoitus (hallinnan tuotenäkymä)"
+ },
+ {
+  "key": "ui.admin.product.step_config",
+  "lang": "en",
+  "text": "Sales and visibility",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "HALL-TUOTTEET-01: tuote-editorin välilehdet, yksi Tallenna muutokset -palkki ja tallentamattomien muutosten varoitus (hallinnan tuotenäkymä)"
+ },
+ {
+  "key": "ui.admin.product.step_image",
+  "lang": "en",
+  "text": "Image",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "HALL-TUOTTEET-01: tuote-editorin välilehdet, yksi Tallenna muutokset -palkki ja tallentamattomien muutosten varoitus (hallinnan tuotenäkymä)"
+ },
+ {
+  "key": "ui.admin.product.step_upsell",
+  "lang": "en",
+  "text": "Upsell",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "HALL-TUOTTEET-01: tuote-editorin välilehdet, yksi Tallenna muutokset -palkki ja tallentamattomien muutosten varoitus (hallinnan tuotenäkymä)"
+ },
+ {
+  "key": "ui.admin.product.step_variant",
+  "lang": "en",
+  "text": "Price variant {{var:name}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [
+   "{{var:name}}"
+  ],
+  "reason": "HALL-TUOTTEET-01: tuote-editorin välilehdet, yksi Tallenna muutokset -palkki ja tallentamattomien muutosten varoitus (hallinnan tuotenäkymä)"
+ },
+ {
+  "key": "ui.admin.product.leave_title",
+  "lang": "en",
+  "text": "Unsaved changes",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "HALL-TUOTTEET-01: tuote-editorin välilehdet, yksi Tallenna muutokset -palkki ja tallentamattomien muutosten varoitus (hallinnan tuotenäkymä)"
+ },
+ {
+  "key": "ui.admin.product.leave_body",
+  "lang": "en",
+  "text": "This product has changes that are not saved. If you leave, they are lost.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "HALL-TUOTTEET-01: tuote-editorin välilehdet, yksi Tallenna muutokset -palkki ja tallentamattomien muutosten varoitus (hallinnan tuotenäkymä)"
+ },
+ {
+  "key": "ui.admin.product.leave_yes",
+  "lang": "en",
+  "text": "Discard changes",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "HALL-TUOTTEET-01: tuote-editorin välilehdet, yksi Tallenna muutokset -palkki ja tallentamattomien muutosten varoitus (hallinnan tuotenäkymä)"
+ },
+ {
+  "key": "ui.admin.product.leave_no",
+  "lang": "en",
+  "text": "Keep editing",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "HALL-TUOTTEET-01: tuote-editorin välilehdet, yksi Tallenna muutokset -palkki ja tallentamattomien muutosten varoitus (hallinnan tuotenäkymä)"
+ },
+ {
+  "key": "ui.admin.product.price_text_auto",
+  "lang": "en",
+  "text": "Updates with the price until you edit it yourself.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "HALL-TUOTTEET-01: tuote-editorin välilehdet, yksi Tallenna muutokset -palkki ja tallentamattomien muutosten varoitus (hallinnan tuotenäkymä)"
+ },
+ {
+  "key": "ui.admin.product.price_text_manual",
+  "lang": "en",
+  "text": "Edited by hand, so it does not change with the price.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "HALL-TUOTTEET-01: tuote-editorin välilehdet, yksi Tallenna muutokset -palkki ja tallentamattomien muutosten varoitus (hallinnan tuotenäkymä)"
+ },
+ {
+  "key": "ui.admin.product.price_text_reset",
+  "lang": "en",
+  "text": "Restore text from price",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "HALL-TUOTTEET-01: tuote-editorin välilehdet, yksi Tallenna muutokset -palkki ja tallentamattomien muutosten varoitus (hallinnan tuotenäkymä)"
+ },
+ {
+  "key": "ui.admin.product.price_text_stale",
+  "lang": "en",
+  "text": "The price has changed, but the price text was written by hand. Check it before saving.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "HALL-TUOTTEET-01: tuote-editorin välilehdet, yksi Tallenna muutokset -palkki ja tallentamattomien muutosten varoitus (hallinnan tuotenäkymä)"
+ },
+ {
+  "key": "ui.admin.product.err_name",
+  "lang": "en",
+  "text": "The name cannot be empty.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "HALL-TUOTTEET-01: tuote-editorin välilehdet, yksi Tallenna muutokset -palkki ja tallentamattomien muutosten varoitus (hallinnan tuotenäkymä)"
+ },
+ {
+  "key": "ui.admin.product.err_price",
+  "lang": "en",
+  "text": "Enter the price as a number, zero or higher.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "HALL-TUOTTEET-01: tuote-editorin välilehdet, yksi Tallenna muutokset -palkki ja tallentamattomien muutosten varoitus (hallinnan tuotenäkymä)"
+ },
+ {
+  "key": "ui.admin.product.err_vat",
+  "lang": "en",
+  "text": "Choose a VAT rate.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "HALL-TUOTTEET-01: tuote-editorin välilehdet, yksi Tallenna muutokset -palkki ja tallentamattomien muutosten varoitus (hallinnan tuotenäkymä)"
+ },
+ {
+  "key": "ui.admin.product.err_number",
+  "lang": "en",
+  "text": "Enter a number.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "HALL-TUOTTEET-01: tuote-editorin välilehdet, yksi Tallenna muutokset -palkki ja tallentamattomien muutosten varoitus (hallinnan tuotenäkymä)"
+ },
+ {
+  "key": "ui.admin.product.image_remove_pending",
+  "lang": "en",
+  "text": "The image is removed when you save the changes.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "HALL-TUOTTEET-01: tuote-editorin välilehdet, yksi Tallenna muutokset -palkki ja tallentamattomien muutosten varoitus (hallinnan tuotenäkymä)"
+ },
+ {
+  "key": "ui.admin.product.image_undo",
+  "lang": "en",
+  "text": "Undo removal",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "HALL-TUOTTEET-01: tuote-editorin välilehdet, yksi Tallenna muutokset -palkki ja tallentamattomien muutosten varoitus (hallinnan tuotenäkymä)"
+ },
+ {
+  "key": "ui.admin.product.image_pending",
+  "lang": "en",
+  "text": "The selected image is saved when you save the changes.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "HALL-TUOTTEET-01: tuote-editorin välilehdet, yksi Tallenna muutokset -palkki ja tallentamattomien muutosten varoitus (hallinnan tuotenäkymä)"
+ },
+ {
+  "key": "ui.admin.product.options_note",
+  "lang": "en",
+  "text": "Product choices and extras are shared by all products. Edit them in the Product choices and Extras sections at the bottom of this page.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "HALL-TUOTTEET-01: tuote-editorin välilehdet, yksi Tallenna muutokset -palkki ja tallentamattomien muutosten varoitus (hallinnan tuotenäkymä)"
+ },
+ {
+  "key": "ui.admin.product.upsell_missing",
+  "lang": "en",
+  "text": "Upsell settings are not available.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 300,
+  "placeholders": [],
+  "reason": "HALL-TUOTTEET-01: tuote-editorin välilehdet, yksi Tallenna muutokset -palkki ja tallentamattomien muutosten varoitus (hallinnan tuotenäkymä)"
+ }
+]
