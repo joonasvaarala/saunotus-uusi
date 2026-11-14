@@ -97,7 +97,7 @@ test('Ikonit: stepperin ikonit on määritelty', async () => {
 test('Tyylit: ei sinistä focus-rengasta, nav-järjestys: palkin reitit + yläpalkin uusi/tarkista (Talous on Kassa ja talous -ryhmä)', () => {
   const css = readFileSync(join(root, 'admin/admin.css'), 'utf8');
   assert.ok(!/1d6fd8/i.test(css), 'sininen #1d6fd8 pois');
-  assert.match(css, /:focus-visible\{outline:3px solid var\(--gold\)/);
+  assert.match(css, /:focus-visible\{outline:var\(--focus\)/);   // --focus = 3px solid --c-accent (tokens.css, YHT-07)
   const js = readFileSync(join(root, 'admin/admin.js'), 'utf8');
   const order = [...js.matchAll(/\{ path: '([^']*)', label:/g)].map((m) => m[1]);
   // Hyväksytty nykyinen ROUTES (main/PR315+): lahjakortit + koulutukset palkissa; tilat/asetukset ryhmäreitteinä.

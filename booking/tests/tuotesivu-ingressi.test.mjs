@@ -55,7 +55,7 @@ test('moreInfo: painike Lue lisää, pitkä kuvaus ja peruutusehto samassa osios
   assert.match(m, /text: t\.readMore/); assert.match(m, /t\.showLess/);
   assert.doesNotMatch(m, /h\('details'|h\('summary'|t\.moreInfo/);
   assert.match(read('shop/src/shop.css'), /\.bk-more-toggle:focus\{outline:none\}/);
-  assert.match(read('shop/src/shop.css'), /\.bk-more-toggle:focus-visible\{outline:3px solid var\(--ink\)/);
+  assert.match(read('shop/src/shop.css'), /\.bk-more-toggle:focus-visible\{outline:3px solid var\(--gold\)/);
   assert.match(src, /showCancel && S\.cancelRule/);
   assert.equal((src.match(/legalFields\(\{ showCancel: true \}\)/g) || []).length, 1);
   assert.match(read('shop/src/treatment-ui.js'), /legalFields\(\{ showCancel: true \}\)/);
