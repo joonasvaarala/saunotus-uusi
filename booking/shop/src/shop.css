@@ -767,6 +767,20 @@ div.bk-ev-date.is-full{cursor:default}
 .bk-upsell-inline{padding:10px 0}.bk-upsell-feedback:not(:empty){margin-top:8px}
 @media(min-width:700px){.bk-upsell-backdrop{align-items:center;padding:24px}.bk-upsell-sheet{border-radius:20px;max-height:85vh}.bk-upsell-detail .bk-upsell-photo,.bk-upsell-detail .bk-upsell-photo img{border-radius:20px 20px 0 0;height:240px}}
 @media(prefers-reduced-motion:reduce){.bk-upsell-row{scroll-behavior:auto}}
+/* booking_ux2_kassa02 (KAUPPA-KASSA-02): lomakevirheet (form-errors.js): pakollisuusmerkki, kenttävirhe, virhekoonti lomakkeen alussa. Virheväri #7b1d12 kuten .bk-error. */
+.bk-req{color:#7b1d12;font-weight:700}
+.bk-reqnote{margin:0 0 12px}
+.bk-fielderr{margin:6px 0 0;color:#7b1d12;font-size:15px;font-weight:600}
+.bk-field.bad input,.bk-field.bad textarea,.bk-field.bad select,.bk-field input[aria-invalid="true"],.bk-field textarea[aria-invalid="true"]{border:2px solid #7b1d12;background:#fffafa}
+.bk-check.bad input[type=checkbox],.bk-check input[aria-invalid="true"]{outline:2px solid #7b1d12;outline-offset:2px}
+.bk-errsum{background:#fbeaea;border:1px solid #c0392b;border-left-width:5px;color:#7b1d12;padding:14px 16px;border-radius:var(--r);margin:0 0 18px;scroll-margin-top:84px}
+.bk-errsum:focus,.bk-errsum:focus-visible{outline:none}
+#booking-app .bk-errsum h3,.bk-errsum h3{margin:0 0 6px;font-size:18px;color:#7b1d12}
+.bk-errsum-list{margin:0;padding:0 0 0 20px}
+.bk-errsum-list li{margin:0}
+.bk-errsum-list a{display:inline-flex;align-items:center;min-height:44px;color:#7b1d12;font-weight:600;text-decoration:underline}
+.bk-field,.bk-check,.gc-field{scroll-margin-top:84px}
+
 /* booking_177b: maksulinkkisivun yhteenveto ennen maksua (/maksa/, /en/pay/). Värit #2B3A30 / #F4EFE7 / #7A5530, ei sivuttaisvieritystä 390 px:llä. */
 .pl-card{max-width:640px;overflow-wrap:anywhere}
 .pl-sum{background:#F4EFE7;border:1px solid #7A5530;border-radius:var(--r,12px);padding:16px 18px;margin:12px 0 16px;color:#2B3A30}
