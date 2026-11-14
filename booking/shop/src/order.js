@@ -4,6 +4,7 @@ import { rpc, functionUrl } from './sb.js';
 import { richHost } from './rich-view.js';
 import { orderUpsellSection } from './upsell-ui.js';
 import { OT } from './order-texts.js';
+import { siteConfirm } from './site-confirm.js';
 import { oneKey } from './plural.js';   // yksikkö: {hours}/{minutes} = 1 → <avain>One
 import { T } from './i18n.js';
 import { createOrderApi, validToken, wantsMock } from './order-api.js';
@@ -413,7 +414,7 @@ async function main() {
     const reason = h('textarea', { id: 'ord-reason', rows: 3, maxlength: 500, 'data-testid': 'cancel-reason' });
     const btn = h('button', { type: 'submit', class: 'btn light ord-btn', 'data-testid': 'cancel-submit', text: t.cancelSubmit });
     return h('form', { class: 'ord-form', onsubmit: async (ev) => {
-      ev.preventDefault(); if (!confirm(t.cancelConfirm)) return; btn.disabled = true;
+      ev.preventDefault(); if (!await siteConfirm(t.cancelConfirm, { yes: t.cancelSubmit, no: t.dialogBack, testid: 'cancel-confirm' })) return; btn.disabled = true;
       try {
         const r = await api.requestCancel({ reason: reason.value.trim() });
         if (r?.notReady) throw new Error('cancel');

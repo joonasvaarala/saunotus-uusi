@@ -114,6 +114,7 @@ test('tuontitiedosto on generoitu koodista: scripts/site-texts-extract-shop.mjs 
     ...J('content/site-texts.pending-import-106.json').map((r) => `${r.key}|${r.lang}`),   // hoitosivun henkilömäärän hinta
     ...J('content/site-texts.pending-import-114.json').filter((r) => r.key.startsWith('ui.order.')).map((r) => `${r.key}|${r.lang}`),   // booking_226: koulutuksen loppusumma tilaussivulla
     ...J('content/site-texts.pending-import-122.json').filter((r) => r.key.startsWith('ui.shop.')).map((r) => `${r.key}|${r.lang}`),   // lahjakorttivihje alennuskoodikentässä
+    ...J('content/site-texts.pending-import-152.json').map((r) => `${r.key}|${r.lang}`),   // KAUPPA-DIALOGI-01: vahvistusdialogin Takaisin
   ]);
   const imp = new Set(PENDING.map((r) => r.key));
   writeFileSync(prod, JSON.stringify({ ok: true, texts: FALLBACK.texts.filter((r) => !imp.has(r.key)) }));   // tuotanto ennen #61:n tuontia
@@ -165,7 +166,9 @@ test('generaattori ei lisää riviä jos avain on jo tuotannossa (vain uudet ava
   const trainingOrderUi = J('content/site-texts.pending-import-114.json').filter((r) => r.key.startsWith('ui.order.'));   // booking_226
   const giftCodeHintUi = J('content/site-texts.pending-import-122.json').filter((r) => r.key.startsWith('ui.shop.'));   // lahjakorttivihje alennuskoodikentässä
   // Myöhemmät tuonnit (33–122 ym.) ovat jo tuotannon varatekstissä, joten generaattori ei lisää niitä.
-  assert.equal(rows.length, PENDING.length - have.length);
+  const dialogUi = J('content/site-texts.pending-import-152.json');   // KAUPPA-DIALOGI-01: ei vielä varatekstissä → generaattori lisää
+  assert.equal(rows.length, PENDING.length - have.length + dialogUi.length);
+  for (const d of dialogUi) assert.ok(rows.some((x) => x.key === d.key && x.lang === d.lang && x.text === d.text), `${d.key} [${d.lang}]: koodin oletus = tuontirivi`);
   assert.ok(!rows.some((x) => haveKeys.has(x.key)));
   for (const e of extraRows) assert.ok(!rows.some((x) => x.key === e.key), `${e.key}: jo tuotannossa, generaattori ei lisää`);
   const bad = spawnSync('node', [join(root, 'scripts/site-texts-extract-shop.mjs'), '--prod', join(work, 'ei-ole.json')], { encoding: 'utf8' });
