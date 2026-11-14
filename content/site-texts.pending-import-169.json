@@ -1,0 +1,214 @@
+[
+  {
+    "key": "ui.admin.open_payments.tab",
+    "lang": "fi",
+    "text": "Avoimet maksut",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-AVOIMET-01: Avoimet maksut -välilehti (maksulinkit ja hyvitykset yhdessä), Tarkista-merkki, ⋯-valikon nimi ja Näytä lisää -painike"
+  },
+  {
+    "key": "ui.admin.open_payments.tab",
+    "lang": "en",
+    "text": "Open payments",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-AVOIMET-01: Avoimet maksut -välilehti (maksulinkit ja hyvitykset yhdessä), Tarkista-merkki, ⋯-valikon nimi ja Näytä lisää -painike"
+  },
+  {
+    "key": "ui.admin.open_payments.links",
+    "lang": "fi",
+    "text": "Maksulinkit",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-AVOIMET-01: Avoimet maksut -välilehti (maksulinkit ja hyvitykset yhdessä), Tarkista-merkki, ⋯-valikon nimi ja Näytä lisää -painike"
+  },
+  {
+    "key": "ui.admin.open_payments.links",
+    "lang": "en",
+    "text": "Payment links",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-AVOIMET-01: Avoimet maksut -välilehti (maksulinkit ja hyvitykset yhdessä), Tarkista-merkki, ⋯-valikon nimi ja Näytä lisää -painike"
+  },
+  {
+    "key": "ui.admin.open_payments.refunds",
+    "lang": "fi",
+    "text": "Hyvitykset",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-AVOIMET-01: Avoimet maksut -välilehti (maksulinkit ja hyvitykset yhdessä), Tarkista-merkki, ⋯-valikon nimi ja Näytä lisää -painike"
+  },
+  {
+    "key": "ui.admin.open_payments.refunds",
+    "lang": "en",
+    "text": "Refunds",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-AVOIMET-01: Avoimet maksut -välilehti (maksulinkit ja hyvitykset yhdessä), Tarkista-merkki, ⋯-valikon nimi ja Näytä lisää -painike"
+  },
+  {
+    "key": "ui.admin.open_payments.more_actions",
+    "lang": "fi",
+    "text": "Lisää toimintoja",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-AVOIMET-01: Avoimet maksut -välilehti (maksulinkit ja hyvitykset yhdessä), Tarkista-merkki, ⋯-valikon nimi ja Näytä lisää -painike"
+  },
+  {
+    "key": "ui.admin.open_payments.more_actions",
+    "lang": "en",
+    "text": "More actions",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-AVOIMET-01: Avoimet maksut -välilehti (maksulinkit ja hyvitykset yhdessä), Tarkista-merkki, ⋯-valikon nimi ja Näytä lisää -painike"
+  },
+  {
+    "key": "ui.admin.open_payments.load_more",
+    "lang": "fi",
+    "text": "Näytä lisää ({{var:n}} jäljellä)",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:n}}"
+    ],
+    "reason": "HALL-AVOIMET-01: Avoimet maksut -välilehti (maksulinkit ja hyvitykset yhdessä), Tarkista-merkki, ⋯-valikon nimi ja Näytä lisää -painike"
+  },
+  {
+    "key": "ui.admin.open_payments.load_more",
+    "lang": "en",
+    "text": "Show more ({{var:n}} left)",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:n}}"
+    ],
+    "reason": "HALL-AVOIMET-01: Avoimet maksut -välilehti (maksulinkit ja hyvitykset yhdessä), Tarkista-merkki, ⋯-valikon nimi ja Näytä lisää -painike"
+  },
+  {
+    "key": "ui.admin.open_payments.review_title",
+    "lang": "fi",
+    "text": "Avoimet maksut",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-AVOIMET-01: Avoimet maksut -välilehti (maksulinkit ja hyvitykset yhdessä), Tarkista-merkki, ⋯-valikon nimi ja Näytä lisää -painike"
+  },
+  {
+    "key": "ui.admin.open_payments.review_title",
+    "lang": "en",
+    "text": "Open payments",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-AVOIMET-01: Avoimet maksut -välilehti (maksulinkit ja hyvitykset yhdessä), Tarkista-merkki, ⋯-valikon nimi ja Näytä lisää -painike"
+  },
+  {
+    "key": "ui.admin.open_payments.review_hint",
+    "lang": "fi",
+    "text": "Maksulinkkejä tai hyvityksiä, jotka vaativat toimenpiteitä. Jono on Tilaukset-sivun Avoimet maksut -välilehdellä.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-AVOIMET-01: Avoimet maksut -välilehti (maksulinkit ja hyvitykset yhdessä), Tarkista-merkki, ⋯-valikon nimi ja Näytä lisää -painike"
+  },
+  {
+    "key": "ui.admin.open_payments.review_hint",
+    "lang": "en",
+    "text": "Payment links or refunds that need action. The queue is in the Open payments tab of Orders.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-AVOIMET-01: Avoimet maksut -välilehti (maksulinkit ja hyvitykset yhdessä), Tarkista-merkki, ⋯-valikon nimi ja Näytä lisää -painike"
+  },
+  {
+    "key": "ui.admin.open_payments.review_links",
+    "lang": "fi",
+    "text": "Maksulinkit, jotka vaativat toimenpiteitä: {{var:n}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:n}}"
+    ],
+    "reason": "HALL-AVOIMET-01: Avoimet maksut -välilehti (maksulinkit ja hyvitykset yhdessä), Tarkista-merkki, ⋯-valikon nimi ja Näytä lisää -painike"
+  },
+  {
+    "key": "ui.admin.open_payments.review_links",
+    "lang": "en",
+    "text": "Payment links needing action: {{var:n}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:n}}"
+    ],
+    "reason": "HALL-AVOIMET-01: Avoimet maksut -välilehti (maksulinkit ja hyvitykset yhdessä), Tarkista-merkki, ⋯-valikon nimi ja Näytä lisää -painike"
+  },
+  {
+    "key": "ui.admin.open_payments.review_refunds",
+    "lang": "fi",
+    "text": "Hyvitykset, jotka ovat epäonnistuneet tai odottaneet yli vuorokauden: {{var:n}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:n}}"
+    ],
+    "reason": "HALL-AVOIMET-01: Avoimet maksut -välilehti (maksulinkit ja hyvitykset yhdessä), Tarkista-merkki, ⋯-valikon nimi ja Näytä lisää -painike"
+  },
+  {
+    "key": "ui.admin.open_payments.review_refunds",
+    "lang": "en",
+    "text": "Refunds that failed or have waited over a day: {{var:n}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:n}}"
+    ],
+    "reason": "HALL-AVOIMET-01: Avoimet maksut -välilehti (maksulinkit ja hyvitykset yhdessä), Tarkista-merkki, ⋯-valikon nimi ja Näytä lisää -painike"
+  },
+  {
+    "key": "ui.admin.open_payments.review_open",
+    "lang": "fi",
+    "text": "Avaa Avoimet maksut",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-AVOIMET-01: Avoimet maksut -välilehti (maksulinkit ja hyvitykset yhdessä), Tarkista-merkki, ⋯-valikon nimi ja Näytä lisää -painike"
+  },
+  {
+    "key": "ui.admin.open_payments.review_open",
+    "lang": "en",
+    "text": "Open Open payments",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-AVOIMET-01: Avoimet maksut -välilehti (maksulinkit ja hyvitykset yhdessä), Tarkista-merkki, ⋯-valikon nimi ja Näytä lisää -painike"
+  }
+]
