@@ -57,6 +57,31 @@ button.link{background:none;border:0;padding:6px 0;font:inherit;color:var(--ink)
 /* listat */
 .toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
 .toolbar input[type=date]{width:auto}
+/* HALL-PAIVA-04: päivänäkymän päivityskello ja tulostettava päivälista (A4). Lista näkyy vain tulosteessa. */
+.day-updated{font-size:13px;margin-left:auto}
+.day-print{display:none}
+@media print{
+  @page{size:A4;margin:12mm}
+  body{background:var(--card);color:var(--ink)}
+  .top,.nav,.nav-rail,.nav-toggle,.toast,#toasts{display:none!important}
+  #shell{display:block}#shell main{margin:0;padding:0;max-width:none}
+  #view>*:not(.day-print){display:none!important}
+  #view>.day-print{display:block!important;font-size:10.5pt;line-height:1.3}
+  .day-print h2{font-size:15pt;margin:0 0 2mm}
+  .day-print .pl-meta{margin:0 0 4mm;font-size:9.5pt}
+  .pl-block{break-inside:avoid;margin:0 0 4mm}
+  .pl-block h3{font-size:11.5pt;margin:0 0 1mm;border-bottom:1.5px solid currentColor;padding-bottom:1mm}
+  .pl-sum{font-weight:400}
+  .pl-table{width:100%;border-collapse:collapse;table-layout:fixed}
+  .pl-table th{font-size:9pt;text-align:left;border-bottom:1px solid currentColor;padding:1mm 1.5mm}
+  .pl-table td{vertical-align:top;padding:1.5mm;border-bottom:.5px solid var(--muted);overflow-wrap:anywhere}
+  .pl-table tr{break-inside:avoid}
+  .pl-table th:nth-child(1){width:30%}.pl-table th:nth-child(2){width:17%}.pl-table th:nth-child(3){width:8%}
+  .pl-table th:nth-child(4){width:24%}.pl-table th:nth-child(5){width:13%}.pl-table th:nth-child(6){width:8%}.pl-table .pl-box{text-align:center}
+  .pl-note{font-size:9pt;font-style:italic}
+  .pl-check{display:inline-block;width:6mm;height:6mm;border:1.5px solid currentColor;line-height:5mm;font-weight:700}
+}
+
 .filters{display:grid;gap:10px;margin-bottom:10px}
 @media(min-width:700px){.filters{grid-template-columns:2fr 1fr 1fr}.filters .filter-groups{grid-column:1/-1}}
 .list{display:grid;gap:6px;margin:8px 0}

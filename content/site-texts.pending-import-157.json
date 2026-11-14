@@ -1,0 +1,206 @@
+[
+  {
+    "key": "ui.admin.day.updated_at",
+    "lang": "fi",
+    "text": "Päivitetty klo {{var:time}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:time}}"
+    ],
+    "reason": "HALL-PAIVA-04: vastaanoton tabletin automaattinen päivitys ja tulostettava päivälista (hallinta, päivänäkymä)"
+  },
+  {
+    "key": "ui.admin.day.updated_at",
+    "lang": "en",
+    "text": "Updated at {{var:time}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:time}}"
+    ],
+    "reason": "HALL-PAIVA-04: vastaanoton tabletin automaattinen päivitys ja tulostettava päivälista (hallinta, päivänäkymä)"
+  },
+  {
+    "key": "ui.admin.day.print_list",
+    "lang": "fi",
+    "text": "Tulosta päivälista",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-PAIVA-04: vastaanoton tabletin automaattinen päivitys ja tulostettava päivälista (hallinta, päivänäkymä)"
+  },
+  {
+    "key": "ui.admin.day.print_list",
+    "lang": "en",
+    "text": "Print day list",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-PAIVA-04: vastaanoton tabletin automaattinen päivitys ja tulostettava päivälista (hallinta, päivänäkymä)"
+  },
+  {
+    "key": "ui.admin.day.print_title",
+    "lang": "fi",
+    "text": "Päivälista",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-PAIVA-04: vastaanoton tabletin automaattinen päivitys ja tulostettava päivälista (hallinta, päivänäkymä)"
+  },
+  {
+    "key": "ui.admin.day.print_title",
+    "lang": "en",
+    "text": "Day list",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-PAIVA-04: vastaanoton tabletin automaattinen päivitys ja tulostettava päivälista (hallinta, päivänäkymä)"
+  },
+  {
+    "key": "ui.admin.day.print_col_name",
+    "lang": "fi",
+    "text": "Nimi",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-PAIVA-04: vastaanoton tabletin automaattinen päivitys ja tulostettava päivälista (hallinta, päivänäkymä)"
+  },
+  {
+    "key": "ui.admin.day.print_col_name",
+    "lang": "en",
+    "text": "Name",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-PAIVA-04: vastaanoton tabletin automaattinen päivitys ja tulostettava päivälista (hallinta, päivänäkymä)"
+  },
+  {
+    "key": "ui.admin.day.print_col_phone",
+    "lang": "fi",
+    "text": "Puhelin",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-PAIVA-04: vastaanoton tabletin automaattinen päivitys ja tulostettava päivälista (hallinta, päivänäkymä)"
+  },
+  {
+    "key": "ui.admin.day.print_col_phone",
+    "lang": "en",
+    "text": "Phone",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-PAIVA-04: vastaanoton tabletin automaattinen päivitys ja tulostettava päivälista (hallinta, päivänäkymä)"
+  },
+  {
+    "key": "ui.admin.day.print_col_persons",
+    "lang": "fi",
+    "text": "Hlö",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-PAIVA-04: vastaanoton tabletin automaattinen päivitys ja tulostettava päivälista (hallinta, päivänäkymä)"
+  },
+  {
+    "key": "ui.admin.day.print_col_persons",
+    "lang": "en",
+    "text": "Guests",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-PAIVA-04: vastaanoton tabletin automaattinen päivitys ja tulostettava päivälista (hallinta, päivänäkymä)"
+  },
+  {
+    "key": "ui.admin.day.print_col_addons",
+    "lang": "fi",
+    "text": "Lisäpalvelut",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-PAIVA-04: vastaanoton tabletin automaattinen päivitys ja tulostettava päivälista (hallinta, päivänäkymä)"
+  },
+  {
+    "key": "ui.admin.day.print_col_addons",
+    "lang": "en",
+    "text": "Extras",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-PAIVA-04: vastaanoton tabletin automaattinen päivitys ja tulostettava päivälista (hallinta, päivänäkymä)"
+  },
+  {
+    "key": "ui.admin.day.print_col_pay",
+    "lang": "fi",
+    "text": "Maksu",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-PAIVA-04: vastaanoton tabletin automaattinen päivitys ja tulostettava päivälista (hallinta, päivänäkymä)"
+  },
+  {
+    "key": "ui.admin.day.print_col_pay",
+    "lang": "en",
+    "text": "Payment",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-PAIVA-04: vastaanoton tabletin automaattinen päivitys ja tulostettava päivälista (hallinta, päivänäkymä)"
+  },
+  {
+    "key": "ui.admin.day.print_col_arrived",
+    "lang": "fi",
+    "text": "Saapunut",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-PAIVA-04: vastaanoton tabletin automaattinen päivitys ja tulostettava päivälista (hallinta, päivänäkymä)"
+  },
+  {
+    "key": "ui.admin.day.print_col_arrived",
+    "lang": "en",
+    "text": "Arrived",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-PAIVA-04: vastaanoton tabletin automaattinen päivitys ja tulostettava päivälista (hallinta, päivänäkymä)"
+  },
+  {
+    "key": "ui.admin.day.print_empty",
+    "lang": "fi",
+    "text": "Ei varauksia tälle päivälle.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-PAIVA-04: vastaanoton tabletin automaattinen päivitys ja tulostettava päivälista (hallinta, päivänäkymä)"
+  },
+  {
+    "key": "ui.admin.day.print_empty",
+    "lang": "en",
+    "text": "No bookings for this day.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-PAIVA-04: vastaanoton tabletin automaattinen päivitys ja tulostettava päivälista (hallinta, päivänäkymä)"
+  }
+]

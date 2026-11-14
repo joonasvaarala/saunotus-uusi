@@ -1,6 +1,6 @@
 // Päivänäkymä: vuorot kapasiteetteineen + varaukset vuoroittain + tapahtumat osallistujineen + päivän tuotto + sulut.
 import { rpc } from '../sb.js';
-import { h, fmtDay, fmtTime, todayHel, addDays, dayStartIso, arrivalStatusBadge, payBadge, sourceBadge, badge, toast, run, dialog, field, fmtDT, empty, money, countText } from '../ui.js';
+import { h, fmtDay, fmtTime, todayHel, addDays, dayStartIso, arrivalStatusBadge, payBadge, sourceBadge, badge, toast, run, dialog, field, fmtDT, empty, money, countText, PAY } from '../ui.js';
 import { formatWhenRange, spansDays } from '../when-range.js';
 import { reservationDialog } from './shared.js';
 import { openOrderView } from '../order-open.js';
@@ -13,6 +13,7 @@ import { assignDayCards, canSeeDayRevenue, eventSortIso, eventTimeLabel, revenue
 import { dayLang, dayText, loadDayTexts } from '../day-texts.js';
 import { bulletinCard, dayNotesCard, loadDayMemos } from './day-memos.js';
 import { loadMemoTexts, memoText } from '../day-memos-texts.js';
+import { clockLabel } from '../day-refresh.js';
 import { cachedDayBundle, seedDayBundle, clearDayBundles } from '../day-bundle-cache.js';
 
 // Tiedotteet ja päivän muistiinpanot: toistaiseksi pois päivänäkymästä.
@@ -133,7 +134,9 @@ export async function render({ ctx, refs, reload, query }) {
         if (next) go(next); else toast(memoText('ui.admin.day_memos.next_own_shift_none'));
       } catch { toast(memoText('ui.admin.day_memos.next_own_shift_failed'), 'err'); } finally { b.disabled = false; }
     } }),
-    blocksBtn);
+    blocksBtn,
+    h('button', { class: 'btn ghost sm', type: 'button', 'data-testid': 'print-day', text: dayText('ui.admin.day.print_list'), onclick: () => window.print() }),
+    h('span', { class: 'day-updated muted', 'data-testid': 'day-updated', role: 'status', text: dayText('ui.admin.day.updated_at', { time: clockLabel() }) }));
   const rows = resv || [];
   // Lisäpalvelut: varauskohtaiset (view.reservations), vuorokohtainen "valmistele" (view.prep) ja päivän summat (view.addon_totals)
   const dv = new Map((view.reservations || []).map((r) => [r.reservation_id, r]));
@@ -175,9 +178,12 @@ export async function render({ ctx, refs, reload, query }) {
         h('span', { class: 'hdr-right' }, h('span', { class: 'cnt', 'data-testid': 'session-persons', text: `${sumPersons(list)} hlö` }))),
       h('ul', { class: 'reslist' }, list.map(resRow))); };
   // Tapahtumat (kb.event_dates) samalla kortilla kuin vuorot. Osallistuja ei toistu slotissa. Ilman kelloa kortti menee päivän loppuun.
-  const eventCard = (ev, mine) => {
+  const eventTime = (ev) => {
     const label = eventTimeLabel(ev);
-    const time = label.kind === 'text' ? label.text : label.kind === 'range' ? (spansDays(label.start, label.end) ? formatWhenRange(label.start, label.end, dayLang() === 'en' ? 'en' : 'fi') : `${fmtTime(label.start)}–${fmtTime(label.end)}`) : dayText('ui.admin.day.event_all_day');
+    return label.kind === 'text' ? label.text : label.kind === 'range' ? (spansDays(label.start, label.end) ? formatWhenRange(label.start, label.end, dayLang() === 'en' ? 'en' : 'fi') : `${fmtTime(label.start)}–${fmtTime(label.end)}`) : dayText('ui.admin.day.event_all_day');
+  };
+  const eventCard = (ev, mine) => {
+    const time = eventTime(ev);
     const prod = refs.productById.get(ev.product_id);
     const name = (dayLang() === 'en' && (ev.name_en || prod?.name_en)) || ev.name || prod?.name || dayText('ui.admin.day.event_badge');
     return h('section', { class: 'card session event', 'data-testid': 'event', 'data-event-id': ev.event_id ?? '', 'data-product': String(ev.product_id ?? '') },
@@ -185,6 +191,22 @@ export async function render({ ctx, refs, reload, query }) {
         h('span', { class: 'hdr-right' }, badge('ev', dayText('ui.admin.day.event_badge')), h('span', { class: 'cnt', 'data-testid': 'session-persons', text: `${sumPersons(mine)} hlö` }))),
       mine.length ? h('ul', { class: 'reslist' }, mine.map(resRow)) : null);
   };
+  // HALL-PAIVA-04: tulostettava päivälista (näkyy vain tulosteessa). Nimi, puhelin, henkilöt, lisäpalvelut, maksutila, saapunut-ruutu.
+  const rangeText = (a, b) => (spansDays(a, b) ? formatWhenRange(a, b, dayLang() === 'en' ? 'en' : 'fi') : `${fmtTime(a)}–${fmtTime(b)}`);
+  const printRow = (r) => { const x = dv.get(r.reservation_id) || {}; const ad = (x.addons && x.addons.length) ? x.addons : (r.addons || []);
+    return h('tr', { class: r.status === 'completed' ? 'is-arrived' : '' },
+      h('td', { class: 'pl-name' }, h('strong', { text: r.customer_name || '–' }), (r.notes || x.notes) ? h('div', { class: 'pl-note', text: r.notes || x.notes }) : null),
+      h('td', { class: 'pl-phone', text: r.customer_phone || x.customer_phone || '' }),
+      h('td', { class: 'pl-n', text: String(r.persons ?? '') }),
+      h('td', { class: 'pl-add', text: ad.length ? addonText(ad) : '' }),
+      h('td', { class: 'pl-pay', text: PAY[r.payment_status] || r.payment_status || '' }),
+      h('td', { class: 'pl-box' }, h('span', { class: 'pl-check', 'aria-label': dayText('ui.admin.day.print_col_arrived') }, r.status === 'completed' ? icon('tick', 14) : null)));
+  };
+  const printBlock = (time, title, mine) => h('section', { class: 'pl-block' },
+    h('h3', {}, h('span', { class: 'pl-time', text: time }), ' ', title, ' ', h('span', { class: 'pl-sum', text: `· ${sumPersons(mine)} hlö` })),
+    mine.length ? h('table', { class: 'pl-table' },
+      h('thead', {}, h('tr', {}, ...['name', 'phone', 'persons', 'addons', 'pay', 'arrived'].map((k) => h('th', { scope: 'col', text: dayText(`ui.admin.day.print_col_${k}`) })))),
+      h('tbody', {}, mine.filter((r) => ACTIVE.includes(r.status)).map(printRow))) : null);
   // Lista ei tuo rule_id:tä; päivänäkymän varausrivi tuo. Ilman sitä samaan aikaan alkavat säännöt jakaisivat varauksen.
   const cardRows = rows.map((r) => {
     if (r.rule_id != null) return r;
@@ -193,10 +215,11 @@ export async function render({ ctx, refs, reload, query }) {
   });
   const plan = assignDayCards({ sessions: view.sessions || [], reservations: cardRows, events: extras?.events || [], date });
   const timeline = [
-    ...plan.sessions.map((x) => ({ at: x.session.starts_at, end: x.session.ends_at, node: card({ s: x.session, mine: x.reservations }) })),
-    ...plan.slots.map((l) => ({ at: l[0].starts_at, end: l[0].ends_at, node: slotCard(l) })),
-    ...plan.events.map((x) => { const at = eventSortIso(x.event, date) || '9999-12-31T23:59:59.000Z'; return { at, end: at, node: eventCard(x.event, x.participants) }; }),
-  ].sort((a, b) => a.at.localeCompare(b.at) || a.end.localeCompare(b.end)).map((x) => x.node);
+    ...plan.sessions.map((x) => ({ at: x.session.starts_at, end: x.session.ends_at, node: card({ s: x.session, mine: x.reservations }), print: printBlock(rangeText(x.session.starts_at, x.session.ends_at), refs.productById.get(x.session.product_id)?.name || x.session.label || '', x.reservations) })),
+    ...plan.slots.map((l) => ({ at: l[0].starts_at, end: l[0].ends_at, node: slotCard(l), print: printBlock(rangeText(l[0].starts_at, l[0].ends_at), slotTitle(l, refs.productById.get(l[0].product_id)?.name) || 'Varaus', l) })),
+    ...plan.events.map((x) => { const at = eventSortIso(x.event, date) || '9999-12-31T23:59:59.000Z'; return { at, end: at, node: eventCard(x.event, x.participants), print: printBlock(eventTime(x.event), x.event.name || refs.productById.get(x.event.product_id)?.name || dayText('ui.admin.day.event_badge'), x.participants) }; }),
+  ].sort((a, b) => a.at.localeCompare(b.at) || a.end.localeCompare(b.end));
+  const timelineNodes = timeline.map((x) => x.node);
   const rev = seeMoney ? revenueView(revenueRpc === undefined ? extras : revenueRpc, date) : null;
   const revenue = rev && h('section', { class: 'dayrev', 'data-testid': 'day-revenue', 'data-gross': rev.available ? String(rev.gross) : '' },
     h('h2', { text: dayText('ui.admin.day.revenue_title') }),
@@ -213,6 +236,10 @@ export async function render({ ctx, refs, reload, query }) {
       DAY_VIEW_SHOW_ANNOUNCEMENTS ? bulletinCard({ date, bulletins: memos?.bulletins || [], can: ctx.can, reload }) : null,
       revenue, shifts, optNote,
       DAY_VIEW_SHOW_DAY_NOTES ? dayNotesCard({ date, dayNotes: memos?.day_notes || [], can: ctx.can, reload }) : null, prepBox,
-      h('div', { class: 'daygrid day-view' }, timeline.length ? timeline : empty('Ei vuoroja tälle päivälle.')),
-      inactive.length ? h('details', { class: 'card inactive-res', 'data-testid': 'inactive-res' }, h('summary', { text: `Peruutetut ja päättyneet varaukset (${inactive.length})` }), h('ul', { class: 'reslist' }, inactive.map(resRow))) : null)];
+      h('div', { class: 'daygrid day-view' }, timelineNodes.length ? timelineNodes : empty('Ei vuoroja tälle päivälle.')),
+      inactive.length ? h('details', { class: 'card inactive-res', 'data-testid': 'inactive-res' }, h('summary', { text: `Peruutetut ja päättyneet varaukset (${inactive.length})` }), h('ul', { class: 'reslist' }, inactive.map(resRow))) : null),
+    h('section', { class: 'day-print', 'data-testid': 'day-print', 'aria-hidden': 'true' },
+      h('h2', { text: `${dayText('ui.admin.day.print_title')} · ${fmtDay(`${date}T12:00:00Z`)}` }),
+      h('p', { class: 'pl-meta', text: `${countText(active.length, 'aktiivinen varaus', 'aktiivista varausta')}, ${countText(sumPersons(active), 'henkilö', 'henkilöä')} yhteensä · ${dayText('ui.admin.day.updated_at', { time: clockLabel() })}` }),
+      timeline.length ? timeline.map((x) => x.print) : h('p', { text: dayText('ui.admin.day.print_empty') }))];
 }
