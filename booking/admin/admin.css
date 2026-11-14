@@ -96,7 +96,7 @@ button.link{background:none;border:0;padding:6px 0;font:inherit;color:var(--ink)
 .empty{color:var(--muted);padding:14px 0}
 /* päivänäkymä */
 .daygrid{display:grid;gap:10px}
-@media(min-width:1000px){.daygrid{grid-template-columns:1fr 1fr}.daygrid.day-view{grid-template-columns:minmax(0,760px)}}
+@media(min-width:1000px){.daygrid{grid-template-columns:1fr 1fr}.daygrid.day-view{grid-template-columns:minmax(0,1fr)}}
 .session header{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center}
 .session .time{font-size:18px;color:var(--ink);overflow-wrap:anywhere;white-space:normal;min-width:0;max-width:100%}.session .ttl{font-weight:600;flex:1}.session .cnt{font-size:13px;color:var(--muted)}
 .rc-when,.rd-when,.tl-sub-meta{overflow-wrap:anywhere;white-space:normal}
@@ -454,13 +454,21 @@ input[aria-invalid=true],select[aria-invalid=true],textarea[aria-invalid=true]{b
 .session.slot{border-left:5px solid #8a6a4a}
 .session.event{border-left:5px solid #6b4a2b}
 .badge.ev{background:#efe4d6;color:#6b4a2b;border:1px solid #8a6a4a}
-.dayrev{max-width:760px;margin:0 0 12px;padding:12px 14px 14px;border-radius:12px;background:#f7f3ea;border:1px solid #e2d3b8;border-left:6px solid #a87b45}
-.dayrev h2{margin:0;font-size:15px;font-weight:600;color:#6b4a2b}
-.dayrev-sum{margin:2px 0 0;font-size:28px;line-height:1.15}
+.dayrev{margin:0 0 12px;padding:8px 12px;border-radius:12px;background:#f7f3ea;border:1px solid #e2d3b8;border-left:6px solid #a87b45}
+.dayrev{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 12px}.dayrev h2{margin:0;font-size:14px;font-weight:600;color:#6b4a2b}
+.dayrev-sum{margin:0;font-size:20px;line-height:1.2}
 .dayrev-sum strong{font-variant-numeric:tabular-nums;color:var(--ink)}
-.dayrev-note{margin:4px 0 0;font-size:13px}
+.dayrev-note{margin:0;font-size:13px}
 /* Valmistelu: päivän yhteenvetokortti (hillitty hiekka/vihreä, ei sinistä) */
-.prepcard{max-width:760px;margin:0 0 14px;padding:12px 14px 14px;border-radius:12px;background:#ecebd9;border:1px solid #c5c8a3;border-left:6px solid #7a8a52}
+/* HALL-PAIVA-01: päivänäkymän kortit samassa 760 px:n sarakkeessa; työkalurivi otsikon alla, tabletilla kiinteänä; vuoron tyyppimerkki */
+.daycol{max-width:760px;min-width:0}
+.daycol > *{max-width:100%}
+.toolbar.daytools{margin-bottom:12px}
+@media(min-width:600px){.toolbar.daytools{position:sticky;top:56px;z-index:10;background:var(--bg);padding:8px 0;margin-top:-8px;border-bottom:1px solid var(--line)}}
+.session .badge.kind{font-weight:600}
+.session .badge.kind-exclusive{background:var(--warnbg);color:var(--gold)}
+.session .badge.kind-shared{background:var(--okbg);color:var(--ok)}
+.prepcard{margin:0 0 14px;padding:12px 14px 14px;border-radius:12px;background:#ecebd9;border:1px solid #c5c8a3;border-left:6px solid #7a8a52}
 .prepcard h2{margin:0 0 10px;font-size:17px;color:#33401f;display:flex;align-items:center;gap:6px}
 .prepcard h2 .icon{color:#4f6130}
 .prep-tiles{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px}
@@ -938,7 +946,7 @@ body.shot #shell .nav .lbl{display:inline}
 .rc-actions .btn{flex:1 1 140px;min-width:0;white-space:normal;line-height:1.25;text-align:center}
 .dlg .stack,.dlg form{min-width:0}
 /* Päivän muistiinpanot ja henkilöstötiedotteet (paketti 04, booking_140). Vain teeman muuttujat (vihreä, hiekka, kullanruskea), ei uusia värejä. */
-.day-bulletins,.day-notes{max-width:760px;min-width:0;margin:0 0 12px;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:var(--card)}
+.day-bulletins,.day-notes{min-width:0;margin:0 0 12px;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:var(--card)}
 .day-bulletins{border-left:6px solid var(--gold)}
 .day-memos-heading{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;justify-content:space-between}
 .day-bulletins h2,.day-notes h2{margin:0 0 6px;font-size:15px;font-weight:600;color:var(--green)}
