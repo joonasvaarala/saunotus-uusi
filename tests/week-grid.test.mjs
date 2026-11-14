@@ -281,7 +281,7 @@ test('hoitoikkuna tulee asetuksesta: 90 pv → viikko 30.11. näyttää hoidot, 
 test('tapahtumat näkyvät aina Hoidot ja rituaalit -solussa, myös kun careLater on tosi tai hoitoja ei ole', () => {
   const later = week({ start: '2026-11-30', care: [], careHorizon: 14, events: evDec });
   assert.equal(later.careLater, true);
-  assert.deepEqual(day(later, '2026-12-04').events.map((x) => x.name), ['Perinnesaunotusilta (la & su)']);
+  assert.deepEqual(day(later, '2026-12-04').events.map((x) => x.name), ['Perinnesaunotusilta'], 'kortin nimestä sulkuosa pois');
   assert.equal(later.hasEvents, true);
   const html = weekGridTree(later, T, {}).map(toHtml).join('');
   const care = html.slice(html.indexOf('vk-carec'));
@@ -414,4 +414,27 @@ test('tyylit: viikko-ohjelman virhe- ja vähissä-värit käyttävät --danger-t
   assert.match(vk, /\.vk-low\{color:var\(--danger\)/);
   assert.match(vk, /\.vk-error\{[^}]*color:var\(--danger\)/);
   assert.doesNotMatch(vk, /#9a4b1f|#c98a5a/i);
+});
+
+test('tapahtumakortin nimi: sulkuosa pois sekä FI:ssä että EN:ssä', () => {
+  const events = [ev('perinnesaunotusilta', 'Perinnesaunotusilta (la & su)', [occ('2026-12-04', '17:00', '18:30')], { name_en: 'Traditional Sauna Ritual Evening (Perinnesaunotusilta)' })];
+  const fiM = week({ start: '2026-11-30', care: [], careHorizon: 14, events });
+  assert.equal(day(fiM, '2026-12-04').events[0].name, 'Perinnesaunotusilta');
+  const enM = week({ start: '2026-11-30', care: [], careHorizon: 14, events, lang: 'en' });
+  assert.equal(day(enM, '2026-12-04').events[0].name, 'Traditional Sauna Ritual Evening');
+  assert.equal(week({ events: [ev('x', 'Joulusauna', [occ('2026-11-20', '17:00', '18:30')])] }).days.find((d) => d.events.length).events[0].name, 'Joulusauna', 'ilman sulkuja ennallaan');
+});
+
+test('tyylit: viikko-ohjelman nimet tavuttuvat sanarajoilla (hyphens:auto), ei anywhere/break-all; juuressa lang', () => {
+  const css = readFileSync(new URL('../src/styles.css', import.meta.url), 'utf8');
+  for (const sel of ['.vk-n', '.vk-cl']) {
+    const line = css.split('\n').find((l) => l.startsWith(`${sel}{`));
+    assert.ok(line, `${sel} löytyy`);
+    assert.match(line, /hyphens:auto/, `${sel} hyphens:auto`);
+    assert.doesNotMatch(line, /overflow-wrap:anywhere|word-break:break-all/, `${sel} ei anywhere/break-all`);
+  }
+  const vkLines = css.split('\n').filter((l) => /^(\.vk\b|\s+\.vk\b)/.test(l)).join('\n');
+  assert.doesNotMatch(vkLines, /overflow-wrap:anywhere|word-break:break-all/);
+  assert.match(weekGrid('fi'), /<div class="vk" data-vk data-quiet-week lang="fi" /);
+  assert.match(weekGrid('en'), /<div class="vk" data-vk data-quiet-week lang="en" /);
 });

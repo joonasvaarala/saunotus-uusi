@@ -147,7 +147,7 @@ export function buildWeek({ start, today, now, rows = null, catalog = null, care
       const allFull = os.every((o) => o.status === 'full');
       const price = ev.price != null && Number.isFinite(+ev.price) ? money(ev.price, lang) : '';
       d.events.push({
-        name: eventDisplayName({ slug: ev.slug, productId: ev.product_id, name: ev.name, nameEn: ev.name_en }, catalog, lang), price, full: allFull,
+        name: careName(eventDisplayName({ slug: ev.slug, productId: ev.product_id, name: ev.name, nameEn: ev.name_en }, catalog, lang)), price, full: allFull,
         times: os.map((o) => rangeLabel(o.starts_at, o.ends_at, lang, now)).filter(Boolean), href: hrefs.event(ev.slug, date),
       });
       hasEvents = true;
