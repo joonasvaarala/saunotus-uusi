@@ -12,6 +12,7 @@ import { analyticsMock } from './analytics-mock.js';
 import { createEventsMock, EVENT_MOCK_RESOURCES } from './events-mock.js';
 import { generatedAnnualCardCode, generatedDiscountCode, normalizeCode } from '../shop/src/discount-code-logic.js';
 import { paylinkWatchHandlers } from './paylink-watch-mock.js';
+import { viewsMockHandlers } from './views-mock.js';   // YHT-08: Resurssit, Kalenterisulut, Käyttäjät, asiakasnäkymä
 import { refundWatchHandlers } from './refund-watch-mock.js';
 const TZ = 'Europe/Helsinki';
 const todayHel = (now = new Date()) => now.toLocaleDateString('sv-SE', { timeZone: TZ });
@@ -98,7 +99,8 @@ function procountorStatus(cfg) {
     bank_account_configured: Boolean(cfg.bank_account), last: null, errors: [],
   };
 }
-const PERMS = ['bookings.manage', 'bookings.override', 'customers.manage', 'catalog.edit', 'payments.manage', 'payments.refund', 'reports.view', 'settings.edit', 'pos.use', 'invoices.manage', 'giftcards.manage', 'messages.edit'];
+// YHT-08: blocks.manage, resources.edit ja rules.edit kuten tuotannon manager/admin (Resurssit ja Kalenterisulut avautuvat kokeilutilassa).
+const PERMS = ['bookings.manage', 'bookings.override', 'customers.manage', 'catalog.edit', 'payments.manage', 'payments.refund', 'reports.view', 'settings.edit', 'pos.use', 'invoices.manage', 'giftcards.manage', 'messages.edit', 'blocks.manage', 'resources.edit', 'rules.edit'];
 const CODE_RE = /^[a-z0-9_]{1,40}$/;
 
 export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, role = 'manager', latePaymentScenario = false, checkoutx = false } = {}) {
@@ -405,7 +407,7 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
     admin_my_permissions: () => ({ role, role_label: role === 'staff' ? 'Työntekijä (esimerkki)' : role === 'admin' ? 'Pääkäyttäjä (esimerkki)' : 'Päällikkö (esimerkki)', permissions: st.perms }),
     admin_list_products: () => st.products.map((p) => ({ ...p })),
     'select:payment_methods': () => [{ code: 'pay_later', label: 'Maksu myöhemmin', is_manual: true, active: true }, { code: 'cash', label: 'Käteinen', is_manual: false, active: false }, { code: 'card_terminal', label: 'Korttipääte', is_manual: true, active: true }],
-    'select:resources': () => EVENT_MOCK_RESOURCES.map((r) => ({ ...r })),   // booking_158: kind (space/person/capacity_pool) Tapahtumat-näkymän resurssivalintaan
+    'select:resources': () => (st.mockResources ??= EVENT_MOCK_RESOURCES.map((r) => ({ ...r }))).map((r) => ({ ...r })),   // booking_158: kind (space/person/capacity_pool) Tapahtumat-näkymän resurssivalintaan
     'select:product_space_rules': () => [10, 8, 7].map((pid) => ({ product_id: pid, leg_no: 1, priority: 1, space_id: 1, mode: 'exclusive', min_persons: 1, max_persons: 6, selection: 'auto', active: true })),
     admin_list_addons: () => [],
     admin_list_customers: (a) => st.customers.filter((c) => !a.p_search || `${c.name} ${c.email} ${c.phone}`.toLowerCase().includes(String(a.p_search).toLowerCase())).slice(0, a.p_limit || 5),
@@ -1125,6 +1127,7 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
     },
   };
   Object.assign(handlers, paylinkWatchHandlers({ st, need, err, now }), refundWatchHandlers({ st, err, role, now }));
+  Object.assign(handlers, viewsMockHandlers({ st, need, err, now, resources: st.mockResources ??= EVENT_MOCK_RESOURCES.map((r) => ({ ...r })) }));   // YHT-08
   // booking_158: tapahtumat ja koulutukset (events-mock.js) + tuotteen kopio (admin_product_copy: 'Kopio: nimi', piilotettu, ei myynnissä)
   const eventsMock = createEventsMock({ today, products: st.products });
   Object.assign(handlers, eventsMock.handlers, {
