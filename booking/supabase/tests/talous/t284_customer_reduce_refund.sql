@@ -157,7 +157,10 @@ begin
   perform pg_temp.ck(v -> 'auto_refund' ->> 'reason' = 'payment_method', 'H1: käteinen/pääte → estetty ' || v::text);
   select * into o6, t6 from pg_temp.mk(v_rule, d + 21, 3, 'f@t284.example', 'montonio', 20, 'HHGCAAA28401');
   v := pg_temp.anon_('10.4.0.6', format('select booking.public_change_preview(%L, null, null, 2)', t6));
-  perform pg_temp.ck(v -> 'auto_refund' ->> 'reason' = 'payment_method', 'H2: lahjakortti + Montonio → estetty (lahjakorttiosuutta ei hyvitetä automaattisesti)');
+  -- booking_308 (Joonas 14.11.): osin lahjakortilla maksettu sallitaan, hyvitetään vain rahaosuus (lahjakortti 20 + raha 67, uusi hinta 58 → 29 € rahana)
+  perform pg_temp.ck(case when exists (select 1 from booking.settings where key = 'customer_move_min_days_private')
+                          then (v -> 'auto_refund' ->> 'allowed')::boolean and (v -> 'auto_refund' ->> 'amount')::numeric = 29
+                          else v -> 'auto_refund' ->> 'reason' = 'payment_method' end, 'H2: lahjakortti + Montonio (284: estetty, 308: sallittu rahaosuudella) ' || v::text);
   select * into o7, t7 from pg_temp.mk(v_rule, d + 28, 3, 'g@t284.example', 'partner');
   v := pg_temp.anon_('10.4.0.7', format('select booking.public_change_preview(%L, null, null, 2)', t7));
   perform pg_temp.ck(v -> 'auto_refund' ->> 'reason' = 'payment_method', 'H3: kumppanikoodi → estetty');

@@ -1360,7 +1360,7 @@ async function viewChange(token, b) {
     const refundOk = !!(rd && rd.status === 'allowed');
     msg.replaceChildren(...(!priceBlocked ? [] : !reducing ? [h('p', { class: 'bk-note', text: t.changePaidPrice })]
       : !rd || rd.status === 'loading' ? [h('p', { class: 'bk-note', role: 'status', text: rt(S.lang, 'checking') })]
-      : refundOk ? [h('p', { class: 'bk-note', role: 'status', 'data-testid': 'reduce-preview', text: rt(S.lang, 'preview_refund', { amount: money(rd.amount), total: money(newTotal) }) })]
+      : refundOk ? [h('p', { class: 'bk-note', role: 'status', 'data-testid': 'reduce-preview', text: (rd.kept > 0.004 ? rt(S.lang, 'preview_refund_partial', { amount: money(rd.amount), total: money(newTotal), kept: money(rd.kept) }) : rt(S.lang, 'preview_refund', { amount: money(rd.amount), total: money(newTotal) })) })]
       : [h('p', { class: 'bk-note', 'data-testid': 'reduce-blocked', text: reduceBlockedText(rd.reason) })]));
     submit.textContent = refundOk ? rt(S.lang, 'confirm', { amount: money(rd.amount) }) : t.saveChange;
     submit.disabled = !changed || (priceBlocked && !refundOk);
@@ -1376,7 +1376,7 @@ async function viewChange(token, b) {
     try { r = await rpc('public_change_preview', JSON.parse(key)); } catch { r = null; }
     if (st.reduce?.key !== key) return;   // valinta ehti vaihtua
     const ar = r?.ok ? r.auto_refund : null;
-    st.reduce = { key, status: ar && ar.allowed ? 'allowed' : 'blocked', amount: ar?.amount ?? null, reason: ar?.reason || 'contact_staff' };
+    st.reduce = { key, status: ar && ar.allowed ? 'allowed' : 'blocked', amount: ar?.amount ?? null, kept: +(ar?.non_refundable || 0), reason: ar?.reason || 'contact_staff' };
     upd();
   }
   function reduceBlockedText(reason) {
@@ -1424,7 +1424,7 @@ async function viewChange(token, b) {
       const r = await rpc('public_change_booking', args);
       if (!r.ok) {
         if (r.code === 'refund_confirmation_required') st.reduce = null;
-        throw Object.assign(new Error((r.code === 'order_invoiced' ? t.errors.order_invoiced_persons : r.code === 'refund_confirmation_required' ? rt(S.lang, 'changed') : r.code === 'already_moved' ? rt(S.lang, 'already_moved') : t.errors[r.code]) || t.errorGeneric), { code: r.code, mapped: true });
+        throw Object.assign(new Error((r.code === 'order_invoiced' ? t.errors.order_invoiced_persons : r.code === 'refund_confirmation_required' ? rt(S.lang, 'changed') : r.code === 'already_moved' ? rt(S.lang, 'already_moved') : r.code === 'move_too_late_private' ? rt(S.lang, 'move_too_late_private', { days: state.settings?.customer_move_min_days_private || 7 }) : t.errors[r.code]) || t.errorGeneric), { code: r.code, mapped: true });
       }
       state.months.clear();
       if (r.refund_amount > 0) {   // booking_284: näytetään hyvitysvahvistus (muutoksen jälkeen varaussivu näyttää uuden summan)

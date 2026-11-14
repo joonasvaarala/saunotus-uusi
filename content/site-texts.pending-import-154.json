@@ -1,0 +1,54 @@
+[
+  {
+    "key": "ui.public.order_change.reduce.preview_refund_partial",
+    "lang": "fi",
+    "text": "Uusi hinta on {{var:total}}. Hyvitämme rahana maksetusta osuudesta {{var:amount}} alkuperäiseen maksutapaan, yleensä 1–3 pankkipäivässä. Lahjakortilla tai koodilla maksettua osuutta ({{var:kept}}) ei hyvitetä.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 260,
+    "placeholders": [
+      "{{var:total}}",
+      "{{var:amount}}",
+      "{{var:kept}}"
+    ],
+    "reason": "booking_308: osin lahjakortilla/koodilla maksetun tilauksen pienennys – vain rahaosuus hyvitetään"
+  },
+  {
+    "key": "ui.public.order_change.reduce.preview_refund_partial",
+    "lang": "en",
+    "text": "The new price is {{var:total}}. We will refund {{var:amount}} of the part paid with money to your original payment method, usually within 1–3 bank days. The part paid with a gift card or code ({{var:kept}}) is not refunded.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 260,
+    "placeholders": [
+      "{{var:total}}",
+      "{{var:amount}}",
+      "{{var:kept}}"
+    ],
+    "reason": "booking_308: osin lahjakortilla/koodilla maksetun tilauksen pienennys – vain rahaosuus hyvitetään"
+  },
+  {
+    "key": "ui.public.order_change.reduce.move_too_late_private",
+    "lang": "fi",
+    "text": "Tämän varauksen voi siirtää verkossa viimeistään {{var:days}} vrk ennen alkua. Ota yhteyttä sähköpostilla.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 220,
+    "placeholders": [
+      "{{var:days}}"
+    ],
+    "reason": "booking_308: yksityisvuoron oma siirto vain ehtojen puitteissa (≥ 7 vrk ennen alkua)"
+  },
+  {
+    "key": "ui.public.order_change.reduce.move_too_late_private",
+    "lang": "en",
+    "text": "This booking can be moved online no later than {{var:days}} days before it starts. Please contact us by email.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 220,
+    "placeholders": [
+      "{{var:days}}"
+    ],
+    "reason": "booking_308: yksityisvuoron oma siirto vain ehtojen puitteissa (≥ 7 vrk ennen alkua)"
+  }
+]

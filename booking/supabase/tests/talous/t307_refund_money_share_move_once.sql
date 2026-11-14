@@ -144,12 +144,13 @@ begin
   v := pg_temp.as_(u_adm, format('select booking.admin_change_booking(%s, %s, %L, null)', r, v_rule, d + 42));
   v := pg_temp.anon_('10.7.0.2', format('select booking.public_change_booking(%L, %s, %L, null)', t, v_rule, d + 49));
   perform pg_temp.ck((v ->> 'ok')::boolean, 'M7: henkilökunnan siirron jälkeen asiakkaan oma (ensimmäinen) siirto sallittu ' || v::text);
-  -- private_event: ehdoissa ei kertarajaa → toinen siirto sallittu
+  -- private_event: 307:ssä toinen siirto sallittu; booking_308 (Joonas 14.11.) laajensi kertarajan yksityisvuoroihin → already_moved
   update booking.product_config set cancellation_tier = 'private_event' where product_id = v_prod;
   t := (test.pub_book(v_rule, d + 35, 2, 'p@t307.example') ->> 'token')::uuid;
   v := pg_temp.anon_('10.7.0.3', format('select booking.public_change_booking(%L, %s, %L, null)', t, v_rule, d + 42));
   v := pg_temp.anon_('10.7.0.3', format('select booking.public_change_booking(%L, %s, %L, null)', t, v_rule, d + 49));
-  perform pg_temp.ck((v ->> 'ok')::boolean, 'M8: private_event: toinen siirto sallittu (sääntö koskee yleisiä vuoroja) ' || v::text);
+  perform pg_temp.ck(case when exists (select 1 from booking.settings where key = 'customer_move_min_days_private') then v ->> 'code' = 'already_moved'
+                          else (v ->> 'ok')::boolean end, 'M8: private_event: toinen siirto (307: sallittu, 308: already_moved) ' || v::text);
   update booking.product_config set cancellation_tier = null where product_id = v_prod;
   t := (test.pub_book(v_rule, d + 35, 2, 'q@t307.example') ->> 'token')::uuid;
   v := pg_temp.anon_('10.7.0.4', format('select booking.public_change_booking(%L, %s, %L, null)', t, v_rule, d + 42));
