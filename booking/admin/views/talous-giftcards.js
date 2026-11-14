@@ -325,7 +325,6 @@ export function createGiftcardsTab({ api, gift, pay = null, ctx, onOpenOrder = (
     });
     submitBtn = d.querySelector('form button[type=submit]');
     d.querySelector('form').querySelector('.row.wrap')?.append(submitBtn);   // Takaisin · Seuraava · Luo samalle riville
-    if (pay && canPay) mode.value = GC_MODE_LINK;   // puhelinmyynnin oletus: maksulinkki sähköpostiin
     sync(); goStep(1); return d;
   }
   // Tulosdialogi: kortit, tilaus (linkki tilaukseen) ja maksulinkin tila. Linkin epäonnistuminen ei peru korttia: "Luo maksulinkki uudelleen" käyttää samaa tilausta (ei tuplakorttia).

@@ -85,6 +85,14 @@ test('näkymä: kaksi vaihetta, kieli valittavissa, ei kovakoodattua fi-kieltä,
   assert.match(src('admin/views/lahjakortit.js'), /createGiftcardsTab\(\{ api: null, gift, pay,/);
 });
 
+test('näkymä: dialogi ei avaudu maksulinkki valittuna (sähköposti vain tietoisesta valinnasta)', () => {
+  const v = src('admin/views/talous-giftcards.js');
+  assert.ok(!/mode\.value\s*=\s*GC_MODE_LINK/.test(v), 'ei oletusvalintaa mode.value = GC_MODE_LINK');
+  assert.ok(!/mode\.value\s*=(?!=)/.test(v), 'maksutavan arvoa ei aseteta avauksessa');
+  assert.match(v, /h\('select', \{ name: 'mode'[^\n]*\}, h\('option', \{ value: 'free'/, 'ensimmäinen vaihtoehto on free');
+  assert.ok(!/<option[^>]*value="?link[^>]*selected/.test(v) && !/selected:\s*(true|canPay)/.test(v), 'ei selected-oletusta');
+});
+
 test('tekstit: uudet avaimet FI+EN', () => {
   for (const k of ['gc.n.mode.link', 'gc.n.locale', 'gc.n.next', 'gc.n.back', 'gc.n.stepNo', 'gc.n.step1', 'gc.n.step2', 'gc.r.link.failed', 'gc.r.link.retry', 'gc.r.link.sent', 'gc.r.openOrder']) {
     assert.ok(TEXTS.fi[k], `fi ${k}`); assert.ok(TEXTS.en[k], `en ${k}`);
