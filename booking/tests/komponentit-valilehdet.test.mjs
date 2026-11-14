@@ -41,3 +41,18 @@ test('tyylitarkistus: admin.css ei kasvata heksavärien tai asteikon ulkopuolist
   assert.ok(r.size <= BASELINE.size, `size ${r.size} > ${BASELINE.size}`);
   assert.deepEqual(checkAdminCss(':root{--a:#fff}.x{color:#123456;font-size:17px}'), { hex: 1, size: 1 });
 });
+
+test('HALL-KUORI-01: yhdeksän pääkohtaa, enintään kaksi tasoa ryhmissä, Kassa yläpalkissa, tuonti 151', async () => {
+  const { NAV_GROUPS, resolveAdminPath } = await import('../admin/admin-navigation.js');
+  assert.deepEqual(NAV_GROUPS.map((g) => g.id), ['gifts', 'offering', 'cash', 'settings']);
+  const paths = NAV_GROUPS.flatMap((g) => g.tabs.map((t) => t.path));
+  assert.equal(new Set(paths).size, paths.length, 'jokainen välilehti yhdessä paikassa');
+  assert.ok(!paths.includes('pikakassa'));
+  assert.deepEqual(resolveAdminPath('pikakassa').path, 'pikakassa');
+  const html = read('booking/admin/index.html');
+  assert.match(html, /id="quick-pos" href="#\/pikakassa"[^>]*hidden/);
+  assert.match(read('booking/admin/admin.js'), /pos\.hidden = !ctx\.can\('pos\.use'\)/);
+  const rows = JSON.parse(read('content/site-texts.pending-import-151.json'));
+  assert.deepEqual(rows.map((r) => `${r.key}|${r.lang}`).sort(), ['gifts_codes', 'offering', 'pos_quick'].flatMap((k) => [`ui.admin.nav.${k}|en`, `ui.admin.nav.${k}|fi`]).sort());
+  for (const r of rows) assert.doesNotMatch(r.text, /REDACTED/);
+});

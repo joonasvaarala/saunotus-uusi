@@ -3,29 +3,34 @@ import { navText } from './nav-texts.js';
 
 // Päänavigaation ryhmät. Polku on ryhmän kanoninen osoite; välilehden oma polku (esim. #/pikakassa) ohjautuu ryhmään.
 // any: sama oikeuslista kuin entisellä nav-kohdalla. Puuttuva any = kaikille henkilökunnalle.
+// HALL-KUORI-01: yhdeksän pääkohtaa työn mukaan, enintään kaksi tasoa. Pikakassa on yläpalkin pikatoiminto (#/pikakassa), ei ryhmän välilehti.
+// Ryhmä aukeaa tärkeimpään välilehteensä (ensimmäinen sallittu). Vanhat ryhmäosoitteet: LEGACY_GROUP_PATHS.
 export const NAV_GROUPS = [
-  { id: 'cash', path: 'kassa', labelKey: 'ui.admin.nav.cash_finance', tabs: [
-    { id: 'pikakassa', path: 'pikakassa', labelKey: 'ui.admin.nav.pos', view: 'pos', any: ['pos.use'] },
+  { id: 'gifts', path: 'lahjakortit', labelKey: 'ui.admin.nav.gifts_codes', tabs: [
+    { id: 'lahjakortit', path: 'lahjakortit', labelKey: 'ui.admin.nav.giftcards', view: 'lahjakortit', any: ['giftcards.manage'] },
+    { id: 'alennuskoodit', path: 'alennuskoodit', labelKey: 'ui.admin.nav.discounts', view: 'discounts', any: ['catalog.edit', 'annual_cards.manage'] },
+  ] },
+  { id: 'offering', path: 'tarjonta', labelKey: 'ui.admin.nav.offering', tabs: [
+    { id: 'tuotteet', path: 'tuotteet', labelKey: 'ui.admin.nav.products', view: 'products' },
+    { id: 'tapahtumat', path: 'tapahtumat', labelKey: 'ui.admin.nav.events', view: 'events' },
+    { id: 'koulutukset', path: 'koulutukset', labelKey: 'ui.admin.nav.trainings', view: 'koulutukset' },
+    { id: 'hiljaiset-ajat', path: 'hiljaiset-ajat', labelKey: 'ui.admin.nav.quiet_hours', view: 'quiet', any: ['catalog.edit', 'settings.edit'] },
+    { id: 'resurssit', path: 'resurssit', labelKey: 'ui.admin.nav.resources', view: 'resources' },
+    { id: 'sulkukalenterit', path: 'sulkukalenterit', labelKey: 'ui.admin.nav.closures', view: 'closures', any: ['blocks.manage'] },
+  ] },
+  { id: 'cash', path: 'talous', labelKey: 'ui.admin.nav.finance', tabs: [
     { id: 'talous', path: 'talous', labelKey: 'ui.admin.nav.finance', view: 'talous', any: ['payments.manage', 'giftcards.manage'] },
     { id: 'seurattavat', path: 'seurattavat-maksut', labelKey: 'ui.admin.nav.paylink_watch', view: 'paylink-watch', any: ['payments.manage'] },
     { id: 'hyvitykset', path: 'hyvitysten-seuranta', labelKey: 'ui.admin.nav.refund_watch', view: 'refund-watch', any: ['bookings.manage'] },
     { id: 'laskut', path: 'laskut', labelKey: 'ui.admin.nav.invoices', view: 'invoices', any: ['invoices.manage'] },
-  ] },
-  { id: 'products', path: 'tuotteet', labelKey: 'ui.admin.nav.products', tabs: [
-    { id: 'tuotteet', path: 'tuotteet', labelKey: 'ui.admin.nav.products', view: 'products' },
-    { id: 'tapahtumat', path: 'tapahtumat', labelKey: 'ui.admin.nav.events', view: 'events' },
-    { id: 'alennuskoodit', path: 'alennuskoodit', labelKey: 'ui.admin.nav.discounts', view: 'discounts', any: ['catalog.edit', 'annual_cards.manage'] },
-    { id: 'hiljaiset-ajat', path: 'hiljaiset-ajat', labelKey: 'ui.admin.nav.quiet_hours', view: 'quiet', any: ['catalog.edit', 'settings.edit'] },
-  ] },
-  { id: 'spaces', path: 'tilat', labelKey: 'ui.admin.nav.spaces_blocks', tabs: [
-    { id: 'resurssit', path: 'resurssit', labelKey: 'ui.admin.nav.resources', view: 'resources' },
-    { id: 'sulkukalenterit', path: 'sulkukalenterit', labelKey: 'ui.admin.nav.closures', view: 'closures', any: ['blocks.manage'] },
   ] },
   { id: 'settings', path: 'asetukset', labelKey: 'ui.admin.nav.settings', tabs: [
     { id: 'asetukset', path: 'asetukset', labelKey: 'ui.admin.nav.settings', view: 'settings', any: ['settings.edit', 'pos.use'] },
     { id: 'kayttajat', path: 'kayttajat', labelKey: 'ui.admin.nav.users', view: 'users', any: ['staff.manage'] },
   ] },
 ];
+/** Poistuneet ryhmäosoitteet → uusi välilehti (kirjanmerkit). */
+export const LEGACY_GROUP_PATHS = { tilat: 'resurssit', kassa: 'pikakassa' };   // #/kassa avasi ennen Pikakassan
 const GROUP_BY_ID = new Map(NAV_GROUPS.map((g) => [g.id, g]));
 const GROUP_BY_CHILD = new Map(NAV_GROUPS.flatMap((g) => g.tabs.map((t) => [t.path, { group: g, tab: t }])));
 const GROUP_BY_PATH = new Map(NAV_GROUPS.map((g) => [g.path, g]));
@@ -42,6 +47,7 @@ export function legacyFinanceGiftTarget(path, query) {
 }
 export function resolveAdminPath(path) {
   if (path === 'varaukset') return resolved('tilaukset', true, null, null);
+  if (LEGACY_GROUP_PATHS[path]) path = LEGACY_GROUP_PATHS[path];
   const child = GROUP_BY_CHILD.get(path);
   if (child) return resolved(child.group.path, false, child.group.id, child.tab.id);
   const group = GROUP_BY_PATH.get(path);

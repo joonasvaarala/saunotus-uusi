@@ -63,14 +63,13 @@ const ROUTES = [
   { path: 'kalenteri', label: 'Kalenteri', icon: 'calendar', mod: () => loadView('calendar') },
   { path: 'tilaukset', label: 'Tilaukset', labelFn: () => navText('ui.admin.nav.orders'), icon: 'list', mod: () => loadView('orders') },
   { path: 'asiakkaat', label: 'Asiakkaat', icon: 'users', mod: () => loadView('customers') },
-  { path: 'lahjakortit', label: 'Lahjakortit', labelFn: () => navText('ui.admin.nav.giftcards'), icon: 'gift', any: ['giftcards.manage'], mod: () => loadView('lahjakortit') },
-  { path: 'kassa', label: 'Kassa ja talous', labelFn: () => navText('ui.admin.nav.cash_finance'), icon: 'euro', groupId: 'cash', mod: () => loadView('nav-group') },
-  { path: 'tuotteet', label: 'Tuotteet', labelFn: () => navText('ui.admin.nav.products'), icon: 'tag', groupId: 'products', mod: () => loadView('nav-group') },
-  { path: 'koulutukset', label: 'Koulutukset', labelFn: () => navText('ui.admin.nav.trainings'), icon: 'school', mod: () => loadView('koulutukset') },
+  { path: 'lahjakortit', label: 'Lahjakortit ja koodit', labelFn: () => navText('ui.admin.nav.gifts_codes'), icon: 'gift', groupId: 'gifts', mod: () => loadView('nav-group') },
+  { path: 'tarjonta', label: 'Tarjonta', labelFn: () => navText('ui.admin.nav.offering'), icon: 'tag', groupId: 'offering', mod: () => loadView('nav-group') },
+  { path: 'talous', label: 'Talous', labelFn: () => navText('ui.admin.nav.finance'), icon: 'euro', groupId: 'cash', mod: () => loadView('nav-group') },
   { path: 'viestit', label: 'Viestit', icon: 'mail', any: ['messages.edit'], mod: () => loadView('messages') },
-  { path: 'tilat', label: 'Tilat ja sulut', labelFn: () => navText('ui.admin.nav.spaces_blocks'), icon: 'cabin', groupId: 'spaces', mod: () => loadView('nav-group') },
   { path: 'asetukset', label: 'Asetukset', labelFn: () => navText('ui.admin.nav.settings'), icon: 'sliders', groupId: 'settings', mod: () => loadView('nav-group') },
   // Yläpalkin + ja tarkistusmerkki. Eivät ole sivupalkissa, mutta osoitteet #/uusi ja #/tarkista toimivat.
+  { path: 'pikakassa', label: 'Pikakassa', labelFn: () => navText('ui.admin.nav.pos'), icon: 'till', rail: false, any: ['pos.use'], mod: () => loadView('pos') },   // HALL-KUORI-01: yläpalkin Kassa
   { path: 'uusi', label: 'Uusi varaus', icon: 'plus', rail: false, mod: () => loadView('newbooking') },
   { path: 'tarkista', label: 'Tarkista', icon: 'check', rail: false, mod: () => loadView('review') },
 ];
@@ -85,6 +84,8 @@ export async function refs(force = false) {
 
 const allowed = (r) => (r.groupId ? groupAllowed(navGroupById(r.groupId), (p) => ctx.can(p)) : !r.any || r.any.some((p) => ctx.can(p)));
 function drawNav(current) {
+  const pos = $('quick-pos');   // HALL-KUORI-01: Kassa yhden napautuksen päässä joka näkymästä
+  if (pos) { pos.hidden = !ctx.can('pos.use'); pos.setAttribute('aria-current', current === 'pikakassa' ? 'page' : 'false'); }
   $('nav').replaceChildren(...ROUTES.filter((r) => r.rail !== false && allowed(r)).map((r) => h('a', { href: `#/${r.path}`, 'aria-label': r.labelFn ? r.labelFn() : r.label, title: r.labelFn ? r.labelFn() : r.label, 'aria-current': r.path === current ? 'page' : null }, h('span', { class: 'ico', 'aria-hidden': 'true' }, icon(r.icon)), h('span', { class: 'lbl', text: r.labelFn ? r.labelFn() : r.label }))));
   // Pystypalkissa aktiivinen navigaatiolinkki pysyy näkyvillä ilman vaakavieritystä.
   const nav = $('nav'), cur = nav.querySelector('[aria-current]');
@@ -234,7 +235,7 @@ function paintTopBarTexts() {
   attr('quick-search-input', 'placeholder', 'search_placeholder'); attr('quick-search-input', 'aria-label', 'search_label');
   attr('quick-search-results', 'aria-label', 'search_results');
   document.querySelector('label[for=quick-search-input]').textContent = tn('search_label');
-  for (const [id, k] of [['quick-new', 'new_reservation'], ['quick-review', 'review']]) { attr(id, 'aria-label', k); $(id).querySelector('.action-label').textContent = tn(k); }
+  for (const [id, k] of [['quick-new', 'new_reservation'], ['quick-pos', 'pos_quick'], ['quick-review', 'review']]) { attr(id, 'aria-label', k); $(id).querySelector('.action-label').textContent = tn(k); }
   attr('user-menu-toggle', 'aria-label', 'user_menu');
   $('open-shop-label').textContent = tn('open_shop'); $('open-shop-hint').textContent = tn('new_tab');
   const nt = $('nav-toggle'); nt.setAttribute('aria-label', tn(nt.getAttribute('aria-expanded') === 'true' ? 'collapse' : 'expand'));

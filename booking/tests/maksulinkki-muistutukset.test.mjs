@@ -15,7 +15,7 @@ const src = (p) => readFileSync(join(root, p), 'utf8');
 test('navigaatio: Seurattavat maksut on Kassa ja talous -välilehti, oikeus payments.manage', () => {
   assert.equal(NAV_TEXTS.fi['ui.admin.nav.paylink_watch'], 'Seurattavat maksut');
   assert.equal(NAV_TEXTS.en['ui.admin.nav.paylink_watch'], 'Payments to follow');
-  assert.deepEqual(resolveAdminPath('seurattavat-maksut'), { path: 'kassa', legacyReservations: false, groupId: 'cash', tabId: 'seurattavat' });
+  assert.deepEqual(resolveAdminPath('seurattavat-maksut'), { path: 'talous', legacyReservations: false, groupId: 'cash', tabId: 'seurattavat' });
   const cash = navGroupById('cash');
   const can = (list) => (p) => list.includes(p);
   assert.deepEqual(visibleGroupTabs(cash, can(['payments.manage'])).map((t) => t.id), ['talous', 'seurattavat']);

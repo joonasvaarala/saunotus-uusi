@@ -101,8 +101,8 @@ test('Tyylit: ei sinistä focus-rengasta, nav-järjestys: palkin reitit + yläpa
   const js = readFileSync(join(root, 'admin/admin.js'), 'utf8');
   const order = [...js.matchAll(/\{ path: '([^']*)', label:/g)].map((m) => m[1]);
   // Hyväksytty nykyinen ROUTES (main/PR315+): lahjakortit + koulutukset palkissa; tilat/asetukset ryhmäreitteinä.
-  assert.deepEqual(order.slice(0, 11), ['', 'kalenteri', 'tilaukset', 'asiakkaat', 'lahjakortit', 'kassa', 'tuotteet', 'koulutukset', 'viestit', 'tilat', 'asetukset']);
-  assert.deepEqual(order.slice(11), ['uusi', 'tarkista']);
+  assert.deepEqual(order.slice(0, 9), ['', 'kalenteri', 'tilaukset', 'asiakkaat', 'lahjakortit', 'tarjonta', 'talous', 'viestit', 'asetukset']);   // HALL-KUORI-01
+  assert.deepEqual(order.slice(9), ['pikakassa', 'uusi', 'tarkista']);
 });
 
 test('Maksulinkki: paidDefaultFor false; validate vaatii emailin; payload paid=false', () => {
