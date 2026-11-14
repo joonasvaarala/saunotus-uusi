@@ -433,11 +433,17 @@ input[aria-invalid=true],select[aria-invalid=true],textarea[aria-invalid=true]{b
 .resrow.has-arrive{flex-wrap:nowrap;gap:10px}
 .resrow .resmain{flex:1;min-width:0;display:grid;gap:2px}
 .resrow .resmain .meta{justify-content:flex-start}
-.arrive{flex:none;width:44px;height:44px;border-radius:50%;border:2px solid #2E6B3F;background:#fff;color:transparent;display:inline-grid;place-items:center;padding:0;cursor:pointer}
-.arrive:hover{background:#e8f3ea}
-.arrive.on{background:#2E6B3F;color:#fff}
+.arrive-wrap{flex:none;display:inline-flex;align-items:center;gap:6px}
+.arrive{flex:none;min-width:44px;min-height:44px;border-radius:22px;border:2px solid var(--ok);background:#fff;color:var(--ok);font-weight:700;font-size:14px;line-height:1.1;display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:0 14px;cursor:pointer;white-space:nowrap}
+.arrive:hover{background:var(--okbg)}
+.arrive .arrive-tick{display:none}
+.arrive.on{background:var(--ok);color:#fff}
+.arrive.on .arrive-tick{display:inline-flex}
 .arrive[aria-busy=true]{opacity:.7}
 .arrive .icon{display:block}
+.arrive-wrap .ov-menu>summary{min-height:44px;min-width:44px}
+.arrive-wrap .ov-menu-list{left:auto;right:0}
+@media (max-width:480px){.resrow.has-arrive{flex-wrap:wrap}.arrive-wrap{margin-left:auto}}
 .addon-items{display:flex;flex-wrap:wrap;gap:2px 12px}
 .addon-item{display:inline-flex;align-items:center;gap:4px;font-size:14px;color:var(--gold)}
 .addon-item .icon{color:var(--green);flex:none}

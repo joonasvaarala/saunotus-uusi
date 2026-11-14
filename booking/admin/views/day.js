@@ -1,11 +1,11 @@
 // Päivänäkymä: vuorot kapasiteetteineen + varaukset vuoroittain + tapahtumat osallistujineen + päivän tuotto + sulut.
 import { rpc } from '../sb.js';
-import { h, fmtDay, fmtTime, todayHel, addDays, dayStartIso, statusBadge, payBadge, sourceBadge, badge, toast, run, dialog, field, fmtDT, empty, money, countText } from '../ui.js';
+import { h, fmtDay, fmtTime, todayHel, addDays, dayStartIso, arrivalStatusBadge, payBadge, sourceBadge, badge, toast, run, dialog, field, fmtDT, empty, money, countText } from '../ui.js';
 import { formatWhenRange, spansDays } from '../when-range.js';
 import { reservationDialog } from './shared.js';
 import { openOrderView } from '../order-open.js';
 import { icon } from '../icons.js';
-import { sessionKindText, sessionFill, capacityButton, arrivalButton, addonItems, shiftsBar, prepCard } from './dayparts.js';
+import { sessionKindText, sessionFill, capacityButton, arrivalControls, addonItems, shiftsBar, prepCard } from './dayparts.js';
 import { legsList, resourceBadges, spaceBadge } from './legs.js';
 import { optionBadge, optionReminder } from '../options.js';
 import { blockList, blockDialog } from './blocks.js';
@@ -149,8 +149,8 @@ export async function render({ ctx, refs, reload, query }) {
   const open = (r) => openOrderView(r.order_no) || reservationDialog(merged(r), { methods: refs.methods, onChange: reload, refs, can: ctx.can, role: ctx.role });
   const resRow = (r) => { const x = dv.get(r.reservation_id) || {}; const ad = (x.addons && x.addons.length) ? x.addons : (r.addons || []); const src = { source: r.source ?? x.source, external_id: r.external_id ?? x.external_id };
     const kind = x.customer_kind || r.customer_kind; const company = x.company || r.company; const legs = (x.legs && x.legs.length) ? x.legs : (r.legs || []); const space = x.space_code || r.space_code;
-    let stBadge = statusBadge(r.status);
-    const arrive = arrivalButton(r, { can: ctx.can, onState: (st) => { clearDayBundleCache(); const nb = statusBadge(st); stBadge.replaceWith(nb); stBadge = nb; } });
+    let stBadge = arrivalStatusBadge(r.status);
+    const arrive = arrivalControls(r, { can: ctx.can, onState: (st) => { clearDayBundleCache(); const nb = arrivalStatusBadge(st); stBadge.replaceWith(nb); stBadge = nb; } });
     const unpaid = isDayUnpaidHighlight(r);
     return h('li', { class: `resrow ${r.status}${ad.length ? ' has-addons' : ''}${arrive ? ' has-arrive' : ''}${unpaid ? ' unpaid-pay' : ''}`, 'data-testid': unpaid ? 'unpaid-pay' : undefined },
     h('div', { class: 'resmain' }, h('button', { type: 'button', class: 'link', onclick: () => open(r) }, h('strong', { text: r.customer_name || '–' }), ` · ${r.persons} hlö`, kind === 'company' ? [' ', badge('warn', 'Yritys'), company ? ` ${company}` : ''] : null,

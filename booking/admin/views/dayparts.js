@@ -6,6 +6,10 @@ import { roleLabel, shiftClass, NO_ASSIGNEE } from './calendar.js';
 import { sessionFill } from '../day-logic.js';
 import { dayText } from '../day-texts.js';
 import { memoText } from '../day-memos-texts.js';
+import { overflowMenu } from './overflow-menu.js';
+import { confirmAsk } from '../confirm.js';
+import { orderText } from '../orders-texts.js';
+import { arrivalActionsAllowed } from '../reservation-dialog-logic.js';
 
 // ---- vuorokortin otsikko: tyyppi tekstinä ja täyttöaste ----
 // HALL-PAIVA-01: yleinen/yksityinen ei saa näkyä vain reunan värinä; yleisellä vuorolla "6/10" (varatut / enimmäishenkilömäärä, max_persons tulee admin_day_viewn sessions-riveiltä).
@@ -27,14 +31,17 @@ export function capacityButton(s, date, booked) {
 }
 
 // ---- saapunut-nappi ----
+// HALL-PAIVA-02: näkyvä "Saapui"-painike (rasti kun painettu), kiinteä aria-label + aria-pressed ("Saapunut, <nimi>, ei painettu"), tilamerkki "Saapunut".
 // Käyttää admin_set_reservation_status: 'completed' = saapunut (asettaa checkin_at), takaisin 'confirmed'. Oikeus bookings.manage.
+// "Ei saapunut" (no_show) on rivin ⋯-valikossa, sama vahvistus ja tekstit kuin tilausnäkymässä (HALL-TILAUS-01).
 export const ARRIVE_STATES = ['pending', 'confirmed', 'completed'];
+export const ARRIVE_LABEL = 'Saapui';
+export const arriveAriaLabel = (r) => `Saapunut, ${r.customer_name || `#${r.order_no}`}`;
 export function arrivalButton(r, { can, onState } = {}) {
   if (can && !can('bookings.manage')) return null;
   if (!ARRIVE_STATES.includes(r.status)) return null;
-  const name = r.customer_name || `#${r.order_no}`;
-  const b = h('button', { type: 'button', class: 'arrive', 'data-testid': 'arrive' }, icon('tick', 22));
-  const paint = () => { const on = r.status === 'completed'; b.setAttribute('aria-pressed', String(on)); b.setAttribute('aria-label', on ? `Saapunut: ${name}` : `Merkitse saapuneeksi: ${name}`); b.title = on ? 'Saapunut (paina peruaksesi)' : 'Merkitse saapuneeksi'; b.classList.toggle('on', on); };
+  const b = h('button', { type: 'button', class: 'arrive', 'data-testid': 'arrive', 'aria-label': arriveAriaLabel(r) }, h('span', { class: 'arrive-tick', 'aria-hidden': 'true' }, icon('tick', 18)), h('span', { class: 'arrive-txt', text: ARRIVE_LABEL }));
+  const paint = () => { const on = r.status === 'completed'; b.setAttribute('aria-pressed', String(on)); b.title = on ? 'Saapunut (paina peruaksesi)' : 'Merkitse saapuneeksi'; b.classList.toggle('on', on); };
   paint();
   let busy = false;
   b.addEventListener('click', async () => {
@@ -45,6 +52,29 @@ export function arrivalButton(r, { can, onState } = {}) {
     finally { busy = false; b.removeAttribute('aria-busy'); }
   });
   return b;
+}
+
+// Päivänäkymän saapumisalue: Saapui-painike + ⋯-valikko, jossa "Ei saapunut" (vahvistetulle varaukselle varauspäivästä alkaen).
+export const NO_SHOW_LABEL = 'Ei saapunut…';
+export function arrivalControls(r, { can, onState, now = new Date() } = {}) {
+  const btn = arrivalButton(r, { can, onState: (st) => { renderMenu(); onState?.(st); } });
+  if (!btn) return null;
+  const wrap = h('div', { class: 'arrive-wrap', 'data-testid': 'arrive-wrap' }, btn);
+  let menu = null;
+  function renderMenu() {
+    menu?.remove(); menu = null;
+    if (!arrivalActionsAllowed(r, now)) return;
+    menu = overflowMenu([['noShow', NO_SHOW_LABEL, async () => {
+      if (!(await confirmAsk(orderText('ui.admin.res.no_show_text'), { title: orderText('ui.admin.res.no_show_title'), yes: orderText('ui.admin.res.no_show_submit') }))) return;
+      try {
+        await rpc('admin_set_reservation_status', { p_reservation_id: r.reservation_id, p_status: 'no_show', p_reason: null });
+        r.status = 'no_show'; toast('Merkitty: ei saapunut'); onState?.(r.status); wrap.remove();   // tila ei ole enää saapumismerkittävä
+      } catch (e) { toast(errMsg(e), 'err'); }
+    }]], `Lisätoiminnot: ${r.customer_name || `#${r.order_no}`}`, 'arrive-more', { prefer: 'end' });
+    wrap.append(menu);
+  }
+  renderMenu();
+  return wrap;
 }
 
 // ---- lisäpalveluikonit ----
