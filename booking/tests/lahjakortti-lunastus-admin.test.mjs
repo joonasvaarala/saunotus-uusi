@@ -166,7 +166,8 @@ test('kytkennät: Tarkista-osio, tilauksen ikkuna, Talous-tilaus, Procountor-til
   const s = rd('admin/views/settings.js');
   for (const k of ['partner_voucher_kokemuskauppa', 'partner_voucher_offerilla', 'partner_voucher_elamyslahjat']) assert.match(s, new RegExp(`\\['${k}', 'method_${k}'\\]`));
   assert.match(s, /\['partner_voucher', 'method_partner_voucher_fallback'\]/, 'vanha yhteinen tili jää varatiliksi');
-  assert.match(s, /redeemUrlsCard\(\)/); assert.match(s, /VCR_RPC\.setUrls/);
+  const cards = rd('admin/settings-cards.js');   // HALL-ASETUKSET-01: lunastussivut asuvat Lahjakortit-näkymän asetuksissa
+  assert.match(cards, /redeemUrlsCard\(\)/); assert.match(cards, /VCR_RPC\.setUrls/);
   assert.match(rd('../scripts/build-pages.mjs'), /'voucher-redeem-logic\.js', 'voucher-redeem-texts\.js', 'voucher-redeem-mock\.js', 'views\/voucher-redeem\.js'/);
   assert.match(rd('admin/views/talous-ui.js'), /'partner_voucher_kokemuskauppa', 'partner_voucher_offerilla', 'partner_voucher_elamyslahjat'/);
 });

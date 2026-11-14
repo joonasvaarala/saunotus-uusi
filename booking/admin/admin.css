@@ -882,6 +882,27 @@ html.pos-modal-open,body.pos-modal-open{overflow:hidden}
 .set-page .set-save{margin-top:4px}
 .set-page .linkrow{display:flex;align-items:center;min-height:44px;font-weight:600}
 @media(max-width:899px){.set-page .set-save .btn{width:100%}}
+/* HALL-ASETUKSET-01: yksi kiinnitetty tallennuspalkki, kiinni olevat Järjestelmä-osiot, ei vaakavieritystä kapealla */
+.set-page,.set-page .card,.set-page .stack{min-width:0;max-width:100%}
+.set-page .fld input,.set-page .fld select{max-width:100%}
+.set-page .set-group{display:grid;gap:10px}
+.set-page .set-group+.set-group{margin-top:16px;padding-top:12px;border-top:1px solid var(--line)}
+.set-page .set-group h3{margin:0}
+.set-page .set-fold>summary{display:flex;align-items:center;gap:8px;cursor:pointer;min-height:44px;list-style:none}
+.set-page .set-fold>summary::-webkit-details-marker{display:none}
+.set-page .set-fold>summary::before{content:"\25B8";color:var(--muted);flex:none}
+.set-page .set-fold[open]>summary::before{content:"\25BE"}
+.set-page .set-fold>summary h2{margin:0;font-size:18px}
+.set-page .set-fold>summary:focus-visible{outline:var(--focus);outline-offset:2px}
+.set-page .set-fold[open]>summary{margin-bottom:6px}
+.set-page .set-fold .card{border:0;box-shadow:none;padding:0;background:none;margin:0 0 12px}
+.set-page .set-fold .stat,.set-page .set-fold .fld{overflow-wrap:anywhere}
+.set-bar{position:sticky;bottom:calc(var(--navh,0px) + env(safe-area-inset-bottom));z-index:15;display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;justify-content:space-between;margin-top:12px;padding:10px 12px;background:#fff;border:1px solid var(--line);border-top:3px solid var(--green);border-radius:12px;box-shadow:0 -6px 16px rgba(43,58,48,.14)}
+.set-bar[hidden]{display:none}
+.set-bar .set-bar-count{font-weight:600;color:var(--ink)}
+.set-bar .btn{min-height:44px}
+@media(max-width:480px){.set-bar{flex-direction:column;align-items:stretch}.set-bar .row{display:grid;grid-template-columns:1fr 1fr}}
+.set-embedded{margin-top:18px}
 body.shot #shell{display:flex;flex-direction:column;min-height:0}
 body.shot .top{position:static;order:1}
 body.shot main{order:2;padding-bottom:16px}

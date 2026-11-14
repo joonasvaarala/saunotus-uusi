@@ -171,7 +171,8 @@ test('tekstit: ui.admin.nav.* FI+EN sanakirjassa ja pending-import-38/88:ssa, ei
   const rows118 = JSON.parse(readFileSync(join(root, '../content/site-texts.pending-import-118.json'), 'utf8')).filter((r) => r.key.startsWith('ui.admin.nav.'));
   const rows126 = JSON.parse(readFileSync(join(root, '../content/site-texts.pending-import-126.json'), 'utf8')).filter((r) => r.key.startsWith('ui.admin.nav.'));   // Koulutukset
   const rows151 = JSON.parse(readFileSync(join(root, '../content/site-texts.pending-import-151.json'), 'utf8'));   // HALL-KUORI-01
-  const rows = [...rows38, ...rows88, ...rows102, ...rows105, ...rows118, ...rows126, ...rows151];
+  const rows167 = JSON.parse(readFileSync(join(root, '../content/site-texts.pending-import-167.json'), 'utf8')).filter((r) => r.key.startsWith('ui.admin.nav.'));   // HALL-ASETUKSET-01
+  const rows = [...rows38, ...rows88, ...rows102, ...rows105, ...rows118, ...rows126, ...rows151, ...rows167];
   assert.deepEqual(Object.keys(NAV_TEXTS.fi).sort(), Object.keys(NAV_TEXTS.en).sort());
   assert.equal(rows.length, Object.keys(NAV_TEXTS.fi).length * 2);
   const seen = new Set();
@@ -189,7 +190,7 @@ test('tekstit: ui.admin.nav.* FI+EN sanakirjassa ja pending-import-38/88:ssa, ei
   for (const r of rows38) assert.equal(newKeys.has(r.key), false, r.key);
   const taken = new Set();
   for (const f of readdirSync(join(root, '../content'))) {
-    if (!/^site-texts\.(pending-import-(?!38\.|88\.|102\.|105\.|118\.|126\.|151\.)|imported)/.test(f) || !f.endsWith('.json')) continue;
+    if (!/^site-texts\.(pending-import-(?!38\.|88\.|102\.|105\.|118\.|126\.|151\.|167\.)|imported)/.test(f) || !f.endsWith('.json')) continue;
     const j = JSON.parse(readFileSync(join(root, '../content', f), 'utf8'));
     for (const r of Array.isArray(j) ? j : j.texts || []) taken.add(`${r.key}|${r.lang}`);
   }
@@ -246,7 +247,8 @@ test('ryhmät: vanhat osoitteet avaavat oikean välilehden, oikeus rajaa välile
   assert.equal(groupAllowed(gifts, can([])), false);
   const settings = navGroupById('settings');
   assert.deepEqual(visibleGroupTabs(settings, can(['staff.manage'])).map((t) => t.id), ['kayttajat']);
-  assert.deepEqual(visibleGroupTabs(settings, can(['pos.use'])).map((t) => t.id), ['asetukset']);
+  assert.deepEqual(visibleGroupTabs(settings, can(['pos.use'])).map((t) => t.id), [], 'HALL-ASETUKSET-01: QR-tulostus siirtyi Tuotteisiin, pos.use ei enää avaa Asetuksia');
+  assert.deepEqual(visibleGroupTabs(settings, can(['settings.edit'])).map((t) => t.id), ['asetukset']);
   assert.match(src('admin/views/nav-group.js'), /testid: `nav-group-tab-\$\{tab\.id\}`/);   // YHT-03: ui.js tabs()
   assert.match(src('admin/views/nav-group.js'), /href: `#\/\$\{tab\.path\}`/);
 });
