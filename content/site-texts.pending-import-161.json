@@ -1,0 +1,1096 @@
+[
+  {
+    "key": "ui.admin.customer_view.save",
+    "lang": "fi",
+    "text": "Tallenna",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASIAKKAAT-01: asiakasnäkymän kortit muokattaviksi paikallaan (yhteystiedot, kieli, tyyppi, osoite, lupa, muistiinpano, vuosikortti)"
+  },
+  {
+    "key": "ui.admin.customer_view.save",
+    "lang": "en",
+    "text": "Save",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASIAKKAAT-01: asiakasnäkymän kortit muokattaviksi paikallaan (yhteystiedot, kieli, tyyppi, osoite, lupa, muistiinpano, vuosikortti)"
+  },
+  {
+    "key": "ui.admin.customer_view.cancel",
+    "lang": "fi",
+    "text": "Peruuta",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASIAKKAAT-01: asiakasnäkymän kortit muokattaviksi paikallaan (yhteystiedot, kieli, tyyppi, osoite, lupa, muistiinpano, vuosikortti)"
+  },
+  {
+    "key": "ui.admin.customer_view.cancel",
+    "lang": "en",
+    "text": "Cancel",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASIAKKAAT-01: asiakasnäkymän kortit muokattaviksi paikallaan (yhteystiedot, kieli, tyyppi, osoite, lupa, muistiinpano, vuosikortti)"
+  },
+  {
+    "key": "ui.admin.customer_view.saved",
+    "lang": "fi",
+    "text": "Asiakkaan tiedot tallennettu.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASIAKKAAT-01: asiakasnäkymän kortit muokattaviksi paikallaan (yhteystiedot, kieli, tyyppi, osoite, lupa, muistiinpano, vuosikortti)"
+  },
+  {
+    "key": "ui.admin.customer_view.saved",
+    "lang": "en",
+    "text": "Customer details saved.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASIAKKAAT-01: asiakasnäkymän kortit muokattaviksi paikallaan (yhteystiedot, kieli, tyyppi, osoite, lupa, muistiinpano, vuosikortti)"
+  },
+  {
+    "key": "ui.admin.customer_view.no_changes",
+    "lang": "fi",
+    "text": "Ei muutoksia.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASIAKKAAT-01: asiakasnäkymän kortit muokattaviksi paikallaan (yhteystiedot, kieli, tyyppi, osoite, lupa, muistiinpano, vuosikortti)"
+  },
+  {
+    "key": "ui.admin.customer_view.no_changes",
+    "lang": "en",
+    "text": "No changes.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASIAKKAAT-01: asiakasnäkymän kortit muokattaviksi paikallaan (yhteystiedot, kieli, tyyppi, osoite, lupa, muistiinpano, vuosikortti)"
+  },
+  {
+    "key": "ui.admin.customer_view.contact_edit_title",
+    "lang": "fi",
+    "text": "Muokkaa yhteystietoja",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASIAKKAAT-01: asiakasnäkymän kortit muokattaviksi paikallaan (yhteystiedot, kieli, tyyppi, osoite, lupa, muistiinpano, vuosikortti)"
+  },
+  {
+    "key": "ui.admin.customer_view.contact_edit_title",
+    "lang": "en",
+    "text": "Edit contact details",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASIAKKAAT-01: asiakasnäkymän kortit muokattaviksi paikallaan (yhteystiedot, kieli, tyyppi, osoite, lupa, muistiinpano, vuosikortti)"
+  },
+  {
+    "key": "ui.admin.customer_view.name",
+    "lang": "fi",
+    "text": "Nimi",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASIAKKAAT-01: asiakasnäkymän kortit muokattaviksi paikallaan (yhteystiedot, kieli, tyyppi, osoite, lupa, muistiinpano, vuosikortti)"
+  },
+  {
+    "key": "ui.admin.customer_view.name",
+    "lang": "en",
+    "text": "Name",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASIAKKAAT-01: asiakasnäkymän kortit muokattaviksi paikallaan (yhteystiedot, kieli, tyyppi, osoite, lupa, muistiinpano, vuosikortti)"
+  },
+  {
+    "key": "ui.admin.customer_view.contact_name",
+    "lang": "fi",
+    "text": "Yhteyshenkilön nimi",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASIAKKAAT-01: asiakasnäkymän kortit muokattaviksi paikallaan (yhteystiedot, kieli, tyyppi, osoite, lupa, muistiinpano, vuosikortti)"
+  },
+  {
+    "key": "ui.admin.customer_view.contact_name",
+    "lang": "en",
+    "text": "Contact person name",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASIAKKAAT-01: asiakasnäkymän kortit muokattaviksi paikallaan (yhteystiedot, kieli, tyyppi, osoite, lupa, muistiinpano, vuosikortti)"
+  },
+  {
+    "key": "ui.admin.customer_view.company_name",
+    "lang": "fi",
+    "text": "Yrityksen nimi",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASIAKKAAT-01: asiakasnäkymän kortit muokattaviksi paikallaan (yhteystiedot, kieli, tyyppi, osoite, lupa, muistiinpano, vuosikortti)"
+  },
+  {
+    "key": "ui.admin.customer_view.company_name",
+    "lang": "en",
+    "text": "Company name",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASIAKKAAT-01: asiakasnäkymän kortit muokattaviksi paikallaan (yhteystiedot, kieli, tyyppi, osoite, lupa, muistiinpano, vuosikortti)"
+  },
+  {
+    "key": "ui.admin.customer_view.company_name_optional",
+    "lang": "fi",
+    "text": "Yritys (valinnainen)",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASIAKKAAT-01: asiakasnäkymän kortit muokattaviksi paikallaan (yhteystiedot, kieli, tyyppi, osoite, lupa, muistiinpano, vuosikortti)"
+  },
+  {
+    "key": "ui.admin.customer_view.company_name_optional",
+    "lang": "en",
+    "text": "Company (optional)",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASIAKKAAT-01: asiakasnäkymän kortit muokattaviksi paikallaan (yhteystiedot, kieli, tyyppi, osoite, lupa, muistiinpano, vuosikortti)"
+  },
+  {
+    "key": "ui.admin.customer_view.street",
+    "lang": "fi",
+    "text": "Katuosoite",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASIAKKAAT-01: asiakasnäkymän kortit muokattaviksi paikallaan (yhteystiedot, kieli, tyyppi, osoite, lupa, muistiinpano, vuosikortti)"
+  },
+  {
+    "key": "ui.admin.customer_view.street",
+    "lang": "en",
+    "text": "Street address",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASIAKKAAT-01: asiakasnäkymän kortit muokattaviksi paikallaan (yhteystiedot, kieli, tyyppi, osoite, lupa, muistiinpano, vuosikortti)"
+  },
+  {
+    "key": "ui.admin.customer_view.zip",
+    "lang": "fi",
+    "text": "Postinumero",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASIAKKAAT-01: asiakasnäkymän kortit muokattaviksi paikallaan (yhteystiedot, kieli, tyyppi, osoite, lupa, muistiinpano, vuosikortti)"
+  },
+  {
+    "key": "ui.admin.customer_view.zip",
+    "lang": "en",
+    "text": "Postcode",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASIAKKAAT-01: asiakasnäkymän kortit muokattaviksi paikallaan (yhteystiedot, kieli, tyyppi, osoite, lupa, muistiinpano, vuosikortti)"
+  },
+  {
+    "key": "ui.admin.customer_view.city",
+    "lang": "fi",
+    "text": "Postitoimipaikka",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASIAKKAAT-01: asiakasnäkymän kortit muokattaviksi paikallaan (yhteystiedot, kieli, tyyppi, osoite, lupa, muistiinpano, vuosikortti)"
+  },
+  {
+    "key": "ui.admin.customer_view.city",
+    "lang": "en",
+    "text": "City",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASIAKKAAT-01: asiakasnäkymän kortit muokattaviksi paikallaan (yhteystiedot, kieli, tyyppi, osoite, lupa, muistiinpano, vuosikortti)"
+  },
+  {
+    "key": "ui.admin.customer_view.einvoice_address",
+    "lang": "fi",
+    "text": "Verkkolaskuosoite (OVT)",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASIAKKAAT-01: asiakasnäkymän kortit muokattaviksi paikallaan (yhteystiedot, kieli, tyyppi, osoite, lupa, muistiinpano, vuosikortti)"
+  },
+  {
+    "key": "ui.admin.customer_view.einvoice_address",
+    "lang": "en",
+    "text": "E-invoice address (OVT)",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASIAKKAAT-01: asiakasnäkymän kortit muokattaviksi paikallaan (yhteystiedot, kieli, tyyppi, osoite, lupa, muistiinpano, vuosikortti)"
+  },
+  {
+    "key": "ui.admin.customer_view.einvoice_operator",
+    "lang": "fi",
+    "text": "Verkkolaskuoperaattorin välittäjätunnus",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASIAKKAAT-01: asiakasnäkymän kortit muokattaviksi paikallaan (yhteystiedot, kieli, tyyppi, osoite, lupa, muistiinpano, vuosikortti)"
+  },
+  {
+    "key": "ui.admin.customer_view.einvoice_operator",
+    "lang": "en",
+    "text": "E-invoice operator ID",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASIAKKAAT-01: asiakasnäkymän kortit muokattaviksi paikallaan (yhteystiedot, kieli, tyyppi, osoite, lupa, muistiinpano, vuosikortti)"
+  },
+  {
+    "key": "ui.admin.customer_view.invoice_reference",
+    "lang": "fi",
+    "text": "Viite / tilausnumero (oletus uusille tilauksille)",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASIAKKAAT-01: asiakasnäkymän kortit muokattaviksi paikallaan (yhteystiedot, kieli, tyyppi, osoite, lupa, muistiinpano, vuosikortti)"
+  },
+  {
+    "key": "ui.admin.customer_view.invoice_reference",
+    "lang": "en",
+    "text": "Reference / order number (default for new orders)",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASIAKKAAT-01: asiakasnäkymän kortit muokattaviksi paikallaan (yhteystiedot, kieli, tyyppi, osoite, lupa, muistiinpano, vuosikortti)"
+  },
+  {
+    "key": "ui.admin.customer_view.address_label",
+    "lang": "fi",
+    "text": "Osoite",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASIAKKAAT-01: asiakasnäkymän kortit muokattaviksi paikallaan (yhteystiedot, kieli, tyyppi, osoite, lupa, muistiinpano, vuosikortti)"
+  },
+  {
+    "key": "ui.admin.customer_view.address_label",
+    "lang": "en",
+    "text": "Address",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASIAKKAAT-01: asiakasnäkymän kortit muokattaviksi paikallaan (yhteystiedot, kieli, tyyppi, osoite, lupa, muistiinpano, vuosikortti)"
+  },
+  {
+    "key": "ui.admin.customer_view.einvoice_label",
+    "lang": "fi",
+    "text": "Verkkolasku",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASIAKKAAT-01: asiakasnäkymän kortit muokattaviksi paikallaan (yhteystiedot, kieli, tyyppi, osoite, lupa, muistiinpano, vuosikortti)"
+  },
+  {
+    "key": "ui.admin.customer_view.einvoice_label",
+    "lang": "en",
+    "text": "E-invoice",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASIAKKAAT-01: asiakasnäkymän kortit muokattaviksi paikallaan (yhteystiedot, kieli, tyyppi, osoite, lupa, muistiinpano, vuosikortti)"
+  },
+  {
+    "key": "ui.admin.customer_view.reference_label",
+    "lang": "fi",
+    "text": "Viite",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASIAKKAAT-01: asiakasnäkymän kortit muokattaviksi paikallaan (yhteystiedot, kieli, tyyppi, osoite, lupa, muistiinpano, vuosikortti)"
+  },
+  {
+    "key": "ui.admin.customer_view.reference_label",
+    "lang": "en",
+    "text": "Reference",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASIAKKAAT-01: asiakasnäkymän kortit muokattaviksi paikallaan (yhteystiedot, kieli, tyyppi, osoite, lupa, muistiinpano, vuosikortti)"
+  },
+  {
+    "key": "ui.admin.customer_view.lang_sv",
+    "lang": "fi",
+    "text": "ruotsi",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASIAKKAAT-01: asiakasnäkymän kortit muokattaviksi paikallaan (yhteystiedot, kieli, tyyppi, osoite, lupa, muistiinpano, vuosikortti)"
+  },
+  {
+    "key": "ui.admin.customer_view.lang_sv",
+    "lang": "en",
+    "text": "Swedish",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASIAKKAAT-01: asiakasnäkymän kortit muokattaviksi paikallaan (yhteystiedot, kieli, tyyppi, osoite, lupa, muistiinpano, vuosikortti)"
+  },
+  {
+    "key": "ui.admin.customer_view.kind_hint",
+    "lang": "fi",
+    "text": "Yritysasiakkaalle tarvitaan yrityksen nimi, y-tunnus ja osoite.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASIAKKAAT-01: asiakasnäkymän kortit muokattaviksi paikallaan (yhteystiedot, kieli, tyyppi, osoite, lupa, muistiinpano, vuosikortti)"
+  },
+  {
+    "key": "ui.admin.customer_view.kind_hint",
+    "lang": "en",
+    "text": "A company customer needs a company name, business ID and address.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASIAKKAAT-01: asiakasnäkymän kortit muokattaviksi paikallaan (yhteystiedot, kieli, tyyppi, osoite, lupa, muistiinpano, vuosikortti)"
+  },
+  {
+    "key": "ui.admin.customer_view.err_name",
+    "lang": "fi",
+    "text": "Anna nimi.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASIAKKAAT-01: asiakasnäkymän kortit muokattaviksi paikallaan (yhteystiedot, kieli, tyyppi, osoite, lupa, muistiinpano, vuosikortti)"
+  },
+  {
+    "key": "ui.admin.customer_view.err_name",
+    "lang": "en",
+    "text": "Enter a name.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASIAKKAAT-01: asiakasnäkymän kortit muokattaviksi paikallaan (yhteystiedot, kieli, tyyppi, osoite, lupa, muistiinpano, vuosikortti)"
+  },
+  {
+    "key": "ui.admin.customer_view.err_email",
+    "lang": "fi",
+    "text": "Tarkista sähköpostiosoite.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASIAKKAAT-01: asiakasnäkymän kortit muokattaviksi paikallaan (yhteystiedot, kieli, tyyppi, osoite, lupa, muistiinpano, vuosikortti)"
+  },
+  {
+    "key": "ui.admin.customer_view.err_email",
+    "lang": "en",
+    "text": "Check the email address.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASIAKKAAT-01: asiakasnäkymän kortit muokattaviksi paikallaan (yhteystiedot, kieli, tyyppi, osoite, lupa, muistiinpano, vuosikortti)"
+  },
+  {
+    "key": "ui.admin.customer_view.err_phone",
+    "lang": "fi",
+    "text": "Tarkista puhelinnumero.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASIAKKAAT-01: asiakasnäkymän kortit muokattaviksi paikallaan (yhteystiedot, kieli, tyyppi, osoite, lupa, muistiinpano, vuosikortti)"
+  },
+  {
+    "key": "ui.admin.customer_view.err_phone",
+    "lang": "en",
+    "text": "Check the phone number.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASIAKKAAT-01: asiakasnäkymän kortit muokattaviksi paikallaan (yhteystiedot, kieli, tyyppi, osoite, lupa, muistiinpano, vuosikortti)"
+  },
+  {
+    "key": "ui.admin.customer_view.err_company",
+    "lang": "fi",
+    "text": "Anna yrityksen nimi.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASIAKKAAT-01: asiakasnäkymän kortit muokattaviksi paikallaan (yhteystiedot, kieli, tyyppi, osoite, lupa, muistiinpano, vuosikortti)"
+  },
+  {
+    "key": "ui.admin.customer_view.err_company",
+    "lang": "en",
+    "text": "Enter the company name.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASIAKKAAT-01: asiakasnäkymän kortit muokattaviksi paikallaan (yhteystiedot, kieli, tyyppi, osoite, lupa, muistiinpano, vuosikortti)"
+  },
+  {
+    "key": "ui.admin.customer_view.err_bid",
+    "lang": "fi",
+    "text": "Tarkista y-tunnus (muoto 1234567-8).",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASIAKKAAT-01: asiakasnäkymän kortit muokattaviksi paikallaan (yhteystiedot, kieli, tyyppi, osoite, lupa, muistiinpano, vuosikortti)"
+  },
+  {
+    "key": "ui.admin.customer_view.err_bid",
+    "lang": "en",
+    "text": "Check the business ID (format 1234567-8).",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASIAKKAAT-01: asiakasnäkymän kortit muokattaviksi paikallaan (yhteystiedot, kieli, tyyppi, osoite, lupa, muistiinpano, vuosikortti)"
+  },
+  {
+    "key": "ui.admin.customer_view.err_street",
+    "lang": "fi",
+    "text": "Anna katuosoite.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASIAKKAAT-01: asiakasnäkymän kortit muokattaviksi paikallaan (yhteystiedot, kieli, tyyppi, osoite, lupa, muistiinpano, vuosikortti)"
+  },
+  {
+    "key": "ui.admin.customer_view.err_street",
+    "lang": "en",
+    "text": "Enter the street address.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASIAKKAAT-01: asiakasnäkymän kortit muokattaviksi paikallaan (yhteystiedot, kieli, tyyppi, osoite, lupa, muistiinpano, vuosikortti)"
+  },
+  {
+    "key": "ui.admin.customer_view.err_zip",
+    "lang": "fi",
+    "text": "Postinumerossa on viisi numeroa.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASIAKKAAT-01: asiakasnäkymän kortit muokattaviksi paikallaan (yhteystiedot, kieli, tyyppi, osoite, lupa, muistiinpano, vuosikortti)"
+  },
+  {
+    "key": "ui.admin.customer_view.err_zip",
+    "lang": "en",
+    "text": "The postcode has five digits.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASIAKKAAT-01: asiakasnäkymän kortit muokattaviksi paikallaan (yhteystiedot, kieli, tyyppi, osoite, lupa, muistiinpano, vuosikortti)"
+  },
+  {
+    "key": "ui.admin.customer_view.err_city",
+    "lang": "fi",
+    "text": "Anna postitoimipaikka.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASIAKKAAT-01: asiakasnäkymän kortit muokattaviksi paikallaan (yhteystiedot, kieli, tyyppi, osoite, lupa, muistiinpano, vuosikortti)"
+  },
+  {
+    "key": "ui.admin.customer_view.err_city",
+    "lang": "en",
+    "text": "Enter the city.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASIAKKAAT-01: asiakasnäkymän kortit muokattaviksi paikallaan (yhteystiedot, kieli, tyyppi, osoite, lupa, muistiinpano, vuosikortti)"
+  },
+  {
+    "key": "ui.admin.customer_view.err_einvoice",
+    "lang": "fi",
+    "text": "Anna verkkolaskuosoite ja välittäjätunnus yhdessä tai jätä molemmat tyhjiksi.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASIAKKAAT-01: asiakasnäkymän kortit muokattaviksi paikallaan (yhteystiedot, kieli, tyyppi, osoite, lupa, muistiinpano, vuosikortti)"
+  },
+  {
+    "key": "ui.admin.customer_view.err_einvoice",
+    "lang": "en",
+    "text": "Enter the e-invoice address and operator ID together, or leave both empty.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASIAKKAAT-01: asiakasnäkymän kortit muokattaviksi paikallaan (yhteystiedot, kieli, tyyppi, osoite, lupa, muistiinpano, vuosikortti)"
+  },
+  {
+    "key": "ui.admin.customer_view.consent_switch_on",
+    "lang": "fi",
+    "text": "Markkinointilupa on päällä. Kytke pois napauttamalla.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASIAKKAAT-01: asiakasnäkymän kortit muokattaviksi paikallaan (yhteystiedot, kieli, tyyppi, osoite, lupa, muistiinpano, vuosikortti)"
+  },
+  {
+    "key": "ui.admin.customer_view.consent_switch_on",
+    "lang": "en",
+    "text": "Marketing consent is on. Tap to switch it off.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASIAKKAAT-01: asiakasnäkymän kortit muokattaviksi paikallaan (yhteystiedot, kieli, tyyppi, osoite, lupa, muistiinpano, vuosikortti)"
+  },
+  {
+    "key": "ui.admin.customer_view.consent_switch_off",
+    "lang": "fi",
+    "text": "Markkinointilupa ei ole päällä. Kytke päälle napauttamalla.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASIAKKAAT-01: asiakasnäkymän kortit muokattaviksi paikallaan (yhteystiedot, kieli, tyyppi, osoite, lupa, muistiinpano, vuosikortti)"
+  },
+  {
+    "key": "ui.admin.customer_view.consent_switch_off",
+    "lang": "en",
+    "text": "Marketing consent is off. Tap to switch it on.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASIAKKAAT-01: asiakasnäkymän kortit muokattaviksi paikallaan (yhteystiedot, kieli, tyyppi, osoite, lupa, muistiinpano, vuosikortti)"
+  },
+  {
+    "key": "ui.admin.customer_view.consent_on_done",
+    "lang": "fi",
+    "text": "Markkinointilupa kirjattu (lähde: admin).",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASIAKKAAT-01: asiakasnäkymän kortit muokattaviksi paikallaan (yhteystiedot, kieli, tyyppi, osoite, lupa, muistiinpano, vuosikortti)"
+  },
+  {
+    "key": "ui.admin.customer_view.consent_on_done",
+    "lang": "en",
+    "text": "Marketing consent recorded (source: admin).",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASIAKKAAT-01: asiakasnäkymän kortit muokattaviksi paikallaan (yhteystiedot, kieli, tyyppi, osoite, lupa, muistiinpano, vuosikortti)"
+  },
+  {
+    "key": "ui.admin.customer_view.consent_off_done",
+    "lang": "fi",
+    "text": "Markkinointilupa poistettu.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASIAKKAAT-01: asiakasnäkymän kortit muokattaviksi paikallaan (yhteystiedot, kieli, tyyppi, osoite, lupa, muistiinpano, vuosikortti)"
+  },
+  {
+    "key": "ui.admin.customer_view.consent_off_done",
+    "lang": "en",
+    "text": "Marketing consent removed.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASIAKKAAT-01: asiakasnäkymän kortit muokattaviksi paikallaan (yhteystiedot, kieli, tyyppi, osoite, lupa, muistiinpano, vuosikortti)"
+  },
+  {
+    "key": "ui.admin.customer_view.notes_add",
+    "lang": "fi",
+    "text": "Lisää muistiinpano",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASIAKKAAT-01: asiakasnäkymän kortit muokattaviksi paikallaan (yhteystiedot, kieli, tyyppi, osoite, lupa, muistiinpano, vuosikortti)"
+  },
+  {
+    "key": "ui.admin.customer_view.notes_add",
+    "lang": "en",
+    "text": "Add a note",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASIAKKAAT-01: asiakasnäkymän kortit muokattaviksi paikallaan (yhteystiedot, kieli, tyyppi, osoite, lupa, muistiinpano, vuosikortti)"
+  },
+  {
+    "key": "ui.admin.customer_view.notes_label",
+    "lang": "fi",
+    "text": "Muistiinpano asiakkaasta (sisäinen)",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASIAKKAAT-01: asiakasnäkymän kortit muokattaviksi paikallaan (yhteystiedot, kieli, tyyppi, osoite, lupa, muistiinpano, vuosikortti)"
+  },
+  {
+    "key": "ui.admin.customer_view.notes_label",
+    "lang": "en",
+    "text": "Note about the customer (internal)",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASIAKKAAT-01: asiakasnäkymän kortit muokattaviksi paikallaan (yhteystiedot, kieli, tyyppi, osoite, lupa, muistiinpano, vuosikortti)"
+  },
+  {
+    "key": "ui.admin.customer_view.notes_saved",
+    "lang": "fi",
+    "text": "Muistiinpano tallennettu.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASIAKKAAT-01: asiakasnäkymän kortit muokattaviksi paikallaan (yhteystiedot, kieli, tyyppi, osoite, lupa, muistiinpano, vuosikortti)"
+  },
+  {
+    "key": "ui.admin.customer_view.notes_saved",
+    "lang": "en",
+    "text": "Note saved.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASIAKKAAT-01: asiakasnäkymän kortit muokattaviksi paikallaan (yhteystiedot, kieli, tyyppi, osoite, lupa, muistiinpano, vuosikortti)"
+  },
+  {
+    "key": "ui.admin.customer_view.new_booking",
+    "lang": "fi",
+    "text": "Uusi varaus tälle asiakkaalle",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASIAKKAAT-01: asiakasnäkymän kortit muokattaviksi paikallaan (yhteystiedot, kieli, tyyppi, osoite, lupa, muistiinpano, vuosikortti)"
+  },
+  {
+    "key": "ui.admin.customer_view.new_booking",
+    "lang": "en",
+    "text": "New booking for this customer",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASIAKKAAT-01: asiakasnäkymän kortit muokattaviksi paikallaan (yhteystiedot, kieli, tyyppi, osoite, lupa, muistiinpano, vuosikortti)"
+  },
+  {
+    "key": "ui.admin.customer_view.annual_none",
+    "lang": "fi",
+    "text": "Ei vuosikorttia.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASIAKKAAT-01: asiakasnäkymän kortit muokattaviksi paikallaan (yhteystiedot, kieli, tyyppi, osoite, lupa, muistiinpano, vuosikortti)"
+  },
+  {
+    "key": "ui.admin.customer_view.annual_none",
+    "lang": "en",
+    "text": "No annual card.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASIAKKAAT-01: asiakasnäkymän kortit muokattaviksi paikallaan (yhteystiedot, kieli, tyyppi, osoite, lupa, muistiinpano, vuosikortti)"
+  },
+  {
+    "key": "ui.admin.customer_view.annual_active",
+    "lang": "fi",
+    "text": "Voimassa",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASIAKKAAT-01: asiakasnäkymän kortit muokattaviksi paikallaan (yhteystiedot, kieli, tyyppi, osoite, lupa, muistiinpano, vuosikortti)"
+  },
+  {
+    "key": "ui.admin.customer_view.annual_active",
+    "lang": "en",
+    "text": "Valid",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASIAKKAAT-01: asiakasnäkymän kortit muokattaviksi paikallaan (yhteystiedot, kieli, tyyppi, osoite, lupa, muistiinpano, vuosikortti)"
+  },
+  {
+    "key": "ui.admin.customer_view.annual_revoked",
+    "lang": "fi",
+    "text": "Peruttu",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASIAKKAAT-01: asiakasnäkymän kortit muokattaviksi paikallaan (yhteystiedot, kieli, tyyppi, osoite, lupa, muistiinpano, vuosikortti)"
+  },
+  {
+    "key": "ui.admin.customer_view.annual_revoked",
+    "lang": "en",
+    "text": "Revoked",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASIAKKAAT-01: asiakasnäkymän kortit muokattaviksi paikallaan (yhteystiedot, kieli, tyyppi, osoite, lupa, muistiinpano, vuosikortti)"
+  },
+  {
+    "key": "ui.admin.customer_view.annual_period",
+    "lang": "fi",
+    "text": "{{var:from}} – {{var:to}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:from}}",
+      "{{var:to}}"
+    ],
+    "reason": "HALL-ASIAKKAAT-01: asiakasnäkymän kortit muokattaviksi paikallaan (yhteystiedot, kieli, tyyppi, osoite, lupa, muistiinpano, vuosikortti)"
+  },
+  {
+    "key": "ui.admin.customer_view.annual_period",
+    "lang": "en",
+    "text": "{{var:from}} – {{var:to}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:from}}",
+      "{{var:to}}"
+    ],
+    "reason": "HALL-ASIAKKAAT-01: asiakasnäkymän kortit muokattaviksi paikallaan (yhteystiedot, kieli, tyyppi, osoite, lupa, muistiinpano, vuosikortti)"
+  },
+  {
+    "key": "ui.admin.customer_view.annual_revoke",
+    "lang": "fi",
+    "text": "Peru kortti",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASIAKKAAT-01: asiakasnäkymän kortit muokattaviksi paikallaan (yhteystiedot, kieli, tyyppi, osoite, lupa, muistiinpano, vuosikortti)"
+  },
+  {
+    "key": "ui.admin.customer_view.annual_revoke",
+    "lang": "en",
+    "text": "Revoke card",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASIAKKAAT-01: asiakasnäkymän kortit muokattaviksi paikallaan (yhteystiedot, kieli, tyyppi, osoite, lupa, muistiinpano, vuosikortti)"
+  },
+  {
+    "key": "ui.admin.customer_view.annual_revoke_title",
+    "lang": "fi",
+    "text": "Perutaanko vuosikortti?",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASIAKKAAT-01: asiakasnäkymän kortit muokattaviksi paikallaan (yhteystiedot, kieli, tyyppi, osoite, lupa, muistiinpano, vuosikortti)"
+  },
+  {
+    "key": "ui.admin.customer_view.annual_revoke_title",
+    "lang": "en",
+    "text": "Revoke the annual card?",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASIAKKAAT-01: asiakasnäkymän kortit muokattaviksi paikallaan (yhteystiedot, kieli, tyyppi, osoite, lupa, muistiinpano, vuosikortti)"
+  },
+  {
+    "key": "ui.admin.customer_view.annual_revoke_body",
+    "lang": "fi",
+    "text": "Kortti {{var:code}} lakkaa toimimasta heti.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:code}}"
+    ],
+    "reason": "HALL-ASIAKKAAT-01: asiakasnäkymän kortit muokattaviksi paikallaan (yhteystiedot, kieli, tyyppi, osoite, lupa, muistiinpano, vuosikortti)"
+  },
+  {
+    "key": "ui.admin.customer_view.annual_revoke_body",
+    "lang": "en",
+    "text": "Card {{var:code}} stops working immediately.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:code}}"
+    ],
+    "reason": "HALL-ASIAKKAAT-01: asiakasnäkymän kortit muokattaviksi paikallaan (yhteystiedot, kieli, tyyppi, osoite, lupa, muistiinpano, vuosikortti)"
+  },
+  {
+    "key": "ui.admin.customer_view.annual_future_title",
+    "lang": "fi",
+    "text": "Perutaanko myös tulevat varaukset?",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASIAKKAAT-01: asiakasnäkymän kortit muokattaviksi paikallaan (yhteystiedot, kieli, tyyppi, osoite, lupa, muistiinpano, vuosikortti)"
+  },
+  {
+    "key": "ui.admin.customer_view.annual_future_title",
+    "lang": "en",
+    "text": "Also cancel the upcoming bookings?",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASIAKKAAT-01: asiakasnäkymän kortit muokattaviksi paikallaan (yhteystiedot, kieli, tyyppi, osoite, lupa, muistiinpano, vuosikortti)"
+  },
+  {
+    "key": "ui.admin.customer_view.annual_future_body",
+    "lang": "fi",
+    "text": "Kortti peruutetaan joka tapauksessa. Valitse, perutaanko kortilla tehdyt tulevat varaukset samalla vai jäävätkö ne voimaan.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 250,
+    "placeholders": [],
+    "reason": "HALL-ASIAKKAAT-01: asiakasnäkymän kortit muokattaviksi paikallaan (yhteystiedot, kieli, tyyppi, osoite, lupa, muistiinpano, vuosikortti)"
+  },
+  {
+    "key": "ui.admin.customer_view.annual_future_body",
+    "lang": "en",
+    "text": "The card is revoked either way. Choose whether the upcoming bookings made with it are cancelled too or stay in place.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 250,
+    "placeholders": [],
+    "reason": "HALL-ASIAKKAAT-01: asiakasnäkymän kortit muokattaviksi paikallaan (yhteystiedot, kieli, tyyppi, osoite, lupa, muistiinpano, vuosikortti)"
+  },
+  {
+    "key": "ui.admin.customer_view.annual_future_yes",
+    "lang": "fi",
+    "text": "Peru myös varaukset",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASIAKKAAT-01: asiakasnäkymän kortit muokattaviksi paikallaan (yhteystiedot, kieli, tyyppi, osoite, lupa, muistiinpano, vuosikortti)"
+  },
+  {
+    "key": "ui.admin.customer_view.annual_future_yes",
+    "lang": "en",
+    "text": "Cancel the bookings too",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASIAKKAAT-01: asiakasnäkymän kortit muokattaviksi paikallaan (yhteystiedot, kieli, tyyppi, osoite, lupa, muistiinpano, vuosikortti)"
+  },
+  {
+    "key": "ui.admin.customer_view.annual_future_no",
+    "lang": "fi",
+    "text": "Säilytä varaukset",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASIAKKAAT-01: asiakasnäkymän kortit muokattaviksi paikallaan (yhteystiedot, kieli, tyyppi, osoite, lupa, muistiinpano, vuosikortti)"
+  },
+  {
+    "key": "ui.admin.customer_view.annual_future_no",
+    "lang": "en",
+    "text": "Keep the bookings",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASIAKKAAT-01: asiakasnäkymän kortit muokattaviksi paikallaan (yhteystiedot, kieli, tyyppi, osoite, lupa, muistiinpano, vuosikortti)"
+  },
+  {
+    "key": "ui.admin.customer_view.annual_revoked_done",
+    "lang": "fi",
+    "text": "Vuosikortti peruttu.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASIAKKAAT-01: asiakasnäkymän kortit muokattaviksi paikallaan (yhteystiedot, kieli, tyyppi, osoite, lupa, muistiinpano, vuosikortti)"
+  },
+  {
+    "key": "ui.admin.customer_view.annual_revoked_done",
+    "lang": "en",
+    "text": "Annual card revoked.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASIAKKAAT-01: asiakasnäkymän kortit muokattaviksi paikallaan (yhteystiedot, kieli, tyyppi, osoite, lupa, muistiinpano, vuosikortti)"
+  },
+  {
+    "key": "ui.admin.customer_view.annual_revoked_done_n",
+    "lang": "fi",
+    "text": "Vuosikortti peruttu, {{var:n}} varausta peruttu.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:n}}"
+    ],
+    "reason": "HALL-ASIAKKAAT-01: asiakasnäkymän kortit muokattaviksi paikallaan (yhteystiedot, kieli, tyyppi, osoite, lupa, muistiinpano, vuosikortti)"
+  },
+  {
+    "key": "ui.admin.customer_view.annual_revoked_done_n",
+    "lang": "en",
+    "text": "Annual card revoked, {{var:n}} bookings cancelled.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:n}}"
+    ],
+    "reason": "HALL-ASIAKKAAT-01: asiakasnäkymän kortit muokattaviksi paikallaan (yhteystiedot, kieli, tyyppi, osoite, lupa, muistiinpano, vuosikortti)"
+  },
+  {
+    "key": "ui.admin.customer_view.annual_grant",
+    "lang": "fi",
+    "text": "Myönnä vuosikortti",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASIAKKAAT-01: asiakasnäkymän kortit muokattaviksi paikallaan (yhteystiedot, kieli, tyyppi, osoite, lupa, muistiinpano, vuosikortti)"
+  },
+  {
+    "key": "ui.admin.customer_view.annual_grant",
+    "lang": "en",
+    "text": "Grant an annual card",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASIAKKAAT-01: asiakasnäkymän kortit muokattaviksi paikallaan (yhteystiedot, kieli, tyyppi, osoite, lupa, muistiinpano, vuosikortti)"
+  },
+  {
+    "key": "ui.admin.customer_view.annual_from",
+    "lang": "fi",
+    "text": "Alkaa",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASIAKKAAT-01: asiakasnäkymän kortit muokattaviksi paikallaan (yhteystiedot, kieli, tyyppi, osoite, lupa, muistiinpano, vuosikortti)"
+  },
+  {
+    "key": "ui.admin.customer_view.annual_from",
+    "lang": "en",
+    "text": "Starts",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASIAKKAAT-01: asiakasnäkymän kortit muokattaviksi paikallaan (yhteystiedot, kieli, tyyppi, osoite, lupa, muistiinpano, vuosikortti)"
+  },
+  {
+    "key": "ui.admin.customer_view.annual_to",
+    "lang": "fi",
+    "text": "Päättyy",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASIAKKAAT-01: asiakasnäkymän kortit muokattaviksi paikallaan (yhteystiedot, kieli, tyyppi, osoite, lupa, muistiinpano, vuosikortti)"
+  },
+  {
+    "key": "ui.admin.customer_view.annual_to",
+    "lang": "en",
+    "text": "Ends",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASIAKKAAT-01: asiakasnäkymän kortit muokattaviksi paikallaan (yhteystiedot, kieli, tyyppi, osoite, lupa, muistiinpano, vuosikortti)"
+  },
+  {
+    "key": "ui.admin.customer_view.annual_note",
+    "lang": "fi",
+    "text": "Muistiinpano",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASIAKKAAT-01: asiakasnäkymän kortit muokattaviksi paikallaan (yhteystiedot, kieli, tyyppi, osoite, lupa, muistiinpano, vuosikortti)"
+  },
+  {
+    "key": "ui.admin.customer_view.annual_note",
+    "lang": "en",
+    "text": "Note",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-ASIAKKAAT-01: asiakasnäkymän kortit muokattaviksi paikallaan (yhteystiedot, kieli, tyyppi, osoite, lupa, muistiinpano, vuosikortti)"
+  }
+]
