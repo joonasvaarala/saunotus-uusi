@@ -23,7 +23,7 @@ export const OT = {
     guideTitle: 'Ohjeet', guideShow: 'Näytä ohjeet', guideHide: 'Piilota ohjeet', guideLead: 'Tässä ovat tilauksen tuotteiden ohjeet. Avaa ne napista.', guideLink: 'Avaa linkki',
     unsubTitle: 'Markkinointiviestit', unsubDone: 'Markkinointiviestit on peruttu. Ohjeet ja palautepyynnöt voivat silti tulla.', unsubMissing: 'Linkki ei kelpaa.', unsubError: 'Peruutus ei onnistunut. Yritä hetken kuluttua uudelleen.',
     addNewBooking: 'Haluatko varata uuden käynnin? Tee uusi varaus varauskalenterissa.', addNewBookingLink: 'Avaa varauskalenteri', addClosed: 'Lisäykset eivät ole enää mahdollisia, koska varaus on päättynyt. Tee uusi varaus kalenterissa.',
-    cancelTitle: 'Peruutuspyyntö', cancelLead: 'Henkilökunta käsittelee peruutuspyynnöt. Saat vahvistuksen sähköpostilla; hyvitys tehdään alkuperäiselle maksutavalle.', cancelReason: 'Syy (valinnainen)', cancelSubmit: 'Lähetä peruutuspyyntö',
+    cancelTitle: 'Peruutuspyyntö', dialogBack: 'Takaisin', cancelLead: 'Henkilökunta käsittelee peruutuspyynnöt. Saat vahvistuksen sähköpostilla; hyvitys tehdään alkuperäiselle maksutavalle.', cancelReason: 'Syy (valinnainen)', cancelSubmit: 'Lähetä peruutuspyyntö',
     cancelDone: 'Peruutuspyyntö lähetetty. Henkilökunta ottaa yhteyttä.', cancelPending: 'Peruutuspyyntö on jo lähetetty ja odottaa käsittelyä.', cancelConfirm: 'Lähetetäänkö peruutuspyyntö?',
     // booking_149 (Joonaksen päätös 24.10.2026): asiakkaan itse tekemä peruutus ja hyvitys vain, jos vuoron alkuun on vähintään {hours} (48) tuntia.
     // {email} = S.email (sivutekstissä {{var:email}}), mailto-linkki tilaussivulla. Asiakas ohjataan sähköpostiin, ei puhelimeen.
@@ -67,7 +67,7 @@ export const OT = {
     guideTitle: 'Instructions', guideShow: 'Show instructions', guideHide: 'Hide instructions', guideLead: 'These are the instructions for the products in your order. Open them with the button.', guideLink: 'Open the link',
     unsubTitle: 'Marketing messages', unsubDone: 'Marketing messages are stopped. Instructions and feedback requests may still be sent.', unsubMissing: 'This link is not valid.', unsubError: 'Could not unsubscribe. Please try again in a moment.',
     addNewBooking: 'Want to book another visit? Make a new booking in the booking calendar.', addNewBookingLink: 'Open the booking calendar', addClosed: 'Additions are no longer possible because the booking has ended. Please make a new booking in the calendar.',
-    cancelTitle: 'Cancellation request', cancelLead: 'Our staff handle cancellation requests. You will receive a confirmation by email; refunds go to the original payment method.', cancelReason: 'Reason (optional)', cancelSubmit: 'Send cancellation request',
+    cancelTitle: 'Cancellation request', dialogBack: 'Go back', cancelLead: 'Our staff handle cancellation requests. You will receive a confirmation by email; refunds go to the original payment method.', cancelReason: 'Reason (optional)', cancelSubmit: 'Send cancellation request',
     cancelDone: 'Cancellation request sent. Our staff will contact you.', cancelPending: 'A cancellation request has already been sent and is awaiting handling.', cancelConfirm: 'Send the cancellation request?',
     cancelRule: 'You can send a cancellation request up to {hours} hours before your session starts, that is by {date}. Less than {hours} hours before the session, cancellation is no longer possible.',
     cancelClosed: 'Cancellation is no longer possible because your session starts in less than {hours} hours. If you have any questions, email us: {email}.',

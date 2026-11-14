@@ -1,6 +1,7 @@
 // Varauskauppa: tuote → päivä/vuoro → henkilömäärä → yhteystiedot → vahvistus. Vaihtoehtoinen selaus: päivän mukaan (#/paiva/<pvm>) → kaikki päivän vuorot. Vanilla JS, ei riippuvuuksia, ei build-vaihetta.
 // Data tulee vain julkisista RPC-funktioista (public_catalog / public_product_images / public_availability / public_create_booking / public_get_booking / public_change_booking).
 // Asiakas ei voi itse perua vahvistettua varausta (peruutukset sähköpostilla henkilökunnalle); hän voi MUUTTAA varausta (toinen vuoro / henkilömäärä) asetuksen mukaan vähintään 48 h ennen vuoroa.
+import { siteConfirm } from './site-confirm.js';
 import { rpc, storageUrl, setRpcOverride } from './sb.js';
 import { withAttribution } from './attribution.js';
 import { ensureAllMonths } from './availability-months.js';
@@ -1241,7 +1242,7 @@ async function viewConfirmation({ refresh = false, notice = null, host = null, n
   const inv = customerInvoiceLock(b);
   if (b.status === 'confirmed' && b.can_change) actions.append(h('a', { class: 'btn gold', href: `#${token}/muuta`, text: t.changeBooking }));
   if (b.status === 'pending' && inv.showPendingCancel) actions.append(h('button', { type: 'button', class: 'btn light', onclick: async () => {
-    if (!confirm(t.cancelConfirm)) return;
+    if (!await siteConfirm(t.cancelConfirm, { yes: t.cancelBooking, no: t.dialogBack, testid: 'cancel-confirm' })) return;
     const r = await rpc('public_cancel_booking', { p_token: token });
     out.replaceChildren(r.ok ? h('p', { class: 'bk-ok', text: t.cancelled }) : errorBox(t.errors[r.code] || t.cancelFail));
     if (r.ok) setTimeout(() => location.reload(), 800);

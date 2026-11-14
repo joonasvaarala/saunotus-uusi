@@ -1,0 +1,42 @@
+[
+  {
+    "key": "ui.shop.dialog_back",
+    "lang": "fi",
+    "text": "Takaisin",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "KAUPPA-DIALOGI-01: peruutuksen vahvistus sivuston omassa dialogissa selaimen confirm()-ikkunan sijaan (Takaisin-painike)"
+  },
+  {
+    "key": "ui.shop.dialog_back",
+    "lang": "en",
+    "text": "Go back",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "KAUPPA-DIALOGI-01: peruutuksen vahvistus sivuston omassa dialogissa selaimen confirm()-ikkunan sijaan (Takaisin-painike)"
+  },
+  {
+    "key": "ui.order.dialog_back",
+    "lang": "fi",
+    "text": "Takaisin",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "KAUPPA-DIALOGI-01: peruutuksen vahvistus sivuston omassa dialogissa selaimen confirm()-ikkunan sijaan (Takaisin-painike)"
+  },
+  {
+    "key": "ui.order.dialog_back",
+    "lang": "en",
+    "text": "Go back",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "KAUPPA-DIALOGI-01: peruutuksen vahvistus sivuston omassa dialogissa selaimen confirm()-ikkunan sijaan (Takaisin-painike)"
+  }
+]
