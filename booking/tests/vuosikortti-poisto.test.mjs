@@ -18,7 +18,7 @@ const RB = 'booking/supabase/rollbacks/20261024130658_booking_152_ROLLBACK.sql';
 const SQLT = 'booking/supabase/tests/discounts/t152_annual_card_delete.sql';
 const P52 = 'content/site-texts.pending-import-52.json';
 const M142 = 'booking/supabase/migrations/20261024104958_booking_142_annual_cards_discount_codes.sql';
-const DISC = rd('booking/admin/views/discounts.js'), CUST = rd('booking/admin/views/customers.js');
+const DISC = rd('booking/admin/views/discounts.js'), CUST = rd('booking/admin/views/customer-cards.js'), CVIEW = rd('booking/admin/views/customer-view.js')   // HALL-ASIAKKAAT-01: vuosikortti on asiakasnäkymän omassa kortissa;
 const fnBody = (sql, name) => { const m = new RegExp(`create or replace function booking\\.${name}\\([\\s\\S]*?\\nend \\$\\$;`).exec(sql); assert.ok(m, name); return m[0]; };
 const norm = (s) => s.replace(/\s+/g, ' ').trim();
 
@@ -89,9 +89,11 @@ test('käyttöliittymä: korttilistassa Peru (samat vahvistukset kuin asiakaskor
   assert.match(DISC, /'data-testid': `annual-delete-\$\{a\.id\}`/);
   assert.match(DISC, /'data-testid': `annual-revoke-\$\{a\.id\}`/);
   // asiakaskortin vahvistukset ovat samat sanamuodot
-  assert.match(CUST, /confirmAsk\('Perutaanko vuosikortti\?'/);
+  // HALL-ASIAKKAAT-01: asiakasnäkymän vuosikortti käyttää confirmDialogia ja omia selkeitä sanamuotoja (ei "OK = peru, Peruuta = säilytä")
+  assert.match(CUST, /confirmDialog\(\{ title: c\('annual_revoke_title'\)/);
+  assert.match(CUST, /confirmDialog\(\{ title: c\('annual_future_title'\)[^\n]*yes: c\('annual_future_yes'\), no: c\('annual_future_no'\)/);
+  assert.doesNotMatch(CUST, /confirmAsk|\bconfirm\(/);
   assert.equal(ANNUAL_MANAGE_TEXTS.fi['ui.admin.annual_manage.revoke_confirm'], 'Perutaanko vuosikortti?');
-  assert.ok(CUST.includes(`confirmAsk('${ANNUAL_MANAGE_TEXTS.fi['ui.admin.annual_manage.revoke_future_confirm'].replace(/\s*\((OK|Kyllä)\b[^)]*\)\s*$/, '')}', { yes: 'Peru myös varaukset', no: 'Säilytä varaukset' })`));
   assert.doesNotMatch(DISC, /Peruutus tehdään asiakaskortilta/);
   assert.doesNotMatch(DISC + CUST, /#[0-9a-f]{3,6}\b|style:/i, 'ei kovakoodattuja värejä (teeman luokat btn / danger)');
   assert.doesNotMatch(DISC + CUST, /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/u, 'ei emojeja');
@@ -107,7 +109,7 @@ test('Myönnä vuosikortti -dialogi: Arvo koodi (generatedAnnualCardCode) ja aja
   assert.match(ANNUAL_MANAGE_TEXTS.en['ui.admin.annual_manage.code_hint'], /random 10-character code \(e\.g\. TS5DSYAH2X\)/);
   assert.ok(validCodeFormat('TS5DSYAH2X'));
   for (let i = 0; i < 50; i++) assert.match(generatedAnnualCardCode(), /^[A-HJKMNP-Z2-9]{10}$/);
-  assert.match(DISC, /loadAmTexts\(rpc\)/); assert.match(CUST, /loadAmTexts\(rpc\)/);
+  assert.match(DISC, /loadAmTexts\(rpc\)/); assert.match(CVIEW, /loadAmTexts\(rpc\)/);
 });
 
 test('tekstit: ui.admin.annual_manage.* FI+EN, pending-import-52 täsmää sanakirjaan, ei < eikä emojeja, ei päällekkäin muiden tuontien kanssa', () => {

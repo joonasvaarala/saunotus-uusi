@@ -125,7 +125,7 @@ test('pikahaku löytää asiakkaita, varauksia, tilauksia, lahjakortteja ja luo 
   const found=await findQuickResults(fake,{can:()=>true},'#13025');
   assert.equal(cleanSearch(' #13025 '),'13025');
   assert.deepEqual(new Set(found.map(x=>x.href)),new Set([
-    '#/asiakkaat?id=42','#/varaukset?id=12&q=13025&period=all',
+    '#/asiakkaat/42','#/varaukset?id=12&q=13025&period=all',
     '#/tilaukset?order=13025','#/lahjakortit?tab=omat&code=ABCD-1234-EFGH',
   ]));
   assert.ok(calls.some(c=>c.fn==='admin_list_orders'&&c.args.p_payment_filter==='all'));
@@ -141,7 +141,7 @@ test('pikahaku noudattaa oikeuksia ja yhden RPC:n virhe ei estä muita', async (
     return [{id:7,name:'Virtanen'}];
   },{can:()=>false},'Virtanen');
   assert.deepEqual(called,['admin_list_customers','admin_list_reservations']);
-  assert.equal(found[0].href,'#/asiakkaat?id=7');
+  assert.equal(found[0].href,'#/asiakkaat/7');
 });
 
 test('yläpalkin pikatoiminnot, käyttäjävalikko, kokeilutila ja uloskirjautuminen', () => {

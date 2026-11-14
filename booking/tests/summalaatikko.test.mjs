@@ -131,7 +131,7 @@ test('päivänäkymä, kalenteri, varauslista, asiakas ja uusi varaus avaavat ti
   assert.match(V('calendar.js'), /onclick: \(\) => openOrderView\(r\.order_no\) \|\| reservationDialog\(r,/);
   assert.match(V('reservations.js'), /onclick: \(\) => openOrderView\(r\.order_no\) \|\| reservationDialog\(r,/);
   assert.match(V('reservations.js'), /openOrderView\(target\.order_no, \{ replace: true \}\)/);
-  assert.match(V('customers.js'), /if \(o\.order_no && openOrderView\(o\.order_no\)\) d\.close\(\);/);
+  assert.match(V('customer-view.js'), /href: `#\/tilaukset\/\$\{o\.order_no\}`/, 'asiakasnäkymän tilausrivi avaa tilausnäkymän (vanha asiakasmodaali poistettu, HALL-ASIAKKAAT-01)');
   assert.match(V('newbooking.js'), /if \(openOrderView\(r\.order_no\)\) return;/);
   const orders = V('orders.js');
   assert.match(orders, /orderReturn\(orderNo\)/); assert.match(orders, /back: ret \? \{ href: ret\.from, prev: true \} : null/);

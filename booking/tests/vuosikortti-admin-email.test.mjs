@@ -158,12 +158,12 @@ test('tekstit: pending-import-54 FI+EN, ei < eikä emojeja, email-rivit = texts.
 });
 
 test('käyttöliittymä: Myönnä-dialogin "Lähetä koodi asiakkaalle" oletuksena päällä, p_send_email, ilmoitus sähköpostin tilasta', () => {
-  const disc = rd('booking/admin/views/discounts.js'), cust = rd('booking/admin/views/customers.js');
+  const disc = rd('booking/admin/views/discounts.js'), cust = rd('booking/admin/views/customer-cards.js');
   assert.match(disc, /h\('input', \{ type: 'checkbox', name: 'send_email', checked: true, 'data-testid': 'annual-send-email' \}\)/);
   assert.match(disc, /amText\('ui\.admin\.annual_manage\.send_email'\)/);
   assert.match(disc, /p_send_email: send\.checked \}\);\n\s*toast\(amCreatedMessage\(r\)\);/);
   assert.match(cust, /h\('input', \{ type: 'checkbox', name: 'vsend', checked: true \}\)/);
-  assert.match(cust, /p_send_email: grant\.vsend\.checked \}\); toast\(amCreatedMessage\(created\)\);/);
+  assert.match(cust, /p_send_email: grant\.vsend\.checked \}\);\s*toast\(amCreatedMessage\(created\)\);/);
   for (const s of [disc, cust]) { assert.doesNotMatch(s, /#[0-9a-f]{3,6}\b.*send_email/i); assert.doesNotMatch(s, /\p{Extended_Pictographic}/u); }
   clearAmTextCache();
   assert.equal(amCreatedMessage({ code: 'ABC123', email: { status: 'pending' } }), 'Vuosikortti myönnetty. Koodi: ABC123. Koodi lähetetään asiakkaan sähköpostiin.');
