@@ -1,7 +1,7 @@
 // Hallinnan kuori: kirjautuminen (Supabase Auth), reititys (hash), roolien mukainen valikko. Näkymät ovat tiedostoissa views/*.js.
 import { signIn, signOut, getSession, onAuthChange, rpc, select, adoptSessionFromHash, setPassword, setRpcOverride, setMockSession } from './sb.js';
 import { startDayAutoRefresh, isEditingElement } from './day-refresh.js';
-import { h, toast, errMsg, todayHel, closeDialogs, skeleton } from './ui.js';
+import { h, toast, errMsg, todayHel, closeDialogs, skeleton, leaveAllowed, setLeaveGuard } from './ui.js';
 import { icon } from './icons.js';
 import { loadFilterTexts } from './filter-texts.js';
 import { primeSiteTexts, clearSiteTextsCache } from './site-texts-cache.js';
@@ -96,8 +96,12 @@ function drawNav(current) {
 let dayModule = null;
 let lastPath = null;   // toisesta näkymästä Päivään palattaessa päivänippu haetaan aina tuoreena (muutokset muissa näkymissä)
 let routeSeq = 0;   // nopea navigointi: vain viimeisin reitti saa piirtää näkymän (vanhentuneet vastaukset hylätään)
+let lastHash = null;   // HALL-TUOTTEET-01: edellinen osoite, johon palataan, jos käyttäjä jää korjaamaan tallentamattomia muutoksia
 async function route() {
   if (!getSession()) return;
+  if (lastHash !== null && location.hash !== lastHash && !(await leaveAllowed(location.hash))) { history.replaceState(null, '', lastHash || '#/'); return; }
+  setLeaveGuard(null);   // näkymä rekisteröi oman vahtinsa uudelleen renderöidessään
+  lastHash = location.hash;
   const version = getVersionController();
   // Palkki jäi tallentamattoman lomakkeen takia: seuraava siirtymä lataa uuden julkaisun ennen näkymää.
   if (version?.onNavigate()) return;

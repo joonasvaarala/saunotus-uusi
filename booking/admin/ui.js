@@ -160,6 +160,20 @@ export function dialog(title, content, { wide = false } = {}) {
   document.body.append(d); d.showModal();
   return d;
 }
+// HALL-TUOTTEET-01: poistumisvahti. Näkymä (esim. tuote-editori) rekisteröi { dirty(), ask(nextHash) }; admin.js route() kysyy vahdilta ennen
+// toiseen osoitteeseen siirtymistä ja selain varoittaa välilehden sulkemisesta, jos dirty() on tosi. Vahti nollataan jokaisen reitityksen jälkeen.
+let leaveGuard = null;
+export const setLeaveGuard = (g) => { leaveGuard = g || null; };
+export const getLeaveGuard = () => leaveGuard;
+/** true = saa poistua. Muutoksia ei ole, tai käyttäjä vahvisti hylkäämisen. */
+export async function leaveAllowed(nextHash) {
+  const g = leaveGuard;
+  if (!g || !g.dirty?.()) return true;
+  return g.ask ? !!(await g.ask(nextHash)) : true;
+}
+if (typeof globalThis.addEventListener === 'function') {
+  globalThis.addEventListener('beforeunload', (e) => { if (leaveGuard?.dirty?.()) { e.preventDefault(); e.returnValue = ''; } });
+}
 /** YHT-06: reitinvaihto sulkee auki jääneet dialogit (admin.js route). */
 export const closeDialogs = (doc = globalThis.document) => { for (const d of doc?.querySelectorAll?.('dialog[open]') || []) d.close(); };
 export const field = (label, input, hint) => h('label', { class: 'fld' }, h('span', { text: label }), input, hint ? h('small', { text: hint }) : null);
