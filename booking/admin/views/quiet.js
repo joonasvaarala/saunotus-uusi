@@ -10,6 +10,7 @@ import { h, field, toast, run, dialog, empty, money, badge, fmtDate, fmtDT, toda
 import { quietText as qt, loadQuietTexts } from '../quiet-texts.js';
 import { validateQuietRule } from '../quiet-logic.js';
 import { getLang } from '../talous-i18n.js';
+import { confirmAsk } from '../confirm.js';
 
 const pctText = (n) => { const s = String(+n); return getLang() === 'fi' ? s.replace('.', ',') : s; };
 const dOnly = (ds) => (ds ? fmtDate(`${ds}T12:00:00Z`) : '');
@@ -28,9 +29,10 @@ export async function render({ reload }) {
   const toggle = h('div', { class: 'card row between wrap', 'data-testid': 'quiet-status' },
     h('span', { class: 'row wrap' }, badge(enabled ? 'ok' : 'muted', qt(enabled ? 'ui.admin.quiet.status_on' : 'ui.admin.quiet.status_off'))),
     canToggle
-      ? h('button', { type: 'button', class: `btn ${enabled ? 'ghost' : 'primary'}`, 'data-testid': 'quiet-toggle', onclick: (e) => {
-        if (!confirm(qt(enabled ? 'ui.admin.quiet.disable_confirm' : 'ui.admin.quiet.enable_confirm'))) return;
-        run(e.currentTarget, async () => { await rpc('admin_quiet_set_enabled', { p_enabled: !enabled }); toast(qt('ui.admin.quiet.status_saved')); reload(); });
+      ? h('button', { type: 'button', class: `btn ${enabled ? 'ghost' : 'primary'}`, 'data-testid': 'quiet-toggle', onclick: async (e) => {
+        const btn = e.currentTarget;
+        if (!(await confirmAsk(qt(enabled ? 'ui.admin.quiet.disable_confirm' : 'ui.admin.quiet.enable_confirm')))) return;
+        run(btn, async () => { await rpc('admin_quiet_set_enabled', { p_enabled: !enabled }); toast(qt('ui.admin.quiet.status_saved')); reload(); });
       } }, qt(enabled ? 'ui.admin.quiet.disable' : 'ui.admin.quiet.enable'))
       : h('small', { class: 'muted', text: qt('ui.admin.quiet.toggle_readonly') }));
   root.append(toggle);
@@ -45,9 +47,10 @@ export async function render({ reload }) {
       r.valid_to ? qt('ui.admin.quiet.valid_to', { date: dOnly(r.valid_to) }) : null].filter(Boolean).join(' · ') }) : null,
     canEdit ? h('div', { class: 'row wrap' },
       h('button', { type: 'button', class: 'btn sm', 'data-testid': `quiet-edit-${r.id}`, onclick: () => edit(r) }, qt('ui.admin.quiet.edit')),
-      h('button', { type: 'button', class: 'btn ghost sm', 'data-testid': `quiet-delete-${r.id}`, onclick: (e) => {
-        if (!confirm(qt('ui.admin.quiet.delete_confirm', { name: r.label }))) return;
-        run(e.currentTarget, async () => { await rpc('admin_quiet_rule_delete', { p_id: r.id }); toast(qt('ui.admin.quiet.deleted')); reload(); });
+      h('button', { type: 'button', class: 'btn ghost sm', 'data-testid': `quiet-delete-${r.id}`, onclick: async (e) => {
+        const btn = e.currentTarget;
+        if (!(await confirmAsk(qt('ui.admin.quiet.delete_confirm', { name: r.label })))) return;
+        run(btn, async () => { await rpc('admin_quiet_rule_delete', { p_id: r.id }); toast(qt('ui.admin.quiet.deleted')); reload(); });
       } }, qt('ui.admin.quiet.delete'))) : null)) : empty(qt('ui.admin.quiet.no_rules')));
   root.append(h('div', { class: 'row between wrap' }, h('h2', { text: qt('ui.admin.quiet.rules') }),
     canEdit ? h('button', { type: 'button', class: 'btn primary', 'data-testid': 'quiet-new', onclick: () => edit(null) }, qt('ui.admin.quiet.new')) : null),

@@ -15,3 +15,6 @@ export function confirmDialog({ title, body, yes, no, testid = 'confirm-dialog' 
     yesBtn.focus();
   });
 }
+
+/** YHT-06: selaimen vahvistusikkunan korvaaja. Esc ja sulkurasti = ei. */
+export const confirmAsk = (body, { title = 'Vahvista', yes = 'Kyllä', no = 'Peruuta', testid } = {}) => confirmDialog({ title, body, yes, no, testid });

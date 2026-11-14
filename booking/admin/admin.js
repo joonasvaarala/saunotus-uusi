@@ -1,6 +1,6 @@
 // Hallinnan kuori: kirjautuminen (Supabase Auth), reititys (hash), roolien mukainen valikko. Näkymät ovat tiedostoissa views/*.js.
 import { signIn, signOut, getSession, onAuthChange, rpc, select, adoptSessionFromHash, setPassword, setRpcOverride, setMockSession } from './sb.js';
-import { h, toast, errMsg, todayHel } from './ui.js';
+import { h, toast, errMsg, todayHel, closeDialogs } from './ui.js';
 import { icon } from './icons.js';
 import { loadFilterTexts } from './filter-texts.js';
 import { primeSiteTexts, clearSiteTextsCache } from './site-texts-cache.js';
@@ -110,6 +110,7 @@ async function route() {
   if (jump && jump !== location.hash) { location.replace(jump); return; }
   const resolved = resolveAdminPath(path);
   const r = ROUTES.find((x) => x.path === resolved.path && allowed(x)) || ROUTES[0];
+  if (r.path !== lastPath) closeDialogs();   // YHT-06: toiseen näkymään siirryttäessä vanhan näkymän dialogi ei jää auki
   drawNav(r.path);
   const view = $('view');
   view.replaceChildren(h('p', { class: 'muted pad', text: 'Ladataan…' }));

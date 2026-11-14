@@ -81,17 +81,17 @@ test('SQL-testi t152 kattaa poiston, asiakastyypin, auditin, käytetyn, ostetun,
 test('käyttöliittymä: korttilistassa Peru (samat vahvistukset kuin asiakaskortilla) ja Poista vain kun deletable', () => {
   assert.match(DISC, /cardActions\(a\)\)\) : empty\('Ei vuosikortteja\.'\)/);
   assert.match(DISC, /const revoke = a\.active && !a\.revoked_at \? h\('button'/);
-  assert.match(DISC, /confirm\(amText\('ui\.admin\.annual_manage\.revoke_confirm'\)\)/);
-  assert.match(DISC, /const cancelFuture = confirm\(amText\('ui\.admin\.annual_manage\.revoke_future_confirm'\)\);/);
+  assert.match(DISC, /await confirmAsk\(amText\('ui\.admin\.annual_manage\.revoke_confirm'\)\)/);
+  assert.match(DISC, /const cancelFuture = await confirmAsk\(amText\('ui\.admin\.annual_manage\.revoke_future_confirm'\)\.replace\(/);   // YHT-06: OK/Peruuta-vihje pois, painikkeet nimetty
   assert.match(DISC, /rpc\('admin_revoke_annual_card', \{ p_id: a\.id, p_cancel_future: cancelFuture \}\)/);
   assert.match(DISC, /const del = a\.deletable === true \? h\('button'/);
   assert.match(DISC, /rpc\('admin_delete_annual_card', \{ p_id: a\.id \}\)/);
   assert.match(DISC, /'data-testid': `annual-delete-\$\{a\.id\}`/);
   assert.match(DISC, /'data-testid': `annual-revoke-\$\{a\.id\}`/);
   // asiakaskortin vahvistukset ovat samat sanamuodot
-  assert.match(CUST, /confirm\('Perutaanko vuosikortti\?'\)/);
+  assert.match(CUST, /confirmAsk\('Perutaanko vuosikortti\?'/);
   assert.equal(ANNUAL_MANAGE_TEXTS.fi['ui.admin.annual_manage.revoke_confirm'], 'Perutaanko vuosikortti?');
-  assert.ok(CUST.includes(`confirm('${ANNUAL_MANAGE_TEXTS.fi['ui.admin.annual_manage.revoke_future_confirm']}')`));
+  assert.ok(CUST.includes(`confirmAsk('${ANNUAL_MANAGE_TEXTS.fi['ui.admin.annual_manage.revoke_future_confirm'].replace(/\s*\((OK|Kyllä)\b[^)]*\)\s*$/, '')}', { yes: 'Peru myös varaukset', no: 'Säilytä varaukset' })`));
   assert.doesNotMatch(DISC, /Peruutus tehdään asiakaskortilta/);
   assert.doesNotMatch(DISC + CUST, /#[0-9a-f]{3,6}\b|style:/i, 'ei kovakoodattuja värejä (teeman luokat btn / danger)');
   assert.doesNotMatch(DISC + CUST, /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/u, 'ei emojeja');

@@ -5,6 +5,7 @@
 import { rpc } from '../sb.js';
 import { h, toast, run, badge, fmtDT, errMsg } from '../ui.js';
 import { ssText, loadSsTexts } from '../shift-staff-texts.js';
+import { confirmAsk } from '../confirm.js';
 
 const T = (k, vars) => ssText('ui.admin.shift_staff.' + k, vars);
 
@@ -19,8 +20,8 @@ export async function renderShiftStaffPanel({ reload, rpcFn = rpc } = {}) {
   const cards = list.map((s) => {
     const out = h('div', { class: 'shift-staff-link' });
     const act = async (btn, action) => run(btn, async () => {
-      if (action === 'renew' && s.link_status === 'active' && !confirm(T('renew_confirm', { name: s.name }))) return;
-      if (action === 'revoke' && !confirm(T('revoke_confirm', { name: s.name }))) return;
+      if (action === 'renew' && s.link_status === 'active' && !(await confirmAsk(T('renew_confirm', { name: s.name })))) return;
+      if (action === 'revoke' && !(await confirmAsk(T('revoke_confirm', { name: s.name })))) return;
       const res = await rpcFn('admin_shift_staff_link', { p_staff: s.staff_id, p_action: action });
       if (action === 'revoke') { toast(T('revoked')); reload?.(); return; }
       if (action === 'dismiss_suggestion') { reload?.(); return; }
