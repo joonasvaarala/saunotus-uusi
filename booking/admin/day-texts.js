@@ -15,6 +15,9 @@ export const DAY_TEXTS = {
     'ui.admin.day.event_badge': 'Tapahtuma',
     'ui.admin.day.event_all_day': 'Koko päivä',
     'ui.admin.day.gift_card_badge': 'Lahjakortti',
+    'ui.admin.day.kind_shared': 'Yleinen',
+    'ui.admin.day.kind_exclusive': 'Yksityinen',
+    'ui.admin.day.blocks_title': 'Sulut',
   },
   en: {
     'ui.admin.day.revenue_title': "Day's revenue",
@@ -25,6 +28,9 @@ export const DAY_TEXTS = {
     'ui.admin.day.event_badge': 'Event',
     'ui.admin.day.event_all_day': 'All day',
     'ui.admin.day.gift_card_badge': 'Gift card',
+    'ui.admin.day.kind_shared': 'Shared',
+    'ui.admin.day.kind_exclusive': 'Private',
+    'ui.admin.day.blocks_title': 'Closures',
   },
 };
 

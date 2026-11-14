@@ -278,3 +278,10 @@ export function isDayUnpaidHighlight(row) {
   if (st && !ACTIVE_STATUSES.includes(st)) return false;
   return DAY_UNPAID_PAY.has(row.payment_status);
 }
+
+// HALL-PAIVA-01: vuorokortin täyttöaste. Yleinen vuoro "6/10" (varatut / max_persons), yksityinen vain varattuna.
+export function sessionFill(s, booked) {
+  if (s.mode === 'exclusive') return booked ? `${booked} hlö` : '';
+  const max = Number(s.max_persons);
+  return Number.isFinite(max) && max > 0 ? `${booked}/${max}` : `${booked} hlö`;
+}
