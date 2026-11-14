@@ -1,7 +1,7 @@
 // Lahjakortit: Omat lahjakortit (haku + voimassaolon pikajatko) ja Lunastuspyynnöt.
 // Oikeus sama kuin aiemmin Talous › Lahjakortit: giftcards.manage. Toiminnot ovat talous-giftcards.js ja talous-vouchers.js.
 import { rpc, functionUrl } from '../sb.js';
-import { h } from '../ui.js';
+import { h, tabs as tabList } from '../ui.js';
 import { createGiftApi } from '../giftcards-api.js';
 import { createVoucherApi } from '../vouchers-api.js';
 import { t, getLang, setLang, LANGS } from '../talous-i18n.js';
@@ -49,19 +49,9 @@ export async function render({ ctx, query }) {
     if (q.get('tab') !== id) history.replaceState(null, '', hrefFor(id));
     if (focus) buttons[id].focus();
   }
-  const list = h('div', { class: 'tl-tabs', role: 'tablist', 'aria-label': navText('ui.admin.nav.giftcards'), 'data-testid': 'lahjakortit-tabs' },
-    ...TABS.map(([id, key], i) => {
-      const b = h('button', { type: 'button', role: 'tab', id: `lahjakortit-tab-${id}`, class: 'tl-tabbtn', 'aria-controls': `lahjakortit-pnl-${id}`, 'data-testid': `lahjakortit-tab-${id}`,
-        onclick: () => select(id),
-        onkeydown: (e) => {
-          const nx = { ArrowRight: i + 1, ArrowLeft: i - 1, Home: 0, End: TABS.length - 1 }[e.key];
-          if (nx == null) return;
-          e.preventDefault();
-          select(TABS[(nx + TABS.length) % TABS.length][0], true);
-        } }, navText(key));
-      buttons[id] = b;
-      return b;
-    }));
+  const list = tabList({ label: navText('ui.admin.nav.giftcards'), testid: 'lahjakortit-tabs', idPrefix: 'lahjakortit-tab', selected: tab, onSelect: (id, focus) => select(id, focus),
+    items: TABS.map(([id, key]) => ({ id, text: navText(key), controls: `lahjakortit-pnl-${id}`, testid: `lahjakortit-tab-${id}` })) });
+  for (const [id] of TABS) buttons[id] = list.button(id);
   for (const [id] of TABS) panels[id] = h('div', { role: 'tabpanel', id: `lahjakortit-pnl-${id}`, 'aria-labelledby': `lahjakortit-tab-${id}`, hidden: true, class: 'tl-panel-wrap' });
   const langs = h('div', { class: 'tl-langs tl-noprint', role: 'group', 'aria-label': t('lang.label') }, LANGS.map((l) => h('button', { type: 'button', class: 'tl-lang', 'aria-pressed': String(getLang() === l), 'data-testid': `lang-${l}`, lang: l,
     onclick: () => { if (getLang() === l) return; setLang(l); location.reload(); } }, l.toUpperCase())));

@@ -7,7 +7,7 @@
 // Henkilökunta näkee, catalog.edit muokkaa kertoja, messages.edit lähettää viestin. Kaikki nimet textContentina.
 // Tekstit: events-texts.js (FI+EN, pending-import-57 ja imported-pr250). RPC:t booking_158 + booking_202.
 import { rpc } from '../sb.js';
-import { h, dialog, field, toast, badge, errMsg, fmtDate, fmtTime, fmtDT, todayHel, STATUS, PAY } from '../ui.js';
+import { h, dialog, field, toast, badge, errMsg, fmtDate, fmtTime, fmtDT, todayHel, STATUS, PAY, tabs as tabList } from '../ui.js';
 import { formatWhenRange, spansDays } from '../when-range.js';
 import { downloadCsv } from '../csv.js';
 import { loadEventsTexts, evText as T, courseText as tx } from '../events-texts.js';
@@ -228,9 +228,10 @@ export async function render({ ctx, refs, reload, query, section = null }) {
     const back = h('p', {}, h('a', { href: hrefOf(listQuery()), 'data-testid': 'events-back', text: `‹ ${sectionTitle}` }));
     const head = h('div', { class: 'row between wrap' }, h('h1', { class: 'ev-name', text: p.name }),
       h('span', { class: 'meta' }, badge('muted', catName(p.category)), p.sale_enabled === false ? badge('warn', T('badge_sale_off')) : null, p.active === false ? badge('err', T('badge_hidden')) : null, canEdit ? null : badge('muted', T('read_only'))));
-    const tablist = h('div', { class: 'tl-tabs ev-tabs', role: 'tablist', 'aria-label': p.name, 'data-testid': 'event-tabs' },
-      tabsFor(p).map(([id, key]) => h('button', { type: 'button', class: 'tl-tabbtn', role: 'tab', 'aria-selected': String(id === tab), 'data-testid': `event-tab-${id}`, onclick: () => go({ tapahtuma: p.product_id, valilehti: id, kerta: kertaQ || '' }) }, tabLabel(id, key))));
-    const panel = (id, ...nodes) => h('div', { hidden: tab !== id || null, 'data-testid': `event-panel-${id}`, class: id === tab ? null : 'ev-no-print' }, nodes);
+    const tablist = tabList({ label: p.name, cls: 'ev-tabs', testid: 'event-tabs', idPrefix: 'event-tab', selected: tab,
+      onSelect: (id) => go({ tapahtuma: p.product_id, valilehti: id, kerta: kertaQ || '' }),
+      items: tabsFor(p).map(([id, key]) => ({ id, text: tabLabel(id, key), controls: `event-panel-${id}`, testid: `event-tab-${id}` })) });
+    const panel = (id, ...nodes) => h('div', { role: 'tabpanel', id: `event-panel-${id}`, 'aria-labelledby': `event-tab-${id}`, hidden: tab !== id || null, 'data-testid': `event-panel-${id}`, class: id === tab ? null : 'ev-no-print' }, nodes);
     const rules = [...(p.rules || [])].sort((a, b) => String(a.starts_at).localeCompare(String(b.starts_at)));
     return [back, head, p.sale_enabled === false ? h('p', { class: 'ev-note ev-no-print', role: 'note', text: T('sale_off_note') }) : null, tablist,
       panel('yleiskatsaus', eventOverview(p, rules)),

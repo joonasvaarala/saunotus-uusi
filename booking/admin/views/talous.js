@@ -1,7 +1,7 @@
 // Talous: välilehdet Tilaukset, Maksut, Raportit, Kävijät. Lahjakortit ja lunastuspyynnöt ovat valikossa Lahjakortit (giftcards.manage).
 // Datakerros: ../talous-api.js (mock kun ?mock=1 tai RPC puuttuu). Kieli FI/EN (../talous-i18n.js).
 import { rpc, select as dbSelect, functionUrl, fnBlob, fn } from '../sb.js';
-import { h } from '../ui.js';
+import { h, tabs as tabList } from '../ui.js';
 import { createTalousApi } from '../talous-api.js';
 import { createGiftApi } from '../giftcards-api.js';
 import { t, getLang, setLang, LANGS } from '../talous-i18n.js';
@@ -73,9 +73,9 @@ export async function render({ ctx, reload, query }) {
     history.replaceState(null, '', `#/talous?${q.toString()}`);   // hashchange-tapahtumaa ei synny → sivua ei piirretä uudelleen
     if (focus) tabBtns[k].focus();
   }
-  const list = h('div', { class: 'tl-tabs', role: 'tablist', 'aria-label': t('tabs') },
-    ...TABS.map(([k, label]) => { const b = h('button', { type: 'button', role: 'tab', id: `tl-tab-${k}`, class: 'tl-tabbtn', 'aria-controls': `tl-pnl-${k}`, 'data-testid': `tab-${k}-btn`, onclick: () => select(k),
-      onkeydown: (e) => { const i = TABS.findIndex(([x]) => x === k); const nx = { ArrowRight: i + 1, ArrowLeft: i - 1, Home: 0, End: TABS.length - 1 }[e.key]; if (nx != null) { e.preventDefault(); select(TABS[(nx + TABS.length) % TABS.length][0], true); } } }, t(label)); tabBtns[k] = b; return b; }));
+  const list = tabList({ label: t('tabs'), idPrefix: 'tl-tab', selected: tab, onSelect: (k, focus) => select(k, focus),
+    items: TABS.map(([k, label]) => ({ id: k, text: t(label), controls: `tl-pnl-${k}`, testid: `tab-${k}-btn` })) });
+  for (const [k] of TABS) tabBtns[k] = list.button(k);
   for (const [k] of TABS) panels[k] = h('div', { role: 'tabpanel', id: `tl-pnl-${k}`, 'aria-labelledby': `tl-tab-${k}`, hidden: true, class: 'tl-panel-wrap' });
   const langs = h('div', { class: 'tl-langs tl-noprint', role: 'group', 'aria-label': t('lang.label') }, LANGS.map((l) => h('button', { type: 'button', class: 'tl-lang', 'aria-pressed': String(getLang() === l), 'data-testid': `lang-${l}`, lang: l,
     onclick: () => { if (getLang() === l) return; setLang(l); reload(); } }, l.toUpperCase())));

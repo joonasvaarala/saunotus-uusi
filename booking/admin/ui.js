@@ -163,6 +163,46 @@ export const closeDialogs = (doc = globalThis.document) => { for (const d of doc
 export const field = (label, input, hint) => h('label', { class: 'fld' }, h('span', { text: label }), input, hint ? h('small', { text: hint }) : null);
 export const empty = (text) => h('p', { class: 'empty', text });
 
+// YHT-02: yhteiset perusosat; uudet ja muutettavat näkymät käyttävät näitä omien luokkien sijaan (luokat booking/shared/ui.css, ux-*).
+/** Tyhjä tila: teksti ja valinnainen toiminto (esim. "Uusi koodi"). */
+export const emptyState = (text, action = null) => h('div', { class: 'ux-empty', 'data-testid': 'empty-state' }, h('p', { text }), action);
+/** Latausrunko tekstin "Ladataan…" sijaan; ruudunlukija kuulee tekstin. */
+export const skeleton = (label = 'Ladataan…', lines = 3) => h('div', { class: 'skel stack', role: 'status', 'aria-busy': 'true', 'data-testid': 'skeleton' },
+  h('span', { class: 'sr-only', text: label }), ...Array.from({ length: lines }, () => h('span', { class: 'ux-skeleton', 'aria-hidden': 'true' })));
+/** Ilmoituslaatikko: kind = ok | warn | danger | info. */
+export const alertBox = (kind, ...kids) => h('div', { class: `ux-alert ux-alert--${kind}`, role: kind === 'danger' ? 'alert' : 'status' }, ...kids);
+/** Sivun otsikkorivi: H1 ja oikealle tasatut toiminnot. */
+export const pageHead = (title, ...actions) => h('div', { class: 'ux-page-head' }, h('h1', { text: title }), actions.length ? h('div', { class: 'row wrap' }, ...actions) : null);
+/** Suodatinsiru (aria-pressed). */
+export const chip = (text, { on = false, onclick, testid } = {}) => h('button', { type: 'button', class: 'ux-chip', 'aria-pressed': String(!!on), 'data-testid': testid, onclick }, text);
+
+/**
+ * YHT-03: yksi välilehtikomponentti (role=tablist, nuolinäppäimet, aria-controls). Kohde on joko painike (onSelect) tai linkki (href, reititys).
+ * items: [{ id, text, href?, testid?, controls? }]. Palauttaa listan; list.select(id) päivittää valinnan ilman uudelleenpiirtoa.
+ */
+export function tabs({ label, items, selected, onSelect, idPrefix = 'tab', testid, cls = '', hidden = false }) {
+  const list = h('div', { class: `tl-tabs${cls ? ` ${cls}` : ''}`, role: 'tablist', 'aria-label': label, 'data-testid': testid, hidden: hidden || null });
+  const nodes = new Map();
+  const choose = (it, focus) => { if (it.href) { if (location.hash !== it.href) location.hash = it.href; } else onSelect?.(it.id, focus); };
+  items.forEach((it, i) => {
+    const attrs = { role: 'tab', class: 'tl-tabbtn', id: `${idPrefix}-${it.id}`, 'aria-controls': it.controls || null, 'data-testid': it.testid || null,
+      onkeydown: (e) => {
+        const j = { ArrowRight: i + 1, ArrowLeft: i - 1, Home: 0, End: items.length - 1 }[e.key];
+        if (j == null) return;
+        e.preventDefault();
+        const next = items[(j + items.length) % items.length];
+        nodes.get(next.id)?.focus();
+        choose(next, true);
+      } };
+    const node = it.href ? h('a', { ...attrs, href: it.href }, it.text) : h('button', { ...attrs, type: 'button', onclick: () => choose(it, false) }, it.text);
+    nodes.set(it.id, node); list.append(node);
+  });
+  list.select = (id) => { for (const [k, n] of nodes) { n.setAttribute('aria-selected', String(k === id)); n.tabIndex = k === id ? 0 : -1; } };
+  list.button = (id) => nodes.get(id);
+  list.select(selected);
+  return list;
+}
+
 // Vaiheiden, onnistumis- ja virheilmoitusten hallittu vieritys.
 export const prefersReducedMotion = (win = globalThis) => !!win?.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
 export function revealSection(el, focusEl = el, win = globalThis) {

@@ -1,7 +1,7 @@
 // booking_255: Lauran työtila. category=training, ei kind-pohjaista luokittelua.
 // Tekstit ja muut aiemmat tuotetoiminnot säilyvät erillisessä lisätietonäkymässä.
 import { rpc } from '../sb.js';
-import { h, dialog, field, toast, run, errMsg, fmtDate, fmtDT, money, todayHel, badge } from '../ui.js';
+import { h, dialog, field, toast, run, errMsg, fmtDate, fmtDT, money, todayHel, badge, tabs as tabList } from '../ui.js';
 import { getLang } from '../talous-i18n.js';
 import { render as renderEvents } from './events.js';
 import { loadTrainingTexts, trainingText as T } from '../training-texts.js';
@@ -37,9 +37,8 @@ export async function render(args) {
   const href = extras => '#/koulutukset' + (Object.keys({ ...qbase, ...extras }).length ? '?' + new URLSearchParams({ ...qbase, ...extras }) : '');
   const refresh = () => { clearDayBundles(); ctx.refs = null; reload(); };
   const go = (panel, ruleId = rule?.id) => { location.hash = href({ tapahtuma: p.product_id, kerta: ruleId, valilehti: panel }); };
-  const nav = h('nav', { class: 'tl-tabs training-top', 'aria-label': T('title') },
-    link(T('title'), '#/koulutukset', `tl-tabbtn${group === 'training' ? ' active' : ''}`),
-    link(T('trips'), '#/koulutukset?ryhma=matkat', `tl-tabbtn${group === 'trip' ? ' active' : ''}`));
+  const nav = tabList({ label: T('title'), cls: 'training-top', idPrefix: 'training-group', selected: group,   // YHT-03: yhteinen välilehtikomponentti
+    items: [{ id: 'training', text: T('title'), href: '#/koulutukset' }, { id: 'trip', text: T('trips'), href: '#/koulutukset?ryhma=matkat' }] });
   const title = h('h1', { text: group === 'trip' ? T('trips') : T('title') });
   if (!p) {
     const rows = trainingCards(products || [], { group, includePast: query.get('menneet') === '1', today: todayHel(), statuses: statuses || [] });
@@ -68,9 +67,10 @@ export async function render(args) {
     rules.length > 1 ? field(T('date'), h('select', { 'aria-label': T('date'), onchange: e => go('osallistujat', Number(e.target.value)) }, rules.map(r => h('option', { value: r.id, selected: r.id === rule.id || null, text: dates(r) })))) : h('p', { class: 'training-dates', text: dates(rule) }),
     h('div', { class: 'training-facts' }, fact(T('places_free'), String(rule.seats_remaining ?? '–')), fact(T('people'), `${rule.sold_persons || 0} / ${rule.max_persons ?? '–'}`), fact(T('spaces'), blocks.length ? T('spaces_ok') : T('spaces_missing')), fact(T('open_payments'), String(people.filter(x => Number(x.due_actual)>0.004).length))),
     h('div', { class: 'row wrap' }, h('strong', { text: `${T('next')}:` }), btn(next === 'materials' ? T('materials') : next === 'spaces' ? T('reserve') : T(next), () => go(nextPanel), 'training-next')));
-  const tabs = h('nav', { class: 'tl-tabs training-tabs', 'aria-label': nameOf(p) }, PANELS.map((id,i) => link(T(KEYS[i]), href({ tapahtuma: p.product_id, kerta: rule.id, valilehti: id }), `tl-tabbtn${id===panel?' active':''}`)));
+  const tabs = tabList({ label: nameOf(p), cls: 'training-tabs', idPrefix: 'training-tab', selected: panel,
+    items: PANELS.map((id, i) => ({ id, text: T(KEYS[i]), href: href({ tapahtuma: p.product_id, kerta: rule.id, valilehti: id }), controls: `training-panel-${id}` })) });
   const content = panel === 'osallistujat' ? peoplePanel() : panel === 'viestit' ? messagesPanel() : panel === 'maksut' ? paymentsPanel() : spacesPanel();
-  return [h('div', { class: 'training-work' }, link(`‹ ${T('back')}`, href({}), 'link'), nav, summary, checklist, tabs, h('section', { class: 'training-panel', 'data-testid': `training-panel-${panel}` }, content), more())];
+  return [h('div', { class: 'training-work' }, link(`‹ ${T('back')}`, href({}), 'link'), nav, summary, checklist, tabs, h('section', { class: 'training-panel', role: 'tabpanel', id: `training-panel-${panel}`, 'aria-labelledby': `training-tab-${panel}`, 'data-testid': `training-panel-${panel}` }, content), more())];
 
   function card({ p: item, r, status }) {
     const reserved = spaceBlocks(r, refs).length > 0;
