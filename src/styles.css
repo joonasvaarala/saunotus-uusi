@@ -4,7 +4,7 @@
 @font-face{font-family:"Lato";font-style:normal;font-weight:400;font-display:swap;src:url(__BASE__/fonts/Lato-normal-400.woff2) format("woff2")}
 @font-face{font-family:"Lato";font-style:normal;font-weight:700;font-display:swap;src:url(__BASE__/fonts/Lato-normal-700.woff2) format("woff2")}
 @font-face{font-family:"Montserrat";font-style:normal;font-weight:500 600;font-display:swap;src:url(__BASE__/fonts/Montserrat-normal-500.woff2) format("woff2")}
-:root{--ink:#2F2923;--text:#4F443A;--muted:#6B5E52;--gold:#7A5530;--accent:#C49A6C;--green:#2B3A30;--card:#FAF7F1;--tint:#F3ECE1;--bg:#F4EFE7;--line:rgba(63,53,44,.16);--head:"Cormorant Garamond",Georgia,"Times New Roman",serif;--disp:"Playfair Display",Georgia,serif;--label:"Montserrat",Arial,sans-serif;--body:"Lato",Arial,sans-serif;--r:12px;--w:1180px}
+:root{--ink:#2F2923;--text:#4F443A;--muted:#6B5E52;--gold:#7A5530;--accent:#C49A6C;--green:#2B3A30;--card:#FAF7F1;--tint:#F3ECE1;--bg:#F4EFE7;--line:rgba(63,53,44,.16);--head:"Cormorant Garamond",Georgia,"Times New Roman",serif;--disp:"Playfair Display",Georgia,serif;--label:"Montserrat",Arial,sans-serif;--body:"Lato",Arial,sans-serif;--r:12px;--w:1180px;--field:#8B7F73;--r-md:10px;--danger:#7B1D12;--danger-bg:#FBEAEA}
 *,*::before,*::after{box-sizing:border-box}
 html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
 body{margin:0;background:var(--bg);color:var(--text);font:400 17px/1.65 var(--body);-webkit-font-smoothing:antialiased}
@@ -12,7 +12,8 @@ img,picture{display:block;max-width:100%}
 img{height:auto}
 a{color:var(--gold);text-underline-offset:3px}
 a:hover{color:var(--ink)}
-:focus-visible{outline:3px solid #1d6fd8;outline-offset:3px;border-radius:3px}
+:focus-visible{outline:3px solid var(--gold);outline-offset:3px;border-radius:3px}   /* yksi fokusväri (YHT-07): --c-accent #7A5530, 6,6:1 valkoista ja 5,5:1 sivun taustaa vasten */
+.hero :focus-visible,.ritual :focus-visible,.site-footer :focus-visible{outline-color:#EDE3D0}   /* tummalla taustalla vaalea kehys (≥ 9:1) */
 /* Ohjelmallinen kohde (tabindex=-1 + .focus(), esim. hero-otsikko, reitin h2 ja #main-skip-kohde) ei piirrä kehystä.
    Chrome laskee sen :focus-visibleksi ennen ensimmäistä osoitinta, joten pelkkä :focus { outline:none } ei riitä.
    !important voittaa myöhemmät otsikkokohtaiset :focus-visible-säännöt. Näppäimistökehys säilyy linkeillä, painikkeilla ja kentillä. */
@@ -338,8 +339,10 @@ html.co-js #yritysvuorot,html.co-js #tarjous{display:none}
 html.co-js.co-show-sauna #yritysvuorot,html.co-js.co-show-day #tarjous{display:block}
 .co-form{display:grid;gap:14px;text-align:left}
 .co-form label{display:grid;gap:6px;font-weight:700;color:var(--ink)}
-.co-form input,.co-form textarea{font:400 17px/1.45 var(--body);color:var(--ink);background:#fff;border:1px solid var(--line);border-radius:8px;padding:10px 12px;width:100%}
-.co-form fieldset{border:1px solid var(--line);border-radius:8px;margin:0;padding:12px 16px}
+.co-form input,.co-form textarea{font:400 17px/1.45 var(--body);color:var(--ink);background:#fff;border:1px solid var(--field);border-radius:var(--r-md);padding:10px 12px;width:100%;min-height:44px}   /* kaupan kenttätyyli: reunus ≥ 3:1 (WCAG 1.4.11) */
+.co-form input[aria-invalid=true],.co-form textarea[aria-invalid=true]{border:2px solid var(--danger);background:#fffafa}
+.co-form .checks input,.co-form label.check input{min-height:0}
+.co-form fieldset{border:1px solid var(--field);border-radius:var(--r-md);margin:0;padding:12px 16px}
 .co-form legend{font-weight:700;color:var(--ink);padding:0 6px}
 .co-form .checks{display:grid;gap:8px}
 .co-form .checks label,.co-form label.check{font-weight:400;display:flex;gap:10px;align-items:flex-start}
@@ -347,7 +350,8 @@ html.co-js.co-show-sauna #yritysvuorot,html.co-js.co-show-day #tarjous{display:b
 .co-form .co-consent label.check{flex:1 1 18rem}
 .co-form .co-consent a{font-weight:700;text-decoration:underline;text-underline-offset:.2em;padding-top:.15em}
 .co-form .checks input,.co-form label.check input{width:1.15em;height:1.15em;margin-top:.35em;flex:none}
-.co-msg{background:#f8ebe6;color:#5c241c;border:1px solid #e2c2b8;border-radius:8px;padding:12px 14px}
+.co-msg{background:var(--danger-bg);color:var(--danger);border:1px solid var(--danger);border-radius:8px;padding:8px 12px;margin:0;font-size:15px;font-weight:600}   /* yksi virheväri; kenttäkohtainen viesti kentän alla */
+.co-form fieldset .co-msg{margin-top:8px}
 .co-msg.ok{background:#e7f0e8;color:#1c3a24;border-color:#b7d2bc}
 
 /* Käyttäjän avaamat lomakkeet ja tulososiot jäävät kiinteän yläpalkin alapuolelle. */
