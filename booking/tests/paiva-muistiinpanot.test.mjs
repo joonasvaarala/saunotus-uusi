@@ -28,6 +28,7 @@ const h = (tag, props = {}, ...children) => ({ tag, props, children: children.fl
 const field = (label, input) => h('label', { text: label }, input);
 const dialog = (title, body) => ({ title, body, close() {} });
 const toast = () => {};
+const confirmAsk = async () => true;   // YHT-06: vahvistus omalla dialogilla
 const run = async (_node, fn) => fn();
 const fmtDT = (iso) => String(iso);
 const fmtDate = (iso) => String(iso).slice(8, 10) + '.' + String(iso).slice(5, 7) + '.';

@@ -2,6 +2,7 @@
 import { rpc, fn, getSession } from '../sb.js';
 import { h, field, toast, run, badge, dialog, empty, errMsg } from '../ui.js';
 import { renderShiftStaffPanel } from './shift-staff-panel.js';
+import { confirmAsk } from '../confirm.js';
 
 const INVITE_ROLES = ['admin', 'manager', 'staff'];   // sama sallittulista kuin Edge Functionissa; asiakasrooleja ei voi kutsua
 const ROLE_HELP = 'admin = kaikki, myös käyttäjähallinta; manager (ylläpitäjä) = varaukset, hinnat, asetukset, resurssit ja sulut + kaikkien työvuorot, ei käyttäjähallintaa; staff (peruskäyttäjä) = varaukset, asiakkaat, maksujen kirjaus ja omat työvuorot.';
@@ -27,7 +28,7 @@ export async function render({ ctx, reload }) {
       h('div', { class: 'user-grid' }, field('Rooli', roleSel), field('Työntekijä (työvuorot)', linkSel),
         h('div', { class: 'user-act' }, h('button', { class: `btn sm${s.active ? ' danger' : ''}`, type: 'button', disabled: self || null, title: self ? 'Et voi poistaa omaa tunnustasi käytöstä' : null, text: s.active ? 'Poista käytöstä' : 'Aktivoi',
           onclick: (e) => run(e.target, async () => {
-            if (s.active && !confirm(`Poistetaanko ${s.name} käytöstä? Kirjautuminen estetään.`)) return;
+            if (s.active && !(await confirmAsk(`Poistetaanko ${s.name} käytöstä? Kirjautuminen estetään.`, { yes: 'Poista käytöstä' }))) return;
             await fn('admin-users', { action: s.active ? 'deactivate' : 'reactivate', user_id: s.user_id }); toast(s.active ? 'Poistettu käytöstä' : 'Aktivoitu'); reload();
           }) }))));
   });

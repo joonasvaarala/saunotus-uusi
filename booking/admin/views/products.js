@@ -15,6 +15,7 @@ import { settingsHref } from '../settings-tabs.js';
 import { looksLikeAlcohol } from '../pos-logic.js';
 import { loadEventsTexts, evText } from '../events-texts.js';
 import { copyArgs, copyName } from '../events-logic.js';
+import { confirmAsk } from '../confirm.js';
 
 const VAT_ACTIVE = [25.5, 13.5, 0];
 const CATEGORY_ORDER = ['product_rental', 'add_on', 'public_sauna', 'private_sauna', 'corporate', 'treatment', 'ritual', 'ceremony', 'event', 'gift_card', 'season_card', 'training', 'other'];
@@ -273,7 +274,7 @@ function imageBox(p, c, canEdit, done) {
     if (file && r?.previous_path && r.previous_path !== path) await removeObject('product-images', r.previous_path).catch(() => {});   // siivotaan vanha tiedosto (virhe ei haittaa)
     toast('Kuva tallennettu'); done();
   }));
-  del.addEventListener('click', () => { if (!confirm('Poistetaanko tuotteen kuva?')) return; run(del, async () => {
+  del.addEventListener('click', async () => { if (!(await confirmAsk('Poistetaanko tuotteen kuva?', { yes: 'Poista kuva' }))) return; run(del, async () => {
     const r = await rpc('admin_set_product_image', { p_product_id: p.id, p_image_path: null, p_image_alt: null });
     if (r?.previous_path) await removeObject('product-images', r.previous_path).catch(() => {});
     toast('Kuva poistettu'); done();

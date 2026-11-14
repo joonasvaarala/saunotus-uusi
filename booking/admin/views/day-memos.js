@@ -5,6 +5,7 @@ import { h, dialog, field, toast, run, fmtDT, fmtDate } from '../ui.js';
 import { icon } from '../icons.js';
 import { firstSentence } from '../day-memos-logic.js';
 import { memoText as t } from '../day-memos-texts.js';
+import { confirmAsk } from '../confirm.js';
 
 /** Nipun notes_bundle (booking_140) tai erillinen admin_list_day_notes. Virhe ei kaada päivänäkymää. */
 export async function loadDayMemos(date, preloaded) {
@@ -47,8 +48,8 @@ export function bulletinCard({ date, bulletins = [], can = () => false, reload }
       } }, icon('chev', 18))
       : h('span', { class: 'bulletin-preview', text: preview });
     const period = manager ? h('small', { class: 'muted bulletin-period', text: t('ui.admin.day_memos.bulletin_period', { start: fmtDate(`${b.start_date}T12:00:00Z`), end: fmtDate(`${b.end_date}T12:00:00Z`) }) }) : null;
-    const del = manager ? h('button', { type: 'button', class: 'btn ghost sm', 'data-testid': 'bulletin-delete', onclick: () => {
-      if (!confirm(t('ui.admin.day_memos.bulletin_delete_confirm'))) return;
+    const del = manager ? h('button', { type: 'button', class: 'btn ghost sm', 'data-testid': 'bulletin-delete', onclick: async () => {
+      if (!(await confirmAsk(t('ui.admin.day_memos.bulletin_delete_confirm')))) return;
       run(del, async () => { await rpc('admin_delete_bulletin', { p_id: b.id }); toast(t('ui.admin.day_memos.bulletin_deleted')); reload?.(); });
     } }, icon('trash', 18), ` ${t('ui.admin.day_memos.bulletin_delete')}`) : null;
     const actions = manager ? h('span', { class: 'bulletin-actions' },
@@ -72,8 +73,8 @@ export function dayNotesCard({ date, dayNotes = [], can = () => false, reload })
     input.value = ''; toast(t('ui.admin.day_memos.note_added')); reload?.();
   }); } }, input, save);
   const entries = (dayNotes || []).map((n) => {
-    const del = manager ? h('button', { type: 'button', class: 'btn ghost sm', 'data-testid': 'day-note-delete', 'aria-label': t('ui.admin.day_memos.note_delete'), onclick: () => {
-      if (!confirm(t('ui.admin.day_memos.note_delete_confirm'))) return;
+    const del = manager ? h('button', { type: 'button', class: 'btn ghost sm', 'data-testid': 'day-note-delete', 'aria-label': t('ui.admin.day_memos.note_delete'), onclick: async () => {
+      if (!(await confirmAsk(t('ui.admin.day_memos.note_delete_confirm')))) return;
       run(del, async () => { await rpc('admin_delete_day_note', { p_id: n.id }); toast(t('ui.admin.day_memos.note_deleted')); reload?.(); });
     } }, icon('trash', 18)) : null;
     return h('li', { class: 'day-note-entry', 'data-testid': 'day-note' },

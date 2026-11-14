@@ -138,14 +138,28 @@ export async function run(btn, fn) {
   if (btn) btn.disabled = true;
   try { return await fn(); } catch (e) { toast(errMsg(e), 'err'); } finally { if (btn) btn.disabled = false; }
 }
+// YHT-06: jokaisella dialogilla oma otsikon id (aria-labelledby). Jos dialogin lomakkeeseen on kirjoitettu, Esc ja sulkurasti kysyvät ensin
+// (palkki dialogin alareunassa: Hylkää muutokset / Jatka muokkausta); ohjelman oma d.close() (esim. tallennuksen jälkeen) sulkee aina.
+let dlgSeq = 0;
 export function dialog(title, content, { wide = false } = {}) {
-  const d = h('dialog', { class: `dlg${wide ? ' wide' : ''}`, 'aria-labelledby': 'dlg-title' },
-    h('div', { class: 'dlg-head' }, h('h2', { id: 'dlg-title', text: title }), h('button', { type: 'button', class: 'icon-btn', 'aria-label': 'Sulje', onclick: () => d.close() }, icon('close', 22))),
-    h('div', { class: 'dlg-body' }, content));
+  const tid = `dlg-title-${++dlgSeq}`;
+  let dirty = false;
+  const keep = h('button', { type: 'button', class: 'btn ghost', 'data-testid': 'dlg-keep', text: 'Jatka muokkausta', onclick: () => { bar.hidden = true; } });
+  const bar = h('div', { class: 'dlg-unsaved row wrap', role: 'alert', hidden: true, 'data-testid': 'dlg-unsaved' },
+    h('span', { class: 'grow', text: 'Muutokset eivät ole tallessa.' }), keep,
+    h('button', { type: 'button', class: 'btn danger', 'data-testid': 'dlg-discard', text: 'Hylkää muutokset', onclick: () => d.close() }));
+  const ask = () => { if (!dirty) { d.close(); return; } bar.hidden = false; keep.focus(); };
+  const d = h('dialog', { class: `dlg${wide ? ' wide' : ''}`, 'aria-labelledby': tid },
+    h('div', { class: 'dlg-head' }, h('h2', { id: tid, text: title }), h('button', { type: 'button', class: 'icon-btn', 'aria-label': 'Sulje', onclick: ask }, icon('close', 22))),
+    h('div', { class: 'dlg-body' }, content), bar);
+  d.addEventListener('input', (e) => { if (e.target?.closest?.('form') && !e.target.closest('.dlg-unsaved')) dirty = true; });
+  d.addEventListener('cancel', (e) => { if (dirty) { e.preventDefault(); ask(); } });
   d.addEventListener('close', () => d.remove());
   document.body.append(d); d.showModal();
   return d;
 }
+/** YHT-06: reitinvaihto sulkee auki jääneet dialogit (admin.js route). */
+export const closeDialogs = (doc = globalThis.document) => { for (const d of doc?.querySelectorAll?.('dialog[open]') || []) d.close(); };
 export const field = (label, input, hint) => h('label', { class: 'fld' }, h('span', { text: label }), input, hint ? h('small', { text: hint }) : null);
 export const empty = (text) => h('p', { class: 'empty', text });
 

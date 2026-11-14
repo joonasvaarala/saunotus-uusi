@@ -115,6 +115,9 @@ fieldset.box legend{font-weight:600;padding:0 6px}
 .dlg-head{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--line);position:sticky;top:0;background:#fff}
 .dlg-head h2{margin:0}
 .dlg-body{padding:14px 16px 20px}
+/* YHT-06: tallentamattomien muutosten palkki (Esc / sulkurasti) */
+.dlg-unsaved{position:sticky;bottom:0;gap:8px;align-items:center;padding:10px 16px;background:var(--warnbg);border-top:1px solid var(--line)}
+.dlg-unsaved[hidden]{display:none}
 .icon-btn{width:44px;height:44px;border:0;background:none;color:var(--icon);display:inline-grid;place-items:center;cursor:pointer}
 /* taulukko */
 .tablewrap{overflow-x:auto;background:#fff;border:1px solid var(--line);border-radius:10px}

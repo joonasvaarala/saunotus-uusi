@@ -7,6 +7,7 @@ import { amText, loadAmTexts, amCreatedMessage } from '../annual-manage-texts.js
 import { h, fmtDT, fmtDate, todayHel, addDays, money, dialog, field, toast, run, empty, payBadge, statusBadge, badge, countText } from '../ui.js';
 import { openOrderCard } from './order-card.js';
 import { openOrderView } from '../order-open.js';
+import { confirmAsk } from '../confirm.js';
 
 export async function render({ ctx, reload, query = new URLSearchParams(), rest = '' }) {
   const PAGE = 50; let offset = 0, search = query.get('q') || '';
@@ -85,8 +86,8 @@ export async function render({ ctx, reload, query = new URLSearchParams(), rest 
       cards.length ? h('ul', { class: 'reslist' }, cards.map((a) => h('li', { class: 'resrow' }, h('span', {}, `${a.code ? a.code + ' · ' : ''}${fmtDate(a.valid_from + 'T12:00:00Z')} – ${fmtDate(a.valid_to + 'T12:00:00Z')}${a.notes ? ' · ' + a.notes : ''}`),
         h('span', { class: 'meta' }, a.active ? badge('ok', 'Voimassa') : badge('muted', 'Peruttu'),
           can && a.active ? h('button', { type: 'button', class: 'btn danger sm', onclick: (e) => run(e.target, async () => {
-            if (!confirm('Perutaanko vuosikortti?')) return;
-            const cancelFuture = confirm('Perutaanko myös kortin tulevat varaukset? (OK = peru, Peruuta = säilytä)');
+            if (!(await confirmAsk('Perutaanko vuosikortti?', { yes: 'Peru kortti' }))) return;
+            const cancelFuture = await confirmAsk('Perutaanko myös kortin tulevat varaukset?', { yes: 'Peru myös varaukset', no: 'Säilytä varaukset' });
             const r = await rpc('admin_revoke_annual_card', { p_id: a.id, p_cancel_future: cancelFuture });
             toast(`Vuosikortti peruttu${r.cancelled ? `, ${countText(r.cancelled, 'varaus', 'varausta')} peruttu` : ''}`); document.querySelector('dialog')?.close(); load(true); }) }, 'Peru kortti') : null)))) : empty('Ei vuosikorttia.'),
       can ? grant : null);

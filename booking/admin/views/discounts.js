@@ -7,6 +7,7 @@ import { rpc } from '../sb.js';
 import { h, field, toast, run, dialog, empty, money, badge, fmtDate, todayHel } from '../ui.js';
 import { normalizeCode, generatedDiscountCode, generatedAnnualCardCode } from '../../shop/src/discount-code-logic.js';
 import { amText, loadAmTexts, amCreatedMessage } from '../annual-manage-texts.js';
+import { confirmAsk } from '../confirm.js';
 
 const STATE = { active: ['ok', 'Voimassa'], inactive: ['muted', 'Pois käytöstä'], not_started: ['warn', 'Ei vielä alkanut'], expired: ['muted', 'Vanhentunut'], used_up: ['muted', 'Käytetty loppuun'] };
 const dOnly = (ds) => (ds ? fmtDate(`${ds}T12:00:00Z`) : '');
@@ -32,9 +33,10 @@ export async function render({ ctx, refs, reload }) {
     h('small', { class: 'muted', text: [d.is_annual_card_code ? null : usageText(d), d.valid_from ? `alkaa ${dOnly(d.valid_from)}` : null, d.valid_to ? `päättyy ${dOnly(d.valid_to)}` : 'ei päättymispäivää', d.description].filter(Boolean).join(' · ') }),
     canCodes && (!d.is_annual_card_code || canCards) ? h('div', { class: 'row wrap' },
       h('button', { type: 'button', class: 'btn sm', 'data-testid': `discount-edit-${d.code}`, onclick: () => editCode(d) }, 'Muokkaa'),
-      h('button', { type: 'button', class: 'btn ghost sm', onclick: (e) => {
-        if (!confirm(d.used_count > 0 ? `Koodia ${d.code} on käytetty, joten se poistetaan vain käytöstä. Jatketaanko?` : `Poistetaanko koodi ${d.code}?`)) return;
-        run(e.currentTarget, async () => { const r = await rpc('admin_delete_discount_code', { p_id: d.id }); toast(r?.deactivated ? 'Koodi poistettu käytöstä' : 'Koodi poistettu'); reload(); });
+      h('button', { type: 'button', class: 'btn ghost sm', onclick: async (e) => {
+        const btn = e.currentTarget;
+        if (!(await confirmAsk(d.used_count > 0 ? `Koodia ${d.code} on käytetty, joten se poistetaan vain käytöstä. Jatketaanko?` : `Poistetaanko koodi ${d.code}?`))) return;
+        run(btn, async () => { const r = await rpc('admin_delete_discount_code', { p_id: d.id }); toast(r?.deactivated ? 'Koodi poistettu käytöstä' : 'Koodi poistettu'); reload(); });
       } }, 'Poista')) : null)) : empty('Ei alennuskoodeja.'));
   root.append(h('div', { class: 'row between wrap' }, h('h2', { text: 'Alennuskoodit' }),
     canCodes ? h('button', { type: 'button', class: 'btn primary', 'data-testid': 'discount-new', onclick: () => editCode(null) }, 'Uusi alennuskoodi') : null), list);
@@ -56,13 +58,13 @@ export async function render({ ctx, refs, reload }) {
   // poistettavaksi (deletable = ei ostotilausta eikä varauksia); palvelin tarkistaa ehdot silti aina (annual_card_used / annual_card_purchased).
   function cardActions(a) {
     const revoke = a.active && !a.revoked_at ? h('button', { type: 'button', class: 'btn sm', 'data-testid': `annual-revoke-${a.id}`, onclick: (e) => run(e.currentTarget, async () => {
-      if (!confirm(amText('ui.admin.annual_manage.revoke_confirm'))) return;
-      const cancelFuture = confirm(amText('ui.admin.annual_manage.revoke_future_confirm'));
+      if (!(await confirmAsk(amText('ui.admin.annual_manage.revoke_confirm')))) return;
+      const cancelFuture = await confirmAsk(amText('ui.admin.annual_manage.revoke_future_confirm').replace(/\s*\((OK|Kyllä)\b[^)]*\)\s*$/, ''), { yes: 'Peru myös varaukset', no: 'Säilytä varaukset' });
       const r = await rpc('admin_revoke_annual_card', { p_id: a.id, p_cancel_future: cancelFuture });
       toast(r?.cancelled ? amText('ui.admin.annual_manage.revoked_with_bookings', { count: r.cancelled }) : amText('ui.admin.annual_manage.revoked')); reload();
     }) }, amText('ui.admin.annual_manage.revoke')) : null;
     const del = a.deletable === true ? h('button', { type: 'button', class: 'btn danger sm', 'data-testid': `annual-delete-${a.id}`, onclick: (e) => run(e.currentTarget, async () => {
-      if (!confirm(amText('ui.admin.annual_manage.delete_confirm', { code: a.code || `#${a.id}` }))) return;
+      if (!(await confirmAsk(amText('ui.admin.annual_manage.delete_confirm', { code: a.code || `#${a.id}` })))) return;
       await rpc('admin_delete_annual_card', { p_id: a.id });
       toast(amText('ui.admin.annual_manage.deleted')); reload();
     }) }, amText('ui.admin.annual_manage.delete')) : null;
