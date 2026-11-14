@@ -47,7 +47,7 @@ test('kassa liittää lisähoidon kerran eikä luo perusvarausta uudelleen', () 
   assert.doesNotMatch(fail, /rpc\('public_create_booking/);
   assert.match(shop, /confirmationUpsellOrder/);
   assert.match(read('booking/shop/src/order.js'), /orderUpsellSection/);
-  assert.match(read('booking/admin/views/products.js'), /ctx\.role === 'admin'/);
+  assert.match(read('booking/admin/views/product-editor.js'), /ctx\.role === 'admin'/);
   assert.match(read('.github/workflows/pages.yml'), /upsell-179\.test\.mjs/);
   const css = read('booking/shop/src/shop.css');
   const i0 = css.indexOf('/* booking_179');
