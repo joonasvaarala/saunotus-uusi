@@ -1,6 +1,6 @@
 // Asiakkaan oma pienennys + automaattinen osahyvitys (booking_284): tilaussivun muutosnäkymän tekstit FI + EN.
 // Erillinen moduuli (ei i18n.js:n T-sanakirjaa), koska T-sanakirjan lehdet kuuluvat text-registryyn. Avaimet vastaavat
-// content/site-texts.pending-import-139.json -tiedoston ui.public.order_change.reduce.*-rivejä; paikkamerkit {{var:nimi}}.
+// content/site-texts.pending-import-139.json -tiedoston ui.public.order_change.reduce.*-rivejä (booking_307: lisäksi pending-import-153); paikkamerkit {{var:nimi}}.
 export const REDUCE_TEXTS = {
   fi: {
     preview_refund: 'Uusi hinta on {{var:total}}. Hyvitämme {{var:amount}} alkuperäiseen maksutapaan, yleensä 1–3 pankkipäivässä.',
@@ -15,6 +15,9 @@ export const REDUCE_TEXTS = {
     done_title: 'Varaus muutettu',
     done: 'Varaus on muutettu. Hyvitämme {{var:amount}} alkuperäiseen maksutapaan, yleensä 1–3 pankkipäivässä. Saat siitä vahvistuksen sähköpostiin.',
     back: 'Takaisin varaukseen',
+    not_allowed_deadline_private_both: 'Tämän varauksen maksuton pienennys onnistuu verkossa vain, kun sekä nykyisen että uuden ajan alkuun on vähintään {{var:days}} vrk. Ota yhteyttä sähköpostilla.',
+    not_allowed_not_classified: 'Tämän palvelun varausta ei voi pienentää verkossa. Ota yhteyttä sähköpostilla, niin hoidamme muutoksen.',
+    already_moved: 'Tämän varauksen voi siirtää verkossa vain kerran. Ota yhteyttä sähköpostilla, jos haluat siirtää sitä uudelleen.',
   },
   en: {
     preview_refund: 'The new price is {{var:total}}. We will refund {{var:amount}} to your original payment method, usually within 1–3 bank days.',
@@ -29,6 +32,9 @@ export const REDUCE_TEXTS = {
     done_title: 'Booking changed',
     done: 'Your booking has been changed. We will refund {{var:amount}} to your original payment method, usually within 1–3 bank days. You will get a confirmation by email.',
     back: 'Back to the booking',
+    not_allowed_deadline_private_both: 'This booking can be reduced free of charge online only when both the current and the new time start in at least {{var:days}} days. Please contact us by email.',
+    not_allowed_not_classified: 'Bookings for this service cannot be reduced online. Please contact us by email and we will take care of the change.',
+    already_moved: 'This booking can be moved online only once. Please contact us by email if you want to move it again.',
   },
 };
 /** rt('fi', 'confirm', { amount: '29,00 €' }) */

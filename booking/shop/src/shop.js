@@ -1382,7 +1382,8 @@ async function viewChange(token, b) {
   function reduceBlockedText(reason) {
     const prvDays = state.settings?.customer_reduce_full_refund_days_private || 14;
     if (reason === 'too_late') return rt(S.lang, 'not_allowed_deadline', { hours });
-    if (reason === 'too_late_private') return rt(S.lang, 'not_allowed_deadline_private', { days: prvDays });
+    if (reason === 'too_late_private') return rt(S.lang, 'not_allowed_deadline_private_both', { days: prvDays });   // booking_307: koskee myös uutta päivää
+    if (reason === 'not_classified') return rt(S.lang, 'not_allowed_not_classified');
     if (reason === 'payment_method') return rt(S.lang, 'not_allowed_payment_method');
     if (reason === 'feature_disabled') return t.changePaidPrice;   // lippu pois: täsmälleen entinen viesti
     return rt(S.lang, 'contact_staff');
@@ -1423,7 +1424,7 @@ async function viewChange(token, b) {
       const r = await rpc('public_change_booking', args);
       if (!r.ok) {
         if (r.code === 'refund_confirmation_required') st.reduce = null;
-        throw Object.assign(new Error((r.code === 'order_invoiced' ? t.errors.order_invoiced_persons : r.code === 'refund_confirmation_required' ? rt(S.lang, 'changed') : t.errors[r.code]) || t.errorGeneric), { code: r.code, mapped: true });
+        throw Object.assign(new Error((r.code === 'order_invoiced' ? t.errors.order_invoiced_persons : r.code === 'refund_confirmation_required' ? rt(S.lang, 'changed') : r.code === 'already_moved' ? rt(S.lang, 'already_moved') : t.errors[r.code]) || t.errorGeneric), { code: r.code, mapped: true });
       }
       state.months.clear();
       if (r.refund_amount > 0) {   // booking_284: näytetään hyvitysvahvistus (muutoksen jälkeen varaussivu näyttää uuden summan)
