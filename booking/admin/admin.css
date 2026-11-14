@@ -897,7 +897,7 @@ html.pos-modal-open,body.pos-modal-open{overflow:hidden}
 .set-page .set-fold[open]>summary{margin-bottom:6px}
 .set-page .set-fold .card{border:0;box-shadow:none;padding:0;background:none;margin:0 0 12px}
 .set-page .set-fold .stat,.set-page .set-fold .fld{overflow-wrap:anywhere}
-.set-bar{position:sticky;bottom:calc(var(--navh,0px) + env(safe-area-inset-bottom));z-index:15;display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;justify-content:space-between;margin-top:12px;padding:10px 12px;background:#fff;border:1px solid var(--line);border-top:3px solid var(--green);border-radius:12px;box-shadow:0 -6px 16px rgba(43,58,48,.14)}
+.set-bar{position:sticky;bottom:calc(var(--navh,0px) + env(safe-area-inset-bottom));z-index:15;display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;justify-content:space-between;margin-top:12px;padding:10px 12px;background:var(--card);border:1px solid var(--line);border-top:3px solid var(--green);border-radius:12px;box-shadow:0 -6px 16px rgba(43,58,48,.14)}
 .set-bar[hidden]{display:none}
 .set-bar .set-bar-count{font-weight:600;color:var(--ink)}
 .set-bar .btn{min-height:44px}
