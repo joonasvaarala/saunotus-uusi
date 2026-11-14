@@ -1,0 +1,62 @@
+[
+  {
+    "key": "ui.admin.nav.gifts_codes",
+    "lang": "fi",
+    "text": "Lahjakortit ja koodit",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "HALL-KUORI-01: hallinnan päävalikko työn mukaan (9 kohtaa) ja yläpalkin Kassa-pikatoiminto"
+  },
+  {
+    "key": "ui.admin.nav.gifts_codes",
+    "lang": "en",
+    "text": "Gift cards and codes",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "HALL-KUORI-01: hallinnan päävalikko työn mukaan (9 kohtaa) ja yläpalkin Kassa-pikatoiminto"
+  },
+  {
+    "key": "ui.admin.nav.offering",
+    "lang": "fi",
+    "text": "Tarjonta",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "HALL-KUORI-01: hallinnan päävalikko työn mukaan (9 kohtaa) ja yläpalkin Kassa-pikatoiminto"
+  },
+  {
+    "key": "ui.admin.nav.offering",
+    "lang": "en",
+    "text": "Offering",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "HALL-KUORI-01: hallinnan päävalikko työn mukaan (9 kohtaa) ja yläpalkin Kassa-pikatoiminto"
+  },
+  {
+    "key": "ui.admin.nav.pos_quick",
+    "lang": "fi",
+    "text": "Kassa",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "HALL-KUORI-01: hallinnan päävalikko työn mukaan (9 kohtaa) ja yläpalkin Kassa-pikatoiminto"
+  },
+  {
+    "key": "ui.admin.nav.pos_quick",
+    "lang": "en",
+    "text": "Till",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "HALL-KUORI-01: hallinnan päävalikko työn mukaan (9 kohtaa) ja yläpalkin Kassa-pikatoiminto"
+  }
+]

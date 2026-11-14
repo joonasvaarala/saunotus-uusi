@@ -17,7 +17,7 @@ const src = (p) => readFileSync(join(root, p), 'utf8');
 test('navigaatio: Hyvitysten seuranta on Kassa ja talous -välilehti', () => {
   assert.equal(NAV_TEXTS.fi['ui.admin.nav.refund_watch'], 'Hyvitysten seuranta');
   assert.equal(NAV_TEXTS.en['ui.admin.nav.refund_watch'], 'Refund follow-up');
-  assert.deepEqual(resolveAdminPath('hyvitysten-seuranta'), { path: 'kassa', legacyReservations: false, groupId: 'cash', tabId: 'hyvitykset' });
+  assert.deepEqual(resolveAdminPath('hyvitysten-seuranta'), { path: 'talous', legacyReservations: false, groupId: 'cash', tabId: 'hyvitykset' });
   const cash = navGroupById('cash');
   const can = (list) => (p) => list.includes(p);
   assert.deepEqual(visibleGroupTabs(cash, can(['payments.manage'])).map((t) => t.id), ['talous', 'seurattavat']);

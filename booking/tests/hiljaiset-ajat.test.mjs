@@ -309,7 +309,7 @@ test('jälkilöylyt: vain vapaa tuleva vuoro tänään+6; varattu, mennyt ja vie
 });
 test('hallinta: reitti Hiljaiset ajat (catalog.edit / settings.edit) alennuskoodien jälkeen; CI ajaa tämän testin', () => {
   const nav = rd('booking/admin/admin-navigation.js');
-  assert.match(nav, /id: 'alennuskoodit', path: 'alennuskoodit'[\s\S]{0,220}id: 'hiljaiset-ajat', path: 'hiljaiset-ajat', labelKey: 'ui\.admin\.nav\.quiet_hours', view: 'quiet', any: \['catalog\.edit', 'settings\.edit'\]/);
-  assert.match(rd('booking/admin/admin.js'), /groupId: 'products', mod: \(\) => loadView\('nav-group'\)/);
+  assert.match(nav, /id: 'koulutukset', path: 'koulutukset'[\s\S]{0,220}id: 'hiljaiset-ajat', path: 'hiljaiset-ajat', labelKey: 'ui\.admin\.nav\.quiet_hours', view: 'quiet', any: \['catalog\.edit', 'settings\.edit'\]/);
+  assert.match(rd('booking/admin/admin.js'), /groupId: 'offering', mod: \(\) => loadView\('nav-group'\)/);   // HALL-KUORI-01: Tarjonta
   assert.match(rd('.github/workflows/pages.yml'), /node --test booking\/tests\/hiljaiset-ajat\.test\.mjs/);
 });

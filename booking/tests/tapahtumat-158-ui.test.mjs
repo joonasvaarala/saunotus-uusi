@@ -249,7 +249,7 @@ test('XSS: tapahtuman, kerran ja resurssin nimet piirretään tekstinä (ei <img
 test('hallinta: reitti, kopio-nappi tuotteissa, mock kytketty, build-lista ja CI', () => {
   const admin = read('booking/admin/admin.js');
   assert.match(read('booking/admin/admin-navigation.js'), /id: 'tapahtumat', path: 'tapahtumat', labelKey: 'ui\.admin\.nav\.events', view: 'events'/);
-  assert.match(admin, /groupId: 'products', mod: \(\) => loadView\('nav-group'\)/);
+  assert.match(admin, /groupId: 'offering', mod: \(\) => loadView\('nav-group'\)/);   // HALL-KUORI-01: Tarjonta
   const prod = read('booking/admin/views/products.js');
   assert.match(prod, /data-testid': 'product-copy'/);
   assert.match(prod, /copyArgs\(\{ product_id: p\.id \}\)/);

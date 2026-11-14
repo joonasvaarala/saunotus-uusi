@@ -40,7 +40,7 @@ test('omat kortit: haku ensin, pikajatko kutsuu setExpiryä, ei uutta kirjoitus-
   assert.match(view, /gc-btn-expiry/);
   assert.match(page, /searchFirst: true/);
   assert.match(page, /any|giftcards/);
-  assert.match(src('admin/admin.js'), /any: \['giftcards\.manage'\]/);
+  assert.match(src('admin/admin-navigation.js'), /id: 'lahjakortit', path: 'lahjakortit', labelKey: 'ui\.admin\.nav\.giftcards', view: 'lahjakortit', any: \['giftcards\.manage'\]/);   // HALL-KUORI-01: Lahjakortit ja koodit
   assert.doesNotMatch(view, /admin_extend_gift_card|p_months/);
 });
 

@@ -3,7 +3,8 @@
 // Tuonti: content/site-texts.pending-import-38.json (alkuperäiset avaimet) ja
 // content/site-texts.pending-import-88.json (ryhmien ja välilehtien nimet) ja
 // content/site-texts.pending-import-118.json (Lahjakortit) ja
-// content/site-texts.pending-import-126.json (Koulutukset). Ei ylikirjoita olemassa olevia.
+// content/site-texts.pending-import-126.json (Koulutukset) ja
+// content/site-texts.pending-import-151.json (HALL-KUORI-01: Lahjakortit ja koodit, Tarjonta, Kassa). Ei ylikirjoita olemassa olevia.
 import { getLang } from './talous-i18n.js';
 import { getSiteTexts } from './site-texts-cache.js';
 
@@ -59,6 +60,10 @@ export const NAV_TEXTS = {
     'ui.admin.nav.giftcards_own': 'Omat lahjakortit',
     'ui.admin.nav.giftcards_claims': 'Lunastuspyynnöt',
     'ui.admin.nav.trainings': 'Koulutukset',
+    // HALL-KUORI-01 (tuonti 151)
+    'ui.admin.nav.gifts_codes': 'Lahjakortit ja koodit',
+    'ui.admin.nav.offering': 'Tarjonta',
+    'ui.admin.nav.pos_quick': 'Kassa',
   },
   en: {
     'ui.admin.nav.orders': 'Orders',
@@ -109,6 +114,9 @@ export const NAV_TEXTS = {
     'ui.admin.nav.giftcards_own': 'Our gift cards',
     'ui.admin.nav.giftcards_claims': 'Redemption requests',
     'ui.admin.nav.trainings': 'Trainings',
+    'ui.admin.nav.gifts_codes': 'Gift cards and codes',
+    'ui.admin.nav.offering': 'Offering',
+    'ui.admin.nav.pos_quick': 'Till',
   },
 };
 

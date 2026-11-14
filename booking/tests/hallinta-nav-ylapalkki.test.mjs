@@ -17,12 +17,13 @@ const src = (p) => readFileSync(join(root, p), 'utf8');
 test('päänavigaatio: yhdeksän kohtaa, Varaukset vain Tilaukset-välilehtenä', () => {
   const js = src('admin/admin.js');
   const order = [...js.matchAll(/\{ path: '([^']*)', label:/g)].map((m) => m[1]);
-  assert.deepEqual(order, ['', 'kalenteri', 'tilaukset', 'asiakkaat', 'lahjakortit', 'kassa', 'tuotteet', 'koulutukset', 'viestit', 'tilat', 'asetukset', 'uusi', 'tarkista']);
-  assert.match(js, /path: 'lahjakortit'[\s\S]{0,180}any: \['giftcards\.manage'\]/);
+  // HALL-KUORI-01: yhdeksän pääkohtaa työn mukaan; Pikakassa yläpalkin pikatoimintona (rail: false)
+  assert.deepEqual(order, ['', 'kalenteri', 'tilaukset', 'asiakkaat', 'lahjakortit', 'tarjonta', 'talous', 'viestit', 'asetukset', 'pikakassa', 'uusi', 'tarkista']);
+  assert.match(js, /path: 'lahjakortit'[\s\S]{0,180}groupId: 'gifts'/);
+  assert.match(js, /path: 'pikakassa'[\s\S]{0,160}rail: false, any: \['pos\.use'\]/);
   assert.match(js, /path: 'uusi'[\s\S]{0,120}rail: false/);
   assert.match(js, /path: 'tarkista'[\s\S]{0,120}rail: false/);
   assert.doesNotMatch(js, /path: 'varaukset', label:/);
-  assert.doesNotMatch(js, /path: 'pikakassa', label:/);
   assert.match(src('admin/views/orders.js'), /\['reservations', 'ui\.admin\.nav\.reservations'\]/);
   assert.equal(NAV_TEXTS.fi['ui.admin.nav.reservations'], 'Varaukset');
   assert.match(src('admin/views/orders.js'), /orders-tab-\$\{key\}/);
@@ -167,7 +168,8 @@ test('tekstit: ui.admin.nav.* FI+EN sanakirjassa ja pending-import-38/88:ssa, ei
   const rows105 = JSON.parse(readFileSync(join(root, '../content/site-texts.pending-import-105.json'), 'utf8')).filter((r) => r.key.startsWith('ui.admin.nav.'));
   const rows118 = JSON.parse(readFileSync(join(root, '../content/site-texts.pending-import-118.json'), 'utf8')).filter((r) => r.key.startsWith('ui.admin.nav.'));
   const rows126 = JSON.parse(readFileSync(join(root, '../content/site-texts.pending-import-126.json'), 'utf8')).filter((r) => r.key.startsWith('ui.admin.nav.'));   // Koulutukset
-  const rows = [...rows38, ...rows88, ...rows102, ...rows105, ...rows118, ...rows126];
+  const rows151 = JSON.parse(readFileSync(join(root, '../content/site-texts.pending-import-151.json'), 'utf8'));   // HALL-KUORI-01
+  const rows = [...rows38, ...rows88, ...rows102, ...rows105, ...rows118, ...rows126, ...rows151];
   assert.deepEqual(Object.keys(NAV_TEXTS.fi).sort(), Object.keys(NAV_TEXTS.en).sort());
   assert.equal(rows.length, Object.keys(NAV_TEXTS.fi).length * 2);
   const seen = new Set();
@@ -185,7 +187,7 @@ test('tekstit: ui.admin.nav.* FI+EN sanakirjassa ja pending-import-38/88:ssa, ei
   for (const r of rows38) assert.equal(newKeys.has(r.key), false, r.key);
   const taken = new Set();
   for (const f of readdirSync(join(root, '../content'))) {
-    if (!/^site-texts\.(pending-import-(?!38\.|88\.|102\.|105\.|118\.|126\.)|imported)/.test(f) || !f.endsWith('.json')) continue;
+    if (!/^site-texts\.(pending-import-(?!38\.|88\.|102\.|105\.|118\.|126\.|151\.)|imported)/.test(f) || !f.endsWith('.json')) continue;
     const j = JSON.parse(readFileSync(join(root, '../content', f), 'utf8'));
     for (const r of Array.isArray(j) ? j : j.texts || []) taken.add(`${r.key}|${r.lang}`);
   }
@@ -206,21 +208,20 @@ test('tekstit: ui.admin.nav.* FI+EN sanakirjassa ja pending-import-38/88:ssa, ei
 
 test('ryhmät: vanhat osoitteet avaavat oikean välilehden, oikeus rajaa välilehdet', () => {
   const can = (list) => (p) => list.includes(p);
-  assert.deepEqual(resolveAdminPath('pikakassa'), { path: 'kassa', legacyReservations: false, groupId: 'cash', tabId: 'pikakassa' });
-  assert.deepEqual(resolveAdminPath('laskut'), { path: 'kassa', legacyReservations: false, groupId: 'cash', tabId: 'laskut' });
-  assert.deepEqual(resolveAdminPath('talous'), { path: 'kassa', legacyReservations: false, groupId: 'cash', tabId: 'talous' });
-  assert.deepEqual(resolveAdminPath('kassa'), { path: 'kassa', legacyReservations: false, groupId: 'cash', tabId: null });
-  assert.deepEqual(resolveAdminPath('tapahtumat'), { path: 'tuotteet', legacyReservations: false, groupId: 'products', tabId: 'tapahtumat' });
-  assert.deepEqual(resolveAdminPath('alennuskoodit'), { path: 'tuotteet', legacyReservations: false, groupId: 'products', tabId: 'alennuskoodit' });
-  assert.deepEqual(resolveAdminPath('hiljaiset-ajat'), { path: 'tuotteet', legacyReservations: false, groupId: 'products', tabId: 'hiljaiset-ajat' });
-  assert.deepEqual(resolveAdminPath('tuotteet'), { path: 'tuotteet', legacyReservations: false, groupId: 'products', tabId: 'tuotteet' });
-  assert.deepEqual(resolveAdminPath('resurssit'), { path: 'tilat', legacyReservations: false, groupId: 'spaces', tabId: 'resurssit' });
-  assert.deepEqual(resolveAdminPath('sulkukalenterit'), { path: 'tilat', legacyReservations: false, groupId: 'spaces', tabId: 'sulkukalenterit' });
+  assert.deepEqual(resolveAdminPath('pikakassa'), { path: 'pikakassa', legacyReservations: false, groupId: null, tabId: null });
+  assert.deepEqual(resolveAdminPath('laskut'), { path: 'talous', legacyReservations: false, groupId: 'cash', tabId: 'laskut' });
+  assert.deepEqual(resolveAdminPath('talous'), { path: 'talous', legacyReservations: false, groupId: 'cash', tabId: 'talous' });
+  assert.deepEqual(resolveAdminPath('kassa'), { path: 'pikakassa', legacyReservations: false, groupId: null, tabId: null });   // vanha kirjanmerkki
+  const off = (tabId) => ({ path: 'tarjonta', legacyReservations: false, groupId: 'offering', tabId });
+  for (const t of ['tuotteet', 'tapahtumat', 'koulutukset', 'hiljaiset-ajat', 'resurssit', 'sulkukalenterit']) assert.deepEqual(resolveAdminPath(t), off(t));
+  assert.deepEqual(resolveAdminPath('tilat'), off('resurssit'));   // vanha Tilat ja sulut -ryhmä
+  assert.deepEqual(resolveAdminPath('tarjonta'), { path: 'tarjonta', legacyReservations: false, groupId: 'offering', tabId: null });
+  assert.deepEqual(resolveAdminPath('alennuskoodit'), { path: 'lahjakortit', legacyReservations: false, groupId: 'gifts', tabId: 'alennuskoodit' });
   assert.deepEqual(resolveAdminPath('kayttajat'), { path: 'asetukset', legacyReservations: false, groupId: 'settings', tabId: 'kayttajat' });
   assert.deepEqual(resolveAdminPath('asetukset'), { path: 'asetukset', legacyReservations: false, groupId: 'settings', tabId: 'asetukset' });
   assert.deepEqual(resolveAdminPath('uusi'), { path: 'uusi', legacyReservations: false, groupId: null, tabId: null });
   assert.deepEqual(resolveAdminPath('tarkista'), { path: 'tarkista', legacyReservations: false, groupId: null, tabId: null });
-  assert.deepEqual(resolveAdminPath('lahjakortit'), { path: 'lahjakortit', legacyReservations: false, groupId: null, tabId: null });
+  assert.deepEqual(resolveAdminPath('lahjakortit'), { path: 'lahjakortit', legacyReservations: false, groupId: 'gifts', tabId: 'lahjakortit' });
   assert.equal(legacyFinanceGiftTarget('talous', new URLSearchParams('tab=giftcards&code=ABCD')), '#/lahjakortit?tab=omat&code=ABCD');
   assert.equal(legacyFinanceGiftTarget('talous', new URLSearchParams('tab=vouchers')), '#/lahjakortit?tab=lunastukset');
   assert.equal(legacyFinanceGiftTarget('talous', new URLSearchParams('tab=orders')), null);
@@ -229,16 +230,17 @@ test('ryhmät: vanhat osoitteet avaavat oikean välilehden, oikeus rajaa välile
   assert.equal(NAV_TEXTS.fi['ui.admin.nav.giftcards_claims'], 'Lunastuspyynnöt');
   assert.deepEqual(resolveAdminPath(''), { path: '', legacyReservations: false, groupId: null, tabId: null });
   const cash = navGroupById('cash');
-  assert.deepEqual(visibleGroupTabs(cash, can(['pos.use'])).map((t) => t.id), ['pikakassa']);
+  assert.deepEqual(visibleGroupTabs(cash, can(['pos.use'])).map((t) => t.id), []);   // kassalle Talous ei näy; Kassa on yläpalkissa
   assert.equal(groupAllowed(cash, can([])), false);
-  assert.equal(selectGroupTab(cash, 'laskut', can(['pos.use'])).id, 'pikakassa');
-  assert.equal(selectGroupTab(cash, null, can(['invoices.manage', 'pos.use'])).id, 'pikakassa');
-  const products = navGroupById('products');
-  assert.deepEqual(visibleGroupTabs(products, can([])).map((t) => t.id), ['tuotteet', 'tapahtumat']);
-  assert.equal(groupAllowed(products, can([])), true);
-  const spaces = navGroupById('spaces');
-  assert.deepEqual(visibleGroupTabs(spaces, can(['blocks.manage'])).map((t) => t.id), ['resurssit', 'sulkukalenterit']);
-  assert.equal(selectGroupTab(spaces, 'sulkukalenterit', can([])).id, 'resurssit');
+  assert.equal(selectGroupTab(cash, null, can(['invoices.manage', 'payments.manage'])).id, 'talous');   // ryhmä aukeaa tärkeimpään välilehteen
+  assert.equal(selectGroupTab(cash, 'laskut', can(['invoices.manage'])).id, 'laskut');
+  const offering = navGroupById('offering');
+  assert.deepEqual(visibleGroupTabs(offering, can([])).map((t) => t.id), ['tuotteet', 'tapahtumat', 'koulutukset', 'resurssit']);
+  assert.deepEqual(visibleGroupTabs(offering, can(['blocks.manage'])).map((t) => t.id), ['tuotteet', 'tapahtumat', 'koulutukset', 'resurssit', 'sulkukalenterit']);
+  assert.equal(selectGroupTab(offering, 'sulkukalenterit', can([])).id, 'tuotteet');
+  const gifts = navGroupById('gifts');
+  assert.deepEqual(visibleGroupTabs(gifts, can(['giftcards.manage', 'annual_cards.manage'])).map((t) => t.id), ['lahjakortit', 'alennuskoodit']);
+  assert.equal(groupAllowed(gifts, can([])), false);
   const settings = navGroupById('settings');
   assert.deepEqual(visibleGroupTabs(settings, can(['staff.manage'])).map((t) => t.id), ['kayttajat']);
   assert.deepEqual(visibleGroupTabs(settings, can(['pos.use'])).map((t) => t.id), ['asetukset']);
