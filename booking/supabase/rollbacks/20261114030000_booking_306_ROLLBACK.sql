@@ -1,4 +1,4 @@
--- booking_290 ROLLBACK: palauttaa admin_newsletter_dispatch- ja email_newsletter_payload-funktiot booking_259:n runkoon ja poistaa kytkinfunktiot.
+-- booking_306 ROLLBACK: palauttaa admin_newsletter_dispatch- ja email_newsletter_payload-funktiot booking_259:n runkoon ja poistaa kytkinfunktiot.
 -- VAROITUS: rollbackin jälkeen lähetystä ei suojaa enää kytkin. Resend on PRODissa live. Aja vain, jos uutiskirjeominaisuus poistetaan käytöstä muulla tavoin.
 -- Asetusrivi booking.settings newsletter_enabled jätetään paikalleen (vaaraton; poisto käsin päätöksellä). Suppressiodataan ei koskea.
 set local lock_timeout = '5s';
@@ -7,7 +7,7 @@ do $pre$
 begin
   if (select md5(prosrc) from pg_catalog.pg_proc where oid = 'booking.admin_newsletter_dispatch(bigint,integer,boolean,uuid)'::regprocedure) <> '74b3bf2d8b7f6451cec5c5114108ae94'
      or (select md5(prosrc) from pg_catalog.pg_proc where oid = 'booking.email_newsletter_payload(bigint)'::regprocedure) <> 'e88487302149a408ece7b0435baac8db' then
-    raise exception 'rollback 290: funktiot poikkeavat booking_290:n jälkeisestä tilasta. Ei muutoksia.'; end if;
+    raise exception 'rollback 306: funktiot poikkeavat booking_306:n jälkeisestä tilasta. Ei muutoksia.'; end if;
 end $pre$;
 
 create or replace function booking.admin_newsletter_dispatch(p_id bigint,p_version integer,p_confirm boolean default false,p_preview_token uuid default null)

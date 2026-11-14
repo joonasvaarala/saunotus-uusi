@@ -1,5 +1,5 @@
--- DISPOSABLE LOCAL DATABASE ONLY (rollback-only). booking_290: newsletter_enabled-kytkin, booking_291: peruutuslistojen yhdistäminen.
--- Synteettinen data (example.test). Ajo: psql -X -v ON_ERROR_STOP=1 -1 -f t290_newsletter_enabled.sql ; kaikki muutokset perutaan.
+-- DISPOSABLE LOCAL DATABASE ONLY (rollback-only). booking_306: newsletter_enabled-kytkin, booking_299: peruutuslistojen yhdistäminen (yksi taulu marketing_suppressions + yhteensopivuusnäkymä newsletter_suppressions; korvasi haaran booking_291:n).
+-- Synteettinen data (example.test). Ajo: psql -X -v ON_ERROR_STOP=1 -1 -f t306_newsletter_enabled.sql ; kaikki muutokset perutaan.
 begin;
 create function pg_temp.ck(ok boolean,label text) returns void language plpgsql as $$begin
   if ok is not true then raise exception 'FAIL: %',label; end if;
@@ -67,7 +67,7 @@ begin
   perform pg_temp.ck(blocked,'service_role ei voi lähettää/esikatsella kytkimen ollessa auki');
   perform set_config('request.jwt.claims',jsonb_build_object('sub',uid,'role','authenticated')::text,true);
 
-  -- ---- booking_291: osoite vain marketing_suppressions-taulussa ----
+  -- ---- booking_299: osoite vain marketing_suppressions-taulussa ----
   draft:=booking.svc_newsletter_save(null,data||'{"subject_fi":"Toinen"}');nid:=(draft->>'id')::bigint;v:=(draft->>'version')::int;
   perform pg_temp.ck((select count(*) from booking._newsletter_recipients('all','all'))=4,'ennen suppressiota 4 vastaanottajaa');
   perform pg_temp.ck(not exists(select 1 from booking.newsletter_suppressions where address_fingerprint=booking._email_hash('n290-2@example.test')),'osoite ei ole newsletter_suppressions-taulussa');
@@ -88,6 +88,24 @@ begin
   insert into booking.newsletter_suppressions(address_fingerprint) values(booking._newsletter_fingerprint('n290-4@example.test'));
   perform pg_temp.ck((select count(*) from booking._newsletter_recipients('all','all'))=1,'newsletter_suppressions estää edelleen (jäljellä 1 vastaanottaja)');
   perform pg_temp.ck(not booking._newsletter_address_blocked(booking._newsletter_fingerprint('n290-1@example.test'),'n290-1@example.test'),'suppressoimaton osoite ei ole estetty');
+  -- ---- booking_299: kirjoitus kumpaankin nimeen (taulu marketing_suppressions ja yhteensopivuusnäkymä newsletter_suppressions) ----
+  perform pg_temp.ck((select relkind from pg_catalog.pg_class where oid=to_regclass('booking.newsletter_suppressions'))='v'
+                     and (select relkind from pg_catalog.pg_class where oid=to_regclass('booking.marketing_suppressions'))='r','299: newsletter_suppressions on näkymä, marketing_suppressions taulu');
+  perform pg_temp.ck(not booking.is_email_suppressed('n290-5@example.test') and not booking.is_email_suppressed('n290-6@example.test'),'299: ennen kirjoitusta osoitteet 5 ja 6 eivät ole kiellettyjä');
+  -- vanha kirjoitustapa näkymän kautta (kuten public_newsletter_unsubscribe ennen 299:ää)
+  insert into booking.newsletter_suppressions(address_fingerprint) values(booking._newsletter_fingerprint(' N290-5@Example.test')) on conflict do nothing;
+  perform pg_temp.ck(booking.is_email_suppressed('n290-5@example.test'),'299: näkymään kirjoitettu kielto näkyy is_email_suppressed-funktiolle');
+  perform pg_temp.ck(exists(select 1 from booking.marketing_suppressions where email_hash=booking._email_hash('n290-5@example.test') and reason='newsletter_unsubscribed' and newsletter_unsubscribed_at is not null),
+                     '299: näkymän kirjoitus menee marketing_suppressions-tauluun (reason newsletter_unsubscribed)');
+  perform pg_temp.ck(booking._newsletter_address_blocked(booking._newsletter_fingerprint('n290-5@example.test'),'n290-5@example.test'),'299: näkymän kirjoitus estää uutiskirjeen');
+  -- suora kirjoitus tauluun (285: yhdistäminen/anonymisointi)
+  insert into booking.marketing_suppressions(email_hash,reason,source) values(booking._email_hash('n290-6@example.test'),'anonymized','t306');
+  perform pg_temp.ck(booking.is_email_suppressed('N290-6@example.test ') and booking._newsletter_address_blocked(booking._newsletter_fingerprint('n290-6@example.test'),'n290-6@example.test'),
+                     '299: tauluun kirjoitettu kielto: is_email_suppressed ja uutiskirjeen esto');
+  perform pg_temp.ck(exists(select 1 from booking.newsletter_suppressions where address_fingerprint=booking._newsletter_fingerprint('n290-6@example.test')),'299: tauluun kirjoitettu kielto näkyy näkymän kautta');
+  insert into booking.newsletter_suppressions(address_fingerprint) values(booking._newsletter_fingerprint('n290-6@example.test')) on conflict do nothing;
+  perform pg_temp.ck((select count(*) from booking.marketing_suppressions where email_hash=booking._email_hash('n290-6@example.test'))=1,'299: sama osoite kumpaankin nimeen → yksi rivi');
+  perform pg_temp.ck(not booking.is_email_suppressed('n290-1@example.test'),'299: kieltämätön osoite ei ole is_email_suppressed');
 end
 $test$;
 rollback;

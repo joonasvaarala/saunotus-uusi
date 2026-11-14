@@ -60,25 +60,36 @@ test('newsletter is a tab on the Viestit page (no separate entry), sandboxed pre
  assert.match(read('booking/admin/views/customer-message-panel.js'),/messages-tab-uutiskirje/);
  assert.match(read('scripts/build-pages.mjs'),/'views\/newsletters\.js'/);
 });
-test('booking_290: newsletter_enabled defaults to false, migration never sets true, both functions check it',()=>{
- const m=read('booking/supabase/migrations/20261113120000_booking_290_newsletter_enabled_flag.sql');
+test('booking_306: newsletter_enabled defaults to false, migration never sets true, both functions check it',()=>{
+ const m=read('booking/supabase/migrations/20261114030000_booking_306_newsletter_enabled_flag.sql');
  assert.match(m,/\('newsletter_enabled', 'false'::jsonb/);assert.match(m,/on conflict \(key\) do nothing/);
  assert.doesNotMatch(m,/newsletter_enabled'[^\n]*'true'|update booking\.settings|set value/i);
  assert.match(m,/coalesce\(p_confirm,false\) and not booking\._newsletter_flag\('newsletter_enabled'\)/);
  assert.match(m,/not booking\._newsletter_flag\('newsletter_enabled'\) then return jsonb_build_object\('allowed',false\)/);
  assert.doesNotMatch(m,/public\./);
- assert.ok(existsSync(new URL('../supabase/rollbacks/20261113120000_booking_290_ROLLBACK.sql',import.meta.url)));
- const sql=read('booking/supabase/tests/t290_newsletter_enabled.sql');
+ assert.ok(existsSync(new URL('../supabase/rollbacks/20261114030000_booking_306_ROLLBACK.sql',import.meta.url)));
+ const sql=read('booking/supabase/tests/t306_newsletter_enabled.sql');
  assert.match(sql,/dispatch\(confirm=true\) antaa virheen kun kytkin on false/);assert.match(sql,/payload allowed:false/);
 });
-test('booking_291: _newsletter_address_blocked checks both suppression tables; rollbacks keep suppression data',()=>{
- const m=read('booking/supabase/migrations/20261113120100_booking_291_newsletter_suppression_union.sql');
- assert.match(m,/from booking\.newsletter_suppressions/);assert.match(m,/from booking\.marketing_suppressions/);
- for(const f of ['20261106223314_booking_259','20261106223319_booking_262','20261113120000_booking_290','20261113120100_booking_291']){
+test('booking_299: one suppression table + compatibility view; branch union migration 291 removed; rollbacks keep suppression data',()=>{
+ const m=read('booking/supabase/migrations/20261114004910_booking_299_suppressions_unify.sql');
+ assert.match(m,/create (or replace )?view booking\.newsletter_suppressions/i);assert.match(m,/from booking\.marketing_suppressions/);
+ assert.ok(!existsSync(new URL('../supabase/migrations/20261113120100_booking_291_newsletter_suppression_union.sql',import.meta.url)));
+ assert.ok(!existsSync(new URL('../supabase/rollbacks/20261113120100_booking_291_ROLLBACK.sql',import.meta.url)));
+ for(const f of ['20261106223314_booking_259','20261106223319_booking_262','20261114030000_booking_306']){
   const r=read('booking/supabase/rollbacks/'+f+'_ROLLBACK.sql');
   assert.doesNotMatch(r.replace(/--[^\n]*/g,''),/(drop|delete|truncate)[^;]*(newsletter_suppressions|marketing_suppressions|newsletter_optout_tokens)/i,f);
  }
- assert.match(read('booking/supabase/tests/t290_newsletter_enabled.sql'),/osoite vain marketing_suppressions-taulussa: ei vastaanottaja/);
+ // 299:n rollback palauttaa alkuperäisen taulun (drop view sallittu). Uutiskirjerivit kopioidaan takaisin ja tarkistetaan ennen kuin ne poistetaan markkinointitaulusta.
+ const r299=read('booking/supabase/rollbacks/20261114004910_booking_299_ROLLBACK.sql').replace(/--[^\n]*/g,'');
+ assert.doesNotMatch(r299,/truncate|drop table[^;]*suppressions|delete from booking\.newsletter_suppressions/i);
+ const ins=r299.search(/insert into booking\.newsletter_suppressions/i), chk=r299.search(/uutiskirjerivi puuttuisi palautuksesta/), del=r299.search(/delete from booking\.marketing_suppressions where reason = 'newsletter_unsubscribed'/);
+ assert.ok(ins>0&&chk>ins&&del>chk,'299 rollback: kopio → tarkistus → poisto');
+ assert.equal((r299.match(/delete from/gi)||[]).length,1);
+ const t=read('booking/supabase/tests/t306_newsletter_enabled.sql');
+ assert.match(t,/osoite vain marketing_suppressions-taulussa: ei vastaanottaja/);
+ assert.match(t,/insert into booking\.newsletter_suppressions\(address_fingerprint\)/);assert.match(t,/insert into booking\.marketing_suppressions\(email_hash/);
+ assert.match(t,/booking\.is_email_suppressed\(/);
 });
 
 

@@ -10,7 +10,7 @@ do $$declare h newsletter_identity_history;d jsonb;x jsonb;y jsonb;n bigint;v in
  d:=booking.svc_newsletter_save(null,'{"subject_fi":"Uusi","subject_en":"New","body_fi":"Testi","body_en":"Test","style":{"layout":"letter"},"segment":"all"}');
  n:=(d->>'id')::bigint;v:=(d->>'version')::integer;
  if n<=h.campaign_id then raise exception 'Campaign identity restarted';end if;
- insert into booking.settings(key,value) values('newsletter_enabled','true'::jsonb) on conflict (key) do update set value='true'::jsonb; -- booking_290: kytkin auki kertakäyttökannassa
+ insert into booking.settings(key,value) values('newsletter_enabled','true'::jsonb) on conflict (key) do update set value='true'::jsonb; -- booking_306: kytkin auki kertakäyttökannassa
  x:=booking.admin_newsletter_dispatch(n,v,false);x:=booking.admin_newsletter_dispatch(n,v,true,(x->>'preview_token')::uuid);
  if x->>'queued_count'<>'1'then raise exception 'New campaign collided with retained dedupe/history';end if;
  select id into l from booking.newsletter_logs where newsletter_id=n;

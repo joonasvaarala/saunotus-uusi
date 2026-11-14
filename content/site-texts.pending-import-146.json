@@ -7,7 +7,7 @@
     "kind": "plain",
     "max_len": 400,
     "placeholders": [],
-    "reason": "booking_290: uutiskirjeen lähetyskytkin ja välilehti Viestit-sivulla"
+    "reason": "booking_306: uutiskirjeen lähetyskytkin ja välilehti Viestit-sivulla"
   },
   {
     "key": "admin.newsletter.disabled",
@@ -17,7 +17,7 @@
     "kind": "plain",
     "max_len": 400,
     "placeholders": [],
-    "reason": "booking_290: uutiskirjeen lähetyskytkin ja välilehti Viestit-sivulla"
+    "reason": "booking_306: uutiskirjeen lähetyskytkin ja välilehti Viestit-sivulla"
   },
   {
     "key": "admin.newsletter.newsletter_disabled",
@@ -27,7 +27,7 @@
     "kind": "plain",
     "max_len": 400,
     "placeholders": [],
-    "reason": "booking_290: uutiskirjeen lähetyskytkin ja välilehti Viestit-sivulla"
+    "reason": "booking_306: uutiskirjeen lähetyskytkin ja välilehti Viestit-sivulla"
   },
   {
     "key": "admin.newsletter.title",
@@ -561,7 +561,7 @@
     "kind": "plain",
     "max_len": 400,
     "placeholders": [],
-    "reason": "booking_290: uutiskirjeen lähetyskytkin ja välilehti Viestit-sivulla"
+    "reason": "booking_306: uutiskirjeen lähetyskytkin ja välilehti Viestit-sivulla"
   },
   {
     "key": "admin.newsletter.disabled",
@@ -571,7 +571,7 @@
     "kind": "plain",
     "max_len": 400,
     "placeholders": [],
-    "reason": "booking_290: uutiskirjeen lähetyskytkin ja välilehti Viestit-sivulla"
+    "reason": "booking_306: uutiskirjeen lähetyskytkin ja välilehti Viestit-sivulla"
   },
   {
     "key": "admin.newsletter.newsletter_disabled",
@@ -581,7 +581,7 @@
     "kind": "plain",
     "max_len": 400,
     "placeholders": [],
-    "reason": "booking_290: uutiskirjeen lähetyskytkin ja välilehti Viestit-sivulla"
+    "reason": "booking_306: uutiskirjeen lähetyskytkin ja välilehti Viestit-sivulla"
   },
   {
     "key": "admin.newsletter.title",

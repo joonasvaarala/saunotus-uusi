@@ -1,4 +1,4 @@
--- booking_290: uutiskirjeen oma kytkin newsletter_enabled (booking.settings, oletus false).
+-- booking_306: uutiskirjeen oma kytkin newsletter_enabled (booking.settings, oletus false).
 -- Taustaa: docs/claude/uutiskirje-tila.md kohta 3.3 ja 5. Resend on PRODissa live, joten ilman kytkintä admin_newsletter_dispatch olisi teknisesti
 -- käytettävissä heti, kun joku, jolla on messages.edit, kutsuu RPC:tä. Malli: _customer_flag (booking_285).
 --   * Kytkin lisätään arvolla false (on conflict do nothing): migraatio EI muuta jo asetettua arvoa. Kytkimen avaa vain Joonaksen luvalla (admin_set_setting).
@@ -6,20 +6,20 @@
 --   * email_newsletter_payload palauttaa allowed:false, jolloin jonossa jo olevatkaan rivit eivät lähde (send-emails ohittaa ne tilalla skipped).
 --   * admin_newsletter_enabled(): hallinnan käyttöliittymän tilatieto (messages.edit).
 -- Muuttaa vain nämä kaksi funktiota (rungot muuten samat kuin booking_259). Ennakkotarkistus: nykyisten funktioiden prosrc md5 (sama kuin 259/262 PRODissa).
--- Rollback: ../rollbacks/20261113120000_booking_290_ROLLBACK.sql
+-- Rollback: ../rollbacks/20261114030000_booking_306_ROLLBACK.sql
 set local lock_timeout = '5s';
 
 do $pre$
 begin
   if to_regprocedure('booking.admin_newsletter_dispatch(bigint,integer,boolean,uuid)') is null or to_regprocedure('booking.email_newsletter_payload(bigint)') is null then
-    raise exception 'booking_290: booking_259 puuttuu. Ei muutoksia.'; end if;
+    raise exception 'booking_306: booking_259 puuttuu. Ei muutoksia.'; end if;
   if (select md5(prosrc) from pg_catalog.pg_proc where oid = 'booking.admin_newsletter_dispatch(bigint,integer,boolean,uuid)'::regprocedure) <> '0274fee6e58fbfbc702a539ca3be3f90'
      or (select md5(prosrc) from pg_catalog.pg_proc where oid = 'booking.email_newsletter_payload(bigint)'::regprocedure) <> '4854445d21ab30783bd3afdcdbf64356' then
-    raise exception 'booking_290: admin_newsletter_dispatch tai email_newsletter_payload poikkeaa odotetusta (booking_259). Ei muutoksia.'; end if;
+    raise exception 'booking_306: admin_newsletter_dispatch tai email_newsletter_payload poikkeaa odotetusta (booking_259). Ei muutoksia.'; end if;
 end $pre$;
 
 insert into booking.settings(key, value, description, is_public) values
-  ('newsletter_enabled', 'false'::jsonb, 'booking_290: uutiskirjeiden lähetys hallinnasta (admin_newsletter_dispatch confirm=true ja email_newsletter_payload). Oletus false. Käyttöönotto vaatii Joonaksen erillisen luvan; ensimmäinen lähetys vain testisegmentille.', false)
+  ('newsletter_enabled', 'false'::jsonb, 'booking_306: uutiskirjeiden lähetys hallinnasta (admin_newsletter_dispatch confirm=true ja email_newsletter_payload). Oletus false. Käyttöönotto vaatii Joonaksen erillisen luvan; ensimmäinen lähetys vain testisegmentille.', false)
 on conflict (key) do nothing;
 
 create or replace function booking._newsletter_flag(p_key text) returns boolean
@@ -42,7 +42,7 @@ declare n booking.newsletters; ids bigint[]; langs text[]; fingerprints text[]; 
   -- Even a service-role bot must not be able to send with this function.
   if auth.uid() is null or coalesce(booking._jwt_role(),'')<>'authenticated' then perform booking._err('forbidden','Lähetys vain kirjautuneesta hallinnasta'); end if;
   perform booking._require_permission('messages.edit');
-  -- booking_290: oma kytkin. Kun false, lähetys (confirm=true) estetään ennen kuin mitään kirjoitetaan. Esikatselu (confirm=false) sallitaan.
+  -- booking_306: oma kytkin. Kun false, lähetys (confirm=true) estetään ennen kuin mitään kirjoitetaan. Esikatselu (confirm=false) sallitaan.
   if coalesce(p_confirm,false) and not booking._newsletter_flag('newsletter_enabled') then perform booking._err('newsletter_disabled','Uutiskirjeiden lähetys ei ole käytössä'); end if;
   if not exists(select 1 from pg_catalog.pg_trigger t where t.tgrelid='booking.customers'::regclass
     and t.tgname='newsletter_capture_general_optout' and not t.tgisinternal and t.tgenabled in ('O','A')
@@ -83,7 +83,7 @@ end $$;
 create or replace function booking.email_newsletter_payload(p_id bigint) returns jsonb
 language plpgsql stable security definer set search_path='' as $$
 declare e booking.email_outbox; c booking.customers; l booking.newsletter_logs; loc text; site text; expected text; optout uuid; begin
-  -- booking_290: kytkin pois → mikään jonossa oleva rivi ei lähde.
+  -- booking_306: kytkin pois → mikään jonossa oleva rivi ei lähde.
   if not booking._newsletter_flag('newsletter_enabled') then return jsonb_build_object('allowed',false); end if;
   if not exists(select 1 from pg_catalog.pg_trigger t where t.tgrelid='booking.customers'::regclass
     and t.tgname='newsletter_capture_general_optout' and not t.tgisinternal and t.tgenabled in ('O','A')
@@ -117,5 +117,5 @@ begin
      or has_function_privilege('authenticated', 'booking.email_newsletter_payload(bigint)', 'execute')
      or not has_function_privilege('service_role', 'booking.email_newsletter_payload(bigint)', 'execute')
      or not has_function_privilege('authenticated', 'booking.admin_newsletter_dispatch(bigint,integer,boolean,uuid)', 'execute') then
-    raise exception 'booking_290: funktioiden oikeudet poikkeavat odotetusta'; end if;
+    raise exception 'booking_306: funktioiden oikeudet poikkeavat odotetusta'; end if;
 end $post$;
