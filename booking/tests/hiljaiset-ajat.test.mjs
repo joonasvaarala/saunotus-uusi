@@ -117,11 +117,7 @@ test('createQuietOfferCache: yksi kutsu / ikkuna, 60 s tai next_change_at, virhe
   t += 5000; await c.load('2026-10-24', '2026-10-30'); assert.equal(calls, 3);
   t += 6000; await c.load('2026-10-24', '2026-10-30'); assert.equal(calls, 4);
 });
-test('quietByWeekday: tänään + 6 päivää viikonpäivittäin aikajärjestyksessä', () => {
-  const m = L.quietByWeekday([offer({ session_date: '2026-10-26', starts_at: '2026-10-26T20:00:00+02:00' }), offer({ session_date: '2026-10-26', starts_at: '2026-10-26T12:00:00+02:00' }),
-    offer({ session_date: '2026-10-31', starts_at: '2026-10-31T12:00:00+02:00' }), offer({ session_date: '2026-10-23' })], '2026-10-24');
-  assert.deepEqual([...m.keys()], [1]);
-  assert.deepEqual(m.get(1).map((o) => o.starts_at), ['2026-10-26T12:00:00+02:00', '2026-10-26T20:00:00+02:00']);
+test('weekdayIso: viikonpäivä 1–7', () => {
   assert.equal(L.weekdayIso('2026-10-25'), 7);
   assert.equal(L.weekdayIso('bad'), null);
 });
@@ -247,7 +243,7 @@ test('rollback: palauttaa kolme funktiota ja poistaa uudet objektit; SQL-testi a
 
 // ---------------------------------------------------------------- käyttöliittymä: turvallisuus, värit, rakentaminen
 test('ei innerHTML:ää uusissa/muutetuissa käyttöliittymätiedostoissa; ei sinisiä värejä tai emojeita booking_162-tyyleissä', () => {
-  for (const f of ['booking/shop/src/shop.js', 'booking/shop/src/quiet-week.js', 'booking/shop/src/quiet-offers-logic.js', 'booking/admin/views/quiet.js', 'booking/admin/quiet-texts.js'])
+  for (const f of ['booking/shop/src/shop.js', 'booking/shop/src/quiet-week.js', 'booking/shop/src/week-grid.js', 'booking/shop/src/week-grid-view.js', 'booking/shop/src/week-grid-logic.js', 'booking/shop/src/quiet-offers-logic.js', 'booking/admin/views/quiet.js', 'booking/admin/quiet-texts.js'])
     assert.ok(!/innerHTML|outerHTML|insertAdjacentHTML/.test(rd(f).replace(/^\s*\/\/.*$/gm, '')), f);
   const shopCss = rd('booking/shop/src/shop.css'), siteCss = rd('src/styles.css');
   const blocks = [shopCss.slice(shopCss.indexOf('booking_162')), siteCss.slice(siteCss.indexOf('booking_162'))];
@@ -266,46 +262,36 @@ test('kontrasti ≥ 4,5:1 paletin pareille (#2B3A30 / #F4EFE7 / #7A5530 valkoise
   for (const [fg, bg] of [['#F4EFE7', '#2B3A30'], ['#7A5530', '#ffffff'], ['#7A5530', '#F4EFE7'], ['#7A5530', '#efe6d8'], ['#7A5530', '#e8f3ea'], ['#2B3A30', '#F4EFE7'], ['#2B3A30', '#efe6d8']])
     assert.ok(ratio(fg, bg) >= 4.5, `${fg} / ${bg}: ${ratio(fg, bg).toFixed(2)}`);
 });
-test('viikko-ohjelma: <ol data-quiet-week> tekstit + yksityisvuorotuotteet (25, 26), päivillä data-wd; kauppa-build lisää quiet-week.js:n', async () => {
-  const R = await import('../../src/render.mjs');
+test('viikko-ohjelma: .vk[data-quiet-week] + tekstit (ale-merkki, selite) attribuutissa; kauppa-build lisää quiet-week.js:n; haut', async () => {
+  const { weekGrid } = await import('../../src/week-grid.mjs');
   for (const lang of ['fi', 'en']) {
-    const html = R.week(lang);
-    assert.match(html, /<ol class="week"[^>]* data-quiet-week /);
-    for (let d = 1; d <= 7; d++) assert.ok(html.includes(`data-wd="${d}"`), `${lang} ${d}`);
-    const prods = JSON.parse(/data-quiet-products="([^"]*)"/.exec(html)[1].replace(/&quot;/g, '"').replace(/&amp;/g, '&'));
-    assert.deepEqual(Object.keys(prods).sort(), ['25', '26']);
-    assert.equal(prods[26].s, 'jalkiloylyt');
-    assert.match(html, lang === 'fi' ? /data-quiet-badge="−\{pct\} %"/ : /data-quiet-badge="−\{pct\}%"/);
-    assert.doesNotMatch(html, /data-quiet-note=/, `${lang}: huomiolaatikon tekstiä ei sivulle`);
+    const html = weekGrid(lang);
+    assert.match(html, /<div class="vk" data-vk data-quiet-week /);
+    for (let d = 0; d < 7; d++) assert.ok(html.includes(`data-vk-day="${d}"`), `${lang} ${d}`);
+    const T = JSON.parse(/data-vk-texts="([^"]*)"/.exec(html)[1].replace(/&quot;/g, '"').replace(/&amp;/g, '&'));
+    assert.equal(T.quietBadge, lang === 'fi' ? '−{pct} %' : '−{pct}%');
+    assert.match(T.quietSr, /\{pct\}.*\{was\}.*\{now\}/);
+    assert.doesNotMatch(html, /data-quiet-note=|data-quiet-products=/, `${lang}: huomiolaatikon tekstiä ei sivulle`);
     assert.doesNotMatch(html, /Hiljaisen ajan ale: vielä vapaat|private sessions still available/);
   }
   const build = rd('booking/shop/build.mjs');
   assert.match(build, /out\.includes\('data-quiet-week'\) && !out\.includes\('\/booking\/quiet-week\.js'\)/);
   assert.match(build, /window\.BOOKING_QUIET=/);
-  assert.match(rd('booking/shop/src/quiet-week.js'), /rpc\('public_quiet_offers', \{ p_from: from, p_to: to, p_audience: 'consumer' \}\)/);
-  assert.match(rd('booking/shop/src/quiet-week.js'), /rpc\('public_availability', \{ p_product_id: JALKIL_ID, p_from: from, p_to: to \}\)/);
+  const grid = rd('booking/shop/src/week-grid.js');
+  assert.match(grid, /rpc\('public_quiet_offers', \{ p_from: offerFrom, p_to: offerTo, p_audience: 'consumer' \}\)/);
+  assert.match(grid, /rpc\('public_availability_all', \{ p_from: from, p_to: to, p_audience: 'consumer' \}\)/);
 });
 test('viikko-ohjelma ei renderöi hiljaisen ajan huomiolaatikkoa', () => {
   assert.doesNotMatch(rd('booking/shop/src/quiet-week.js'), /quiet-week-note/);
   assert.doesNotMatch(rd('src/styles.css'), /\.quiet-week-note/);
   assert.doesNotMatch(rd('src/quiet-week.mjs'), /note: quietSiteText\('ui\.site\.quiet_note'/);
 });
-test('jälkilöylyt: vain vapaa tuleva vuoro tänään+6; varattu, mennyt ja vieras tuote pois; ale osuu samaan vuoroon', () => {
-  const today = '2026-10-28', now = Date.parse('2026-10-28T00:30:00Z');
-  const row = (date, status, hh, extra = {}) => ({ rule_id: 22, status, session_date: date, starts_at: `${date}T${hh}:00:00Z`, ends_at: `${date}T19:00:00Z`, base_price: 180, ...extra });
-  const out = L.bookablePrivateSlots([
-    row('2026-10-28', 'full', '17'),
-    row('2026-10-28', 'available', '17'),
-    row('2026-10-28', 'available', '00'),
-    row('2026-10-29', 'available', '17'),
-    row('2026-10-30', 'unavailable', '17'),
-    row('2026-11-04', 'available', '17'),
-    row('2026-10-28', 'available', '17', { product_id: 25, rule_id: 9, base_price: 100 }),
-  ], { today, now });
-  assert.deepEqual(out.map((r) => [r.session_date, r.product_id]), [['2026-10-28', 26], ['2026-10-29', 26]]);
-  const offer = { product_id: 26, rule_id: 22, session_date: '2026-10-28', percent: 20, base_price: 180, discounted_price: 144, starts_at: out[0].starts_at };
-  assert.equal(L.offerForSlot([offer, { percent: 0 }], out[0])?.percent, 20);
-  assert.equal(L.offerForSlot([offer], out[1]), null);
+test('jälkilöylyt: ale osuu samaan vuoroon (tuote, sääntö, päivä)', () => {
+  const slot = { product_id: 26, rule_id: 22, session_date: '2026-10-28', starts_at: '2026-10-28T17:00:00Z', ends_at: '2026-10-28T19:00:00Z', base_price: 180 };
+  const offer = { product_id: 26, rule_id: 22, session_date: '2026-10-28', percent: 20, base_price: 180, discounted_price: 144, starts_at: slot.starts_at };
+  assert.equal(L.offerForSlot([offer, { percent: 0 }], slot)?.percent, 20);
+  assert.equal(L.offerForSlot([offer], { ...slot, session_date: '2026-10-29' }), null);
+  assert.equal(L.offerForSlot([offer], { ...slot, rule_id: 23 }), null);
 });
 test('hallinta: reitti Hiljaiset ajat (catalog.edit / settings.edit) alennuskoodien jälkeen; CI ajaa tämän testin', () => {
   const nav = rd('booking/admin/admin-navigation.js');

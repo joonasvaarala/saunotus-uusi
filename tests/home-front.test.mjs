@@ -140,7 +140,7 @@ test('public_catalog peittää kb-hinnan ja nimen; HTML escapetaan', () => {
   clearLiveCatalog();
 });
 
-test('etusivu: järjestys, ei varaa-verkosta-listaa, torstai 16:00, kaksi tapahtumaa, haitari, valikon kultanappi', () => {
+test('etusivu: järjestys, ei varaa-verkosta-listaa, torstai 16:00, kaksi tapahtumaa, viikko-ohjelma, valikon kultanappi', () => {
   clearLiveCatalog();
   setArticlesState({ count: { fi: 1, en: 1 }, source: 'test' });
   const fi = R.home('fi');
@@ -149,8 +149,8 @@ test('etusivu: järjestys, ei varaa-verkosta-listaa, torstai 16:00, kaksi tapaht
   assert.doesNotMatch(fi, /Saunotus on ohjattu moniaistinen/);
   assert.match(fi, /Valitse elämys/);
   assert.match(en, /Choose an experience/);
-  assert.ok(fi.indexOf('id="valitse-elamys"') < fi.indexOf('class="week soon"'));
-  assert.ok(fi.indexOf('class="week soon"') < fi.indexOf('class="tradition"'));
+  assert.ok(fi.indexOf('id="valitse-elamys"') < fi.indexOf('class="vk"'));
+  assert.ok(fi.indexOf('class="vk"') < fi.indexOf('class="tradition"'));
   assert.ok(fi.indexOf('class="tradition"') < fi.indexOf('id="arvostelut"'));
   assert.ok(fi.indexOf('id="arvostelut"') < fi.indexOf('class="home-book"'));
   assert.ok(fi.indexOf('class="home-book"') < fi.indexOf('id="tapahtumat"'));
@@ -162,9 +162,13 @@ test('etusivu: järjestys, ei varaa-verkosta-listaa, torstai 16:00, kaksi tapaht
   assert.doesNotMatch(R.book('fi'), /class="home-book"/);
   assert.ok(fi.indexOf('id="tapahtumat"') < fi.indexOf('id="saunatietoa"'));
   assert.ok(fi.indexOf('id="saunatietoa"') < fi.indexOf('id="yrityksille"'));
-  assert.match(fi, /Näytä koko viikko/);
-  assert.match(fi, /Näytä vain tänään ja huomenna/);
-  assert.match(en, /Today and tomorrow/);
+  // Viikko-ohjelma: yksi näkymä, ei tiivis/laaja-valitsinta (backlog 82, tuonti 171)
+  const weekFi = fi.slice(fi.indexOf('class="vk"'), fi.indexOf('class="tradition"'));
+  assert.doesNotMatch(weekFi, /Näytä koko viikko|Näytä vain tänään ja huomenna|Näytä kaikki tiedot|Näytä vähemmän|class="week-more"|aria-expanded/);
+  assert.doesNotMatch(fi, /Näytä koko viikko|Näytä vain tänään ja huomenna|class="week-more"/);
+  assert.doesNotMatch(en, /Today and tomorrow|Show the full week/);
+  assert.match(fi, /Tällä viikolla saunassa/);
+  assert.match(en, /This week at the sauna/);
   const ld = JSON.parse(fi.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)[1]);
   const thu = ld.openingHoursSpecification.find((x) => x.dayOfWeek === 'Thursday');
   assert.equal(thu.opens, '16:00');
@@ -231,7 +235,7 @@ test('etusivu: järjestys, ei varaa-verkosta-listaa, torstai 16:00, kaksi tapaht
   assert.match(fi, />Koulutukset</);
   assert.match(fi, /href="\/varaa\/#\/tuote\/saunarituaali-ja-savusaunavuoro"/);
   assert.match(fi, /49 €/);
-  const choose = fi.slice(fi.indexOf('id="valitse-elamys"'), fi.indexOf('class="week soon"'));
+  const choose = fi.slice(fi.indexOf('id="valitse-elamys"'), fi.indexOf('class="vk"'));
   const tradition = fi.slice(fi.indexOf('class="tradition"'), fi.indexOf('id="arvostelut"'));
   assert.doesNotMatch(choose + tradition, /johku/i);
   assert.match(tradition, /Saunarituaali-ilta/);
