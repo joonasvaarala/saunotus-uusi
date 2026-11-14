@@ -160,7 +160,7 @@ test('hallinnassa ei ole Yritykset-näkymää eikä quotes.manage-oikeutta', () 
   assert.throws(() => rd('booking/admin/views/quotes.js'));
   const mock = rd('booking/admin/options-mock.js');
   assert.doesNotMatch(mock, /quotes\.manage|admin_list_business_quotes|admin_set_business_quote_status/);
-  assert.match(rd('booking/admin/views/products.js'), /'audience' in c/);
+  assert.match(rd('booking/admin/views/product-editor.js'), /'audience' in c/);
   assert.doesNotMatch(rd('scripts/build-pages.mjs'), /views\/quotes\.js/);
   const mail = J('content/site-texts.pending-import-14.json');
   const keys = new Set(mail.map((r) => r.key));

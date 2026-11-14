@@ -8,12 +8,14 @@ const href = (rel) => new URL(rel, import.meta.url);
 const read = (rel) => readFileSync(href(rel), 'utf8');
 
 // booking_156: lyhyen kuvauksen kenttätekstit tuodaan erikseen (pending-import-56), samat säännöt
-const pending = [...JSON.parse(read('../../content/site-texts.pending-import-19.json')), ...JSON.parse(read('../../content/site-texts.pending-import-56.json'))];
+// HALL-TUOTTEET-01: pending-import-165 (editorin välilehdet ja tallennuspalkki) kuuluu samaan sanakirjaan
+const pending = [...JSON.parse(read('../../content/site-texts.pending-import-19.json')), ...JSON.parse(read('../../content/site-texts.pending-import-56.json')), ...JSON.parse(read('../../content/site-texts.pending-import-165.json'))];
 const migration = read('../supabase/migrations/20261019081000_booking_111_admin_product_create.sql');
 const rollback = read('../supabase/rollbacks/20261019081000_booking_111_ROLLBACK.sql');
 const sqlTest = read('../supabase/tests/products/t111_admin_product_create.sql');
 const productsSrc = read('../admin/views/products.js');
 const pending167 = JSON.parse(read('../../content/site-texts.pending-import-167.json'));
+const editorSrc = read('../admin/views/product-editor.js');
 const css = read('../admin/admin.css');
 const pages = read('../../.github/workflows/pages.yml');
 
@@ -221,7 +223,7 @@ test('pending-import-19 + 56 vastaa sanakirjaa, FI+EN, normal, ilman hintoja', a
   for (const row of pending) {
     assert.equal(row.class, 'normal');
     assert.equal(row.kind, 'plain');
-    assert.deepEqual(row.placeholders, []);
+    assert.deepEqual(row.placeholders, [...row.text.matchAll(/\{\{var:\w+\}\}/g)].map((m) => m[0]));
     assert.match(row.key, /^ui\.admin\.product\./);
     assert.ok(row.lang === 'fi' || row.lang === 'en');
     const newer = pending167.find((r) => r.key === row.key && r.lang === row.lang);   // HALL-ASETUKSET-01 päivittää qr_hint
@@ -264,7 +266,7 @@ test('migraatio, rollback ja sivutesti on paikallaan', () => {
   assert.match(productsSrc, /filterDrawer\(/);
   assert.match(productsSrc, /products-search/);
   assert.ok(productsSrc.indexOf('search:') < productsSrc.indexOf('filters:'));
-  assert.match(productsSrc, /'audience' in c/);
+  assert.match(editorSrc, /'audience' in c/);
   assert.match(productsSrc, /data-testid': 'product-add'/);
   assert.match(css, /@media\(max-width:699px\)/);
   assert.match(css, /\.prod-add,\.prod-next \.btn\{width:100%\}/);
@@ -364,11 +366,18 @@ test('lisää tuote avaa tyhjän lomakkeen ja luonnin jälkeen muokkauksen', asy
     assert.equal(call.args.p_data.shop_visible, undefined);
     assert.equal(Object.hasOwn(call.args.p_data, 'shop_visible'), false);
     assert.equal(q(document.body, 'product-create-form'), null);
+    assert.match(document.getElementById('toast').textContent, /Tuote luotu/);
+    // HALL-TUOTTEET-01: luonnin jälkeen siirrytään osoitteeseen #/tuotteet/<id>, jossa tuotteen editori aukeaa (ei dialogia)
+    const newId = mock.state.calls.find((x) => x.name === 'admin_product_create') && Math.max(...(await mock.rpc('admin_list_products')).map((x) => x.id));
+    assert.equal(globalThis.location.hash, `#/tuotteet/${newId}`);
+    document.body.replaceChildren();
+    const fresh = await mock.rpc('admin_list_products');
+    const editorNodes = await render({ ctx, refs: { products: fresh }, reload: () => { reloaded += 1; }, query: new URLSearchParams(), rest: String(newId) });
+    document.body.append(...editorNodes);
     assert.equal(q(document.body, 'product-open-pos').getAttribute('href'), '#/pikakassa');
     assert.equal(q(document.body, 'product-open-qr').getAttribute('href'), '#/tuotteet?qr=1');
     assert.match(document.body.textContent, /Näytä pikakassassa/);
-    assert.match(document.getElementById('toast').textContent, /Tuote luotu/);
-    assert.equal(reloaded, 1);
+    assert.equal(q(document.body, 'product-editor-title').textContent, 'T111 testijuoma');
     SB.setRpcOverride(null);
 
     document.body.replaceChildren();

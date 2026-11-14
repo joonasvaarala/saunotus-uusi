@@ -125,10 +125,13 @@ test('static-products.json ja kb.json: short_description(_en) mukana', () => {
 });
 
 test('hallinta: Quill-kentät FI+EN muokkaus- ja luontilomakkeessa, tallennus lähettää kentät; rich-editor.js ennallaan', () => {
+  // HALL-TUOTTEET-01: muokkaus on views/product-editor.js:ssä (lukee kentän val('...'):lla ja product-editor-logic.js rakentaa patchin), luonti products.js:ssä
   const v = read('booking/admin/views/products.js');
+  const e = read('booking/admin/views/product-editor.js');
   for (const k of ['short_description', 'short_description_en']) {
-    assert.equal((v.match(new RegExp(`inp\\('${k}', [^)]*'data-rich': '1'`, 'g')) || []).length, 2, `${k}: 2 rikasta kenttää`);
-    assert.equal((v.match(new RegExp(`${k}: fd\\.get\\('${k}'\\)`, 'g')) || []).length, 2, `${k}: patch + luonti`);
+    assert.equal(((v + e).match(new RegExp(`inp\\('${k}', [^)]*'data-rich': '1'`, 'g')) || []).length, 2, `${k}: 2 rikasta kenttää`);
+    assert.equal((v.match(new RegExp(`${k}: fd\\.get\\('${k}'\\)`, 'g')) || []).length, 1, `${k}: luonti`);
+    assert.ok(e.includes(`${k}: val('${k}')`), `${k}: muokkaus lukee kentän`);
   }
   assert.match(read('booking/admin/options-mock.js'), /'description_en', 'short_description', 'short_description_en', 'price'/);
 });

@@ -337,8 +337,9 @@ test('Quill-vendor: versioitu 2.0.3, ei source mapia eikä ulkoisia osoitteita, 
 
 test('Quill alustetaan tuotekuvauksille (FI+EN) ja viestiteksteille; ei omaa tekstipainikeriviä', () => {
   const products = read('booking/admin/views/products.js');
+  const prodEditor = read('booking/admin/views/product-editor.js');   // HALL-TUOTTEET-01: muokkauslomake on editorissa, luonti products.js:ssä
   const messages = read('booking/admin/views/messages.js');
-  for (const name of ['description', 'description_en']) assert.ok(products.includes(`inp('${name}', p.${name}, { area: true, 'data-rich': '1' })`), name);
+  for (const name of ['description', 'description_en']) assert.ok(prodEditor.includes(`inp('${name}', p.${name}, { area: true, 'data-rich': '1' })`), name);
   for (const name of ['short_fi', 'short_en', 'body_fi', 'body_en']) assert.ok(messages.includes(`inp('${name}', row.${name}, { area: true, 'data-rich': '1' })`), name);
   for (const src of [products, messages]) assert.match(src, /await mountRichFields\(f\)/);
   const editor = read('booking/admin/rich-editor.js');

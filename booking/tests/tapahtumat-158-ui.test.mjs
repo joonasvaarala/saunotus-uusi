@@ -251,7 +251,7 @@ test('hallinta: reitti, kopio-nappi tuotteissa, mock kytketty, build-lista ja CI
   assert.match(read('booking/admin/admin-navigation.js'), /id: 'tapahtumat', path: 'tapahtumat', labelKey: 'ui\.admin\.nav\.events', view: 'events'/);
   assert.match(admin, /groupId: 'offering', mod: \(\) => loadView\('nav-group'\)/);   // HALL-KUORI-01: Tarjonta
   const prod = read('booking/admin/views/products.js');
-  assert.match(prod, /data-testid': 'product-copy'/);
+  assert.match(read('booking/admin/views/product-editor.js'), /data-testid': 'product-copy'/);   // HALL-TUOTTEET-01: Kopioi-painike on editorin otsikossa
   assert.match(prod, /copyArgs\(\{ product_id: p\.id \}\)/);
   assert.match(prod, /q0\.get\('muokkaa'\)/);
   const mock = read('booking/admin/options-mock.js');

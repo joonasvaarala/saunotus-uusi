@@ -156,7 +156,7 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
       { id: 10, name: 'Saunahoito', name_en: 'Sauna treatment', price: 85, vat_rate: 25.5, active: true, category: 'treatment', description: 'Hoitosauna Rauni', config: { resource_class: 'resourced', lifecycle: 'current', sale_kind: 'other', duration_minutes: 90, min_persons: 1, max_persons: 4, bookable: true, shop_visible: true, public_slots: true, time_window_class: 'therapy', required_skill: 'treatment', audience: 'consumer' } },
       { id: 8, name: 'Rituaali 90 min', price: 64, vat_rate: 25.5, active: true, category: 'ritual', config: { resource_class: 'resourced', lifecycle: 'current', sale_kind: 'other', duration_minutes: 90, min_persons: 1, max_persons: 6, bookable: true, shop_visible: true, public_slots: true, public_weekdays: [6, 7], time_window_class: 'ritual', audience: 'consumer' } },
       { id: 7, name: 'Saunarituaali ja savusaunavuoro (la & su)', name_en: 'Sauna Ritual & Smoke Sauna Session', price: 49, price_type: 'per_person', vat_rate: 25.5, active: true, category: 'ritual', config: { resource_class: 'resourced', lifecycle: 'current', sale_kind: 'other', duration_minutes: 120, min_persons: 1, max_persons: 6, bookable: true, shop_visible: true, public_slots: true, public_weekdays: [6, 7], time_window_class: 'ritual', required_skill: 'yleinen', audience: 'consumer' } },
-      { id: 3, name: 'Yleinen saunavuoro', price: 18, vat_rate: 25.5, active: true, category: 'public_sauna', config: { resource_class: 'shift', lifecycle: 'current', sale_kind: 'slots', bookable: true, shop_visible: true, audience: 'consumer' } },
+      { id: 3, name: 'Yleinen saunavuoro', price: 18, vat_rate: 25.5, active: true, category: 'public_sauna', variants: [{ id: 901, label: 'Talvihinta', price: 18, valid_from: '2026-11-01', valid_to: '2027-03-31' }, { id: 902, label: 'Kesähinta', price: 16, valid_from: '2027-04-01', valid_to: '2027-09-30' }], config: { resource_class: 'shift', lifecycle: 'current', sale_kind: 'slots', bookable: true, shop_visible: true, audience: 'consumer' } },
       { id: 31, slug: 'perinnesaunotusilta', name: 'Perinnesaunotusilta', name_en: 'Traditional sauna evening', price: 69, vat_rate: 25.5, active: true, category: 'event', config: { resource_class: 'shift', lifecycle: 'current', sale_kind: 'other', duration_minutes: 180, min_persons: 1, max_persons: 10, bookable: true, shop_visible: true, audience: 'consumer' } },
       { id: 32, slug: 'naisten-joulusauna', name: 'Naisten joulusauna', name_en: 'Women’s Christmas sauna', price: 59, vat_rate: 25.5, active: true, category: 'event', config: { resource_class: 'shift', lifecycle: 'current', sale_kind: 'other', duration_minutes: 150, min_persons: 1, max_persons: 12, bookable: true, shop_visible: true, audience: 'consumer' } },
       { id: 33, slug: 'saunottajakoulutus', name: 'Saunottajakoulutus', name_en: 'Sauna host training', price: 390, vat_rate: 25.5, active: true, category: 'training', config: { resource_class: 'shift', lifecycle: 'current', sale_kind: 'other', duration_minutes: 1980, min_persons: 1, max_persons: 8, bookable: true, shop_visible: false, audience: 'consumer' } },
@@ -569,6 +569,20 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
       return rows;
     },
     public_get_site_texts: () => ({ ok: true, texts: [
+      { key: 'ui.upsell.admin_title', lang: 'fi', text: 'Lisämyynti tuotteen sivulla' },
+      { key: 'ui.upsell.admin_help', lang: 'fi', text: 'Valitse enintään kolme tuotetta tai lisäpalvelua, joita ehdotetaan tämän tuotteen yhteydessä.' },
+      { key: 'ui.upsell.admin_item', lang: 'fi', text: 'Ehdotus' },
+      { key: 'ui.upsell.admin_enabled', lang: 'fi', text: 'Käytössä' },
+      { key: 'ui.upsell.admin_up', lang: 'fi', text: 'Ylös' },
+      { key: 'ui.upsell.admin_down', lang: 'fi', text: 'Alas' },
+      { key: 'ui.upsell.admin_remove', lang: 'fi', text: 'Poista' },
+      { key: 'ui.upsell.admin_add', lang: 'fi', text: 'Lisää ehdotus' },
+      { key: 'ui.upsell.admin_save', lang: 'fi', text: 'Tallenna lisämyynti' },
+      { key: 'ui.upsell.admin_saved', lang: 'fi', text: 'Lisämyynti tallennettu' },
+      { key: 'ui.upsell.admin_duplicate', lang: 'fi', text: 'Sama kohde on valittu kahdesti' },
+      { key: 'ui.upsell.report_title', lang: 'fi', text: 'Lisämyynnin tulokset' },
+      { key: 'ui.upsell.report_load', lang: 'fi', text: 'Näytä tulokset' },
+      { key: 'ui.upsell.report_error', lang: 'fi', text: 'Tuloksia ei voitu hakea' },
       { key: 'ui.admin.day.revenue_title', lang: 'fi', text: 'Päivän tuotto' },
       { key: 'ui.admin.day.revenue_title', lang: 'en', text: "Day's revenue" },
       { key: 'ui.admin.day.revenue_vat', lang: 'fi', text: 'sis. alv' },
@@ -950,6 +964,52 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
       if (patch.age_restricted && patch.fridge_sale) throw err('age_restricted', 'Ikärajallista tuotetta ei voi myydä kylmälaitteessa');
       if (patch.age_restricted && patch.fridge_sale == null) patch.fridge_sale = false;
       Object.assign(p.config, patch);
+      return { ok: true };
+    },
+    // HALL-TUOTTEET-01: tuote-editorin tallennukset kokeilutilassa (peilaa palvelimen kenttärajat; muistissa)
+    admin_update_product: (a) => {
+      need('catalog.edit');
+      const p = product(a.p_product_id);
+      if (!p) throw err('not_found', 'Tuotetta ei löydy');
+      const patch = a.p_patch || {};
+      const allowed = new Set(['name', 'name_en', 'description', 'description_en', 'short_description', 'short_description_en', 'price', 'price_text', 'vat_rate', 'active']);
+      for (const k of Object.keys(patch)) if (!allowed.has(k)) throw err('unknown_field', 'Kenttää ei saa muokata: ' + k);
+      if ('name' in patch && !String(patch.name ?? '').trim()) throw err('invalid_name', 'Nimi ei voi olla tyhjä');
+      if ('price' in patch && !(Number.isFinite(+patch.price) && +patch.price >= 0)) throw err('invalid_price', 'Virheellinen hinta');
+      if ('vat_rate' in patch && !st.vatRates.some((r) => r.active && r.rate === +patch.vat_rate)) throw err('invalid_vat', 'ALV-kanta ei ole sallittu');
+      Object.assign(p, patch);
+      if ('price' in patch) p.price = +patch.price;
+      if ('vat_rate' in patch) p.vat_rate = +patch.vat_rate;
+      return { ok: true };
+    },
+    admin_update_price_variant: (a) => {
+      need('catalog.edit');
+      const v = st.products.flatMap((p) => p.variants || []).find((x) => x.id === a.p_variant_id);
+      if (!v) throw err('not_found', 'Hintavarianttia ei löydy');
+      const patch = a.p_patch || {};
+      if (Object.keys(patch).some((k) => k !== 'price')) throw err('unknown_field', 'Kenttää ei saa muokata');
+      if (!(Number.isFinite(+patch.price) && +patch.price >= 0)) throw err('invalid_price', 'Virheellinen hinta');
+      v.price = +patch.price;
+      return { ok: true };
+    },
+    admin_set_product_image: (a) => {
+      need('catalog.edit');
+      const p = product(a.p_product_id);
+      if (!p?.config) throw err('not_found', 'Tuotteella ei ole varauskonfiguraatiota');
+      const previous = p.config.image_path || null;
+      p.config.image_path = a.p_image_path || null; p.config.image_alt = a.p_image_alt || null;
+      return { ok: true, previous_path: previous };
+    },
+    admin_training_addons_get: (a) => (st.trainingOffers ??= {})[a.p_product_id] || [],
+    admin_training_addons_set: (a) => {
+      need('catalog.edit');
+      (st.trainingOffers ??= {})[a.p_product_id] = (a.p_offers || []).map((o) => ({ code: o.code, price: +o.price, active: o.active !== false }));
+      return { ok: true };
+    },
+    admin_get_product_suggestions: (a) => (st.suggestions ??= {})[a.p_product_id] || [],
+    admin_set_product_suggestions: (a) => {
+      need('catalog.edit');
+      (st.suggestions ??= {})[a.p_product_id] = (a.p_items || []).map((x) => ({ product_id: x.product_id || null, addon_id: x.addon_id || null, enabled: x.enabled !== false }));
       return { ok: true };
     },
     admin_set_product_option_settings: (a) => {

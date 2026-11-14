@@ -1,9 +1,9 @@
 // Tuotteet: nimet, kuvaukset, hinnat ja ALV muokataan kb.products / kb.product_price_variants -tauluihin (oikeus catalog.edit: manager + admin).
 // Peruskäyttäjä (staff) näkee tuotteet mutta ei voi muokata hintoja.
-import { rpc, storageUrl, uploadObject, removeObject } from '../sb.js';
-import { prepareImage, IMG_TYPES, IMG_MAX_INPUT } from './productimage.js';
+import { rpc, storageUrl } from '../sb.js';
 import { addonsAdmin } from './addons.js';
-import { productSuggestionsEditor } from './product-suggestions.js';
+import { productEditor } from './product-editor.js';
+import { productIdFromRest, productHash } from '../product-editor-logic.js';
 import { productOptionsAdmin } from './productoptions.js';
 import { h, dialog, field, toast, run, money, badge, vatText, countText } from '../ui.js';
 import { filterDrawer } from '../filter-drawer.js';
@@ -13,10 +13,8 @@ import { loadRichTexts, richText } from '../rich-texts.js';
 import { mountRichFields, syncRichFields } from '../rich-editor.js';
 import { renderQrPanel } from '../qr-panel.js';
 import { loadSettingsTexts, settingsText } from '../settings-texts.js';
-import { looksLikeAlcohol } from '../pos-logic.js';
 import { loadEventsTexts, evText } from '../events-texts.js';
 import { copyArgs, copyName } from '../events-logic.js';
-import { confirmAsk } from '../confirm.js';
 
 const VAT_ACTIVE = [25.5, 13.5, 0];
 const CATEGORY_ORDER = ['product_rental', 'add_on', 'public_sauna', 'private_sauna', 'corporate', 'treatment', 'ritual', 'ceremony', 'event', 'gift_card', 'season_card', 'training', 'other'];
@@ -47,14 +45,14 @@ export const VISIBILITY = [['', 'Kaikki'], ['online', 'Verkossa'], ['offline', '
 const VIS_URL = { online: 'verkossa', offline: 'ei-verkossa' };
 const norm = (x) => String(x ?? '').toLocaleLowerCase('fi');   // kirjainkoolla ei ole merkitystä
 
-export async function render({ ctx, refs, reload, query }) {
+export async function render({ ctx, refs, reload, query, rest }) {
   // booking_158: Kopioi-tekstit (ui.admin.product.copy*) tulevat events-teksteistä. Kaikki jaetusta välimuistista rinnakkain.
   await Promise.all([loadPosTexts(rpc), loadProductTexts(rpc), loadRichTexts(rpc), loadEventsTexts(rpc)]);
   const isAdmin = ctx.can('catalog.edit');  // manager + admin
   const fresh = () => { ctx.refs = null; reload(); };   // tuotelista haetaan uudelleen (refs on välimuistissa; muuten uusi kuva/tiedot eivät näy listassa)
   const list = h('div', { class: 'list' });
   const rowOf = (p) => { const c = p.config;
-    return h('button', { type: 'button', class: 'listrow', onclick: () => edit(p) },
+    return h('a', { class: 'listrow', href: productHash(p.id, filterQuery()), 'aria-current': p.id === openId ? 'true' : null, 'data-testid': `product-row-${p.id}` },
       h('span', { class: 'what' }, c?.image_path ? h('img', { class: 'pthumb', src: storageUrl('product-images', c.image_path), alt: '', width: 40, height: 40, loading: 'lazy' }) : null, h('strong', { text: p.name }), h('small', { text: ` ${catLabel(p.category)}` })),
       h('span', { class: 'meta' }, isOnline(p) ? badge('ok', 'Verkossa') : badge('muted', 'Ei verkossa'), c?.pos_enabled ? badge('ok', posText('badge_pos')) : null, c?.fridge_sale ? badge('ok', posText('badge_qr')) : null, !p.active ? badge('err', 'Piilotettu') : null, h('strong', { text: money(p.price) }), h('small', { text: `ALV ${vatText(p.vat_rate)}` }))); };
 
@@ -62,6 +60,10 @@ export async function render({ ctx, refs, reload, query }) {
   const all = refs.products;
   const catCodes = [...new Set(all.map((p) => p.category || ''))].sort((a, b) => catLabel(a).localeCompare(catLabel(b), 'fi'));
   const q0 = query || new URLSearchParams();
+  // HALL-TUOTTEET-01: #/tuotteet/<id> avaa tuotteen editorin (työpöydällä listan viereen). Vanha #/tuotteet?muokkaa=<id> ohjataan uuteen osoitteeseen.
+  const legacyId = Number(q0.get('muokkaa')) || null;
+  const openId = productIdFromRest(rest) ?? legacyId;
+  const openProduct = openId ? all.find((x) => x.id === openId) || null : null;
   const f = { vis: Object.keys(VIS_URL).find((k) => VIS_URL[k] === q0.get('nakyvyys')) || '', cat: catCodes.includes(q0.get('kategoria')) ? q0.get('kategoria') : '', search: (q0.get('haku') || '').slice(0, 80) };
   const matchSearch = (p) => !f.search.trim() || [p.name, p.name_en, p.slug].some((x) => norm(x).includes(norm(f.search.trim())));
   const matchVis = (p) => !f.vis || (f.vis === 'online') === isOnline(p);
@@ -69,9 +71,10 @@ export async function render({ ctx, refs, reload, query }) {
   const active = () => !!(f.vis || f.cat || f.search.trim());
   const count = h('p', { class: 'muted prodcount', role: 'status', 'aria-live': 'polite' });
   const clearBtn = h('button', { type: 'button', class: 'link', text: 'Tyhjennä suodattimet', onclick: () => { f.vis = ''; f.cat = ''; f.search = ''; searchInp.value = ''; catSel.value = ''; for (const r of filters.querySelectorAll('input[type=radio]')) r.checked = r.value === ''; draw(); } });
+  const filterQuery = () => { const qs = new URLSearchParams(); if (f.vis) qs.set('nakyvyys', VIS_URL[f.vis]); if (f.cat) qs.set('kategoria', f.cat); if (f.search.trim()) qs.set('haku', f.search.trim()); return qs.toString(); };
   const syncUrl = () => {
-    const qs = new URLSearchParams(); if (f.vis) qs.set('nakyvyys', VIS_URL[f.vis]); if (f.cat) qs.set('kategoria', f.cat); if (f.search.trim()) qs.set('haku', f.search.trim());
-    history.replaceState(null, '', `#/tuotteet${qs.toString() ? `?${qs}` : ''}`);   // ei hashchangea → ei uudelleenpiirtoa
+    const qs = new URLSearchParams(filterQuery());
+    history.replaceState(null, '', productHash(openId, qs.toString()));   // ei hashchangea → ei uudelleenpiirtoa
   };
   const labels = new Map();   // radio-arvo → label-span (lukumäärät päivitetään suodatuksen mukaan: kunkin ryhmän luvut huomioivat muut suodattimet)
   const seg = (legend, name, opts, cur, onPick, testid) => h('fieldset', { class: 'srcset prodseg', 'data-testid': testid }, h('legend', { text: legend }),
@@ -107,95 +110,15 @@ export async function render({ ctx, refs, reload, query }) {
     drawer.refresh();
   }
   draw();
-  async function edit(p) {
-    const training = p.category === 'training';
-    const offers = training ? await rpc('admin_training_addons_get', { p_product_id: p.id }).catch(() => []) : [];
-    const offerOf = (code) => (offers || []).find((o) => o.code === code) || null;
-    const inp = (name, v, { area, ...o } = {}) => h(area ? 'textarea' : 'input', { name, value: v ?? '', rows: area ? 5 : null, disabled: !isAdmin, ...o });
-    const vat = h('select', { name: 'vat_rate', disabled: !isAdmin }, vatChoices(p.vat_rate).map((v) => h('option', { value: v, text: vatLabel(v), selected: +p.vat_rate === v || null })));
-    const f = h('form', { class: 'stack' },
-      field('Nimi (FI)', inp('name', p.name, { required: true })), field('Nimi (EN)', inp('name_en', p.name_en)),
-      field('Kuvaus (FI)', inp('description', p.description, { area: true, 'data-rich': '1' }), richText('hint')), field('Kuvaus (EN)', inp('description_en', p.description_en, { area: true, 'data-rich': '1' }), richText('hint')),
-      // booking_156: lyhyt kuvaus (rikas teksti, sama allowlist kuin kuvauksella) → tuotekortti ja tuotesivun yläosa; tyhjä → ote kuvauksesta
-      field(productText('short_fi'), inp('short_description', p.short_description, { area: true, 'data-rich': '1', 'data-testid': 'product-short-fi' }), productText('short_hint')), field(productText('short_en'), inp('short_description_en', p.short_description_en, { area: true, 'data-rich': '1', 'data-testid': 'product-short-en' }), productText('short_hint')),
-      h('div', { class: 'row wrap' }, field(training ? 'Varausmaksu € (maksetaan verkossa)' : 'Hinta € (sis. ALV)', inp('price', training ? (p.config?.deposit_amount ?? p.price) : p.price, { type: 'number', step: '0.01', min: '0', 'data-testid': 'product-deposit' })), field('ALV', vat)),
-      training ? h('div', { class: 'row wrap', 'data-testid': 'product-training-prices' }, field('Kurssin hinta € (loppusumma, laskutetaan myöhemmin)', inp('course_price', p.config?.course_price ?? '', { type: 'number', step: '0.01', min: '0', 'data-testid': 'product-course-price' }))) : null,
-      training ? h('fieldset', { class: 'stack', 'data-testid': 'product-training-addons' }, h('legend', { text: 'Lisävalinnat (eivät veloitu verkossa)' }),
-        h('label', { class: 'check' }, h('input', { type: 'checkbox', name: 'addon_single', checked: offerOf('single_room')?.active ? true : null, disabled: !isAdmin }), ' Yhden hengen huone'),
-        field('Hinta €', inp('addon_single_price', offerOf('single_room')?.price ?? 200, { type: 'number', step: '0.01', min: '0' })),
-        h('label', { class: 'check' }, h('input', { type: 'checkbox', name: 'addon_intern', checked: offerOf('internship')?.active ? true : null, disabled: !isAdmin }), ' Harjoittelujakso'),
-        field('Hinta €', inp('addon_intern_price', offerOf('internship')?.price ?? 500, { type: 'number', step: '0.01', min: '0' }))) : null,
-      field('Hintateksti', inp('price_text', p.price_text), 'Näytetään kb:ssä; verkkokauppa laskee näytettävän hinnan hinta-kentästä. Päivitä teksti kun muutat hintaa.'),
-      h('label', { class: 'check' }, h('input', { type: 'checkbox', name: 'active', disabled: !isAdmin }), ' Aktiivinen (näkyy kb:ssä)'),
-      isAdmin ? h('button', { class: 'btn primary', type: 'submit', text: 'Tallenna tuote' }) : h('p', { class: 'muted', text: 'Tuotteiden, hintojen ja kuvausten muokkaus vaatii ylläpitäjän (manager/admin) oikeudet.' }));
-    f.active.checked = !!p.active;
-    f.addEventListener('submit', (ev) => { ev.preventDefault(); run(f.querySelector('button'), async () => {
-      syncRichFields(f);
-      const fd = new FormData(f);
-      await rpc('admin_update_product', { p_product_id: p.id, p_patch: { name: fd.get('name'), name_en: fd.get('name_en'), description: fd.get('description'), description_en: fd.get('description_en'), short_description: fd.get('short_description'), short_description_en: fd.get('short_description_en'), price: +fd.get('price'), price_text: fd.get('price_text'), vat_rate: +fd.get('vat_rate'), active: f.active.checked } });
-      if (training) {
-        const course = String(fd.get('course_price') ?? '').trim();
-        await rpc('admin_update_product_config', { p_product_id: p.id, p_patch: { deposit_amount: +fd.get('price'), course_price: course === '' ? null : +course } });
-        const addonRows = [];
-        if (f.addon_single?.checked) addonRows.push({ code: 'single_room', price: +fd.get('addon_single_price'), active: true });
-        if (f.addon_intern?.checked) addonRows.push({ code: 'internship', price: +fd.get('addon_intern_price'), active: true });
-        await rpc('admin_training_addons_set', { p_product_id: p.id, p_offers: addonRows });
-      }
-      toast('Tuote tallennettu'); d.close(); fresh();
-    }); });
-    // verkkokaupan asetukset
-    const c = p.config;
-    const alcohol = looksLikeAlcohol([p.name, p.name_en, p.description, p.description_en].filter(Boolean).join(' '));
-    const cfg = c ? h('form', { class: 'stack box' }, h('h3', { text: 'Verkkokaupan asetukset' }),
-      h('label', { class: 'check' }, h('input', { type: 'checkbox', name: 'bookable', disabled: !isAdmin }), ' Varattavissa verkossa'),
-      h('label', { class: 'check' }, h('input', { type: 'checkbox', name: 'shop_visible', disabled: !isAdmin }), ' Näkyy kaupan listassa'),
-      'audience' in c ? field('Kalenteri', h('select', { name: 'audience', disabled: !isAdmin }, h('option', { value: 'consumer', text: 'Kuluttajien kalenteri' }), h('option', { value: 'business', text: 'Yrityksille' })), 'Yrityksille-valinta näyttää vuoron vain yritysten kalenterissa.') : null,
-      h('div', { class: 'row wrap' }, field('Järjestys', h('input', { name: 'sort_order', type: 'number', value: c.sort_order, disabled: !isAdmin })), field('Min hlö', h('input', { name: 'min_persons', type: 'number', min: 1, value: c.min_persons, disabled: !isAdmin })), field('Max hlö', h('input', { name: 'max_persons', type: 'number', min: 1, value: c.max_persons ?? '', disabled: !isAdmin }))),
-      h('h3', { text: posText('nav') }),
-      h('label', { class: 'check' }, h('input', { type: 'checkbox', name: 'pos_enabled', disabled: !isAdmin }), ' ' + posText('product_pos')),
-      field(posText('product_pos_sort'), h('input', { name: 'pos_sort', type: 'number', min: 0, max: 10000, value: c.pos_sort ?? 100, disabled: !isAdmin })),
-      h('label', { class: 'check' }, h('input', { type: 'checkbox', name: 'fridge_sale', disabled: !isAdmin || alcohol || !!c.age_restricted }), ' ' + posText('qr_sale')),
-      h('label', { class: 'check' }, h('input', { type: 'checkbox', name: 'age_restricted', disabled: !isAdmin }), ' ' + posText('product_age')),
-      h('p', { class: 'muted', text: posText('qr_sale_hint') }),
-      alcohol ? h('p', { class: 'err', text: posText('alcohol_qr') }) : null,
-      isAdmin ? h('button', { class: 'btn', type: 'submit', text: 'Tallenna asetukset' }) : null) : h('p', { class: 'muted', text: 'Tuotetta ei ole vielä otettu mukaan varausjärjestelmään (product_config puuttuu).' });
-    if (c) { cfg.bookable.checked = !!c.bookable; cfg.shop_visible.checked = !!c.shop_visible; if (cfg.audience) cfg.audience.value = c.audience === 'business' ? 'business' : 'consumer'; cfg.pos_enabled.checked = !!c.pos_enabled; cfg.fridge_sale.checked = !!c.fridge_sale && !c.age_restricted && !alcohol; cfg.age_restricted.checked = !!c.age_restricted;
-      cfg.age_restricted.addEventListener('change', () => { if (cfg.age_restricted.checked) { cfg.fridge_sale.checked = false; cfg.fridge_sale.disabled = true; } else if (isAdmin && !alcohol) cfg.fridge_sale.disabled = false; });
-      cfg.addEventListener('submit', (ev) => { ev.preventDefault(); run(cfg.querySelector('button'), async () => {
-      const patch = { bookable: cfg.bookable.checked, shop_visible: cfg.shop_visible.checked, sort_order: +cfg.sort_order.value, min_persons: +cfg.min_persons.value, max_persons: cfg.max_persons.value ? +cfg.max_persons.value : null, pos_enabled: cfg.pos_enabled.checked, pos_sort: +cfg.pos_sort.value, fridge_sale: cfg.fridge_sale.checked, age_restricted: cfg.age_restricted.checked };
-      if (cfg.audience) patch.audience = cfg.audience.value;
-      await rpc('admin_update_product_config', { p_product_id: p.id, p_patch: patch });
-      toast('Tallennettu'); d.close(); fresh(); }); }); }
-    // tuotekuva (Storage: product-images; polku talletetaan funktiolla admin_set_product_image)
-    const img = c ? imageBox(p, c, isAdmin, () => { d.close(); fresh(); }) : null;
-    // hintavariantit
-    const vars = (p.variants || []).length ? h('div', { class: 'box stack' }, h('h3', { text: 'Hintavariantit' }), ...p.variants.map((v) => {
-      const inpP = h('input', { type: 'number', step: '0.01', min: '0', value: v.price, disabled: !isAdmin, 'aria-label': `Hinta: ${v.label}` });
-      return h('div', { class: 'row wrap varrow' }, h('span', { class: 'grow' }, h('strong', { text: v.label }), h('small', { text: ` ${v.valid_from || ''}${v.valid_to ? '–' + v.valid_to : ''}${v.included_persons ? ` · sis. ${v.included_persons} hlö` : ''}${v.extra_person_price ? ` · lisählö ${v.extra_person_price} €` : ''}` })), inpP,
-        isAdmin ? h('button', { type: 'button', class: 'btn sm', text: 'Tallenna', onclick: (e) => run(e.target, async () => { await rpc('admin_update_price_variant', { p_variant_id: v.id, p_patch: { price: +inpP.value } }); toast('Hinta tallennettu'); fresh(); }) }) : null);
-    })) : null;
-    let d;
-    const next = c && isAdmin ? h('div', { class: 'box stack prod-next', 'data-testid': 'product-next' },
-      h('p', { text: productText('next') }),
-      h('p', { class: 'muted', text: productText('pos_hint') }),
-      h('a', { class: 'btn', href: '#/pikakassa', 'data-testid': 'product-open-pos', text: productText('link_pos'), onclick: () => d?.close() }),
-      h('p', { class: 'muted', text: productText('qr_hint') }),
-      h('a', { class: 'btn', href: '#/tuotteet?qr=1', 'data-testid': 'product-open-qr', text: productText('link_qr'), onclick: () => d?.close() })) : null;
-    // booking_158: tuotteen kopio (admin_product_copy): 'Kopio: nimi', uusi slug palvelimelta, piilotettu eikä myynnissä; avataan heti muokattavaksi
-    const copyBtn = isAdmin ? h('div', { class: 'row wrap' }, h('button', { type: 'button', class: 'btn', 'data-testid': 'product-copy', text: evText('ui.admin.product.copy'), onclick: () => copyProduct(p, d) })) : null;
-    const suggested = await productSuggestionsEditor({ product: p, all, canEdit: isAdmin && ctx.role === 'admin' });
-    d = dialog(p.name, h('div', { class: 'stack' }, copyBtn, f, img, cfg, suggested, next, vars), { wide: true });
-    try { await mountRichFields(f); } catch (e) { console.error(e); }
-  }
-  function copyProduct(p, parent) {
+  function copyProduct(p) {
     const a = copyArgs({ product_id: p.id });
     const f = h('form', { class: 'stack', 'data-testid': 'product-copy-form' }, h('p', { text: evText('ui.admin.product.copy_confirm', { name: copyName(p.name) }) }),
       h('button', { type: 'submit', class: 'btn primary', 'data-testid': 'product-copy-submit', text: evText('ui.admin.product.copy_submit') }));
     const cd = dialog(evText('ui.admin.product.copy_title'), f);
     f.addEventListener('submit', (ev) => { ev.preventDefault(); if (!a.ok) return; run(f.querySelector('button'), async () => {
       const out = await rpc(a.fn, a.args);
-      toast(evText('ui.admin.product.copied')); cd.close(); parent?.close(); ctx.refs = null;
-      if (out?.product_id) location.hash = `#/tuotteet?muokkaa=${out.product_id}`; else fresh();
+      toast(evText('ui.admin.product.copied')); cd.close(); ctx.refs = null;
+      if (out?.product_id) location.hash = productHash(out.product_id); else fresh();
     }); });
   }
   async function createProduct() {
@@ -207,7 +130,7 @@ export async function render({ ctx, refs, reload, query }) {
     const f = h('form', { class: 'stack', 'data-testid': 'product-create-form' },
       field(productText('name_fi'), inp('name', '', { required: true, maxlength: 200 })),
       field(productText('name_en'), inp('name_en', '', { maxlength: 200 }), productText('name_en_hint')),
-      field('Kuvaus (FI)', inp('description', '', { area: true, 'data-rich': '1' }), richText('hint')), field('Kuvaus (EN)', inp('description_en', '', { area: true, 'data-rich': '1' }), richText('hint')),
+      field(productText('desc_fi'), inp('description', '', { area: true, 'data-rich': '1' }), richText('hint')), field(productText('desc_en'), inp('description_en', '', { area: true, 'data-rich': '1' }), richText('hint')),
       field(productText('short_fi'), inp('short_description', '', { area: true, 'data-rich': '1', 'data-testid': 'product-create-short-fi' }), productText('short_hint')), field(productText('short_en'), inp('short_description_en', '', { area: true, 'data-rich': '1', 'data-testid': 'product-create-short-en' }), productText('short_hint')),
       h('div', { class: 'row wrap' }, field(productText('price'), inp('price', '', { type: 'number', step: '0.01', min: '0', required: true, inputmode: 'decimal' })), field(productText('vat'), vat)),
       field(productText('price_text'), inp('price_text', '', { maxlength: 200 }), productText('price_text_hint')),
@@ -228,65 +151,28 @@ export async function render({ ctx, refs, reload, query }) {
         price: fd.get('price'), price_text: fd.get('price_text'), vat_rate: fd.get('vat_rate'), category: fd.get('category'),
         active: f.active.checked, age_restricted: f.age_restricted.checked,
       } });
-      toast(productText('created')); d.close();
-      if (res?.product) edit(res.product);
-      fresh();
+      toast(productText('created')); d.close(); ctx.refs = null;
+      if (res?.product?.id != null) location.hash = productHash(res.product.id);   // luonnin jälkeen avataan heti muokkaus
+      else fresh();
     }); });
     const d = dialog(productText('new_title'), f, { wide: true });
     try { await mountRichFields(f); } catch (e) { console.error(e); }
   }
-  // #/tuotteet?muokkaa=<id>: avaa tuotteen muokkauksen (Tapahtumat-näkymän linkki ja kopion avaus)
-  const openId = Number(q0.get('muokkaa')) || null;
-  if (openId) { const op = all.find((x) => x.id === openId); if (op) setTimeout(() => edit(op), 0); }
+  if (legacyId && !productIdFromRest(rest)) { const qs = new URLSearchParams(q0); qs.delete('muokkaa'); history.replaceState(null, '', productHash(legacyId, qs.toString())); }
+  const panelHost = h('div', { class: 'prodpanel-host' });
+  const mountPanel = async () => {
+    const ed = await productEditor({ p: openProduct, all, ctx, isAdmin, deps: { vatChoices, vatLabel, isOnline, catLabel }, backHash: productHash(null, filterQuery()), onSaved: () => draw(), onReset: () => mountPanel(), onCopy: copyProduct });
+    panelHost.replaceChildren(ed.node);
+    void ed.mount();   // rikas teksti alustetaan, kun paneeli on sivulla
+  };
+  if (openProduct) await mountPanel();
+  else if (openId) panelHost.append(h('p', { class: 'err', role: 'alert', text: 'Tuotetta ei löydy.' }), h('a', { class: 'btn', href: productHash(null, filterQuery()), text: productText('back') }));
   const addonsSection = await addonsAdmin({ ctx });
   // HALL-ASETUKSET-01: QR-tulostus on tuotteen ominaisuus, ei asetus. Osio avautuu osoitteesta #/tuotteet?qr=1 ja latautuu vasta avattaessa.
   const qrSection = await qrPrintSection({ openNow: query?.get?.('qr') === '1' });
   const optionsSection = await productOptionsAdmin({ ctx });   // tuotevalinnat (booking_50)
   const addBtn = isAdmin ? h('button', { type: 'button', class: 'btn primary prod-add', 'data-testid': 'product-add', text: productText('add'), onclick: () => createProduct() }) : null;
-  return [h('div', { class: 'row between wrap prod-head' }, h('h1', { text: 'Tuotteet' }), addBtn), h('p', { class: 'muted', text: isAdmin ? 'Tuotetiedot tallentuvat yhteiseen luetteloon (sivusto ja botti käyttävät samaa totuutta). Muutokset kirjataan lokiin.' : 'Näet tuotteet; hintojen ja tuotteiden muokkaus vaatii ylläpitäjän (manager/admin) oikeudet.' }), filters, count, list, qrSection, optionsSection, addonsSection];
-}
-
-// ---- tuotekuva: esikatselu, lataus, alt-teksti, poisto ----
-const newPath = (id, ext) => `products/${id}-${[...crypto.getRandomValues(new Uint8Array(6))].map((b) => (b % 36).toString(36)).join('')}.${ext}`;
-function imageBox(p, c, canEdit, done) {
-  const cur = c.image_path ? storageUrl('product-images', c.image_path) : null;
-  let file = null;                       // valittu, valmisteltu (skaalattu) kuva { blob, ext, url }
-  const preview = h('div', { class: 'imgprev', role: 'img', 'aria-label': 'Tuotekuvan esikatselu' });
-  const status = h('p', { class: 'muted', role: 'status', 'aria-live': 'polite' });
-  const alt = h('input', { name: 'image_alt', maxlength: 200, value: c.image_alt || '', disabled: !canEdit, placeholder: p.name });
-  const input = h('input', { type: 'file', accept: IMG_TYPES.join(','), class: 'sr', id: `img-file-${p.id}`, 'aria-label': 'Valitse kuvatiedosto', tabindex: -1, disabled: !canEdit });
-  const show = (url) => { preview.replaceChildren(url ? h('img', { src: url, alt: '' }) : h('span', { class: 'muted', text: 'Ei kuvaa' })); preview.classList.toggle('has', !!url); };
-  show(file?.url || cur);
-  const save = h('button', { type: 'button', class: 'btn', text: 'Tallenna kuva', disabled: true });
-  const del = h('button', { type: 'button', class: 'btn danger', text: 'Poista kuva', disabled: !c.image_path });
-  const pick = h('button', { type: 'button', class: 'btn', text: c.image_path ? 'Vaihda kuva' : 'Valitse kuva', onclick: () => input.click() });
-  alt.addEventListener('input', () => { save.disabled = !(file || c.image_path); });
-  input.addEventListener('change', async () => {
-    const f = input.files[0]; input.value = ''; if (!f) return;
-    status.textContent = 'Käsitellään kuvaa…'; status.className = 'muted';
-    try {
-      file = await prepareImage(f);
-      show(file.url); save.disabled = false;
-      status.textContent = `Valittu: ${f.name} → ${(file.blob.size / 1024).toFixed(0)} kt (${file.w}×${file.h}). Paina "Tallenna kuva".`;
-    } catch (e) { status.textContent = e.message; status.className = 'err'; save.disabled = !(file || c.image_path) && true; }
-  });
-  save.addEventListener('click', () => run(save, async () => {
-    let path = c.image_path;
-    if (file) { path = newPath(p.id, file.ext); await uploadObject('product-images', path, file.blob); }
-    const r = await rpc('admin_set_product_image', { p_product_id: p.id, p_image_path: path, p_image_alt: alt.value.trim() || null });
-    if (file && r?.previous_path && r.previous_path !== path) await removeObject('product-images', r.previous_path).catch(() => {});   // siivotaan vanha tiedosto (virhe ei haittaa)
-    toast('Kuva tallennettu'); done();
-  }));
-  del.addEventListener('click', async () => { if (!(await confirmAsk('Poistetaanko tuotteen kuva?', { yes: 'Poista kuva' }))) return; run(del, async () => {
-    const r = await rpc('admin_set_product_image', { p_product_id: p.id, p_image_path: null, p_image_alt: null });
-    if (r?.previous_path) await removeObject('product-images', r.previous_path).catch(() => {});
-    toast('Kuva poistettu'); done();
-  }); });
-  return h('div', { class: 'stack box', id: `img-box-${p.id}` }, h('h3', { text: 'Tuotekuva' }), preview,
-    canEdit ? [h('div', { class: 'row wrap' }, pick, input, save, del),
-      field('Kuvan alt-teksti (valinnainen)', alt, 'Kuvaus ruudunlukijalle; jos tyhjä, käytetään tuotteen nimeä.'),
-      h('p', { class: 'muted', text: `JPEG, PNG tai WebP, enintään ${IMG_MAX_INPUT / 1048576} Mt. Kuva pienennetään automaattisesti (enintään 1600 px) ja tallennetaan julkiseen kuvakansioon.` })] : h('p', { class: 'muted', text: 'Kuvan vaihto vaatii ylläpitäjän (manager/admin) oikeudet.' }),
-    status);
+  return [h('div', { class: 'row between wrap prod-head' }, h('h1', { text: 'Tuotteet' }), addBtn), h('p', { class: 'muted', text: isAdmin ? 'Tuotetiedot tallentuvat yhteiseen luetteloon (sivusto ja botti käyttävät samaa totuutta). Muutokset kirjataan lokiin.' : 'Näet tuotteet; hintojen ja tuotteiden muokkaus vaatii ylläpitäjän (manager/admin) oikeudet.' }), h('div', { class: `prodlayout${openId ? ' editing' : ''}` }, h('div', { class: 'prodlist-col' }, filters, count, list), openId ? panelHost : null), h('div', { class: 'prodextras' }, qrSection, optionsSection, addonsSection)];
 }
 
 async function qrPrintSection({ openNow }) {
