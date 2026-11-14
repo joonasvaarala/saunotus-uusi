@@ -214,6 +214,9 @@ jobs:
       # booking_286: Pikakassan kortti puhelimella (CheckoutX / Surfboard demo, vain testitila). Edge-logiikka Surfboard-mockilla yllä (checkoutx_test.ts).
       # t286 (booking/supabase/tests/pos/t286_checkoutx_pos.sql) ei ole tässä ajossa: työnkulussa ei ole Postgresia. Bottiavustus ajaa sen psql:llä migraation jälkeen.
       - run: node --test booking/tests/checkoutx-pikakassa.test.mjs
+      # booking_309 (verkkokaupan maksamatta vanhentuneet tilaukset poistuvat näkyvistä = automaattinen arkistointi; #15210 Vanhentunut+Maksettu-merkkikorjaus).
+      # SQL-testi booking/supabase/tests/checkout/t309_expired_web_orders_auto_archive.sql VAIN paikalliseen kertakäyttökantaan (rollback).
+      - run: node --test booking/tests/vanhentuneet-poisto-309.test.mjs
       # Tilausnäkymä v3, PR 3 (booking_282–284): osahyvitys ja asiakkaan oma pienennys lippujen takana; tekstit pending-import-139.
       # SQL: booking/supabase/tests/talous/t282_*.sql, t283_*.sql, t284_*.sql ja race_283.sh ajetaan paikallisessa PG17:ssä. Työnkulussa ei ole Postgresia.
       # booking_305 (jumiin jääneiden hyvitysten hälytys): booking/supabase/tests/talous/t305_refund_stuck.sql ajetaan paikallisessa PG:ssä (ei Postgresia työnkulussa).
