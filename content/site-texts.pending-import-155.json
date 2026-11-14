@@ -1,0 +1,62 @@
+[
+  {
+    "key": "ui.admin.day.kind_shared",
+    "lang": "fi",
+    "text": "Yleinen",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-PAIVA-01: vuorokortin tyyppimerkki (yleinen vuoro)"
+  },
+  {
+    "key": "ui.admin.day.kind_shared",
+    "lang": "en",
+    "text": "Shared",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-PAIVA-01: vuorokortin tyyppimerkki (yleinen vuoro)"
+  },
+  {
+    "key": "ui.admin.day.kind_exclusive",
+    "lang": "fi",
+    "text": "Yksityinen",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-PAIVA-01: vuorokortin tyyppimerkki (yksityinen vuoro)"
+  },
+  {
+    "key": "ui.admin.day.kind_exclusive",
+    "lang": "en",
+    "text": "Private",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-PAIVA-01: vuorokortin tyyppimerkki (yksityinen vuoro)"
+  },
+  {
+    "key": "ui.admin.day.blocks_title",
+    "lang": "fi",
+    "text": "Sulut",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-PAIVA-01: Sulut-painike ja -ikkuna päivänäkymän työkalurivillä"
+  },
+  {
+    "key": "ui.admin.day.blocks_title",
+    "lang": "en",
+    "text": "Closures",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-PAIVA-01: Sulut-painike ja -ikkuna päivänäkymän työkalurivillä"
+  }
+]
