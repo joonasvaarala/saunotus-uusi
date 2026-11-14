@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="fi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Luonnos 03: Aukiolot – hallinta</title>
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="ui.css">
+<style>
+  .layout { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: var(--sp-5); align-items: start; }
+  .week { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: var(--sp-2); }
+  .day { background: var(--c-surface); border: 1px solid var(--c-line); border-radius: var(--r-lg); padding: var(--sp-2); display: grid; gap: 6px; align-content: start; min-height: 260px; }
+  .day h3 { font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: .06em; color: var(--c-muted); padding: 4px 4px 2px; }
+  .ses { width: 100%; overflow-wrap: anywhere; display: grid; gap: 2px; padding: 6px 8px; border-radius: 8px; background: var(--c-info-bg); border-left: 3px solid var(--c-brand); font-size: 12px; color: var(--c-ink); text-align: left; border-top: 0; border-right: 0; border-bottom: 0; }
+  .ses b { font-size: 13px; }
+  .ses span { color: var(--c-text); }
+  .ses.priv { background: var(--c-warn-bg); border-left-color: var(--c-warn); }
+  .ses.hour { background: var(--c-neutral-bg); border-left-color: var(--c-muted); }
+  .ses[aria-pressed="true"] { outline: 2px solid var(--c-accent); outline-offset: 1px; }
+  .addses { min-height: 36px; border: 1px dashed var(--c-field); border-radius: 8px; background: none; color: var(--c-accent); font: 600 12px/1 var(--f-ui); }
+  .none { font-size: 12px; color: var(--c-muted); padding: 4px; }
+  .exc { display: grid; grid-template-columns: 110px 1fr auto; gap: var(--sp-3); align-items: center; padding: var(--sp-3) 0; border-top: 1px solid var(--c-line); }
+  .exc:first-of-type { border-top: 0; }
+  .exc .d { font-weight: 700; color: var(--c-ink); }
+  .grid2 { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); gap: var(--sp-3); }
+  .field { justify-items: start; }
+  .field > * { max-width: 100%; }
+  .field .input, .field .select, .field .unit { justify-self: stretch; }
+  .wd { display: flex; gap: 4px; flex-wrap: wrap; }
+  .wd .chip { min-height: 36px; padding: 0 10px; }
+  .legend-row { display: flex; gap: var(--sp-4); flex-wrap: wrap; font-size: var(--fs-xs); color: var(--c-muted); margin: var(--sp-2) 0 var(--sp-3); }
+  .legend-row i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 4px; vertical-align: -1px; }
+  .layout > *, .ov > *, .pos > * { min-width: 0; }
+</style>
+</head>
+<body>
+<div class="mock-bar"><b>Luonnos 03/10</b> Hallinta · Aukiolot ja poikkeuspäivät, uusi näkymä (1280 px) · <a href="index.html">kaikki luonnokset</a><span class="ids">HALL-TILAT-01 · HALL-TILAT-02 · YHT-03</span></div>
+<div class="app">
+  <header class="app-top">
+    <a class="brand" href="#"><img src="../../../booking/admin/logo-haalea.svg" alt="Hallinta" width="26" height="36"></a>
+    <div class="search"><span data-icon="search" data-size="18"></span>Hae nimeä, numeroa tai koodia</div>
+    <span class="spacer"></span>
+    <a class="top-btn" href="#"><span data-icon="plus" data-size="18"></span>Uusi varaus</a>
+    <a class="top-btn" href="#"><span data-icon="till" data-size="18"></span>Kassa</a>
+    <a class="top-btn" href="#"><span data-icon="check" data-size="18"></span>Tarkista <span class="count">3</span></a>
+    <span class="user"><i>J</i>Joonas · Pääkäyttäjä</span>
+  </header>
+  <nav class="app-nav" aria-label="Päävalikko">
+    <a href="#"><span data-icon="day"></span>Päivä</a>
+    <a href="#"><span data-icon="calendar"></span>Kalenteri</a>
+    <a href="#"><span data-icon="list"></span>Tilaukset<span class="badge badge--warn">2</span></a>
+    <a href="#"><span data-icon="users"></span>Asiakkaat</a>
+    <a href="#"><span data-icon="gift"></span>Lahjakortit ja koodit</a>
+    <a href="#" aria-current="page"><span data-icon="tag"></span>Tarjonta</a>
+    <a href="#"><span data-icon="school"></span>Koulutukset</a>
+    <a href="#"><span data-icon="chart"></span>Talous</a>
+    <a href="#"><span data-icon="mail"></span>Sisältö</a>
+    <a href="#"><span data-icon="sliders"></span>Asetukset</a>
+  </nav>
+  <main class="app-main">
+    <div class="page-head">
+      <div><h1>Tarjonta</h1></div>
+    </div>
+    <div class="tabs" role="tablist" aria-label="Tarjonta">
+      <a role="tab" href="#">Tuotteet</a>
+      <a role="tab" href="#">Tapahtumat</a>
+      <a role="tab" href="#">Hiljaiset ajat</a>
+      <a role="tab" href="#" aria-selected="true">Aukiolot <span class="badge badge--info">Uusi</span></a>
+      <a role="tab" href="#">Tilat ja sulut</a>
+      <span class="pin" style="align-self:center">1</span>
+    </div>
+
+    <div class="row wrap" style="margin-bottom:var(--sp-3)">
+      <div class="seg" role="group" aria-label="Näkymä"><button aria-pressed="true">Viikkopohja</button><button aria-pressed="false">Poikkeuspäivät <span class="badge badge--neutral">3</span></button></div>
+      <span class="grow"></span>
+      <span class="small muted">Näytä viikko</span>
+      <button class="btn btn--sm">‹</button><b class="num">16.–22.11.2026</b><button class="btn btn--sm">›</button>
+    </div>
+
+    <div class="legend-row"><span><i style="background:var(--c-brand)"></i>Yleinen vuoro</span><span><i style="background:var(--c-muted)"></i>1 h vuoro</span><span><i style="background:var(--c-warn)"></i>Yksityisvuoro (näkyy, kun tila on vapaa)</span></div>
+        <div class="week">
+          <div class="day"><h3>Ma</h3><button class="ses"><b>16.00–19.00</b><span>Miestenvuoro</span><span>16 paikkaa</span></button><button class="addses">+ Vuoro</button></div>
+          <div class="day"><h3>Ti</h3><button class="ses"><b>16.00–19.00</b><span>Naistenvuoro</span><span>16 paikkaa</span></button><button class="addses">+ Vuoro</button></div>
+          <div class="day"><h3>Ke</h3><button class="ses"><b>16.00–19.00</b><span>Hiljainen vuoro</span><span>16 paikkaa</span></button><button class="addses">+ Vuoro</button></div>
+          <div class="day"><h3>To</h3><button class="ses"><b>16.00–17.00</b><span>Turvesauna</span><span>8 paikkaa</span></button><button class="ses"><b>17.00–19.00</b><span>Yleinen vuoro</span><span>16 paikkaa</span></button><button class="addses">+ Vuoro</button></div>
+          <div class="day"><h3>Pe</h3><p class="none">Ei yleisiä vuoroja</p><button class="ses priv"><b>12.00–22.00</b><span>Oma savusaunavuoro</span><span>1–7 h</span></button><button class="addses">+ Vuoro</button></div>
+          <div class="day"><h3>La</h3><button class="ses hour"><b>14.00</b><span>1 h · 10 paikkaa</span></button><button class="ses"><b>14.00 · 14.30 · 15.00</b><span>2 h · 6 paikkaa / alku</span></button><button class="ses" aria-pressed="true"><b>16.00</b><span>2 h · 6 paikkaa</span></button><button class="ses"><b>16.30 · 17.00</b><span>2 h · 6 paikkaa / alku</span></button><button class="ses hour"><b>18.00</b><span>1 h · 10 paikkaa</span></button><button class="addses">+ Vuoro</button></div>
+          <div class="day"><h3>Su</h3><button class="ses hour"><b>14.00</b><span>1 h · 10 paikkaa</span></button><button class="ses"><b>14.00–17.00</b><span>6 alkua · 2 h · 6 / alku</span></button><button class="ses hour"><b>18.00</b><span>1 h · 10 paikkaa</span></button><button class="addses">+ Vuoro</button></div>
+        </div>
+        <p class="small muted" style="margin-top:var(--sp-2)">Napauta vuoroa muokataksesi. Muutos koskee vain tulevia päiviä alkaen valitusta päivästä; tehdyt varaukset säilyvät.</p>
+    <div class="layout" style="margin-top:var(--sp-5)">
+      <section class="card">
+          <div class="card-head"><h2>Tulevat poikkeuspäivät</h2><button class="btn btn--sm btn--primary">+ Poikkeuspäivä</button></div>
+          <div class="exc"><span class="d num">Ke 24.12.</span><div><b style="color:var(--c-ink)">Jouluaatto: kertavuoro</b><div class="small">13.00–15.00 · Yleinen vuoro · 16 paikkaa · normaalit vuorot suljettu</div></div><button class="btn btn--sm">Muokkaa</button></div>
+          <div class="exc"><span class="d num">To 31.12.</span><div><b style="color:var(--c-ink)">Suljettu</b><div class="small">Kaikki vuorot · syy: uudenvuodenaatto</div></div><button class="btn btn--sm">Muokkaa</button></div>
+          <div class="exc"><span class="d num">La 19.12.</span><div><b style="color:var(--c-ink)">Pienempi kapasiteetti</b><div class="small">14.00-vuoro 6 → 4 paikkaa · syy: lauteiden huolto</div></div><button class="btn btn--sm">Muokkaa</button></div>
+          <span class="pin">2</span>
+        </section>
+      <aside class="card" >
+        <div class="card-head"><h2>Muokkaa vuoroa</h2><span class="pin">3</span></div>
+        <p class="small muted" style="margin:-6px 0 12px">Yleinen savusauna · la 16.00</p>
+        <div class="stack">
+          <div class="grid2">
+            <label class="field"><span>Alkaa</span><select class="select"><option>16.00</option></select></label>
+            <label class="field"><span>Kesto</span><div class="unit"><input value="2" inputmode="numeric" aria-label="Tunnit"><span>h</span><input value="0" inputmode="numeric" aria-label="Minuutit"><span>min</span></div></label>
+          </div>
+          <label class="field"><span>Paikkoja</span><div class="stepper"><button aria-label="Vähemmän paikkoja">−</button><output>8</output><button aria-label="Enemmän paikkoja">+</button></div><span class="hint">Oli 6. Koskee vain tätä alkamisaikaa.</span></label>
+          <div class="field"><span>Päivät</span><div class="wd"><button class="chip" aria-pressed="false">Ma</button><button class="chip" aria-pressed="false">Ti</button><button class="chip" aria-pressed="false">Ke</button><button class="chip" aria-pressed="false">To</button><button class="chip" aria-pressed="false">Pe</button><button class="chip" aria-pressed="true">La</button><button class="chip" aria-pressed="true">Su</button></div></div>
+          <label class="field"><span>Voimassa alkaen</span><input class="input" value="la 5.12.2026"><span class="hint">Tyhjä loppupäivä = toistaiseksi</span></label>
+          <div class="alert alert--info"><span data-icon="eye"></span><div><b>Esikatselu</b>Muutos koskee 18 tulevaa päivää (5.12. alkaen). Kauppa näyttää 2 lisäpaikkaa heti tallennuksen jälkeen. Muutettuun aikaan osuvia varauksia: 0.</div></div>
+          <div class="row wrap"><button class="btn btn--primary">Tallenna muutos</button><button class="btn btn--ghost">Peruuta</button></div>
+          <button class="linkbtn" style="color:var(--c-danger);justify-self:start">Lopeta tämä vuoro…</button>
+        </div>
+      </aside>
+    </div>
+  </main>
+</div>
+
+<section class="legend" aria-label="Mitä muuttui">
+  <h2>Mitä muuttui: aukiolot ilman kehittäjää</h2>
+  <ol>
+    <li><span class="pin">1</span><div><b>Uusi välilehti Tarjonta › Aukiolot.</b> Viikkopohja näyttää kaikki vuorot viikonpäivittäin; henkilökunta lisää ja muuttaa vuoroja itse. <span class="before">Nyt uusi vuoro, alkuaika, viikonpäivät tai kesto vaativat SQL-migraation (Bottiavustus), ja Resurssit-sivu puhuu tauluista ("Säännöt ovat dataa (booking.schedule_rules)").</span> <code>HALL-TILAT-01</code> <code>HALL-TILAT-02</code></div></li>
+    <li><span class="pin">2</span><div><b>Poikkeuspäivät:</b> kertavuoro (esim. jouluaatto), koko päivän sulku ja yhden päivän kapasiteetti. <span class="before">Nyt kertavuoroa ei voi tehdä, ja kapasiteetin muutos koskee aina kaikkia päiviä.</span> <code>HALL-TILAT-01</code></div></li>
+    <li><span class="pin">3</span><div><b>Muokkaus esikatselulla:</b> alkuaika, kesto tunteina ja minuutteina, paikat, viikonpäivät ja voimassaolo; ennen tallennusta näkyy, montaako päivää ja varausta muutos koskee. Tehdyt varaukset säilyvät, koska muutos päättää vanhan säännön ja aloittaa uuden. <code>HALL-TILAT-01</code></div></li>
+  </ol>
+  <p class="small muted" style="margin-top:12px">Vaatii tietokantamuutoksen (raportin luonnos: <code>schedule_rules.kind = 'extra'</code>, taulu <code>session_overrides</code>, <code>admin_schedule_rule_split</code>, <code>admin_session_override_set</code>). Vuorot vastaavat nykyistä viikko-ohjelmaa; luvut ovat esimerkkejä.</p>
+</section>
+<script src="icons.js"></script>
+</body>
+</html>

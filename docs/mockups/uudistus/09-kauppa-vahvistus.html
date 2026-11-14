@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="fi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Luonnos 09: Vahvistussivu – kauppa</title>
+<link rel="stylesheet" href="fonts.css">
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="ui.css">
+<style>
+  .frame .s-brand b { font-size: 17px; }
+  .page { padding: var(--sp-5) var(--sp-4) var(--sp-6); display: grid; gap: var(--sp-4); }
+  .status { display: grid; gap: var(--sp-2); justify-items: start; }
+  .status h1 { font-size: 32px; line-height: 1.1; }
+  .status p { font-size: var(--fs-sm); }
+  .ok-ring { width: 48px; height: 48px; border-radius: 50%; display: grid; place-items: center; background: var(--c-ok-bg); color: var(--c-ok); }
+  .warn-ring { width: 48px; height: 48px; border-radius: 50%; display: grid; place-items: center; background: var(--c-warn-bg); color: var(--c-warn); }
+  .sum { background: var(--c-surface-2); border: 1px solid var(--c-line); border-radius: var(--r-lg); padding: var(--sp-4); display: grid; gap: var(--sp-2); }
+  .sum .prod { display: flex; gap: var(--sp-3); align-items: center; }
+  .sum .prod img { width: 56px; height: 56px; border-radius: var(--r-md); object-fit: cover; }
+  .sum .prod b { display: block; font: 600 15px/1.3 var(--f-label); color: var(--c-ink); }
+  .sum .kv dt, .sum .kv dd { font-size: var(--fs-sm); }
+  .sum .total { display: flex; justify-content: space-between; align-items: baseline; border-top: 1px solid var(--c-line); padding-top: var(--sp-2); }
+  .sum .total b { font-size: 20px; color: var(--c-ink); }
+  .box { border-radius: var(--r-lg); border: 1px solid var(--c-line); background: #fff; padding: var(--sp-4); display: grid; gap: var(--sp-2); font-size: var(--fs-sm); }
+  .box h2 { font: 600 15px/1.3 var(--f-label); color: var(--c-ink); }
+  .box ul { margin: 0; padding-left: 18px; display: grid; gap: 4px; }
+  .site .s-btn { width: 100%; }
+</style>
+</head>
+<body class="site">
+<div class="mock-bar"><b>Luonnos 09/10</b> Kauppa · Vahvistussivu puhelimella, kaksi tilaa (390 px) · <a href="index.html">kaikki luonnokset</a><span class="ids">KAUPPA-VAHVISTUS-01 · KAUPPA-MAKSU-01 · KAUPPA-TUOTE-01</span></div>
+<div class="frames">
+  <div>
+    <p class="frame-label">Maksettu ja vahvistettu</p>
+    <div class="frame">
+      <header class="s-head"><a class="s-brand" href="#"><img src="../../../public/img/favicon.svg" alt=""><span><b>SAUNOTUS</b><small>Sipoonjoen perinnesauna</small></span></a></header>
+      <div class="page">
+        <div class="status">
+          <span class="ok-ring"><span data-icon="tick" data-size="26"></span></span>
+          <h1>Varaus on vahvistettu</h1>
+          <p>Vahvistus ja kuitti on lähetetty osoitteeseen m•••@example.com.</p>
+          <span class="pin">1</span>
+        </div>
+        <div class="sum">
+          <div class="prod"><img src="../../../public/img/j-yleinen-480.webp" alt=""><div><b>Yleinen saunavuoro</b><span class="small">Lauantai 14.11.2026 klo 14.00–16.00</span></div></div>
+          <dl class="kv"><dt>Tilausnumero</dt><dd class="num">15123</dd><dt>Henkilöt</dt><dd>2</dd><dt>Lisäpalvelut</dt><dd>Pyyhe × 1</dd><dt>Maksu</dt><dd><span class="badge badge--ok">Maksettu kortilla</span></dd></dl>
+          <div class="total"><span>Yhteensä</span><b class="num">63,00 €</b></div>
+          <span class="pin">2</span>
+        </div>
+        <a class="s-btn" href="#">Hallitse varausta</a>
+        <p class="small" style="margin-top:-8px">Siirrä aikaa, lisää pyyhkeitä tai vihta, lataa kuitti tai pyydä peruutusta.</p>
+        <a class="s-btn s-btn--line" href="#">Lisää kalenteriin</a>
+        <span class="pin">3</span>
+        <div class="box">
+          <h2>Ennen saapumista</h2>
+          <ul><li>Saavu noin 10 minuuttia ennen vuoron alkua.</li><li>Ota mukaan pyyhe (varattu 1) ja juomapullo.</li><li>Lauantain vuorolla saunotaan uima-asussa.</li></ul>
+          <a href="#" style="font-weight:700">Reittiohje ja pysäköinti →</a>
+        </div>
+        <div class="box">
+          <h2>Muutokset ja peruutus</h2>
+          <p>Voit siirtää varausta tai pyytää peruutusta viimeistään 48 tuntia ennen alkua sivulla <a href="#">Hallitse varausta</a>.</p>
+          <span class="pin">4</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div>
+    <p class="frame-label">Paikkavaraus vanheni ennen maksua</p>
+    <div class="frame">
+      <header class="s-head"><a class="s-brand" href="#"><img src="../../../public/img/favicon.svg" alt=""><span><b>SAUNOTUS</b><small>Sipoonjoen perinnesauna</small></span></a></header>
+      <div class="page">
+        <div class="status">
+          <span class="warn-ring"><span data-icon="undo" data-size="26"></span></span>
+          <h1>Paikkavaraus vanheni</h1>
+          <p>Maksua ei tehty 15 minuutissa, joten paikka vapautui. Sinulta ei ole veloitettu mitään.</p>
+          <span class="pin">5</span>
+        </div>
+        <div class="sum">
+          <div class="prod"><img src="../../../public/img/j-yleinen-480.webp" alt=""><div><b>Yleinen saunavuoro</b><span class="small">Lauantai 14.11.2026 klo 14.00–16.00</span></div></div>
+          <p class="small"><span class="badge badge--ok">4 paikkaa vielä vapaana</span></p>
+        </div>
+        <a class="s-btn s-btn--gold" href="#">Varaa sama aika uudelleen</a>
+        <a href="#" class="small" style="font-weight:700;justify-self:center">Valitse toinen aika</a>
+        <span class="pin">6</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<section class="legend" aria-label="Mitä muuttui" style="max-width:860px">
+  <h2>Mitä muuttui nykyiseen vahvistussivuun verrattuna</h2>
+  <ol>
+    <li><span class="pin">1</span><div><b>Yksi otsikko ja tieto lähetetystä vahvistuksesta.</b> <span class="before">Nyt esim. pitotilassa H1 "Viimeistele varaus", H2 "Varauksesi odottaa maksua" ja merkki "Varaus odottaa maksua"; sähköpostista ei kerrota.</span> <code>KAUPPA-VAHVISTUS-01</code></div></li>
+    <li><span class="pin">2</span><div><b>Selkeä maksun tila</b> ("Maksettu kortilla", laskulla "Laskutetaan"). <span class="before">Nyt maksun tila voi olla "Maksamatta (maksu paikan päällä)" myös laskulla ja vanhentuneella varauksella; teksti "Visma Pay otetaan käyttöön myöhemmin" näkyy, jos maksutapojen haku epäonnistuu.</span> <code>KAUPPA-MAKSU-01</code></div></li>
+    <li><span class="pin">3</span><div><b>"Hallitse varausta" vie tilaussivulle</b>, jossa kuitit, lisäykset ja peruutuspyyntö ovat. Tiivis yläosa heron sijaan. <span class="before">Nyt vahvistussivulta ei ole linkkiä tilaussivulle, ja 300 px:n tuotekuva vie ensimmäisen näkymän.</span> <code>KAUPPA-VAHVISTUS-01</code> <code>KAUPPA-TUOTE-01</code></div></li>
+    <li><span class="pin">4</span><div><b>Yksi peruutusohje</b>, sama kuin tilaussivulla. <span class="before">Nyt vahvistussivu ohjaa peruuttamaan sähköpostilla, vaikka tilaussivulla on peruutuspyyntölomake.</span> <code>KAUPPA-VAHVISTUS-01</code></div></li>
+    <li><span class="pin">5</span><div><b>Vanhentunut tila kertoo selvästi, ettei mitään veloitettu.</b> <span class="before">Nyt sama asia toistuu H1:ssä, H2:ssa, merkissä, H3:ssa ja leipätekstissä.</span> <code>KAUPPA-VAHVISTUS-01</code></div></li>
+    <li><span class="pin">6</span><div><b>Yksi päätoiminto:</b> varaa sama aika uudelleen. <span class="before">Nyt kaksi kilpailevaa painiketta ("Tee uusi varaus" kultainen ja "Yritä uudelleen" vihreä).</span> <code>KAUPPA-VAHVISTUS-01</code></div></li>
+  </ol>
+  <p class="small muted" style="margin-top:12px">Ohjetekstit ovat esimerkkejä; oikeat tekstit tulevat tietokannasta. Sähköpostiosoite on esimerkissä osittain peitetty.</p>
+</section>
+<script src="icons.js"></script>
+</body>
+</html>
