@@ -1,0 +1,152 @@
+[
+ {
+  "key": "ui.shop.manage_booking",
+  "lang": "fi",
+  "text": "Hallitse varausta",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "KAUPPA-VAHVISTUS-01: vahvistussivun yksi päätoiminto (Hallitse varausta), sähköpostivahvistuksen maininta ja tilaussivun peruutusohje (booking/shop/src/i18n.js). Sama kuin koodin oletus; Koodari tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.shop.manage_booking",
+  "lang": "en",
+  "text": "Manage booking",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "KAUPPA-VAHVISTUS-01: vahvistussivun yksi päätoiminto (Hallitse varausta), sähköpostivahvistuksen maininta ja tilaussivun peruutusohje (booking/shop/src/i18n.js). Sama kuin koodin oletus; Koodari tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.shop.conf_email_sent",
+  "lang": "fi",
+  "text": "Vahvistus on lähetetty antamaasi sähköpostiosoitteeseen.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "KAUPPA-VAHVISTUS-01: vahvistussivun yksi päätoiminto (Hallitse varausta), sähköpostivahvistuksen maininta ja tilaussivun peruutusohje (booking/shop/src/i18n.js). Sama kuin koodin oletus; Koodari tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.shop.conf_email_sent",
+  "lang": "en",
+  "text": "A confirmation has been sent to the email address you gave.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "KAUPPA-VAHVISTUS-01: vahvistussivun yksi päätoiminto (Hallitse varausta), sähköpostivahvistuksen maininta ja tilaussivun peruutusohje (booking/shop/src/i18n.js). Sama kuin koodin oletus; Koodari tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.shop.new_booking",
+  "lang": "fi",
+  "text": "Tee uusi varaus",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "KAUPPA-VAHVISTUS-01: vahvistussivun yksi päätoiminto (Hallitse varausta), sähköpostivahvistuksen maininta ja tilaussivun peruutusohje (booking/shop/src/i18n.js). Sama kuin koodin oletus; Koodari tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.shop.new_booking",
+  "lang": "en",
+  "text": "Make a new booking",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "KAUPPA-VAHVISTUS-01: vahvistussivun yksi päätoiminto (Hallitse varausta), sähköpostivahvistuksen maininta ja tilaussivun peruutusohje (booking/shop/src/i18n.js). Sama kuin koodin oletus; Koodari tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.shop.conf_change",
+  "lang": "fi",
+  "text": "Voit siirtää varauksen toiselle vapaalle vuorolle tai muuttaa henkilömäärää viimeistään {{var:hours}} h ennen vuoron alkua (nyt viimeistään {{var:date}}).",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [
+   "{{var:hours}}",
+   "{{var:date}}"
+  ],
+  "reason": "KAUPPA-VAHVISTUS-01: vahvistussivun yksi päätoiminto (Hallitse varausta), sähköpostivahvistuksen maininta ja tilaussivun peruutusohje (booking/shop/src/i18n.js). Sama kuin koodin oletus; Koodari tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.shop.conf_change",
+  "lang": "en",
+  "text": "You can move your booking to another available session or change the number of guests up to {{var:hours}} h before the session starts (currently by {{var:date}} at the latest).",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 450,
+  "placeholders": [
+   "{{var:hours}}",
+   "{{var:date}}"
+  ],
+  "reason": "KAUPPA-VAHVISTUS-01: vahvistussivun yksi päätoiminto (Hallitse varausta), sähköpostivahvistuksen maininta ja tilaussivun peruutusohje (booking/shop/src/i18n.js). Sama kuin koodin oletus; Koodari tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.shop.conf_change_locked",
+  "lang": "fi",
+  "text": "Varausta ei voi enää muuttaa verkossa (muutos vähintään {{var:hours}} h ennen vuoron alkua).",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 250,
+  "placeholders": [
+   "{{var:hours}}"
+  ],
+  "reason": "KAUPPA-VAHVISTUS-01: vahvistussivun yksi päätoiminto (Hallitse varausta), sähköpostivahvistuksen maininta ja tilaussivun peruutusohje (booking/shop/src/i18n.js). Sama kuin koodin oletus; Koodari tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.shop.conf_change_locked",
+  "lang": "en",
+  "text": "This booking can no longer be changed online (changes up to {{var:hours}} h before the start).",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 250,
+  "placeholders": [
+   "{{var:hours}}"
+  ],
+  "reason": "KAUPPA-VAHVISTUS-01: vahvistussivun yksi päätoiminto (Hallitse varausta), sähköpostivahvistuksen maininta ja tilaussivun peruutusohje (booking/shop/src/i18n.js). Sama kuin koodin oletus; Koodari tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.shop.conf_cancel_hint",
+  "lang": "fi",
+  "text": "Peruutuspyynnön voit lähettää kohdassa Hallitse varausta. Siellä näkyy myös peruutuksen määräaika.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 250,
+  "placeholders": [],
+  "reason": "KAUPPA-VAHVISTUS-01: vahvistussivun yksi päätoiminto (Hallitse varausta), sähköpostivahvistuksen maininta ja tilaussivun peruutusohje (booking/shop/src/i18n.js). Sama kuin koodin oletus; Koodari tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.shop.conf_cancel_hint",
+  "lang": "en",
+  "text": "You can send a cancellation request under Manage booking. The cancellation deadline is shown there.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 250,
+  "placeholders": [],
+  "reason": "KAUPPA-VAHVISTUS-01: vahvistussivun yksi päätoiminto (Hallitse varausta), sähköpostivahvistuksen maininta ja tilaussivun peruutusohje (booking/shop/src/i18n.js). Sama kuin koodin oletus; Koodari tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.shop.conf_cancel_hint_locked",
+  "lang": "fi",
+  "text": "Peruutukset ja muutokset: ota yhteyttä sähköpostilla",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "KAUPPA-VAHVISTUS-01: vahvistussivun yksi päätoiminto (Hallitse varausta), sähköpostivahvistuksen maininta ja tilaussivun peruutusohje (booking/shop/src/i18n.js). Sama kuin koodin oletus; Koodari tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.shop.conf_cancel_hint_locked",
+  "lang": "en",
+  "text": "For cancellations and changes please email us at",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "KAUPPA-VAHVISTUS-01: vahvistussivun yksi päätoiminto (Hallitse varausta), sähköpostivahvistuksen maininta ja tilaussivun peruutusohje (booking/shop/src/i18n.js). Sama kuin koodin oletus; Koodari tuo admin_texts_importilla."
+ }
+]

@@ -6,9 +6,9 @@ import { ht, HT } from './hold-texts.js';
 import { createHoldClock, clockText, createAnnouncer, spoken, nextPollIn, changed, POLL } from './hold-logic.js';
 
 let seq = 0;
-// opts: { L, co (normCheckout), minutes, giftUsed, newHref, refresh(): Promise<co|null> | null, onChange(co), fmtDate(ms), mono, timers }
+// opts: { L, co (normCheckout), minutes, giftUsed, newHref, showNew (false: sivulla on jo oma päätoiminto), titleVisible (false: otsikko vain ruudunlukijalle, sivun H1 sanoo saman), refresh(): Promise<co|null> | null, onChange(co), fmtDate(ms), mono, timers }
 // → { node, stop() }. refresh = null → ei kyselyitä (esim. MobilePay-paluun pollaus hoitaa tilan).
-export function holdPanel({ L = 'fi', co, minutes = 15, giftUsed = false, newHref = '#', refresh = null, onChange = () => {}, fmtDate = (t) => new Date(t).toLocaleDateString(L === 'en' ? 'en-GB' : 'fi-FI'), mono, timers = { setTimeout: (f, ms) => setTimeout(f, ms), clearTimeout: (id) => clearTimeout(id), setInterval: (f, ms) => setInterval(f, ms), clearInterval: (id) => clearInterval(id) } } = {}) {
+export function holdPanel({ L = 'fi', co, minutes = 15, giftUsed = false, newHref = '#', showNew = true, titleVisible = true, refresh = null, onChange = () => {}, fmtDate = (t) => new Date(t).toLocaleDateString(L === 'en' ? 'en-GB' : 'fi-FI'), mono, timers = { setTimeout: (f, ms) => setTimeout(f, ms), clearTimeout: (id) => clearTimeout(id), setInterval: (f, ms) => setInterval(f, ms), clearInterval: (id) => clearInterval(id) } } = {}) {
   const tx = (k, v) => ht(L, k, v), id = `hold-${++seq}`;
   const kind = co.expired ? 'expired' : co.preliminary ? 'preliminary' : co.processing ? 'processing' : 'awaiting';
   let cur = co, stopped = false, pollT = null, tickT = null, longShown = false;
@@ -16,7 +16,7 @@ export function holdPanel({ L = 'fi', co, minutes = 15, giftUsed = false, newHre
   const monoNow = mono || (() => (typeof performance !== 'undefined' ? performance.now() : Date.now()));
   const clock = createHoldClock(co, mono);
   const ann = createAnnouncer();
-  const kids = [h('h3', { id: `${id}-t`, tabindex: '-1', class: kind === 'awaiting' ? 'sr-only' : '', text: tx(`title.${kind}`) })];   // awaiting: otsikko vain ruudunlukijalle (sivun h2 + tilabadge sanovat saman) → kompakti banneri; muut tilat: näkyvä pieni otsikko   // tabindex -1: tilan vaihtuessa fokus siirretään otsikkoon (ruudunlukija lukee uuden tilan)
+  const kids = [h('h3', { id: `${id}-t`, tabindex: '-1', class: kind === 'awaiting' || !titleVisible ? 'sr-only' : '', text: tx(`title.${kind}`) })];   // awaiting: otsikko vain ruudunlukijalle (sivun h2 + tilabadge sanovat saman) → kompakti banneri; muut tilat: näkyvä pieni otsikko   // tabindex -1: tilan vaihtuessa fokus siirretään otsikkoon (ruudunlukija lukee uuden tilan)
   let timeEl = null, labelEl = null, announce = null, msgEl = null, recheckBtn = null;
   if (kind === 'awaiting') {
     kids.push(h('p', { class: 'bk-hold-must', 'data-testid': 'hold-must', text: tx('mustPay', { minutes }) }));   // selkeä 15 min -ohje (mustPay); ei toistavaa lead-tekstiä (poistettu)
@@ -33,7 +33,7 @@ export function holdPanel({ L = 'fi', co, minutes = 15, giftUsed = false, newHre
   } else {
     kids.push(h('p', { class: 'bk-hold-msg', 'data-testid': 'hold-msg', text: tx('expired', { minutes }) }));
     if (giftUsed) kids.push(h('p', { class: 'bk-hold-msg', 'data-testid': 'hold-gift-returned', text: tx('expiredGift') }));
-    kids.push(h('p', { class: 'bk-actions' }, h('a', { class: 'btn gold', href: newHref, 'data-testid': 'hold-new', text: tx('newBooking') })));
+    if (showNew) kids.push(h('p', { class: 'bk-actions' }, h('a', { class: 'btn gold', href: newHref, 'data-testid': 'hold-new', text: tx('newBooking') })));
   }
   const node = h('section', { class: `ord-card bk-hold bk-hold-${kind}`, 'aria-labelledby': `${id}-t`, 'data-testid': 'hold-panel', 'data-state': co.state }, kids);
 

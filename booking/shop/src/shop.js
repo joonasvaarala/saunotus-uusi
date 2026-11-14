@@ -52,7 +52,7 @@ import { formPaysOnline, paysByInvoice } from './company-pay.js';
 import { clockFromIso } from './clock.js';
 import { cardAnchor } from './card-link.js';
 import { bindLangLinks, restoreDraft } from './lang-switch.js';
-import { confirmPageKind } from './confirm-heading.js';
+import { confirmPageKind, showsThanksHeading, primaryAction, orderPageHref } from './confirm-heading.js';
 import { swimwearKey } from './product-layout.js';
 import { createPayBar } from './pay-bar.js';
 
@@ -1221,7 +1221,7 @@ async function viewConfirmation({ refresh = false, notice = null, host = null, n
   const pageTitle = { finish: t.finishTitle, cancelled: t.confCancelled, expired: t.confExpired, preliminary: ht(S.lang, 'status.preliminary') }[pageKind];
   if (pageTitle) {
     const h1 = document.querySelector('main .hero.page h1');
-    if (h1) h1.textContent = pageTitle;
+    if (h1) { h1.textContent = pageTitle; h1.dataset.testid = 'conf-title'; }
     const rest = document.title.includes(' | ') ? document.title.split(' | ').slice(1).join(' | ') : 'Sipoonjoen Perinnesauna';
     document.title = `${pageTitle} | ${rest}`;
     document.querySelector('meta[property="og:title"]')?.setAttribute('content', document.title);
@@ -1245,27 +1245,35 @@ async function viewConfirmation({ refresh = false, notice = null, host = null, n
   dl.dataset.testid = 'conf-summary';
   const trainingNote = b.training ? h('p', { class: 'bk-note', 'data-testid': 'conf-training-balance', text: S.lang === 'en' ? 'The balance is invoiced later. Only the reservation fee is paid online.' : 'Loppusumma laskutetaan myöhemmin. Verkossa maksetaan vain varausmaksu.' }) : null;
   const actions = h('div', { class: 'bk-actions' });
+  const primary = primaryAction(pageKind, { hasRetry: unpaidEnd });   // KAUPPA-VAHVISTUS-01: yksi päätoiminto per tila (kulta); muut toissijaisia
+  const orderHref = orderPageHref({ token, lang: S.lang, orderHref: S.orderHref, mock: MOCK });
+  if (primary === 'manage') actions.append(h('a', { class: 'btn gold', 'data-testid': 'conf-manage', href: orderHref, text: t.manageBooking }));
   if (b.status !== 'cancelled' && b.status !== 'expired' && !holdV) {   // kalenterilisäys vasta vahvistetusta varauksesta
     const url = URL.createObjectURL(new Blob([ics(b)], { type: 'text/calendar' }));
     actions.append(h('a', { class: 'btn light', href: url, download: `varaus-${b.order_no}.ics`, text: t.addCal }));
   }
   const inv = customerInvoiceLock(b);
-  if (b.status === 'confirmed' && b.can_change) actions.append(h('a', { class: 'btn gold', href: `#${token}/muuta`, text: t.changeBooking }));
-  if (b.status === 'pending' && inv.showPendingCancel) actions.append(h('button', { type: 'button', class: 'btn light', onclick: async () => {
+  if (b.status === 'confirmed' && b.can_change) actions.append(h('a', { class: 'btn light', href: `#${token}/muuta`, text: t.changeBooking }));
+  if (b.status === 'pending' && inv.showPendingCancel) actions.append(h('button', { type: 'button', class: 'btn light', onclick: async (ev) => {
+    const btn = ev.currentTarget;   // talteen ennen await-kutsua (currentTarget nollautuu)
     if (!await siteConfirm(t.cancelConfirm, { yes: t.cancelBooking, no: t.dialogBack, testid: 'cancel-confirm' })) return;
-    const r = await rpc('public_cancel_booking', { p_token: token });
-    out.replaceChildren(r.ok ? h('p', { class: 'bk-ok', text: t.cancelled }) : errorBox(t.errors[r.code] || t.cancelFail));
-    if (r.ok) setTimeout(() => location.reload(), 800);
+    btn.disabled = true;
+    let r = null; try { r = await rpc('public_cancel_booking', { p_token: token }); } catch { r = null; }   // verkkovirhe → virheilmoitus + painike takaisin käyttöön (ei hiljaista epäonnistumista)
+    out.replaceChildren(r?.ok ? h('p', { class: 'bk-ok', role: 'status', text: t.cancelled }) : errorBox((r && t.errors[r.code]) || t.cancelFail));
+    if (r?.ok) setTimeout(() => location.reload(), 800); else btn.disabled = false;
   } }, t.cancelBooking));
   if (b.status === 'pending' && inv.locked) actions.append(h('p', { class: 'bk-note', role: 'status', 'data-testid': 'invoiced-cancel-note', text: t.invoicedCancelNote }, ' ', h('a', { href: `mailto:${S.email}`, text: S.email })));
-  mount(h('div', { class: `bk-conf ${b.status}` }, h('h2', { 'data-testid': 'conf-title', text: b.status === 'cancelled' ? t.confCancelled : b.status === 'expired' ? t.confExpired : b.status === 'pending' || (co && co.awaiting) ? ht(S.lang, 'h2.awaiting') : t.confTitle }), h('p', { class: 'bk-status', role: 'status', 'data-testid': 'conf-status', text: head }), holdHost, mpHost, dl, trainingNote,   // pitotilassa: otsikko + tilabadge → pitopaneeli → tiivis tilausyhteenveto → maksuosio (secEl lisätään yhteenvedon jälkeen)
+  mount(h('div', { class: `bk-conf ${b.status}` }, showsThanksHeading(pageKind) && b.status === 'confirmed' ? h('h2', { 'data-testid': 'conf-thanks', text: t.confTitle }) : null, h('p', { class: 'bk-status', role: 'status', 'data-testid': 'conf-status', text: head }),   // yksi otsikko: sivun H1 (+ kiitos-H2 vain vahvistetussa), yksi tilamerkki
+    b.status === 'confirmed' && pageKind === 'confirmed' ? h('p', { class: 'bk-note', 'data-testid': 'conf-email-sent', text: t.confEmailSent }) : null, holdHost, mpHost, dl, trainingNote,   // pitotilassa: otsikko + tilabadge → pitopaneeli → tiivis tilausyhteenveto → maksuosio (secEl lisätään yhteenvedon jälkeen)
     swimKey ? h('p', { class: 'bk-note bk-swim', 'data-testid': 'conf-swim', text: t[swimKey] }) : null,
     b.status === 'confirmed' && paysByInvoice(b) && b.payment_status !== 'paid' ? h('p', { class: 'bk-pay', text: t.companyInvoiceMethodNote }) : null,
     b.status === 'confirmed' && b.payment_status !== 'paid' && b.payment_status !== 'invoiced' && !paysByInvoice(b) && !isTreatmentBooking(b) && !online ? h('p', { class: 'bk-pay', text: t.payLater }) : null, optNote && b.status === 'confirmed' ? h('p', { class: 'bk-note', 'data-testid': 'conf-option-note', text: optNote }) : null, actions, out,
     b.status === 'confirmed' && (b.has_ritual_addon || ritItems.length) ? h('p', { class: 'bk-note', 'data-testid': 'conf-ritual-note', text: rtx('ritualConfNote') }, ' ', h('a', { href: `mailto:${S.email}`, text: S.email }))
-      : b.status === 'confirmed' ? h('p', { class: 'bk-note', text: b.can_change ? t.changeInfo(b.change_hours_before, fmt(b.change_deadline, { day: 'numeric', month: 'numeric', hour: 'numeric', minute: '2-digit', hourCycle: 'h23' })) : t.changeLocked(b.change_hours_before) }, ' ', h('a', { href: `mailto:${S.email}`, text: S.email })) : null,
-    unpaidEnd ? h('p', { class: 'bk-note', 'data-testid': 'conf-unpaid', text: t.unpaidCancel }) : null,
-    unpaidEnd ? h('p', { class: 'bk-actions' }, h('a', { class: 'btn', 'data-testid': 'conf-retry', href: retryBookingHref(b, it, stMap), text: t.tryAgain })) : null,
+      : b.status === 'confirmed' ? h('p', { class: 'bk-note', 'data-testid': 'conf-change-note' }, b.can_change ? t.confChange.split('{hours}').join(String(b.change_hours_before)).split('{date}').join(fmt(b.change_deadline, { day: 'numeric', month: 'numeric', hour: 'numeric', minute: '2-digit', hourCycle: 'h23' })) : t.confChangeLocked.split('{hours}').join(String(b.change_hours_before)), ' ',   // peruutusohje sama kuin tilaussivulla: pyyntö Hallitse varausta -sivulta; sähköposti vain kun muutos on lukittu
+        b.can_change ? t.confCancelHint : [t.confCancelHintLocked, ' ', h('a', { href: `mailto:${S.email}`, text: S.email })]) : null,
+    unpaidEnd && !holdV ? h('p', { class: 'bk-note', 'data-testid': 'conf-unpaid', text: t.unpaidCancel }) : null,   // pitotilan viesti kertoo jo, ettei maksua saatu
+    unpaidEnd ? h('p', { class: 'bk-actions' }, h('a', { class: 'btn gold', 'data-testid': 'conf-retry', href: retryBookingHref(b, it, stMap), text: t.tryAgain })) : null,
+    primary === 'new' && !holdV ? h('p', { class: 'bk-actions' }, h('a', { class: 'btn gold', 'data-testid': 'conf-new', href: bk(''), text: t.newBooking })) : null,
     h('p', {}, h('a', { href: S.infoHref, text: t.directions }))));
   if (b.status === 'confirmed' && !inv.locked && !b.training) {
     const holdMinutes = holdModeOf(model?.checkout, state.settings).minutes || 15;
@@ -1291,7 +1299,7 @@ async function viewConfirmation({ refresh = false, notice = null, host = null, n
   if (holdV && !(retPay && co.processing)) {   // paluu MobilePaysta + käsittely kesken: runReturn näyttää tilan itse (ei kahta viestiä)
     const gk = `bk-gift-${token}`;
     const minutes = holdModeOf(model?.checkout, state.settings).minutes;
-    holdCtl = holdPanel({ L, co, minutes, giftUsed: giftWasUsed(b, (() => { try { return sessionStorage.getItem(gk) === '1'; } catch { return false; } })()), newHref: bk(''),
+    holdCtl = holdPanel({ L, co, minutes, giftUsed: giftWasUsed(b, (() => { try { return sessionStorage.getItem(gk) === '1'; } catch { return false; } })()), newHref: bk(''), showNew: !unpaidEnd, titleVisible: false,
       fmtDate: (ms) => fmt(new Date(ms).toISOString(), { day: 'numeric', month: 'numeric', year: 'numeric' }),
       refresh: co.awaiting ? async () => { const n = await rpc('public_get_booking', { p_token: token }); return n?.ok ? normCheckout(n) : null; } : null,
       onChange: () => viewConfirmation({ refresh: true, host: mpHost, noReturn: true, notice }) });
