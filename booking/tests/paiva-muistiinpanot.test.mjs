@@ -162,7 +162,7 @@ test('näkymät eivät kovakoodaa uusia lauseita, kytkennät day.js/shared.js/da
   assert.doesNotMatch(view, /text: '[A-ZÄÖ][^']*'/, 'day-memos.js käyttää t()-avaimia');
   const day = read('booking/admin/views/day.js'), shared = read('booking/admin/views/order-card.js'), parts = read('booking/admin/views/dayparts.js');
   assert.match(day, /export const DAY_VIEW_SHOW_ANNOUNCEMENTS = false/);
-  assert.match(day, /export const DAY_VIEW_SHOW_DAY_NOTES = false/);
+  assert.match(day, /export const DAY_VIEW_SHOW_DAY_NOTES = true/);
   assert.match(day, /DAY_VIEW_SHOW_ANNOUNCEMENTS \? bulletinCard\(/);
   assert.match(day, /DAY_VIEW_SHOW_DAY_NOTES \? dayNotesCard\(/);
   assert.match(day, /\(DAY_VIEW_SHOW_ANNOUNCEMENTS \|\| DAY_VIEW_SHOW_DAY_NOTES\)\s*\?\s*await loadDayMemos\(date, bundle\?\.notes_bundle \|\| null\)\s*: null/);

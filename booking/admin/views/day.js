@@ -16,11 +16,11 @@ import { loadMemoTexts, memoText } from '../day-memos-texts.js';
 import { clockLabel } from '../day-refresh.js';
 import { cachedDayBundle, seedDayBundle, clearDayBundles } from '../day-bundle-cache.js';
 
-// Tiedotteet ja päivän muistiinpanot: toistaiseksi pois päivänäkymästä.
-// Palauta käyttöön vaihtamalla false → true (yksi tai molemmat). Kortteja ei piirretä eikä
-// admin_list_day_notes-kutsua tehdä, kun lippu on false. Koodi, taulut ja RPC:t säilyvät.
+// Tiedotteet ja päivän muistiinpanot (liput erikseen). HALL-PAIVA-05: päivän muistiinpanot ovat päällä kaikille
+// henkilökunnan rooleille (vuoronvaihdon viestit); tiedotteet ovat edelleen pois. Kortteja ei piirretä eikä
+// admin_list_day_notes-kutsua tehdä, kun molemmat liput ovat false. Koodi, taulut ja RPC:t säilyvät.
 export const DAY_VIEW_SHOW_ANNOUNCEMENTS = false;
-export const DAY_VIEW_SHOW_DAY_NOTES = false;
+export const DAY_VIEW_SHOW_DAY_NOTES = true;
 
 // Vanha kanta / väärällä allekirjoituksella julkaistu bundle: 42883, PGRST202 -> varapolku 60 s.
 let bundleMissing = 0;
