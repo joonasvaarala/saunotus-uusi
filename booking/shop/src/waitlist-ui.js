@@ -1,5 +1,6 @@
 // Julkinen jonotuslista rakentuu samoista h(), bk-pick, bk-form ja bk-checkout -osista kuin viewCheckout.
 import { waitlistParty } from './waitlist-logic.js';
+import { createFormErrors, emailOk, phoneOk } from './form-errors.js';
 export function createWaitlistView({ h, t, S, state, loadMonth, setHero, mount, focusTop, errorBox, phoneBox, bk, rpc, pname, dayLong, hm }) {
   const backFor = (p, ds, via) => via === 'day' ? bk(`/paiva/${ds}?tuote=${p.slug}`) : bk(`/tuote/${p.slug}/${ds}`);
   const err = (code, kind) => (code === 'invalid_persons' && kind === 'event' && t.waitlistInvalidPersonsEvent) || t.waitlistErrors?.[code] || t.errorGeneric;
@@ -41,7 +42,7 @@ export function createWaitlistView({ h, t, S, state, loadMonth, setHero, mount, 
     dec.addEventListener('click', () => { num.value = n - 1; update(); });
     inc.addEventListener('click', () => { num.value = n + 1; update(); });
     num.addEventListener('change', update); update();
-    const input = (key, label, attrs = {}) => h('div', { class: 'bk-field' }, h('label', { for: `bk-wl-${key}`, text: label }),
+    const input = (key, label, attrs = {}) => h('div', { class: 'bk-field' }, h('label', { for: `bk-wl-${key}` }, label, attrs.required ? h('span', { class: 'bk-req', 'aria-hidden': 'true', text: ' *' }) : null),
       h('input', { id: `bk-wl-${key}`, name: key, ...attrs }),
       key === 'phone' ? h('small', { class: 'bk-hint', text: t.waitlistPhoneHint }) : null);
     const msg = h('div', { 'aria-live': 'polite' });
@@ -50,10 +51,15 @@ export function createWaitlistView({ h, t, S, state, loadMonth, setHero, mount, 
     const privacy = isEvent ? h('div', { class: 'bk-check' },
       h('input', { type: 'checkbox', id: 'bk-wl-privacy', name: 'privacy', required: true, 'data-testid': 'waitlist-privacy' }),
       h('label', { for: 'bk-wl-privacy' }, t.waitlistPrivacy + ' ', h('a', { href: S.privacyHref || (S.lang === 'en' ? '/en/privacy/' : '/tietosuoja/'), target: '_blank', rel: 'noopener', text: t.waitlistPrivacyLink }))) : null;
-    const form = h('form', { class: 'bk-form', 'data-testid': 'waitlist-form', onsubmit: async (ev) => {
+    const form = h('form', { class: 'bk-form', novalidate: true, 'data-testid': 'waitlist-form', onsubmit: async (ev) => {
       ev.preventDefault(); msg.replaceChildren(); update();
-      if (isEvent && !form.privacy.checked) { msg.append(errorBox(t.waitlistPrivacyRequired)); form.privacy.focus(); return; }
-      if (!form.reportValidity()) return;
+      const fd = new FormData(form), v = (k) => String(fd.get(k) || '').trim(), items = [], bad = (k, m) => items.push({ el: form.elements[k], msg: m, label: t[k] });
+      if (!v('name')) bad('name', t.reqName);
+      if (!v('email')) bad('email', t.reqEmail); else if (!emailOk(v('email'))) bad('email', t.invalidEmail);
+      if (v('phone') && !phoneOk(v('phone'))) bad('phone', t.invalidPhone);   // puhelin on valinnainen, mutta jos annettu, sen pitää olla numero
+      if (isEvent && !form.privacy.checked) items.push({ el: form.privacy, msg: t.waitlistPrivacyRequired });
+      if (items.length) { fe.show(items); return; }
+      fe.clear();
       btn.disabled = true; btn.textContent = t.waitlistSubmitting;
       const f = new FormData(form);
       try {
@@ -81,6 +87,7 @@ export function createWaitlistView({ h, t, S, state, loadMonth, setHero, mount, 
       } catch (e) { msg.append(errorBox(e?.mapped ? e.message : t.errorGeneric)); btn.disabled = false; btn.textContent = t.waitlistJoin; }
     } },
       h('p', { class: 'bk-note', text: isEvent ? t.waitlistEventIntro : t.waitlistIntro }),
+      h('p', { class: 'bk-note bk-reqnote', text: t.requiredNote }),
       priv ? h('p', { class: 'bk-note', 'data-testid': 'wl-private-note', text: t.waitlistPrivateNote })
         : h('fieldset', { class: 'bk-section' }, h('legend', { text: t.persons }), h('div', { class: 'bk-stepper' }, dec, num, inc),
           h('small', { class: 'bk-hint', text: party.kind === 'event' ? t.waitlistPersonsHintEvent : t.waitlistPersonsHint })),
@@ -88,6 +95,7 @@ export function createWaitlistView({ h, t, S, state, loadMonth, setHero, mount, 
       input('email', t.email, { required: true, type: 'email', maxlength: 200, autocomplete: 'email' }),
       input('phone', t.phone, { type: 'tel', maxlength: 30, autocomplete: 'tel' }),
       privacy, msg, btn);
+    const fe = createFormErrors(form, { h, title: t.errSummaryTitle });
     const aside = h('aside', { class: 'bk-aside', 'aria-label': t.summary }, h('h3', { text: t.summary }),
       h('p', { text: pname(p) }), h('p', { text: `${dayLong(s.starts_at)} · ${hm(s.starts_at)}–${hm(s.ends_at)}` }),
       h('p', { class: 'bk-note', text: isEvent ? t.waitlistEventIntro : t.waitlistIntro }));

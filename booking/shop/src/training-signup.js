@@ -1,6 +1,7 @@
 import { isMultiDay, occurrenceText } from './event-sale.js';
 import { formatWhenList } from './when-range.js';
 import { withAttribution } from './attribution.js';
+import { createFormErrors, validateCustomer } from './form-errors.js';
 
 // Koulutuksen ilmoittautuminen (booking_226). Puhdas hintalasku + kassalomake.
 // Verkossa maksetaan vain varausmaksu. Lisävalinnat nostavat myöhemmin laskutettavaa loppusummaa.
@@ -166,6 +167,7 @@ export function createTrainingSignup(ctx) {
         const when = g?.ends_at ? formatWhenList([g], lang) : (g?.starts_at ? dayLong(g.starts_at) : '');
         return h('li', { text: `${(lang === 'en' && g.label_en) || g.label || ''}${when ? ` · ${when}` : ''}`.trim() });
       }))) : null;
+    const req = () => h('span', { class: 'bk-req', 'aria-hidden': 'true', text: ' *' });
     const submit = h('button', { type: 'submit', class: 'btn gold', 'data-testid': 'training-submit', disabled: seatsLeft === 0 || null, text: L('pay_online') });
     const form = h('form', { class: 'bk-form', novalidate: true, 'data-testid': 'training-form', onsubmit: async (ev) => {
       ev.preventDefault();
@@ -174,8 +176,11 @@ export function createTrainingSignup(ctx) {
       const name = String(fd.get('name') || '').trim();
       const email = String(fd.get('email') || '').trim();
       const phone = String(fd.get('phone') || '').trim();
-      if (name.length < 2 || !email || !phone) { msg.append(errorBox(t.required)); reveal?.(msg); return; }
-      if (!privacy.checked) { msg.append(errorBox(t.acceptTermsErr || L('privacy'))); reveal?.(msg); privacy.focus(); return; }
+      const items = validateCustomer({ name, email, phone }).map(({ field: id, key }) => ({ el: form.elements[id], msg: t[key], label: t[id] }));
+      if (name.length === 1 && !items.some((i) => i.el === form.elements.name)) items.push({ el: form.elements.name, msg: t.reqName, label: t.name });   // kurssi vaatii vähintään 2 merkkiä (kuten ennen)
+      if (!privacy.checked) items.push({ el: privacy, msg: t.acceptTermsErr || L('privacy') });
+      if (items.length) { fe.show(items); return; }
+      fe.clear();
       const q = trainingQuote({ coursePrice, deposit, offers, selected: [...selected] });
       if (q.blocked) { msg.append(errorBox(L('single_room_full'))); reveal?.(msg); return; }
       submit.disabled = true;
@@ -195,18 +200,19 @@ export function createTrainingSignup(ctx) {
         reveal?.(msg);
       }
     } },
-      h('fieldset', { class: 'bk-section' }, h('legend', { text: t.details }),
-        h('div', { class: 'bk-field' }, h('label', { for: 'name', text: t.name }), h('input', { id: 'name', name: 'name', required: true, autocomplete: 'name', maxlength: 120 })),
-        h('div', { class: 'bk-field' }, h('label', { for: 'email', text: t.email }), h('input', { id: 'email', name: 'email', type: 'email', required: true, autocomplete: 'email', maxlength: 254 })),
-        h('div', { class: 'bk-field' }, h('label', { for: 'phone', text: t.phone }), h('input', { id: 'phone', name: 'phone', type: 'tel', required: true, autocomplete: 'tel', maxlength: 30 })),
+      h('fieldset', { class: 'bk-section' }, h('legend', { text: t.details }), h('p', { class: 'bk-note bk-reqnote', text: t.requiredNote }),
+        h('div', { class: 'bk-field' }, h('label', { for: 'name' }, t.name, req()), h('input', { id: 'name', name: 'name', required: true, autocomplete: 'name', maxlength: 120 })),
+        h('div', { class: 'bk-field' }, h('label', { for: 'email' }, t.email, req()), h('input', { id: 'email', name: 'email', type: 'email', required: true, autocomplete: 'email', maxlength: 254 })),
+        h('div', { class: 'bk-field' }, h('label', { for: 'phone' }, t.phone, req()), h('input', { id: 'phone', name: 'phone', type: 'tel', required: true, autocomplete: 'tel', maxlength: 30 })),
         h('div', { class: 'bk-field' }, h('label', { for: 'country', text: L('country') }), country),
         h('div', { class: 'bk-field' }, h('label', { for: 'language', text: L('language') }), language),
         h('div', { class: 'bk-field' }, h('label', { for: 'note', text: t.note }), h('textarea', { id: 'note', name: 'note', rows: 3, maxlength: 1000 }))),
       boxes.length ? h('fieldset', { class: 'bk-section', 'data-testid': 'training-addons' }, h('legend', { text: L('addons') }), ...boxes) : null,
       h('p', { class: 'bk-note', 'data-testid': 'training-balance', text: L('balance_later') }),
-      h('div', { class: 'bk-check' }, privacy, h('label', { for: 'bk-training-privacy' }, L('privacy'), ' ', h('a', { href: S.privacyHref || S.termsHref, target: '_blank', rel: 'noopener', text: t.termsLink || '' }), ' *')),
+      h('div', { class: 'bk-check' }, privacy, h('label', { for: 'bk-training-privacy' }, L('privacy'), ' ', h('a', { href: S.privacyHref || S.termsHref, target: '_blank', rel: 'noopener', text: t.termsLink || '' }), req())),
       h('div', { class: 'bk-check' }, marketing, h('label', { for: 'bk-training-marketing', text: t.consentMarketing })),
       msg, submit);
+    const fe = createFormErrors(form, { h, title: t.errSummaryTitle });
     const pick = h('section', { class: 'bk-pick', 'aria-label': t.pickedSlot },
       h('div', { class: 'bk-pick-main' }, h('strong', { class: 'bk-pick-name', text: (lang === 'en' && p.name_en) || p.name }),
         h('span', { class: 'bk-pick-when', text: when })),

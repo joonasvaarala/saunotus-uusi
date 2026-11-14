@@ -4,6 +4,8 @@
 // Sopimus: KOODARI_talous_A_D_fi.md §13.0, §13.2.
 import { rpc } from './sb.js';
 import { GT } from './gift-texts.js';
+import { T } from './i18n.js';
+import { createFormErrors, labelText } from './form-errors.js';
 import { createGiftApi } from './gift-api.js';
 import { applyShopTexts } from './site-texts.js';
 import { h, makeFmt, phoneBox, field, revealForm, revealIfHidden } from './gift-ui.js';
@@ -91,7 +93,7 @@ function buildSale(pk) {
 
   // -- ostoskori + lomake
   const buyer = { name: '', email: '', phone: '', marketing: false, terms: false };
-  let buyerFields = null, totalEl = null, submitBtn = null, msg = null, lineEls = new Map();
+  let buyerFields = null, totalEl = null, submitBtn = null, msg = null, formErr = null, lineEls = new Map();
   const updateTotal = () => {
     const tt = G.totals(lines, pkgs);
     if (totalEl) { totalEl.querySelector('.gc-sum').textContent = money(tt.total); totalEl.querySelector('.gc-cnt').textContent = tt.cards === 1 ? tx('cardsCount1') : tx('cardsCount', { n: tt.cards }); }
@@ -200,6 +202,7 @@ function buildSale(pk) {
     // palauta jo täytetyt ostajatiedot
     for (const k of ['name', 'email', 'phone']) buyerFields[k].control.value = buyer[k];
     buyerFields.terms.checked = buyer.terms; buyerFields.marketing.checked = buyer.marketing;
+    formErr = createFormErrors(form, { h, title: T[L]?.errSummaryTitle || T.fi.errSummaryTitle });
     cartHost.replaceChildren(form);
     updateTotal();
   }
@@ -218,7 +221,7 @@ function buildSale(pk) {
   }
   async function onSubmit(ev) {
     ev.preventDefault(); if (submitBtn.disabled) return;
-    msg.replaceChildren(); let firstBad = null; const mark = (f, m) => { f.setError(m); if (!firstBad) firstBad = f.control; };
+    msg.replaceChildren(); const items = []; const mark = (f, m) => { f.setError(m); items.push({ el: f.control, msg: m, label: labelText(f.control), inline: true }); };   // inline: kentällä on jo oma virheteksti (gift-ui field)
     for (const l of lines) {
       const p = by.get(l.pkg), er = G.validateLine(l, p), fs = lineEls.get(l.id).fs, months = Math.min(G.DELIVER_MAX_MONTHS, p.valid_months || 6);
       if (er.amount) mark(fs.amount, tx('err.amount', { min: p.min_amount, max: p.max_amount }));
@@ -231,8 +234,9 @@ function buildSale(pk) {
     }
     const be = G.validateBuyer(buyer);
     for (const k of ['name', 'email', 'phone']) if (be[k]) mark(buyerFields[k], tx(`err.${k}`));
-    if (be.terms) { buyerFields.termsErr.textContent = tx('err.terms'); if (!firstBad) firstBad = buyerFields.terms; }
-    if (firstBad) { msg.append(h('p', { class: 'bk-error', text: tx('err.fix') })); revealIfHidden(firstBad); firstBad.focus({ preventScroll: true }); return; }
+    if (be.terms) { buyerFields.termsErr.textContent = tx('err.terms'); buyerFields.terms.setAttribute('aria-invalid', 'true'); items.push({ el: buyerFields.terms, msg: tx('err.terms'), inline: true }); }
+    if (items.length) { formErr.show(items); return; }
+    formErr.clear();
     submitBtn.disabled = true; submitBtn.textContent = tx('submitting');
     try {
       const r = await api.buy(G.buyArgs({ lines, pkgs, buyer, locale: L }));

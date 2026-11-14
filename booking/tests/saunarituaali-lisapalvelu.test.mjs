@@ -235,7 +235,7 @@ test('kassa: rituaali on kortti LISÄPALVELUT-listassa (.bk-addon), aika alasvet
   assert.ok(!/type: 'radio', name: 'bk-ritual'/.test(js), 'ei radiolistaa');
   assert.match(js, /h\('select', \{ id: 'bk-rit-time'/); assert.match(js, /h\('option', \{ value: '', text: rtx\('ritualChoose'\) \}\)/);
   assert.match(js, /timeBox\.hidden = !\(rit\.sel\.qty > 0\)/);
-  assert.match(js, /ritErr\(rtx\('ritualTimeRequired'\)\); rit\.ui\.card\.scrollIntoView/);
+  assert.match(js, /ritErr\(rtx\('ritualTimeRequired'\)\); extra\.push\(\{ el: rit\.sel, [^\n]*inline: true \}\)/);   // KAUPPA-KASSA-02: kortin oma virhe + rivi virhekoontiin (fokus ja vieritys form-errors.js)
   assert.match(js, /const rtx = \(k, v\) => \{ const k1 = oneKey\(k, S\.lang, v, t, RITUAL_TEXTS\[S\.lang\], RITUAL_TEXTS\.fi\); return fillText\(t\[k1\] \|\| RITUAL_TEXTS\[S\.lang\]\?\.\[k1\] \|\| RITUAL_TEXTS\.fi\[k1\] \|\| t\[k\] \|\| RITUAL_TEXTS\[S\.lang\]\?\.\[k\] \|\| RITUAL_TEXTS\.fi\[k\] \|\| ''/);
   assert.ok(!/\bt\.ritual[A-Z]/.test(js), 'rituaalitekstit vain rtx():n kautta');
 });

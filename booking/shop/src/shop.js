@@ -32,7 +32,8 @@ import { optName, needsOption, findOption } from './options-logic.js';
 import { ht, holdError, methodList } from './hold-texts.js';
 import { normCheckout, isHoldView, holdModeOf, giftWasUsed } from './hold-logic.js';
 import { holdPanel, additionHoldSection } from './hold-ui.js';
-import { normBusinessId, validBusinessId, normOvt, validOvt, validOperator } from './invoice-validate.js';
+import { normBusinessId, normOvt } from './invoice-validate.js';
+import { createFormErrors, validateCustomer } from './form-errors.js';
 import { richHost } from './rich-view.js';
 import { softenSpaces } from './text-spaces.js';
 import { revealForm, revealIfHidden, bookingJump } from './gift-ui.js';
@@ -176,6 +177,11 @@ const focusQuiet = (el, extra = {}) => { if (el) el.focus({ preventScroll: true,
 const focusTop = () => { const el = [...root.querySelectorAll('h2,h1')].find((n) => !n.closest('.bk-rich')) || document.querySelector('main .hero.page h1, main h1'); if (el) { el.setAttribute('tabindex', '-1'); focusQuiet(el, { preventScroll: false }); } };
 const spinner = () => mount(h('p', { class: 'bk-loading', role: 'status', text: t.loading }));
 const errorBox = (msg) => h('p', { class: 'bk-error', role: 'alert', text: msg });
+// KAUPPA-KASSA-02: lomakekohtainen virhekoonti + kenttävirheet (form-errors.js); yksi esiintymä / lomake
+const formErrs = new WeakMap();
+const errorsFor = (form) => { if (!formErrs.has(form)) formErrs.set(form, createFormErrors(form, { h, title: t.errSummaryTitle })); return formErrs.get(form); };
+const labelOf = (el) => (el?.id ? (document.querySelector(`label[for="${el.id}"]`)?.textContent || '').replace(/\s*\*\s*$/, '').trim() : '');
+const reqMark = () => h('span', { class: 'bk-req', 'aria-hidden': 'true', text: ' *' });
 const phoneBox = () => h('p', { class: 'bk-contact' }, h('a', { href: `tel:${S.phoneTel}`, text: S.phone }), ' · ', h('a', { href: `mailto:${S.email}`, text: S.email }));
 
 // Hoito- ja rituaalituotteet (adapteri treatments.js): public_catalog()-rivit joilla booking_kind = 'slots'. Rivi täydennetään build-aikaisella kb-datalla (static-products.json).
@@ -335,15 +341,16 @@ async function viewAnnualPurchase() {
   const back = h('p', {}, h('a', { href: bk('/'), text: t.annualBack }));
   if (!o?.available) { mount(back, h('h2', { text: t.annualBuyTitle }), h('div', { class: 'bk-notice' }, h('p', { text: t.annualUnavailable }), phoneBox())); focusTop(); return; }
   const msg = h('div', { id: 'bk-msg' });
-  const fld = (name, label, type, auto) => h('div', { class: 'bk-field' }, h('label', { for: `bk-ac-${name}`, text: `${label} *` }), h('input', { id: `bk-ac-${name}`, name, type, autocomplete: auto, required: true, maxlength: name === 'name' ? 120 : 160 }));
+  const fld = (name, label, type, auto) => h('div', { class: 'bk-field' }, h('label', { for: `bk-ac-${name}` }, label, reqMark()), h('input', { id: `bk-ac-${name}`, name, type, autocomplete: auto, required: true, maxlength: name === 'name' ? 120 : 160 }));
   const legal = legalFields();
   const submit = h('button', { type: 'submit', class: 'btn gold', 'data-testid': 'annual-submit', text: t.annualBuySubmit });
   const form = h('form', { class: 'bk-form', novalidate: true, onsubmit: async (ev) => {
     ev.preventDefault(); msg.replaceChildren();
     const f = new FormData(form), val = (k) => String(f.get(k) || '').trim();
-    const need = ['name', 'email', 'phone'].filter((k) => !val(k));
-    if (need.length || !form.email.checkValidity()) { msg.append(errorBox(t.required)); form[need[0] || 'email'].focus(); return; }
-    if (!legal.terms.checked) { msg.append(errorBox(t.acceptTermsErr)); legal.terms.focus(); return; }
+    const items = validateCustomer({ name: val('name'), email: val('email'), phone: val('phone') }).map(({ field: id, key }) => ({ el: form.elements[id], msg: t[key], label: labelOf(form.elements[id]) }));
+    if (!legal.terms.checked) items.push({ el: legal.terms, msg: t.acceptTermsErr });
+    if (items.length) { errorsFor(form).show(items); return; }
+    errorsFor(form).clear();
     submit.disabled = true; submit.textContent = t.annualBuying;
     try {
       const r = await rpc('public_buy_annual_card', withAttribution('public_buy_annual_card', { p_name: val('name'), p_email: val('email'), p_phone: val('phone'), p_marketing_consent: legal.consent.checked, p_locale: S.lang }));
@@ -355,7 +362,7 @@ async function viewAnnualPurchase() {
       msg.replaceChildren(errorBox(e.mapped ? e.message : t.errorGeneric)); revealIfHidden(msg);
     }
   } },
-    fld('name', t.name, 'text', 'name'), fld('email', t.email, 'email', 'email'), fld('phone', t.phone, 'tel', 'tel'),
+    h('p', { class: 'bk-note bk-reqnote', text: t.requiredNote }), fld('name', t.name, 'text', 'name'), fld('email', t.email, 'email', 'email'), fld('phone', t.phone, 'tel', 'tel'),
     legal.nodes.slice(1), msg, submit);
   mount(back, h('h2', { text: t.annualBuyTitle }), h('p', { class: 'lead', text: t.annualBuyLead }),
     h('div', { class: 'bk-checkout' }, form,
@@ -764,14 +771,15 @@ function viewEventClosed(ev) {
 }
 
 // ---- jaetut lomakeosat (vuorovaraus + hoitovaraus) ----
-const field = (id, label, { hint, ...attrs } = {}) => h('div', { class: 'bk-field' }, h('label', { for: id, text: label }), h('input', { id, name: id, required: true, 'aria-describedby': hint ? `${id}-hint` : null, ...attrs }), hint ? h('small', { class: 'bk-hint', id: `${id}-hint`, text: hint }) : null);
+const field = (id, label, { hint, ...attrs } = {}) => h('div', { class: 'bk-field' }, h('label', { for: id }, label, attrs.required === false ? null : reqMark()), h('input', { id, name: id, required: true, 'aria-describedby': hint ? `${id}-hint` : null, ...attrs }), hint ? h('small', { class: 'bk-hint', id: `${id}-hint`, text: hint }) : null);
 const opt = (id, label, attrs) => field(id, label, { required: false, ...attrs });
 // Asiakastiedot: yksityinen / yritys + nimi, sähköposti, puhelin. read(form, msg) validoi (virhe → msg + fokus, palauttaa null) ja palauttaa { kind, name, email, phone, company }.
 function customerFields({ onChange } = {}) {
   let kind = 'private';
   let invoiceMethod = 'einvoice';   // booking_175/187: verkkolasku (oletus), PDF-lasku tai Maksa verkossa; OVT vain verkkolaskulla
   const kindInputs = [['private', t.kindPrivate], ['company', t.kindCompany]].map(([k, label]) => h('label', { class: 'bk-kind' }, h('input', { type: 'radio', name: 'kind', value: k, checked: k === 'private' || null, onchange: () => setKind(k) }), ' ', label));
-  const nameLabel = h('label', { for: 'name', text: t.name });
+  const nameText = h('span', { text: t.name });
+  const nameLabel = h('label', { for: 'name' }, nameText, reqMark());
   const einvoiceBox = h('div', { class: 'bk-einvoice', id: 'bk-einvoice-fields', 'data-testid': 'einvoice-fields' },
     h('h4', { text: t.einvoiceDetailsTitle }),
     field('einvoice_address', t.einvoiceAddress, { maxlength: 40 }), field('einvoice_operator', t.einvoiceOperator, { maxlength: 40, hint: t.einvoiceDetailsHint }));
@@ -779,7 +787,7 @@ function customerFields({ onChange } = {}) {
     h('label', { class: 'bk-kind' }, h('input', { type: 'radio', name: 'invoice_method', value: m, checked: m === 'einvoice' || null, 'data-testid': `invoice-method-${m}`, onchange: () => setInvoiceMethod(m) }), ' ', label));
   const companyBox = h('fieldset', { class: 'bk-company', id: 'bk-company', hidden: true },
     h('legend', { text: t.companyTitle }),
-    field('company_name', t.companyName, { maxlength: 200, autocomplete: 'organization' }), field('business_id', t.businessId, { maxlength: 20, inputmode: 'numeric', placeholder: '1234567-8', hint: t.businessIdHint }),
+    field('company_name', t.companyName, { maxlength: 200, autocomplete: 'organization' }), field('business_id', t.businessId, { maxlength: 20, inputmode: 'text', autocapitalize: 'characters', autocomplete: 'off', spellcheck: 'false', placeholder: '1234567-8', hint: t.businessIdHint }),
     field('street', t.street, { maxlength: 200, autocomplete: 'street-address' }),
     h('div', { class: 'bk-row2' }, field('zip', t.zip, { maxlength: 5, inputmode: 'numeric', autocomplete: 'postal-code' }), field('city', t.city, { maxlength: 100, autocomplete: 'address-level2' })),
     h('fieldset', { class: 'bk-kinds bk-invoice-method' }, h('legend', { text: t.invoiceMethodLabel }), h('div', { class: 'bk-kindrow' }, methodInputs)),
@@ -794,7 +802,7 @@ function customerFields({ onChange } = {}) {
     if (onChange) onChange();
   }
   function setKind(k) {
-    kind = k; companyBox.hidden = k !== 'company'; if (k === 'company') revealIfHidden(companyBox); nameLabel.textContent = k === 'company' ? t.contactName : t.name;
+    kind = k; companyBox.hidden = k !== 'company'; if (k === 'company') revealIfHidden(companyBox); nameText.textContent = k === 'company' ? t.contactName : t.name;
     for (const id of ['company_name', 'business_id', 'street', 'zip', 'city']) { const el = document.getElementById(id); if (el) el.required = k === 'company'; }
     setInvoiceMethod(invoiceMethod);
   }
@@ -803,22 +811,19 @@ function customerFields({ onChange } = {}) {
     companyBox,
     h('div', { class: 'bk-field' }, nameLabel, h('input', { id: 'name', name: 'name', required: true, autocomplete: 'name', maxlength: 120 })), field('email', t.email, { type: 'email', autocomplete: 'email', maxlength: 254 }),
     field('phone', t.phone, { type: 'tel', autocomplete: 'tel', maxlength: 30 }));
-  const read = (form, msg) => {
+  node.querySelector('legend').after(h('p', { class: 'bk-note bk-reqnote', text: t.requiredNote }));
+  // read(form, msg, extra): tarkistaa asiakastiedot (validateCustomer) ja lisäksi kutsujan virheet extra = [{ el, msg, label?, inline? }] (esim. ehdot).
+  // Virheet näytetään yhdellä kertaa: kenttävirheet + koonti lomakkeen alkuun + fokus ensimmäiseen. Palauttaa null virheissä.
+  const read = (form, msg, extra = []) => {
     const f = new FormData(form), val = (k) => String(f.get(k) || '').trim();
-    const need = ['name', 'email', 'phone'].filter((k) => !val(k));
-    if (need.length || !form.email.checkValidity()) { msg.append(errorBox(t.required)); form[need[0] || 'email'].focus(); return null; }
+    const vals = Object.fromEntries(['name', 'email', 'phone', 'company_name', 'business_id', 'street', 'zip', 'city', 'einvoice_address', 'einvoice_operator'].map((k) => [k, val(k)]));
+    const items = validateCustomer(vals, { kind, invoiceMethod }).map(({ field: id, key }) => ({ el: form.elements[id], msg: t[key], label: labelOf(form.elements[id]) })).concat(extra);
+    const fe = errorsFor(form);
+    if (items.length) { fe.show(items); return null; }
+    fe.clear();
     let company = null;
     if (kind === 'company') {
-      const needC = ['company_name', 'business_id', 'street', 'zip', 'city'].filter((k) => !val(k));
-      if (needC.length) { msg.append(errorBox(t.required)); form[needC[0]].focus(); return null; }
-      if (!validBusinessId(val('business_id'))) { msg.append(errorBox(t.invalidBusinessId)); form.business_id.focus(); return null; }
-      if (!/^\d{5}$/.test(val('zip'))) { msg.append(errorBox(t.invalidZip)); form.zip.focus(); return null; }
       const ei = invoiceMethod === 'einvoice';
-      if (ei) {
-        if (!val('einvoice_address') || !val('einvoice_operator')) { msg.append(errorBox(t.einvoiceDetailsRequired)); form[val('einvoice_address') ? 'einvoice_operator' : 'einvoice_address'].focus(); return null; }
-        if (!validOvt(val('einvoice_address'), val('business_id'))) { msg.append(errorBox(t.invalidOvt)); form.einvoice_address.focus(); return null; }
-        if (!validOperator(val('einvoice_operator'))) { msg.append(errorBox(t.einvoiceDetailsRequired)); form.einvoice_operator.focus(); return null; }
-      }
       company = { company_name: val('company_name'), business_id: normBusinessId(val('business_id')), street: val('street'), zip: val('zip'), city: val('city'),
         invoice_method: invoiceMethod, einvoice_address: ei ? normOvt(val('einvoice_address')) : null, einvoice_operator: ei ? normOvt(val('einvoice_operator')) : null,
         reference: val('reference') || null, require_einvoice: ei };
@@ -833,7 +838,7 @@ function legalFields({ showCancel = false } = {}) {
   const consent = h('input', { type: 'checkbox', id: 'bk-consent' });
   const nodes = [h('div', { class: 'bk-field' }, h('label', { for: 'note', text: t.note }), h('textarea', { id: 'note', name: 'note', rows: 3, maxlength: 1000 })),
     showCancel && S.cancelRule ? h('p', { class: 'bk-note bk-cancel-rule', 'data-testid': 'checkout-cancel-rule', text: S.cancelRule }) : null,
-    h('div', { class: 'bk-check' }, terms, h('label', { for: 'bk-terms' }, t.acceptTerms + ' ', h('a', { href: S.termsHref, target: '_blank', rel: 'noopener', text: t.termsLink }), ' *')),
+    h('div', { class: 'bk-check' }, terms, h('label', { for: 'bk-terms' }, t.acceptTerms + ' ', h('a', { href: S.termsHref, target: '_blank', rel: 'noopener', text: t.termsLink }), reqMark())),
     h('div', { class: 'bk-check' }, consent, h('label', { for: 'bk-consent', text: t.consentMarketing }))].filter((n) => n != null);
   return { nodes, terms, consent };
 }
@@ -1066,11 +1071,10 @@ async function viewCheckout(ruleId, ds, productId, via) {
   }
   const form = h('form', { class: 'bk-form', novalidate: true, onsubmit: async (ev) => {
     ev.preventDefault(); msg.replaceChildren();
-    const f = new FormData(form), cust = cf.read(form, msg); if (!cust) { revealIfHidden(msg); return; }
-    if (ritWant() && !rit.sel.key && rit.ui) {   // määrä ≥ 1 mutta aikaa ei valittu → selkeä ilmoitus kortissa, vieritys ja fokus valikkoon
-      ritErr(rtx('ritualTimeRequired')); rit.ui.card.scrollIntoView({ block: 'center', behavior: 'smooth' }); rit.ui.sel.focus({ preventScroll: true }); return;
-    }
-    if (!terms.checked) { msg.append(errorBox(t.acceptTermsErr)); revealIfHidden(msg); terms.focus({ preventScroll: true }); return; }
+    const f = new FormData(form), extra = [];
+    if (ritWant() && !rit.sel.key && rit.ui) { ritErr(rtx('ritualTimeRequired')); extra.push({ el: rit.sel, msg: rtx('ritualTimeRequired'), inline: true }); }   // määrä ≥ 1 mutta aikaa ei valittu → kortin oma virhe + koontirivi
+    if (!terms.checked) extra.push({ el: terms, msg: t.acceptTermsErr });
+    const cust = cf.read(form, msg, extra); if (!cust) return;
     const wasFree = free();
     submit.disabled = true; submit.textContent = wasFree ? t.codeConfirming : paysOnline() && hmode.on ? ht(S.lang, 'checkout.creating') : t.booking;
     try {
