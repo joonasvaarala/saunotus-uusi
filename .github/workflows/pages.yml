@@ -207,6 +207,10 @@ jobs:
       # Tilausnäkymä v3, PR 3 (booking_282–284): osahyvitys ja asiakkaan oma pienennys lippujen takana; tekstit pending-import-139.
       # SQL: booking/supabase/tests/talous/t282_*.sql, t283_*.sql, t284_*.sql ja race_283.sh ajetaan paikallisessa PG17:ssä. Työnkulussa ei ole Postgresia.
       # booking_305 (jumiin jääneiden hyvitysten hälytys): booking/supabase/tests/talous/t305_refund_stuck.sql ajetaan paikallisessa PG:ssä (ei Postgresia työnkulussa).
+      # Uutiskirje (booking_259/262/299/306, kytkin newsletter_enabled oletuksena false): JS-rakennetestit tässä.
+      # SQL-testit booking/supabase/tests/t306_newsletter_enabled.sql, t259_newsletters*.sql ja tests/newsletters/*.sql ovat VAIN paikalliseen kertakäyttökantaan
+      # (ne avaavat kytkimen ja muuttavat fixture-dataa); niitä ei ajeta työnkulussa eikä koskaan DEV/PROD-kantaan.
+      - run: node --test booking/tests/newsletters.test.mjs
       - run: node --test booking/tests/osahyvitys-v3.test.mjs booking/tests/tilausnakyma-hyvitys-15149.test.mjs booking/tests/hyvitys-kasittelyssa-15149.test.mjs
       # QR-tuote, tulostus ja asetusten välilehdet (booking_104–105).
       # t104 (booking/supabase/tests/pos/t104_product_qr.sql) ei ole tässä ajossa:

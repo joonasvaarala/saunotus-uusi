@@ -7,6 +7,7 @@ import { CATEGORIES, UNITS, DIRECTIONS, ANCHORS, PLACEHOLDERS, timingLabel, vali
 import { loadRichTexts, richText } from '../rich-texts.js';
 import { mountRichFields, syncRichFields } from '../rich-editor.js';
 import { loadCustomerMessageTexts } from '../customer-message-texts.js';
+import { loadNewsletterTexts } from '../newsletter-texts.js';
 import { currentMessagesTab, messagesTabBar, renderCustomerMessagePanel } from './customer-message-panel.js';
 
 const ERR = {
@@ -23,11 +24,17 @@ const ERR = {
 const catLabel = (id) => CATEGORIES.find((c) => c.id === id)?.label || id;
 
 export async function render({ ctx, refs }) {
-  await Promise.all([loadRichTexts(rpc), loadCustomerMessageTexts(rpc)]);
+  await Promise.all([loadRichTexts(rpc), loadCustomerMessageTexts(rpc), loadNewsletterTexts(rpc)]);
   const can = ctx.can('messages.edit');
   const wrap = h('section', { class: 'stack', 'data-testid': 'messages-page', 'aria-labelledby': 'messages-h' });
   if (!can) {
     wrap.append(h('h1', { id: 'messages-h', text: 'Viestit' }), h('p', { class: 'muted', text: 'Viestien muokkaus vaatii oikeuden messages.edit.' }));
+    return wrap;
+  }
+  if (currentMessagesTab() === 'uutiskirje') {
+    // booking_259/290: uutiskirje on Viestit-sivun välilehti. Oikeus messages.edit on jo tarkistettu yllä.
+    const { render: renderNewsletters } = await import('./newsletters.js');
+    wrap.replaceChildren(messagesTabBar('uutiskirje'), ...await renderNewsletters({ ctx }));
     return wrap;
   }
   if (currentMessagesTab() === 'asiakkaalle') {
