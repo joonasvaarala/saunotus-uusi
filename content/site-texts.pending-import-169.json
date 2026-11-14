@@ -204,7 +204,27 @@
   {
     "key": "ui.admin.open_payments.review_open",
     "lang": "en",
-    "text": "Open Open payments",
+    "text": "Go to Open payments",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-AVOIMET-01: Avoimet maksut -välilehti (maksulinkit ja hyvitykset yhdessä), Tarkista-merkki, ⋯-valikon nimi ja Näytä lisää -painike"
+  },
+  {
+    "key": "ui.admin.open_payments.review_ok",
+    "lang": "fi",
+    "text": "Avoimet maksut",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "HALL-AVOIMET-01: Avoimet maksut -välilehti (maksulinkit ja hyvitykset yhdessä), Tarkista-merkki, ⋯-valikon nimi ja Näytä lisää -painike"
+  },
+  {
+    "key": "ui.admin.open_payments.review_ok",
+    "lang": "en",
+    "text": "Open payments",
     "class": "normal",
     "kind": "plain",
     "max_len": 200,

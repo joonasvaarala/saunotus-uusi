@@ -14,6 +14,7 @@ export const OP_TEXTS = {
     'ui.admin.open_payments.review_links': 'Maksulinkit, jotka vaativat toimenpiteitä: {{var:n}}',
     'ui.admin.open_payments.review_refunds': 'Hyvitykset, jotka ovat epäonnistuneet tai odottaneet yli vuorokauden: {{var:n}}',
     'ui.admin.open_payments.review_open': 'Avaa Avoimet maksut',
+    'ui.admin.open_payments.review_ok': 'Avoimet maksut',
   },
   en: {
     'ui.admin.open_payments.tab': 'Open payments',
@@ -25,7 +26,8 @@ export const OP_TEXTS = {
     'ui.admin.open_payments.review_hint': 'Payment links or refunds that need action. The queue is in the Open payments tab of Orders.',
     'ui.admin.open_payments.review_links': 'Payment links needing action: {{var:n}}',
     'ui.admin.open_payments.review_refunds': 'Refunds that failed or have waited over a day: {{var:n}}',
-    'ui.admin.open_payments.review_open': 'Open Open payments',
+    'ui.admin.open_payments.review_open': 'Go to Open payments',
+    'ui.admin.open_payments.review_ok': 'Open payments',
   },
 };
 

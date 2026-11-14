@@ -146,3 +146,10 @@ test('tekstit: pending-import-169 vastaa OP_TEXTS:ää, FI+EN, ei päällekkäin
   assert.equal(op('ui.admin.open_payments.load_more', { n: 7 }, 'en'), 'Show more (7 left)');
   for (const t of Object.values(OP_TEXTS.fi).concat(Object.values(OP_TEXTS.en))) assert.doesNotMatch(t, /<|https?:|[\u{1F300}-\u{1FAFF}]/u);
 });
+
+test('tekstit: jokainen näkymissä käytetty op()-avain on OP_TEXTS:ssä FI+EN (ei raakaa avainta ruudulle)', () => {
+  const files = ['admin/views/review.js', 'admin/views/orders.js', 'admin/views/open-payments.js', 'admin/views/paylink-watch.js', 'admin/views/refund-watch.js'];
+  const used = new Set(files.flatMap((f) => [...src(f).matchAll(/\bop\(\s*'(ui\.admin\.open_payments\.[a-z0-9_]+)'/g)].map((m) => m[1])));
+  assert.ok(used.has('ui.admin.open_payments.review_ok'));
+  for (const k of used) for (const l of ['fi', 'en']) assert.ok(OP_TEXTS[l][k], `${k} [${l}] puuttuu OP_TEXTS:stä`);
+});
