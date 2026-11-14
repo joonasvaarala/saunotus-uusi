@@ -217,6 +217,8 @@ jobs:
       # booking_309 (verkkokaupan maksamatta vanhentuneet tilaukset poistuvat näkyvistä = automaattinen arkistointi; #15210 Vanhentunut+Maksettu-merkkikorjaus).
       # SQL-testi booking/supabase/tests/checkout/t309_expired_web_orders_auto_archive.sql VAIN paikalliseen kertakäyttökantaan (rollback).
       - run: node --test booking/tests/vanhentuneet-poisto-309.test.mjs
+      # booking_310: peruttu nollaledgerin lahjakorttimaksu ei estä vanhentuneen verkkotilauksen piilotusta (Joonas 14.11. klo 12.34)
+      - run: node --test booking/tests/lahjakorttipiilotus-310.test.mjs
       # Tilausnäkymä v3, PR 3 (booking_282–284): osahyvitys ja asiakkaan oma pienennys lippujen takana; tekstit pending-import-139.
       # SQL: booking/supabase/tests/talous/t282_*.sql, t283_*.sql, t284_*.sql ja race_283.sh ajetaan paikallisessa PG17:ssä. Työnkulussa ei ole Postgresia.
       # booking_305 (jumiin jääneiden hyvitysten hälytys): booking/supabase/tests/talous/t305_refund_stuck.sql ajetaan paikallisessa PG:ssä (ei Postgresia työnkulussa).
