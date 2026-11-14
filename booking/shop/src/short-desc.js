@@ -56,3 +56,14 @@ export function fallbackDesc(h, st, lang) {
   const raw = (lang === 'en' && has(st?.description_en) && st.description_en) || st?.description || '';
   return richHost(h, raw, 'bk-desc');
 }
+
+/** KAUPPA-SELAUS-01: päivänäkymän tuotekortin ote (pelkkä teksti, enintään max merkkiä sanarajalta). Lyhyt kuvaus ensin; muuten pitkä kuvaus
+ *  ilman alun otsikkoa (<h1>–<h6>), jottei tuotteen nimi toistu ("Saunahoito Saunahoito on…"). Ote ei myöskään ala nimellä kahdesti. */
+export function dayCardExcerpt(p, lang, desc, name, max = 90) {
+  const s = shortRaw(p, lang);
+  const raw = s || String(desc ?? '').replace(/^\s*<h[1-6]\b[^>]*>[\s\S]*?<\/h[1-6]>/i, '');
+  let d = (isRichHtml(raw) ? visibleText(raw) : softenSpaces(raw)).replace(/\s+/g, ' ').trim();
+  const n = String(name ?? '').trim();
+  if (n && d.toLowerCase().startsWith(`${n} ${n}`.toLowerCase())) d = d.slice(n.length).trim();
+  return d.length > max ? `${d.slice(0, max).replace(/\s+\S*$/, '')}…` : d;
+}

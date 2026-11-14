@@ -7,7 +7,7 @@ import { t, fmt, getLang } from '../talous-i18n.js';
 import { formatWhenRange, spansDays } from '../when-range.js';
 import { RPC, absLink } from '../talous-api.js';
 import { redeemFields, redeemSubmit } from './talous-giftcards.js';
-import { johkuBadge, SOURCES, sourceLabel, payBadge, sourceBadge, loading, emptyBox, errorBox, pager, pageSizeSelect, selectFld, dateFld, searchFld, expandRow, actionBtn, doneToast, formDialog, methodLabel, pstatBadge } from './talous-ui.js';
+import { johkuBadge, SOURCES, sourceLabel, payBadge, sourceBadge, loading, emptyBox, errorBox, pager, pageSizeSelect, selectFld, dateFld, searchFld, expandRow, actionBtn, doneToast, formDialog, methodLabel, pstatBadge, linkEmailControl } from './talous-ui.js';
 import { countActive, filterDrawer } from '../filter-drawer.js';
 import { effectivePaymentFilters, isDefaultPaymentFilters, isUnpaidRow, normalizePaymentFilters, togglePaymentFilter, DEFAULT_PAYMENT_FILTERS, PAYMENT_FILTERS } from '../orders-filter.js';
 import { orderText } from '../orders-texts.js';
@@ -272,14 +272,16 @@ export function createOrdersTab({ api, ctx, gift = null, rpc = null, onAfterChan
   function linkDialog(o) {
     if (orderInvoiceLocked(o)) { toast(invoiceLockReason(o, alt), 'warn'); return; }
     const deadline = linkDeadlineControl();
+    const mail = linkEmailControl(o);
     formDialog(t('btn.linkTitle'), [
       h('p', { class: 'muted', text: api.isMock('createPaymentLink') ? t('mock.note') : t('live.note') }),
       h('p', { text: t('link.amount', { sum: fmt.money(o.balance.unpaid) }), 'data-testid': 'link-amount' }),
       deadline.nodes,
-      h('label', { class: 'check' }, h('input', { type: 'checkbox', name: 'email' }), ` ${t('link.email')}`),
-    ], t('link.submit'), linkSubmitOnce((fd) => deadline.read(fd), async (expiresDays, sent) => {
-      const res = await api.createPaymentLink({ orderId: o.order_id, sendEmail: sent.get('email') === 'on', expiresDays });
-      doneToast(res, RPC.createPaymentLink); afterChange(res, o.order_id);
+      mail.nodes,
+    ], mail.submit, linkSubmitOnce((fd) => deadline.read(fd), async (expiresDays, sent) => {
+      const sendEmail = mail.wants(sent);
+      const res = await api.createPaymentLink({ orderId: o.order_id, sendEmail, expiresDays });
+      mail.report(res, sendEmail, RPC.createPaymentLink); afterChange(res, o.order_id);
       const url = absLink(res.link_path, o);
       if (url) dialog(t('link.created'), h('div', { class: 'stack' },
         res.mock ? h('p', { class: 'muted', text: t('mock.note') }) : null,
