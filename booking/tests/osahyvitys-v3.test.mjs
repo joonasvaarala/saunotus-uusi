@@ -104,7 +104,7 @@ test('tekstit: FI = EN, paikkamerkit, ei HTML:ää, pending-import-139 täsmää
   const pubFi = rows.filter((r) => r.key.startsWith('ui.public.order_change.reduce.') && r.lang === 'fi').map((r) => r.key).sort();
   const pubEn = rows.filter((r) => r.key.startsWith('ui.public.order_change.reduce.') && r.lang === 'en').map((r) => r.key).sort();
   assert.deepEqual(pubFi, pubEn);
-  for (const f of readdirSync(join(root, 'content')).filter((n) => /^site-texts\.(pending-import|imported).*\.json$/.test(n) && n !== 'site-texts.pending-import-139.json')) {
+  for (const f of readdirSync(join(root, 'content')).filter((n) => /^site-texts\.(pending-import|imported).*\.json$/.test(n) && n !== 'site-texts.pending-import-139.json' && n !== 'site-texts.pending-import-153.json')) {
     const j = JSON.parse(read(`content/${f}`)); const other = Array.isArray(j) ? j : j.texts || [];
     for (const r of other) assert.ok(!String(r.key).startsWith(PREFIX) && !String(r.key).startsWith('ui.public.order_change.reduce.'), `${r.key} myös ${f}`);
   }
@@ -141,7 +141,9 @@ test('asiakkaan tilaussivu: ennakkohyvitys vahvistetaan summalla, lippu pois →
   assert.match(shop, /refund_confirmation_required/);
   assert.doesNotMatch(read('booking/shop/src/i18n.js'), /reduce:/, 'asiakasteksit omassa moduulissa (text-registry ei tunne uusia T-lehtiä)');
   assert.deepEqual(Object.keys(REDUCE_TEXTS.fi).sort(), Object.keys(REDUCE_TEXTS.en).sort());
-  const pub = JSON.parse(read('content/site-texts.pending-import-139.json')).filter((r) => r.key.startsWith('ui.public.order_change.reduce.'));
+  // booking_307: uudet avaimet tuonnissa 153 (tuonti ei päivitä olemassa olevia rivejä, joten 139:n rivit eivät muutu)
+  const pub = ['139', '153'].flatMap((n) => JSON.parse(read(`content/site-texts.pending-import-${n}.json`))).filter((r) => r.key.startsWith('ui.public.order_change.reduce.'));
+  assert.equal(new Set(pub.map((r) => `${r.key}|${r.lang}`)).size, pub.length, 'sama avain ei kahdessa tuonnissa');
   assert.equal(pub.length, Object.keys(REDUCE_TEXTS.fi).length * 2);
   for (const r of pub) assert.equal(r.text, REDUCE_TEXTS[r.lang][r.key.replace('ui.public.order_change.reduce.', '')], r.key);
   assert.equal(rt('fi', 'confirm', { amount: '29,00 €' }), 'Vahvista muutos ja hyvitys 29,00 €');

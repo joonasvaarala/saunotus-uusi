@@ -222,6 +222,9 @@ jobs:
       # (ne avaavat kytkimen ja muuttavat fixture-dataa); niitä ei ajeta työnkulussa eikä koskaan DEV/PROD-kantaan.
       - run: node --test booking/tests/newsletters.test.mjs
       - run: node --test booking/tests/osahyvitys-v3.test.mjs booking/tests/tilausnakyma-hyvitys-15149.test.mjs booking/tests/hyvitys-kasittelyssa-15149.test.mjs
+      # booking_307 (hyvitys lahjakortti-/kumppaniosuudella, yleisen vuoron siirto vain kerran; tekstit pending-import-153). SQL-testi
+      # booking/supabase/tests/talous/t307_refund_money_share_move_once.sql VAIN paikalliseen kertakäyttökantaan (avaa lipun transaktion sisällä, rollback).
+      - run: node --test booking/tests/hyvitys-siirto-307.test.mjs
       # QR-tuote, tulostus ja asetusten välilehdet (booking_104–105).
       # t104 (booking/supabase/tests/pos/t104_product_qr.sql) ei ole tässä ajossa:
       # työnkulussa ei ole Postgresia, ja booking/supabase/tests/run.sh ajaa vain juuren [0-9]*.test.sql.

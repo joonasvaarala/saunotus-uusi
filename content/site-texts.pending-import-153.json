@@ -1,0 +1,66 @@
+[
+  {
+    "key": "ui.public.order_change.reduce.not_allowed_deadline_private_both",
+    "lang": "fi",
+    "text": "Tämän varauksen maksuton pienennys onnistuu verkossa vain, kun sekä nykyisen että uuden ajan alkuun on vähintään {{var:days}} vrk. Ota yhteyttä sähköpostilla.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 220,
+    "placeholders": [
+      "{{var:days}}"
+    ],
+    "reason": "booking_307: too_late_private koskee myös uutta päivää (alle 14 vrk) – teksti kattaa nykyisen ja uuden ajan"
+  },
+  {
+    "key": "ui.public.order_change.reduce.not_allowed_deadline_private_both",
+    "lang": "en",
+    "text": "This booking can be reduced free of charge online only when both the current and the new time start in at least {{var:days}} days. Please contact us by email.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 220,
+    "placeholders": [
+      "{{var:days}}"
+    ],
+    "reason": "booking_307: too_late_private koskee myös uutta päivää (alle 14 vrk) – teksti kattaa nykyisen ja uuden ajan"
+  },
+  {
+    "key": "ui.public.order_change.reduce.not_allowed_not_classified",
+    "lang": "fi",
+    "text": "Tämän palvelun varausta ei voi pienentää verkossa. Ota yhteyttä sähköpostilla, niin hoidamme muutoksen.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 220,
+    "placeholders": [],
+    "reason": "booking_307: luokittelemattoman tuotteen (not_classified) oma teksti asiakkaan pienennykseen"
+  },
+  {
+    "key": "ui.public.order_change.reduce.not_allowed_not_classified",
+    "lang": "en",
+    "text": "Bookings for this service cannot be reduced online. Please contact us by email and we will take care of the change.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 220,
+    "placeholders": [],
+    "reason": "booking_307: luokittelemattoman tuotteen (not_classified) oma teksti asiakkaan pienennykseen"
+  },
+  {
+    "key": "ui.public.order_change.reduce.already_moved",
+    "lang": "fi",
+    "text": "Tämän varauksen voi siirtää verkossa vain kerran. Ota yhteyttä sähköpostilla, jos haluat siirtää sitä uudelleen.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 220,
+    "placeholders": [],
+    "reason": "booking_307: yleisen vuoron siirto vain kerran – asiakkaan toinen siirto estetty (already_moved)"
+  },
+  {
+    "key": "ui.public.order_change.reduce.already_moved",
+    "lang": "en",
+    "text": "This booking can be moved online only once. Please contact us by email if you want to move it again.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 220,
+    "placeholders": [],
+    "reason": "booking_307: yleisen vuoron siirto vain kerran – asiakkaan toinen siirto estetty (already_moved)"
+  }
+]
