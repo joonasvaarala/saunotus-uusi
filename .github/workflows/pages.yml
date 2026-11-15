@@ -219,6 +219,9 @@ jobs:
       - run: node --test booking/tests/vanhentuneet-poisto-309.test.mjs
       # booking_310: peruttu nollaledgerin lahjakorttimaksu ei estä vanhentuneen verkkotilauksen piilotusta (Joonas 14.11. klo 12.34)
       - run: node --test booking/tests/lahjakorttipiilotus-310.test.mjs
+      # booking_316: myyntikanavat datana (sales_channels + product_sales_channels), monivalinta tuote-editorissa (Joonas t1780u 15.11. klo 9.04).
+      # SQL-testi booking/supabase/tests/t316_sales_channels.sql VAIN paikalliseen kertakäyttökantaan (rollback). Työnkulussa ei ole Postgresia.
+      - run: node --test booking/tests/myyntikanavat-316.test.mjs
       # Tilausnäkymä v3, PR 3 (booking_282–284): osahyvitys ja asiakkaan oma pienennys lippujen takana; tekstit pending-import-139.
       # SQL: booking/supabase/tests/talous/t282_*.sql, t283_*.sql, t284_*.sql ja race_283.sh ajetaan paikallisessa PG17:ssä. Työnkulussa ei ole Postgresia.
       # booking_305 (jumiin jääneiden hyvitysten hälytys): booking/supabase/tests/talous/t305_refund_stuck.sql ajetaan paikallisessa PG:ssä (ei Postgresia työnkulussa).
@@ -312,6 +315,8 @@ jobs:
       - run: node --test booking/tests/paiva-muistiinpanot.test.mjs
       # HALL-TUOTTEET-01: tuote-editori omana näkymänä (#/tuotteet/<id>), yksi tallennuspalkki, poistumisvahti; tekstit pending-import-165. Ei migraatiota.
       - run: node --test booking/tests/tuote-editori-hall-tuotteet-01.test.mjs
+      # booking_316 / HALL-TUOTTEET-03: myyntikanavien monivalinta tuote-editorissa (kanavat datasta), tekstit pending-import-174
+      - run: node --test booking/tests/tuotteet-myyntikanavat-03.test.mjs
       # Paketti 07: yhdenmukainen siirtymävieritys (kauppa, lahjakortit, tilaussivu, hallinnan uusi varaus / resurssivaraus):
       # yhteiset apurit revealForm/revealSection (block start, reduced-motion → auto, fokus preventScroll) ja revealIfHidden (vain jos ei näkyvissä),
       # scroll-margin-top 84 px kiinteän yläpalkin alle. Ei migraatiota eikä tekstejä.

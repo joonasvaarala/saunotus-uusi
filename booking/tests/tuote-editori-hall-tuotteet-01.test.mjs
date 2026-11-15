@@ -15,7 +15,7 @@ const product = (over = {}) => ({
   variants: [{ id: 11, label: 'Talvi', price: 5 }, { id: 12, label: 'Kesä', price: 4 }],
   ...over,
 });
-const labels = { product: 'Perustiedot ja hinta', training: 'Koulutus', config: 'Myynti ja näkyvyys', image: 'Kuva', suggestions: 'Lisämyynti', variant: (id) => `Variantti ${id}` };
+const labels = { product: 'Perustiedot ja hinta', training: 'Koulutus', config: 'Myynti ja näkyvyys', channels: 'Myyntikanavat', image: 'Kuva', suggestions: 'Lisämyynti', variant: (id) => `Variantti ${id}` };
 const clone = (o) => JSON.parse(JSON.stringify(o));
 const plan = (base, cur, training = false) => L.buildSavePlan({ productId: 7, training, base, cur, labels });
 
@@ -42,7 +42,7 @@ test('muokkaamaton lomake ei ole muuttunut; hinta ja näkyvyys ovat yksi tallenn
   const cur = clone(base);
   cur.product.price = 6;
   cur.product.price_text = '6,00 €';   // näkymä päivittää tekstin, kun se on automaattinen
-  cur.config.shop_visible = false;
+  cur.config.sort_order = 20;
   cur.variants[11] = 7;
   const d = L.diffSnapshots(base, cur);
   assert.equal(L.isDirty(d), true);
@@ -50,7 +50,7 @@ test('muokkaamaton lomake ei ole muuttunut; hinta ja näkyvyys ovat yksi tallenn
   const steps = plan(base, cur);
   assert.deepEqual(steps.map((s) => s.key), ['product', 'config', 'variant:11']);
   assert.deepEqual(steps[0].calls[0], { fn: 'admin_update_product', args: { p_product_id: 7, p_patch: { price: 6, price_text: '6,00 €' } } });
-  assert.deepEqual(steps[1].calls[0].args.p_patch, { shop_visible: false });   // vain muuttunut kenttä
+  assert.deepEqual(steps[1].calls[0].args.p_patch, { sort_order: 20 });   // vain muuttunut kenttä
   assert.deepEqual(steps[2].calls[0], { fn: 'admin_update_price_variant', args: { p_variant_id: 11, p_patch: { price: 7 } } });
 });
 
@@ -82,13 +82,16 @@ test('koulutus: hinta päivittää myös varausmaksun, lisävalinnat lähtevät 
   assert.deepEqual(steps[1].calls[1].args.p_offers, [{ code: 'single_room', price: 200, active: true }, { code: 'internship', price: 500, active: true }]);
 });
 
-test('alkoholituote: kylmämyynti suljetaan kannasta, kun asetuksia tallennetaan (kuten ennen)', () => {
-  const p = product({ config: { ...product().config, fridge_sale: true } });
-  const base = L.baselineFromProduct(p, { alcohol: true });
-  assert.equal(base.config.fridge_sale, false);   // lomake näyttää sen pois päältä
+test('alkoholituote: QR-myynti poistetaan kannasta, kun asetuksia tallennetaan (kuten ennen fridge_sale)', () => {
+  const base = L.baselineFromProduct(product(), { alcohol: true, channels: ['pos', 'qr'] });
+  assert.deepEqual(base.channels, ['pos']);   // lomake näyttää QR-myynnin pois päältä
+  assert.equal(base.qrStored, true);
   assert.equal(L.isDirty(L.diffSnapshots(base, clone(base))), false);
   const cur = clone(base); cur.config.sort_order = 20;
-  assert.deepEqual(plan(base, cur)[0].calls[0].args.p_patch, { sort_order: 20, fridge_sale: false });
+  const steps = plan(base, cur);
+  assert.deepEqual(steps.map((s) => s.key), ['channels', 'config']);   // QR pois ensin
+  assert.deepEqual(steps[0].calls[0], { fn: 'admin_set_product_sales_channels', args: { p_product_id: 7, p_codes: ['pos'] } });
+  assert.deepEqual(steps[1].calls[0].args.p_patch, { sort_order: 20 });
 });
 
 test('tarkistus: tyhjä nimi, virheellinen hinta ja luvut estävät tallennuksen', () => {
@@ -107,7 +110,7 @@ test('tarkistus: tyhjä nimi, virheellinen hinta ja luvut estävät tallennuksen
 test('tallennus: yksi virhe ei estä muita; tulosviesti kertoo epäonnistuneen osan; onnistuneet kuitataan', async () => {
   const base = L.baselineFromProduct(product());
   const cur = clone(base);
-  cur.product.name = 'Uusi nimi'; cur.config.shop_visible = false; cur.variants[11] = 9;
+  cur.product.name = 'Uusi nimi'; cur.config.sort_order = 30; cur.variants[11] = 9;
   const steps = plan(base, cur);
   const seen = [];
   const res = await L.runPlan(steps, async (s) => { seen.push(s.key); if (s.key === 'config') throw Object.assign(new Error('Ei oikeutta'), { code: 'forbidden' }); });
@@ -125,7 +128,7 @@ test('tallennus: yksi virhe ei estä muita; tulosviesti kertoo epäonnistuneen o
   const d = L.diffSnapshots(next, cur);
   assert.deepEqual(d.product, []);
   assert.deepEqual(d.variants, []);
-  assert.deepEqual(d.config, ['shop_visible']);
+  assert.deepEqual(d.config, ['sort_order']);
 });
 
 test('kuva ja lisämyynti ovat omia askeleitaan; alt-teksti ilman kuvaa ei ole muutos', () => {

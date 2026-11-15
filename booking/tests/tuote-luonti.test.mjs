@@ -9,7 +9,8 @@ const read = (rel) => readFileSync(href(rel), 'utf8');
 
 // booking_156: lyhyen kuvauksen kenttätekstit tuodaan erikseen (pending-import-56), samat säännöt
 // HALL-TUOTTEET-01: pending-import-165 (editorin välilehdet ja tallennuspalkki) kuuluu samaan sanakirjaan
-const pending = [...JSON.parse(read('../../content/site-texts.pending-import-19.json')), ...JSON.parse(read('../../content/site-texts.pending-import-56.json')), ...JSON.parse(read('../../content/site-texts.pending-import-165.json'))];
+// booking_316 / HALL-TUOTTEET-03: pending-import-174 (myyntikanavien monivalinta) samoin
+const pending = [...JSON.parse(read('../../content/site-texts.pending-import-19.json')), ...JSON.parse(read('../../content/site-texts.pending-import-56.json')), ...JSON.parse(read('../../content/site-texts.pending-import-165.json')), ...JSON.parse(read('../../content/site-texts.pending-import-174.json'))];
 const migration = read('../supabase/migrations/20261019081000_booking_111_admin_product_create.sql');
 const rollback = read('../supabase/rollbacks/20261019081000_booking_111_ROLLBACK.sql');
 const sqlTest = read('../supabase/tests/products/t111_admin_product_create.sql');
@@ -377,7 +378,9 @@ test('lisää tuote avaa tyhjän lomakkeen ja luonnin jälkeen muokkauksen', asy
     document.body.append(...editorNodes);
     assert.equal(q(document.body, 'product-open-pos').getAttribute('href'), '#/pikakassa');
     assert.equal(q(document.body, 'product-open-qr').getAttribute('href'), '#/tuotteet?qr=1');
-    assert.match(document.body.textContent, /Näytä pikakassassa/);
+    // booking_316: pikakassa on myyntikanava (monivalinta, kanavat datasta)
+    assert.ok(q(document.body, 'product-channel-pos'));
+    assert.match(q(document.body, 'product-channels').textContent, /Pikakassa/);
     assert.equal(q(document.body, 'product-editor-title').textContent, 'T111 testijuoma');
     SB.setRpcOverride(null);
 
