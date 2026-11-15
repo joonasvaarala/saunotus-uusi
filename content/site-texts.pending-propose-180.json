@@ -1,0 +1,28 @@
+[
+  {
+    "key": "ui.pos.link_valid_help",
+    "lang": "fi",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "apply": "texts_propose",
+    "base_version": 1,
+    "base_text": "Linkki on voimassa 24 tuntia. Voit aloittaa uuden myynnin, linkki ja tilaus jäävät voimaan.",
+    "text": "Linkki ei vanhene. Asiakas voi maksaa sen myöhemmin, kunnes tilaus perutaan. Voit aloittaa uuden myynnin.",
+    "reason": "booking_323 (DEV 20261115164329, PROD 20261115164340): pikakassan maksulinkillä ei takarajaa (Joonas 15.11.2026 klo 18.42). Ohje ei enää lupaa 24 tuntia: linkki ei vanhene ja sen voi maksaa myöhemmin, kunnes tilaus perutaan. Sama kuin koodin varateksti booking/admin/pos-texts.js. Koodari 15.11.2026"
+  },
+  {
+    "key": "ui.pos.link_valid_help",
+    "lang": "en",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "apply": "texts_propose",
+    "base_version": 1,
+    "base_text": "The link is valid for 24 hours. You can start a new sale; the link and the order stay valid.",
+    "text": "The link does not expire. The customer can pay it later until the order is cancelled. You can start a new sale.",
+    "reason": "booking_323 (DEV 20261115164329, PROD 20261115164340): pikakassan maksulinkillä ei takarajaa (Joonas 15.11.2026 klo 18.42). Ohje ei enää lupaa 24 tuntia: linkki ei vanhene ja sen voi maksaa myöhemmin, kunnes tilaus perutaan. Sama kuin koodin varateksti booking/admin/pos-texts.js. Koodari 15.11.2026"
+  }
+]
