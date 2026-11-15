@@ -1,0 +1,106 @@
+[
+  {
+    "key": "ui.shop.slot_start_title",
+    "lang": "fi",
+    "text": "Valitse aloitusaika",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Oman saunavuoron (tuote 25, yritysversio 48) kaksivaiheinen valinta: ensin aloitusaika, sitten kesto (Joonas t1798u/t1799u). Uusi avain, FI+EN. Koodin varateksti täsmää. Bottiavustus/Koodari tuo admin_texts_importilla; ei ylikirjoita olemassa olevia. Kauppa: booking/shop/src/slot-start-texts.js."
+  },
+  {
+    "key": "ui.shop.slot_start_title",
+    "lang": "en",
+    "text": "Choose a start time",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Oman saunavuoron (tuote 25, yritysversio 48) kaksivaiheinen valinta: ensin aloitusaika, sitten kesto (Joonas t1798u/t1799u). Uusi avain, FI+EN. Koodin varateksti täsmää. Bottiavustus/Koodari tuo admin_texts_importilla; ei ylikirjoita olemassa olevia. Kauppa: booking/shop/src/slot-start-texts.js."
+  },
+  {
+    "key": "ui.shop.slot_start_lead",
+    "lang": "fi",
+    "text": "Valitse ensin aloitusaika, sitten kesto.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Oman saunavuoron (tuote 25, yritysversio 48) kaksivaiheinen valinta: ensin aloitusaika, sitten kesto (Joonas t1798u/t1799u). Uusi avain, FI+EN. Koodin varateksti täsmää. Bottiavustus/Koodari tuo admin_texts_importilla; ei ylikirjoita olemassa olevia. Kauppa: booking/shop/src/slot-start-texts.js."
+  },
+  {
+    "key": "ui.shop.slot_start_lead",
+    "lang": "en",
+    "text": "Choose a start time first, then a duration.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Oman saunavuoron (tuote 25, yritysversio 48) kaksivaiheinen valinta: ensin aloitusaika, sitten kesto (Joonas t1798u/t1799u). Uusi avain, FI+EN. Koodin varateksti täsmää. Bottiavustus/Koodari tuo admin_texts_importilla; ei ylikirjoita olemassa olevia. Kauppa: booking/shop/src/slot-start-texts.js."
+  },
+  {
+    "key": "ui.shop.slot_duration_title",
+    "lang": "fi",
+    "text": "Valitse kesto – alkaa {{var:start}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:start}}"
+    ],
+    "reason": "Oman saunavuoron (tuote 25, yritysversio 48) kaksivaiheinen valinta: ensin aloitusaika, sitten kesto (Joonas t1798u/t1799u). Uusi avain, FI+EN. Koodin varateksti täsmää. Bottiavustus/Koodari tuo admin_texts_importilla; ei ylikirjoita olemassa olevia. Kauppa: booking/shop/src/slot-start-texts.js."
+  },
+  {
+    "key": "ui.shop.slot_duration_title",
+    "lang": "en",
+    "text": "Choose a duration – starts at {{var:start}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:start}}"
+    ],
+    "reason": "Oman saunavuoron (tuote 25, yritysversio 48) kaksivaiheinen valinta: ensin aloitusaika, sitten kesto (Joonas t1798u/t1799u). Uusi avain, FI+EN. Koodin varateksti täsmää. Bottiavustus/Koodari tuo admin_texts_importilla; ei ylikirjoita olemassa olevia. Kauppa: booking/shop/src/slot-start-texts.js."
+  },
+  {
+    "key": "ui.shop.slot_change_start",
+    "lang": "fi",
+    "text": "← Vaihda aloitusaika",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Oman saunavuoron (tuote 25, yritysversio 48) kaksivaiheinen valinta: ensin aloitusaika, sitten kesto (Joonas t1798u/t1799u). Uusi avain, FI+EN. Koodin varateksti täsmää. Bottiavustus/Koodari tuo admin_texts_importilla; ei ylikirjoita olemassa olevia. Kauppa: booking/shop/src/slot-start-texts.js."
+  },
+  {
+    "key": "ui.shop.slot_change_start",
+    "lang": "en",
+    "text": "← Change start time",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Oman saunavuoron (tuote 25, yritysversio 48) kaksivaiheinen valinta: ensin aloitusaika, sitten kesto (Joonas t1798u/t1799u). Uusi avain, FI+EN. Koodin varateksti täsmää. Bottiavustus/Koodari tuo admin_texts_importilla; ei ylikirjoita olemassa olevia. Kauppa: booking/shop/src/slot-start-texts.js."
+  },
+  {
+    "key": "ui.shop.slot_no_free_durations",
+    "lang": "fi",
+    "text": "Ei vapaita kestoja valitulle päivälle. Valitse toinen päivä.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Oman saunavuoron (tuote 25, yritysversio 48) kaksivaiheinen valinta: ensin aloitusaika, sitten kesto (Joonas t1798u/t1799u). Uusi avain, FI+EN. Koodin varateksti täsmää. Bottiavustus/Koodari tuo admin_texts_importilla; ei ylikirjoita olemassa olevia. Kauppa: booking/shop/src/slot-start-texts.js."
+  },
+  {
+    "key": "ui.shop.slot_no_free_durations",
+    "lang": "en",
+    "text": "No available durations for the selected day. Please pick another day.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Oman saunavuoron (tuote 25, yritysversio 48) kaksivaiheinen valinta: ensin aloitusaika, sitten kesto (Joonas t1798u/t1799u). Uusi avain, FI+EN. Koodin varateksti täsmää. Bottiavustus/Koodari tuo admin_texts_importilla; ei ylikirjoita olemassa olevia. Kauppa: booking/shop/src/slot-start-texts.js."
+  }
+]

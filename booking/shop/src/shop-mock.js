@@ -38,6 +38,37 @@ function businessShiftSlots(now, productId) {
   const hh = productId === 49 ? 19 : 14;
   return [row(base + 1, 1, hh, 'available'), row(base + 2, 2, hh, 'available')];
 }
+// Oma saunavuoro (25) ja sen yritysversio (48): jokainen kesto on oma sääntörivinsä samalla alulla (kuten tuotannossa). Vain UI:n ja testauksen mock, ei varauslogiikkaa.
+// Lauantai: alku 13.00 kestot 1–6 h + 9 h, alku 14.00 kestot 1–5 h. Arki: useita kestoja vähemmällä alkujen määrällä. Sunnuntai: osa kestoista täynnä (alku 12.00 kaikki täynnä).
+// Hinnat ja "sis. 8 hlö, lisähenkilö +10 €" tulevat riveiltä (base_price / included_persons / extra_person_price), ei kovakoodattua tekstiä.
+const OWN_PRICE = { 1: 350, 2: 600, 3: 800, 4: 1000, 5: 1200, 6: 1400, 9: 1900 };
+const OWN_PLAN = {   // viikonpäivä (0 = su) → [alkutunti, [kestot h], täynnä-kestot h]
+  6: [[13, [1, 2, 3, 4, 5, 6, 9], [5]], [14, [1, 2, 3, 4, 5], []]],
+  0: [[12, [1, 2, 3], [1, 2, 3]], [15, [2, 3], [3]]],
+  weekday: [[16, [2, 3, 4], []], [18, [2, 3], [3]]],
+};
+const helsinkiIso = (date, hh) => {
+  for (const off of [2, 3]) {
+    const d = new Date(Date.parse(`${date}T${String(hh).padStart(2, '0')}:00:00Z`) - off * 36e5);
+    if (+new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/Helsinki', hour: '2-digit', hourCycle: 'h23' }).format(d) === hh) return d;
+  }
+  return new Date(Date.parse(`${date}T${String(hh).padStart(2, '0')}:00:00Z`) - 2 * 36e5);
+};
+function ownShiftSlots(productId, from, to) {
+  const biz = productId === 48, out = [];
+  for (let t0 = Date.parse(`${from}T12:00:00Z`); t0 <= Date.parse(`${to}T12:00:00Z`); t0 += 864e5) {
+    const date = new Date(t0).toISOString().slice(0, 10), dow = new Date(t0).getUTCDay();
+    for (const [hh, durs, fullDurs] of OWN_PLAN[dow === 6 || dow === 0 ? dow : 'weekday']) {
+      for (const d of durs) {
+        const start = helsinkiIso(date, hh), full = fullDurs.includes(d);
+        out.push({ rule_id: productId * 100000 + dow * 10000 + hh * 100 + d, product_id: productId, label: biz ? 'Savusaunavuoro yrityksille' : 'Oma saunavuoro', label_en: biz ? 'Smoke sauna for companies' : 'Private session', mode: 'exclusive', session_date: date,
+          starts_at: start.toISOString(), ends_at: new Date(start.getTime() + d * 36e5).toISOString(), status: full ? 'full' : 'available', remaining: full ? 0 : 20, min_persons: 1, max_persons: 20,
+          price_mode: 'base_plus_extra', unit_price: null, base_price: OWN_PRICE[d], included_persons: 8, extra_person_price: 10 });
+      }
+    }
+  }
+  return out;
+}
 const PRIV_DEMO = [
   { id: 25, slug: 'oma-saunavuoro', name: 'Oma saunavuoro', name_en: 'Private sauna session', category: 'private_sauna', sale_kind: 'private_shift', price: 220, price_type: 'from', duration_text: '2 h', duration_text_en: '2 h', booking_kind: 'rules', min_persons: 1, max_persons: 20, short_description: 'Koko miljöö omaan käyttöön.', short_description_en: 'The whole setting for your group.' },
   { id: 26, slug: 'jalkiloylyt', name: 'Savusaunan jälkilöylyt', name_en: 'After Session Sauna', category: 'private_sauna', sale_kind: 'private_shift', price: 180, price_type: 'from', duration_text: '2 h', duration_text_en: '2 h', booking_kind: 'rules', min_persons: 1, max_persons: 20, included_persons: 6, extra_person_price: 10, short_description: 'Yleisten vuorojen jälkeen pehmeät jälkilöylyt.', short_description_en: 'Soft after-session löyly after the public sessions.' },
@@ -166,7 +197,7 @@ export function createShopMock({ storage = globalThis.sessionStorage, now = () =
           return Array.isArray(response?.body) ? response.body.map((r) => ({ ...r, product_id: +p.id })) : [];
         });
         if (args.p_audience !== 'business') return base;
-        const extra = [48, 49].flatMap((id) => businessShiftSlots(now, id).filter((r) => r.session_date >= args.p_from && r.session_date <= args.p_to));
+        const extra = [...ownShiftSlots(48, args.p_from, args.p_to), ...businessShiftSlots(now, 49).filter((r) => r.session_date >= args.p_from && r.session_date <= args.p_to)];
         return [...base, ...extra];
       }
       // booking_162: hiljaisten aikojen ale vain ?quiet=1 (oletus pois kuten tuotannossa)
@@ -234,10 +265,12 @@ export function createShopMock({ storage = globalThis.sessionStorage, now = () =
         return r ? r.body : { ok: false, code: 'not_found', message: 'Varausta ei löytynyt' };
       }
       default: {
-        if (name === 'public_availability' && (+args.p_product_id === 48 || +args.p_product_id === 49)) {
-          return businessShiftSlots(now, +args.p_product_id).filter((r) => r.session_date >= args.p_from && r.session_date <= args.p_to);
+        if (name === 'public_availability' && +args.p_product_id === 48) return ownShiftSlots(48, args.p_from, args.p_to);
+        if (name === 'public_availability' && +args.p_product_id === 49) {
+          return businessShiftSlots(now, 49).filter((r) => r.session_date >= args.p_from && r.session_date <= args.p_to);
         }
-        if (name === 'public_availability' && privOn && ( +args.p_product_id === 25 || +args.p_product_id === 26)) {
+        if (name === 'public_availability' && privOn && +args.p_product_id === 25) return ownShiftSlots(25, args.p_from, args.p_to);
+        if (name === 'public_availability' && privOn && +args.p_product_id === 26) {
           return privDemoSlots(now, +args.p_product_id).filter((r) => r.session_date >= args.p_from && r.session_date <= args.p_to);
         }
         if (name === 'public_availability' && +args.p_product_id === 22601) {
