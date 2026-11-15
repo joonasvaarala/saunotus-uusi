@@ -39,6 +39,7 @@ export async function renderPos({ ctx, rpc, fn }) {
   let order = null;
   let phase = 'cart';
   let payInfo = null;
+  let linkCancelAsk = false;   // t1818u: Peru linkkitilaus -vahvistus auki
   let pollTimer = null;
   let payOpen = false;
   let busy = false;
@@ -255,6 +256,32 @@ export async function renderPos({ ctx, rpc, fn }) {
     try { await rpc('admin_pos_void', { p_order_id: id }); } catch (e) { toast(errMsg(e)); }
   }
 
+  // t1818u: maksulinkki on voimassa 24 h. Kun linkki on luotu/lähetetty, kassan seuraava toimenpide EI peru tilausta:
+  // kassa vapautuu uuteen myyntiin (tyhjä kori) ja linkki jää voimaan. Peruminen vain erillisellä Peru-napilla vahvistuksen kanssa.
+  // Korttimaksun (CheckoutX) käytös ennallaan: kesken oleva maksu perutaan ensin Surfboardissa (voidOpen).
+  const withOrderNo = (text, no) => String(text).replace(/\{\{var:order_no\}\}|\{order_no\}/g, String(no ?? ''));
+  const linkPending = () => phase === 'paying' && payInfo?.kind === 'link' && !!order;
+  function releaseLink() {
+    if (!linkPending()) return false;
+    const no = order.order_no;
+    stopPoll();
+    order = null; phase = 'cart'; payInfo = null; mail = null; mailError = ''; payError = ''; linkCancelAsk = false;
+    cart = []; email = '';
+    stopSuggest();
+    toast(withOrderNo(t('link_released'), no));
+    return true;
+  }
+  async function cancelLinkOrder() {
+    if (busy || !linkPending()) return;
+    busy = true; draw();
+    const no = order.order_no;
+    try {
+      await voidOpen();
+      linkCancelAsk = false; cart = []; email = ''; payOpen = false;
+      toast(withOrderNo(t('link_cancelled'), no));
+    } finally { busy = false; draw(); }
+  }
+
   function watch(orderId) {
     stopPoll();
     const tick = async () => {
@@ -333,7 +360,7 @@ export async function renderPos({ ctx, rpc, fn }) {
           payInfo = { kind: 'link', url, amount: link.amount };
           mail = { status: link.outbox_status || 'pending', masked_to: link.masked_to || null, attempts: null, max_attempts: null, sent_at: null, last_error: null };
           mailError = '';
-          if (MOCK()) await rpc('admin_pos_mock_tender', { p_order_id: res.order_id });
+          if (MOCK() && new URLSearchParams(location.search).get('mocklink') !== 'wait') await rpc('admin_pos_mock_tender', { p_order_id: res.order_id });   // ?mocklink=wait: linkki jää maksamatta (demo)
           watch(res.order_id);
         } else if (chosen.handler === 'checkoutx') {
           await startCheckoutx(res.order_id);
@@ -627,6 +654,16 @@ export async function renderPos({ ctx, rpc, fn }) {
         }));
       }
       if (payInfo.url) box.append(h('p', { class: 'muted', text: t('link_help') }), h('p', { class: 'pos-url', text: payInfo.url }), qrSvgElement(payInfo.url, { size: 220, label: t('method_link') }));
+      box.append(h('p', { class: 'muted', 'data-testid': 'pos-link-valid', text: t('link_valid_help') }),
+        h('div', { class: 'pos-link-actions' },
+          h('button', { type: 'button', class: 'btn primary', 'data-testid': 'pos-link-new', text: t('link_new_sale'), disabled: busy || null, onclick: () => { releaseLink(); payOpen = false; draw(); } }),
+          linkCancelAsk ? null : h('button', { type: 'button', class: 'btn danger', 'data-testid': 'pos-link-cancel', text: t('link_cancel'), disabled: busy || null, onclick: () => { linkCancelAsk = true; draw(); } })));
+      if (linkCancelAsk) {
+        box.append(h('div', { class: 'pos-link-confirm', role: 'group', 'aria-labelledby': 'pos-link-confirm-q', 'data-testid': 'pos-link-confirm' },
+          h('p', { id: 'pos-link-confirm-q', role: 'alert', text: t('link_cancel_confirm') }),
+          h('button', { type: 'button', class: 'btn danger', 'data-testid': 'pos-link-cancel-yes', text: busy ? t('wait') : t('link_cancel_yes'), disabled: busy || null, onclick: () => cancelLinkOrder() }),
+          h('button', { type: 'button', class: 'btn ghost', 'data-testid': 'pos-link-cancel-no', text: t('link_cancel_no'), disabled: busy || null, onclick: () => { linkCancelAsk = false; draw(); } })));
+      }
     }
     if (phase === 'paying' && payInfo?.kind === 'checkoutx') {
       if (cx.state === 'failed' || cx.state === 'cancelled') {
@@ -703,7 +740,7 @@ export async function renderPos({ ctx, rpc, fn }) {
         canEdit ? h('button', { type: 'button', class: 'btn primary lg pos-edit', 'data-testid': 'pos-add', text: t('add'), onclick: () => { editing = true; draw(); } }) : null));
     }
     for (const p of catalog) {
-      grid.append(h('button', { type: 'button', class: 'pos-btn', 'data-testid': `pos-product-${p.product_id}`, onclick: () => { if (phase === 'paying') voidOpen().then(() => { cart = cartAdd(cart, p); draw(); }); else { cart = cartAdd(cart, p); draw(); } } },
+      grid.append(h('button', { type: 'button', class: 'pos-btn', 'data-testid': `pos-product-${p.product_id}`, onclick: () => { if (releaseLink()) { cart = cartAdd(cart, p); draw(); } else if (phase === 'paying') voidOpen().then(() => { cart = cartAdd(cart, p); draw(); }); else { cart = cartAdd(cart, p); draw(); } } },
         h('span', { class: 'pos-name', text: p.name }),
         p.age_restricted ? h('small', { class: 'pos-age', text: t('age') }) : null,
         h('strong', { class: 'pos-price', text: money(p.price) })));
@@ -722,8 +759,15 @@ export async function renderPos({ ctx, rpc, fn }) {
       h('span', { class: 'pos-lines-count', text: String(lineQty) })));
     if (showLines || wide) {
       if (!cart.length) lines.append(h('p', { class: 'muted', text: t('empty') }));
+      const locked = linkPending();   // t1818u: lähetetyn linkin rivit eivät ole muokattavissa (muutos ei peru tilausta)
+      if (locked) lines.append(h('p', { class: 'muted', 'data-testid': 'pos-link-locked', text: t('link_locked') }));
       for (const r of cart) {
         const key = cartLineKey(r);
+        if (locked) {
+          lines.append(h('div', { class: 'pos-line', 'data-testid': r.kind === 'custom' ? 'pos-custom-line' : 'pos-product-line' },
+            h('span', { class: 'grow', text: r.name }), h('span', { class: 'pos-qty', text: String(r.quantity) }), h('strong', { text: money(r.unit_price * r.quantity) })));
+          continue;
+        }
         lines.append(h('div', { class: 'pos-line', 'data-testid': r.kind === 'custom' ? 'pos-custom-line' : 'pos-product-line' },
           h('span', { class: 'grow', text: r.name }),
           h('button', { type: 'button', class: 'btn pos-step', 'aria-label': t('qty_less'), text: '−', onclick: () => { cart = cartSetQty(cart, key, r.quantity - 1); if (phase === 'paying') voidOpen(); draw(); } }),
@@ -754,7 +798,7 @@ export async function renderPos({ ctx, rpc, fn }) {
       }, vatRates);
       if (!check.ok) { customError = t(check.error); draw(); return; }
       customError = '';
-      if (phase === 'paying') voidOpen();
+      if (!releaseLink() && phase === 'paying') voidOpen();
       cart = cartAddCustom(cart, check);
       showLines = true;
       customOpen = false;
@@ -828,6 +872,7 @@ export async function renderPos({ ctx, rpc, fn }) {
         disabled: busy || null,
         onclick: () => openPay(),
       }));
+      if (linkPending()) side.append(h('button', { type: 'button', class: 'btn pos-link-new-side', 'data-testid': 'pos-link-new-side', text: t('link_new_sale'), disabled: busy || null, onclick: () => { releaseLink(); draw(); } }));
     }
 
     const editBtn = canEdit ? h('button', {

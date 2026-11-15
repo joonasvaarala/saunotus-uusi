@@ -311,6 +311,32 @@ export const POS_CHECKOUTX_TEXTS = {
   },
 };
 
+// t1818u: lähetetty maksulinkki jää voimaan, kassa vapautuu uuteen myyntiin; peruminen vain Peru-napilla (pending-import-179).
+export const POS_LINK_HOLD_TEXTS = {
+  fi: {
+    link_new_sale: 'Uusi myynti',
+    link_valid_help: 'Linkki on voimassa 24 tuntia. Voit aloittaa uuden myynnin, linkki ja tilaus jäävät voimaan.',
+    link_released: 'Maksulinkki jäi voimaan (tilaus {{var:order_no}}). Kassa on vapaa uuteen myyntiin.',
+    link_locked: 'Maksulinkki on lähetetty, joten rivejä ei voi muuttaa. Lisää tuote tai valitse Uusi myynti aloittaaksesi uuden myynnin.',
+    link_cancel: 'Peru linkkitilaus',
+    link_cancel_confirm: 'Perutaanko tilaus? Maksulinkki lakkaa toimimasta, eikä asiakas voi enää maksaa sillä.',
+    link_cancel_yes: 'Kyllä, peru tilaus',
+    link_cancel_no: 'Älä peru',
+    link_cancelled: 'Tilaus {{var:order_no}} peruttiin ja maksulinkki suljettiin.',
+  },
+  en: {
+    link_new_sale: 'New sale',
+    link_valid_help: 'The link is valid for 24 hours. You can start a new sale; the link and the order stay valid.',
+    link_released: 'The payment link stays valid (order {{var:order_no}}). The till is free for a new sale.',
+    link_locked: 'The payment link has been sent, so the lines cannot be changed. Add a product or choose New sale to start a new sale.',
+    link_cancel: 'Cancel link order',
+    link_cancel_confirm: 'Cancel the order? The payment link will stop working and the customer can no longer pay with it.',
+    link_cancel_yes: 'Yes, cancel the order',
+    link_cancel_no: 'Do not cancel',
+    link_cancelled: 'Order {{var:order_no}} was cancelled and the payment link was closed.',
+  },
+};
+
 const PREFIX = 'ui.pos.';
 let db = new Map();
 let loaded = false;
@@ -345,6 +371,6 @@ export function clearPosTextCache() {
 export function posText(key, lang = getLang()) {
   const live = db.get(`${PREFIX}${key}|${lang}`);
   if (live) return live;
-  return POS_TEXTS[lang]?.[key] || POS_EDIT_TEXTS[lang]?.[key] || POS_PAY_TEXTS[lang]?.[key] || POS_LINK_TEXTS[lang]?.[key] || POS_CUSTOMER_TEXTS[lang]?.[key] || POS_CUSTOM_TEXTS[lang]?.[key] || POS_CHECKOUTX_TEXTS[lang]?.[key] || POS_CART_TEXTS[lang]?.[key]
-    || POS_TEXTS.fi[key] || POS_EDIT_TEXTS.fi[key] || POS_PAY_TEXTS.fi[key] || POS_LINK_TEXTS.fi[key] || POS_CUSTOMER_TEXTS.fi[key] || POS_CUSTOM_TEXTS.fi[key] || POS_CHECKOUTX_TEXTS.fi[key] || POS_CART_TEXTS.fi[key] || key;
+  return POS_TEXTS[lang]?.[key] || POS_EDIT_TEXTS[lang]?.[key] || POS_PAY_TEXTS[lang]?.[key] || POS_LINK_TEXTS[lang]?.[key] || POS_CUSTOMER_TEXTS[lang]?.[key] || POS_CUSTOM_TEXTS[lang]?.[key] || POS_CHECKOUTX_TEXTS[lang]?.[key] || POS_CART_TEXTS[lang]?.[key] || POS_LINK_HOLD_TEXTS[lang]?.[key]
+    || POS_TEXTS.fi[key] || POS_EDIT_TEXTS.fi[key] || POS_PAY_TEXTS.fi[key] || POS_LINK_TEXTS.fi[key] || POS_CUSTOMER_TEXTS.fi[key] || POS_CUSTOM_TEXTS.fi[key] || POS_CHECKOUTX_TEXTS.fi[key] || POS_CART_TEXTS.fi[key] || POS_LINK_HOLD_TEXTS.fi[key] || key;
 }

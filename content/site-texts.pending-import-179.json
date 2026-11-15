@@ -1,0 +1,190 @@
+[
+  {
+    "key": "ui.pos.link_new_sale",
+    "lang": "fi",
+    "text": "Uusi myynti",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "t1818u: pikakassan lähetetty maksulinkki jää voimaan, kassa vapautuu uuteen myyntiin; peruminen vain Peru linkkitilaus -napilla vahvistuksen kanssa. Uusi avain, FI+EN, sama kuin koodin varateksti (booking/admin/pos-texts.js POS_LINK_HOLD_TEXTS)."
+  },
+  {
+    "key": "ui.pos.link_new_sale",
+    "lang": "en",
+    "text": "New sale",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "t1818u: pikakassan lähetetty maksulinkki jää voimaan, kassa vapautuu uuteen myyntiin; peruminen vain Peru linkkitilaus -napilla vahvistuksen kanssa. Uusi avain, FI+EN, sama kuin koodin varateksti (booking/admin/pos-texts.js POS_LINK_HOLD_TEXTS)."
+  },
+  {
+    "key": "ui.pos.link_valid_help",
+    "lang": "fi",
+    "text": "Linkki on voimassa 24 tuntia. Voit aloittaa uuden myynnin, linkki ja tilaus jäävät voimaan.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "t1818u: pikakassan lähetetty maksulinkki jää voimaan, kassa vapautuu uuteen myyntiin; peruminen vain Peru linkkitilaus -napilla vahvistuksen kanssa. Uusi avain, FI+EN, sama kuin koodin varateksti (booking/admin/pos-texts.js POS_LINK_HOLD_TEXTS)."
+  },
+  {
+    "key": "ui.pos.link_valid_help",
+    "lang": "en",
+    "text": "The link is valid for 24 hours. You can start a new sale; the link and the order stay valid.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "t1818u: pikakassan lähetetty maksulinkki jää voimaan, kassa vapautuu uuteen myyntiin; peruminen vain Peru linkkitilaus -napilla vahvistuksen kanssa. Uusi avain, FI+EN, sama kuin koodin varateksti (booking/admin/pos-texts.js POS_LINK_HOLD_TEXTS)."
+  },
+  {
+    "key": "ui.pos.link_released",
+    "lang": "fi",
+    "text": "Maksulinkki jäi voimaan (tilaus {{var:order_no}}). Kassa on vapaa uuteen myyntiin.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:order_no}}"
+    ],
+    "reason": "t1818u: pikakassan lähetetty maksulinkki jää voimaan, kassa vapautuu uuteen myyntiin; peruminen vain Peru linkkitilaus -napilla vahvistuksen kanssa. Uusi avain, FI+EN, sama kuin koodin varateksti (booking/admin/pos-texts.js POS_LINK_HOLD_TEXTS)."
+  },
+  {
+    "key": "ui.pos.link_released",
+    "lang": "en",
+    "text": "The payment link stays valid (order {{var:order_no}}). The till is free for a new sale.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:order_no}}"
+    ],
+    "reason": "t1818u: pikakassan lähetetty maksulinkki jää voimaan, kassa vapautuu uuteen myyntiin; peruminen vain Peru linkkitilaus -napilla vahvistuksen kanssa. Uusi avain, FI+EN, sama kuin koodin varateksti (booking/admin/pos-texts.js POS_LINK_HOLD_TEXTS)."
+  },
+  {
+    "key": "ui.pos.link_locked",
+    "lang": "fi",
+    "text": "Maksulinkki on lähetetty, joten rivejä ei voi muuttaa. Lisää tuote tai valitse Uusi myynti aloittaaksesi uuden myynnin.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "t1818u: pikakassan lähetetty maksulinkki jää voimaan, kassa vapautuu uuteen myyntiin; peruminen vain Peru linkkitilaus -napilla vahvistuksen kanssa. Uusi avain, FI+EN, sama kuin koodin varateksti (booking/admin/pos-texts.js POS_LINK_HOLD_TEXTS)."
+  },
+  {
+    "key": "ui.pos.link_locked",
+    "lang": "en",
+    "text": "The payment link has been sent, so the lines cannot be changed. Add a product or choose New sale to start a new sale.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "t1818u: pikakassan lähetetty maksulinkki jää voimaan, kassa vapautuu uuteen myyntiin; peruminen vain Peru linkkitilaus -napilla vahvistuksen kanssa. Uusi avain, FI+EN, sama kuin koodin varateksti (booking/admin/pos-texts.js POS_LINK_HOLD_TEXTS)."
+  },
+  {
+    "key": "ui.pos.link_cancel",
+    "lang": "fi",
+    "text": "Peru linkkitilaus",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "t1818u: pikakassan lähetetty maksulinkki jää voimaan, kassa vapautuu uuteen myyntiin; peruminen vain Peru linkkitilaus -napilla vahvistuksen kanssa. Uusi avain, FI+EN, sama kuin koodin varateksti (booking/admin/pos-texts.js POS_LINK_HOLD_TEXTS)."
+  },
+  {
+    "key": "ui.pos.link_cancel",
+    "lang": "en",
+    "text": "Cancel link order",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "t1818u: pikakassan lähetetty maksulinkki jää voimaan, kassa vapautuu uuteen myyntiin; peruminen vain Peru linkkitilaus -napilla vahvistuksen kanssa. Uusi avain, FI+EN, sama kuin koodin varateksti (booking/admin/pos-texts.js POS_LINK_HOLD_TEXTS)."
+  },
+  {
+    "key": "ui.pos.link_cancel_confirm",
+    "lang": "fi",
+    "text": "Perutaanko tilaus? Maksulinkki lakkaa toimimasta, eikä asiakas voi enää maksaa sillä.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "t1818u: pikakassan lähetetty maksulinkki jää voimaan, kassa vapautuu uuteen myyntiin; peruminen vain Peru linkkitilaus -napilla vahvistuksen kanssa. Uusi avain, FI+EN, sama kuin koodin varateksti (booking/admin/pos-texts.js POS_LINK_HOLD_TEXTS)."
+  },
+  {
+    "key": "ui.pos.link_cancel_confirm",
+    "lang": "en",
+    "text": "Cancel the order? The payment link will stop working and the customer can no longer pay with it.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "t1818u: pikakassan lähetetty maksulinkki jää voimaan, kassa vapautuu uuteen myyntiin; peruminen vain Peru linkkitilaus -napilla vahvistuksen kanssa. Uusi avain, FI+EN, sama kuin koodin varateksti (booking/admin/pos-texts.js POS_LINK_HOLD_TEXTS)."
+  },
+  {
+    "key": "ui.pos.link_cancel_yes",
+    "lang": "fi",
+    "text": "Kyllä, peru tilaus",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "t1818u: pikakassan lähetetty maksulinkki jää voimaan, kassa vapautuu uuteen myyntiin; peruminen vain Peru linkkitilaus -napilla vahvistuksen kanssa. Uusi avain, FI+EN, sama kuin koodin varateksti (booking/admin/pos-texts.js POS_LINK_HOLD_TEXTS)."
+  },
+  {
+    "key": "ui.pos.link_cancel_yes",
+    "lang": "en",
+    "text": "Yes, cancel the order",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "t1818u: pikakassan lähetetty maksulinkki jää voimaan, kassa vapautuu uuteen myyntiin; peruminen vain Peru linkkitilaus -napilla vahvistuksen kanssa. Uusi avain, FI+EN, sama kuin koodin varateksti (booking/admin/pos-texts.js POS_LINK_HOLD_TEXTS)."
+  },
+  {
+    "key": "ui.pos.link_cancel_no",
+    "lang": "fi",
+    "text": "Älä peru",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "t1818u: pikakassan lähetetty maksulinkki jää voimaan, kassa vapautuu uuteen myyntiin; peruminen vain Peru linkkitilaus -napilla vahvistuksen kanssa. Uusi avain, FI+EN, sama kuin koodin varateksti (booking/admin/pos-texts.js POS_LINK_HOLD_TEXTS)."
+  },
+  {
+    "key": "ui.pos.link_cancel_no",
+    "lang": "en",
+    "text": "Do not cancel",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "t1818u: pikakassan lähetetty maksulinkki jää voimaan, kassa vapautuu uuteen myyntiin; peruminen vain Peru linkkitilaus -napilla vahvistuksen kanssa. Uusi avain, FI+EN, sama kuin koodin varateksti (booking/admin/pos-texts.js POS_LINK_HOLD_TEXTS)."
+  },
+  {
+    "key": "ui.pos.link_cancelled",
+    "lang": "fi",
+    "text": "Tilaus {{var:order_no}} peruttiin ja maksulinkki suljettiin.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:order_no}}"
+    ],
+    "reason": "t1818u: pikakassan lähetetty maksulinkki jää voimaan, kassa vapautuu uuteen myyntiin; peruminen vain Peru linkkitilaus -napilla vahvistuksen kanssa. Uusi avain, FI+EN, sama kuin koodin varateksti (booking/admin/pos-texts.js POS_LINK_HOLD_TEXTS)."
+  },
+  {
+    "key": "ui.pos.link_cancelled",
+    "lang": "en",
+    "text": "Order {{var:order_no}} was cancelled and the payment link was closed.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:order_no}}"
+    ],
+    "reason": "t1818u: pikakassan lähetetty maksulinkki jää voimaan, kassa vapautuu uuteen myyntiin; peruminen vain Peru linkkitilaus -napilla vahvistuksen kanssa. Uusi avain, FI+EN, sama kuin koodin varateksti (booking/admin/pos-texts.js POS_LINK_HOLD_TEXTS)."
+  }
+]
