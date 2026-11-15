@@ -749,7 +749,7 @@ export async function renderPos({ ctx, rpc, fn }) {
     const results = () => searchSaleProducts({ products: allProducts, catalog, channelData, lang: getLang() }, sale.q);
     const list = h('ul', { id: 'pos-sale-list', class: 'pos-suggest pos-sale-list', role: 'listbox', 'aria-label': t('sale_results'), 'data-testid': 'pos-sale-list', hidden: true });
     const inp = h('input', {
-      id: 'pos-sale-input', type: 'search', class: 'pos-sale-input', autocomplete: 'off', autocapitalize: 'off', spellcheck: 'false', enterkeyhint: 'search',
+      id: 'pos-sale-input', type: 'text', inputmode: 'search', class: 'pos-sale-input', autocomplete: 'off', autocapitalize: 'off', spellcheck: 'false', enterkeyhint: 'search',
       role: 'combobox', 'aria-autocomplete': 'list', 'aria-expanded': 'false', 'aria-controls': 'pos-sale-list', 'aria-label': t('sale_search'),
       placeholder: t('sale_placeholder'), value: sale.q, 'data-testid': 'pos-sale-input',
     });
@@ -1051,7 +1051,7 @@ export async function renderPos({ ctx, rpc, fn }) {
               oninput: (e) => { customForm = { ...customForm, price: e.target.value }; },
             })),
           h('label', { class: 'fld', for: 'pos-custom-vat' }, h('span', { text: t('custom_vat') }), vatSelect)),
-        customError ? h('p', { role: 'alert', class: 'err', 'data-testid': 'pos-custom-error', text: customError }) : null,
+        customError ? h('p', { role: 'alert', class: 'err', 'data-testid': 'pos-custom-error', text: customError }) : '',
         h('div', { class: 'pos-custom-actions' },
           h('button', { type: 'button', class: 'btn primary', 'data-testid': 'pos-custom-save', text: t('custom_save'), onclick: () => submitCustom() }),
           h('button', { type: 'button', class: 'btn ghost', 'data-testid': 'pos-custom-cancel', text: t('custom_cancel'),
