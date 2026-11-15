@@ -925,3 +925,343 @@ test('pending-import-159: ostoskorin tekstit FI+EN vastaavat koodin sanakirjaa',
   assert.match(css, /@media\(min-width:1000px\)\{\.pos-grid\{grid-template-columns:repeat\(4,1fr\)\}/);
   assert.match(css, /@media\(min-width:800px\)\{\.pos-layout\{grid-template-columns:minmax\(0,1fr\) 300px\}/);
 });
+
+// ---- HALL-KASSA-02: myynnin haku (t1808u) ja varattavan tuotteen paneeli (t1809u) ----
+function typeSale(root, text) {
+  const inp = q(root, 'pos-sale-input');
+  inp.value = text;
+  inp.dispatch('input');
+  return inp;
+}
+const hits = (root) => all(root).filter((n) => n.getAttribute('data-testid') === 'pos-sale-hit');
+function cartNames(root) {
+  const toggle = q(root, 'pos-lines');
+  if (toggle && toggle.getAttribute('aria-expanded') === 'false') toggle.click();
+  return cartRows(root);
+}
+const cartRows = (root) => all(root).filter((n) => ['pos-product-line', 'pos-custom-line'].includes(n.getAttribute('data-testid'))).map((n) => n.children[0].textContent);
+
+test('haku: nimi näyttää hinnan ja valinta lisää ei-varattavan tuotteen koriin', async () => {
+  const root = await mount();
+  const inp = q(root, 'pos-sale-input');
+  assert.equal(inp.getAttribute('role'), 'combobox');
+  assert.equal(inp.getAttribute('aria-expanded'), 'false');
+  typeSale(root, 'vic');
+  const list = q(root, 'pos-sale-list');
+  assert.equal(list.hidden, false);
+  assert.equal(inp.getAttribute('aria-expanded'), 'true');
+  const hs = hits(root);
+  assert.equal(hs.length, 1);
+  assert.match(hs[0].textContent, /Vichy/);
+  assert.match(hs[0].textContent, /3,00/);
+  hs[0].click();
+  assert.deepEqual(cartNames(root), ['Vichy']);
+  assert.equal(q(root, 'pos-book'), null, 'ei-varattava ei avaa paneelia');
+  assert.equal(q(root, 'pos-sale-input').value, '', 'haku tyhjenee valinnan jälkeen');
+  assert.equal(q(root, 'pos-total').textContent.replace(/\s/g, ''), '3,00€');
+});
+
+test('haku: koodi ja alias löytävät tuotteen', async () => {
+  const root = await mount();
+  typeSale(root, 'sip01');
+  assert.match(hits(root)[0].textContent, /Sipsit/);
+  typeSale(root, 'kivennäis');
+  assert.match(hits(root)[0].textContent, /Vichy/);
+});
+
+test('haku: pos-kanavan tuote löytyy kanavatiedosta, vaikka vanha pos_enabled on pois', async () => {
+  const mock = createAdminMock({ delay: 0 });
+  await mock.rpc('admin_set_product_sales_channels', { p_product_id: 105, p_codes: ['pos'] });
+  const root = await mount(mock.rpc);
+  typeSale(root, 'käsipyyhe');
+  const hs = hits(root);
+  assert.equal(hs.length, 1);
+  hs[0].click();
+  assert.deepEqual(cartNames(root), ['Käsipyyhe']);
+  assert.equal(mock.state.calls.some((c) => c.name === 'admin_list_sales_channels'), true);
+});
+
+test('haku: ei osumaa → «Lisää oma rivi» avaa lomakkeen esitäytetyllä nimellä', async () => {
+  const root = await mount();
+  typeSale(root, 'Kahvi');
+  assert.equal(hits(root).length, 0);
+  const custom = q(root, 'pos-sale-custom');
+  assert.ok(custom);
+  assert.match(custom.textContent, /Lisää oma rivi:/);
+  assert.match(custom.textContent, /Kahvi/);
+  assert.match(q(root, 'pos-sale-list').textContent, /Ei osumia/);
+  custom.click();
+  assert.equal(q(root, 'pos-custom-description').value, 'Kahvi');
+  assert.ok(q(root, 'pos-custom-price'));
+  assert.equal(q(root, 'pos-sale-input').value, '');
+  q(root, 'pos-custom-price').value = '4,50';
+  q(root, 'pos-custom-price').dispatch('input');
+  q(root, 'pos-custom-save').click();
+  assert.deepEqual(cartNames(root), ['Kahvi']);
+  assert.equal(q(root, 'pos-total').textContent.replace(/\s/g, ''), '4,50€');
+});
+
+test('haku: oma rivi on tarjolla myös osumien alla; vanha «Lisää vapaa rivi» -nappi säilyy', async () => {
+  const root = await mount();
+  assert.ok(q(root, 'pos-custom-add'));
+  typeSale(root, 'vichy');
+  const opts = all(q(root, 'pos-sale-list')).filter((n) => n.getAttribute('role') === 'option');
+  assert.equal(opts.at(-1).getAttribute('data-testid'), 'pos-sale-custom');
+  assert.ok(opts.length >= 2);
+});
+
+test('haku: nuolet, Enter ja Esc', async () => {
+  const root = await mount();
+  const inp = typeSale(root, 'vichy');
+  const opts = () => all(q(root, 'pos-sale-list')).filter((n) => n.getAttribute('role') === 'option');
+  assert.equal(opts().every((o) => o.getAttribute('aria-selected') === 'false'), true);
+  const down = inp.dispatch('keydown', { key: 'ArrowDown' });
+  assert.equal(down.defaultPrevented, true);
+  assert.equal(opts()[0].getAttribute('aria-selected'), 'true');
+  assert.equal(inp.getAttribute('aria-activedescendant'), opts()[0].id);
+  inp.dispatch('keydown', { key: 'ArrowUp' });
+  assert.equal(opts().at(-1).getAttribute('aria-selected'), 'true', 'ylös ensimmäisestä kiertää viimeiseen');
+  inp.dispatch('keydown', { key: 'ArrowDown' });
+  assert.equal(opts()[0].getAttribute('aria-selected'), 'true');
+  const esc = inp.dispatch('keydown', { key: 'Escape' });
+  assert.equal(esc.defaultPrevented, true);
+  assert.equal(q(root, 'pos-sale-list').hidden, true);
+  assert.equal(inp.value, '');
+  // Enter ilman nuolta valitsee ensimmäisen osuman
+  typeSale(root, 'sips');
+  q(root, 'pos-sale-input').dispatch('keydown', { key: 'Enter' });
+  assert.deepEqual(cartNames(root), ['Sipsit']);
+  // Enter nuolella valittuun omaan riviin
+  const inp2 = typeSale(root, 'Jäätelö');
+  inp2.dispatch('keydown', { key: 'ArrowDown' });
+  inp2.dispatch('keydown', { key: 'Enter' });
+  assert.equal(q(root, 'pos-custom-description').value, 'Jäätelö');
+});
+
+test('haku: tyhjä haku ei näytä listaa; tyhjennä-painike tyhjentää', async () => {
+  const root = await mount();
+  assert.equal(q(root, 'pos-sale-list').hidden, true);
+  assert.equal(q(root, 'pos-sale-clear').hidden, true);
+  typeSale(root, 'vi');
+  assert.equal(q(root, 'pos-sale-clear').hidden, false);
+  q(root, 'pos-sale-clear').click();
+  assert.equal(q(root, 'pos-sale-list').hidden, true);
+});
+
+// ---- t1812u: varattava tuote vain maksuksi (ei varausta) ----
+async function openBookable(root, text = 'yleinen') {
+  typeSale(root, text);
+  hits(root)[0].click();
+  await flush();
+}
+async function payByLink(root, mock) {
+  q(root, 'pos-pay').click();
+  const dlg = document.getElementById('pos-pay-dialog');
+  all(dlg).find((n) => n.getAttribute('name') === 'tender' && n.value === 'payment_link').dispatch('change');
+  const origSet = globalThis.setInterval; const origClear = globalThis.clearInterval;
+  globalThis.setInterval = () => 1; globalThis.clearInterval = () => {};
+  try {
+    const email = q(document.getElementById('pos-pay-dialog'), 'pos-email');
+    email.value = 'asiakas@example.test'; email.dispatch('input');
+    q(document.getElementById('pos-pay-dialog'), 'pos-confirm').click();
+    await flush();
+  } finally { globalThis.setInterval = origSet; globalThis.clearInterval = origClear; }
+  return mock.state.calls.find((c) => c.name === 'admin_pos_checkout');
+}
+function setField(root, id, value) { const el = q(root, id); el.value = value; el.dispatch('input'); el.dispatch('change'); }
+
+test('varattava tuote: haku avaa kevyen paneelin, ei aikavalintaa eikä siirtymää, kori ei tyhjene', async () => {
+  const mock = createAdminMock({ delay: 0 });
+  const root = await mount(mock.rpc);
+  typeSale(root, 'vichy');
+  hits(root)[0].click();
+  assert.deepEqual(cartNames(root), ['Vichy']);
+  const prevHash = globalThis.location.hash;
+  typeSale(root, 'yleinen');
+  const hs = hits(root);
+  assert.equal(hs.length, 1);
+  assert.match(hs[0].textContent, /Varattava/);
+  assert.match(hs[0].textContent, /18,00/);
+  hs[0].click();
+  await flush();
+  assert.deepEqual(cartNames(root), ['Vichy'], 'kori säilyy, ei suoraa lisäystä');
+  const panel = q(root, 'pos-book');
+  assert.ok(panel);
+  assert.match(panel.textContent, /Yleinen saunavuoro/);
+  assert.ok(q(root, 'pos-book-date'));
+  assert.ok(q(root, 'pos-book-note'));
+  assert.ok(q(root, 'pos-book-qty'));
+  for (const gone of ['pos-book-continue', 'pos-book-slots', 'pos-book-slot', 'pos-book-none', 'pos-book-duration', 'pos-book-cart-note', 'pos-book-unbooked-off', 'pos-book-prev', 'pos-book-next', 'pos-book-persons']) assert.equal(q(root, gone), null, gone);
+  assert.match(q(root, 'pos-book-add').textContent, /^Lisää koriin \(ei varausta\)$/);
+  assert.doesNotMatch(panel.textContent, /Jatka varaukseen|tyhjenee|vapaa aika/);
+  assert.equal(mock.state.calls.some((c) => c.name === 'admin_day_view' || c.name === 'admin_treatment_availability'), false, 'ei saatavuushakua');
+  assert.equal(globalThis.location.hash, prevHash, 'ei siirtymää Uusi varaus -lomakkeelle');
+});
+
+test('varattava tuote: nappi lisää rivin koriin, kori säilyy ja checkoutItems on { product_id, quantity, unbooked, note }', async () => {
+  const mock = createAdminMock({ delay: 0 });
+  const root = await mount(mock.rpc);
+  typeSale(root, 'sips');
+  hits(root)[0].click();
+  await openBookable(root);
+  q(root, 'pos-book-add').click();
+  assert.equal(q(root, 'pos-book'), null, 'paneeli sulkeutuu');
+  assert.deepEqual(cartNames(root), ['Sipsit', 'Yleinen saunavuoro (ilman varausta)1 hlö']);
+  assert.equal(q(root, 'pos-total').textContent.replace(/\s/g, ''), '21,00€');
+  assert.equal(q(root, 'pos-line-note').textContent, '1 hlö', 'ilman päivää ja muistiinpanoa vain henkilömäärä');
+  // sama tuote tavallisena rivinä ja uusi ilman varausta eivät yhdisty
+  await openBookable(root);
+  q(root, 'pos-book-add').click();
+  assert.equal(cartNames(root).length, 3);
+});
+
+test('varattava tuote: määrä, vapaaehtoinen päivä ja muistiinpano kulkevat korin riviltä kassalle', async () => {
+  const mock = createAdminMock({ delay: 0 });
+  const root = await mount(mock.rpc);
+  await openBookable(root);
+  const qty = all(q(root, 'pos-book-qty')).find((n) => n.getAttribute('name') === 'pos-book-qty');
+  qty.value = '3'; qty.dispatch('input');
+  setField(root, 'pos-book-date', '2026-11-12');
+  setField(root, 'pos-book-note', '  Hoito tehty ilman varausta  ');
+  q(root, 'pos-book-add').click();
+  assert.equal(q(root, 'pos-total').textContent.replace(/\s/g, ''), '54,00€', '3 × 18 €');
+  assert.match(q(root, 'pos-line-note').textContent, /12\.11\.2026/);
+  assert.match(q(root, 'pos-line-note').textContent, /Hoito tehty ilman varausta/);
+  const checkout = await payByLink(root, mock);
+  assert.deepEqual(checkout.args.p_items, [{ product_id: 3, quantity: 3, unbooked: true, note: '12.11.2026, 3 hlö, Hoito tehty ilman varausta' }]);
+});
+
+test('varattava tuote: määrän otsikko Määrä; per_person-tuotteella Henkilömäärä; peruutus ja Esc sulkevat', async () => {
+  const root = await mount();
+  await openBookable(root);
+  assert.match(q(root, 'pos-book-qty').textContent, /Määrä/);
+  q(root, 'pos-book-cancel').click();
+  assert.equal(q(root, 'pos-book'), null);
+  assert.deepEqual(cartNames(root), []);
+  await openBookable(root, 'ritual');
+  assert.match(q(root, 'pos-book-qty').textContent, /Henkilömäärä/);
+  q(root, 'pos-book').dispatch('keydown', { key: 'Escape' });
+  assert.equal(q(root, 'pos-book'), null);
+});
+
+test('varattava tuote: ruudukon painike avaa paneelin, peruutus sulkee sen', async () => {
+  const root = await mount();
+  q(root, 'pos-product-3').click();
+  await flush();
+  assert.ok(q(root, 'pos-book'));
+  assert.deepEqual(cartNames(root), []);
+  q(root, 'pos-book-cancel').click();
+  assert.equal(q(root, 'pos-book'), null);
+});
+
+test('haku: varattava tuote ilman pos-kanavaa löytyy ja sen voi lisätä koriin (ei estoa)', async () => {
+  const root = await mount();
+  typeSale(root, 'hoito90');
+  const hs = hits(root);
+  assert.equal(hs.length, 1);
+  assert.match(hs[0].textContent, /Saunahoito/);
+  hs[0].click();
+  await flush();
+  assert.equal(q(root, 'pos-book-add').disabled, false);
+  assert.equal(q(root, 'pos-book-unbooked-off'), null);
+  q(root, 'pos-book-add').click();
+  assert.deepEqual(cartNames(root), ['Saunahoito (ilman varausta)1 hlö']);
+});
+
+test('kassa: ilman varausta -rivi lähtee admin_pos_checkoutiin muodossa { product_id, quantity, unbooked, note } ja mock hyväksyy sen', async () => {
+  const mock = createAdminMock({ delay: 0 });
+  const root = await mount(mock.rpc);
+  await openBookable(root, 'hoito90');
+  setField(root, 'pos-book-date', '2026-11-12');
+  setField(root, 'pos-book-note', 'Jälkilaskutus');
+  q(root, 'pos-book-add').click();
+  typeSale(root, 'vichy');
+  hits(root)[0].click();
+  assert.deepEqual(cartNames(root), ['Saunahoito (ilman varausta)12.11.2026, 1 hlö, Jälkilaskutus', 'Vichy']);
+  const checkout = await payByLink(root, mock);
+  assert.deepEqual(checkout.args.p_items, [{ product_id: 10, quantity: 1, unbooked: true, note: '12.11.2026, 1 hlö, Jälkilaskutus' }, { product_id: 101, quantity: 1 }]);
+  const order = mock.state.posOrders.at(-1);
+  assert.equal(order.total, 88);
+  assert.deepEqual(order.lines[0], { product_id: 10, name: 'Saunahoito — 12.11.2026, 1 hlö, Jälkilaskutus', quantity: 1, unit_price: 85, vat_rate: 25.5, line_total: 85, unbooked: true, note: '12.11.2026, 1 hlö, Jälkilaskutus' });
+});
+
+test('mock: admin_pos_checkout – lopullinen sopimus (unbooked kaikille hinnoitelluille, hinta kannasta, virheet)', async () => {
+  const mock = createAdminMock({ delay: 0 });
+  const co = (items) => mock.rpc('admin_pos_checkout', { p_items: items, p_locale: 'fi', p_email: null });
+  const r = await co([{ product_id: 10, quantity: 2, unbooked: true, note: '16.11.2026, 2 hlö' }]);
+  assert.equal(r.ok, true); assert.equal(r.total, 170); assert.ok(r.order_id && r.order_no);
+  assert.deepEqual(r.lines[0].unbooked, true); assert.equal(r.lines[0].note, '16.11.2026, 2 hlö'); assert.equal(r.lines[0].name, 'Saunahoito — 16.11.2026, 2 hlö');
+  // ilman noteä nimi on tuotteen nimi; unbooked ilman pos-kanavaa ja ei-varattavalle hinnoitellulle tuotteelle kelpaa
+  assert.equal((await co([{ product_id: 10, quantity: 1, unbooked: true }])).lines[0].name, 'Saunahoito');
+  assert.equal((await co([{ product_id: 101, quantity: 1, unbooked: true }])).ok, true);
+  // ilman unbooked: varattava → not_counter_product
+  await assert.rejects(() => co([{ product_id: 10, quantity: 1 }]), /pikakassassa/);
+  // lahjakortti evätään
+  await assert.rejects(() => co([{ product_id: 104, quantity: 1, unbooked: true }]), /ei voi lisätä/);
+  // ei unit_price- eikä date-kenttää
+  await assert.rejects(() => co([{ product_id: 10, quantity: 1, unbooked: true, unit_price: 1 }]), /Hintaa/);
+  await assert.rejects(() => co([{ product_id: 10, quantity: 1, unbooked: true, date: '2026-11-16' }]), /päivää/);
+  // note: ≤ 200, ei <, vain unbooked-riville
+  assert.equal((await co([{ product_id: 10, quantity: 1, unbooked: true, note: 'x'.repeat(200) }])).ok, true);
+  await assert.rejects(() => co([{ product_id: 10, quantity: 1, unbooked: true, note: 'x'.repeat(201) }]), /Muistiinpano/);
+  await assert.rejects(() => co([{ product_id: 10, quantity: 1, unbooked: true, note: 'a<b' }]), /Muistiinpano/);
+  await assert.rejects(() => co([{ product_id: 3, quantity: 1, note: 'x' }]), /Muistiinpano/);
+});
+
+test('paneeli: <-merkki ja liian pitkä note näyttävät virheen eikä riviä lisätä', async () => {
+  const mock = createAdminMock({ delay: 0 });
+  const root = await mount(mock.rpc);
+  await openBookable(root);
+  setField(root, 'pos-book-note', 'a<b');
+  q(root, 'pos-book-add').click();
+  assert.ok(q(root, 'pos-book'), 'paneeli jää auki');
+  assert.match(q(root, 'pos-book-error').textContent, /kulmasulku/);
+  assert.deepEqual(cartNames(root), []);
+  setField(root, 'pos-book-note', 'x'.repeat(200));
+  q(root, 'pos-book-add').click();
+  assert.match(q(root, 'pos-book-error').textContent, /liian pitkä/);
+  assert.deepEqual(cartNames(root), []);
+});
+
+test('FI ja EN: hakukentän ja paneelin tekstit', async () => {
+  const i18n = await import(href('../admin/talous-i18n.js'));
+  const root0 = await mount();
+  assert.equal(q(root0, 'pos-sale-input').getAttribute('placeholder'), 'Tuotteen nimi, koodi tai oma rivi');
+  i18n.setLang('en');
+  try {
+    const root = await mount();
+    assert.equal(q(root, 'pos-sale-input').getAttribute('placeholder'), 'Product name, code or custom line');
+    typeSale(root, 'crisps');
+    assert.match(hits(root)[0].textContent, /Crisps/);
+    assert.match(q(root, 'pos-sale-custom').textContent, /Add custom line:/);
+    typeSale(root, 'general');
+    assert.equal(hits(root).length, 0);
+    await openBookable(root);
+    assert.match(q(root, 'pos-book').textContent, /Invoice without a booking/);
+    assert.match(q(root, 'pos-book-qty').textContent, /Quantity/);
+    assert.match(q(root, 'pos-book').textContent, /Date \(optional\)/);
+    assert.match(q(root, 'pos-book').textContent, /Note for the receipt/);
+    assert.match(q(root, 'pos-book-add').textContent, /^Add to cart \(no booking\)$/);
+    q(root, 'pos-book-add').click();
+    assert.match(cartNames(root)[0], /\(without booking\)/);
+  } finally { i18n.setLang('fi'); }
+});
+
+test('pending-import-178: haun ja varauspaneelin tekstit FI+EN vastaavat koodin sanakirjaa', () => {
+  const rows = JSON.parse(read('../../content/site-texts.pending-import-178.json'));
+  const dict = texts.POS_SALE_TEXTS;
+  assert.deepEqual(Object.keys(dict.fi), Object.keys(dict.en));
+  for (const key of Object.keys(dict.fi)) {
+    for (const lang of ['fi', 'en']) {
+      const row = rows.find((r) => r.key === `ui.pos.${key}` && r.lang === lang);
+      assert.ok(row, `${key} ${lang}`);
+      assert.equal(row.text, dict[lang][key]);
+      assert.equal(row.class, 'normal');
+      assert.equal(row.kind, 'plain');
+      assert.equal(/[<>{}]|https?:/.test(row.text), false);
+    }
+  }
+  assert.equal(rows.length, Object.keys(dict.fi).length * 2);
+  assert.equal(new Set(rows.map((r) => `${r.key}|${r.lang}`)).size, rows.length);
+  assert.equal(Object.keys(dict.fi).some((k) => k in texts.POS_TEXTS.fi || k in texts.POS_CART_TEXTS.fi || k in texts.POS_CUSTOM_TEXTS.fi), false);
+});

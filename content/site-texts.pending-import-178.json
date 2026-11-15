@@ -1,0 +1,402 @@
+[
+  {
+    "key": "ui.pos.sale_search",
+    "lang": "fi",
+    "text": "Hae tuote tai kirjoita oma rivi",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 300,
+    "placeholders": [],
+    "reason": "HALL-KASSA-02: pikakassan myynnin haku, oma rivi hausta ja varattavan tuotteen varauspaneeli (t1808u, t1809u)"
+  },
+  {
+    "key": "ui.pos.sale_search",
+    "lang": "en",
+    "text": "Search for a product or type a custom line",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 300,
+    "placeholders": [],
+    "reason": "HALL-KASSA-02: pikakassan myynnin haku, oma rivi hausta ja varattavan tuotteen varauspaneeli (t1808u, t1809u)"
+  },
+  {
+    "key": "ui.pos.sale_placeholder",
+    "lang": "fi",
+    "text": "Tuotteen nimi, koodi tai oma rivi",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 300,
+    "placeholders": [],
+    "reason": "HALL-KASSA-02: pikakassan myynnin haku, oma rivi hausta ja varattavan tuotteen varauspaneeli (t1808u, t1809u)"
+  },
+  {
+    "key": "ui.pos.sale_placeholder",
+    "lang": "en",
+    "text": "Product name, code or custom line",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 300,
+    "placeholders": [],
+    "reason": "HALL-KASSA-02: pikakassan myynnin haku, oma rivi hausta ja varattavan tuotteen varauspaneeli (t1808u, t1809u)"
+  },
+  {
+    "key": "ui.pos.sale_results",
+    "lang": "fi",
+    "text": "Hakutulokset",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 300,
+    "placeholders": [],
+    "reason": "HALL-KASSA-02: pikakassan myynnin haku, oma rivi hausta ja varattavan tuotteen varauspaneeli (t1808u, t1809u)"
+  },
+  {
+    "key": "ui.pos.sale_results",
+    "lang": "en",
+    "text": "Search results",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 300,
+    "placeholders": [],
+    "reason": "HALL-KASSA-02: pikakassan myynnin haku, oma rivi hausta ja varattavan tuotteen varauspaneeli (t1808u, t1809u)"
+  },
+  {
+    "key": "ui.pos.sale_clear",
+    "lang": "fi",
+    "text": "Tyhjennä haku",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 300,
+    "placeholders": [],
+    "reason": "HALL-KASSA-02: pikakassan myynnin haku, oma rivi hausta ja varattavan tuotteen varauspaneeli (t1808u, t1809u)"
+  },
+  {
+    "key": "ui.pos.sale_clear",
+    "lang": "en",
+    "text": "Clear search",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 300,
+    "placeholders": [],
+    "reason": "HALL-KASSA-02: pikakassan myynnin haku, oma rivi hausta ja varattavan tuotteen varauspaneeli (t1808u, t1809u)"
+  },
+  {
+    "key": "ui.pos.sale_none",
+    "lang": "fi",
+    "text": "Ei osumia tuotteista",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 300,
+    "placeholders": [],
+    "reason": "HALL-KASSA-02: pikakassan myynnin haku, oma rivi hausta ja varattavan tuotteen varauspaneeli (t1808u, t1809u)"
+  },
+  {
+    "key": "ui.pos.sale_none",
+    "lang": "en",
+    "text": "No matching products",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 300,
+    "placeholders": [],
+    "reason": "HALL-KASSA-02: pikakassan myynnin haku, oma rivi hausta ja varattavan tuotteen varauspaneeli (t1808u, t1809u)"
+  },
+  {
+    "key": "ui.pos.sale_custom",
+    "lang": "fi",
+    "text": "Lisää oma rivi:",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 300,
+    "placeholders": [],
+    "reason": "HALL-KASSA-02: pikakassan myynnin haku, oma rivi hausta ja varattavan tuotteen varauspaneeli (t1808u, t1809u)"
+  },
+  {
+    "key": "ui.pos.sale_custom",
+    "lang": "en",
+    "text": "Add custom line:",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 300,
+    "placeholders": [],
+    "reason": "HALL-KASSA-02: pikakassan myynnin haku, oma rivi hausta ja varattavan tuotteen varauspaneeli (t1808u, t1809u)"
+  },
+  {
+    "key": "ui.pos.sale_bookable",
+    "lang": "fi",
+    "text": "Varattava",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 300,
+    "placeholders": [],
+    "reason": "HALL-KASSA-02: pikakassan myynnin haku, oma rivi hausta ja varattavan tuotteen varauspaneeli (t1808u, t1809u)"
+  },
+  {
+    "key": "ui.pos.sale_bookable",
+    "lang": "en",
+    "text": "Bookable",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 300,
+    "placeholders": [],
+    "reason": "HALL-KASSA-02: pikakassan myynnin haku, oma rivi hausta ja varattavan tuotteen varauspaneeli (t1808u, t1809u)"
+  },
+  {
+    "key": "ui.pos.sale_help",
+    "lang": "fi",
+    "text": "Nuolet valitsevat, Enter lisää, Esc sulkee.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 300,
+    "placeholders": [],
+    "reason": "HALL-KASSA-02: pikakassan myynnin haku, oma rivi hausta ja varattavan tuotteen varauspaneeli (t1808u, t1809u)"
+  },
+  {
+    "key": "ui.pos.sale_help",
+    "lang": "en",
+    "text": "Arrow keys choose, Enter adds, Esc closes.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 300,
+    "placeholders": [],
+    "reason": "HALL-KASSA-02: pikakassan myynnin haku, oma rivi hausta ja varattavan tuotteen varauspaneeli (t1808u, t1809u)"
+  },
+  {
+    "key": "ui.pos.book_title",
+    "lang": "fi",
+    "text": "Laskuta ilman varausta",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 300,
+    "placeholders": [],
+    "reason": "HALL-KASSA-02: pikakassan myynnin haku, oma rivi hausta ja varattavan tuotteen varauspaneeli (t1808u, t1809u)"
+  },
+  {
+    "key": "ui.pos.book_title",
+    "lang": "en",
+    "text": "Invoice without a booking",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 300,
+    "placeholders": [],
+    "reason": "HALL-KASSA-02: pikakassan myynnin haku, oma rivi hausta ja varattavan tuotteen varauspaneeli (t1808u, t1809u)"
+  },
+  {
+    "key": "ui.pos.book_persons",
+    "lang": "fi",
+    "text": "Henkilömäärä",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 300,
+    "placeholders": [],
+    "reason": "HALL-KASSA-02: pikakassan myynnin haku, oma rivi hausta ja varattavan tuotteen varauspaneeli (t1808u, t1809u)"
+  },
+  {
+    "key": "ui.pos.book_persons",
+    "lang": "en",
+    "text": "Number of people",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 300,
+    "placeholders": [],
+    "reason": "HALL-KASSA-02: pikakassan myynnin haku, oma rivi hausta ja varattavan tuotteen varauspaneeli (t1808u, t1809u)"
+  },
+  {
+    "key": "ui.pos.book_cancel",
+    "lang": "fi",
+    "text": "Peruuta",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 300,
+    "placeholders": [],
+    "reason": "HALL-KASSA-02: pikakassan myynnin haku, oma rivi hausta ja varattavan tuotteen varauspaneeli (t1808u, t1809u)"
+  },
+  {
+    "key": "ui.pos.book_cancel",
+    "lang": "en",
+    "text": "Cancel",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 300,
+    "placeholders": [],
+    "reason": "HALL-KASSA-02: pikakassan myynnin haku, oma rivi hausta ja varattavan tuotteen varauspaneeli (t1808u, t1809u)"
+  },
+  {
+    "key": "ui.pos.unbooked",
+    "lang": "fi",
+    "text": "ilman varausta",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 300,
+    "placeholders": [],
+    "reason": "HALL-KASSA-02: pikakassan myynnin haku, oma rivi hausta ja varattavan tuotteen varauspaneeli (t1808u, t1809u)"
+  },
+  {
+    "key": "ui.pos.unbooked",
+    "lang": "en",
+    "text": "without booking",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 300,
+    "placeholders": [],
+    "reason": "HALL-KASSA-02: pikakassan myynnin haku, oma rivi hausta ja varattavan tuotteen varauspaneeli (t1808u, t1809u)"
+  },
+  {
+    "key": "ui.pos.book_help",
+    "lang": "fi",
+    "text": "Tuote lisätään koriin maksettavaksi. Varausta ei luoda.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 300,
+    "placeholders": [],
+    "reason": "HALL-KASSA-02: pikakassan myynnin haku, oma rivi hausta ja varattavan tuotteen varauspaneeli (t1808u, t1809u)"
+  },
+  {
+    "key": "ui.pos.book_help",
+    "lang": "en",
+    "text": "The product is added to the cart for payment. No booking is created.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 300,
+    "placeholders": [],
+    "reason": "HALL-KASSA-02: pikakassan myynnin haku, oma rivi hausta ja varattavan tuotteen varauspaneeli (t1808u, t1809u)"
+  },
+  {
+    "key": "ui.pos.book_qty",
+    "lang": "fi",
+    "text": "Määrä",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 300,
+    "placeholders": [],
+    "reason": "HALL-KASSA-02: pikakassan myynnin haku, oma rivi hausta ja varattavan tuotteen varauspaneeli (t1808u, t1809u)"
+  },
+  {
+    "key": "ui.pos.book_qty",
+    "lang": "en",
+    "text": "Quantity",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 300,
+    "placeholders": [],
+    "reason": "HALL-KASSA-02: pikakassan myynnin haku, oma rivi hausta ja varattavan tuotteen varauspaneeli (t1808u, t1809u)"
+  },
+  {
+    "key": "ui.pos.book_day_opt",
+    "lang": "fi",
+    "text": "Päivä (vapaaehtoinen)",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 300,
+    "placeholders": [],
+    "reason": "HALL-KASSA-02: pikakassan myynnin haku, oma rivi hausta ja varattavan tuotteen varauspaneeli (t1808u, t1809u)"
+  },
+  {
+    "key": "ui.pos.book_day_opt",
+    "lang": "en",
+    "text": "Date (optional)",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 300,
+    "placeholders": [],
+    "reason": "HALL-KASSA-02: pikakassan myynnin haku, oma rivi hausta ja varattavan tuotteen varauspaneeli (t1808u, t1809u)"
+  },
+  {
+    "key": "ui.pos.book_note",
+    "lang": "fi",
+    "text": "Muistiinpano kuittia varten (vapaaehtoinen)",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 300,
+    "placeholders": [],
+    "reason": "HALL-KASSA-02: pikakassan myynnin haku, oma rivi hausta ja varattavan tuotteen varauspaneeli (t1808u, t1809u)"
+  },
+  {
+    "key": "ui.pos.book_note",
+    "lang": "en",
+    "text": "Note for the receipt (optional)",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 300,
+    "placeholders": [],
+    "reason": "HALL-KASSA-02: pikakassan myynnin haku, oma rivi hausta ja varattavan tuotteen varauspaneeli (t1808u, t1809u)"
+  },
+  {
+    "key": "ui.pos.book_note_ph",
+    "lang": "fi",
+    "text": "Esim. hoito 12.11. klo 14",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 300,
+    "placeholders": [],
+    "reason": "HALL-KASSA-02: pikakassan myynnin haku, oma rivi hausta ja varattavan tuotteen varauspaneeli (t1808u, t1809u)"
+  },
+  {
+    "key": "ui.pos.book_note_ph",
+    "lang": "en",
+    "text": "E.g. treatment 12 Nov at 2 pm",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 300,
+    "placeholders": [],
+    "reason": "HALL-KASSA-02: pikakassan myynnin haku, oma rivi hausta ja varattavan tuotteen varauspaneeli (t1808u, t1809u)"
+  },
+  {
+    "key": "ui.pos.book_add",
+    "lang": "fi",
+    "text": "Lisää koriin (ei varausta)",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 300,
+    "placeholders": [],
+    "reason": "HALL-KASSA-02: pikakassan myynnin haku, oma rivi hausta ja varattavan tuotteen varauspaneeli (t1808u, t1809u)"
+  },
+  {
+    "key": "ui.pos.book_add",
+    "lang": "en",
+    "text": "Add to cart (no booking)",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 300,
+    "placeholders": [],
+    "reason": "HALL-KASSA-02: pikakassan myynnin haku, oma rivi hausta ja varattavan tuotteen varauspaneeli (t1808u, t1809u)"
+  },
+  {
+    "key": "ui.pos.book_err_len",
+    "lang": "fi",
+    "text": "Kuittiteksti on liian pitkä (enintään 200 merkkiä). Lyhennä muistiinpanoa.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 300,
+    "placeholders": [],
+    "reason": "HALL-KASSA-02: pikakassan myynnin haku, oma rivi hausta ja varattavan tuotteen varauspaneeli (t1808u, t1809u)"
+  },
+  {
+    "key": "ui.pos.book_err_len",
+    "lang": "en",
+    "text": "The receipt text is too long (max 200 characters). Shorten the note.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 300,
+    "placeholders": [],
+    "reason": "HALL-KASSA-02: pikakassan myynnin haku, oma rivi hausta ja varattavan tuotteen varauspaneeli (t1808u, t1809u)"
+  },
+  {
+    "key": "ui.pos.book_err_lt",
+    "lang": "fi",
+    "text": "Muistiinpano ei saa sisältää kulmasulkumerkkiä.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 300,
+    "placeholders": [],
+    "reason": "HALL-KASSA-02: pikakassan myynnin haku, oma rivi hausta ja varattavan tuotteen varauspaneeli (t1808u, t1809u)"
+  },
+  {
+    "key": "ui.pos.book_err_lt",
+    "lang": "en",
+    "text": "The note must not contain an angle bracket.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 300,
+    "placeholders": [],
+    "reason": "HALL-KASSA-02: pikakassan myynnin haku, oma rivi hausta ja varattavan tuotteen varauspaneeli (t1808u, t1809u)"
+  }
+]

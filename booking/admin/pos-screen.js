@@ -4,7 +4,9 @@ import { h, toast, money, errMsg } from './ui.js';
 import { icon } from './icons.js';
 import { loadPosTexts, posText as tx } from './pos-texts.js';
 import { getLang } from './talous-i18n.js';
-import { cartAdd, cartAddCustom, cartLineKey, cartSetQty, cartTotal, cartVatBreakdown, checkoutItems, parseEuroInput, validateCustomLine, posSheetTenders, tenderAvailable, joinUrl, posCandidates, filterProducts, tillEditorOpen, moveSort, validEmail, posCustomerHits } from './pos-logic.js';
+import { searchSaleProducts, saleOptions, moveHi, enterTarget, isBookableProduct, cartAddUnbooked } from './pos-logic.js';
+import { stepper } from './stepper.js';
+import { cartAdd, cartAddCustom, cartLineKey, cartSetQty, cartTotal, cartVatBreakdown, checkoutItems, checkUnbookedNote, lineNote, unbookedNote, parseEuroInput, validateCustomLine, posSheetTenders, tenderAvailable, joinUrl, posCandidates, filterProducts, tillEditorOpen, moveSort, validEmail, posCustomerHits } from './pos-logic.js';
 import { searchCustomers } from './customer-hits.js';
 import { qrSvgElement } from './qrsvg.js';
 import { cxEnabled, readTerminal, saveTerminal, pickTerminal, savePending, readPending, clearPending, openAppLink, cxStateOf, cxErrorKey, CX_REGISTER_TTL_MS } from './checkoutx-pos.js';
@@ -21,6 +23,10 @@ export async function renderPos({ ctx, rpc, fn }) {
   const canEdit = ctx.can('pos.use') || ctx.can('catalog.edit') || ctx.can('settings.edit');
   let catalog = [];
   let allProducts = [];
+  let channelData = null;
+  // t1808u: myynnin hakukenttä (tila säilyy uudelleenpiirrossa). t1809u: varattavan tuotteen varauspaneeli.
+  const sale = { q: '', hi: -1, opts: [], focus: false };
+  let bk = null;
   let tenders = [];
   let modes = { mobilepay_mode: 'off', vismapay_mode: 'off', site_base_url: '' };
   let editing = false;
@@ -209,11 +215,12 @@ export async function renderPos({ ctx, rpc, fn }) {
 
   async function load() {
     await loadPosTexts(rpc);
-    const [cat, ten, products, vatRes] = await Promise.all([
+    const [cat, ten, products, vatRes, chans] = await Promise.all([
       rpc('admin_pos_catalog'),
       rpc('admin_pos_tenders'),
-      canEdit ? rpc('admin_list_products').catch(() => []) : Promise.resolve([]),
+      rpc('admin_list_products').catch(() => []),
       rpc('admin_list_vat_rates').catch(() => null),
+      rpc('admin_list_sales_channels').catch(() => null),
     ]);
     catalog = Array.isArray(cat) ? cat : [];
     modes = ten || modes;
@@ -236,6 +243,7 @@ export async function renderPos({ ctx, rpc, fn }) {
       cx.terminal = pickTerminal(readTerminal(store), cx.terminals);
     }
     allProducts = Array.isArray(products) ? products : [];
+    channelData = chans && chans.ok !== false && chans.products ? chans : null;
     editing = tillEditorOpen(catalog.length, editing);
   }
 
@@ -321,7 +329,7 @@ export async function renderPos({ ctx, rpc, fn }) {
       }
       payError = '';
       draw();
-      const items = checkoutItems(cart);
+      const items = checkoutItems(cart, getLang());
       // Asiakkaalle lähtevä viesti pysyy suomenkielisenä riippumatta hallinnan kielestä (maksuvirta ennallaan).
       const res = await rpc('admin_pos_checkout', { p_items: items, p_locale: 'fi', p_email: mailTo });
       order = res;
@@ -693,7 +701,188 @@ export async function renderPos({ ctx, rpc, fn }) {
     return overlay;
   }
 
+  // ---- t1808u: myynnin haku ----
+  function addProduct(p) {
+    const row = { ...p, name: p.name_fi || p.name };
+    const go = () => { cart = cartAdd(cart, row); draw(); };
+    if (phase === 'paying') voidOpen().then(go); else go();
+  }
+
+  function itemFromCatalog(p) {
+    const full = allProducts.find((x) => Number(x.id) === Number(p.product_id)) || null;
+    return { product_id: p.product_id, name: p.name, name_fi: p.name, name_en: p.name_en || null, price: Number(p.price), vat_rate: p.vat_rate, age_restricted: !!p.age_restricted, bookable: full ? isBookableProduct(full) : false, pos: true, product: full };
+  }
+
+  // Ruudukon painike: varattava tuote avaa varauspaneelin, muut menevät suoraan koriin.
+  function pickCatalog(p) {
+    const it = itemFromCatalog(p);
+    if (it.bookable) openBooking(it); else addProduct(it);
+  }
+
+  function clearSale() { sale.q = ''; sale.hi = -1; sale.opts = []; }
+
+  function openCustom(text) {
+    clearSale();
+    customOpen = true;
+    customError = '';
+    customForm = { ...customForm, description: String(text || '') };
+    draw();
+    queueMicrotask(() => {
+      const el = document.getElementById(text ? 'pos-custom-price' : 'pos-custom-description');
+      el?.scrollIntoView?.({ block: 'center' });
+      el?.focus?.();
+    });
+  }
+
+  function chooseSale(opt, { keyboard = false } = {}) {
+    if (!opt) return;
+    if (opt.type === 'custom') { openCustom(opt.text); return; }
+    const it = opt.item;
+    clearSale();
+    sale.focus = keyboard;
+    if (it.bookable) openBooking(it); else addProduct(it);
+  }
+
+  function saleBox() {
+    const results = () => searchSaleProducts({ products: allProducts, catalog, channelData, lang: getLang() }, sale.q);
+    const list = h('ul', { id: 'pos-sale-list', class: 'pos-suggest pos-sale-list', role: 'listbox', 'aria-label': t('sale_results'), 'data-testid': 'pos-sale-list', hidden: true });
+    const inp = h('input', {
+      id: 'pos-sale-input', type: 'text', inputmode: 'search', class: 'pos-sale-input', autocomplete: 'off', autocapitalize: 'off', spellcheck: 'false', enterkeyhint: 'search',
+      role: 'combobox', 'aria-autocomplete': 'list', 'aria-expanded': 'false', 'aria-controls': 'pos-sale-list', 'aria-label': t('sale_search'),
+      placeholder: t('sale_placeholder'), value: sale.q, 'data-testid': 'pos-sale-input',
+    });
+    const clear = h('button', { type: 'button', class: 'btn ghost pos-sale-clear', 'aria-label': t('sale_clear'), 'data-testid': 'pos-sale-clear', hidden: true,
+      onclick: () => { clearSale(); paint(); inp.value = ''; inp.focus?.(); } }, icon('close', 20));
+
+    function mark() {
+      const buttons = [...list.querySelectorAll('[role="option"]')];
+      buttons.forEach((b, i) => b.setAttribute('aria-selected', i === sale.hi ? 'true' : 'false'));
+      if (sale.hi >= 0 && buttons[sale.hi]) { inp.setAttribute('aria-activedescendant', buttons[sale.hi].id || buttons[sale.hi].getAttribute('id')); buttons[sale.hi].scrollIntoView?.({ block: 'nearest' }); }
+      else inp.removeAttribute('aria-activedescendant');
+    }
+
+    function paint() {
+      sale.opts = saleOptions(results(), sale.q);
+      clear.hidden = !sale.q;
+      if (!sale.q) clear.setAttribute('hidden', ''); else clear.removeAttribute('hidden');
+      if (!sale.opts.length) {
+        list.hidden = true; list.setAttribute('hidden', ''); list.replaceChildren();
+        inp.setAttribute('aria-expanded', 'false'); inp.removeAttribute('aria-activedescendant');
+        return;
+      }
+      list.hidden = false; list.removeAttribute('hidden');
+      inp.setAttribute('aria-expanded', 'true');
+      const nProducts = sale.opts.filter((o) => o.type === 'product').length;
+      list.replaceChildren(...sale.opts.map((o, i) => {
+        const id = `pos-sale-opt-${i}`;
+        if (o.type === 'custom') {
+          return h('li', { role: 'presentation' }, h('button', {
+            type: 'button', id, role: 'option', class: 'pos-hit pos-sale-hit pos-sale-custom', 'aria-selected': 'false', 'data-testid': 'pos-sale-custom',
+            onclick: () => chooseSale(o),
+          }, h('span', { class: 'pos-sale-name' }, h('strong', { text: t('sale_custom') }), ' ', h('span', { text: `”${o.text}”` })),
+          !nProducts ? h('small', { class: 'muted', text: t('sale_none') }) : null));
+        }
+        const it = o.item;
+        return h('li', { role: 'presentation' }, h('button', {
+          type: 'button', id, role: 'option', class: 'pos-hit pos-sale-hit', 'aria-selected': 'false', 'data-testid': 'pos-sale-hit', 'data-product': String(it.product_id),
+          onclick: () => chooseSale(o),
+        }, h('span', { class: 'pos-sale-name' }, h('span', { text: it.name }), it.code ? h('small', { class: 'muted', text: ` ${it.code}` }) : null,
+          it.bookable ? h('small', { class: 'pos-sale-badge', text: t('sale_bookable') }) : null,
+          it.age_restricted ? h('small', { class: 'pos-age', text: t('age') }) : null),
+        h('strong', { class: 'pos-sale-price', text: money(it.price) })));
+      }));
+      mark();
+    }
+
+    inp.addEventListener('input', () => { sale.q = String(inp.value || ''); sale.hi = -1; paint(); });
+    inp.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+        if (!sale.opts.length) return;
+        e.preventDefault?.();
+        sale.hi = moveHi(sale.hi, e.key === 'ArrowDown' ? 1 : -1, sale.opts.length);
+        mark();
+        return;
+      }
+      if (e.key === 'Enter') {
+        const target = enterTarget(sale.opts, sale.hi);
+        if (!target) return;
+        e.preventDefault?.();
+        chooseSale(target, { keyboard: true });
+        return;
+      }
+      if (e.key === 'Escape' && sale.q) {
+        e.preventDefault?.();
+        e.stopPropagation?.();
+        clearSale(); inp.value = ''; paint();
+      }
+    });
+    paint();
+    return h('div', { class: 'fld pos-sale', 'data-testid': 'pos-sale' },
+      h('label', { for: 'pos-sale-input', text: t('sale_search') }),
+      h('div', { class: 'pos-sale-row' }, inp, clear),
+      list,
+      h('small', { class: 'muted pos-sale-help', text: t('sale_help') }));
+  }
+
+  // ---- t1812u: varattava tuote vain maksuksi (ei varausta). Kevyt paneeli, kori säilyy. ----
+  function openBooking(it) {
+    bk = { item: it, qty: 1, node: null };
+    draw();
+    queueMicrotask(() => { bk?.node?.scrollIntoView?.({ block: 'nearest' }); document.getElementById('pos-book-note')?.focus?.(); });
+  }
+
+  function closeBooking() { bk = null; draw(); }
+
+  function addUnbooked() {
+    const b = bk;
+    if (!b) return;
+    const note = String(document.getElementById('pos-book-note')?.value || '');
+    const date = String(document.getElementById('pos-book-date')?.value || '');
+    // Tarkistetaan sekä käyttäjän muistiinpano että koko kuittiin menevä note; virhe paneeliin, riviä ei lisätä.
+    const full = unbookedNote({ date, persons: b.qty, note, lang: getLang() });
+    const chk = checkUnbookedNote(note.trim());
+    const chkFull = chk.ok ? checkUnbookedNote(full) : chk;
+    const errBox = document.getElementById('pos-book-error');
+    if (!chkFull.ok) {
+      if (errBox) { errBox.textContent = t(chkFull.error === 'note_lt' ? 'book_err_lt' : 'book_err_len'); errBox.hidden = false; }
+      return;
+    }
+    bk = null;
+    const go = () => { cart = cartAddUnbooked(cart, b.item, { quantity: b.qty, note, date }); showLines = true; draw(); };
+    if (phase === 'paying') voidOpen().then(go); else go();
+  }
+
+  // Luodaan kerran (ei piirretä joka näppäilyllä), jotta kenttien kohdistus säilyy.
+  function bookPanel() {
+    if (!bk) return null;
+    const b = bk;
+    const it = b.item;
+    const perPerson = it.product?.price_type === 'per_person';
+    const qtyLabel = perPerson ? t('book_persons') : t('book_qty');
+    const qty = stepper({ label: qtyLabel, value: b.qty, min: 1, max: 20, inputName: 'pos-book-qty', size: 'lg', onChange: (n) => { b.qty = n; } });
+    const node = h('section', { class: 'card pos-book', role: 'group', 'aria-labelledby': 'pos-book-title', 'data-testid': 'pos-book' },
+      h('div', { class: 'pos-book-head' },
+        h('h2', { id: 'pos-book-title', text: `${t('book_title')}: ${it.name}` }),
+        h('button', { type: 'button', class: 'icon-btn', 'aria-label': t('book_cancel'), 'data-testid': 'pos-book-close', onclick: () => closeBooking() }, icon('close', 22))),
+      h('p', { class: 'muted pos-book-price', text: money(it.price) }),
+      h('p', { class: 'muted', 'data-testid': 'pos-book-help', text: t('book_help') }),
+      h('div', { class: 'fld', 'data-testid': 'pos-book-qty' }, h('span', { class: 'fld-lab', text: qtyLabel }), qty.node),
+      h('div', { class: 'fld' }, h('label', { class: 'fld-lab', for: 'pos-book-date', text: t('book_day_opt') }),
+        h('input', { type: 'date', id: 'pos-book-date', 'data-testid': 'pos-book-date', value: '' })),
+      h('div', { class: 'fld' }, h('label', { class: 'fld-lab', for: 'pos-book-note', text: t('book_note') }),
+        h('input', { type: 'text', id: 'pos-book-note', 'data-testid': 'pos-book-note', maxlength: 200, autocomplete: 'off', placeholder: t('book_note_ph'), value: '' })),
+      h('p', { id: 'pos-book-error', class: 'err pos-book-error', role: 'alert', 'data-testid': 'pos-book-error', hidden: true }),
+      h('div', { class: 'pos-book-actions' },
+        h('button', { type: 'button', class: 'btn primary', 'data-testid': 'pos-book-add', text: t('book_add'), onclick: () => addUnbooked() }),
+        h('button', { type: 'button', class: 'btn ghost', 'data-testid': 'pos-book-cancel', text: t('book_cancel'), onclick: () => closeBooking() })));
+    node.addEventListener('keydown', (e) => { if (e.key === 'Escape') { e.preventDefault?.(); closeBooking(); } });
+    b.node = node;
+    return node;
+  }
+
   function draw() {
+    const hadSaleFocus = sale.focus || document.activeElement?.id === 'pos-sale-input';
+    sale.focus = false;
     const total = cartTotal(cart);
     const grid = h('div', { class: 'pos-grid', 'data-testid': 'pos-grid' });
     if (!catalog.length) {
@@ -703,7 +892,7 @@ export async function renderPos({ ctx, rpc, fn }) {
         canEdit ? h('button', { type: 'button', class: 'btn primary lg pos-edit', 'data-testid': 'pos-add', text: t('add'), onclick: () => { editing = true; draw(); } }) : null));
     }
     for (const p of catalog) {
-      grid.append(h('button', { type: 'button', class: 'pos-btn', 'data-testid': `pos-product-${p.product_id}`, onclick: () => { if (phase === 'paying') voidOpen().then(() => { cart = cartAdd(cart, p); draw(); }); else { cart = cartAdd(cart, p); draw(); } } },
+      grid.append(h('button', { type: 'button', class: 'pos-btn', 'data-testid': `pos-product-${p.product_id}`, onclick: () => pickCatalog(p) },
         h('span', { class: 'pos-name', text: p.name }),
         p.age_restricted ? h('small', { class: 'pos-age', text: t('age') }) : null,
         h('strong', { class: 'pos-price', text: money(p.price) })));
@@ -725,7 +914,8 @@ export async function renderPos({ ctx, rpc, fn }) {
       for (const r of cart) {
         const key = cartLineKey(r);
         lines.append(h('div', { class: 'pos-line', 'data-testid': r.kind === 'custom' ? 'pos-custom-line' : 'pos-product-line' },
-          h('span', { class: 'grow', text: r.name }),
+          h('span', { class: 'grow' }, r.unbooked ? `${r.name} (${t('unbooked')})` : r.name,
+            r.unbooked ? h('small', { class: 'muted pos-line-note', 'data-testid': 'pos-line-note', text: lineNote(r, getLang()) }) : null),
           h('button', { type: 'button', class: 'btn pos-step', 'aria-label': t('qty_less'), text: '−', onclick: () => { cart = cartSetQty(cart, key, r.quantity - 1); if (phase === 'paying') voidOpen(); draw(); } }),
           h('span', { class: 'pos-qty', text: String(r.quantity) }),
           h('button', { type: 'button', class: 'btn pos-step', 'aria-label': t('qty_more'), text: '+', onclick: () => { cart = cartSetQty(cart, key, r.quantity + 1); if (phase === 'paying') voidOpen(); draw(); } }),
@@ -802,7 +992,7 @@ export async function renderPos({ ctx, rpc, fn }) {
               oninput: (e) => { customForm = { ...customForm, price: e.target.value }; },
             })),
           h('label', { class: 'fld', for: 'pos-custom-vat' }, h('span', { text: t('custom_vat') }), vatSelect)),
-        customError ? h('p', { role: 'alert', class: 'err', 'data-testid': 'pos-custom-error', text: customError }) : null,
+        customError ? h('p', { role: 'alert', class: 'err', 'data-testid': 'pos-custom-error', text: customError }) : '',
         h('div', { class: 'pos-custom-actions' },
           h('button', { type: 'button', class: 'btn primary', 'data-testid': 'pos-custom-save', text: t('custom_save'), onclick: () => submitCustom() }),
           h('button', { type: 'button', class: 'btn ghost', 'data-testid': 'pos-custom-cancel', text: t('custom_cancel'),
@@ -840,11 +1030,12 @@ export async function renderPos({ ctx, rpc, fn }) {
 
     const kids = [
       h('h1', { text: t('title') }),
-      h('div', { class: 'pos-layout', 'data-testid': 'pos-layout' }, h('div', { class: 'pos-main' }, grid, wide ? customBox : lines), side),
+      h('div', { class: 'pos-layout', 'data-testid': 'pos-layout' }, h('div', { class: 'pos-main' }, saleBox(), bookPanel(), grid, wide ? customBox : lines), side),
     ];
     if (tools) kids.push(tools);
     root.replaceChildren(...kids);
     syncModal();
+    if (hadSaleFocus && !payOpen) document.getElementById('pos-sale-input')?.focus?.();
   }
 
   function editor() {

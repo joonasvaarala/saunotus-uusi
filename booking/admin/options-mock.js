@@ -167,15 +167,15 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
       ],
     },
     products: [
-      { id: 10, name: 'Saunahoito', name_en: 'Sauna treatment', price: 85, vat_rate: 25.5, active: true, category: 'treatment', description: 'Hoitosauna Rauni', config: { resource_class: 'resourced', lifecycle: 'current', sale_kind: 'other', duration_minutes: 90, min_persons: 1, max_persons: 4, bookable: true, shop_visible: true, public_slots: true, time_window_class: 'therapy', required_skill: 'treatment', audience: 'consumer' } },
+      { id: 10, code: 'HOITO90', name: 'Saunahoito', name_en: 'Sauna treatment', price: 85, vat_rate: 25.5, active: true, category: 'treatment', description: 'Hoitosauna Rauni', config: { resource_class: 'resourced', lifecycle: 'current', sale_kind: 'other', duration_minutes: 90, min_persons: 1, max_persons: 4, bookable: true, shop_visible: true, public_slots: true, time_window_class: 'therapy', required_skill: 'treatment', audience: 'consumer' } },
       { id: 8, name: 'Rituaali 90 min', price: 64, vat_rate: 25.5, active: true, category: 'ritual', config: { resource_class: 'resourced', lifecycle: 'current', sale_kind: 'other', duration_minutes: 90, min_persons: 1, max_persons: 6, bookable: true, shop_visible: true, public_slots: true, public_weekdays: [6, 7], time_window_class: 'ritual', audience: 'consumer' } },
       { id: 7, name: 'Saunarituaali ja savusaunavuoro (la & su)', name_en: 'Sauna Ritual & Smoke Sauna Session', price: 49, price_type: 'per_person', vat_rate: 25.5, active: true, category: 'ritual', config: { resource_class: 'resourced', lifecycle: 'current', sale_kind: 'other', duration_minutes: 120, min_persons: 1, max_persons: 6, bookable: true, shop_visible: true, public_slots: true, public_weekdays: [6, 7], time_window_class: 'ritual', required_skill: 'yleinen', audience: 'consumer' } },
-      { id: 3, name: 'Yleinen saunavuoro', price: 18, vat_rate: 25.5, active: true, category: 'public_sauna', variants: [{ id: 901, label: 'Talvihinta', price: 18, valid_from: '2026-11-01', valid_to: '2027-03-31' }, { id: 902, label: 'Kesähinta', price: 16, valid_from: '2027-04-01', valid_to: '2027-09-30' }], config: { resource_class: 'shift', lifecycle: 'current', sale_kind: 'slots', bookable: true, shop_visible: true, audience: 'consumer' } },
+      { id: 3, code: 'VUORO', name: 'Yleinen saunavuoro', price: 18, vat_rate: 25.5, active: true, category: 'public_sauna', variants: [{ id: 901, label: 'Talvihinta', price: 18, valid_from: '2026-11-01', valid_to: '2027-03-31' }, { id: 902, label: 'Kesähinta', price: 16, valid_from: '2027-04-01', valid_to: '2027-09-30' }], config: { resource_class: 'shift', lifecycle: 'current', sale_kind: 'slots', bookable: true, shop_visible: true, pos_enabled: true, pos_sort: 5, audience: 'consumer' } },
       { id: 31, slug: 'perinnesaunotusilta', name: 'Perinnesaunotusilta', name_en: 'Traditional sauna evening', price: 69, vat_rate: 25.5, active: true, category: 'event', config: { resource_class: 'shift', lifecycle: 'current', sale_kind: 'other', duration_minutes: 180, min_persons: 1, max_persons: 10, bookable: true, shop_visible: true, audience: 'consumer' } },
       { id: 32, slug: 'naisten-joulusauna', name: 'Naisten joulusauna', name_en: 'Women’s Christmas sauna', price: 59, vat_rate: 25.5, active: true, category: 'event', config: { resource_class: 'shift', lifecycle: 'current', sale_kind: 'other', duration_minutes: 150, min_persons: 1, max_persons: 12, bookable: true, shop_visible: true, audience: 'consumer' } },
       { id: 33, slug: 'saunottajakoulutus', name: 'Saunottajakoulutus', name_en: 'Sauna host training', price: 390, vat_rate: 25.5, active: true, category: 'training', config: { resource_class: 'shift', lifecycle: 'current', sale_kind: 'other', duration_minutes: 1980, min_persons: 1, max_persons: 8, bookable: true, shop_visible: false, audience: 'consumer' } },
-      { id: 101, name: 'Vichy', name_en: 'Vichy', price: 3, vat_rate: 13.5, active: true, category: 'other', config: { sale_kind: 'other', pos_enabled: true, pos_sort: 10, fridge_sale: true, age_restricted: false, bookable: false, shop_visible: false, audience: 'consumer' } },
-      { id: 102, name: 'Sipsit', name_en: 'Crisps', price: 3, vat_rate: 13.5, active: true, category: 'other', config: { sale_kind: 'other', pos_enabled: true, pos_sort: 20, fridge_sale: false, age_restricted: false, bookable: false, shop_visible: false, audience: 'consumer' } },
+      { id: 101, code: 'VICHY', aliases: ['kivennäisvesi', 'vesi'], name: 'Vichy', name_en: 'Vichy', price: 3, vat_rate: 13.5, active: true, category: 'other', config: { sale_kind: 'other', pos_enabled: true, pos_sort: 10, fridge_sale: true, age_restricted: false, bookable: false, shop_visible: false, audience: 'consumer' } },
+      { id: 102, code: 'SIP01', name: 'Sipsit', name_en: 'Crisps', price: 3, vat_rate: 13.5, active: true, category: 'other', config: { sale_kind: 'other', pos_enabled: true, pos_sort: 20, fridge_sale: false, age_restricted: false, bookable: false, shop_visible: false, audience: 'consumer' } },
       { id: 103, name: 'Pyyhevuokra', name_en: 'Towel rental', price: 5, vat_rate: 25.5, active: true, category: 'product_rental', config: { sale_kind: 'other', pos_enabled: true, pos_sort: 30, fridge_sale: false, age_restricted: false, bookable: false, shop_visible: false, audience: 'consumer' } },
       { id: 104, name: 'Lahjakortti', price: 58, vat_rate: 0, active: true, category: 'gift_card', config: { sale_kind: 'other', pos_enabled: false, fridge_sale: false, age_restricted: false, bookable: false, shop_visible: false, audience: 'consumer' } },
       { id: 105, name: 'Käsipyyhe', name_en: 'Hand towel', price: 4, vat_rate: 25.5, active: true, category: 'other', config: { sale_kind: 'other', pos_enabled: false, pos_sort: 40, fridge_sale: false, age_restricted: false, bookable: false, shop_visible: false, audience: 'consumer' } },
@@ -791,15 +791,25 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
     admin_pos_checkout: (a) => {
       need('pos.use');
       const items = Array.isArray(a.p_items) ? a.p_items : [];
-      if (items.some((r) => Object.keys(r).some((k) => k !== 'product_id' && k !== 'quantity'))) throw err('price_locked', 'Hintaa ei voi antaa');
+      // booking_322 (lopullinen): { product_id, quantity, unbooked: true, note? }. Ei date- eikä unit_price-kenttää. Hinta aina katalogista.
+      // unbooked kelpaa kaikille aktiivisille hinnoitelluille tuotteille (ei lahja- eikä kausikortti), pos-kanavaa ei vaadita.
+      const OK_KEYS = new Set(['product_id', 'quantity', 'unbooked', 'note']);
+      if (items.some((r) => Object.keys(r).some((k) => !OK_KEYS.has(k)))) throw err('price_locked', 'Hintaa tai päivää ei voi antaa erikseen');
       const lines = [];
       let total = 0;
       for (const r of items) {
         const p = product(r.product_id);
-        if (!p || !p.config?.pos_enabled || ['gift_card', 'season_card'].includes(p.category)) throw err('not_counter_product', 'Tuote ei ole pikakassassa');
+        const notSellable = ['gift_card', 'season_card'].includes(p?.category);
+        if (r.note != null) {
+          if (r.unbooked !== true) throw err('invalid_note', 'Muistiinpano vain ilman varausta -riville');
+          if (typeof r.note !== 'string' || r.note.length > 200 || r.note.includes('<')) throw err('invalid_note', 'Muistiinpano on virheellinen (enintään 200 merkkiä, ei <-merkkiä)');
+        }
+        if (r.unbooked === true) {
+          if (!p || !p.active || p.price == null || notSellable) throw err('not_counter_product', 'Tuotetta ei voi lisätä pikakassaan');
+        } else if (!p || !p.config?.pos_enabled || p.config?.bookable || notSellable) throw err('not_counter_product', 'Tuote ei ole pikakassassa');
         const line = Math.round(p.price * r.quantity * 100) / 100;
         total += line;
-        lines.push({ product_id: p.id, name: p.name, quantity: r.quantity, unit_price: p.price, vat_rate: p.vat_rate, line_total: line });
+        lines.push({ product_id: p.id, name: r.note ? `${p.name} — ${r.note}` : p.name, quantity: r.quantity, unit_price: p.price, vat_rate: p.vat_rate, line_total: line, unbooked: r.unbooked === true, note: r.note ?? null });
       }
       const raw = a.p_email == null ? '' : String(a.p_email).trim().toLowerCase();
       if (raw && (raw.length > 254 || !EMAIL_RE.test(raw))) throw err('invalid_email', 'Sähköposti ei ole kelvollinen');

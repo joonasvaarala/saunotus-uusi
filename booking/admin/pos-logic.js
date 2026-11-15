@@ -14,16 +14,62 @@ export function looksLikeAlcohol(text) {
 
 export function cartLineKey(row) {
   if (!row) return null;
-  if (row.kind === 'custom') return row.line_key;
+  if (row.line_key) return row.line_key;
   return row.product_id;
 }
 
 export function cartAdd(cart, product) {
   const next = cart.map((r) => ({ ...r }));
-  const row = next.find((r) => r.kind !== 'custom' && r.product_id === product.product_id);
+  const row = next.find((r) => r.kind !== 'custom' && !r.unbooked && r.product_id === product.product_id);
   if (row) row.quantity += 1;
-  else next.push({ product_id: product.product_id, name: product.name, unit_price: Number(product.price), vat_rate: product.vat_rate, quantity: 1, age_restricted: !!product.age_restricted });
+  else next.push({ product_id: product.product_id, name: product.name, name_en: product.name_en || null, unit_price: Number(product.price), vat_rate: product.vat_rate, quantity: 1, age_restricted: !!product.age_restricted });
   return next;
+}
+
+/**
+ * booking_322: kuitin rivinimeen liitettävä note ("Saunahoito — {note}"). Ei toista tuotteen nimeä.
+ * Päivä D.M.YYYY (vain jos annettu), henkilömäärä kielen mukaan, perään käyttäjän muistiinpano.
+ */
+export function formatNoteDate(iso) {
+  const m = /^(\d{4})-(\d\d)-(\d\d)$/.exec(String(iso || ''));
+  return m ? `${Number(m[3])}.${Number(m[2])}.${m[1]}` : '';
+}
+
+export function unbookedNote({ date = '', persons = 1, note = '', lang = 'fi' } = {}) {
+  const n = Math.max(1, Math.floor(Number(persons)) || 1);
+  const who = lang === 'en' ? `${n} ${n === 1 ? 'guest' : 'guests'}` : `${n} hlö`;
+  return [formatNoteDate(date), who, String(note ?? '').trim()].filter(Boolean).join(', ');
+}
+
+export const UNBOOKED_NOTE_MAX = 200;
+
+/** Tarkistus: pituus ≤ 200 ja ei `<`. Virhekoodi näytetään paneelissa. */
+export function checkUnbookedNote(note) {
+  const s = String(note ?? '');
+  if (s.includes('<')) return { ok: false, error: 'note_lt' };
+  if (s.length > UNBOOKED_NOTE_MAX) return { ok: false, error: 'note_len' };
+  return { ok: true, error: null };
+}
+
+/**
+ * t1812u: varattava tuote vain maksuksi (ei varausta). Oma rivi (line_key), ei yhdistetä muihin.
+ * Hinta tulee katalogista; määrä 1–20. Riville talletetaan päivä (VVVV-KK-PP, vapaaehtoinen) ja
+ * käyttäjän muistiinpano; lähetettävä note muodostetaan checkoutItemsissa (määrä voi muuttua korissa).
+ */
+export function cartAddUnbooked(cart, product, { quantity = 1, note = '', date = '' } = {}) {
+  const q = Math.max(1, Math.min(20, Math.floor(Number(quantity)) || 1));
+  const n = String(note ?? '').trim();
+  const d = /^\d{4}-\d\d-\d\d$/.test(String(date || '')) ? String(date) : '';
+  const key = `u-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+  return [...(cart || []).map((r) => ({ ...r })), {
+    product_id: product.product_id, name: product.name, name_en: product.name_en || null, unit_price: Number(product.price), vat_rate: product.vat_rate,
+    quantity: q, age_restricted: !!product.age_restricted, unbooked: true, line_key: key, ...(n ? { note: n } : {}), ...(d ? { date: d } : {}),
+  }];
+}
+
+/** Rivin kuittiin menevä note (sama muoto kuin RPC:lle). */
+export function lineNote(r, lang = 'fi') {
+  return unbookedNote({ date: r.date, persons: r.quantity, note: r.note, lang });
 }
 
 /** Vapaa rivi: oma line_key, ei yhdistetä muihin. */
@@ -96,7 +142,7 @@ export function validateCustomLine({ description, quantity, unit_price, vat_rate
   return { ok: true, description: name, quantity: q, unit_price: price, vat_rate: rate };
 }
 
-export function checkoutItems(cart) {
+export function checkoutItems(cart, lang = 'fi') {
   return (cart || []).filter((r) => r.quantity > 0).map((r) => {
     if (r.kind === 'custom') {
       return {
@@ -106,6 +152,11 @@ export function checkoutItems(cart) {
         unit_price: Number(r.unit_price),
         vat_rate: Number(r.vat_rate),
       };
+    }
+    if (r.unbooked) {
+      // booking_322 (lopullinen): { product_id, quantity, unbooked: true, note? }. Ei date- eikä unit_price-kenttää.
+      const note = lineNote(r, lang);
+      return { product_id: r.product_id, quantity: r.quantity, unbooked: true, ...(note ? { note } : {}) };
     }
     return { product_id: r.product_id, quantity: r.quantity };
   });
@@ -181,10 +232,96 @@ export function posCandidates(products) {
   return (products || []).filter((p) => p && p.active && p.config && p.price != null && !NOT_TILL.has(p.category));
 }
 
+/** Haettavat tekstit: nimet, koodi (code / sku / slug) ja aliakset (aliases: lista tai teksti). */
+export function productSearchFields(p) {
+  const alias = Array.isArray(p?.aliases) ? p.aliases : p?.aliases ? String(p.aliases).split(/[,;]/) : [];
+  return {
+    names: [p?.name, p?.name_en].filter(Boolean).map((x) => String(x).toLocaleLowerCase('fi')),
+    codes: [p?.code, p?.sku, p?.slug, ...alias].filter(Boolean).map((x) => String(x).trim().toLocaleLowerCase('fi')),
+  };
+}
+
 export function filterProducts(products, query) {
   const q = String(query || '').trim().toLocaleLowerCase('fi');
   if (!q) return products || [];
-  return (products || []).filter((p) => `${p.name || ''} ${p.name_en || ''}`.toLocaleLowerCase('fi').includes(q));
+  return (products || []).filter((p) => { const f = productSearchFields(p); return [...f.names, ...f.codes].some((x) => x.includes(q)); });
+}
+
+/** Varattava tuote: varauskonfiguraatio sanoo bookable, ja tuote on voimassa (lifecycle current). Lahja- ja kausikortti eivät. */
+export function isBookableProduct(p) {
+  const c = p?.config;
+  return !!(c && c.bookable && (c.lifecycle ?? 'current') === 'current' && !NOT_TILL.has(p.category));
+}
+
+/**
+ * Tuotteet pikakassan pos-kanavassa. Kanavatieto (admin_list_sales_channels, booking_316) on ensisijainen;
+ * ilman sitä vanha config.pos_enabled. Kassan oma katalogi (admin_pos_catalog) on aina mukana.
+ */
+export function posChannelIds(channelData, products, catalog = []) {
+  const ids = new Set((catalog || []).map((c) => Number(c.product_id)));
+  if (channelData && channelData.products && typeof channelData.products === 'object') {
+    for (const [id, codes] of Object.entries(channelData.products)) if (Array.isArray(codes) && codes.includes('pos')) ids.add(Number(id));
+  } else {
+    for (const p of products || []) if (p?.config?.pos_enabled) ids.add(Number(p.id));
+  }
+  return ids;
+}
+
+/**
+ * Myynnin haku: kaikki aktiiviset hinnoitellut tuotteet (ei lahja- eikä kausikorttia), joita voi myydä:
+ * pos-kanavan tuotteet ensin, sitten varattavat tuotteet myös ilman pos-kanavaa (t1812u: laskutus ilman varausta).
+ * Järjestys: koodin tarkka osuma, nimen alku, muu osuma; tasatilanteessa pos-kanava ennen varattavia, sitten nimi.
+ * Tyhjä haku → tyhjä lista (kenttä on hakukenttä, ei selauslista).
+ */
+export function searchSaleProducts({ products = [], catalog = [], channelData = null, lang = 'fi' } = {}, query, limit = 8) {
+  const q = String(query || '').trim().toLocaleLowerCase('fi');
+  if (!q) return [];
+  const posIds = posChannelIds(channelData, products, catalog);
+  const byId = new Map();
+  for (const p of posCandidates(products)) byId.set(Number(p.id), p);
+  const out = [];
+  const seen = new Set();
+  const consider = (id, p, fromCatalog) => {
+    if (seen.has(id)) return;
+    const onPos = posIds.has(id);
+    const bookable = p ? isBookableProduct(p) : false;
+    if (!onPos && !bookable) return;
+    const f = productSearchFields(p || fromCatalog);
+    let rank = -1;
+    if (f.codes.some((c) => c === q)) rank = 0;
+    else if (f.names.some((n) => n.startsWith(q)) || f.codes.some((c) => c.startsWith(q))) rank = 1;
+    else if ([...f.names, ...f.codes].some((x) => x.includes(q))) rank = 2;
+    if (rank < 0) return;
+    seen.add(id);
+    const src = p || fromCatalog;
+    const en = lang === 'en' && src.name_en ? src.name_en : src.name;
+    out.push({ product_id: id, name: en, name_fi: src.name, name_en: src.name_en || null, price: Number(src.price), vat_rate: src.vat_rate, age_restricted: !!(src.age_restricted || p?.config?.age_restricted), bookable, pos: onPos, product: p || null, code: (p?.code || p?.sku || null), rank });
+  };
+  for (const c of catalog || []) consider(Number(c.product_id), byId.get(Number(c.product_id)) || null, c);
+  for (const [id, p] of byId) consider(id, p, null);
+  out.sort((a, b) => a.rank - b.rank || Number(b.pos) - Number(a.pos) || String(a.name).localeCompare(String(b.name), 'fi'));
+  return out.slice(0, Math.max(1, limit));
+}
+
+/** Hakutuloslista + «Lisää oma rivi» -valinta viimeisenä (aina, kun haku ei ole tyhjä). */
+export function saleOptions(results, query) {
+  const q = String(query || '').trim();
+  if (!q) return [];
+  return [...(results || []).map((r) => ({ type: 'product', item: r })), { type: 'custom', text: q.slice(0, 200) }];
+}
+
+/** Nuolinäppäin: -1 = ei valintaa. */
+export function moveHi(hi, dir, n) {
+  if (!n) return -1;
+  if (dir > 0) return hi < 0 ? 0 : (hi + 1) % n;
+  return hi <= 0 ? n - 1 : hi - 1;
+}
+
+/** Enter ilman nuolella valittua: ensimmäinen tuote, ei osumia → oma rivi. */
+export function enterTarget(opts, hi) {
+  if (!opts.length) return null;
+  if (hi >= 0 && opts[hi]) return opts[hi];
+  return opts[0];
 }
 
 /** Muokkaus aukeaa vain pyydettäessä. Tyhjä kassakin pysyy kiinni, jotta pikapainikkeet ovat ensimmäisenä. */
