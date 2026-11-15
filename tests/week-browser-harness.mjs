@@ -56,9 +56,9 @@ export async function startSite({ port, tag }) {
     browser, port,
     async stop() { await browser?.close(); server?.kill(); rmSync(work, { recursive: true, force: true }); },
     /** Avaa sivu kiinnitetyllä kellolla ja mock-datalla; käynnistää viikko-ohjelman (quiet-week.js) ja odottaa live-piirron. */
-    async open(width, path, mock, { height = 1000, live = true } = {}) {
+    async open(width, path, mock, { height = 1000, live = true, now = NOW_ISO } = {}) {
       const page = await browser.newPage({ viewport: { width, height }, deviceScaleFactor: 1 });
-      await page.clock.install({ time: new Date(NOW_ISO) });
+      await page.clock.install({ time: new Date(now) });
       const lang = path.startsWith('/en/') ? 'en' : 'fi';
       await page.addInitScript(({ mock, lang }) => { globalThis.__MOCK = mock; window.BOOKING_QUIET = { lang, shopHref: '/varaa/' }; window.BOOKING_CONFIG = { url: 'http://mock' }; }, { mock, lang });
       await page.goto(`http://127.0.0.1:${port}${path}`, { waitUntil: 'domcontentloaded' });

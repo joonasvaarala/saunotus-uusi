@@ -43,12 +43,14 @@ for (const pg of pages) {
       assert.equal(await day(page, 1).locator('.vk-sale').count(), 0, 'ei ale-merkkiä ilman tarjousta');
       assert.match(norm(await tue.innerText()), /180/);
       assert.equal(await tue.getAttribute('href'), '/varaa/#/varaa/22/2026-11-17/26');
-      // keskiviikko: varattu jälkilöyly yliviivattuna ja linkki tuotesivulle
+      // keskiviikko: varattu jälkilöyly yliviivattuna, «Täynnä» näkyy tekstinä eikä linkkiä ole
       await page.click('.vk-tab[data-vk-pick="2"]');
-      const wed = day(page, 2).locator('a.vk-line.is-full');
+      const wed = day(page, 2).locator('.vk-line.is-full');
       assert.equal(await wed.count(), 1);
+      assert.equal(await day(page, 2).locator('a.vk-line.is-full').count(), 0, 'täydellä ajalla ei linkkiä');
+      assert.equal(await wed.getAttribute('href'), null);
+      assert.match(await wed.innerText(), /Täynnä|Full/);
       assert.equal(await wed.evaluate((e) => getComputedStyle(e.querySelector('.vk-lt')).textDecorationLine), 'line-through');
-      assert.equal(await wed.getAttribute('href'), '/varaa/#/tuote/jalkiloylyt/2026-11-18');
       // perjantai: oma sauna 300 €, ei jälkilöylyjä
       await page.click('.vk-tab[data-vk-pick="4"]');
       assert.match(norm(await day(page, 4).locator('.vk-oma').innerText()), new RegExp(`${pg.from} (€|)300`));

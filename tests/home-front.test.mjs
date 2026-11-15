@@ -167,8 +167,9 @@ test('etusivu: järjestys, ei varaa-verkosta-listaa, torstai 16:00, kaksi tapaht
   assert.doesNotMatch(weekFi, /Näytä koko viikko|Näytä vain tänään ja huomenna|Näytä kaikki tiedot|Näytä vähemmän|class="week-more"|aria-expanded/);
   assert.doesNotMatch(fi, /Näytä koko viikko|Näytä vain tänään ja huomenna|class="week-more"/);
   assert.doesNotMatch(en, /Today and tomorrow|Show the full week/);
-  assert.match(fi, /Tällä viikolla saunassa/);
-  assert.match(en, /This week at the sauna/);
+  assert.match(fi, /Tulevat päivät saunalla/);
+  assert.match(en, /Upcoming days at the sauna/);
+  assert.doesNotMatch(fi, /Tällä viikolla saunassa/);
   const ld = JSON.parse(fi.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)[1]);
   const thu = ld.openingHoursSpecification.find((x) => x.dayOfWeek === 'Thursday');
   assert.equal(thu.opens, '16:00');
