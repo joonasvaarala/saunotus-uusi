@@ -43,12 +43,13 @@ test('booking_316: kanavat ovat dataa, liitostaulu, RLS ja grantit', () => {
   assert.match(mig, /create table booking\.sales_channels \(/);
   assert.match(mig, /create table booking\.product_sales_channels \(/);
   assert.match(mig, /primary key \(product_id, channel_code\)/);
-  for (const [code, fi, en] of [['shop', 'Verkkokauppa', 'Online shop'], ['widget', 'Upotus', 'Embed'], ['link', 'Suora linkki', 'Direct link'],
+  for (const [code, fi, en] of [['shop', 'Verkkokauppa', 'Online shop'], ['widget', 'Upotus', 'Embed'], ['link', 'Suora linkki', 'Direct link'], ['admin', 'Hallinta \\(varaus\\)', 'Admin \\(booking\\)'],
     ['pos', 'Pikakassa', 'Quick till'], ['qr', 'QR-myynti \\(kylmälaite\\)', 'QR sales \\(fridge\\)'], ['gift_shop', 'Lahjakorttikauppa', 'Gift card shop']]) {
     assert.match(mig, new RegExp(`\\('${code}',\\s+'${fi}',\\s+'${en}'`), code);
   }
   const seed = mig.slice(mig.indexOf('insert into booking.sales_channels'), mig.indexOf('-- ---------- 2) apufunktiot'));
-  assert.equal((seed.match(/^\s+\('/gm) || []).length, 6, 'täsmälleen kuusi kanavaa');
+  assert.equal((seed.match(/^\s+\('/gm) || []).length, 7, 'täsmälleen seitsemän kanavaa');
+  assert.match(seed, /\('admin',\s+'Hallinta \(varaus\)',\s+'Admin \(booking\)',\s+35, true, false\)/, 'admin ei ole julkinen varauskanava');
   assert.doesNotMatch(seed, /johku|partner|kumppan/i, 'kumppanien kaupat ja Johku eivät ole kanavia');
   assert.match(mig, /alter table booking\.sales_channels enable row level security;/);
   assert.match(mig, /alter table booking\.product_sales_channels enable row level security;/);
@@ -67,6 +68,8 @@ test('booking_316: backfill nykytilasta ja jälkitarkistus', () => {
   assert.match(mig, /case when pc\.bookable and 'widget' = any/);
   assert.match(mig, /case when pc\.bookable and 'link' = any/);
   assert.match(mig, /julkinen kanava tuotteella, jonka bookable = false/);
+  assert.match(mig, /case when pc\.bookable and pc\.lifecycle = 'current' then 'admin' end/, 'admin = nykyinen hallintavarattavuus');
+  assert.match(mig, /admin-kanava ei vastaa bookable\/lifecycle-tilaa/);
   assert.match(mig, /case when pc\.fridge_sale then 'qr' end/);
   assert.match(mig, /case when pc\.pos_enabled then 'pos' end/);
   assert.match(mig, /select distinct r\.pid, 'gift_shop'/);
@@ -77,9 +80,13 @@ test('booking_316: backfill nykytilasta ja jälkitarkistus', () => {
 });
 
 test('booking_316: siirtymän synkka molempiin suuntiin, rekursiosuoja', () => {
-  assert.match(mig, /after insert or update of shop_visible, channels, fridge_sale, pos_enabled, bookable on booking\.product_config/);
+  assert.match(mig, /after insert or update of shop_visible, channels, fridge_sale, pos_enabled, bookable, lifecycle on booking\.product_config/);
   assert.match(mig, /case when new\.bookable and new\.shop_visible and 'shop' = any \(v_eff\) then 'shop' end/);
-  assert.match(mig, /bookable = bookable or cardinality\(v_pub\) > 0/, 'julkinen kanava asettaa bookable = true, poisto ei muuta sitä');
+  assert.match(mig, /s\.channel_code in \('shop', 'widget', 'link', 'admin'\)\);/, 'varauskanavat = julkiset + admin');
+  assert.match(mig, /detail = 'has_upcoming_bookings'/, 'viimeisen varauskanavan poisto estyy tulevien varausten takia');
+  assert.match(mig, /booking\._res_active\(r\.status, r\.hold_expires_at\) and r\.ends_at > now\(\)/);
+  const set = mig.slice(mig.indexOf('create function booking.admin_set_product_sales_channels'));
+  assert.ok(set.indexOf('insert into booking.product_sales_channels') < set.indexOf('delete from booking.product_sales_channels'), 'lisäys ennen poistoa');
   assert.match(mig, /after insert or delete or update on booking\.product_sales_channels/);
   assert.equal((mig.match(/current_setting\('booking\.channel_sync', true\)/g) || []).length, 2);
   assert.match(mig, /channel_code = any \(array\['shop', 'widget', 'link', 'qr', 'pos'\]\)/, 'vain kartoitetut koodit');

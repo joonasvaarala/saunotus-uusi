@@ -35,7 +35,12 @@ test('kanavasääntö = booking_316:n backfill ja synkka (vanhat kentät ↔ kan
   assert.deepEqual(S.applyChannelsToConfig('training', cfg({ bookable: false }), ['widget']), cfg({ bookable: true }));
   assert.deepEqual(S.applyChannelsToConfig('ceremony', cfg({ bookable: false, shop_visible: true }), ['link']), cfg({ bookable: true, shop_visible: false, channels: ['link'] }),
     'vanhat kentät liitostaulun mukaisiksi (shop ei avaudu vahingossa)');
-  assert.deepEqual(S.applyChannelsToConfig('public_sauna', cfg({ shop_visible: true }), []), cfg({ shop_visible: false, channels: [] }), 'poisto: bookable säilyy');
+  assert.deepEqual(S.applyChannelsToConfig('public_sauna', cfg({ shop_visible: true }), ['admin'], { adminBefore: true }), cfg({ shop_visible: false, channels: [] }), 'julkiset pois, Hallinta (varaus) jää: bookable säilyy');
+  assert.deepEqual(S.applyChannelsToConfig('public_sauna', cfg({ shop_visible: true }), [], { adminBefore: true }), cfg({ bookable: false, shop_visible: false, channels: [] }), 'viimeinen varauskanava pois: bookable false');
+  assert.deepEqual(S.applyChannelsToConfig('ceremony', cfg({ bookable: false }), ['admin']), cfg({ bookable: true }), 'Hallinta (varaus) → bookable true, ei julkisia kenttiä');
+  assert.equal(S.adminFromConfig({ bookable: true, lifecycle: 'current' }), true);
+  assert.equal(S.adminFromConfig({ bookable: true, lifecycle: 'old' }), false, 'vanha tuote ei saa admin-kanavaa');
+  assert.equal(S.adminFromConfig({ bookable: false, lifecycle: 'current' }), false);
   assert.deepEqual(S.applyChannelsToConfig('product_rental', cfg({ bookable: false }), ['pos']), cfg({ bookable: false, pos_enabled: true }));
   // kanavat → kentät
   assert.deepEqual(S.applyChannelsToConfig('public_sauna', cfg({ shop_visible: true }), ['widget', 'pos']), cfg({ shop_visible: false, channels: ['widget'], pos_enabled: true }));
@@ -43,7 +48,7 @@ test('kanavasääntö = booking_316:n backfill ja synkka (vanhat kentät ↔ kan
   assert.deepEqual(S.applyChannelsToConfig('public_sauna', cfg({ shop_visible: false }), ['shop', 'link']), cfg({ shop_visible: true, channels: ['shop', 'link'] }));
   assert.deepEqual(S.applyChannelsToConfig('training', cfg({ shop_visible: true, channels: ['link'], fridge_sale: true }), ['link', 'qr']),
     cfg({ shop_visible: true, channels: ['link'], fridge_sale: true }), '121: tallennus samoilla kanavilla ei muuta shop_visibleä');
-  assert.deepEqual(S.applyChannelsToConfig('training', cfg({}), []), cfg({ channels: [] }));
+  assert.deepEqual(S.applyChannelsToConfig('training', cfg({}), []), cfg({ bookable: false, channels: [] }), 'ei varauskanavia → bookable false');
   // kierros: kanavat → kentät → kanavat
   for (const codes of [[], ['shop'], ['widget', 'link'], ['shop', 'widget', 'link', 'qr', 'pos'], ['link', 'pos']]) {
     for (const cat of ['public_sauna', 'training']) {
@@ -108,7 +113,7 @@ test('editori: kanavien latausvirhe → kanavia ei tallenneta (ei tyhjennetä va
 test('mock: kanavat datasta, tallennus synkkaa vanhat kentät ja tarkistaa kuten palvelin', async () => {
   const mock = createAdminMock({ role: 'manager', delay: 0 });
   const r = await mock.rpc('admin_list_sales_channels');
-  assert.deepEqual(r.channels.map((c) => c.code), ['shop', 'widget', 'link', 'pos', 'qr', 'gift_shop']);
+  assert.deepEqual(r.channels.map((c) => c.code), ['shop', 'widget', 'link', 'admin', 'pos', 'qr', 'gift_shop']);
   const all = await mock.rpc('admin_list_products');
   const towel = all.find((p) => p.category === 'product_rental' && p.config);
   const save = await mock.rpc('admin_set_product_sales_channels', { p_product_id: towel.id, p_codes: ['pos', 'shop'] });
@@ -122,7 +127,7 @@ test('mock: kanavat datasta, tallennus synkkaa vanhat kentät ja tarkistaa kuten
   await assert.rejects(() => mock.rpc('admin_set_product_sales_channels', { p_product_id: gift.id, p_codes: ['pos'] }), (e) => e.code === 'not_counter_product');
   const staff = createAdminMock({ role: 'staff', perms: ['bookings.manage'] });
   await assert.rejects(() => staff.rpc('admin_set_product_sales_channels', { p_product_id: towel.id, p_codes: [] }), (e) => e.code === 'forbidden');
-  assert.ok((await staff.rpc('admin_list_sales_channels')).channels.length === 6, 'henkilökunta näkee kanavat');
+  assert.ok((await staff.rpc('admin_list_sales_channels')).channels.length === 7, 'henkilökunta näkee kanavat');
 });
 
 test('näkymä: monivalinta Myynti ja näkyvyys -välilehdellä, kanavat datasta, Piilotettu erillinen; vanha kolmen valinnan malli ei palaa', () => {

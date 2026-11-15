@@ -1,17 +1,18 @@
 -- booking_316: myyntikanavat datana ja tuotekohtainen monivalinta (Joonas t1780u 15.11.2026 klo 9.04).
 -- Uudet taulut booking.sales_channels (code, name, name_en, sort_order, active, public_booking) ja booking.product_sales_channels (product_id, channel_code).
--- Kanavat: shop Verkkokauppa, widget Upotus, link Suora linkki, pos Pikakassa, qr QR-myynti (kylmälaite), gift_shop Lahjakorttikauppa.
+-- Kanavat: shop Verkkokauppa, widget Upotus, link Suora linkki, admin Hallinta (varaus), pos Pikakassa, qr QR-myynti (kylmälaite), gift_shop Lahjakorttikauppa.
 -- Kumppanien kaupat ja Johku eivät kuulu tähän.
 -- Backfill nykytilasta (ei muutosta asiakkaalle). Julkiset kanavat (shop, widget, link) vain bookable-tuotteille:
 --   shop   = bookable ja shop_visible ja 'shop' ∈ _channels_effective(channels, category)
 --   widget = bookable ja 'widget' ∈ _channels_effective(...);  link = bookable ja 'link' ∈ _channels_effective(...)
 --   qr     = fridge_sale;  pos = pos_enabled
+--   admin  = bookable ja lifecycle = 'current' (Hallinta (varaus): varattavissa hallinnassa ja kassalla, ei julkisesti)
 --   gift_shop = jokainen tuote, johon jokin lahjakorttipaketti viittaa (kb_product_id tai items[].kb_product_id)
 -- Julkiset funktiot ja kassat lukevat kanavan liitostaulusta (booking._in_channel / _public_channel_ok / _gc_package_in_shop); suora API-kutsu estyy
 -- (public_create_booking[_code], training_signup ja rituaalilisä vaativat julkisen varauskanavan: not_bookable "Tuotetta ei voi varata verkossa";
 -- jonoon liittyminen public_join_waitlist: not_full kuten ei-varattavalla tuotteella).
--- bookable: Varattavissa verkossa -valinta poistuu hallinnasta (Joonas 15.11. klo 10.38). Julkisen kanavan lisäys asettaa bookable = true,
--- julkisten kanavien poisto ei muuta sitä (hallinnan ja kassan varaukset toimivat). Julkinen varattavuus = julkinen kanava.
+-- bookable: Varattavissa verkossa -valinta poistuu hallinnasta (Joonas 15.11. klo 10.38). Varauskanava (julkinen tai admin) asettaa bookable = true;
+-- viimeisen varauskanavan poisto asettaa false, ellei tuotteella ole tulevia aktiivisia varauksia (silloin poisto hylätään). Julkinen varattavuus = julkinen kanava.
 -- Vaihe 1: vanhat kentät (shop_visible, channels, fridge_sale, pos_enabled) pidetään synkassa triggereillä molempiin suuntiin, koska
 -- muut funktiot ja nykyinen hallinta käyttävät niitä. Vaihe 2 (myöhemmin) poistaa vanhat kentät ja synkan.
 -- Pohjana PRODin määritelmät 15.11.2026 (SELECT). Rollback: rollbacks/20261115091122_booking_316_ROLLBACK.sql.
@@ -112,6 +113,7 @@ insert into booking.sales_channels (code, name, name_en, sort_order, active, pub
   ('shop',      'Verkkokauppa',           'Online shop',       10, true, true),
   ('widget',    'Upotus',                 'Embed',             20, true, true),
   ('link',      'Suora linkki',           'Direct link',       30, true, true),
+  ('admin',     'Hallinta (varaus)',      'Admin (booking)',   35, true, false),
   ('pos',       'Pikakassa',              'Quick till',        40, true, false),
   ('qr',        'QR-myynti (kylmälaite)', 'QR sales (fridge)', 50, true, false),
   ('gift_shop', 'Lahjakorttikauppa',      'Gift card shop',    60, true, false);
@@ -158,9 +160,13 @@ $function$;
 --   * Julkinen kanava (shop, widget, link) vaatii bookable = true. Backfill ja vanhoista kentistä tehtävä synkka antavat
 --     julkisen kanavan vain bookable-tuotteelle, joten julkinen varattavuus = julkinen kanava (julkiset funktiot tarkistavat
 --     yhä myös bookable-kentän, mikä on tämän invariantin vuoksi sama asia).
---   * Julkisen kanavan lisäys liitostauluun asettaa bookable = true ja kirjoittaa shop_visible/channels liitostaulun mukaisiksi.
---   * Julkisten kanavien poisto ei muuta bookablea: hallinnan ja kassan varaukset (_resolve_session, siirrot) toimivat edelleen.
---   * Vanha polku (admin_update_product_config bookable=false) poistaa julkiset kanavarivit; bookable=true palauttaa ne vanhoista kentistä.
+--   * Kanava admin = Hallinta (varaus) (Joonas 15.11. klo 11.18): varattavissa hallinnassa ja kassalla, ei julkisesti (public_booking = false).
+--   * Varauskanavat = julkiset (shop, widget, link) + admin. Varauskanavan lisäys asettaa bookable = true; julkisen kanavan lisäys
+--     kirjoittaa myös shop_visible/channels liitostaulun mukaisiksi.
+--   * Kun tuotteelta poistuu viimeinen varauskanava, bookable = false. Turvallisuus: jos tuotteella on tulevia aktiivisia varauksia
+--     (pending/confirmed, ends_at > now()), poisto hylätään (has_upcoming_bookings), jotta niiden muutokset ja siirrot eivät esty.
+--   * Vanha polku (admin_update_product_config bookable=false) poistaa varauskanavat; bookable=true palauttaa julkiset kanavat vanhoista
+--     kentistä ja lisää admin-kanavan nykyiselle (lifecycle = current) tuotteelle.
 create function booking._psc_from_config_trg()
  returns trigger language plpgsql security definer set search_path to ''
 as $function$
@@ -183,6 +189,13 @@ begin
   insert into booking.product_sales_channels (product_id, channel_code)
   select new.product_id, c from unnest(v_want) c
   on conflict do nothing;
+  -- admin (Hallinta (varaus)) seuraa bookablea vain sen muuttuessa (tai lifecycle → current); muuten valinta on käyttäjän
+  if not new.bookable then
+    delete from booking.product_sales_channels where product_id = new.product_id and channel_code = 'admin';
+  elsif new.lifecycle = 'current'
+        and (tg_op = 'INSERT' or old.bookable is distinct from new.bookable or old.lifecycle is distinct from new.lifecycle) then
+    insert into booking.product_sales_channels (product_id, channel_code) values (new.product_id, 'admin') on conflict do nothing;
+  end if;
   perform set_config('booking.channel_sync', '', true);
   return null;
 end $function$;
@@ -194,18 +207,30 @@ declare
   v_pid bigint := coalesce(new.product_id, old.product_id);
   v_code text := coalesce(new.channel_code, old.channel_code);
   v_on boolean := tg_op = 'INSERT';
-  pc booking.product_config; v_cat text; v_pub text[]; v_new text[];
+  pc booking.product_config; v_cat text; v_pub text[]; v_new text[]; v_book boolean;
 begin
   if coalesce(current_setting('booking.channel_sync', true), '') = '1' then return null; end if;
   if tg_op = 'UPDATE' then
     raise exception using errcode = 'BK001', message = 'Kanavariviä ei päivitetä; poista ja lisää', detail = 'invalid_param';
   end if;
-  if v_code not in ('shop', 'widget', 'link', 'qr', 'pos') then return null; end if;
+  if v_code not in ('shop', 'widget', 'link', 'admin', 'qr', 'pos') then return null; end if;
   select * into pc from booking.product_config where product_id = v_pid;
   if not found then return null; end if;
   select category into v_cat from kb.products where id = v_pid;
+  if v_code in ('shop', 'widget', 'link', 'admin') then
+    -- varauskanavat (julkiset + admin) → bookable; viimeisen poisto vain, jos tulevia aktiivisia varauksia ei ole
+    v_book := exists (select 1 from booking.product_sales_channels s where s.product_id = v_pid and s.channel_code in ('shop', 'widget', 'link', 'admin'));
+    if not v_book and pc.bookable and exists (
+         select 1 from booking.reservations r
+          where r.product_id = v_pid and r.status in ('pending', 'confirmed') and booking._res_active(r.status, r.hold_expires_at) and r.ends_at > now()) then
+      raise exception using errcode = 'BK001',
+        message = 'Tuotteella on tulevia varauksia: jätä Hallinta (varaus) tai julkinen kanava valituksi', detail = 'has_upcoming_bookings';
+    end if;
+  end if;
   perform set_config('booking.channel_sync', '1', true);
-  if v_code in ('shop', 'widget', 'link') then
+  if v_code = 'admin' then
+    update booking.product_config set bookable = v_book where product_id = v_pid and bookable is distinct from v_book;
+  elsif v_code in ('shop', 'widget', 'link') then
     -- vanhat kentät kirjoitetaan liitostaulun julkisten rivien mukaisiksi (rivitriggeri näkee lauseen lopputilan)
     v_pub := array(select u.c from unnest(array['shop', 'widget', 'link']) with ordinality u(c, o)
                     where exists (select 1 from booking.product_sales_channels s where s.product_id = v_pid and s.channel_code = u.c)
@@ -215,10 +240,10 @@ begin
     update booking.product_config
        set channels = v_new,
            shop_visible = 'shop' = any (v_pub),
-           bookable = bookable or cardinality(v_pub) > 0
+           bookable = v_book
      where product_id = v_pid
        and (channels is distinct from v_new or shop_visible is distinct from ('shop' = any (v_pub))
-            or (cardinality(v_pub) > 0 and not bookable));
+            or bookable is distinct from v_book);
   elsif v_code = 'qr' then
     update booking.product_config set fridge_sale = v_on where product_id = v_pid and fridge_sale is distinct from v_on;
   else
@@ -238,7 +263,10 @@ select pc.product_id, x.code, null
     case when pc.bookable and 'widget' = any (booking._channels_effective(pc.channels, p.category)) then 'widget' end,
     case when pc.bookable and 'link' = any (booking._channels_effective(pc.channels, p.category)) then 'link' end,
     case when pc.fridge_sale then 'qr' end,
-    case when pc.pos_enabled then 'pos' end]::text[], null)) as x(code);
+    case when pc.pos_enabled then 'pos' end,
+    -- Hallinta (varaus): nykyinen hallintavarattavuus. Vanhoilla tuotteilla (lifecycle = old) bookable ei vaikuta hallinnan varauksiin
+    -- (_resolve_session ja siirrot vaativat current; vanhat varataan _create_legs_bookingilla ilman bookablea), joten ne eivät saa kanavaa.
+    case when pc.bookable and pc.lifecycle = 'current' then 'admin' end]::text[], null)) as x(code);
 
 insert into booking.product_sales_channels (product_id, channel_code, created_by)
 select distinct r.pid, 'gift_shop', null::uuid
@@ -253,7 +281,7 @@ select distinct r.pid, 'gift_shop', null::uuid
  join kb.products kp on kp.id = r.pid
 on conflict do nothing;
 
-create trigger zz_sales_channels_sync after insert or update of shop_visible, channels, fridge_sale, pos_enabled, bookable on booking.product_config
+create trigger zz_sales_channels_sync after insert or update of shop_visible, channels, fridge_sale, pos_enabled, bookable, lifecycle on booking.product_config
   for each row execute function booking._psc_from_config_trg();
 create trigger zz_config_sync after insert or delete or update on booking.product_sales_channels
   for each row execute function booking._psc_to_config_trg();
@@ -295,7 +323,7 @@ begin
   select c into v_bad from unnest(v_codes) c
    where not (c = any (v_cur)) and exists (select 1 from booking.sales_channels s where s.code = c and not s.active) limit 1;
   if v_bad is not null then perform booking._err('channel_inactive', 'Myyntikanava ei ole käytössä: ' || v_bad); end if;
-  if v_codes && array['shop', 'widget', 'link', 'qr', 'pos'] and not p.has_cfg then
+  if v_codes && array['shop', 'widget', 'link', 'admin', 'qr', 'pos'] and not p.has_cfg then
     perform booking._err('not_found', 'Tuotteella ei ole varauskonfiguraatiota');
   end if;
   if 'pos' = any (v_codes) and not ('pos' = any (v_cur))
@@ -305,9 +333,10 @@ begin
   if 'qr' = any (v_codes) and p.age_restricted then
     perform booking._err('age_restricted', 'Ikärajallista tuotetta ei voi myydä kylmälaitteessa');
   end if;
-  delete from booking.product_sales_channels where product_id = p_product_id and not (channel_code = any (v_codes));
+  -- lisäys ensin: varauskanavan vaihto (esim. shop → link) ei koskaan käy läpi tilaa "ei varauskanavaa"
   insert into booking.product_sales_channels (product_id, channel_code)
   select p_product_id, c from unnest(v_codes) c on conflict do nothing;
+  delete from booking.product_sales_channels where product_id = p_product_id and not (channel_code = any (v_codes));
   return jsonb_build_object('ok', true, 'product_id', p_product_id,
     'channels', coalesce((select jsonb_agg(psc.channel_code order by s.sort_order, s.code)
                             from booking.product_sales_channels psc join booking.sales_channels s on s.code = psc.channel_code
@@ -1537,8 +1566,12 @@ begin
             case when pc.fridge_sale then 'qr' end,
             case when pc.pos_enabled then 'pos' end]::text[], null)) c order by 1);
   if v_n > 0 then raise exception 'booking_316: backfill ei vastaa vanhoja kenttiä (% tuotetta). Ei muutoksia.', v_n; end if;
+  if exists (select 1 from booking.product_config pc
+              where (pc.bookable and pc.lifecycle = 'current') is distinct from exists (select 1 from booking.product_sales_channels s where s.product_id = pc.product_id and s.channel_code = 'admin')) then
+    raise exception 'booking_316: admin-kanava ei vastaa bookable/lifecycle-tilaa. Ei muutoksia.';
+  end if;
   if exists (select 1 from booking.product_sales_channels s join booking.product_config pc on pc.product_id = s.product_id
-              where s.channel_code in ('shop', 'widget', 'link') and not pc.bookable) then
+              where s.channel_code in ('shop', 'widget', 'link', 'admin') and not pc.bookable) then
     raise exception 'booking_316: julkinen kanava tuotteella, jonka bookable = false. Ei muutoksia.';
   end if;
   if exists (select 1 from booking.gift_card_packages g where not booking._gc_package_in_shop(g.code)) then

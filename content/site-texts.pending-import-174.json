@@ -162,22 +162,22 @@
   {
     "key": "ui.admin.product.channels_public_hint",
     "lang": "fi",
-    "text": "Verkkokauppa, Upotus ja Suora linkki tekevät tuotteesta varattavan verkossa.",
+    "text": "Verkkokauppa, Upotus ja Suora linkki tekevät tuotteesta varattavan verkossa. Hallinta (varaus): varattavissa hallinnassa ja kassalla, ei verkossa. Ilman näitä tuotetta ei voi varata.",
     "class": "normal",
     "kind": "plain",
     "max_len": 400,
     "placeholders": [],
-    "reason": "booking_316 / HALL-TUOTTEET-03: Varattavissa verkossa -valinta poistui tuote-editorista, julkiset kanavat korvaavat sen (Joonas 15.11.2026 klo 10.38). Bottiavustus/Koodari tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+    "reason": "booking_316 / HALL-TUOTTEET-03: Varattavissa verkossa -valinta poistui; varauskanavat (julkiset + Hallinta (varaus)) korvaavat sen (Joonas 15.11.2026 klo 10.38 ja 11.18). Bottiavustus/Koodari tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
   },
   {
     "key": "ui.admin.product.channels_public_hint",
     "lang": "en",
-    "text": "Online shop, Embed and Direct link make the product bookable online.",
+    "text": "Online shop, Embed and Direct link make the product bookable online. Admin (booking): bookable in the admin and at the till, not online. Without these the product cannot be booked.",
     "class": "normal",
     "kind": "plain",
     "max_len": 400,
     "placeholders": [],
-    "reason": "booking_316 / HALL-TUOTTEET-03: Varattavissa verkossa -valinta poistui tuote-editorista, julkiset kanavat korvaavat sen (Joonas 15.11.2026 klo 10.38). Bottiavustus/Koodari tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+    "reason": "booking_316 / HALL-TUOTTEET-03: Varattavissa verkossa -valinta poistui; varauskanavat (julkiset + Hallinta (varaus)) korvaavat sen (Joonas 15.11.2026 klo 10.38 ja 11.18). Bottiavustus/Koodari tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
   },
   {
     "key": "ui.admin.product.vis_hidden",

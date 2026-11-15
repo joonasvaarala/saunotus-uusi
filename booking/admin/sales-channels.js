@@ -5,9 +5,14 @@
 // channelsFromConfig/applyChannelsToConfig ovat saman säännön peili kokeilutilaa (options-mock) ja testejä varten.
 
 /** Kanavat, joilla on vastine vanhoissa product_config-kentissä (muut, esim. gift_shop, ovat vain liitostaulussa). */
-export const MAPPED = ['shop', 'widget', 'link', 'qr', 'pos'];
+export const MAPPED = ['shop', 'widget', 'link', 'admin', 'qr', 'pos'];
 /** Julkiset varauskanavat (sales_channels.public_booking). Julkinen kanava vaatii bookable = true. */
 export const WEB = ['shop', 'widget', 'link'];
+/** Varauskanavat: julkiset + admin (Hallinta (varaus): varattavissa hallinnassa ja kassalla, ei julkisesti). Asettavat bookable = true. */
+export const BOOKING = [...WEB, 'admin'];
+
+/** Backfillin admin-sääntö: nykyinen hallintavarattavuus (bookable ja lifecycle current). */
+export const adminFromConfig = (c) => !!c?.bookable && (c.lifecycle ?? 'current') === 'current';
 /** Kanavat, jotka vaativat varausjärjestelmän konfiguraation (product_config). */
 export const NEEDS_CONFIG = MAPPED;
 
@@ -30,19 +35,22 @@ export function channelsFromConfig(category, c) {
 
 /**
  * Kanavakoodit → vanhat kentät (kuten booking._psc_to_config_trg; palauttaa uuden olion, ei muuta alkuperäistä).
- * Jos julkiset kanavat muuttuvat, shop_visible ja channels kirjoitetaan niiden mukaisiksi; julkinen kanava asettaa bookable = true,
- * julkisten kanavien poisto ei muuta bookablea (hallinnan ja kassan varaukset toimivat edelleen).
+ * adminBefore: oliko tuote ennen Hallinta (varaus) -kanavassa (admin ei johdu vanhoista kentistä).
+ * Jos julkiset kanavat muuttuvat, shop_visible ja channels kirjoitetaan niiden mukaisiksi. Jos varauskanavat (julkiset + admin) muuttuvat,
+ * bookable = onko jokin varauskanava valittuna (palvelin hylkää viimeisen poiston, jos tuotteella on tulevia varauksia).
  */
-export function applyChannelsToConfig(category, c, codes) {
+export function applyChannelsToConfig(category, c, codes, { adminBefore = false } = {}) {
   if (!c) return c;
   const want = new Set(codes || []);
   const before = channelsFromConfig(category, c).filter((x) => WEB.includes(x));
   const pub = WEB.filter((x) => want.has(x));
-  const out = { ...c, fridge_sale: want.has('qr'), pos_enabled: want.has('pos') };
-  if (pub.join(',') === before.join(',')) return out;
+  let out = { ...c, fridge_sale: want.has('qr'), pos_enabled: want.has('pos') };
+  const pubChanged = pub.join(',') !== before.join(',');
+  if (pubChanged || want.has('admin') !== !!adminBefore) out = { ...out, bookable: BOOKING.some((x) => want.has(x)) };
+  if (!pubChanged) return out;
   const dflt = effectiveChannels(null, category);
   const nullDefault = (c.channels ?? null) == null && pub.join(',') === dflt.join(',');
-  return { ...out, channels: nullDefault ? null : pub, shop_visible: pub.includes('shop'), bookable: !!c.bookable || pub.length > 0 };
+  return { ...out, channels: nullDefault ? null : pub, shop_visible: pub.includes('shop') };
 }
 
 /** Järjestä koodit kanavalistan järjestykseen (sort_order); tuntemattomat loppuun aakkosjärjestyksessä. */
