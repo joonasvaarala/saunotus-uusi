@@ -20,7 +20,7 @@ const product = (over = {}) => ({
 const plan = (base, cur) => L.buildSavePlan({ productId: 7, base, cur, labels });
 
 test('kanavasääntö = booking_316:n backfill ja synkka (vanhat kentät ↔ kanavat)', () => {
-  const cfg = (o) => ({ shop_visible: false, channels: null, fridge_sale: false, pos_enabled: false, ...o });
+  const cfg = (o) => ({ bookable: true, shop_visible: false, channels: null, fridge_sale: false, pos_enabled: false, ...o });
   assert.deepEqual(S.channelsFromConfig('public_sauna', cfg({ shop_visible: true })), ['shop']);
   assert.deepEqual(S.channelsFromConfig('treatment', cfg({ shop_visible: false })), [], 'shop vaatii shop_visible');
   assert.deepEqual(S.channelsFromConfig('training', cfg({})), ['widget'], 'koulutuksen oletus');
@@ -28,6 +28,15 @@ test('kanavasääntö = booking_316:n backfill ja synkka (vanhat kentät ↔ kan
   assert.deepEqual(S.channelsFromConfig('training', cfg({ shop_visible: true, channels: ['link'], fridge_sale: true })), ['link', 'qr'], 'PRODin tuote 121');
   assert.deepEqual(S.channelsFromConfig('product_rental', cfg({ fridge_sale: true, pos_enabled: true })), ['qr', 'pos']);
   assert.deepEqual(S.channelsFromConfig('x', null), []);
+  // julkinen kanava vain bookable-tuotteelle (PRODin koulutukset 35–37: bookable false → ei Upotusta)
+  assert.deepEqual(S.channelsFromConfig('training', cfg({ bookable: false })), []);
+  assert.deepEqual(S.channelsFromConfig('public_sauna', cfg({ bookable: false, shop_visible: true, pos_enabled: true })), ['pos']);
+  // julkisen kanavan lisäys asettaa bookable = true; poisto ei muuta sitä; ei-julkinen kanava ei koske siihen
+  assert.deepEqual(S.applyChannelsToConfig('training', cfg({ bookable: false }), ['widget']), cfg({ bookable: true }));
+  assert.deepEqual(S.applyChannelsToConfig('ceremony', cfg({ bookable: false, shop_visible: true }), ['link']), cfg({ bookable: true, shop_visible: false, channels: ['link'] }),
+    'vanhat kentät liitostaulun mukaisiksi (shop ei avaudu vahingossa)');
+  assert.deepEqual(S.applyChannelsToConfig('public_sauna', cfg({ shop_visible: true }), []), cfg({ shop_visible: false, channels: [] }), 'poisto: bookable säilyy');
+  assert.deepEqual(S.applyChannelsToConfig('product_rental', cfg({ bookable: false }), ['pos']), cfg({ bookable: false, pos_enabled: true }));
   // kanavat → kentät
   assert.deepEqual(S.applyChannelsToConfig('public_sauna', cfg({ shop_visible: true }), ['widget', 'pos']), cfg({ shop_visible: false, channels: ['widget'], pos_enabled: true }));
   assert.deepEqual(S.applyChannelsToConfig('public_sauna', cfg({ shop_visible: true }), ['shop']), cfg({ shop_visible: true }), 'muuttamaton oletus pysyy null-arvona');
@@ -60,9 +69,11 @@ test('estot: passiivinen kanava, QR ikärajalle/alkoholille, pikakassa lahjakort
 
 test('editori: kanavat ovat oma askel; vanhat kentät eivät ole enää config-kenttiä', () => {
   assert.ok(!L.CONFIG_FIELDS.includes('shop_visible') && !L.CONFIG_FIELDS.includes('pos_enabled') && !L.CONFIG_FIELDS.includes('fridge_sale'));
+  assert.ok(!L.CONFIG_FIELDS.includes('bookable'), 'Varattavissa verkossa -valinta poistui (Joonas 15.11. klo 10.38)');
   const base = L.baselineFromProduct(product(), { channels: ['shop', 'gift_shop'] });
   assert.deepEqual(base.channels, ['gift_shop', 'shop']);
   assert.equal('shop_visible' in base.config, false);
+  assert.equal('bookable' in base.config, false);
   const cur = clone(base); cur.channels = ['pos', 'shop'];
   const d = L.diffSnapshots(base, cur);
   assert.equal(d.channels, true);
@@ -104,6 +115,7 @@ test('mock: kanavat datasta, tallennus synkkaa vanhat kentät ja tarkistaa kuten
   assert.deepEqual(save.channels, ['shop', 'pos']);
   const after = (await mock.rpc('admin_list_products')).find((p) => p.id === towel.id);
   assert.equal(after.config.shop_visible, true); assert.equal(after.config.pos_enabled, true); assert.equal(after.config.fridge_sale, false);
+  assert.equal(after.config.bookable, true, 'julkinen kanava asettaa bookable = true kuten palvelin');
   assert.deepEqual((await mock.rpc('admin_list_sales_channels')).products[String(towel.id)], ['shop', 'pos']);
   await assert.rejects(() => mock.rpc('admin_set_product_sales_channels', { p_product_id: towel.id, p_codes: ['partner_x'] }), (e) => e.code === 'unknown_channel');
   const gift = all.find((p) => p.category === 'gift_card');
@@ -122,7 +134,9 @@ test('näkymä: monivalinta Myynti ja näkyvyys -välilehdellä, kanavat datasta
   assert.match(ed, /chk\('hidden', T\('vis_hidden'\), !base\.product\.active\)/);
   assert.match(ed, /active: !ctl\.hidden\.checked/);
   assert.match(ed, /channels: T\('channels_title'\)/);
-  assert.doesNotMatch(ed, /chk\('(shop_visible|pos_enabled|fridge_sale)'/, 'vanhat valintaruudut korvattu kanavilla');
+  assert.doesNotMatch(ed, /chk\('(shop_visible|pos_enabled|fridge_sale|bookable)'/, 'vanhat valintaruudut korvattu kanavilla');
+  assert.doesNotMatch(ed, /Varattavissa verkossa|ctl\.bookable/, 'Varattavissa verkossa -valinta poistui; julkiset kanavat korvaavat sen');
+  assert.match(ed, /T\('channels_public_hint'\)/);
   assert.doesNotMatch(ed, /vis_online|vis_internal|visibilityPlan|product-visibility/, '#388:n kolmen vaihtoehdon malli ei palaa');
   assert.doesNotMatch(ed, /['"](shop|widget|link|pos|qr|gift_shop)['"]\s*:\s*['"][A-ZÄÖ]/, 'kanavien nimiä ei ole kovakoodattu');
   const logic = read('../admin/product-editor-logic.js');
@@ -132,13 +146,13 @@ test('näkymä: monivalinta Myynti ja näkyvyys -välilehdellä, kanavat datasta
 test('tekstit: pending-import-174 = sanakirja, FI+EN, ei hintoja; käyttämättömät 166-avaimet eivät ole sanakirjassa', async () => {
   const { PRODUCT_TEXTS } = await import(href('../admin/product-texts.js'));
   const rows = JSON.parse(read('../../content/site-texts.pending-import-174.json'));
-  assert.equal(rows.length, 28);
+  assert.equal(rows.length, 30);
   for (const r of rows) {
     assert.equal(PRODUCT_TEXTS[r.lang][r.key], r.text, r.key);
     assert.equal(r.class, 'normal'); assert.equal(r.kind, 'plain'); assert.ok(r.text.length <= r.max_len);
     assert.doesNotMatch(r.text, /\d+[,.]?\d*\s*€|alv\s*\d/i, 'ei hintoja tai ALV-kantoja');
   }
-  for (const k of ['channels_title', 'channels_lead', 'channels_none', 'channels_inactive', 'channels_load_error', 'channels_qr_blocked', 'channels_pos_blocked', 'channels_gift_hint']) {
+  for (const k of ['channels_title', 'channels_lead', 'channels_none', 'channels_inactive', 'channels_load_error', 'channels_qr_blocked', 'channels_pos_blocked', 'channels_gift_hint', 'channels_public_hint']) {
     for (const lang of ['fi', 'en']) assert.ok(rows.some((r) => r.key === `ui.admin.product.${k}` && r.lang === lang), `${k} ${lang}`);
   }
   const reused = ['vis_hidden', 'vis_hidden_hint', 'vis_note', 'vis_why_no_config', 'vis_why_lifecycle_old', 'vis_why_no_image'];

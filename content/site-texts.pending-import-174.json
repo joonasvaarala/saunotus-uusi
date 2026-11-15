@@ -160,6 +160,26 @@
     "reason": "booking_316 / HALL-TUOTTEET-03: tuotteen myyntikanavat monivalintana tuote-editorin Myynti ja näkyvyys -välilehdellä; kanavat ladataan datasta (Joonas t1780u 15.11.2026 klo 9.04). Bottiavustus/Koodari tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
   },
   {
+    "key": "ui.admin.product.channels_public_hint",
+    "lang": "fi",
+    "text": "Verkkokauppa, Upotus ja Suora linkki tekevät tuotteesta varattavan verkossa.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_316 / HALL-TUOTTEET-03: Varattavissa verkossa -valinta poistui tuote-editorista, julkiset kanavat korvaavat sen (Joonas 15.11.2026 klo 10.38). Bottiavustus/Koodari tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.product.channels_public_hint",
+    "lang": "en",
+    "text": "Online shop, Embed and Direct link make the product bookable online.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_316 / HALL-TUOTTEET-03: Varattavissa verkossa -valinta poistui tuote-editorista, julkiset kanavat korvaavat sen (Joonas 15.11.2026 klo 10.38). Bottiavustus/Koodari tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
     "key": "ui.admin.product.vis_hidden",
     "lang": "fi",
     "text": "Piilotettu",

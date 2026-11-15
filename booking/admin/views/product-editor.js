@@ -99,6 +99,7 @@ export async function productEditor({ p, all, ctx, isAdmin, deps, backHash, onSa
     ? h('fieldset', { class: 'box stack prod-channels', 'data-testid': 'product-channels' },
       h('legend', { text: T('channels_title') }),
       h('p', { class: 'muted', text: T('channels_lead') }),
+      h('p', { class: 'muted', 'data-testid': 'product-channels-public-hint', text: T('channels_public_hint') }),
       ...sortCodes([...channelList.filter((ch) => ch.active || base.channels.includes(ch.code)).map((ch) => ch.code)], channelList).map((code) => {
         const ch = channelList.find((x) => x.code === code);
         const selected = base.channels.includes(code);
@@ -138,7 +139,6 @@ export async function productEditor({ p, all, ctx, isAdmin, deps, backHash, onSa
     hiddenBox,
     channelBox,
     c ? h('div', { class: 'stack box' }, h('h3', { text: 'Verkkokaupan asetukset' }),
-      chk('bookable', 'Varattavissa verkossa', bc.bookable),
       'audience' in c ? field('Kalenteri', (ctl.audience = h('select', { name: 'audience', disabled: dis }, h('option', { value: 'consumer', text: 'Kuluttajien kalenteri' }), h('option', { value: 'business', text: 'Yrityksille' }))), 'Yrityksille-valinta näyttää vuoron vain yritysten kalenterissa.') : null,
       h('div', { class: 'row wrap' }, field('Järjestys', inp('sort_order', c.sort_order, { type: 'number' })), field('Min hlö', inp('min_persons', c.min_persons, { type: 'number', min: 1 })), field('Max hlö', inp('max_persons', c.max_persons ?? '', { type: 'number', min: 1 })), errFor('sort_order'), errFor('min_persons'), errFor('max_persons')),
       h('h3', { text: posText('nav') }),
@@ -226,7 +226,7 @@ export async function productEditor({ p, all, ctx, isAdmin, deps, backHash, onSa
     const cur = {
       product: { name: val('name'), name_en: val('name_en'), description: val('description'), description_en: val('description_en'), short_description: val('short_description'), short_description_en: val('short_description_en'),
         price: numOrNull(ctl.price.value), price_text: ctl.price_text.value, vat_rate: numOrNull(vat.value), active: !ctl.hidden.checked },
-      config: c ? { bookable: ctl.bookable.checked, ...(ctl.audience ? { audience: ctl.audience.value } : {}),
+      config: c ? { ...(ctl.audience ? { audience: ctl.audience.value } : {}),
         sort_order: numOrNull(ctl.sort_order.value), min_persons: numOrNull(ctl.min_persons.value), max_persons: numOrNull(ctl.max_persons.value),
         pos_sort: numOrNull(ctl.pos_sort.value), age_restricted: ctl.age_restricted.checked } : null,
       channels: readChannels(),

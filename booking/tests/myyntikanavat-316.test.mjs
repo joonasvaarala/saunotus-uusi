@@ -26,12 +26,13 @@ const fnDef = (src, name) => {
 
 const REWRITTEN = ['public_catalog', 'public_availability', 'public_availability_all', 'public_events', 'public_training_checkout', 'public_product_by_slug',
   '_upsell_options', '_public_create_booking_impl', '_public_create_booking_code_impl', '_public_create_training_signup_impl', 'public_ritual_addon',
-  '_ritual_addon_fit', '_counter_lines', 'admin_pos_catalog', 'public_drinks_catalog', 'public_gift_card_packages', '_public_buy_gift_card_impl'];
+  '_ritual_addon_fit', '_counter_lines', 'admin_pos_catalog', 'public_drinks_catalog', 'public_gift_card_packages', '_public_buy_gift_card_impl',
+  'public_join_waitlist'];
 const PROD_MD5 = ['a14cb1f474b5858c47bafbb8d96091aa', '5e3634cd8c5e6e2cf8576acf15b02c2e', 'e0fece192800777e3a7554edc704ed07', '32f88991275054c7aae90df0229708c5',
   '89398f45d01322cf4ffaa117bb4d9924', '630a9db6ab457b4c412bb368dcb4ae8d', '66abc9abd7ea2b4962e52db8ff14ceb9', '2fb0e0c5d84feea78e7adb904676481a',
   '786b3856991464fe118d2d6bc0b5826b', 'd5017b23bde3ff427459c77caea0b807', 'aed97660d894b70129acfac243ecabbf', '3201a2c1db7f0c8e7016c807f5f10446',
   'ac50053b47c2b14d8c20034b0d62ffb1', '3abd467f4f8aab624a90b48e60f356e0', 'e7e507a766b7287ff03e794711ac6ace', '3ac6c50c3af91a5f771db71ebd0f2d6f',
-  '367323d3aab88fc78e552a7c1475fbc3'];
+  '367323d3aab88fc78e552a7c1475fbc3', 'af0188264002fdb1b42bb22092fd94c6'];
 
 test('booking_316: yksi migraatio, numero vapaa, nimi', () => {
   assert.equal(migs.filter((f) => /_booking_316_/.test(f)).length, 1);
@@ -61,7 +62,11 @@ test('booking_316: kanavat ovat dataa, liitostaulu, RLS ja grantit', () => {
 });
 
 test('booking_316: backfill nykytilasta ja jälkitarkistus', () => {
-  assert.match(mig, /case when pc\.shop_visible and 'shop' = any \(booking\._channels_effective\(pc\.channels, p\.category\)\) then 'shop' end/);
+  // julkiset kanavat vain bookable-tuotteille (Varattavissa verkossa -valinta poistui; Joonas 15.11. klo 10.38)
+  assert.match(mig, /case when pc\.bookable and pc\.shop_visible and 'shop' = any \(booking\._channels_effective\(pc\.channels, p\.category\)\) then 'shop' end/);
+  assert.match(mig, /case when pc\.bookable and 'widget' = any/);
+  assert.match(mig, /case when pc\.bookable and 'link' = any/);
+  assert.match(mig, /julkinen kanava tuotteella, jonka bookable = false/);
   assert.match(mig, /case when pc\.fridge_sale then 'qr' end/);
   assert.match(mig, /case when pc\.pos_enabled then 'pos' end/);
   assert.match(mig, /select distinct r\.pid, 'gift_shop'/);
@@ -72,7 +77,9 @@ test('booking_316: backfill nykytilasta ja jälkitarkistus', () => {
 });
 
 test('booking_316: siirtymän synkka molempiin suuntiin, rekursiosuoja', () => {
-  assert.match(mig, /after insert or update of shop_visible, channels, fridge_sale, pos_enabled on booking\.product_config/);
+  assert.match(mig, /after insert or update of shop_visible, channels, fridge_sale, pos_enabled, bookable on booking\.product_config/);
+  assert.match(mig, /case when new\.bookable and new\.shop_visible and 'shop' = any \(v_eff\) then 'shop' end/);
+  assert.match(mig, /bookable = bookable or cardinality\(v_pub\) > 0/, 'julkinen kanava asettaa bookable = true, poisto ei muuta sitä');
   assert.match(mig, /after insert or delete or update on booking\.product_sales_channels/);
   assert.equal((mig.match(/current_setting\('booking\.channel_sync', true\)/g) || []).length, 2);
   assert.match(mig, /channel_code = any \(array\['shop', 'widget', 'link', 'qr', 'pos'\]\)/, 'vain kartoitetut koodit');
@@ -98,6 +105,7 @@ test('booking_316: julkiset funktiot ja kassat lukevat liitostaulua; suora API e
   for (const n of ['_public_create_booking_impl', '_public_create_booking_code_impl', '_public_create_training_signup_impl']) {
     assert.match(fnDef(mig, n), /'not_bookable', 'message', 'Tuotetta ei voi varata verkossa'/, n);
   }
+  assert.match(fnDef(mig, 'public_join_waitlist'), /or not booking\._public_channel_ok\(v_rule\.product_id\)/, 'jono vaatii julkisen kanavan');
   assert.match(fnDef(mig, '_ritual_addon_fit'), /if p_public then\n    if not booking\._public_channel_ok\(v_prod\)/, 'vain julkinen polku');
   assert.match(fnDef(mig, '_counter_lines'), /booking\._in_channel\(v_id, 'pos'\)/);
   assert.match(fnDef(mig, '_counter_lines'), /booking\._in_channel\(v_id, 'qr'\)/);

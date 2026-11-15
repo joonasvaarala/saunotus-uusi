@@ -56,7 +56,8 @@ update booking.product_config pc set bookable = s.b, lifecycle = s.l, shop_visib
 update booking.product_config set bookable = true, lifecycle = 'old', shop_visible = false, channels = null where product_id between 14 and 23;
 insert into booking.schedule_rules overriding system value select (jsonb_populate_record(null::booking.schedule_rules, to_jsonb(r) || jsonb_build_object('id', 90000 + x.pid, 'product_id', x.pid, 'kind', 'event',
          'valid_from', current_date + 20, 'valid_to', current_date + 20, 'weekdays', jsonb_build_array(extract(isodow from current_date + 20)::int), 'active', true, 'training_segment_only', false))).*
-  from booking.schedule_rules r cross join (values (113), (114), (121), (36)) x(pid) where r.id = 1;
+  from booking.schedule_rules r cross join (values (113), (114), (121)) x(pid) where r.id = 1;
+-- (PRODissa koulutuksilla 35–37 ei ole yhtään vuorosääntöä 15.11.; koulutuksen 36 tapahtumakerta lisätään vasta kohdassa 5)
 insert into booking.product_qr(code, product_id, label, active) values ('a316a316a316a316a316a316a316a082', 82, 'T316', true), ('a316a316a316a316a316a316a316a121', 121, 'T316', true);
 set local session_replication_role = origin;
 update booking.settings set value = 'true'::jsonb where key in ('events.sale_enabled', 'gift_cards.sale_enabled');
@@ -123,7 +124,10 @@ select pg_temp.ck((select array_agg(product_id order by product_id) from booking
 select pg_temp.ck((select array_agg(product_id order by product_id) from booking.product_sales_channels where channel_code = 'link')
                   = array[114,115,116,117,118,119,120,121]::bigint[], 'backfill link = koulutukset 114–121');
 select pg_temp.ck((select array_agg(product_id order by product_id) from booking.product_sales_channels where channel_code = 'widget')
-                  = array[35,36,37]::bigint[], 'backfill widget = koulutukset, joilla channels on tyhjä');
+                  is null, 'backfill widget: ei yhtään (koulutukset 35–37 ovat bookable = false)');
+select pg_temp.ck(not exists (select 1 from booking.product_sales_channels s join booking.product_config pc on pc.product_id = s.product_id
+                               where s.channel_code in ('shop', 'widget', 'link') and not pc.bookable)
+                  and not exists (select 1 from booking.product_sales_channels where product_id in (35, 36, 37)), 'backfill: julkinen kanava vain bookable-tuotteelle');
 select pg_temp.ck((select array_agg(product_id order by product_id) from booking.product_sales_channels where channel_code = 'pos')
                   = array[44,45,46,82]::bigint[], 'backfill pos = pos_enabled');
 select pg_temp.ck((select array_agg(product_id order by product_id) from booking.product_sales_channels where channel_code = 'qr')
@@ -145,7 +149,8 @@ savepoint before_rb;
 \ir ../rollbacks/20261115091122_booking_316_ROLLBACK.sql
 select pg_temp.ck(to_regclass('booking.sales_channels') is null and to_regclass('booking.product_sales_channels') is null and to_regprocedure('booking._in_channel(bigint,text)') is null
                   and not exists (select 1 from pg_trigger where tgname = 'zz_sales_channels_sync'), 'rollback: taulut, apufunktiot ja triggerit poistettu');
-select pg_temp.ck(count(*) = 17, 'rollback: 17 funktiota PRODin md5:llä (' || count(*) || ')') from (values
+select pg_temp.ck(count(*) = 18, 'rollback: 18 funktiota PRODin md5:llä (' || count(*) || ')') from (values
+  ('booking.public_join_waitlist(bigint,date,integer,text,text,text,text,boolean,boolean)','af0188264002fdb1b42bb22092fd94c6'),
   ('booking.public_catalog()','a14cb1f474b5858c47bafbb8d96091aa'),('booking.public_availability(bigint,date,date)','5e3634cd8c5e6e2cf8576acf15b02c2e'),
   ('booking.public_availability_all(date,date,text)','e0fece192800777e3a7554edc704ed07'),('booking.public_events(date,text)','32f88991275054c7aae90df0229708c5'),
   ('booking.public_training_checkout(bigint,date)','89398f45d01322cf4ffaa117bb4d9924'),('booking.public_product_by_slug(text)','630a9db6ab457b4c412bb368dcb4ae8d'),
@@ -161,7 +166,7 @@ select pg_temp.ck(count(*) = 17, 'rollback: 17 funktiota PRODin md5:llä (' || c
 select pg_temp.snap('rollback');
 select pg_temp.ck(not exists (select 1 from t316_snap b join t316_snap a on a.k = b.k and a.phase = 'rollback' where b.phase = 'before' and a.v is distinct from b.v), 'rollback: tulos sama kuin ennen migraatiota');
 \ir ../migrations/20261115091122_booking_316_sales_channels.sql
-select pg_temp.ck((select count(*) from booking.product_sales_channels) = (select n from t316_cnt) and (select n from t316_cnt) = 47, 'uudelleenajo rollbackin jälkeen onnistuu (' || (select n from t316_cnt) || ' kanavariviä)');
+select pg_temp.ck((select count(*) from booking.product_sales_channels) = (select n from t316_cnt) and (select n from t316_cnt) = 44, 'uudelleenajo rollbackin jälkeen onnistuu (' || (select n from t316_cnt) || ' kanavariviä)');
 release savepoint before_rb;
 
 -- RLS: kirjautunut ei-henkilökunta ei näe rivejä, henkilökunta näkee
@@ -212,6 +217,10 @@ begin
   perform pg_temp.ck(not booking._in_channel(4, 'shop') and booking._in_channel(4, 'gift_shop') is false, 'synkka: shop_visible false → shop pois');
   perform booking.admin_update_product_config(4, '{"shop_visible": true, "pos_enabled": true}'::jsonb);
   perform pg_temp.ck(booking._in_channel(4, 'shop') and booking._in_channel(4, 'pos'), 'synkka: shop_visible/pos_enabled true → shop ja pos');
+  perform booking.admin_update_product_config(5, '{"bookable": false}'::jsonb);
+  perform pg_temp.ck(not booking._in_channel(5, 'shop') and not booking.public_catalog() @> '[{"id": 5}]', 'vanha polku: bookable false → julkiset kanavat pois');
+  perform booking.admin_update_product_config(5, '{"bookable": true}'::jsonb);
+  perform pg_temp.ck(booking._in_channel(5, 'shop') and booking.public_catalog() @> '[{"id": 5}]', 'vanha polku: bookable true → kanavat vanhoista kentistä');
   perform booking.admin_update_product_config(1, '{"pos_sort": 5}'::jsonb);
   perform pg_temp.ck(booking._in_channel(1, 'gift_shop') and booking._in_channel(1, 'shop'), 'synkka ei koske gift_shopiin');
 
@@ -234,6 +243,18 @@ begin
   perform booking.admin_set_product_sales_channels(1, array[]::text[]);
   perform booking.admin_set_product_sales_channels(8, array[]::text[]);
   perform booking.admin_set_product_sales_channels(114, array[]::text[]);
+  perform pg_temp.ck((select bookable and not shop_visible and channels = '{}' from booking.product_config where product_id = 114)
+                     and (select bookable from booking.product_config where product_id = 1), 'julkisten kanavien poisto ei muuta bookablea (hallinnan varaukset toimivat)');
+  -- jonoon liittyminen: täysi vuoro, tuote ilman julkista kanavaa → not_full (kuten ei-varattavalla tuotteella)
+  insert into booking.resources(code, name, kind, capacity, parent_id) values ('t316_full', 'T316 täysi', 'capacity_pool', 1, (select min(id) from booking.resources where kind = 'space'));
+  update booking.schedule_rules set min_persons = 2 where id in (90114, 90121);
+  insert into booking.schedule_rule_pools(rule_id, pool_id) select x.rid, (select id from booking.resources where code = 't316_full') from (values (90114), (90121)) x(rid);
+  perform set_config('request.jwt.claims', '{"role":"anon"}', true);
+  v := booking.public_join_waitlist(90121, current_date + 20, 2, 'T316 Testi', 't316w@example.test', null, 'fi', false, true);
+  perform pg_temp.ck((v ->> 'ok')::boolean, 'jono: koulutus 121 (Suora linkki) täysi → jonoon (' || coalesce(v ->> 'code', 'ok') || ')');
+  v := booking.public_join_waitlist(90114, current_date + 20, 2, 'T316 Testi', 't316w@example.test', null, 'fi', false, true);
+  perform pg_temp.ck(v ->> 'code' = 'not_full', 'jono: koulutus 114 ilman julkista kanavaa → not_full (' || coalesce(v ->> 'code', 'ok') || ')');
+  perform set_config('request.jwt.claims', json_build_object('sub', '00000000-0000-4000-8000-000000000316', 'role', 'authenticated')::text, true);
   perform booking.admin_set_product_sales_channels(82, array[]::text[]);
   perform booking.admin_set_product_sales_channels(44, array[]::text[]);
   perform booking.admin_set_product_sales_channels(7, array['shop', 'gift_shop']);
@@ -261,6 +282,27 @@ begin
 
   -- passiivinen kanava = ei kanavassa
   perform set_config('request.jwt.claims', json_build_object('sub', '00000000-0000-4000-8000-000000000316', 'role', 'authenticated')::text, true);
+  -- bookable = false -tuote saa julkisen kanavan → bookable = true ja vanhat kentät liitostaulun mukaisiksi
+  set local session_replication_role = replica;
+  insert into booking.schedule_rules overriding system value select (jsonb_populate_record(null::booking.schedule_rules, to_jsonb(r) || jsonb_build_object('id', 90036, 'product_id', 36, 'kind', 'event',
+         'valid_from', current_date + 20, 'valid_to', current_date + 20, 'weekdays', jsonb_build_array(extract(isodow from current_date + 20)::int), 'active', true, 'training_segment_only', false))).*
+    from booking.schedule_rules r where r.id = 1;
+  set local session_replication_role = origin;
+  -- muutos vanhaan: bookable = false -koulutus ei enää näy upotuksen listassa suljettuna (sillä ei ole julkista kanavaa; PRODissa ei tällaisia kertoja)
+  perform pg_temp.ck(not booking.public_events(current_date, 'widget') @> '[{"product_id": 36}]', 'koulutus 36 (bookable false) ei upotuksessa ennen kanavaa');
+  x := booking.admin_set_product_sales_channels(36, array['widget']);
+  perform pg_temp.ck((x -> 'config' ->> 'bookable')::boolean and (select bookable and channels is null and not shop_visible from booking.product_config where product_id = 36),
+                     'julkisen kanavan lisäys: bookable = true, channels = koulutuksen oletus (null = widget)');
+  perform pg_temp.ck(booking.public_events(current_date, 'widget') @> '[{"product_id": 36}]'
+                     and booking.public_events(current_date, 'widget') -> 0 -> 'occurrences' -> 0 ->> 'status' = 'available', 'koulutus 36 näkyy upotuksessa varattavana kanavan lisäyksen jälkeen');
+  x := booking.admin_set_product_sales_channels(27, array['pos']);
+  perform pg_temp.ck((select not bookable from booking.product_config where product_id = 27), 'ei-julkinen kanava (pos) ei muuta bookablea');
+  -- uusi tuote: bookable = false eikä kanavia, kunnes julkinen kanava valitaan
+  x := booking.admin_product_create('{"name": "T316 uusi hoito", "price": 50, "vat_rate": 25.5, "category": "treatment"}'::jsonb);
+  perform pg_temp.ck(not (select bookable from booking.product_config where product_id = (x ->> 'id')::bigint)
+                     and not exists (select 1 from booking.product_sales_channels where product_id = (x ->> 'id')::bigint), 'uusi tuote: bookable false, ei kanavia');
+  v := booking.admin_set_product_sales_channels((x ->> 'id')::bigint, array['link']);
+  perform pg_temp.ck((select bookable and channels = array['link'] and not shop_visible from booking.product_config where product_id = (x ->> 'id')::bigint), 'uusi tuote + Suora linkki → bookable true');
   update booking.sales_channels set active = false where code = 'widget';
   perform pg_temp.ck(not booking._in_channel(36, 'widget') and booking.public_events(current_date, 'widget') = '[]'::jsonb, 'passiivinen kanava ei näy julkisesti');
   perform pg_temp.ck(pg_temp.errcode('select booking.admin_set_product_sales_channels(5, array[''shop'',''widget''])') = 'channel_inactive', 'passiivista kanavaa ei voi lisätä');

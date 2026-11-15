@@ -6,7 +6,8 @@ import { codesKey } from './sales-channels.js';
 
 export const TAB_IDS = ['perustiedot', 'hinnat', 'myynti', 'kuva', 'valinnat', 'lisamyynti'];
 // booking_316: shop_visible, pos_enabled ja fridge_sale ovat nyt myyntikanavia (snapshot.channels), eivät config-kenttiä.
-export const CONFIG_FIELDS = ['bookable', 'audience', 'sort_order', 'min_persons', 'max_persons', 'pos_sort', 'age_restricted'];
+// bookable (Varattavissa verkossa) ei ole enää lomakkeella (Joonas 15.11.): julkinen kanava asettaa sen kannassa.
+export const CONFIG_FIELDS = ['audience', 'sort_order', 'min_persons', 'max_persons', 'pos_sort', 'age_restricted'];
 
 /** Syöte → luku. Tyhjä → null, virheellinen → NaN. Pilkku kelpaa desimaalierottimena. */
 export const numOrNull = (v) => {
@@ -43,7 +44,6 @@ export function baselineFromProduct(p, { offers = [], alcohol = false, channels 
       price: numOrNull(price), price_text: p.price_text ?? '', vat_rate: numOrNull(p.vat_rate), active: !!p.active,
     },
     config: c ? {
-      bookable: !!c.bookable,
       ...('audience' in c ? { audience: c.audience === 'business' ? 'business' : 'consumer' } : {}),
       sort_order: numOrNull(c.sort_order), min_persons: numOrNull(c.min_persons), max_persons: numOrNull(c.max_persons),
       pos_sort: numOrNull(c.pos_sort ?? 100), age_restricted: !!c.age_restricted,

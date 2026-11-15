@@ -1,6 +1,7 @@
 -- booking_316 ROLLBACK: palauttaa julkiset funktiot ja kassat PRODin 15.11.2026 määrittelyihin (lukevat taas vanhoja kenttiä),
 -- poistaa synkkatriggerit, kanavafunktiot ja taulut booking.product_sales_channels ja booking.sales_channels.
 -- Vanhat kentät (shop_visible, channels, fridge_sale, pos_enabled) ovat synkassa, joten tuotteiden näkyvyys säilyy.
+-- HUOM: bookable-kenttä jää siihen tilaan, johon kanavamuutokset sen asettivat (julkisen kanavan lisäys asetti true); vanhat funktiot käyttävät sitä kuten ennen.
 -- HUOM: Lahjakorttikauppa-kanavan (gift_shop) valinnat eivät palaudu vanhoihin kenttiin (vanhassa mallissa paketti näkyy, jos se on aktiivinen).
 set local lock_timeout = '5s';
 
@@ -44,6 +45,8 @@ begin
   if v is distinct from '90eca5cada3e28b9c98fd07d1d9c1c72' then bad := bad || ' public_gift_card_packages=' || coalesce(v, 'puuttuu'); end if;
   v := md5(pg_get_functiondef(to_regprocedure('booking._public_buy_gift_card_impl(jsonb,text,text,text,boolean,text,text,text,text,text,text,text,text)')));
   if v is distinct from '3354339ce7db3f6a7cd64df7fb23695f' then bad := bad || ' _public_buy_gift_card_impl=' || coalesce(v, 'puuttuu'); end if;
+  v := md5(pg_get_functiondef(to_regprocedure('booking.public_join_waitlist(bigint,date,integer,text,text,text,text,boolean,boolean)')));
+  if v is distinct from 'ef2597bfc1430c418ba1d3849bce603e' then bad := bad || ' public_join_waitlist=' || coalesce(v, 'puuttuu'); end if;
   if bad <> '' then raise exception 'booking_316 ROLLBACK: määrittelyt eivät vastaa booking_316:ta:%. Ei muutoksia.', bad; end if;
 end $pre$;
 
@@ -1120,6 +1123,104 @@ begin
   return jsonb_build_object('ok', true, 'order_no', v_res -> 'order_no', 'token', v_res -> 'public_token', 'status', v_status, 'total', v_res -> 'total',
     'payment_mode', v_mode, 'payment_url', null, 'cards', (select coalesce(jsonb_agg(c - 'id'), '[]'::jsonb) from jsonb_array_elements(v_res -> 'cards') c),
     'note', 'Kortit aktivoituvat ja koodit toimitetaan kun tilaus on maksettu');
+end $function$
+;
+
+CREATE OR REPLACE FUNCTION booking.public_join_waitlist(p_rule_id bigint, p_date date, p_persons integer DEFAULT 1, p_name text DEFAULT NULL::text, p_email text DEFAULT NULL::text, p_phone text DEFAULT NULL::text, p_locale text DEFAULT 'fi'::text, p_whatsapp_opt_in boolean DEFAULT false, p_privacy_consent boolean DEFAULT false)
+ RETURNS jsonb
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO ''
+AS $function$
+declare
+  v_rule booking.schedule_rules;
+  v_s record;
+  v_name text := btrim(coalesce(p_name,''));
+  v_email text := lower(btrim(coalesce(p_email,'')));
+  v_phone text := nullif(btrim(coalesce(p_phone,'')), '');
+  v_token uuid;
+  v_id bigint;
+  v_opt boolean := coalesce(p_whatsapp_opt_in, false);
+  v_party record;
+  v_persons integer;
+  v_pname text;
+  v_site text;
+  v_shop text;
+  v_ip text := booking._client_ip();
+  v_status text;
+begin
+  if booking._setting('waitlist_enabled', 'true'::jsonb) <> 'true'::jsonb then
+    return jsonb_build_object('ok',false,'code','disabled');
+  end if;
+  if not booking._rate_limit('waitlist:email:' || v_email, 8, interval '10 minutes') then
+    return jsonb_build_object('ok',false,'code','rate_limited');
+  end if;
+  -- booking_210: tapahtumajono lähettää vahvistusviestin, joten myös IP-kohtainen raja (sama malli kuin lahjakorttiostossa).
+  if v_ip is not null and not booking._rate_limit('waitlist:ip:' || v_ip, 20, interval '10 minutes') then
+    return jsonb_build_object('ok',false,'code','rate_limited');
+  end if;
+  if length(v_name) not between 2 and 120 then return jsonb_build_object('ok',false,'code','invalid_name'); end if;
+  if length(v_email) > 200 or not booking._valid_email(v_email) then return jsonb_build_object('ok',false,'code','invalid_email'); end if;
+  if v_phone is not null and (length(v_phone) > 30 or v_phone !~ '^[0-9+()\- ]{6,30}$') then
+    return jsonb_build_object('ok',false,'code','invalid_phone');
+  end if;
+  if p_locale not in ('fi','en') or p_locale is null then return jsonb_build_object('ok',false,'code','invalid_locale'); end if;
+  select * into v_rule from booking.schedule_rules where id = p_rule_id and active;
+  if not found or p_date is null then
+    return jsonb_build_object('ok',false,'code','invalid_session');
+  end if;
+  select * into v_party from booking._waitlist_party(p_rule_id);
+  if v_party.kind = 'private' then
+    v_persons := greatest(1, coalesce(v_rule.min_persons, 1));
+  else
+    if p_persons is null or p_persons < v_party.min_persons or p_persons > v_party.max_persons then
+      return jsonb_build_object('ok',false,'code','invalid_persons','kind',v_party.kind,
+        'min',v_party.min_persons,'max',v_party.max_persons);
+    end if;
+    v_persons := p_persons;
+  end if;
+  if v_party.kind = 'event' and p_privacy_consent is not true then
+    return jsonb_build_object('ok',false,'code','privacy_required');
+  end if;
+  select * into v_s from booking._sessions(p_date,p_date,v_rule.product_id,true) s
+    where s.rule_id = p_rule_id and s.session_date = p_date limit 1;
+  if not found or v_s.starts_at <= now()
+     or not (v_s.status = 'full'
+             or (v_party.kind = 'private' and v_s.status = 'unavailable'
+                 and booking._waitlist_private_taken(p_rule_id, v_s.starts_at, v_s.ends_at))) then
+    return jsonb_build_object('ok',false,'code','not_full');
+  end if;
+  insert into booking.waitlist_entries(product_id,rule_id,session_date,starts_at,ends_at,space_id,persons,
+    customer_name,customer_email,customer_phone,locale,preferred_channel,whatsapp_opt_in,privacy_consent_at)
+  values (v_rule.product_id,v_rule.id,p_date,v_s.starts_at,v_s.ends_at,v_rule.space_id,v_persons,
+    v_name,v_email,v_phone,p_locale,case when v_opt then 'both' else 'email' end,v_opt,
+    case when p_privacy_consent is true then now() end)
+  on conflict (rule_id,session_date,(lower(customer_email))) where status in ('waiting','notified')
+  do update set persons=excluded.persons, customer_name=excluded.customer_name,
+    customer_phone=excluded.customer_phone,locale=excluded.locale,preferred_channel=excluded.preferred_channel,
+    whatsapp_opt_in=excluded.whatsapp_opt_in,starts_at=excluded.starts_at,ends_at=excluded.ends_at,
+    privacy_consent_at=coalesce(excluded.privacy_consent_at, booking.waitlist_entries.privacy_consent_at),
+    status='waiting',notified_at=null,whatsapp_queued_at=null,whatsapp_send_after=null,updated_at=now()
+  returning id, public_token into v_id, v_token;
+  if v_party.kind = 'event' then
+    select coalesce(case when p_locale = 'en' then nullif(p.name_en,'') end, p.name)
+      into v_pname from kb.products p where p.id = v_rule.product_id;
+    v_site := rtrim(coalesce(booking._setting('site_base_url') #>> '{}',''),'/');
+    v_shop := case when p_locale = 'en' then '/en/book/' else '/varaa/' end;
+    -- Kuten _enqueue_email: resend-tila off -> skipped. Lisäksi varatut testitunnukset (RFC 2606/6761: .invalid, .test, .example, .localhost) -> skipped.
+    v_status := case when coalesce((select c.mode from booking.integration_config c where c.key = 'resend'), 'off') = 'off'
+                       or v_email ~ '[.](invalid|test|example|localhost)$' then 'skipped' else 'pending' end;
+    insert into booking.email_outbox(kind,locale,dedupe_key,status,payload)
+    values ('waitlist_joined', p_locale, 'waitlist_joined:'||v_id, v_status, jsonb_build_object(
+      'to_email', v_email, 'to_name', v_name, 'product_name', v_pname,
+      'starts_at', v_s.starts_at, 'ends_at', v_s.ends_at, 'persons', v_persons,
+      'leave_url', v_site||v_shop||'?poistu_jonosta='||v_token))
+    on conflict (dedupe_key) do nothing;
+    insert into booking.waitlist_notify_log(entry_id, rule_id, session_date, kind)
+    values (v_id, v_rule.id, p_date, 'joined');
+  end if;
+  return jsonb_build_object('ok',true,'token',v_token,'starts_at',v_s.starts_at,'ends_at',v_s.ends_at,
+    'persons',case when v_party.kind = 'private' then null else v_persons end,'kind',v_party.kind);
 end $function$
 ;
 

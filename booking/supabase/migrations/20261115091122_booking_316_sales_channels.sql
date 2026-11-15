@@ -2,13 +2,16 @@
 -- Uudet taulut booking.sales_channels (code, name, name_en, sort_order, active, public_booking) ja booking.product_sales_channels (product_id, channel_code).
 -- Kanavat: shop Verkkokauppa, widget Upotus, link Suora linkki, pos Pikakassa, qr QR-myynti (kylmälaite), gift_shop Lahjakorttikauppa.
 -- Kumppanien kaupat ja Johku eivät kuulu tähän.
--- Backfill nykytilasta (ei muutosta asiakkaalle):
---   shop   = shop_visible ja 'shop' ∈ _channels_effective(channels, category)
---   widget = 'widget' ∈ _channels_effective(...);  link = 'link' ∈ _channels_effective(...)
+-- Backfill nykytilasta (ei muutosta asiakkaalle). Julkiset kanavat (shop, widget, link) vain bookable-tuotteille:
+--   shop   = bookable ja shop_visible ja 'shop' ∈ _channels_effective(channels, category)
+--   widget = bookable ja 'widget' ∈ _channels_effective(...);  link = bookable ja 'link' ∈ _channels_effective(...)
 --   qr     = fridge_sale;  pos = pos_enabled
 --   gift_shop = jokainen tuote, johon jokin lahjakorttipaketti viittaa (kb_product_id tai items[].kb_product_id)
 -- Julkiset funktiot ja kassat lukevat kanavan liitostaulusta (booking._in_channel / _public_channel_ok / _gc_package_in_shop); suora API-kutsu estyy
--- (public_create_booking[_code], training_signup ja rituaalilisä vaativat julkisen varauskanavan: not_bookable "Tuotetta ei voi varata verkossa").
+-- (public_create_booking[_code], training_signup ja rituaalilisä vaativat julkisen varauskanavan: not_bookable "Tuotetta ei voi varata verkossa";
+-- jonoon liittyminen public_join_waitlist: not_full kuten ei-varattavalla tuotteella).
+-- bookable: Varattavissa verkossa -valinta poistuu hallinnasta (Joonas 15.11. klo 10.38). Julkisen kanavan lisäys asettaa bookable = true,
+-- julkisten kanavien poisto ei muuta sitä (hallinnan ja kassan varaukset toimivat). Julkinen varattavuus = julkinen kanava.
 -- Vaihe 1: vanhat kentät (shop_visible, channels, fridge_sale, pos_enabled) pidetään synkassa triggereillä molempiin suuntiin, koska
 -- muut funktiot ja nykyinen hallinta käyttävät niitä. Vaihe 2 (myöhemmin) poistaa vanhat kentät ja synkan.
 -- Pohjana PRODin määritelmät 15.11.2026 (SELECT). Rollback: rollbacks/20261115091122_booking_316_ROLLBACK.sql.
@@ -57,6 +60,8 @@ begin
   if v is distinct from '3ac6c50c3af91a5f771db71ebd0f2d6f' then bad := bad || ' public_gift_card_packages=' || coalesce(v, 'puuttuu'); end if;
   v := md5(pg_get_functiondef(to_regprocedure('booking._public_buy_gift_card_impl(jsonb,text,text,text,boolean,text,text,text,text,text,text,text,text)')));
   if v is distinct from '367323d3aab88fc78e552a7c1475fbc3' then bad := bad || ' _public_buy_gift_card_impl=' || coalesce(v, 'puuttuu'); end if;
+  v := md5(pg_get_functiondef(to_regprocedure('booking.public_join_waitlist(bigint,date,integer,text,text,text,text,boolean,boolean)')));
+  if v is distinct from 'af0188264002fdb1b42bb22092fd94c6' then bad := bad || ' public_join_waitlist=' || coalesce(v, 'puuttuu'); end if;
   if bad <> '' then raise exception 'booking_316: määrittelyt eivät vastaa PRODia 15.11.:%. Ei muutoksia.', bad; end if;
 end $pre$;
 
@@ -149,6 +154,13 @@ $function$;
 -- (hiljaiset tarjoukset, kuvat, tilauksen lisäys, hoitoslotit, tuotekopio, tuotteen luonti, admin_update_product_config,
 -- admin_event_set_channels, admin_set_pos_product, kylmälaitteen QR) lukevat/kirjoittavat niitä. Vaihe 2 poistaa ne.
 -- Vain kartoitetut koodit (shop, widget, link, qr, pos) synkataan; gift_shop ja tulevat kanavat eivät koske vanhoihin kenttiin.
+-- bookable (Joonas 15.11. klo 10.38: Varattavissa verkossa -valinta poistuu hallinnasta, kanavat korvaavat sen):
+--   * Julkinen kanava (shop, widget, link) vaatii bookable = true. Backfill ja vanhoista kentistä tehtävä synkka antavat
+--     julkisen kanavan vain bookable-tuotteelle, joten julkinen varattavuus = julkinen kanava (julkiset funktiot tarkistavat
+--     yhä myös bookable-kentän, mikä on tämän invariantin vuoksi sama asia).
+--   * Julkisen kanavan lisäys liitostauluun asettaa bookable = true ja kirjoittaa shop_visible/channels liitostaulun mukaisiksi.
+--   * Julkisten kanavien poisto ei muuta bookablea: hallinnan ja kassan varaukset (_resolve_session, siirrot) toimivat edelleen.
+--   * Vanha polku (admin_update_product_config bookable=false) poistaa julkiset kanavarivit; bookable=true palauttaa ne vanhoista kentistä.
 create function booking._psc_from_config_trg()
  returns trigger language plpgsql security definer set search_path to ''
 as $function$
@@ -158,9 +170,9 @@ begin
   select category into v_cat from kb.products where id = new.product_id;
   v_eff := booking._channels_effective(new.channels, v_cat);
   v_want := array_remove(array[
-    case when new.shop_visible and 'shop' = any (v_eff) then 'shop' end,
-    case when 'widget' = any (v_eff) then 'widget' end,
-    case when 'link' = any (v_eff) then 'link' end,
+    case when new.bookable and new.shop_visible and 'shop' = any (v_eff) then 'shop' end,
+    case when new.bookable and 'widget' = any (v_eff) then 'widget' end,
+    case when new.bookable and 'link' = any (v_eff) then 'link' end,
     case when new.fridge_sale then 'qr' end,
     case when new.pos_enabled then 'pos' end]::text[], null);
   perform set_config('booking.channel_sync', '1', true);
@@ -182,7 +194,7 @@ declare
   v_pid bigint := coalesce(new.product_id, old.product_id);
   v_code text := coalesce(new.channel_code, old.channel_code);
   v_on boolean := tg_op = 'INSERT';
-  pc booking.product_config; v_cat text; v_eff text[]; v_new text[];
+  pc booking.product_config; v_cat text; v_pub text[]; v_new text[];
 begin
   if coalesce(current_setting('booking.channel_sync', true), '') = '1' then return null; end if;
   if tg_op = 'UPDATE' then
@@ -194,15 +206,19 @@ begin
   select category into v_cat from kb.products where id = v_pid;
   perform set_config('booking.channel_sync', '1', true);
   if v_code in ('shop', 'widget', 'link') then
-    v_eff := booking._channels_effective(pc.channels, v_cat);
-    v_new := case when v_on then v_eff || v_code else array_remove(v_eff, v_code) end;
-    v_new := array(select c from unnest(array['shop', 'widget', 'link']) c where c = any (v_new));
+    -- vanhat kentät kirjoitetaan liitostaulun julkisten rivien mukaisiksi (rivitriggeri näkee lauseen lopputilan)
+    v_pub := array(select u.c from unnest(array['shop', 'widget', 'link']) with ordinality u(c, o)
+                    where exists (select 1 from booking.product_sales_channels s where s.product_id = v_pid and s.channel_code = u.c)
+                    order by u.o);
+    v_new := v_pub;
     if pc.channels is null and v_new = booking._channels_effective(null, v_cat) then v_new := null; end if;
     update booking.product_config
        set channels = v_new,
-           shop_visible = case when v_code = 'shop' then v_on else shop_visible end
+           shop_visible = 'shop' = any (v_pub),
+           bookable = bookable or cardinality(v_pub) > 0
      where product_id = v_pid
-       and (channels is distinct from v_new or (v_code = 'shop' and shop_visible is distinct from v_on));
+       and (channels is distinct from v_new or shop_visible is distinct from ('shop' = any (v_pub))
+            or (cardinality(v_pub) > 0 and not bookable));
   elsif v_code = 'qr' then
     update booking.product_config set fridge_sale = v_on where product_id = v_pid and fridge_sale is distinct from v_on;
   else
@@ -218,9 +234,9 @@ select pc.product_id, x.code, null
   from booking.product_config pc
   join kb.products p on p.id = pc.product_id
  cross join lateral unnest(array_remove(array[
-    case when pc.shop_visible and 'shop' = any (booking._channels_effective(pc.channels, p.category)) then 'shop' end,
-    case when 'widget' = any (booking._channels_effective(pc.channels, p.category)) then 'widget' end,
-    case when 'link' = any (booking._channels_effective(pc.channels, p.category)) then 'link' end,
+    case when pc.bookable and pc.shop_visible and 'shop' = any (booking._channels_effective(pc.channels, p.category)) then 'shop' end,
+    case when pc.bookable and 'widget' = any (booking._channels_effective(pc.channels, p.category)) then 'widget' end,
+    case when pc.bookable and 'link' = any (booking._channels_effective(pc.channels, p.category)) then 'link' end,
     case when pc.fridge_sale then 'qr' end,
     case when pc.pos_enabled then 'pos' end]::text[], null)) as x(code);
 
@@ -237,7 +253,7 @@ select distinct r.pid, 'gift_shop', null::uuid
  join kb.products kp on kp.id = r.pid
 on conflict do nothing;
 
-create trigger zz_sales_channels_sync after insert or update of shop_visible, channels, fridge_sale, pos_enabled on booking.product_config
+create trigger zz_sales_channels_sync after insert or update of shop_visible, channels, fridge_sale, pos_enabled, bookable on booking.product_config
   for each row execute function booking._psc_from_config_trg();
 create trigger zz_config_sync after insert or delete or update on booking.product_sales_channels
   for each row execute function booking._psc_to_config_trg();
@@ -296,7 +312,7 @@ begin
     'channels', coalesce((select jsonb_agg(psc.channel_code order by s.sort_order, s.code)
                             from booking.product_sales_channels psc join booking.sales_channels s on s.code = psc.channel_code
                            where psc.product_id = p_product_id), '[]'::jsonb),
-    'config', (select jsonb_build_object('shop_visible', c.shop_visible, 'channels', c.channels, 'fridge_sale', c.fridge_sale, 'pos_enabled', c.pos_enabled)
+    'config', (select jsonb_build_object('bookable', c.bookable, 'shop_visible', c.shop_visible, 'channels', c.channels, 'fridge_sale', c.fridge_sale, 'pos_enabled', c.pos_enabled)
                  from booking.product_config c where c.product_id = p_product_id));
 end $function$;
 
@@ -1406,6 +1422,105 @@ begin
 end $function$
 ;
 
+CREATE OR REPLACE FUNCTION booking.public_join_waitlist(p_rule_id bigint, p_date date, p_persons integer DEFAULT 1, p_name text DEFAULT NULL::text, p_email text DEFAULT NULL::text, p_phone text DEFAULT NULL::text, p_locale text DEFAULT 'fi'::text, p_whatsapp_opt_in boolean DEFAULT false, p_privacy_consent boolean DEFAULT false)
+ RETURNS jsonb
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO ''
+AS $function$
+declare
+  v_rule booking.schedule_rules;
+  v_s record;
+  v_name text := btrim(coalesce(p_name,''));
+  v_email text := lower(btrim(coalesce(p_email,'')));
+  v_phone text := nullif(btrim(coalesce(p_phone,'')), '');
+  v_token uuid;
+  v_id bigint;
+  v_opt boolean := coalesce(p_whatsapp_opt_in, false);
+  v_party record;
+  v_persons integer;
+  v_pname text;
+  v_site text;
+  v_shop text;
+  v_ip text := booking._client_ip();
+  v_status text;
+begin
+  if booking._setting('waitlist_enabled', 'true'::jsonb) <> 'true'::jsonb then
+    return jsonb_build_object('ok',false,'code','disabled');
+  end if;
+  if not booking._rate_limit('waitlist:email:' || v_email, 8, interval '10 minutes') then
+    return jsonb_build_object('ok',false,'code','rate_limited');
+  end if;
+  -- booking_210: tapahtumajono lähettää vahvistusviestin, joten myös IP-kohtainen raja (sama malli kuin lahjakorttiostossa).
+  if v_ip is not null and not booking._rate_limit('waitlist:ip:' || v_ip, 20, interval '10 minutes') then
+    return jsonb_build_object('ok',false,'code','rate_limited');
+  end if;
+  if length(v_name) not between 2 and 120 then return jsonb_build_object('ok',false,'code','invalid_name'); end if;
+  if length(v_email) > 200 or not booking._valid_email(v_email) then return jsonb_build_object('ok',false,'code','invalid_email'); end if;
+  if v_phone is not null and (length(v_phone) > 30 or v_phone !~ '^[0-9+()\- ]{6,30}$') then
+    return jsonb_build_object('ok',false,'code','invalid_phone');
+  end if;
+  if p_locale not in ('fi','en') or p_locale is null then return jsonb_build_object('ok',false,'code','invalid_locale'); end if;
+  select * into v_rule from booking.schedule_rules where id = p_rule_id and active;
+  if not found or p_date is null then
+    return jsonb_build_object('ok',false,'code','invalid_session');
+  end if;
+  select * into v_party from booking._waitlist_party(p_rule_id);
+  if v_party.kind = 'private' then
+    v_persons := greatest(1, coalesce(v_rule.min_persons, 1));
+  else
+    if p_persons is null or p_persons < v_party.min_persons or p_persons > v_party.max_persons then
+      return jsonb_build_object('ok',false,'code','invalid_persons','kind',v_party.kind,
+        'min',v_party.min_persons,'max',v_party.max_persons);
+    end if;
+    v_persons := p_persons;
+  end if;
+  if v_party.kind = 'event' and p_privacy_consent is not true then
+    return jsonb_build_object('ok',false,'code','privacy_required');
+  end if;
+  select * into v_s from booking._sessions(p_date,p_date,v_rule.product_id,true) s
+    where s.rule_id = p_rule_id and s.session_date = p_date limit 1;
+  -- booking_316: jonoon vain julkisessa varauskanavassa olevalle tuotteelle (sama vastaus kuin ei-varattavalla tuotteella)
+  if not found or v_s.starts_at <= now() or not booking._public_channel_ok(v_rule.product_id)
+     or not (v_s.status = 'full'
+             or (v_party.kind = 'private' and v_s.status = 'unavailable'
+                 and booking._waitlist_private_taken(p_rule_id, v_s.starts_at, v_s.ends_at))) then
+    return jsonb_build_object('ok',false,'code','not_full');
+  end if;
+  insert into booking.waitlist_entries(product_id,rule_id,session_date,starts_at,ends_at,space_id,persons,
+    customer_name,customer_email,customer_phone,locale,preferred_channel,whatsapp_opt_in,privacy_consent_at)
+  values (v_rule.product_id,v_rule.id,p_date,v_s.starts_at,v_s.ends_at,v_rule.space_id,v_persons,
+    v_name,v_email,v_phone,p_locale,case when v_opt then 'both' else 'email' end,v_opt,
+    case when p_privacy_consent is true then now() end)
+  on conflict (rule_id,session_date,(lower(customer_email))) where status in ('waiting','notified')
+  do update set persons=excluded.persons, customer_name=excluded.customer_name,
+    customer_phone=excluded.customer_phone,locale=excluded.locale,preferred_channel=excluded.preferred_channel,
+    whatsapp_opt_in=excluded.whatsapp_opt_in,starts_at=excluded.starts_at,ends_at=excluded.ends_at,
+    privacy_consent_at=coalesce(excluded.privacy_consent_at, booking.waitlist_entries.privacy_consent_at),
+    status='waiting',notified_at=null,whatsapp_queued_at=null,whatsapp_send_after=null,updated_at=now()
+  returning id, public_token into v_id, v_token;
+  if v_party.kind = 'event' then
+    select coalesce(case when p_locale = 'en' then nullif(p.name_en,'') end, p.name)
+      into v_pname from kb.products p where p.id = v_rule.product_id;
+    v_site := rtrim(coalesce(booking._setting('site_base_url') #>> '{}',''),'/');
+    v_shop := case when p_locale = 'en' then '/en/book/' else '/varaa/' end;
+    -- Kuten _enqueue_email: resend-tila off -> skipped. Lisäksi varatut testitunnukset (RFC 2606/6761: .invalid, .test, .example, .localhost) -> skipped.
+    v_status := case when coalesce((select c.mode from booking.integration_config c where c.key = 'resend'), 'off') = 'off'
+                       or v_email ~ '[.](invalid|test|example|localhost)$' then 'skipped' else 'pending' end;
+    insert into booking.email_outbox(kind,locale,dedupe_key,status,payload)
+    values ('waitlist_joined', p_locale, 'waitlist_joined:'||v_id, v_status, jsonb_build_object(
+      'to_email', v_email, 'to_name', v_name, 'product_name', v_pname,
+      'starts_at', v_s.starts_at, 'ends_at', v_s.ends_at, 'persons', v_persons,
+      'leave_url', v_site||v_shop||'?poistu_jonosta='||v_token))
+    on conflict (dedupe_key) do nothing;
+    insert into booking.waitlist_notify_log(entry_id, rule_id, session_date, kind)
+    values (v_id, v_rule.id, p_date, 'joined');
+  end if;
+  return jsonb_build_object('ok',true,'token',v_token,'starts_at',v_s.starts_at,'ends_at',v_s.ends_at,
+    'persons',case when v_party.kind = 'private' then null else v_persons end,'kind',v_party.kind);
+end $function$
+;
+
 -- ---------- 7) jälkitarkistus: liitostaulu = vanhat kentät jokaisella tuotteella ----------
 do $post$
 declare v_n int;
@@ -1416,12 +1531,16 @@ begin
                 where s.product_id = pc.product_id and s.channel_code in ('shop','widget','link','qr','pos') order by 1)
          is distinct from
          array(select c from unnest(array_remove(array[
-            case when pc.shop_visible and 'shop' = any (booking._channels_effective(pc.channels, p.category)) then 'shop' end,
-            case when 'widget' = any (booking._channels_effective(pc.channels, p.category)) then 'widget' end,
-            case when 'link' = any (booking._channels_effective(pc.channels, p.category)) then 'link' end,
+            case when pc.bookable and pc.shop_visible and 'shop' = any (booking._channels_effective(pc.channels, p.category)) then 'shop' end,
+            case when pc.bookable and 'widget' = any (booking._channels_effective(pc.channels, p.category)) then 'widget' end,
+            case when pc.bookable and 'link' = any (booking._channels_effective(pc.channels, p.category)) then 'link' end,
             case when pc.fridge_sale then 'qr' end,
             case when pc.pos_enabled then 'pos' end]::text[], null)) c order by 1);
   if v_n > 0 then raise exception 'booking_316: backfill ei vastaa vanhoja kenttiä (% tuotetta). Ei muutoksia.', v_n; end if;
+  if exists (select 1 from booking.product_sales_channels s join booking.product_config pc on pc.product_id = s.product_id
+              where s.channel_code in ('shop', 'widget', 'link') and not pc.bookable) then
+    raise exception 'booking_316: julkinen kanava tuotteella, jonka bookable = false. Ei muutoksia.';
+  end if;
   if exists (select 1 from booking.gift_card_packages g where not booking._gc_package_in_shop(g.code)) then
     raise exception 'booking_316: lahjakorttipaketin tuote puuttuu Lahjakorttikauppa-kanavasta. Ei muutoksia.';
   end if;

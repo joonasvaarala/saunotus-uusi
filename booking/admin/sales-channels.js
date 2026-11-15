@@ -6,45 +6,43 @@
 
 /** Kanavat, joilla on vastine vanhoissa product_config-kentissä (muut, esim. gift_shop, ovat vain liitostaulussa). */
 export const MAPPED = ['shop', 'widget', 'link', 'qr', 'pos'];
-const WEB = ['shop', 'widget', 'link'];
+/** Julkiset varauskanavat (sales_channels.public_booking). Julkinen kanava vaatii bookable = true. */
+export const WEB = ['shop', 'widget', 'link'];
 /** Kanavat, jotka vaativat varausjärjestelmän konfiguraation (product_config). */
 export const NEEDS_CONFIG = MAPPED;
 
 /** Sama kuin booking._channels_effective: null → koulutus {widget}, muut {shop}. */
 export const effectiveChannels = (channels, category) => (Array.isArray(channels) ? channels : category === 'training' ? ['widget'] : ['shop']);
 
-/** Vanhat kentät → kanavakoodit (sama sääntö kuin booking_316:n backfill ja synkkatriggeri). */
+/** Vanhat kentät → kanavakoodit (sama sääntö kuin booking_316:n backfill ja synkkatriggeri: julkiset kanavat vain bookable-tuotteelle). */
 export function channelsFromConfig(category, c) {
   if (!c) return [];
   const eff = effectiveChannels(c.channels ?? null, category);
+  const web = !!c.bookable;
   const out = [];
-  if (c.shop_visible && eff.includes('shop')) out.push('shop');
-  if (eff.includes('widget')) out.push('widget');
-  if (eff.includes('link')) out.push('link');
+  if (web && c.shop_visible && eff.includes('shop')) out.push('shop');
+  if (web && eff.includes('widget')) out.push('widget');
+  if (web && eff.includes('link')) out.push('link');
   if (c.fridge_sale) out.push('qr');
   if (c.pos_enabled) out.push('pos');
   return out;
 }
 
-/** Kanavakoodit → vanhat kentät (kuten booking._psc_to_config_trg; palauttaa uuden olion, ei muuta alkuperäistä). */
+/**
+ * Kanavakoodit → vanhat kentät (kuten booking._psc_to_config_trg; palauttaa uuden olion, ei muuta alkuperäistä).
+ * Jos julkiset kanavat muuttuvat, shop_visible ja channels kirjoitetaan niiden mukaisiksi; julkinen kanava asettaa bookable = true,
+ * julkisten kanavien poisto ei muuta bookablea (hallinnan ja kassan varaukset toimivat edelleen).
+ */
 export function applyChannelsToConfig(category, c, codes) {
   if (!c) return c;
   const want = new Set(codes || []);
-  const before = new Set(channelsFromConfig(category, c));
+  const before = channelsFromConfig(category, c).filter((x) => WEB.includes(x));
+  const pub = WEB.filter((x) => want.has(x));
+  const out = { ...c, fridge_sale: want.has('qr'), pos_enabled: want.has('pos') };
+  if (pub.join(',') === before.join(',')) return out;
   const dflt = effectiveChannels(null, category);
-  let channels = c.channels ?? null;
-  let sv = !!c.shop_visible;
-  for (const code of WEB) {
-    const on = want.has(code);
-    if (on === before.has(code)) continue;
-    const eff = effectiveChannels(channels, category);
-    let web = on ? [...eff, code] : eff.filter((x) => x !== code);
-    web = WEB.filter((x) => web.includes(x));
-    if (channels == null && web.length === dflt.length && web.every((x, i) => x === dflt[i])) web = null;
-    channels = web;
-    if (code === 'shop') sv = on;
-  }
-  return { ...c, channels, shop_visible: sv, fridge_sale: want.has('qr'), pos_enabled: want.has('pos') };
+  const nullDefault = (c.channels ?? null) == null && pub.join(',') === dflt.join(',');
+  return { ...out, channels: nullDefault ? null : pub, shop_visible: pub.includes('shop'), bookable: !!c.bookable || pub.length > 0 };
 }
 
 /** Järjestä koodit kanavalistan järjestykseen (sort_order); tuntemattomat loppuun aakkosjärjestyksessä. */
