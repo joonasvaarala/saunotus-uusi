@@ -2,8 +2,8 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import test from 'node:test';
 import { finnishMobileMsisdn } from '../admin/phone-fi.js';
-import { searchSaleProducts, saleOptions, moveHi, enterTarget, bookingHref, filterProducts, isBookableProduct, posChannelIds, minutesBetween } from '../admin/pos-logic.js';
-import { cartAdd, cartAddCustom, cartSetQty, cartTotal, cartVatBreakdown, checkoutItems, looksLikeAlcohol, parseEuroInput, posCustomerHits, posSheetTenders, tenderAvailable, tendersFor, validEmail, validateCustomLine } from '../admin/pos-logic.js';
+import { searchSaleProducts, saleOptions, moveHi, enterTarget, filterProducts, isBookableProduct, posChannelIds } from '../admin/pos-logic.js';
+import { cartAdd, cartAddCustom, cartAddUnbooked, cartLineKey, cartSetQty, cartTotal, cartVatBreakdown, checkoutItems, looksLikeAlcohol, parseEuroInput, posCustomerHits, posSheetTenders, tenderAvailable, tendersFor, validEmail, validateCustomLine } from '../admin/pos-logic.js';
 import { POS_TEXTS } from '../admin/pos-texts.js';
 import { qrMatrix } from '../admin/qrsvg.js';
 import { deviceFromSearch, drinksCartAdd, looksLikeAlcohol as drinksAlcohol } from '../drinks/drinks-logic.js';
@@ -323,8 +323,10 @@ test('haku: kanavatieto on ensisijainen vanhaan pos_enabled-kenttään nähden',
   const channelData = { ok: true, products: { 3: ['pos'], 2: ['admin'], 5: ['shop'] } };
   assert.deepEqual([...posChannelIds(channelData, SALE, [])], [3]);
   const r = searchSaleProducts({ products: SALE, catalog: [], channelData }, 'i');
-  // 1 (Vichy) on vain vanhassa kentässä: ei pos-kanavassa eikä varattava → ei hakuun. 5 ei ole Hallinta (varaus) -kanavassa.
-  assert.deepEqual(r.map((x) => x.product_id).sort(), [2, 3]);
+  // 1 (Vichy) on vain vanhassa kentässä: ei pos-kanavassa eikä varattava → ei hakuun. Varattavat 2 ja 5 löytyvät kanavasta riippumatta (t1812u).
+  assert.deepEqual(r.map((x) => x.product_id).sort(), [2, 3, 5]);
+  assert.equal(r[0].product_id, 3, 'pos-kanavan tuote ensin');
+  assert.deepEqual(r.map((x) => x.pos), [true, false, false]);
   assert.equal(r.find((x) => x.product_id === 3).pos, true);
   assert.deepEqual([...posChannelIds(null, SALE, [])].sort(), [1, 3, 4]);
 });
@@ -340,16 +342,24 @@ test('haun valinnat: oma rivi aina viimeisenä, nuolet kiertävät, Enter valits
   assert.equal(enterTarget(opts, -1), opts[0]); assert.equal(enterTarget(opts, 1), opts[1]); assert.equal(enterTarget([], -1), null);
 });
 
-test('varauksen osoite: vuoro, resurssi, henkilömäärä ja kesto', () => {
-  assert.equal(bookingHref({ date: '2026-11-20', ruleId: 9001, startsAt: '2026-11-20T16:00:00.000Z', persons: 3 }), '#/uusi?r=9001&t=2026-11-20T16%3A00%3A00.000Z&d=2026-11-20&n=3');
-  assert.equal(bookingHref({ date: '2026-11-20', ruleId: 9001, startsAt: 'x', persons: 1 }).includes('n='), false);
-  assert.equal(bookingHref({ resourced: true, productId: 10, date: '2026-11-20', time: '16:00', persons: 2 }), '#/uusi?tyyppi=resurssi&p=10&t=16%3A00&d=2026-11-20&n=2');
-  assert.equal(minutesBetween('2026-11-20T16:00:00Z', '2026-11-20T17:30:00Z'), 90);
-  assert.equal(minutesBetween('x', 'y'), null);
-});
-
-test('ilman varausta -rivi: cartAdd merkitsee rivin, checkoutItems lähettää vain tuotteen ja määrän', () => {
-  const cart = cartAdd([], { product_id: 3, name: 'Yleinen saunavuoro', price: 18, vat_rate: 25.5 }, { unbooked: true });
-  assert.equal(cart[0].unbooked, true);
-  assert.deepEqual(checkoutItems(cart), [{ product_id: 3, quantity: 1 }]);
+test('ilman varausta -rivi: oma rivi, ei yhdisty, checkoutItems lähettää product_id, quantity, unbooked ja note/date vain jos annettu', () => {
+  const prod = { product_id: 3, name: 'Yleinen saunavuoro', price: 18, vat_rate: 25.5 };
+  let cart = cartAdd([], prod);
+  cart = cartAddUnbooked(cart, prod, { quantity: 2 });
+  cart = cartAddUnbooked(cart, prod, { quantity: 1, note: '  jälkilaskutus ', date: '2026-11-12' });
+  cart = cartAdd(cart, prod);
+  assert.equal(cart.length, 3, 'tavalliset rivit yhdistyvät, ilman varausta -rivit ovat omiaan');
+  assert.equal(cart[0].quantity, 2);
+  assert.notEqual(cartLineKey(cart[1]), cartLineKey(cart[2]));
+  assert.deepEqual(checkoutItems(cart), [
+    { product_id: 3, quantity: 2 },
+    { product_id: 3, quantity: 2, unbooked: true },
+    { product_id: 3, quantity: 1, unbooked: true, note: 'jälkilaskutus', date: '2026-11-12' },
+  ]);
+  assert.equal(cartTotal(cart), 18 * 2 + 18 * 2 + 18);
+  // määrä rajataan 1–20, huono päivä ja pitkä muistiinpano siivotaan; hintaa ei lähetetä
+  const odd = cartAddUnbooked([], prod, { quantity: 99, note: 'x'.repeat(300), date: 'huomenna' });
+  assert.equal(odd[0].quantity, 20); assert.equal(odd[0].note.length, 200); assert.equal('date' in odd[0], false);
+  assert.equal(Object.keys(checkoutItems(odd)[0]).includes('unit_price'), false);
+  assert.deepEqual(Object.keys(checkoutItems(cartAddUnbooked([], prod))[0]), ['product_id', 'quantity', 'unbooked']);
 });

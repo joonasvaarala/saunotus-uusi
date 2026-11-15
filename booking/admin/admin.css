@@ -806,6 +806,7 @@ a.tl-tabbtn{display:inline-flex;align-items:center;justify-content:center;text-d
 .pos-book-head{display:flex;align-items:center;justify-content:space-between;gap:8px}
 .pos-book-head h2{margin:0;font-size:18px;color:var(--green);overflow-wrap:anywhere}
 .pos-book-price,.pos-book-duration{margin:0}
+.pos-line-note{display:block;font-weight:400}
 .pos-book-actions{display:flex;flex-wrap:wrap;gap:8px}
 .pos-book-actions .btn{min-height:52px;flex:1 1 180px}
 .pos-editor{display:grid;gap:10px;margin:4px 0 12px}

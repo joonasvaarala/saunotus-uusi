@@ -14,16 +14,31 @@ export function looksLikeAlcohol(text) {
 
 export function cartLineKey(row) {
   if (!row) return null;
-  if (row.kind === 'custom') return row.line_key;
+  if (row.line_key) return row.line_key;
   return row.product_id;
 }
 
-export function cartAdd(cart, product, { unbooked = false } = {}) {
+export function cartAdd(cart, product) {
   const next = cart.map((r) => ({ ...r }));
-  const row = next.find((r) => r.kind !== 'custom' && r.product_id === product.product_id);
+  const row = next.find((r) => r.kind !== 'custom' && !r.unbooked && r.product_id === product.product_id);
   if (row) row.quantity += 1;
-  else next.push({ product_id: product.product_id, name: product.name, name_en: product.name_en || null, unit_price: Number(product.price), vat_rate: product.vat_rate, quantity: 1, age_restricted: !!product.age_restricted, ...(unbooked ? { unbooked: true } : {}) });
+  else next.push({ product_id: product.product_id, name: product.name, name_en: product.name_en || null, unit_price: Number(product.price), vat_rate: product.vat_rate, quantity: 1, age_restricted: !!product.age_restricted });
   return next;
+}
+
+/**
+ * t1812u: varattava tuote vain maksuksi (ei varausta). Oma rivi (line_key), ei yhdistetä muihin.
+ * Hinta tulee katalogista; määrä 1–20, muistiinpano enintään 200 merkkiä, päivä muodossa VVVV-KK-PP (vapaaehtoinen).
+ */
+export function cartAddUnbooked(cart, product, { quantity = 1, note = '', date = '' } = {}) {
+  const q = Math.max(1, Math.min(20, Math.floor(Number(quantity)) || 1));
+  const n = String(note ?? '').trim().slice(0, 200);
+  const d = /^\d{4}-\d\d-\d\d$/.test(String(date || '')) ? String(date) : '';
+  const key = `u-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+  return [...(cart || []).map((r) => ({ ...r })), {
+    product_id: product.product_id, name: product.name, name_en: product.name_en || null, unit_price: Number(product.price), vat_rate: product.vat_rate,
+    quantity: q, age_restricted: !!product.age_restricted, unbooked: true, line_key: key, ...(n ? { note: n } : {}), ...(d ? { date: d } : {}),
+  }];
 }
 
 /** Vapaa rivi: oma line_key, ei yhdistetä muihin. */
@@ -106,6 +121,10 @@ export function checkoutItems(cart) {
         unit_price: Number(r.unit_price),
         vat_rate: Number(r.vat_rate),
       };
+    }
+    if (r.unbooked) {
+      // booking_322: { product_id, quantity, unbooked: true, note?, date? }. Hintaa ei lähetetä.
+      return { product_id: r.product_id, quantity: r.quantity, unbooked: true, ...(r.note ? { note: r.note } : {}), ...(r.date ? { date: r.date } : {}) };
     }
     return { product_id: r.product_id, quantity: r.quantity };
   });
@@ -216,19 +235,9 @@ export function posChannelIds(channelData, products, catalog = []) {
   return ids;
 }
 
-/** Hallinta (varaus) -kanavan tuotteet: kanavatieto ensin, muuten bookable + current. */
-export function adminChannelIds(channelData, products) {
-  const ids = new Set();
-  if (channelData && channelData.products && typeof channelData.products === 'object') {
-    for (const [id, codes] of Object.entries(channelData.products)) if (Array.isArray(codes) && codes.includes('admin')) ids.add(Number(id));
-  } else {
-    for (const p of products || []) if (isBookableProduct(p)) ids.add(Number(p.id));
-  }
-  return ids;
-}
-
 /**
- * Myynnin haku: pos-kanavan tuotteet ensin, sitten varattavat (Hallinta (varaus) -kanava) jotka eivät ole pos-kanavassa.
+ * Myynnin haku: kaikki aktiiviset hinnoitellut tuotteet (ei lahja- eikä kausikorttia), joita voi myydä:
+ * pos-kanavan tuotteet ensin, sitten varattavat tuotteet myös ilman pos-kanavaa (t1812u: laskutus ilman varausta).
  * Järjestys: koodin tarkka osuma, nimen alku, muu osuma; tasatilanteessa pos-kanava ennen varattavia, sitten nimi.
  * Tyhjä haku → tyhjä lista (kenttä on hakukenttä, ei selauslista).
  */
@@ -236,7 +245,6 @@ export function searchSaleProducts({ products = [], catalog = [], channelData = 
   const q = String(query || '').trim().toLocaleLowerCase('fi');
   if (!q) return [];
   const posIds = posChannelIds(channelData, products, catalog);
-  const adminIds = adminChannelIds(channelData, products);
   const byId = new Map();
   for (const p of posCandidates(products)) byId.set(Number(p.id), p);
   const out = [];
@@ -245,7 +253,7 @@ export function searchSaleProducts({ products = [], catalog = [], channelData = 
     if (seen.has(id)) return;
     const onPos = posIds.has(id);
     const bookable = p ? isBookableProduct(p) : false;
-    if (!onPos && !(bookable && adminIds.has(id))) return;
+    if (!onPos && !bookable) return;
     const f = productSearchFields(p || fromCatalog);
     let rank = -1;
     if (f.codes.some((c) => c === q)) rank = 0;
@@ -284,28 +292,6 @@ export function enterTarget(opts, hi) {
   return opts[0];
 }
 
-/** Uuden varauksen osoite esitäytettynä (päivä, vuoro, henkilömäärä). Resurssituote (hoito) → resurssilomake. */
-export function bookingHref({ date, ruleId = null, startsAt = null, persons = 1, productId = null, resourced = false, time = null } = {}) {
-  const q = new URLSearchParams();
-  if (resourced) {
-    q.set('tyyppi', 'resurssi');
-    if (productId != null) q.set('p', String(productId));
-    if (time) q.set('t', time);
-  } else {
-    if (ruleId != null) q.set('r', String(ruleId));
-    if (startsAt) q.set('t', startsAt);
-  }
-  if (date) q.set('d', date);
-  if (persons > 1) q.set('n', String(persons));
-  return `#/uusi?${q.toString()}`;
-}
-
-/** Kesto minuutteina alku- ja loppuajasta. */
-export function minutesBetween(startIso, endIso) {
-  const a = Date.parse(startIso); const b = Date.parse(endIso);
-  return Number.isFinite(a) && Number.isFinite(b) && b > a ? Math.round((b - a) / 60000) : null;
-}
-
 /** Muokkaus aukeaa vain pyydettäessä. Tyhjä kassakin pysyy kiinni, jotta pikapainikkeet ovat ensimmäisenä. */
 export function tillEditorOpen(_catalogLength, requested) {
   return !!requested;
@@ -333,11 +319,4 @@ export function qrEligible(product) {
   if (product.config.age_restricted) return false;
   if (looksLikeAlcohol(productBlob(product))) return false;
   return true;
-}
-
-/** Kellonaika HH:MM Helsingin ajassa (resurssilomakkeen alkuaika). */
-export function helTime(iso) {
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return null;
-  return d.toLocaleTimeString('sv-SE', { timeZone: 'Europe/Helsinki', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });
 }

@@ -196,13 +196,6 @@ export async function render({ ctx, refs, query, kind }) {
     revealSection(result, result.querySelector('h3'));
   } catch (e) { errBox.textContent = optErr(e); errBox.hidden = false; revealIfHidden(errBox); } }); });
   const body = products.length ? [f, result] : [h('p', { class: 'empty', text: old ? 'Ei vanhoja tuotteita, joille voisi kirjata varauksen.' : 'Ei resurssituotteita, joille voisi luoda varauksen.' })];
-  // Pikakassan haku (t1809u): #/uusi?tyyppi=resurssi&p=<tuote>&t=<HH:MM>&n=<henkilöt> esitäyttää tuotteen, alkuajan ja henkilömäärän.
-  if (!old) {
-    const pre = products.find((x) => String(x.id) === query.get('p'));
-    if (pre) prodSel.value = String(pre.id);
-    if (/^\d\d:\d\d$/.test(query.get('t') || '')) time.value = query.get('t');
-  }
   if (products.length) sync();
-  if (!old && /^\d{1,2}$/.test(query.get('n') || '')) { pst.set(Number(query.get('n'))); persons.dispatchEvent?.(new Event('input', { bubbles: true })); }
   return [h('h1', { text: old ? 'Jälkikirjaus' : 'Hoito tai tila' }), typeSwitch(kind), ...body];
 }

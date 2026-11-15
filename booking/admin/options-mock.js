@@ -791,15 +791,21 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
     admin_pos_checkout: (a) => {
       need('pos.use');
       const items = Array.isArray(a.p_items) ? a.p_items : [];
-      if (items.some((r) => Object.keys(r).some((k) => k !== 'product_id' && k !== 'quantity'))) throw err('price_locked', 'Hintaa ei voi antaa');
+      // booking_322: ilman varausta -rivi { product_id, quantity, unbooked: true, note?, date? } sallitaan varattavalle tuotteelle myös ilman pos-kanavaa. Hinta aina katalogista.
+      const OK_KEYS = new Set(['product_id', 'quantity', 'unbooked', 'note', 'date']);
+      if (items.some((r) => Object.keys(r).some((k) => !OK_KEYS.has(k)))) throw err('price_locked', 'Hintaa ei voi antaa');
+      if (items.some((r) => (r.note != null || r.date != null) && r.unbooked !== true)) throw err('price_locked', 'Muistiinpano ja päivä vain ilman varausta -riville');
       const lines = [];
       let total = 0;
       for (const r of items) {
         const p = product(r.product_id);
-        if (!p || !p.config?.pos_enabled || ['gift_card', 'season_card'].includes(p.category)) throw err('not_counter_product', 'Tuote ei ole pikakassassa');
+        const notSellable = ['gift_card', 'season_card'].includes(p?.category);
+        if (r.unbooked === true) {
+          if (!p || !p.active || notSellable || !p.config?.bookable) throw err('not_bookable_product', 'Tuote ei ole varattava tuote');
+        } else if (!p || !p.config?.pos_enabled || notSellable) throw err('not_counter_product', 'Tuote ei ole pikakassassa');
         const line = Math.round(p.price * r.quantity * 100) / 100;
         total += line;
-        lines.push({ product_id: p.id, name: p.name, quantity: r.quantity, unit_price: p.price, vat_rate: p.vat_rate, line_total: line });
+        lines.push({ product_id: p.id, name: p.name, quantity: r.quantity, unit_price: p.price, vat_rate: p.vat_rate, line_total: line, ...(r.unbooked === true ? { unbooked: true, note: r.note ?? null, date: r.date ?? null } : {}) });
       }
       const raw = a.p_email == null ? '' : String(a.p_email).trim().toLowerCase();
       if (raw && (raw.length > 254 || !EMAIL_RE.test(raw))) throw err('invalid_email', 'Sähköposti ei ole kelvollinen');

@@ -29,7 +29,7 @@ export async function render({ ctx, refs, query, reload }) {
     select('schedule_rules', { select: 'id,product_id,label,mode,start_time,duration_minutes,min_persons,max_persons,weekdays,space_id', active: 'eq.true', order: 'sort_order.asc,id.asc' }).catch(() => []),
     loadBookingTexts(rpc).catch(() => false),
   ]);
-  const st = { date: /^\d{4}-\d\d-\d\d$/.test(query.get('d') || '') ? query.get('d') : todayHel(), session: null, customer: null, preN: query.get('n'), pre: query.get('r') && query.get('t') ? { r: query.get('r'), t: query.get('t') } : null };
+  const st = { date: /^\d{4}-\d\d-\d\d$/.test(query.get('d') || '') ? query.get('d') : todayHel(), session: null, customer: null, pre: query.get('r') && query.get('t') ? { r: query.get('r'), t: query.get('t') } : null };
   // HALL-ASIAKKAAT-01: #/uusi?c=<asiakas-id> (Uusi varaus tälle asiakkaalle asiakasnäkymästä) esitäyttää asiakkaan; virhe → tavallinen tyhjä lomake
   st.preCustomer = null;
   if (/^[1-9]\d{0,15}$/.test(query.get('c') || '')) {
@@ -114,8 +114,7 @@ export async function render({ ctx, refs, query, reload }) {
     paintSummary();
     const rng = personsRange(s);
     const capMax = staffPersonsMax(s);
-    const preN = st.preN && /^\d{1,2}$/.test(String(st.preN)) ? Number(st.preN) : null; st.preN = null;   // pikakassan haku: #/uusi?...&n=<henkilöt> (kerran)
-    const pers = stepper({ label: T('nb.persons'), value: preN != null ? Math.max(rng.min, Math.min(capMax, preN)) : rng.min, min: rng.min, max: capMax, inputName: 'n', size: 'lg', onChange: () => upd() });
+    const pers = stepper({ label: T('nb.persons'), value: rng.min, min: rng.min, max: capMax, inputName: 'n', size: 'lg', onChange: () => upd() });
     const persHint = h('small', { class: 'fld-hint', text: s.mode === 'exclusive' ? T('nb.personsHintMin', { min: rng.min, max: rng.max }) + (s.wlHold ? ` ${T('nb.holdHintPriv', { time: fmtTime(s.wlHold.until) })}` : '') : T('nb.personsHint', { free: s.remaining, min: rng.min }) + (s.wlHold ? ` ${T('nb.holdHint', { n: s.wlHold.n, time: fmtTime(s.wlHold.until) })}` : '') });
     const persErr = fieldErr();
     const priceIn = h('input', { type: 'text', inputmode: 'decimal', name: 'price', autocomplete: 'off', placeholder: T('nb.priceAuto') });

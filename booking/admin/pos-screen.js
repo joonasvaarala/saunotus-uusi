@@ -1,13 +1,11 @@
 // Pikakassa: pikapainikkeet ensin, maksurivit ja yhteensä niiden alla, muokkaus sivun lopussa.
 // Maksutapa, summa ja vahvistus avautuvat erilliseen ikkunaan. Hintoja ei lähetetä palvelimelle.
-import { h, toast, money, errMsg, todayHel, addDays, fmtTime, fmtDay } from './ui.js';
+import { h, toast, money, errMsg } from './ui.js';
 import { icon } from './icons.js';
 import { loadPosTexts, posText as tx } from './pos-texts.js';
 import { getLang } from './talous-i18n.js';
-import { searchSaleProducts, saleOptions, moveHi, enterTarget, bookingHref, minutesBetween, helTime, isBookableProduct } from './pos-logic.js';
+import { searchSaleProducts, saleOptions, moveHi, enterTarget, isBookableProduct, cartAddUnbooked } from './pos-logic.js';
 import { stepper } from './stepper.js';
-import { nbt } from './nb-texts.js';
-import { personsRange, staffPersonsMax, slotBookable, isPrivateConflict } from './nb-logic.js';
 import { cartAdd, cartAddCustom, cartLineKey, cartSetQty, cartTotal, cartVatBreakdown, checkoutItems, parseEuroInput, validateCustomLine, posSheetTenders, tenderAvailable, joinUrl, posCandidates, filterProducts, tillEditorOpen, moveSort, validEmail, posCustomerHits } from './pos-logic.js';
 import { searchCustomers } from './customer-hits.js';
 import { qrSvgElement } from './qrsvg.js';
@@ -704,9 +702,9 @@ export async function renderPos({ ctx, rpc, fn }) {
   }
 
   // ---- t1808u: myynnin haku ----
-  function addProduct(p, opts) {
+  function addProduct(p) {
     const row = { ...p, name: p.name_fi || p.name };
-    const go = () => { cart = cartAdd(cart, row, opts); draw(); };
+    const go = () => { cart = cartAdd(cart, row); draw(); };
     if (phase === 'paying') voidOpen().then(go); else go();
   }
 
@@ -826,117 +824,49 @@ export async function renderPos({ ctx, rpc, fn }) {
       h('small', { class: 'muted pos-sale-help', text: t('sale_help') }));
   }
 
-  // ---- t1809u: varattavan tuotteen varauspaneeli ----
+  // ---- t1812u: varattava tuote vain maksuksi (ei varausta). Kevyt paneeli, kori säilyy. ----
   function openBooking(it) {
-    const c = it.product?.config || {};
-    bk = { item: it, resourced: c.resource_class === 'resourced', date: todayHel(), slots: null, slot: null, persons: 1, err: '', gen: 0, node: null };
+    bk = { item: it, qty: 1, node: null };
     draw();
-    loadBookSlots();
-    queueMicrotask(() => bk?.node?.scrollIntoView?.({ block: 'nearest' }));
+    queueMicrotask(() => { bk?.node?.scrollIntoView?.({ block: 'nearest' }); document.getElementById('pos-book-note')?.focus?.(); });
   }
 
   function closeBooking() { bk = null; draw(); }
 
-  async function loadBookSlots() {
+  function addUnbooked() {
     const b = bk;
     if (!b) return;
-    const gen = ++b.gen;
-    b.slots = null; b.slot = null; b.err = '';
-    paintBook();
-    let rows = [];
-    try {
-      if (b.resourced) {
-        const r = await rpc('admin_treatment_availability', { p_product_id: Number(b.item.product_id), p_from: b.date, p_to: b.date, p_persons: b.persons, p_override: false, p_override_reason: null });
-        rows = (r || []).filter((x) => x.status === 'available' || x.status == null)
-          .map((x) => ({ kind: 'resource', key: x.starts_at, starts_at: x.starts_at, ends_at: x.ends_at, product_id: x.product_id }));
-      } else {
-        const v = await rpc('admin_day_view', { p_date: b.date });
-        rows = (v?.sessions || []).filter((s) => Number(s.product_id) === Number(b.item.product_id) && s.status !== 'closed')
-          .map((s) => ({ ...s, kind: 'shift', key: `${s.rule_id}|${s.starts_at}` }));
-      }
-    } catch (e) { b.err = errMsg(e); }
-    if (bk !== b || gen !== b.gen) return;
-    b.slots = rows;
-    paintBook();
+    const note = String(document.getElementById('pos-book-note')?.value || '');
+    const date = String(document.getElementById('pos-book-date')?.value || '');
+    bk = null;
+    const go = () => { cart = cartAddUnbooked(cart, b.item, { quantity: b.qty, note, date }); showLines = true; draw(); };
+    if (phase === 'paying') voidOpen().then(go); else go();
   }
 
-  function slotCaption(s) {
-    if (s.kind !== 'shift') return '';
-    if (isPrivateConflict(s)) return nbt('nb.na');
-    if (s.status === 'available') return s.mode === 'exclusive' ? nbt('nb.privFree') : nbt('nb.free', { n: s.remaining });
-    return s.status === 'full' ? nbt('nb.full') : nbt('nb.na');
-  }
-
-  function bookContinue() {
+  // Luodaan kerran (ei piirretä joka näppäilyllä), jotta kenttien kohdistus säilyy.
+  function bookPanel() {
+    if (!bk) return null;
     const b = bk;
-    if (!b?.slot) return;
-    const s = b.slot;
-    location.hash = b.resourced
-      ? bookingHref({ resourced: true, productId: b.item.product_id, date: b.date, time: helTime(s.starts_at), persons: b.persons })
-      : bookingHref({ date: b.date, ruleId: s.rule_id, startsAt: s.starts_at, persons: b.persons });
-  }
-
-  function paintBook() {
-    const b = bk;
-    if (!b?.node) return;
     const it = b.item;
-    const cfg = it.product?.config || {};
-    const shiftMax = b.slot && b.slot.kind === 'shift' ? staffPersonsMax(b.slot) : null;
-    const pMin = b.slot?.kind === 'shift' ? personsRange(b.slot).min : Math.max(1, Number(cfg.min_persons) || 1);
-    const pMax = shiftMax ?? Math.max(pMin, Number(cfg.max_persons) || 99);
-    b.persons = Math.max(pMin, Math.min(pMax, b.persons));
-    const dateIn = h('input', { type: 'date', id: 'pos-book-date', 'data-testid': 'pos-book-date', value: b.date,
-      onchange: (e) => { if (!/^\d{4}-\d\d-\d\d$/.test(e.target.value)) return; b.date = e.target.value; loadBookSlots(); } });
-    const shift = (n) => { b.date = addDays(b.date, n); loadBookSlots(); };
-    const dayCtl = h('div', { class: 'nb-dayctl' },
-      h('button', { type: 'button', class: 'btn ghost nb-daybtn', 'aria-label': nbt('nb.prevDay'), 'data-testid': 'pos-book-prev', onclick: () => shift(-1) }, icon('pgprev', 22)), dateIn,
-      h('button', { type: 'button', class: 'btn ghost nb-daybtn', 'aria-label': nbt('nb.nextDay'), 'data-testid': 'pos-book-next', onclick: () => shift(1) }, icon('pgnext', 22)));
-
-    let slotsEl;
-    if (b.err) slotsEl = h('p', { role: 'alert', class: 'err', 'data-testid': 'pos-book-error', text: b.err });
-    else if (b.slots == null) slotsEl = h('p', { class: 'muted', role: 'status', text: t('book_loading') });
-    else if (!b.slots.length) slotsEl = h('p', { class: 'muted', 'data-testid': 'pos-book-none', text: t('book_none') });
-    else {
-      slotsEl = h('div', { class: 'slotpick', role: 'radiogroup', 'aria-label': t('book_pick'), 'data-testid': 'pos-book-slots' }, b.slots.map((s) => {
-        const ok = s.kind === 'shift' ? slotBookable(s) && !isPrivateConflict(s) : true;
-        const on = b.slot?.key === s.key;
-        return h('button', { type: 'button', role: 'radio', 'aria-checked': on ? 'true' : 'false', class: `slotbtn ${s.status || 'available'}`, disabled: !ok || null, 'data-testid': 'pos-book-slot',
-          onclick: () => { b.slot = s; paintBook(); } },
-        h('strong', { text: `${fmtTime(s.starts_at)}–${fmtTime(s.ends_at)}` }), h('span', { text: it.name }), slotCaption(s) ? h('small', { text: slotCaption(s) }) : null);
-      }));
-    }
-
-    const kids = [
+    const perPerson = it.product?.price_type === 'per_person';
+    const qtyLabel = perPerson ? t('book_persons') : t('book_qty');
+    const qty = stepper({ label: qtyLabel, value: b.qty, min: 1, max: 20, inputName: 'pos-book-qty', size: 'lg', onChange: (n) => { b.qty = n; } });
+    const node = h('section', { class: 'card pos-book', role: 'group', 'aria-labelledby': 'pos-book-title', 'data-testid': 'pos-book' },
       h('div', { class: 'pos-book-head' },
         h('h2', { id: 'pos-book-title', text: `${t('book_title')}: ${it.name}` }),
         h('button', { type: 'button', class: 'icon-btn', 'aria-label': t('book_cancel'), 'data-testid': 'pos-book-close', onclick: () => closeBooking() }, icon('close', 22))),
       h('p', { class: 'muted pos-book-price', text: money(it.price) }),
-      h('div', { class: 'fld' }, h('label', { class: 'fld-lab', for: 'pos-book-date', text: t('book_day') }), dayCtl),
-      h('div', { class: 'fld' }, h('span', { class: 'fld-lab', text: t('book_pick') }), slotsEl),
-    ];
-    const mins = b.slot ? minutesBetween(b.slot.starts_at, b.slot.ends_at) : (Number(cfg.duration_minutes) || null);
-    if (mins) kids.push(h('p', { class: 'pos-book-duration', 'data-testid': 'pos-book-duration' }, h('strong', { text: `${t('book_duration')}: ` }), h('span', { text: `${mins} ${t('book_min')}` })));
-    if (b.slot) {
-      const pers = stepper({ label: t('book_persons'), value: b.persons, min: pMin, max: pMax, inputName: 'pos-book-n', size: 'lg', onChange: (n) => { b.persons = n; } });
-      kids.push(h('div', { class: 'fld', 'data-testid': 'pos-book-persons' }, h('span', { class: 'fld-lab', text: t('book_persons') }), pers.node));
-    }
-    kids.push(h('p', { class: 'muted', text: t('book_customer') }));
-    if (cart.length) kids.push(h('p', { class: 'muted', 'data-testid': 'pos-book-cart-note', text: t('book_cart') }));
-    if (!it.pos) kids.push(h('p', { class: 'muted', 'data-testid': 'pos-book-unbooked-off', text: t('book_unbooked_off') }));
-    kids.push(h('div', { class: 'pos-book-actions' },
-      h('button', { type: 'button', class: 'btn primary', 'data-testid': 'pos-book-continue', text: t('book_continue'), disabled: !b.slot || null, onclick: () => bookContinue() }),
-      h('button', { type: 'button', class: 'btn', 'data-testid': 'pos-book-unbooked', text: t('book_unbooked'), disabled: !it.pos || null,
-        onclick: () => { bk = null; addProduct(it, { unbooked: true }); } }),
-      h('button', { type: 'button', class: 'btn ghost', 'data-testid': 'pos-book-cancel', text: t('book_cancel'), onclick: () => closeBooking() })));
-    b.node.replaceChildren(...kids);
-  }
-
-  function bookPanel() {
-    if (!bk) return null;
-    const node = h('section', { class: 'card pos-book', role: 'group', 'aria-labelledby': 'pos-book-title', 'data-testid': 'pos-book' });
+      h('p', { class: 'muted', 'data-testid': 'pos-book-help', text: t('book_help') }),
+      h('div', { class: 'fld', 'data-testid': 'pos-book-qty' }, h('span', { class: 'fld-lab', text: qtyLabel }), qty.node),
+      h('div', { class: 'fld' }, h('label', { class: 'fld-lab', for: 'pos-book-date', text: t('book_day_opt') }),
+        h('input', { type: 'date', id: 'pos-book-date', 'data-testid': 'pos-book-date', value: '' })),
+      h('div', { class: 'fld' }, h('label', { class: 'fld-lab', for: 'pos-book-note', text: t('book_note') }),
+        h('input', { type: 'text', id: 'pos-book-note', 'data-testid': 'pos-book-note', maxlength: 200, autocomplete: 'off', placeholder: t('book_note_ph'), value: '' })),
+      h('div', { class: 'pos-book-actions' },
+        h('button', { type: 'button', class: 'btn primary', 'data-testid': 'pos-book-add', text: t('book_add'), onclick: () => addUnbooked() }),
+        h('button', { type: 'button', class: 'btn ghost', 'data-testid': 'pos-book-cancel', text: t('book_cancel'), onclick: () => closeBooking() })));
     node.addEventListener('keydown', (e) => { if (e.key === 'Escape') { e.preventDefault?.(); closeBooking(); } });
-    bk.node = node;
-    paintBook();
+    b.node = node;
     return node;
   }
 
@@ -974,7 +904,8 @@ export async function renderPos({ ctx, rpc, fn }) {
       for (const r of cart) {
         const key = cartLineKey(r);
         lines.append(h('div', { class: 'pos-line', 'data-testid': r.kind === 'custom' ? 'pos-custom-line' : 'pos-product-line' },
-          h('span', { class: 'grow', text: r.unbooked ? `${r.name} (${t('unbooked')})` : r.name }),
+          h('span', { class: 'grow' }, r.unbooked ? `${r.name} (${t('unbooked')})` : r.name,
+            r.unbooked && (r.date || r.note) ? h('small', { class: 'muted pos-line-note', 'data-testid': 'pos-line-note', text: [r.date ? r.date.split('-').reverse().map(Number).join('.') : '', r.note || ''].filter(Boolean).join(' · ') }) : null),
           h('button', { type: 'button', class: 'btn pos-step', 'aria-label': t('qty_less'), text: '−', onclick: () => { cart = cartSetQty(cart, key, r.quantity - 1); if (phase === 'paying') voidOpen(); draw(); } }),
           h('span', { class: 'pos-qty', text: String(r.quantity) }),
           h('button', { type: 'button', class: 'btn pos-step', 'aria-label': t('qty_more'), text: '+', onclick: () => { cart = cartSetQty(cart, key, r.quantity + 1); if (phase === 'paying') voidOpen(); draw(); } }),
