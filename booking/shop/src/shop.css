@@ -797,6 +797,13 @@ div.bk-ev-date.is-full{cursor:default}
 .pl-item-when{font-size:16px;color:#2B3A30}
 .pl-valid{margin-top:12px!important;font-size:15px;color:#2B3A30;border-top:1px solid rgba(122,85,48,.35);padding-top:10px}
 .pl-state{background:#F4EFE7;border-left:4px solid #7A5530;color:#2B3A30;padding:12px 16px;border-radius:6px;margin:12px 0;font-size:17px;line-height:1.5;font-weight:600}
+/* oman vuoron kaksivaiheinen valinta (alku → kesto): käyttää olemassa olevia .bk-times/.bk-time-btn ja .bk-slotlist/.bk-slot -tyylejä */
+.bk-slotpick h4{margin:14px 0 6px;font:600 18px var(--head);color:var(--ink)}
+.bk-slotpick h4:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.bk-slotpick>.bk-note{margin:0 0 12px}
+.bk-slotpick .bk-slotlist{margin-bottom:10px}
+.bk-slotpick>p{margin:10px 0 0}
+.bk-slotpick .btn:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
 /* booking_166: saunarituaali lisäpalvelukorttina LISÄPALVELUT-osiossa (.bk-addon-muoto; vain tämän kortin tyylit; värit #2B3A30 / #F4EFE7 / #7A5530 / #6B5E52) */
 .bk-addon-ritual[hidden],.bk-addon-ritual [hidden],.bk-addons[hidden]{display:none}
 .bk-addon-ritual .bk-rit-annual{color:#6B5E52}

@@ -15,6 +15,8 @@ import { rt } from './reduce-texts.js';
 import { createWaitlistView } from './waitlist-ui.js';
 import { visibleWaitlistSlots, fullyBooked, hasWaitlistSlots } from './waitlist-logic.js';
 import { daySlotsAvailableFirst } from './day-slot-order.js';
+import { usesStartPicker } from './slot-groups.js';
+import { createSlotPicker } from './slot-start-ui.js';
 import { indexShopEvents, missingEventProducts, ensureEventProduct, eventIsFull, eventWaitlistPath, byEventStart } from './event-full.js';
 import { loadProducts as loadTreatmentProducts, splitCatalog, isListed as treatmentListed, isTreatmentBooking, loadAvailability as loadTreatmentSlots, horizonDays as treatmentHorizon, timeToken as treatmentTimeToken, isRetryable as treatmentRetryable } from './treatments.js';
 import { pickCatalog } from './catalog-audience.js';
@@ -120,7 +122,8 @@ function quietPriceNode(el, o, kind) {
   const sr = h('span', { class: 'sr', text: fillText(t.quietSr, { pct: pctText(q.pct, S.lang), was: money(q.was), now: money(q.now) }) });
   el.classList.add('bk-quiet');
   if (m === 'per_person') { el.append(' ', qBadge(q.pct), sr); return; }   // henkilöhinta: vain merkki (palvelin laskee summan)
-  const now = m === 'fixed' ? money(q.now) : kind === 'day' ? `${t.from} ${money(q.now)}`
+  // 'dur' = oman vuoron kestorivi: sis. hlö / lisähenkilö näkyy kerran listan alla, ei joka rivillä
+  const now = m === 'fixed' || kind === 'dur' ? money(q.now) : kind === 'day' ? `${t.from} ${money(q.now)}`
     : `${money(q.now)}${o.included_persons != null && q.extraNow != null ? ` (${t.included(o.included_persons)}, ${t.extra(money(q.extraNow))})` : ''}`;
   el.replaceChildren(qBadge(q.pct), ' ', h('del', { 'aria-hidden': 'true', text: money(q.was) }), ' ', h('span', { class: 'bk-quiet-now', 'aria-hidden': 'true', text: now }), sr);
 }
@@ -461,7 +464,9 @@ function prodCard(p, rs, ds, open, onToggle, treat = false) {
   const short = dayCardExcerpt(p, S.lang, pdesc(p) || '', pname(p));   // KAUPPA-SELAUS-01: lyhyt kuvaus, varalla ote ilman alun otsikkoa
   const panel = h('div', { id: `${id}-panel`, class: 'bk-pc-panel', role: 'region', 'aria-labelledby': `${id}-btn`, hidden: open ? null : true },
     treat && tv.timelineText(p) ? h('p', { class: 'bk-note bk-pc-tl', text: tv.timelineText(p) }) : null,
-    h('ul', { class: 'bk-slotlist' }, (treat ? rs : daySlotsAvailableFirst(rs)).map((x) => (treat ? treatItem(x, ds) : dayItem(x, ds)))),
+    !treat && usesStartPicker(rs, p)   // useita kestoja samalla alulla → ensin alku, sitten kesto (sama ryhmittely kuin tuotesivulla)
+      ? makeSlotPicker(p, '?via=day', (r, d) => dayItem({ r, p }, d)).view(rs, ds, p)
+      : h('ul', { class: 'bk-slotlist' }, (treat ? rs : daySlotsAvailableFirst(rs)).map((x) => (treat ? treatItem(x, ds) : dayItem(x, ds)))),
     h('p', { class: 'bk-pc-more' }, h('a', { href: treat ? bk(`/tuote/${p.slug}?n=1&d=${ds}`) : bk(`/tuote/${p.slug}/${ds}`), text: t.productInfo })));
   const btn = h('button', { type: 'button', id: `${id}-btn`, class: 'bk-pc-head', 'aria-expanded': open ? 'true' : 'false', 'aria-controls': `${id}-panel`, onclick: () => onToggle(p, li) },
     pimg(p, 'pc-img', { alt: false, w: 160, hgt: 160 }),
@@ -719,11 +724,13 @@ async function viewProduct(slug, dateStr, query) {
       h('p', { class: 'bk-legend' }, h('span', { class: 'dot free' }), t.free, ' ', h('span', { class: 'dot full' }), t.full, ' ', h('span', { class: 'dot unavail' }), t.unavailable, qLegend()),
       ...(any ? [] : [h('p', { class: 'bk-note', text: t.noSlotsMonth })]));
     const markSel = () => calBox.querySelectorAll('.bk-cell[aria-pressed]').forEach((b) => { const on = b.textContent === String(+sel?.slice(8)) && sel?.startsWith(`${y}-${pad2(m + 1)}`); b.classList.toggle('sel', on); b.setAttribute('aria-pressed', on ? 'true' : 'false'); });
+    const slotPicker = makeSlotPicker(p);
     const drawSlots = () => {
       if (!sel) { slotBox.replaceChildren(); return; }
       const rows = visibleWaitlistSlots(byDay[sel] || []);   // alkamisajan mukaan; loppuunmyyty jää harmaana paikalleen
+      // useita kestoja samalla alulla (oma saunavuoro, yritysversio) → ensin alku, sitten kesto; muuten entinen lista
       slotBox.replaceChildren(h('h3', { text: `${t.pickSlot} – ${dayLong(`${sel}T12:00:00Z`)}` }),
-        rows.length ? h('ul', { class: 'bk-slotlist' }, rows.map((r) => slotItem(r, sel, p))) : h('p', { text: t.noSlots }));
+        !rows.length ? h('p', { text: t.noSlots }) : usesStartPicker(rows, p) ? slotPicker.view(rows, sel, p) : h('ul', { class: 'bk-slotlist' }, rows.map((r) => slotItem(r, sel, p))));
     };
     drawSlots();
   };
@@ -733,6 +740,10 @@ async function viewProduct(slug, dateStr, query) {
 function spotBadge(r, p, ok, fullText, n = r.remaining) {
   if (ok && wholeSpaceBooking(r, p)) return null;
   return h('span', { class: `bk-badge ${ok ? 'free' : 'full'}`, text: ok ? t.freeSpots(n) : fullText });
+}
+// kaksivaiheinen alku → kesto -valinta (slot-start-ui.js); ds annetaan näkymälle, varauslinkki sama kuin slotItemissä
+function makeSlotPicker(p, via = '', legacy = (r, ds) => slotItem(r, ds, p)) {
+  return createSlotPicker({ h, t, money, hm, dur: fmtMinutes, href: (r, ds) => bk(`/varaa/${r.rule_id}/${ds}/${p.id}${via}`), badge: (r) => spotBadge(r, p, true, t.waitlistSessionSoldOut), priceAttrs: (r, shared) => qAttrs(true, p, r, shared ? 'dur' : 'slot'), legacyItem: legacy });
 }
 function slotItem(r, ds, p) {
   const ok = r.status === 'available';
