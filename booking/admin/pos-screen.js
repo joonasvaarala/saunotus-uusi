@@ -256,7 +256,7 @@ export async function renderPos({ ctx, rpc, fn }) {
     try { await rpc('admin_pos_void', { p_order_id: id }); } catch (e) { toast(errMsg(e)); }
   }
 
-  // t1818u: maksulinkki on voimassa 24 h. Kun linkki on luotu/lähetetty, kassan seuraava toimenpide EI peru tilausta:
+  // t1818u, booking_323: pikakassan maksulinkillä ei ole takarajaa (link_expires_at null, paylink no_deadline). Kun linkki on luotu/lähetetty, kassan seuraava toimenpide EI peru tilausta:
   // kassa vapautuu uuteen myyntiin (tyhjä kori) ja linkki jää voimaan. Peruminen vain erillisellä Peru-napilla vahvistuksen kanssa.
   // Korttimaksun (CheckoutX) käytös ennallaan: kesken oleva maksu perutaan ensin Surfboardissa (voidOpen).
   const withOrderNo = (text, no) => String(text).replace(/\{\{var:order_no\}\}|\{order_no\}/g, String(no ?? ''));

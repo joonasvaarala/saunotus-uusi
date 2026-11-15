@@ -963,7 +963,8 @@ test('t1818u: linkin lähetyksen jälkeen tuotteen lisäys vapauttaa kassan uute
   let dlg = document.getElementById('pos-pay-dialog');
   assert.ok(q(dlg, 'pos-link-new'), 'Uusi myynti -nappi');
   assert.ok(q(dlg, 'pos-link-cancel'), 'Peru linkkitilaus -nappi');
-  assert.match(q(dlg, 'pos-link-valid').textContent, /24 tuntia/);
+  assert.match(q(dlg, 'pos-link-valid').textContent, /Linkki ei vanhene/);
+  assert.doesNotMatch(q(dlg, 'pos-link-valid').textContent, /24/);
   q(dlg, 'pos-pay-close').click();
   // rivit lukittu: ei −/+/Poista -nappeja lähetetyn linkin riveillä
   const r1 = document.body;
@@ -1035,9 +1036,21 @@ test('t1818u: korttimaksun (CheckoutX) ja linkin virhetilanteen peruminen ennall
   assert.match(src, /await voidOpen\(\);\n\s+phase = 'cart';/, 'linkin luonnin virhe peruu yhä tilauksen');
   const imp = JSON.parse(read('../../content/site-texts.pending-import-179.json'));
   assert.equal(imp.length, 18);
+  // booking_323: pending-propose-180 päivittää jo tuodun ui.pos.link_valid_help-tekstin (tuonti 179 jää historiaksi = base_text)
+  const prop = JSON.parse(read('../../content/site-texts.pending-propose-180.json'));
+  assert.equal(prop.length, 2);
+  const now = new Map(prop.map((r) => [r.key + '/' + r.lang, r.text]));
+  for (const r of prop) {
+    const old = imp.find((x) => x.key === r.key && x.lang === r.lang);
+    assert.ok(old, r.key + ' on tuonnissa 179');
+    assert.equal(r.base_text, old.text);
+    assert.equal(r.base_version, 1);
+    assert.equal(r.apply, 'texts_propose');
+    assert.ok(!/24/.test(r.text) && r.text.length <= r.max_len, r.key);
+  }
   for (const r of imp) {
     const k = r.key.replace('ui.pos.', '');
-    assert.equal(r.text, texts.POS_LINK_HOLD_TEXTS[r.lang][k], r.key);
+    assert.equal(now.get(r.key + '/' + r.lang) ?? r.text, texts.POS_LINK_HOLD_TEXTS[r.lang][k], r.key);
     assert.equal(r.class, 'normal');
     assert.ok(!r.text.includes('<'));
     assert.deepEqual(r.placeholders, r.text.match(/\{\{var:\w+\}\}/g) || []);

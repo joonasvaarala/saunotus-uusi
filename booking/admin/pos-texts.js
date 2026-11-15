@@ -315,7 +315,7 @@ export const POS_CHECKOUTX_TEXTS = {
 export const POS_LINK_HOLD_TEXTS = {
   fi: {
     link_new_sale: 'Uusi myynti',
-    link_valid_help: 'Linkki on voimassa 24 tuntia. Voit aloittaa uuden myynnin, linkki ja tilaus jäävät voimaan.',
+    link_valid_help: 'Linkki ei vanhene. Asiakas voi maksaa sen myöhemmin, kunnes tilaus perutaan. Voit aloittaa uuden myynnin.',
     link_released: 'Maksulinkki jäi voimaan (tilaus {{var:order_no}}). Kassa on vapaa uuteen myyntiin.',
     link_locked: 'Maksulinkki on lähetetty, joten rivejä ei voi muuttaa. Lisää tuote tai valitse Uusi myynti aloittaaksesi uuden myynnin.',
     link_cancel: 'Peru linkkitilaus',
@@ -326,7 +326,7 @@ export const POS_LINK_HOLD_TEXTS = {
   },
   en: {
     link_new_sale: 'New sale',
-    link_valid_help: 'The link is valid for 24 hours. You can start a new sale; the link and the order stay valid.',
+    link_valid_help: 'The link does not expire. The customer can pay it later until the order is cancelled. You can start a new sale.',
     link_released: 'The payment link stays valid (order {{var:order_no}}). The till is free for a new sale.',
     link_locked: 'The payment link has been sent, so the lines cannot be changed. Add a product or choose New sale to start a new sale.',
     link_cancel: 'Cancel link order',
