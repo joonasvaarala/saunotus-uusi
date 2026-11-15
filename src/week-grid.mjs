@@ -1,5 +1,5 @@
 // Viikko-ohjelma rakennusvaiheessa (etusivu + saunavuorot): staattinen varaversio ilman JS:ää.
-// Rakenne tulee kb.hours-tiedoista (viikonpäivät ilman päivämääriä, ei hintoja eikä vapaita aikoja). Selain (booking/shop/src/week-grid.js) korvaa sen
+// Rakenne tulee kb.hours-tiedoista (viikonpäivät ma–su ilman päivämääriä; wd ja we tulevat viikonpäivästä, ei hintoja eikä vapaita aikoja). Selain (booking/shop/src/week-grid.js) korvaa sen
 // live-datalla: päivämäärät, vapaat ajat, hinnat, hoidot, tapahtumat ja viikkonavigointi. Sama näkymä (week-grid-view.js) piirtää molemmat.
 import { site, kb, e, bookingUrl, money } from './lib.mjs';
 import { tx } from './site-texts.mjs';
@@ -17,7 +17,7 @@ export const trainingUrl = (lang) => TRAINING_URLS[lang] || TRAINING_URLS.fi;
 export function gridTexts(lang) {
   const u = site.ui[lang];
   const tokens = (t) => String(t).replace(/\{\{var:(\w+)\}\}/g, '{$1}');
-  return weekGridTexts((key, def) => tx(key, lang, { fallback: tokens(def[lang] ?? def.fi), vars: { n: '{n}', a: '{a}', b: '{b}' }, log: quiet }), {
+  return weekGridTexts((key, def) => tx(key, lang, { fallback: tokens(def[lang] ?? def.fi), vars: { n: '{n}', a: '{a}', b: '{b}', day: '{day}', date: '{date}' }, log: quiet }), {
     lang, daysLong: u.daysLong, today: u.today, newTab: u.openNewTab,
     quietBadge: quietSiteText('ui.site.quiet_badge', lang), quietSr: quietSiteText('ui.site.quiet_sr', lang),
   });
@@ -39,7 +39,7 @@ function staticModel(lang) {
     }).filter(Boolean);
     const care = rows.filter((h) => h.session_type === 'ritual').map((h) => prod(h.product_id)).filter((p) => p && !HIDDEN_CARE_SLUGS.includes(p.slug))
       .map((p) => ({ name: liveCatalogName(p.slug, lang) || site.sessionLabels.ritual[lang], href: bookingUrl(p.booking_url, lang) }));
-    days.push({ wd: d, date: null, public: pub, publicNone: rows.some((h) => h.session_type === 'private_only') && !pub.length, own: own ? { href: bookingUrl(own.booking_url, lang), price: '', was: '', pct: '', full: false } : null, after: [], care, events: [] });
+    days.push({ wd: d, we: d >= 6, date: null, public: pub, publicNone: rows.some((h) => h.session_type === 'private_only') && !pub.length, own: own ? { href: bookingUrl(own.booking_url, lang), price: '', was: '', pct: '', full: false } : null, after: [], care, events: [] });
   }
   return { start: null, end: null, week: null, range: '', todayIdx: -1, days, hasEvents: false, careLater: false, nav: { prev: false, next: false, now: false }, hint: [], error: false };
 }
@@ -47,7 +47,7 @@ function staticModel(lang) {
 /** opt: { heading: true → kicker + otsikko (etusivu), links: { all } (etusivu), moreHref }. */
 export function weekGrid(lang, opt = {}) {
   const u = site.ui[lang], T = gridTexts(lang);
-  const o = { heading: opt.heading ? { kicker: u.weekKicker, title: T.title } : null, links: opt.links ? { training: trainingUrl(lang), all: opt.links.all } : null };
+  const o = { heading: opt.heading ? { kicker: T.kicker || u.weekKicker, title: T.title } : null, links: opt.links ? { training: trainingUrl(lang), all: opt.links.all } : null };
   // data-quiet-week: build lisää kaupan skriptin (quiet-week.js) sivulle. data-vk-texts = koko tekstisanakirja (myös ale-tekstit) selaimelle.
   const root = `<div class="vk" data-vk data-quiet-week lang="${lang}" data-vk-opts="${e(JSON.stringify(o))}" data-vk-texts="${e(JSON.stringify(T))}">`;
   return `${root}${weekGridTree(staticModel(lang), T, o).map(toHtml).join('')}</div>`;

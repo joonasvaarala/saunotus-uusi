@@ -1,5 +1,5 @@
 // Viikko-ohjelman ajonaikainen ohjaus (etusivu + saunavuorot): hakee julkiset RPC:t viikko kerrallaan, rakentaa mallin (week-grid-logic.js)
-// ja piirtää sen (week-grid-view.js, createElement + textContent). Viikkoja selataan nuolilla; mobiilissa päivänauha valitsee yhden päivän.
+// ja piirtää sen (week-grid-view.js, createElement + textContent). Liukuva 7 päivän ikkuna (tänään … tänään+6); jaksoja selataan nuolilla 7 päivän loikin; mobiilissa päivänauha ja edellinen/seuraava päivä valitsevat yhden päivän.
 // Haut: public_availability_all, public_quiet_offers (≤ 14 pv), public_events, public_catalog, public_settings (hoitojen varausikkuna
 // public_treatment_horizon_days, nyt 90 pv) ja hoidoille public_treatment_availability (treatments.js, rajattu näkyvän viikon ja ikkunan leikkaukseen). Hakuvirhe ei riko sivua: staattinen varaversio jää, tai viikko piirretään ilman puuttuvaa osaa.
 import { addDaysIso, quietWindow } from './quiet-offers-logic.js';
@@ -110,17 +110,29 @@ export function mountWeekGrid(root, { rpc, lang = 'fi', shopHref = '', now = () 
     start = s;
     draw(model, focus);
   }
+  // Valittu päivä (mobiili): päivittää nauhan, paneelin ja edellinen/seuraava-päivä -painikkeet ilman uutta piirtoa
+  function select(i, { focus = false } = {}) {
+    const n = root.querySelectorAll('.vk-day').length;
+    if (!(i >= 0 && i < n)) return;
+    sel = i;
+    root.querySelector('.vk-days')?.setAttribute('data-vk-sel', String(sel));
+    root.querySelectorAll('.vk-day').forEach((d) => d.classList.toggle('is-on', +d.dataset.vkDay === sel));
+    root.querySelectorAll('.vk-tab').forEach((b) => { const on = +b.dataset.vkPick === sel; b.classList.toggle('is-on', on); b.setAttribute('aria-pressed', String(on)); });
+    root.querySelectorAll('[data-vk-step]').forEach((b) => { b.disabled = +b.dataset.vkStep < 0 ? sel <= 0 : sel >= n - 1; });
+    if (focus) root.querySelector('.vk-day.is-on .vk-dh')?.focus({ preventScroll: false });
+  }
   root.addEventListener('click', (ev) => {
-    const t = ev.target.closest?.('[data-vk-nav],[data-vk-pick]');
+    const t = ev.target.closest?.('[data-vk-nav],[data-vk-pick],[data-vk-step]');
     if (!t || !root.contains(t)) return;
-    if (t.dataset.vkPick != null) {
-      sel = +t.dataset.vkPick;
-      root.querySelector('.vk-days')?.setAttribute('data-vk-sel', String(sel));
-      root.querySelectorAll('.vk-day').forEach((d) => d.classList.toggle('is-on', +d.dataset.vkDay === sel));
-      root.querySelectorAll('.vk-tab').forEach((b) => { const on = +b.dataset.vkPick === sel; b.classList.toggle('is-on', on); b.setAttribute('aria-pressed', String(on)); });
+    if (t.dataset.vkPick != null) { select(+t.dataset.vkPick, { focus: t.classList.contains('vk-jump') }); return; }
+    if (t.dataset.vkStep != null) {
+      if (t.disabled) return;
+      select(sel + +t.dataset.vkStep);
+      const keep = root.querySelector(`[data-vk-step="${t.dataset.vkStep}"]:not([disabled])`) || root.querySelector('.vk-day.is-on .vk-dh');   // reunalla painike poistuu käytöstä: fokus paneeliin, ei hukkaan
+      keep?.focus();
       return;
     }
-    // Viikkoselaus viivästetään: nopea selaus hakee vain viimeisen viikon (väliviikoille ei lähetä hoitohakua).
+    // Selaus viivästetään: nopea selaus hakee vain viimeisen 7 päivän jakson (välijaksoille ei lähetä hoitohakua).
     const kind = t.dataset.vkNav;
     if (kind === 'now') target = weekStartOf(today), focusKind = 'next', sel = null;
     else { target = clampWeek(addDaysIso(target ?? start, kind === 'next' ? 7 : -7), today); focusKind = kind; }

@@ -13,21 +13,24 @@ export const HIDDEN_PUBLIC_SLUGS = Object.freeze(['tunnin-vuoro']);
 export const HIDDEN_CARE_SLUGS = Object.freeze(['saunotusrituaali']);
 export const OWN_SLUG = 'oma-saunavuoro';
 export const JALKIL_SLUG = 'jalkiloylyt';
-/** Viikkoja eteenpäin, joille voi selata (varausikkuna on selvästi tätä pidempi). */
+/** Ikkunan pituus päivinä: tänään + 6 päivää (liukuva ikkuna, ei kalenteriviikkoa). */
+export const WINDOW_DAYS = 7;
+/** Jaksoja (7 pv) eteenpäin, joille voi selata (varausikkuna on selvästi tätä pidempi). Nimi on historiallinen. */
 export const MAX_WEEKS_AHEAD = 8;
 /** Hoitojen varausikkuna päivinä VARALLA (sama kuin treatments.js POLICY.horizonDays). Oikea ikkuna tulee public_settings.public_treatment_horizon_days -arvosta (horizonDays(settings)); sen jälkeisille päiville hoitoja ei haeta. */
 export const CARE_HORIZON_DAYS = 14;
 
-export const weekStartOf = (ds) => addDaysIso(ds, 1 - weekdayIso(ds));
+/** Ikkunan ensimmäinen päivä: aina tänään (liukuva ikkuna). Ei maanantaita. */
+export const weekStartOf = (today) => today;
 export function isoWeekNumber(ds) {
   const d = new Date(`${ds}T12:00:00Z`);
   d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
   return Math.ceil(((d - Date.UTC(d.getUTCFullYear(), 0, 1)) / 864e5 + 1) / 7);
 }
 const EN_MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-/** FI: 16.–22.11. (sama kuukausi) tai 30.11.–6.12. EN: 16–22 Nov tai 30 Nov–6 Dec. */
+/** FI: 15.–21.11. (sama kuukausi) tai 30.11.–6.12. EN: 15–21 Nov tai 30 Nov–6 Dec. Alku = ikkunan ensimmäinen päivä (ei välttämättä maanantai). */
 export function weekRange(start, lang = 'fi') {
-  const end = addDaysIso(start, 6);
+  const end = addDaysIso(start, WINDOW_DAYS - 1);
   if (lang === 'en') {
     const m = (ds) => EN_MONTHS[+ds.slice(5, 7) - 1];
     return start.slice(5, 7) === end.slice(5, 7) ? `${+start.slice(8)}–${+end.slice(8)} ${m(end)}` : `${+start.slice(8)} ${m(start)}–${+end.slice(8)} ${m(end)}`;
@@ -35,10 +38,32 @@ export function weekRange(start, lang = 'fi') {
   const a = `${+start.slice(8)}.${+start.slice(5, 7)}.`, b = `${+end.slice(8)}.${+end.slice(5, 7)}.`;
   return start.slice(5, 7) === end.slice(5, 7) ? `${+start.slice(8)}.–${b}` : `${a}–${b}`;
 }
-/** Navigoinnin rajat: ei menneisiin viikkoihin, ei yli MAX_WEEKS_AHEAD viikkoa eteenpäin. */
+/** Navigoinnin rajat: ikkuna alkaa aikaisintaan tänään ja enintään MAX_WEEKS_AHEAD × 7 päivää tästä päivästä. */
 export function clampWeek(start, today) {
-  const cur = weekStartOf(today), max = addDaysIso(cur, 7 * MAX_WEEKS_AHEAD);
-  return start < cur ? cur : start > max ? max : start;
+  const max = addDaysIso(today, WINDOW_DAYS * MAX_WEEKS_AHEAD);
+  return start < today ? today : start > max ? max : start;
+}
+/** Viikonpäivä (1 = ma … 7 = su) ja viikonloppu päivämäärästä, ei sarakkeen järjestyksestä. */
+export const dayInfo = (date) => { const wd = weekdayIso(date); return { wd, we: wd >= 6 }; };
+
+/** Hoidon hinta katalogista: per_person → «49 € / hlö»; vaihteleva (from, lisähenkilöt, valinnat) → «alk. 99 €»; muuten kiinteä. kind: per | from | fixed. */
+export function carePrice(c, lang = 'fi') {
+  if (!c || c.price == null || c.price === '' || !Number.isFinite(+c.price) || +c.price <= 0) return { text: '', kind: '' };
+  const text = money(c.price, lang);
+  if (c.price_type === 'per_person') return { text, kind: 'per' };
+  const extra = Number.isFinite(+c.extra_person_price) && +c.extra_person_price > 0 && c.included_persons != null && c.included_persons !== '';
+  const varies = c.price_type === 'from' || /extra|base_plus/.test(String(c.price_type || '')) || extra;
+  return { text, kind: varies ? 'from' : 'fixed' };
+}
+
+/** Päivän tarjonta (varattavissa): pub = yleinen vuoro, own = oma sauna tai jälkilöyly, care = hoito tai tapahtuma. Täydet eivät ole tarjontaa. */
+export const hasOffering = (d, kind) => kind === 'pub' ? d.public.some((g) => !g.full)
+  : kind === 'own' ? !!((d.own && !d.own.full) || d.after.some((r) => !r.full))
+    : d.care.length > 0 || d.events.some((e) => !e.full);
+/** Seuraava päivä i:n jälkeen, jolla on kyseistä tarjontaa → { index, date, wd } tai null (ei harhaanjohtavaa linkkiä, jos ikkunassa ei ole). */
+export function nextOffering(days, i, kind) {
+  for (let j = i + 1; j < days.length; j++) if (days[j].date && hasOffering(days[j], kind)) return { index: j, date: days[j].date, wd: days[j].wd };
+  return null;
 }
 
 export const money = (n, lang = 'fi') => (n == null || n === '' || !Number.isFinite(+n) ? '' : new Intl.NumberFormat(lang === 'fi' ? 'fi-FI' : 'en-FI', { style: 'currency', currency: 'EUR', minimumFractionDigits: Number.isInteger(+n) ? 0 : 2 }).format(+n));
@@ -60,7 +85,7 @@ function resolver(catalog) {
 
 /**
  * Viikon malli. input:
- *  start        maanantai (YYYY-MM-DD)
+ *  start        ikkunan ensimmäinen päivä (YYYY-MM-DD), yleensä tänään; 7 peräkkäistä päivää
  *  today, now   Helsingin päivä ja ms
  *  rows         public_availability_all (null = ei haettu)
  *  catalog      public_catalog
@@ -76,7 +101,7 @@ export function buildWeek({ start, today, now, rows = null, catalog = null, care
   const name = (r, info) => catalogDisplayName(info.cat, lang) || (lang === 'en' && r.name_en) || r.name || info.slug;
   const list = Array.isArray(rows) ? rows : [];
   const live = (r) => r && /^\d{4}-\d\d-\d\d$/.test(r.session_date || '') && Date.parse(r.ends_at || r.starts_at) > now;
-  const days = dates.map((date, i) => {
+  const days = dates.map((date) => {
     const mine = list.filter((r) => live(r) && r.session_date === date && (r.status === 'available' || r.status === 'full')).map((r) => ({ r, info: resolve(r) }));
 
     // Yleiset vuorot: vuoroittain (tuote), useampi alkuaika → chips
@@ -125,13 +150,13 @@ export function buildWeek({ start, today, now, rows = null, catalog = null, care
       });
 
     const careList = (Array.isArray(care) ? care : []).filter((c) => c && c.days?.has(date) && !HIDDEN_CARE_SLUGS.includes(c.slug))
-      .map((c) => ({ name: careName(catalogDisplayName(c, lang) || c.name), href: hrefs.care(c.slug, date) }));
+      .map((c) => { const pr = carePrice(c, lang); return { name: careName(catalogDisplayName(c, lang) || c.name), href: hrefs.care(c.slug, date), price: pr.text, priceKind: pr.kind }; });
     const careErr = care == null && date >= today && date <= horizonEnd;   // hoitohaku epäonnistui: solussa lyhyt teksti viivojen sijaan
-    return { wd: i + 1, date, past: date < today, public: pub, publicNone: Array.isArray(rows) && !pub.length && date >= today, own, after, care: careList, careErr, events: [] };
+    return { ...dayInfo(date), date, past: date < today, public: pub, publicNone: Array.isArray(rows) && !pub.length && date >= today, own, ownNone: Array.isArray(rows) && !own && !after.length && date >= today, after, care: careList, careErr, careLater: care != null && date > horizonEnd && !careList.length, events: [] };
   });
 
   // Tapahtumat samaan soluun kuin hoidot
-  const end = dates[6];
+  const end = dates[WINDOW_DAYS - 1];
   let hasEvents = false;
   for (const ev of asEventList(events)) {
     if (!ev || ev.category !== 'event' || typeof ev.slug !== 'string' || !ev.slug || !ev.name) continue;
@@ -157,12 +182,15 @@ export function buildWeek({ start, today, now, rows = null, catalog = null, care
   }
   for (const d of days) d.events.sort((a, b) => a.times[0]?.localeCompare(b.times[0] || '', 'fi') || a.name.localeCompare(b.name, 'fi'));
 
+  // Tyhjä hoitosolu: «Ei tänä päivänä» (ei viivaa), paitsi kun haku epäonnistui tai päivä on hoitoikkunan ulkopuolella
+  for (const d of days) d.careNone = !d.careErr && !d.careLater && !d.care.length && !d.events.length && d.date >= today;
+
   const todayIdx = dates.indexOf(today);
   const cur = weekStartOf(today);
   return {
     start, end, week: isoWeekNumber(start), range: weekRange(start, lang), todayIdx, days, hasEvents,
     careLater: care != null && start > horizonEnd,
-    nav: { prev: start > cur, next: start < addDaysIso(cur, 7 * MAX_WEEKS_AHEAD), now: start !== cur },
+    nav: { prev: start > cur, next: start < addDaysIso(cur, WINDOW_DAYS * MAX_WEEKS_AHEAD), now: start !== cur },
     hint: eventHint(events, { after: end, now, lang, hrefs, catalog }), error: false,
   };
 }
@@ -187,5 +215,5 @@ export function eventHint(events, { after, now, lang = 'fi', hrefs, catalog = nu
   return out.sort((a, b) => a.at.localeCompare(b.at)).slice(0, limit).map(({ at, ...x }) => x);
 }
 
-/** Hoitotuote → { id, slug, name, name_en, days } treatments.js:n loadAvailability-vastauksesta (Map<päivä, ajat[]>). */
-export const careEntry = (p, byDay) => ({ id: p.id, slug: p.slug, name: p.name, name_en: p.name_en, days: new Set(byDay ? [...byDay.keys()].filter((d) => byDay.get(d)?.length) : []) });
+/** Hoitotuote → { id, slug, name, name_en, price, price_type, …, days } treatments.js:n loadAvailability-vastauksesta (Map<päivä, ajat[]>). */
+export const careEntry = (p, byDay) => ({ id: p.id, slug: p.slug, name: p.name, name_en: p.name_en, price: p.price, price_type: p.price_type, included_persons: p.included_persons, extra_person_price: p.extra_person_price, days: new Set(byDay ? [...byDay.keys()].filter((d) => byDay.get(d)?.length) : []) });

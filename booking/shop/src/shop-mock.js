@@ -39,15 +39,16 @@ function businessShiftSlots(now, productId) {
   return [row(base + 1, 1, hh, 'available'), row(base + 2, 2, hh, 'available')];
 }
 // Oma saunavuoro (25) ja sen yritysversio (48): jokainen kesto on oma sääntörivinsä samalla alulla (kuten tuotannossa). Vain UI:n ja testauksen mock, ei varauslogiikkaa.
-// Lauantai: alku 13.00 kestot 1–6 h + 9 h, alku 14.00 kestot 1–5 h. Arki: alut 14.00 (2/5/7 h) ja 16.00 (3/5 h). Sunnuntai: osa kestoista täynnä (alku 12.00 kaikki täynnä).
+// booking_318: la ja su aloitus vain 13.00 (kestot 1–6 h + 9 h) tai 14.00 (kestot 1–5 h). Arki (booking_319): alut 14.00 (2/5/7 h) ja 16.00 (3/5 h). Sunnuntaina osa 13.00-vuoroista täynnä (1–3 h).
 // Hinnat ja "sis. 8 hlö, lisähenkilö +10 €" tulevat riveiltä (base_price / included_persons / extra_person_price), ei kovakoodattua tekstiä.
-const OWN_PRICE = { 1: 350, 2: 600, 3: 800, 4: 1000, 5: 1200, 6: 1400, 7: 1600, 9: 1900 };
+const OWN_PRICE = { 1: 350, 2: 600, 3: 950, 4: 1300, 5: 1650, 6: 2000, 9: 2300 };   // booking_318: lauantai
+const SUN_PRICE = { 1: 300, 2: 550, 3: 850, 4: 1150, 5: 1450, 6: 1750, 9: 2000 };   // booking_318: sunnuntai
 // Arki (booking_319): alut 14.00 (2/5/7 h) ja 16.00 (3/5 h). Kuluttajahinnat tuote 25: ma–to 14.00: 250/650/820, 16.00: 420/600; pe 14.00: 300/720/900, 16.00: 420/650.
 const WEEKDAY_PRICE = { 14: { 2: 250, 5: 650, 7: 820 }, 16: { 3: 420, 5: 600 } };
 const FRIDAY_PRICE = { 14: { 2: 300, 5: 720, 7: 900 }, 16: { 3: 420, 5: 650 } };
 const OWN_PLAN = {   // viikonpäivä (0 = su) → [alkutunti, [kestot h], täynnä-kestot h]
   6: [[13, [1, 2, 3, 4, 5, 6, 9], [5]], [14, [1, 2, 3, 4, 5], []]],
-  0: [[12, [1, 2, 3], [1, 2, 3]], [15, [2, 3], [3]]],
+  0: [[13, [1, 2, 3, 4, 5, 6, 9], [1, 2, 3]], [14, [1, 2, 3, 4, 5], []]],
   weekday: [[14, [2, 5, 7], []], [16, [3, 5], []]],
 };
 const helsinkiIso = (date, hh) => {
@@ -66,7 +67,7 @@ function ownShiftSlots(productId, from, to) {
         const start = helsinkiIso(date, hh), full = fullDurs.includes(d);
         out.push({ rule_id: productId * 100000 + dow * 10000 + hh * 100 + d, product_id: productId, label: biz ? 'Savusaunavuoro yrityksille' : 'Oma saunavuoro', label_en: biz ? 'Smoke sauna for companies' : 'Private session', mode: 'exclusive', session_date: date,
           starts_at: start.toISOString(), ends_at: new Date(start.getTime() + d * 36e5).toISOString(), status: full ? 'full' : 'available', remaining: full ? 0 : 20, min_persons: 1, max_persons: 20,
-          price_mode: 'base_plus_extra', unit_price: null, base_price: (dow >= 1 && dow <= 5 && !biz ? (dow === 5 ? FRIDAY_PRICE : WEEKDAY_PRICE)[hh][d] : OWN_PRICE[d]) ?? OWN_PRICE[d], included_persons: 8, extra_person_price: 10 });
+          price_mode: 'base_plus_extra', unit_price: null, base_price: (dow >= 1 && dow <= 5 && !biz ? (dow === 5 ? FRIDAY_PRICE : WEEKDAY_PRICE)[hh][d] : (dow === 0 ? SUN_PRICE : OWN_PRICE)[d]) ?? OWN_PRICE[d], included_persons: 8, extra_person_price: 10 });
       }
     }
   }

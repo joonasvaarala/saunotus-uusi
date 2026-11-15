@@ -37,7 +37,9 @@ export async function startSite({ port, tag }) {
   const r = spawnSync('node', ['scripts/build.mjs'], {
     cwd: root, encoding: 'utf8',
     env: { PATH: process.env.PATH, HOME: process.env.HOME, DIST: dist, SITE_ENV: 'test', SITE_URL: `http://127.0.0.1:${port}`,
-      ARTICLES_CACHE_DIR: join(work, 'cache'), ARTICLES_STATE_FILE: join(work, 'state.json'), ARTICLES_IMAGES: '0' },
+      ARTICLES_CACHE_DIR: join(work, 'cache'), ARTICLES_STATE_FILE: join(work, 'state.json'), ARTICLES_IMAGES: '0',
+      // Sivutekstit: tyhjä välimuisti → repon varateksti (ei CI:n edellisen ajon kannasta tallentamaa snapshotia), jotta testi ei riipu DEVin tekstien tilasta
+      SITE_TEXTS_CACHE_DIR: join(work, 'site-texts') },
   });
   if (r.status !== 0) throw new Error(`build kaatui:\n${r.stdout}\n${r.stderr}`);
   const booking = join(dist, 'booking');
@@ -56,9 +58,9 @@ export async function startSite({ port, tag }) {
     browser, port,
     async stop() { await browser?.close(); server?.kill(); rmSync(work, { recursive: true, force: true }); },
     /** Avaa sivu kiinnitetyllä kellolla ja mock-datalla; käynnistää viikko-ohjelman (quiet-week.js) ja odottaa live-piirron. */
-    async open(width, path, mock, { height = 1000, live = true } = {}) {
+    async open(width, path, mock, { height = 1000, live = true, now = NOW_ISO } = {}) {
       const page = await browser.newPage({ viewport: { width, height }, deviceScaleFactor: 1 });
-      await page.clock.install({ time: new Date(NOW_ISO) });
+      await page.clock.install({ time: new Date(now) });
       const lang = path.startsWith('/en/') ? 'en' : 'fi';
       await page.addInitScript(({ mock, lang }) => { globalThis.__MOCK = mock; window.BOOKING_QUIET = { lang, shopHref: '/varaa/' }; window.BOOKING_CONFIG = { url: 'http://mock' }; }, { mock, lang });
       await page.goto(`http://127.0.0.1:${port}${path}`, { waitUntil: 'domcontentloaded' });

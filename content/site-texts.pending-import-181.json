@@ -1,0 +1,432 @@
+[
+  {
+    "key": "ui.site.vk_kicker",
+    "lang": "fi",
+    "text": "Saunavuorot",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "Etusivun viikko-ohjelma, luonnos B (t1829u): liukuva 7 päivän ikkuna (tänään … tänään+6). Uusi avain. FI+EN, sama kuin koodin varateksti (booking/shop/src/week-grid-texts.js). Käyttö: etusivu ja saunavuorot-sivu (src/week-grid.mjs)."
+  },
+  {
+    "key": "ui.site.vk_kicker",
+    "lang": "en",
+    "text": "Sauna sessions",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "Etusivun viikko-ohjelma, luonnos B (t1829u): liukuva 7 päivän ikkuna (tänään … tänään+6). Uusi avain. FI+EN, sama kuin koodin varateksti (booking/shop/src/week-grid-texts.js). Käyttö: etusivu ja saunavuorot-sivu (src/week-grid.mjs)."
+  },
+  {
+    "key": "ui.site.vk_title",
+    "lang": "fi",
+    "text": "Tulevat päivät saunalla",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "Etusivun viikko-ohjelma, luonnos B (t1829u): liukuva 7 päivän ikkuna (tänään … tänään+6). Päivitetty teksti (aiemmin tuonnissa 171: «Tällä viikolla saunassa»). FI+EN, sama kuin koodin varateksti (booking/shop/src/week-grid-texts.js). Käyttö: etusivu ja saunavuorot-sivu (src/week-grid.mjs)."
+  },
+  {
+    "key": "ui.site.vk_title",
+    "lang": "en",
+    "text": "Upcoming days at the sauna",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "Etusivun viikko-ohjelma, luonnos B (t1829u): liukuva 7 päivän ikkuna (tänään … tänään+6). Päivitetty teksti (aiemmin tuonnissa 171: «This week at the sauna»). FI+EN, sama kuin koodin varateksti (booking/shop/src/week-grid-texts.js). Käyttö: etusivu ja saunavuorot-sivu (src/week-grid.mjs)."
+  },
+  {
+    "key": "ui.site.vk_prev",
+    "lang": "fi",
+    "text": "Edelliset 7 päivää",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "Etusivun viikko-ohjelma, luonnos B (t1829u): liukuva 7 päivän ikkuna (tänään … tänään+6). Päivitetty teksti (aiemmin tuonnissa 171: «Edellinen viikko»). FI+EN, sama kuin koodin varateksti (booking/shop/src/week-grid-texts.js). Käyttö: etusivu ja saunavuorot-sivu (src/week-grid.mjs)."
+  },
+  {
+    "key": "ui.site.vk_prev",
+    "lang": "en",
+    "text": "Previous 7 days",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "Etusivun viikko-ohjelma, luonnos B (t1829u): liukuva 7 päivän ikkuna (tänään … tänään+6). Päivitetty teksti (aiemmin tuonnissa 171: «Previous week»). FI+EN, sama kuin koodin varateksti (booking/shop/src/week-grid-texts.js). Käyttö: etusivu ja saunavuorot-sivu (src/week-grid.mjs)."
+  },
+  {
+    "key": "ui.site.vk_next",
+    "lang": "fi",
+    "text": "Seuraavat 7 päivää",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "Etusivun viikko-ohjelma, luonnos B (t1829u): liukuva 7 päivän ikkuna (tänään … tänään+6). Päivitetty teksti (aiemmin tuonnissa 171: «Seuraava viikko»). FI+EN, sama kuin koodin varateksti (booking/shop/src/week-grid-texts.js). Käyttö: etusivu ja saunavuorot-sivu (src/week-grid.mjs)."
+  },
+  {
+    "key": "ui.site.vk_next",
+    "lang": "en",
+    "text": "Next 7 days",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "Etusivun viikko-ohjelma, luonnos B (t1829u): liukuva 7 päivän ikkuna (tänään … tänään+6). Päivitetty teksti (aiemmin tuonnissa 171: «Next week»). FI+EN, sama kuin koodin varateksti (booking/shop/src/week-grid-texts.js). Käyttö: etusivu ja saunavuorot-sivu (src/week-grid.mjs)."
+  },
+  {
+    "key": "ui.site.vk_prev_off",
+    "lang": "fi",
+    "text": "Edellisiä päiviä ei ole: jakso alkaa tänään",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "Etusivun viikko-ohjelma, luonnos B (t1829u): liukuva 7 päivän ikkuna (tänään … tänään+6). Uusi avain. FI+EN, sama kuin koodin varateksti (booking/shop/src/week-grid-texts.js). Käyttö: etusivu ja saunavuorot-sivu (src/week-grid.mjs)."
+  },
+  {
+    "key": "ui.site.vk_prev_off",
+    "lang": "en",
+    "text": "No earlier days: the period starts today",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "Etusivun viikko-ohjelma, luonnos B (t1829u): liukuva 7 päivän ikkuna (tänään … tänään+6). Uusi avain. FI+EN, sama kuin koodin varateksti (booking/shop/src/week-grid-texts.js). Käyttö: etusivu ja saunavuorot-sivu (src/week-grid.mjs)."
+  },
+  {
+    "key": "ui.site.vk_next_off",
+    "lang": "fi",
+    "text": "Pidemmälle ei voi selata",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "Etusivun viikko-ohjelma, luonnos B (t1829u): liukuva 7 päivän ikkuna (tänään … tänään+6). Uusi avain. FI+EN, sama kuin koodin varateksti (booking/shop/src/week-grid-texts.js). Käyttö: etusivu ja saunavuorot-sivu (src/week-grid.mjs)."
+  },
+  {
+    "key": "ui.site.vk_next_off",
+    "lang": "en",
+    "text": "You cannot browse further ahead",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "Etusivun viikko-ohjelma, luonnos B (t1829u): liukuva 7 päivän ikkuna (tänään … tänään+6). Uusi avain. FI+EN, sama kuin koodin varateksti (booking/shop/src/week-grid-texts.js). Käyttö: etusivu ja saunavuorot-sivu (src/week-grid.mjs)."
+  },
+  {
+    "key": "ui.site.vk_now",
+    "lang": "fi",
+    "text": "Tänään",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "Etusivun viikko-ohjelma, luonnos B (t1829u): liukuva 7 päivän ikkuna (tänään … tänään+6). Päivitetty teksti (aiemmin tuonnissa 171: «Tämä viikko»). FI+EN, sama kuin koodin varateksti (booking/shop/src/week-grid-texts.js). Käyttö: etusivu ja saunavuorot-sivu (src/week-grid.mjs)."
+  },
+  {
+    "key": "ui.site.vk_now",
+    "lang": "en",
+    "text": "Today",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "Etusivun viikko-ohjelma, luonnos B (t1829u): liukuva 7 päivän ikkuna (tänään … tänään+6). Päivitetty teksti (aiemmin tuonnissa 171: «This week»). FI+EN, sama kuin koodin varateksti (booking/shop/src/week-grid-texts.js). Käyttö: etusivu ja saunavuorot-sivu (src/week-grid.mjs)."
+  },
+  {
+    "key": "ui.site.vk_week_nav",
+    "lang": "fi",
+    "text": "Valitse päivä",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "Etusivun viikko-ohjelma, luonnos B (t1829u): liukuva 7 päivän ikkuna (tänään … tänään+6). Päivitetty teksti (aiemmin tuonnissa 171: «Valitse viikko ja päivä»). FI+EN, sama kuin koodin varateksti (booking/shop/src/week-grid-texts.js). Käyttö: etusivu ja saunavuorot-sivu (src/week-grid.mjs)."
+  },
+  {
+    "key": "ui.site.vk_week_nav",
+    "lang": "en",
+    "text": "Choose a day",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "Etusivun viikko-ohjelma, luonnos B (t1829u): liukuva 7 päivän ikkuna (tänään … tänään+6). Päivitetty teksti (aiemmin tuonnissa 171: «Choose week and day»). FI+EN, sama kuin koodin varateksti (booking/shop/src/week-grid-texts.js). Käyttö: etusivu ja saunavuorot-sivu (src/week-grid.mjs)."
+  },
+  {
+    "key": "ui.site.vk_day_prev",
+    "lang": "fi",
+    "text": "Edellinen päivä",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "Etusivun viikko-ohjelma, luonnos B (t1829u): liukuva 7 päivän ikkuna (tänään … tänään+6). Uusi avain. FI+EN, sama kuin koodin varateksti (booking/shop/src/week-grid-texts.js). Käyttö: etusivu ja saunavuorot-sivu (src/week-grid.mjs)."
+  },
+  {
+    "key": "ui.site.vk_day_prev",
+    "lang": "en",
+    "text": "Previous day",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "Etusivun viikko-ohjelma, luonnos B (t1829u): liukuva 7 päivän ikkuna (tänään … tänään+6). Uusi avain. FI+EN, sama kuin koodin varateksti (booking/shop/src/week-grid-texts.js). Käyttö: etusivu ja saunavuorot-sivu (src/week-grid.mjs)."
+  },
+  {
+    "key": "ui.site.vk_day_next",
+    "lang": "fi",
+    "text": "Seuraava päivä",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "Etusivun viikko-ohjelma, luonnos B (t1829u): liukuva 7 päivän ikkuna (tänään … tänään+6). Uusi avain. FI+EN, sama kuin koodin varateksti (booking/shop/src/week-grid-texts.js). Käyttö: etusivu ja saunavuorot-sivu (src/week-grid.mjs)."
+  },
+  {
+    "key": "ui.site.vk_day_next",
+    "lang": "en",
+    "text": "Next day",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "Etusivun viikko-ohjelma, luonnos B (t1829u): liukuva 7 päivän ikkuna (tänään … tänään+6). Uusi avain. FI+EN, sama kuin koodin varateksti (booking/shop/src/week-grid-texts.js). Käyttö: etusivu ja saunavuorot-sivu (src/week-grid.mjs)."
+  },
+  {
+    "key": "ui.site.vk_tab_none",
+    "lang": "fi",
+    "text": "ei vuoroja",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "Etusivun viikko-ohjelma, luonnos B (t1829u): liukuva 7 päivän ikkuna (tänään … tänään+6). Uusi avain. FI+EN, sama kuin koodin varateksti (booking/shop/src/week-grid-texts.js). Käyttö: etusivu ja saunavuorot-sivu (src/week-grid.mjs)."
+  },
+  {
+    "key": "ui.site.vk_tab_none",
+    "lang": "en",
+    "text": "nothing available",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "Etusivun viikko-ohjelma, luonnos B (t1829u): liukuva 7 päivän ikkuna (tänään … tänään+6). Uusi avain. FI+EN, sama kuin koodin varateksti (booking/shop/src/week-grid-texts.js). Käyttö: etusivu ja saunavuorot-sivu (src/week-grid.mjs)."
+  },
+  {
+    "key": "ui.site.vk_book",
+    "lang": "fi",
+    "text": "Varaa",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "Etusivun viikko-ohjelma, luonnos B (t1829u): liukuva 7 päivän ikkuna (tänään … tänään+6). Uusi avain. FI+EN, sama kuin koodin varateksti (booking/shop/src/week-grid-texts.js). Käyttö: etusivu ja saunavuorot-sivu (src/week-grid.mjs)."
+  },
+  {
+    "key": "ui.site.vk_book",
+    "lang": "en",
+    "text": "Book",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "Etusivun viikko-ohjelma, luonnos B (t1829u): liukuva 7 päivän ikkuna (tänään … tänään+6). Uusi avain. FI+EN, sama kuin koodin varateksti (booking/shop/src/week-grid-texts.js). Käyttö: etusivu ja saunavuorot-sivu (src/week-grid.mjs)."
+  },
+  {
+    "key": "ui.site.vk_none_own",
+    "lang": "fi",
+    "text": "Ei oman saunan vuoroja",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "Etusivun viikko-ohjelma, luonnos B (t1829u): liukuva 7 päivän ikkuna (tänään … tänään+6). Uusi avain. FI+EN, sama kuin koodin varateksti (booking/shop/src/week-grid-texts.js). Käyttö: etusivu ja saunavuorot-sivu (src/week-grid.mjs)."
+  },
+  {
+    "key": "ui.site.vk_none_own",
+    "lang": "en",
+    "text": "No private sauna sessions",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "Etusivun viikko-ohjelma, luonnos B (t1829u): liukuva 7 päivän ikkuna (tänään … tänään+6). Uusi avain. FI+EN, sama kuin koodin varateksti (booking/shop/src/week-grid-texts.js). Käyttö: etusivu ja saunavuorot-sivu (src/week-grid.mjs)."
+  },
+  {
+    "key": "ui.site.vk_none_care",
+    "lang": "fi",
+    "text": "Ei hoitoja tänä päivänä",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "Etusivun viikko-ohjelma, luonnos B (t1829u): liukuva 7 päivän ikkuna (tänään … tänään+6). Uusi avain. FI+EN, sama kuin koodin varateksti (booking/shop/src/week-grid-texts.js). Käyttö: etusivu ja saunavuorot-sivu (src/week-grid.mjs)."
+  },
+  {
+    "key": "ui.site.vk_none_care",
+    "lang": "en",
+    "text": "No treatments this day",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "Etusivun viikko-ohjelma, luonnos B (t1829u): liukuva 7 päivän ikkuna (tänään … tänään+6). Uusi avain. FI+EN, sama kuin koodin varateksti (booking/shop/src/week-grid-texts.js). Käyttö: etusivu ja saunavuorot-sivu (src/week-grid.mjs)."
+  },
+  {
+    "key": "ui.site.vk_none_day",
+    "lang": "fi",
+    "text": "Ei tänä päivänä",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "Etusivun viikko-ohjelma, luonnos B (t1829u): liukuva 7 päivän ikkuna (tänään … tänään+6). Uusi avain. FI+EN, sama kuin koodin varateksti (booking/shop/src/week-grid-texts.js). Käyttö: etusivu ja saunavuorot-sivu (src/week-grid.mjs)."
+  },
+  {
+    "key": "ui.site.vk_none_day",
+    "lang": "en",
+    "text": "Not this day",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "Etusivun viikko-ohjelma, luonnos B (t1829u): liukuva 7 päivän ikkuna (tänään … tänään+6). Uusi avain. FI+EN, sama kuin koodin varateksti (booking/shop/src/week-grid-texts.js). Käyttö: etusivu ja saunavuorot-sivu (src/week-grid.mjs)."
+  },
+  {
+    "key": "ui.site.vk_next_with",
+    "lang": "fi",
+    "text": "Seuraava {{var:day}} {{var:date}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [
+      "{{var:day}}",
+      "{{var:date}}"
+    ],
+    "reason": "Etusivun viikko-ohjelma, luonnos B (t1829u): liukuva 7 päivän ikkuna (tänään … tänään+6). Uusi avain. FI+EN, sama kuin koodin varateksti (booking/shop/src/week-grid-texts.js). Käyttö: etusivu ja saunavuorot-sivu (src/week-grid.mjs)."
+  },
+  {
+    "key": "ui.site.vk_next_with",
+    "lang": "en",
+    "text": "Next: {{var:day}} {{var:date}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [
+      "{{var:day}}",
+      "{{var:date}}"
+    ],
+    "reason": "Etusivun viikko-ohjelma, luonnos B (t1829u): liukuva 7 päivän ikkuna (tänään … tänään+6). Uusi avain. FI+EN, sama kuin koodin varateksti (booking/shop/src/week-grid-texts.js). Käyttö: etusivu ja saunavuorot-sivu (src/week-grid.mjs)."
+  },
+  {
+    "key": "ui.site.vk_left_chip",
+    "lang": "fi",
+    "text": "{{var:n}} jäljellä",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [
+      "{{var:n}}"
+    ],
+    "reason": "Etusivun viikko-ohjelma, luonnos B (t1829u): liukuva 7 päivän ikkuna (tänään … tänään+6). Uusi avain. FI+EN, sama kuin koodin varateksti (booking/shop/src/week-grid-texts.js). Käyttö: etusivu ja saunavuorot-sivu (src/week-grid.mjs)."
+  },
+  {
+    "key": "ui.site.vk_left_chip",
+    "lang": "en",
+    "text": "{{var:n}} left",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [
+      "{{var:n}}"
+    ],
+    "reason": "Etusivun viikko-ohjelma, luonnos B (t1829u): liukuva 7 päivän ikkuna (tänään … tänään+6). Uusi avain. FI+EN, sama kuin koodin varateksti (booking/shop/src/week-grid-texts.js). Käyttö: etusivu ja saunavuorot-sivu (src/week-grid.mjs)."
+  },
+  {
+    "key": "ui.site.vk_legend_free",
+    "lang": "fi",
+    "text": "Vapaa",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "Etusivun viikko-ohjelma, luonnos B (t1829u): liukuva 7 päivän ikkuna (tänään … tänään+6). Uusi avain. FI+EN, sama kuin koodin varateksti (booking/shop/src/week-grid-texts.js). Käyttö: etusivu ja saunavuorot-sivu (src/week-grid.mjs)."
+  },
+  {
+    "key": "ui.site.vk_legend_free",
+    "lang": "en",
+    "text": "Available",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "Etusivun viikko-ohjelma, luonnos B (t1829u): liukuva 7 päivän ikkuna (tänään … tänään+6). Uusi avain. FI+EN, sama kuin koodin varateksti (booking/shop/src/week-grid-texts.js). Käyttö: etusivu ja saunavuorot-sivu (src/week-grid.mjs)."
+  },
+  {
+    "key": "ui.site.vk_legend_low",
+    "lang": "fi",
+    "text": "Vähän jäljellä",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "Etusivun viikko-ohjelma, luonnos B (t1829u): liukuva 7 päivän ikkuna (tänään … tänään+6). Uusi avain. FI+EN, sama kuin koodin varateksti (booking/shop/src/week-grid-texts.js). Käyttö: etusivu ja saunavuorot-sivu (src/week-grid.mjs)."
+  },
+  {
+    "key": "ui.site.vk_legend_low",
+    "lang": "en",
+    "text": "Few left",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "Etusivun viikko-ohjelma, luonnos B (t1829u): liukuva 7 päivän ikkuna (tänään … tänään+6). Uusi avain. FI+EN, sama kuin koodin varateksti (booking/shop/src/week-grid-texts.js). Käyttö: etusivu ja saunavuorot-sivu (src/week-grid.mjs)."
+  },
+  {
+    "key": "ui.site.vk_events_none",
+    "lang": "fi",
+    "text": "ei näinä päivinä.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "Etusivun viikko-ohjelma, luonnos B (t1829u): liukuva 7 päivän ikkuna (tänään … tänään+6). Päivitetty teksti (aiemmin tuonnissa 171: «ei tällä viikolla.»). FI+EN, sama kuin koodin varateksti (booking/shop/src/week-grid-texts.js). Käyttö: etusivu ja saunavuorot-sivu (src/week-grid.mjs)."
+  },
+  {
+    "key": "ui.site.vk_events_none",
+    "lang": "en",
+    "text": "none on these days.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "Etusivun viikko-ohjelma, luonnos B (t1829u): liukuva 7 päivän ikkuna (tänään … tänään+6). Päivitetty teksti (aiemmin tuonnissa 171: «none this week.»). FI+EN, sama kuin koodin varateksti (booking/shop/src/week-grid-texts.js). Käyttö: etusivu ja saunavuorot-sivu (src/week-grid.mjs)."
+  },
+  {
+    "key": "ui.site.vk_error",
+    "lang": "fi",
+    "text": "Näiden päivien vapaita aikoja ei saatu haettua. Yritä hetken päästä uudelleen.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Etusivun viikko-ohjelma, luonnos B (t1829u): liukuva 7 päivän ikkuna (tänään … tänään+6). Päivitetty teksti (aiemmin tuonnissa 171: «Viikon vapaita aikoja ei saatu haettua. Yritä hetken päästä uudelleen.»). FI+EN, sama kuin koodin varateksti (booking/shop/src/week-grid-texts.js). Käyttö: etusivu ja saunavuorot-sivu (src/week-grid.mjs)."
+  },
+  {
+    "key": "ui.site.vk_error",
+    "lang": "en",
+    "text": "Could not load the free times for these days. Please try again in a moment.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "Etusivun viikko-ohjelma, luonnos B (t1829u): liukuva 7 päivän ikkuna (tänään … tänään+6). Päivitetty teksti (aiemmin tuonnissa 171: «Could not load the free times for this week. Please try again in a moment.»). FI+EN, sama kuin koodin varateksti (booking/shop/src/week-grid-texts.js). Käyttö: etusivu ja saunavuorot-sivu (src/week-grid.mjs)."
+  }
+]

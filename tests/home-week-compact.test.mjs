@@ -83,12 +83,12 @@ test('työpöytä 1280: 7 saraketta, kolme palveluriviä samoilla korkeuksilla, 
 test('viikkonavigointi: nuolet, Tämä viikko, ei menneisiin viikkoihin, hoidot vain varausikkunassa', async () => {
   const page = await site.open(1280, '/saunavuorot/', { ...weekMock(), settings: { public_treatment_horizon_days: 14 } });
   const label = () => page.locator('.vk .vk-wk').innerText();
-  assert.match(await label(), /Viikko 47\s+16\.–22\.11\./i);
+  assert.equal((await label()).trim(), '16.–22.11.', 'väli vain nuolten välissä, ei viikkonumeroa');
   assert.ok(await page.locator('[data-vk-nav="prev"]').isDisabled(), 'ei edelliseen viikkoon');
-  assert.equal(await page.locator('[data-vk-nav="now"]').count(), 0, 'Tämä viikko -linkki vain, kun ei olla kuluvalla viikolla');
+  assert.equal(await page.locator('[data-vk-nav="now"]').count(), 0, 'Tänään-linkki vain, kun jakso ei ala tänään');
   await page.click('[data-vk-nav="next"]');
-  await page.waitForFunction(() => /Viikko 48/.test(document.querySelector('.vk .vk-wk')?.textContent || ''));
-  assert.match(await label(), /Viikko 48\s+23\.–29\.11\./i);
+  await page.waitForFunction(() => /23\.–29\.11\./.test(document.querySelector('.vk .vk-wk')?.textContent || ''));
+  assert.equal((await label()).trim(), '23.–29.11.');
   assert.ok(await page.locator('[data-vk-nav="now"]').isVisible());
   assert.ok(!(await page.locator('[data-vk-nav="prev"]').isDisabled()));
   assert.match(await page.locator('.vk-day[data-vk-day="0"]').innerText(), /23\.11\./);
@@ -98,13 +98,13 @@ test('viikkonavigointi: nuolet, Tämä viikko, ei menneisiin viikkoihin, hoidot 
   assert.deepEqual(calls, [['2026-11-16', '2026-11-22'], ['2026-11-23', '2026-11-29']]);
   // seuraava viikko: public_settings antaa ikkunaksi 14 pv → viikko 49 ylittää sen: ei hoitohakuja, selite
   await page.click('[data-vk-nav="next"]');
-  await page.waitForFunction(() => /Viikko 49/.test(document.querySelector('.vk .vk-wk')?.textContent || ''));
+  await page.waitForFunction(() => /30\.11\.–6\.12\./.test(document.querySelector('.vk .vk-wk')?.textContent || ''));
   assert.match(await page.locator('.vk .vk-careh').innerText(), /avautuvat lähempänä/);
   assert.match(await page.locator('.vk-day[data-vk-day="4"] .vk-carec').innerText(), /Perinnesaunotusilta/, 'tapahtuma näkyy, vaikka hoitoikkuna on ohitettu');
   const treatCalls = await page.evaluate(() => globalThis.__RPC.filter((c) => c.name === 'public_treatment_availability').map((c) => c.args.p_from));
   assert.ok(treatCalls.every((f) => f < '2026-11-30'), `hoitohaku ikkunan ulkopuolelle: ${treatCalls}`);
   await page.click('[data-vk-nav="now"]');
-  await page.waitForFunction(() => /Viikko 47/.test(document.querySelector('.vk .vk-wk')?.textContent || ''));
+  await page.waitForFunction(() => /16\.–22\.11\./.test(document.querySelector('.vk .vk-wk')?.textContent || ''));
   assert.equal(await page.locator('[data-vk-nav="now"]').count(), 0);
   assert.ok(await page.locator('[data-vk-nav="prev"]').isDisabled());
   await page.close();
@@ -118,9 +118,9 @@ test('hoitoikkuna 90 pv (public_settings): viikko 30.11.–6.12. näyttää hoid
   m.settings = { public_treatment_horizon_days: 90 };
   const page = await site.open(1280, '/saunavuorot/', m);
   await page.click('[data-vk-nav="next"]');
-  await page.waitForFunction(() => /Viikko 48/.test(document.querySelector('.vk .vk-wk')?.textContent || ''));
+  await page.waitForFunction(() => /23\.–29\.11\./.test(document.querySelector('.vk .vk-wk')?.textContent || ''));
   await page.click('[data-vk-nav="next"]');
-  await page.waitForFunction(() => /Viikko 49\s+30\.11\.–6\.12\./.test(document.querySelector('.vk .vk-wk')?.textContent || ''));
+  await page.waitForFunction(() => /30\.11\.–6\.12\./.test(document.querySelector('.vk .vk-wk')?.textContent || ''));
   assert.doesNotMatch(await page.locator('.vk .vk-careh').innerText(), /avautuvat lähempänä/);
   assert.match(await page.locator('.vk-day[data-vk-day="1"] .vk-carec').innerText(), /Saunahoito/);
   const fri = await page.locator('.vk-day[data-vk-day="4"] .vk-carec').innerText();
@@ -129,12 +129,12 @@ test('hoitoikkuna 90 pv (public_settings): viikko 30.11.–6.12. näyttää hoid
   assert.equal(await page.locator('.vk .vk-sec-title, .vk h2.sec-title').count(), 0, 'saunavuorot-sivulla ei otsikkoa');
   await page.close();
   const home = await site.open(1280, '/', m);
-  assert.match(await home.locator('.vk h2.sec-title').innerText(), /Tällä viikolla saunassa/);
+  assert.match(await home.locator('.vk h2.sec-title').innerText(), /Tulevat päivät saunalla/);
   await home.click('[data-vk-nav="next"]');
-  await home.waitForFunction(() => /Viikko 48/.test(document.querySelector('.vk h2.sec-title')?.textContent || ''));
-  assert.match(await home.locator('.vk h2.sec-title').innerText(), /Viikko 48 saunassa/);
+  await home.waitForFunction(() => /23\.–29\.11\./.test(document.querySelector('.vk .vk-wk')?.textContent || ''));
+  assert.match(await home.locator('.vk h2.sec-title').innerText(), /Tulevat päivät saunalla/, 'otsikko ei vaihdu viikkonumeroksi');
   await home.click('[data-vk-nav="now"]');
-  await home.waitForFunction(() => /Tällä viikolla saunassa/.test(document.querySelector('.vk h2.sec-title')?.textContent || ''));
+  await home.waitForFunction(() => /16\.–22\.11\./.test(document.querySelector('.vk .vk-wk')?.textContent || ''));
   const rpcs = await home.evaluate(() => globalThis.__RPC.map((c) => c.name));
   assert.equal(rpcs.filter((n) => n === 'public_catalog').length, 1, 'katalogi haetaan kerran');
   assert.equal(rpcs.filter((n) => n === 'public_events').length, 1, 'tapahtumat haetaan kerran');
@@ -143,23 +143,23 @@ test('hoitoikkuna 90 pv (public_settings): viikko 30.11.–6.12. näyttää hoid
 
 test('EN: viikkoväli englanniksi, Sauna training -linkki saunahealer.com', async () => {
   const en = await site.open(1280, '/en/', weekMock());
-  assert.match(await en.locator('.vk .vk-wk').innerText(), /Week 47\s+16–22 Nov/i);
+  assert.match(await en.locator('.vk .vk-wk').innerText(), /^16–22 Nov$/i);
   assert.equal(await en.locator('.vk a[href="https://saunahealer.com"]').count(), 1);
   assert.equal(await en.locator('.vk a[href="https://saunakoulutus.fi"]').count(), 0);
   assert.match(await en.locator('.vk a[href="https://saunahealer.com"]').innerText(), /Sauna training/i);
   await en.click('[data-vk-nav="next"]');
-  await en.waitForFunction(() => /Week 48/.test(document.querySelector('.vk .vk-wk')?.textContent || ''));
+  await en.waitForFunction(() => /23–29 Nov/.test(document.querySelector('.vk .vk-wk')?.textContent || ''));
   await en.click('[data-vk-nav="next"]');
-  await en.waitForFunction(() => /Week 49/.test(document.querySelector('.vk .vk-wk')?.textContent || ''));
-  assert.match(await en.locator('.vk .vk-wk').innerText(), /Week 49\s+30 Nov–6 Dec/i);
-  assert.match(await en.locator('.vk h2.sec-title').innerText(), /Week 49 at the sauna/);
+  await en.waitForFunction(() => /30 Nov–6 Dec/.test(document.querySelector('.vk .vk-wk')?.textContent || ''));
+  assert.match(await en.locator('.vk .vk-wk').innerText(), /^30 Nov–6 Dec$/i);
+  assert.match(await en.locator('.vk h2.sec-title').innerText(), /Upcoming days at the sauna/);
   await en.close();
 });
 
 test('viikon tapahtumavihje: ei tapahtumia → seuraavat tapahtumat alareunassa, ei erillistä tapahtumariviä', async () => {
   const page = await site.open(390, '/', weekMock());
   const hint = await page.locator('.vk .vk-hint').innerText();
-  assert.match(hint, /Tapahtumat:[\s\S]*ei tällä viikolla/);
+  assert.match(hint, /Tapahtumat:[\s\S]*ei näinä päivinä/);
   assert.match(hint, /Perinnesaunotusilta 4\.12\./);
   assert.match(hint, /Sipoonjoen joulusauna 19\.12\./);
   assert.equal(await page.locator('.vk .vk-evt').count(), 0);
@@ -183,3 +183,117 @@ test('hakuvirhe: ensimmäinen haku kaatuu → staattinen varaversio jää, myöh
   assert.match(await page.locator('.vk .vk-pubc').first().innerText(), /16\.00–19\.00/);
   await page.close();
 });
+
+// ---- luonnos B (t1829u): liukuva ikkuna, mobiilin päänavigaatio ja ylätunniste ----
+const SUN_NOW = '2026-11-15T08:00:00+02:00';   // sunnuntai: ikkuna su 15.11. … la 21.11.
+
+test('liukuva ikkuna 1280 (tänään su): sarakkeet su…la, su ja la viikonloppuvärillä, selite ja ei viivaa hoitosolussa', async () => {
+  const page = await site.open(1280, '/', weekMock({ example: true }), { now: SUN_NOW });
+  assert.equal((await page.locator('.vk .vk-wk').innerText()).trim(), '15.–21.11.');
+  const names = await page.locator('.vk .vk-dh > span:first-child').allTextContents();
+  assert.deepEqual(names, ['Sunnuntai', 'Maanantai', 'Tiistai', 'Keskiviikko', 'Torstai', 'Perjantai', 'Lauantai']);
+  const we = await page.locator('.vk .vk-day').evaluateAll((els) => els.map((e) => e.classList.contains('we')));
+  assert.deepEqual(we, [true, false, false, false, false, false, true], 'viikonloppuvärit päivämäärästä, ei sarakkeen järjestyksestä');
+  assert.equal(await page.locator('.vk .vk-day.is-today').count(), 1);
+  assert.equal(await page.locator('.vk .vk-day.is-today').getAttribute('data-vk-day'), '0');
+  assert.ok(await page.locator('[data-vk-nav="prev"]').isDisabled(), 'taaksepäin pois, jakso alkaa tänään');
+  assert.match(await page.locator('[data-vk-nav="prev"]').getAttribute('aria-label'), /alkaa tänään/);
+  assert.equal(await page.locator('.vk .vk-carec .vk-dash').count(), 0, 'ei viivaa hoitosolussa');
+  assert.match(await page.locator('.vk .vk-carec').first().innerText(), /Ei tänä päivänä/);
+  assert.match(await page.locator('.vk .vk-legend').innerText(), /Vapaa[\s\S]*Vähän jäljellä[\s\S]*Täynnä/i);
+  assert.equal((await boxes(page, '.vk .vk-legend')).length, 1, 'selite ruudukon alla');
+  // täysi aika: ei linkkiä
+  assert.equal(await page.locator('.vk a.is-full:not(.vk-evt), .vk a.vk-chip.is-full').count(), 0, 'täysi aika ei ole linkki');
+  assert.match(await page.locator('.vk .vk-line.is-full').first().innerText(), /Täynnä/);
+  // 7 päivän loikka eteenpäin: su 22.11. …
+  await page.click('[data-vk-nav="next"]');
+  await page.waitForFunction(() => /22\.–28\.11\./.test(document.querySelector('.vk .vk-wk')?.textContent || ''));
+  assert.deepEqual((await page.locator('.vk .vk-dh > span:first-child').allTextContents())[0], 'Sunnuntai');
+  assert.ok(!(await page.locator('[data-vk-nav="prev"]').isDisabled()));
+  await page.close();
+});
+
+test('mobiili 390 (tänään su): tänään merkitty valitsemattomanakin, kolme riviä, linkki seuraavaan päivään, Varaa ≥ 44 px, edellinen/seuraava päivä', async () => {
+  const page = await site.open(390, '/', weekMock(), { now: SUN_NOW });
+  assert.equal(await page.locator('.vk-tab.is-on').getAttribute('data-vk-pick'), '0', 'oletus: tänään valittu');
+  // selite nauhan alla ja nimessä palvelut
+  assert.equal((await boxes(page, '.vk .vk-key')).length, 1);
+  assert.match(await page.locator('.vk .vk-key').innerText(), /Yleiset vuorot[\s\S]*Oma sauna[\s\S]*Hoidot ja rituaalit/);
+  assert.match(await page.locator('.vk-tab[data-vk-pick="2"]').getAttribute('aria-label'), /^Tiistai 17\.11\.: .*Hoidot ja rituaalit/);
+  // valitse ti: tänään (su) pysyy merkittynä
+  await page.click('.vk-tab[data-vk-pick="2"]');
+  const today = page.locator('.vk-tab[data-vk-pick="0"]');
+  assert.equal(await today.evaluate((e) => e.classList.contains('is-today') && !e.classList.contains('is-on')), true);
+  assert.match(await today.evaluate((e) => getComputedStyle(e).boxShadow), /rgb\(196, 154, 108\)/, 'tänään-merkki näkyy myös valitsemattomana');
+  const on = page.locator('.vk-tab[data-vk-pick="2"]');
+  assert.equal(await on.evaluate((e) => e.classList.contains('is-on') && !e.classList.contains('is-today')), true);
+  // kolme riviä samassa järjestyksessä
+  const cells = await page.locator('.vk-day.is-on .vk-cell').evaluateAll((els) => els.map((e) => e.className.match(/vk-(pub|priv|care)c/)[1]));
+  assert.deepEqual(cells, ['pub', 'priv', 'care']);
+  assert.equal((await boxes(page, '.vk-day.is-on .vk-cell')).length, 3, 'kaikki kolme riviä näkyvät');
+  // ti: yleisiä ei ole → «Ei yleisiä vuoroja» + linkki seuraavaan päivään (ke ei, to 19.11.)
+  const pub = await page.locator('.vk-day.is-on .vk-pubc').innerText();
+  assert.match(pub, /Ei yleisiä vuoroja/);
+  assert.match(pub, /Seuraava to 19\.11\.\s*→/);
+  await page.click('.vk-day.is-on .vk-pubc .vk-jump');
+  assert.equal(await page.locator('.vk-tab.is-on').getAttribute('data-vk-pick'), '4', 'linkki valitsee seuraavan päivän, jolla on yleisiä vuoroja');
+  assert.match(await page.locator('.vk-day.is-on .vk-dh').innerText(), /Torstai/i);
+  // oma sauna -laatikon Varaa-painike ≥ 44 px
+  await page.click('.vk-tab[data-vk-pick="6"]');
+  const book = (await boxes(page, '.vk-day.is-on .vk-oma .vk-book'))[0];
+  assert.ok(book && book.height >= 44, `Varaa-painike ${book?.height}`);
+  assert.match(await page.locator('.vk-day.is-on .vk-oma').innerText(), /Varaa/i);
+  // edellinen/seuraava päivä
+  const prev = page.locator('.vk-step-prev'), next = page.locator('.vk-step-next');
+  assert.equal((await boxes(page, '.vk-daynav')).length, 1);
+  assert.ok(await next.isDisabled(), 'ikkunan viimeinen päivä: seuraava pois');
+  assert.ok(!(await prev.isDisabled()));
+  await prev.click();
+  assert.equal(await page.locator('.vk-tab.is-on').getAttribute('data-vk-pick'), '5');
+  assert.ok(!(await next.isDisabled()));
+  for (let i = 0; i < 5; i++) await prev.click();
+  assert.equal(await page.locator('.vk-tab.is-on').getAttribute('data-vk-pick'), '0');
+  assert.ok(await prev.isDisabled(), 'ikkunan ensimmäinen päivä: edellinen pois');
+  // näppäimistö: painike on fokusoitavissa ja Enter vaihtaa päivää
+  await next.focus();
+  await page.keyboard.press('Enter');
+  assert.equal(await page.locator('.vk-tab.is-on').getAttribute('data-vk-pick'), '1');
+  assert.ok((await overflow(page)) <= 1);
+  // desktopin Varaa-nappi ei näy kortissa
+  await page.close();
+  const desk = await site.open(1280, '/', weekMock(), { now: SUN_NOW });
+  assert.equal((await boxes(desk, '.vk .vk-book')).length, 0, 'Varaa-painike vain mobiilissa');
+  assert.equal((await boxes(desk, '.vk .vk-daynav, .vk .vk-key')).length, 0, 'päivänavigointi ja nauhan selite vain mobiilissa');
+  await desk.close();
+});
+
+for (const [path, label] of [['/', 'Varaa'], ['/en/', 'Book']]) {
+  test(`ylätunniste ${path}: Varaa-painike näkyy mobiilissa (360/390/430), mahtuu ja kosketuspinta ≥ 44 px; desktop ehjä`, async () => {
+    for (const width of [360, 390, 430, 768]) {
+      const page = await site.open(width, path, weekMock(), { live: false });
+      await page.addStyleTag({ content: '.test-env-banner{display:none}' });
+      const btn = await boxes(page, '.hdr > a.btn.sm');
+      assert.equal(btn.length, 1, `${width} Varaa näkyy`);
+      assert.equal(btn[0].text.trim().toLowerCase(), label.toLowerCase());
+      assert.ok(btn[0].height >= 44, `${width} korkeus ${btn[0].height}`);
+      const parts = [...(await boxes(page, '.hdr > .brand .brand-txt b')), ...(await boxes(page, '.hdr > .brand img')), ...(await boxes(page, '.hdr > .lang')), ...btn, ...(await boxes(page, '.hdr > .nav-mob > summary'))];
+      assert.equal(parts.length, 5, `${width} brändin nimi + kuvake, kieli, Varaa, Valikko`);
+      assert.ok(await page.locator('.hdr > .brand .brand-txt b').evaluate((e) => e.scrollWidth <= e.clientWidth + 1 && getComputedStyle(e.closest('.brand')).overflow !== 'hidden'), `${width} brändin teksti ei leikkaudu`);
+      for (let i = 0; i < parts.length; i++) {
+        assert.ok(parts[i].left >= 0 && parts[i].right <= width + 0.5, `${width} ${i} reunan yli`);
+        for (let j = i + 1; j < parts.length; j++) assert.ok(!hit(parts[i], parts[j]), `${width} ylätunnisteen osat ${i}/${j} päällekkäin`);
+      }
+      assert.ok((await overflow(page)) <= 1, `${width} sivuttainen ylivuoto`);
+      assert.equal((await boxes(page, '.hdr > .nav-desk')).length, 0, `${width} desktop-valikko piilossa`);
+      await page.close();
+    }
+    const d = await site.open(1280, path, weekMock(), { live: false });
+    assert.equal((await boxes(d, '.hdr > .nav-desk')).length, 1, '1280 desktop-valikko näkyy');
+    assert.equal((await boxes(d, '.hdr > .btn.sm')).length, 1, '1280 Varaa näkyy');
+    assert.equal((await boxes(d, '.hdr > .nav-mob')).length, 0, '1280 mobiilivalikko piilossa');
+    const h = await boxes(d, '.hdr > .brand, .hdr > .nav-desk, .hdr > .lang, .hdr > .btn.sm');
+    for (let i = 0; i < h.length; i++) for (let j = i + 1; j < h.length; j++) assert.ok(!hit(h[i], h[j]), `1280 ylätunniste ${i}/${j} päällekkäin`);
+    assert.ok((await overflow(d)) <= 1);
+    await d.close();
+  });
+}
