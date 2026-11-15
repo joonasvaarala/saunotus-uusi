@@ -59,11 +59,12 @@ test('ilman katalogia viikko ja kortit näyttävät staattisen nimen', () => {
   clearLiveCatalog();
   const fi = R.sauna('fi');
   const en = R.sauna('en');
-  assert.match(fi, /data-catalog-slug="turvetorstai">Turvetorstai \(to\)</);
-  assert.match(fi, /data-catalog-slug="miestensauna-2">Miesten sauna \(ma\)</);
-  assert.match(fi, /data-pid="1"[^>]*>[\s\S]*?data-catalog-name data-pid="1" data-catalog-slug="yleinensauna">Yleinen vuoro \(to, la-su\)</);
-  assert.match(en, /data-catalog-slug="miestensauna-2">Men's Sauna \(Mon\)</);
-  assert.match(en, /Peat Thursday \(Turvetorstai, Thu\)</);
+  const names = (html) => [...html.matchAll(/class="vk-n">([^<]*)</g)].map((m) => m[1]);
+  assert.ok(names(fi).includes('Turvetorstai (to)'));
+  assert.ok(names(fi).includes('Miesten sauna (ma)'));
+  assert.ok(names(fi).includes('Yleinen vuoro (to, la-su)'));
+  assert.ok(names(en).includes("Men's Sauna (Mon)"));
+  assert.ok(names(en).includes('Peat Thursday (Turvetorstai, Thu)'));
   assert.match(fi, /<span class="pill">Maanantaisin<\/span>/);
   assert.match(fi, /<span class="pill">Tiistaisin<\/span>/);
   assert.match(fi, /<span class="pill">Keskiviikkoisin<\/span>/);
@@ -96,7 +97,7 @@ test('public_catalog peittää nimen FI ja EN; hinta, URL ja viikonpäivämerkki
     const home = R.home('fi');
     const homeEn = R.home('en');
     for (const name of ['Yleinen vuoro', 'Miesten sauna', 'Naisten sauna', 'Hiljainen sauna', 'Turvetorstai']) {
-      assert.match(fi, new RegExp(`data-catalog-name data-catalog-slug="[^"]+">${name}<`));
+      assert.match(fi, new RegExp(`class="vk-n">${name}<`), `viikko-ohjelma ${name}`);
       assert.match(home, new RegExp(`>${name}<`));
     }
     assert.doesNotMatch(fi, /Turvetorstai \(to\)|Miesten sauna \(ma\)|Naisten sauna \(ti\)|Hiljainen sauna \(ke\)|Yleinen vuoro \(to, la-su\)/);
@@ -114,8 +115,8 @@ test('public_catalog peittää nimen FI ja EN; hinta, URL ja viikonpäivämerkki
     assert.match(peat, /35 €/);
     assert.doesNotMatch(peat, /999/);
     assert.equal(cardHref(peat), beforeHref);
-    assert.match(home, /data-pid="5"[^>]*>[\s\S]*?data-catalog-name data-pid="5" data-catalog-slug="turvetorstai">Turvetorstai</);
-    assert.match(home, /data-pid="2"[^>]*>[\s\S]*?data-catalog-name data-pid="2" data-catalog-slug="miestensauna-2">Miesten sauna</);
+    assert.match(home, /class="vk-n">Turvetorstai</);
+    assert.match(home, /class="vk-n">Miesten sauna</);
   } finally {
     clearLiveCatalog();
   }
@@ -124,7 +125,7 @@ test('public_catalog peittää nimen FI ja EN; hinta, URL ja viikonpäivämerkki
 test('viikkosivu hakee katalogin ja kirjoittaa nimet haun jälkeen', () => {
   const src = readFileSync(new URL('../booking/shop/src/quiet-week.js', import.meta.url), 'utf8');
   assert.match(src, /rpc\('public_catalog'/);
-  assert.match(src, /applyCatalogNames\(document, catalog, namesLang\)/);
+  assert.match(src, /applyCatalogNames\(document, (catalog|rows), lang\)/);
   assert.doesNotMatch(src.replace(/^\s*\/\/.*$/gm, ''), /innerHTML|outerHTML|insertAdjacentHTML/);
   const boot = readFileSync(new URL('../booking/shop/src/catalog-names-boot.js', import.meta.url), 'utf8');
   assert.match(boot, /rpc\('public_catalog'/);

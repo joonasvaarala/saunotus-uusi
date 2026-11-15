@@ -1,7 +1,6 @@
-// booking_162: hiljaisten aikojen ale sivuston viikko-ohjelmassa (etusivu + saunavuorot). Rakennusvaiheessa vain data-attribuutit:
-// tekstit (sivutekstit ui.site.quiet_*, varateksti = sama kuin content/site-texts.pending-import-59.json) ja yksityisvuorotuotteiden nimet/slugit.
-// Ajonaikainen lisäys: booking/shop/src/quiet-week.js. Vapaat jälkilöylyt (kb 26) haetaan public_availabilitysta;
-// hiljaisen ajan ale public_quiet_offersista. Jos kumpikaan haku ei onnistu, viikko-ohjelma ei muutu.
+// booking_162: hiljaisten aikojen ale sivuston viikko-ohjelmassa (etusivu + saunavuorot): tekstit (sivutekstit ui.site.quiet_*,
+// varateksti = sama kuin content/site-texts.pending-import-59.json). Ale haetaan selaimessa (booking/shop/src/week-grid.js) public_quiet_offersista;
+// tekstit viedään viikko-ohjelman data-vk-texts-attribuuttiin (src/week-grid.mjs).
 import { tx } from './site-texts.mjs';
 
 export const QUIET_SITE_TEXTS = Object.freeze({
@@ -17,14 +16,3 @@ const quiet = { warn: () => {} };
 const KEEP = { pct: '{pct}', was: '{was}', now: '{now}' };
 const varTokens = (s) => String(s).replace(/\{\{var:(\w+)\}\}/g, '{$1}');
 export const quietSiteText = (key, lang) => tx(key, lang, { fallback: varTokens(QUIET_SITE_TEXTS[key][lang] ?? QUIET_SITE_TEXTS[key].fi), vars: KEEP, log: quiet });
-
-// Yksityisvuorotuotteet: kb.products.category = 'private_sauna' (booking_163:n jälkeen booking_url osoittaa uuteen kauppaan,
-// joten vanha Johku-polku /yksityisvuorot/ on vain varalla).
-/** Viikko-ohjelman <ol>-elementin attribuutit (HTML-escapattuina). products = kb.products, name = (p) => nimi kielellä. */
-export function quietWeekAttrs(lang, { esc, products, reserve }) {
-  const map = Object.fromEntries((products || []).filter((p) => (p.category === 'private_sauna' || /\/yksityisvuorot\//.test(p.booking_url || '')) && p.slug)
-    .map((p) => [p.id, { n: (lang === 'en' && p.name_en) || p.name, s: p.slug }]));
-  // note-tekstiä ei viedä sivulle: huomiolaatikkoa ei renderöidä (etusivu + saunavuorot). Avain jää sanakirjaan.
-  const a = { badge: quietSiteText('ui.site.quiet_badge', lang), sr: quietSiteText('ui.site.quiet_sr', lang), reserve, products: JSON.stringify(map) };
-  return ` data-quiet-week${Object.entries(a).map(([k, v]) => ` data-quiet-${k}="${esc(v)}"`).join('')}`;
-}

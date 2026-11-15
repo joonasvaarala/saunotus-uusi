@@ -9,7 +9,7 @@ import { GC_STATUSES, GC_SORTS, GC_PAY_METHODS, GC_GREETING_MAX, normalizeGiftCo
 import { reportText } from '../reports-texts.js';
 import { loading, emptyBox, errorBox, pager, selectFld, searchFld, expandRow, actionBtn, formDialog, friendly, methodLabel } from './talous-ui.js';
 import { countActive, filterDrawer } from '../filter-drawer.js';
-import { GC_MODE_LINK, GC_LOCALES, gcLocale, saleMode, createCardAndLink, tryLink, linkState, step1Error } from '../giftcards-sale-logic.js';
+import { GC_MODE_LINK, GC_LOCALES, gcLocale, createCardAndLink, tryLink, linkState, step1Error } from '../giftcards-sale-logic.js';
 import { absLink } from '../talous-api.js';
 
 const fld = (label, ...kids) => h('label', { class: 'fld' }, h('span', { text: label }), ...kids);

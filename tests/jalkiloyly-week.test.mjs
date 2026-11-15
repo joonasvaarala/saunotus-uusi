@@ -1,224 +1,89 @@
-// Vapaat jälkilöylyt viikko-ohjelmassa: mockattu public_availability + public_quiet_offers.
-// Kompakti mobiilinäkymä ja koko viikko, FI ja EN, ei päällekkäisyyttä 360/390/430 px:ssä.
+// Jälkilöylyt ja hiljaisen ajan ale viikko-ohjelmassa (etusivu + saunavuorot, FI/EN): mockattu public_availability_all + public_quiet_offers.
+// Ale-vuoro: −20 %, normaalihinta yliviivattuna, linkki oikeaan vuoroon; varattu jälkilöyly yliviivattuna; ilman tarjousta täysi hinta;
+// oma saunavuoro "alk." halvin hinta; ei päällekkäisyyttä 360/390/430 px:ssä. Ei verkkoa.
 import test, { before, after } from 'node:test';
 import assert from 'node:assert/strict';
-import { spawn, spawnSync } from 'node:child_process';
-import { mkdtempSync, rmSync, existsSync, mkdirSync, cpSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
-import { join, resolve } from 'node:path';
-import { chromium } from 'playwright-core';
+import { startSite, weekMock, hit } from './week-browser-harness.mjs';
 
-const root = resolve(new URL('..', import.meta.url).pathname);
-const work = mkdtempSync(join(tmpdir(), 'jalkiloyly-'));
-const dist = join(work, 'dist');
-const port = 4192;
-const shots = process.env.JALKIL_SHOTS || '';
-const TODAY = '2026-10-28';
-const NOW = Date.parse('2026-10-28T00:30:00Z');
-
-function chromePath() {
-  if (process.env.CHROME_PATH && existsSync(process.env.CHROME_PATH)) return process.env.CHROME_PATH;
-  for (const p of ['/usr/bin/google-chrome', '/usr/bin/google-chrome-stable', '/usr/bin/chromium', '/usr/bin/chromium-browser']) {
-    if (existsSync(p)) return p;
-  }
-  throw new Error('Chrome puuttuu. Aseta CHROME_PATH tai asenna google-chrome.');
-}
-const hit = (a, b) => !(a.right <= b.left + 0.5 || a.left >= b.right - 0.5 || a.bottom <= b.top + 0.5 || a.top >= b.bottom - 0.5);
-const slot = (date, status, rule, price) => ({ rule_id: rule, status, session_date: date, starts_at: `${date}T17:00:00Z`, ends_at: `${date}T19:00:00Z`, base_price: price, price_mode: 'fixed_plus_extra' });
-const slots = [
-  slot(TODAY, 'full', 22, 180),
-  slot(TODAY, 'available', 22, 180),
-  { rule_id: 90, status: 'available', session_date: TODAY, starts_at: '2026-10-28T00:00:00Z', ends_at: '2026-10-28T01:00:00Z', base_price: 180 },
-  slot('2026-10-29', 'available', 22, 180),
-  slot('2026-10-30', 'available', 23, 250),
-  slot('2026-10-31', 'unavailable', 24, 300),
-  { product_id: 25, rule_id: 9, status: 'available', session_date: TODAY, starts_at: '2026-10-28T17:00:00Z', ends_at: '2026-10-28T19:00:00Z', base_price: 100 },
-];
-const offers = [{ product_id: 26, rule_id: 22, session_date: TODAY, starts_at: '2026-10-28T17:00:00Z', ends_at: '2026-10-28T19:00:00Z', percent: 20, base_price: 180, discounted_price: 144 }];
-
-let server, browser;
-before(async () => {
-  const r = spawnSync('node', ['scripts/build.mjs'], {
-    cwd: root, encoding: 'utf8',
-    env: {
-      PATH: process.env.PATH, HOME: process.env.HOME, DIST: dist,
-      SITE_ENV: 'test', SITE_URL: `http://127.0.0.1:${port}`,
-      ARTICLES_CACHE_DIR: join(work, 'cache'), ARTICLES_STATE_FILE: join(work, 'state.json'), ARTICLES_IMAGES: '0',
-    },
-  });
-  assert.equal(r.status, 0, `build kaatui:\n${r.stdout}\n${r.stderr}`);
-  const booking = join(dist, 'booking');
-  mkdirSync(booking, { recursive: true });
-  cpSync(join(root, 'booking/shop/src/quiet-week.js'), join(booking, 'quiet-week.js'));
-  cpSync(join(root, 'booking/shop/src/catalog-names.js'), join(booking, 'catalog-names.js'));
-  cpSync(join(root, 'booking/shop/src/text-spaces.js'), join(booking, 'text-spaces.js'));
-  cpSync(join(root, 'booking/shop/src/product-image.js'), join(booking, 'product-image.js'));
-  cpSync(join(root, 'booking/shop/src/quiet-offers-logic.js'), join(booking, 'quiet-offers-logic.js'));
-  cpSync(join(root, 'booking/shop/src/week-live.js'), join(booking, 'week-live.js'));
-  cpSync(join(root, 'booking/shop/src/event-date.js'), join(booking, 'event-date.js'));
-  cpSync(join(root, 'booking/shop/src/when-range.js'), join(booking, 'when-range.js'));
-  writeFileSync(join(booking, 'sb.js'), 'export async function rpc(){ throw new Error("ei verkkoa"); }\n');
-  server = spawn('node', ['scripts/serve.mjs', dist, String(port)], { cwd: root, stdio: 'ignore' });
-  await new Promise((res, rej) => {
-    const t = setTimeout(() => rej(new Error('palvelin ei käynnistynyt')), 8000);
-    const ping = () => fetch(`http://127.0.0.1:${port}/`).then(() => { clearTimeout(t); res(); }).catch(() => setTimeout(ping, 80));
-    ping();
-  });
-  browser = await chromium.launch({ executablePath: chromePath(), args: ['--no-sandbox', '--disable-dev-shm-usage'] });
-});
-after(async () => { await browser?.close(); server?.kill(); rmSync(work, { recursive: true, force: true }); });
-
-async function open(width, path) {
-  const page = await browser.newPage({ viewport: { width, height: 1000 }, deviceScaleFactor: 1 });
-  await page.goto(`http://127.0.0.1:${port}${path}`, { waitUntil: 'domcontentloaded' });
-  await page.evaluate(() => document.fonts.ready);
-  return page;
-}
-async function decorate(page, lang) {
-  return page.evaluate(async ({ offers, slots, today, now, lang }) => {
-    const { decorateWeek } = await import('/booking/quiet-week.js');
-    let n = 0;
-    for (const list of document.querySelectorAll('ol.week[data-quiet-week]')) n += decorateWeek(list, offers, { lang, shopHref: '/varaa/', today, slots, now });
-    return n;
-  }, { offers, slots, today: TODAY, now: NOW, lang });
-}
-async function focusWeek(page) {
-  await page.evaluate(() => {
-    document.documentElement.style.scrollBehavior = 'auto';
-    const head = document.querySelector('.week-head') || document.querySelector('ol.week');
-    window.scrollTo({ top: head.getBoundingClientRect().top + window.scrollY - 8, behavior: 'instant' });
-  });
-}
-async function boxes(page) {
-  return page.evaluate(() => {
-    const box = (el) => { const r = el.getBoundingClientRect(); return { top: r.top, right: r.right, bottom: r.bottom, left: r.left, width: r.width, height: r.height }; };
-    const day = (wd) => {
-      const row = document.querySelector(`ol.week > li[data-wd="${wd}"]`);
-      if (!row || getComputedStyle(row).display === 'none') return null;
-      const h3 = row.querySelector('h3');
-      const range = document.createRange(); range.selectNodeContents(h3.firstChild);
-      const badge = h3.querySelector('.today');
-      const shown = badge && getComputedStyle(badge).display !== 'none';
-      return {
-        name: box(range),
-        badge: shown ? box(badge) : null,
-        sessions: [...row.querySelectorAll(':scope .sess')].map((s) => ({
-          t: s.querySelector('.t')?.textContent || '',
-          n: s.querySelector('.n')?.textContent || '',
-          price: s.querySelector('.qp')?.textContent || '',
-          href: s.querySelector('a.bk')?.getAttribute('href') || '',
-          testid: s.dataset.testid || '',
-          parts: [...s.querySelectorAll('.t, .n, .qp, .bk')].map(box),
-        })),
-      };
-    };
-    return {
-      wed: day(3), thu: day(4), fri: day(5),
-      soonVisible: [...document.querySelectorAll('ol.week.soon > li')].filter((li) => getComputedStyle(li).display !== 'none').length,
-      text: document.querySelector('ol.week')?.innerText || '',
-      scrollW: document.documentElement.scrollWidth,
-      clientW: document.documentElement.clientWidth,
-    };
-  });
-}
+let site;
+before(async () => { site = await startSite({ port: 4422, tag: 'jalkiloyly' }); });
+after(async () => { await site?.stop(); });
 
 const pages = [
-  { path: '/', lang: 'fi', name: 'Savusaunan jälkilöylyt', book: 'Varaa' },
-  { path: '/en/', lang: 'en', name: 'After Session Sauna', book: 'Book' },
-  { path: '/saunavuorot/', lang: 'fi', name: 'Savusaunan jälkilöylyt', book: 'Varaa' },
-  { path: '/en/sauna/', lang: 'en', name: 'After Session Sauna', book: 'Book' },
+  { path: '/', lang: 'fi', after: 'Jälkilöylyt', own: 'Oma saunavuoro', from: 'alk.', badge: '−20 %' },
+  { path: '/en/', lang: 'en', after: 'After Session Sauna', own: 'Private sauna session', from: 'from', badge: '−20%' },
+  { path: '/saunavuorot/', lang: 'fi', after: 'Jälkilöylyt', own: 'Oma saunavuoro', from: 'alk.', badge: '−20 %' },
+  { path: '/en/sauna/', lang: 'en', after: 'After Session Sauna', own: 'Private sauna session', from: 'from', badge: '−20%' },
 ];
+const norm = (s) => s.replace(/[\s ]+/g, ' ');
+const day = (page, i) => page.locator(`.vk-day[data-vk-day="${i}"]`);
+const parts = (page, sel) => page.evaluate((s) => [...document.querySelectorAll(s)].map((e) => { const r = e.getBoundingClientRect(); return { top: r.top, right: r.right, bottom: r.bottom, left: r.left, text: e.textContent.trim() }; }), sel);
 
-test('jälkilöyly: vapaa alennettu vuoro tänään, täysi hinta huomenna, varattu ja mennyt piilossa; ei päällekkäisyyttä', async () => {
-  for (const width of [360, 390, 430]) {
-    for (const pg of pages) {
-      const page = await open(width, pg.path);
-      if (shots && width === 390 && pg.path === '/') {
-        await focusWeek(page);
-        mkdirSync(shots, { recursive: true });
-        await page.screenshot({ path: join(shots, 'before_390.png'), fullPage: false });
+for (const pg of pages) {
+  test(`jälkilöylyt ${pg.path}: ale tänään, täysi hinta ilman tarjousta, varattu yliviivattu, oma sauna alk.; ei päällekkäisyyttä`, async () => {
+    for (const width of [360, 390, 430]) {
+      const page = await site.open(width, pg.path, weekMock());
+      // maanantai (tänään): ale-vuoro
+      const mon = day(page, 0);
+      const q = mon.locator('a.vk-line.is-quiet');
+      assert.equal(await q.count(), 1, `${width} alennettu rivi`);
+      const text = norm(await q.innerText());
+      assert.match(text, /19[.:]00–21[.:]00/);
+      assert.match(text, /144 €|€144/);
+      assert.match(text, /180 €|€180/);
+      assert.ok(text.includes(pg.badge), `${pg.path} ale-merkki ${pg.badge}: ${text}`);
+      assert.equal(await q.getAttribute('href'), '/varaa/#/varaa/22/2026-11-16/26');
+      assert.match(await q.getAttribute('aria-label'), /144/);
+      assert.match(norm(await mon.locator('.vk-oma').innerText()), new RegExp(`${pg.own} ${pg.from} (€|)250`), `${pg.path} oma saunavuoro alk.`);
+      assert.ok((await mon.locator('.vk-grp .vk-gn').innerText()).toLowerCase().includes(pg.after.toLowerCase()), 'jälkilöylyjen otsikko');
+      // tiistai: täysi hinta ilman ale-merkkiä
+      await page.click('.vk-tab[data-vk-pick="1"]');
+      const tue = day(page, 1).locator('a.vk-line');
+      assert.equal(await tue.count(), 1);
+      assert.equal(await day(page, 1).locator('.vk-sale').count(), 0, 'ei ale-merkkiä ilman tarjousta');
+      assert.match(norm(await tue.innerText()), /180/);
+      assert.equal(await tue.getAttribute('href'), '/varaa/#/varaa/22/2026-11-17/26');
+      // keskiviikko: varattu jälkilöyly yliviivattuna ja linkki tuotesivulle
+      await page.click('.vk-tab[data-vk-pick="2"]');
+      const wed = day(page, 2).locator('a.vk-line.is-full');
+      assert.equal(await wed.count(), 1);
+      assert.equal(await wed.evaluate((e) => getComputedStyle(e.querySelector('.vk-lt')).textDecorationLine), 'line-through');
+      assert.equal(await wed.getAttribute('href'), '/varaa/#/tuote/jalkiloylyt/2026-11-18');
+      // perjantai: oma sauna 300 €, ei jälkilöylyjä
+      await page.click('.vk-tab[data-vk-pick="4"]');
+      assert.match(norm(await day(page, 4).locator('.vk-oma').innerText()), new RegExp(`${pg.from} (€|)300`));
+      assert.equal(await day(page, 4).locator('.vk-line').count(), 0);
+      // lauantai: täynnä-jälkilöyly, ei turvesaunaa eikä yritystuotteita
+      await page.click('.vk-tab[data-vk-pick="5"]');
+      const satText = await day(page, 5).innerText();
+      assert.doesNotMatch(satText, /Turvesauna|Peat sauna|yrityksille|for businesses|Tunnin|Hour/i);
+      // ei päällekkäisyyttä päivän osien välillä, ei ylivuotoa
+      for (const i of [0, 1, 2, 5]) {
+        await page.click(`.vk-tab[data-vk-pick="${i}"]`);
+        const els = await parts(page, '.vk-day.is-on .vk-pub, .vk-day.is-on .vk-oma, .vk-day.is-on .vk-line, .vk-day.is-on .vk-cl');
+        for (let a = 0; a < els.length; a++) for (let b = a + 1; b < els.length; b++) assert.ok(!hit(els[a], els[b]), `${width} ${pg.path} ${els[a].text} / ${els[b].text} päällekkäin`);
+        for (const e of els) assert.ok(e.left >= 0 && e.right <= width + 0.5, `${pg.path} ${width} reunan yli: ${e.text}`);
       }
-      const added = await decorate(page, pg.lang);
-      assert.ok(added >= 3, `${pg.path} lisäsi ${added}`);
-      assert.equal(await page.locator('.quiet-week-note').count(), 0, `${pg.path} ei huomiolaatikkoa`);
-      assert.doesNotMatch(await page.locator('body').innerText(), /vielä vapaat yksityisvuorot|private sessions still available in the next few days/);
-      await page.evaluate(() => {
-        const items = [...document.querySelectorAll('ol.week.soon > li')];
-        items.forEach((li, n) => {
-          li.classList.toggle('is-today', li.dataset.wd === '3');
-          li.classList.toggle('is-next', li.dataset.wd === '4');
-        });
-        document.querySelectorAll('ol.week.soon').forEach((w) => w.classList.add('is-filtered'));
-        const more = document.querySelector('.week-more');
-        if (more) more.open = false;
-      });
-      await focusWeek(page);
-      if (shots && width === 390 && (pg.path === '/' || pg.path === '/saunavuorot/')) {
-        mkdirSync(shots, { recursive: true });
-        await page.screenshot({ path: join(shots, pg.path === '/' ? 'etusivu-viikko-mobiili.png' : 'saunavuorot-viikko-mobiili.png') });
-      }
-      const compact = await boxes(page);
-      const home = pg.path === '/' || pg.path === '/en/';
-      if (home) assert.equal(compact.soonVisible, 2, `${width} ${pg.path} kompakti`);
-      assert.ok(!compact.text.includes('/varaa/24/'), 'varattu lauantai ei näy');
-      const today = compact.wed.sessions.find((s) => s.testid === 'site-quiet-session');
-      assert.ok(today, `${width} ${pg.path} alennettu rivi`);
-      assert.match(today.n, new RegExp(pg.name));
-      assert.match(today.t, /19/);
-      assert.match(today.price.replace(/\s/g, ''), /180/);
-      assert.match(today.price.replace(/\s/g, ''), /144/);
-      assert.match(today.price, /20/);
-      assert.equal(today.href, '/varaa/#/varaa/22/2026-10-28/26');
-      assert.match(compact.text, new RegExp(pg.book, 'i'));
-      const plain = compact.thu?.sessions.find((s) => s.testid === 'site-jalkiloyly');
-      assert.ok(plain, `${width} ${pg.path} huomisen täysi hinta`);
-      assert.match(plain.price.replace(/\s/g, ''), /180/);
-      assert.doesNotMatch(plain.price, /144/);
-      assert.equal(plain.href, '/varaa/#/varaa/22/2026-10-29/26');
-      const check = (m, label) => {
-        for (const day of [m.wed, m.thu, m.fri].filter(Boolean)) {
-          if (day.badge && home) assert.ok(day.badge.top >= day.name.bottom - 1, `${label} merkki päivän nimen alla`);
-          if (day.badge) {
-            for (const s of day.sessions) for (const p of s.parts) {
-              assert.ok(!hit(day.badge, p), `${label} merkki peittää ${s.t} ${s.n}`);
-              assert.ok(!hit(day.name, p), `${label} päivä peittää ${s.t}`);
-            }
-          }
-          for (let i = 0; i < day.sessions.length; i++) for (let j = i + 1; j < day.sessions.length; j++) {
-            for (const a of day.sessions[i].parts) for (const b of day.sessions[j].parts) assert.ok(!hit(a, b), `${label} vuorot päällekkäin ${day.sessions[i].t}/${day.sessions[j].t}`);
-          }
-        }
-        assert.ok(m.scrollW <= m.clientW + 1, `${label} sivuttainen ylivuoto`);
-      };
-      check(compact, `${width} ${pg.path} kompakti`);
-      if (shots && pg.path === '/' && width === 390) {
-        const clip = await page.evaluate(() => {
-          const a = document.querySelector('.week-head').getBoundingClientRect();
-          const y = Math.max(0, Math.floor(a.top));
-          return { x: 0, y, width: window.innerWidth, height: Math.max(1, Math.min(window.innerHeight - y - 1, 640)) };
-        });
-        await page.screenshot({ path: join(shots, 'after_390_compact.png'), clip });
-      }
-      if (home) {
-        await page.evaluate(() => { const more = document.querySelector('.week-more'); if (more) more.open = true; });
-        await focusWeek(page);
-        const full = await boxes(page);
-        assert.ok(full.soonVisible >= 7, `${width} ${pg.path} koko viikko ${full.soonVisible}`);
-        assert.ok(full.fri, `${width} ${pg.path} perjantai näkyy`);
-        assert.match(full.fri.sessions.map((s) => s.price).join(' ').replace(/\s/g, ''), /250/);
-        check(full, `${width} ${pg.path} koko viikko`);
-        if (shots && pg.path === '/') {
-          const clip = await page.evaluate(() => {
-            const a = (document.querySelector('.week-head') || document.querySelector('ol.week')).getBoundingClientRect();
-            const y = Math.max(0, Math.floor(Math.min(a.top, 4)));
-            return { x: 0, y, width: window.innerWidth, height: Math.max(1, Math.min(window.innerHeight - y - 1, 920)) };
-          });
-          await page.screenshot({ path: join(shots, `after_${width}_${pg.lang}.png`), clip });
-        }
-      } else if (shots && width === 390 && pg.path === '/saunavuorot/') {
-        await page.screenshot({ path: join(shots, 'after_390_saunavuorot.png'), fullPage: false });
-      }
+      assert.ok((await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)) <= 1, 'sivuttainen ylivuoto');
       await page.close();
     }
-  }
+  });
+}
+
+test('ilman hiljaisen ajan tarjouksia jälkilöylyt näkyvät täydellä hinnalla; tarjoushaun virhe ei kaada viikkoa', async () => {
+  const page = await site.open(390, '/', { ...weekMock(), offers: [], fail: ['public_quiet_offers'] });
+  assert.equal(await page.locator('.vk .vk-sale').count(), 0);
+  assert.equal(await page.locator('.vk a.vk-line.is-quiet').count(), 0);
+  assert.match(norm(await day(page, 0).locator('a.vk-line').innerText()), /180/);
+  assert.match(norm(await day(page, 0).locator('.vk-oma').innerText()), /alk\. 250/);
+  await page.close();
+});
+
+test('viikonloppu 1280: hiljaisen ajan ale ja kaikki rivit mahtuvat sarakkeeseen', async () => {
+  const page = await site.open(1280, '/', weekMock());
+  const sat = await page.evaluate(() => { const d = document.querySelector('.vk-day[data-vk-day="5"]').getBoundingClientRect(); return { l: d.left, r: d.right }; });
+  const items = await parts(page, '.vk-day[data-vk-day="5"] .vk-pub, .vk-day[data-vk-day="5"] .vk-oma, .vk-day[data-vk-day="5"] .vk-line, .vk-day[data-vk-day="5"] .vk-chip');
+  assert.ok(items.length >= 5);
+  for (const e of items) assert.ok(e.left >= sat.l - 0.5 && e.right <= sat.r + 0.5, `ylittää sarakkeen: ${e.text}`);
+  await page.close();
 });
