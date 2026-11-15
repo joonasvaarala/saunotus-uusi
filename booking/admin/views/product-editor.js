@@ -13,6 +13,7 @@ import { posText } from '../pos-texts.js';
 import { looksLikeAlcohol } from '../pos-logic.js';
 import { evText } from '../events-texts.js';
 import { confirmAsk as confirmDialogAsk } from '../confirm.js';
+import { factsFromProduct, modeOf, explain, saveVisibility, MODES } from '../product-visibility.js';
 import {
   baselineFromProduct, diffSnapshots, isDirty, dirtyTabs, validateSnapshot, buildSavePlan, runPlan, rebase, saveSummary, fmt,
   numOrNull, autoPriceText, priceTextIsAuto, imageAction, TAB_IDS,
@@ -35,6 +36,11 @@ export async function productEditor({ p, all, ctx, isAdmin, deps, backHash, onSa
   const offers = training ? await rpc('admin_training_addons_get', { p_product_id: p.id }).catch(() => []) : [];
   const alcohol = looksLikeAlcohol([p.name, p.name_en, p.description, p.description_en].filter(Boolean).join(' '));
   let base = baselineFromProduct(p, { offers, alcohol });
+  // HALL-TUOTTEET-02: lahjakorttipaketit, joissa tuote on (lahjakorttikauppa on yksi myyntikanava). Virhe → null (paketteja ei käsitellä).
+  const loadPackages = () => rpc('admin_list_gift_card_packages').then((r) => (Array.isArray(r?.packages) ? r.packages : null)).catch(() => null);
+  let packages = isAdmin ? await loadPackages() : null;
+  const facts = () => factsFromProduct(p, { packages });
+  let savedMode = base.visibility;   // tallennettu tila; base.visibility = 'fix', kun käyttäjä pyytää korjaamaan tallennetun tilan (Korjaa)
   const dis = !isAdmin;
   const ctl = {};   // kenttien viitteet nimen mukaan
   const errs = new Map();   // kenttä → virheviesti-elementti
@@ -82,10 +88,41 @@ export async function productEditor({ p, all, ctx, isAdmin, deps, backHash, onSa
   // ---- Myynti ja näkyvyys ----
   const c = p.config;
   const bc = base.config;
+  // HALL-TUOTTEET-02: yksi Näkyvyys-valinta korvaa Aktiivinen-, Varattavissa- ja Näkyy listassa -valinnat. Tallennetaan samalla tallennuspalkilla.
+  const visRadios = [];
+  const visWhy = h('div', { class: 'vis-why', role: 'status', 'aria-live': 'polite', 'data-testid': 'vis-why' });
+  const visNow = h('p', { class: 'muted', 'data-testid': 'vis-now' });
+  const fixBtn = h('button', { type: 'button', class: 'btn sm', 'data-testid': 'vis-fix', text: T('vis_fix'), hidden: true, onclick: () => { base.visibility = 'fix'; refresh(); paintVisibility(); } });
+  const visBox = h('div', { class: 'stack box', 'data-testid': 'product-visibility' }, h('h3', { text: T('vis_title') }), h('p', { class: 'muted', text: T('vis_lead') }),
+    h('div', { class: 'stack vis-opts', role: 'radiogroup', 'aria-label': T('vis_title') },
+      MODES.map((m) => h('label', { class: 'check big vis-opt' },
+        visRadios[visRadios.push(h('input', { type: 'radio', name: `vis-${p.id}`, value: m, checked: m === savedMode || null, disabled: dis || (m === 'online' && !c) || null, 'data-testid': `vis-${m}` })) - 1],
+        h('span', {}, h('strong', { text: T(`vis_${m}`) }), h('small', { class: 'muted', text: T(`vis_${m}_hint`) }))))),
+    visNow, visWhy, isAdmin ? fixBtn : null);
+  const visChosen = () => visRadios.find((r) => r.checked)?.value || savedMode;
+  const whyText = (x) => {
+    if (x.code === 'still_on_sale') return fmt(T('vis_why_still_on_sale'), { names: x.channels.map((ch) => T(`vis_ch_${ch}`)).join(', ') });
+    return fmt(T(`vis_why_${x.code}`), x.vars || {});
+  };
+  function paintVisibility() {
+    const m = visChosen();
+    visNow.textContent = T(`vis_now_${savedMode}`);
+    const items = explain(facts(), m, { saved: m === savedMode && base.visibility !== 'fix' });   // tallennettu tila sellaisenaan, muutettu valinta tallennuksen jälkeisenä
+    const block = items.filter((x) => x.level === 'block'), warn = items.filter((x) => x.level === 'warn');
+    const list = (head, xs, cls) => (xs.length ? h('div', { class: cls }, h('strong', { text: head }), h('ul', {}, xs.map((x) => h('li', { 'data-why': x.code, text: whyText(x) })))) : null);
+    visWhy.replaceChildren(...[list(T('vis_not_met'), block, 'err'), list(T('vis_note'), warn, 'muted')].filter(Boolean));
+    fixBtn.hidden = !(m === savedMode && base.visibility !== 'fix' && block.some((x) => x.code === 'still_on_sale' || x.code === 'channel_missing'));
+    // QR-myynti on myyntikanava: vain verkossa myytävällä tuotteella (Vain kassalla / Piilotettu sulkee sen tallennuksessa)
+    if (ctl.fridge_sale) {
+      const off = m !== 'online';
+      if (off) ctl.fridge_sale.checked = false;
+      else if (!ctl.fridge_sale.dataset.touched) ctl.fridge_sale.checked = !!base.config?.fridge_sale;
+      ctl.fridge_sale.disabled = dis || alcohol || !!ctl.age_restricted?.checked || off;
+    }
+  }
   const sales = h('div', { class: 'stack', 'data-testid': 'product-tab-sales' },
-    chk('active', 'Aktiivinen (näkyy kb:ssä)', base.product.active),
+    visBox,
     c ? h('div', { class: 'stack box' }, h('h3', { text: 'Verkkokaupan asetukset' }),
-      chk('bookable', 'Varattavissa verkossa', bc.bookable), chk('shop_visible', 'Näkyy kaupan listassa', bc.shop_visible),
       'audience' in c ? field('Kalenteri', (ctl.audience = h('select', { name: 'audience', disabled: dis }, h('option', { value: 'consumer', text: 'Kuluttajien kalenteri' }), h('option', { value: 'business', text: 'Yrityksille' }))), 'Yrityksille-valinta näyttää vuoron vain yritysten kalenterissa.') : null,
       h('div', { class: 'row wrap' }, field('Järjestys', inp('sort_order', c.sort_order, { type: 'number' })), field('Min hlö', inp('min_persons', c.min_persons, { type: 'number', min: 1 })), field('Max hlö', inp('max_persons', c.max_persons ?? '', { type: 'number', min: 1 })), errFor('sort_order'), errFor('min_persons'), errFor('max_persons')),
       h('h3', { text: posText('nav') }),
@@ -102,7 +139,10 @@ export async function productEditor({ p, all, ctx, isAdmin, deps, backHash, onSa
       h('p', { class: 'muted', text: T('qr_hint') }),
       h('a', { class: 'btn', href: '#/tuotteet?qr=1', 'data-testid': 'product-open-qr', text: T('link_qr') })) : null);
   if (c && ctl.audience) ctl.audience.value = bc.audience;
-  if (c) ctl.age_restricted.addEventListener('change', () => { if (ctl.age_restricted.checked) { ctl.fridge_sale.checked = false; ctl.fridge_sale.disabled = true; } else if (isAdmin && !alcohol) ctl.fridge_sale.disabled = false; });
+  if (c) ctl.age_restricted.addEventListener('change', () => { if (ctl.age_restricted.checked) { ctl.fridge_sale.checked = false; ctl.fridge_sale.disabled = true; } else if (isAdmin && !alcohol && visChosen() === 'online') ctl.fridge_sale.disabled = false; });
+  if (c) ctl.fridge_sale.addEventListener('change', () => { ctl.fridge_sale.dataset.touched = '1'; });
+  visBox.addEventListener('change', paintVisibility);
+  paintVisibility();
 
   // ---- Kuva ----
   const img = { file: null, remove: false };
@@ -174,14 +214,16 @@ export async function productEditor({ p, all, ctx, isAdmin, deps, backHash, onSa
     syncRichFields(root);
     const cur = {
       product: { name: val('name'), name_en: val('name_en'), description: val('description'), description_en: val('description_en'), short_description: val('short_description'), short_description_en: val('short_description_en'),
-        price: numOrNull(ctl.price.value), price_text: ctl.price_text.value, vat_rate: numOrNull(vat.value), active: ctl.active.checked },
-      config: c ? { bookable: ctl.bookable.checked, shop_visible: ctl.shop_visible.checked, ...(ctl.audience ? { audience: ctl.audience.value } : {}),
+        price: numOrNull(ctl.price.value), price_text: ctl.price_text.value, vat_rate: numOrNull(vat.value), active: base.product.active },
+      // Aktiivisuus, varattavuus ja kaupan lista tallentuvat Näkyvyys-valinnan kautta (visibility), eivät lomakkeen kenttinä.
+      config: c ? { bookable: base.config.bookable, shop_visible: base.config.shop_visible, ...(ctl.audience ? { audience: ctl.audience.value } : {}),
         sort_order: numOrNull(ctl.sort_order.value), min_persons: numOrNull(ctl.min_persons.value), max_persons: numOrNull(ctl.max_persons.value),
-        pos_enabled: ctl.pos_enabled.checked, pos_sort: numOrNull(ctl.pos_sort.value), fridge_sale: ctl.fridge_sale.checked, age_restricted: ctl.age_restricted.checked } : null,
+        pos_enabled: ctl.pos_enabled.checked, pos_sort: numOrNull(ctl.pos_sort.value), fridge_sale: visChosen() === 'online' ? ctl.fridge_sale.checked : base.config.fridge_sale, age_restricted: ctl.age_restricted.checked } : null,
       training: training ? { course_price: numOrNull(ctl.course_price.value), addon_single: ctl.addon_single.checked, addon_single_price: numOrNull(ctl.addon_single_price.value), addon_intern: ctl.addon_intern.checked, addon_intern_price: numOrNull(ctl.addon_intern_price.value) } : null,
       variants: Object.fromEntries([...variantInputs].map(([id, i]) => [id, numOrNull(i.value)])),
       image: { alt: (ctl.image_alt?.value || '').trim(), hasImage: base.image.hasImage, file: !!img.file, remove: img.remove },
       suggestions: api ? api.snapshot() : null,
+      visibility: visChosen(),
     };
     return cur;
   }
@@ -220,7 +262,7 @@ export async function productEditor({ p, all, ctx, isAdmin, deps, backHash, onSa
       toast(T('save_invalid'), 'err'); return;
     }
     const vlabel = new Map((p.variants || []).map((v) => [String(v.id), v.label]));
-    const labels = { product: T('step_product'), training: T('step_training'), config: T('step_config'), image: T('step_image'), suggestions: T('step_upsell'), variant: (id) => fmt(T('step_variant'), { name: vlabel.get(String(id)) || id }) };
+    const labels = { product: T('step_product'), training: T('step_training'), config: T('step_config'), image: T('step_image'), suggestions: T('step_upsell'), visibility: T('vis_step'), variant: (id) => fmt(T('step_variant'), { name: vlabel.get(String(id)) || id }) };
     const steps = buildSavePlan({ productId: p.id, training, base, cur, labels });
     if (!steps.length) return;
     saving = true; saveBtn.disabled = true; discardBtn.disabled = true; saveBtn.textContent = T('saving');
@@ -228,6 +270,9 @@ export async function productEditor({ p, all, ctx, isAdmin, deps, backHash, onSa
     const res = await runPlan(steps, async (s) => {
       if (s.key === 'image') return saveImage(imgNow);
       if (s.key === 'suggestions') return api.save();
+      if (s.key === 'visibility') {
+        try { return await saveVisibility(rpc, p.id, facts(), s.mode); } catch (e) { throw Object.assign(new Error(`${T(`vis_step_${e.step || 'product'}`)}: ${errMsg(e)}`), { step: e.step, done: e.done }); }
+      }
       for (const call of s.calls) await rpc(call.fn, call.args);
     });
     saving = false; saveBtn.textContent = T('save');
@@ -239,6 +284,7 @@ export async function productEditor({ p, all, ctx, isAdmin, deps, backHash, onSa
       if (res.done.includes('suggestions')) api.rebase();
       if (res.done.includes('image')) { img.file = null; img.remove = false; showImg(); }
       try { await refreshProduct(); } catch (e) { console.warn(e); }
+      if (res.done.includes('visibility') || res.failed.some((f) => f.key === 'visibility')) await syncVisibilityBase();
       title.textContent = p.name;
       imageUi?.();
       onSaved?.();
@@ -258,6 +304,16 @@ export async function productEditor({ p, all, ctx, isAdmin, deps, backHash, onSa
     if (img.file) { path = newPath(p.id, img.file.ext); await uploadObject('product-images', path, img.file.blob); }
     const r = await rpc('admin_set_product_image', { p_product_id: p.id, p_image_path: path, p_image_alt: ci.alt || null });
     if (img.file && r?.previous_path && r.previous_path !== path) await removeObject('product-images', r.previous_path).catch(() => {});   // vanha tiedosto siivotaan (virhe ei haittaa)
+  }
+  // Näkyvyyden tallennus muuttaa tuotteen tilaa, kaupan asetuksia ja lahjakorttipaketteja: lähtökuva ja paketit luetaan uudelleen tallennetusta.
+  async function syncVisibilityBase() {
+    packages = await loadPackages();
+    base.product.active = !!p.active;
+    if (base.config && p.config) { base.config.bookable = !!p.config.bookable; base.config.shop_visible = !!p.config.shop_visible; base.config.fridge_sale = !!p.config.fridge_sale && !p.config.age_restricted && !alcohol; base.fridgeStored = !!p.config.fridge_sale; }
+    savedMode = base.visibility = modeOf(factsFromProduct(p));
+    for (const r of visRadios) r.checked = r.value === savedMode;
+    if (ctl.fridge_sale) delete ctl.fridge_sale.dataset.touched;
+    paintVisibility();
   }
   // Tallennuksen jälkeen haetaan tuore tuote ja päivitetään paikallinen olio paikallaan (lista ja muut näkymät käyttävät samaa oliota).
   async function refreshProduct() {

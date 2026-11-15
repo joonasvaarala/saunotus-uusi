@@ -83,7 +83,7 @@ test('Verkossa-merkki: koulutus suoralla linkillä on verkossa, booking_url ei v
   assert.equal(isOnline({ id: 2, category: 'event', active: true, config: cfg({ shop_visible: false }) }), false);
   assert.equal(isOnline({ id: 3, category: 'event', active: true, config: cfg({ channels: ['link'] }) }), false, 'link-kanava vain koulutuksille');
   assert.equal(isOnline({ id: 4, category: 'public_sauna', active: true, config: null }), false);
-  assert.doesNotMatch(read('booking/admin/views/products.js').split('export const isOnline')[1].split('\n};')[0], /booking_url/);
+  assert.doesNotMatch(read('booking/admin/product-visibility.js').split('export const isOnline')[1].split('\n};')[0], /booking_url/);
 });
 
 test('päänavigaatio: Koulutukset omana pääkohtana Tarjonnan jälkeen (Joonas 14.11.2026), ei Tarjonta-välilehteä, tekstit FI+EN', () => {
