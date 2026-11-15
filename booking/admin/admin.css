@@ -375,7 +375,6 @@ input[aria-invalid=true],select[aria-invalid=true],textarea[aria-invalid=true]{b
 /* maksu */
 .check.big{align-items:flex-start;gap:12px;padding:12px;border:1px solid var(--line);border-radius:10px;background:#FBF8F2;min-height:44px;cursor:pointer}
 .check.big>input{margin-top:1px;flex:none}.check.big>span{display:grid;gap:2px}.check.big strong{color:var(--ink)}
-.vis-opt>input{width:auto;min-width:0;height:auto;flex:none}.vis-opt small{font-size:.9rem}.vis-why ul{margin:6px 0 0;padding-left:20px}.vis-why .err{padding:8px 12px;border-radius:8px}
 .check.big:has(input:checked){border-color:var(--green);background:#E4EBE5}
 .msg-products{max-height:240px;overflow:auto;display:grid;gap:4px;padding:4px}
 .msg-products .check{min-height:44px}

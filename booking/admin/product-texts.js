@@ -4,7 +4,6 @@
 // Hintoja ja ALV-kantoja ei ole näissä teksteissä.
 import { getLang } from './talous-i18n.js';
 import { getSiteTexts, clearSiteTextsCache } from './site-texts-cache.js';
-import { VISIBILITY_TEXTS } from './product-visibility-texts.js';
 
 export const PREFIX = 'ui.admin.product.';
 
@@ -185,5 +184,5 @@ export function productText(key, lang = getLang()) {
   const full = key.startsWith(PREFIX) ? key : PREFIX + key;
   const live = db.get(`${full}|${lang}`);
   if (live) return live;
-  return PRODUCT_TEXTS[lang]?.[full] || PRODUCT_TEXTS.fi[full] || VISIBILITY_TEXTS[lang]?.[full] || VISIBILITY_TEXTS.fi[full] || key;
+  return PRODUCT_TEXTS[lang]?.[full] || PRODUCT_TEXTS.fi[full] || key;
 }
