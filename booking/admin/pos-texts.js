@@ -270,6 +270,8 @@ export const POS_SALE_TEXTS = {
     book_add: 'Lisää koriin (ei varausta)',
     book_persons: 'Henkilömäärä',
     book_cancel: 'Peruuta',
+    book_err_len: 'Kuittiteksti on liian pitkä (enintään 200 merkkiä). Lyhennä muistiinpanoa.',
+    book_err_lt: 'Muistiinpano ei saa sisältää kulmasulkumerkkiä.',
     unbooked: 'ilman varausta',
   },
   en: {
@@ -290,6 +292,8 @@ export const POS_SALE_TEXTS = {
     book_add: 'Add to cart (no booking)',
     book_persons: 'Number of people',
     book_cancel: 'Cancel',
+    book_err_len: 'The receipt text is too long (max 200 characters). Shorten the note.',
+    book_err_lt: 'The note must not contain an angle bracket.',
     unbooked: 'without booking',
   },
 };

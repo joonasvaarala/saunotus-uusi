@@ -1098,7 +1098,7 @@ test('varattava tuote: haku avaa kevyen paneelin, ei aikavalintaa eikä siirtym�
   assert.equal(globalThis.location.hash, prevHash, 'ei siirtymää Uusi varaus -lomakkeelle');
 });
 
-test('varattava tuote: nappi lisää rivin koriin, kori säilyy ja checkoutItems on { product_id, quantity, unbooked, note?, date? }', async () => {
+test('varattava tuote: nappi lisää rivin koriin, kori säilyy ja checkoutItems on { product_id, quantity, unbooked, note }', async () => {
   const mock = createAdminMock({ delay: 0 });
   const root = await mount(mock.rpc);
   typeSale(root, 'sips');
@@ -1106,9 +1106,9 @@ test('varattava tuote: nappi lisää rivin koriin, kori säilyy ja checkoutItems
   await openBookable(root);
   q(root, 'pos-book-add').click();
   assert.equal(q(root, 'pos-book'), null, 'paneeli sulkeutuu');
-  assert.deepEqual(cartNames(root), ['Sipsit', 'Yleinen saunavuoro (ilman varausta)']);
+  assert.deepEqual(cartNames(root), ['Sipsit', 'Yleinen saunavuoro (ilman varausta)1 hlö']);
   assert.equal(q(root, 'pos-total').textContent.replace(/\s/g, ''), '21,00€');
-  assert.equal(q(root, 'pos-line-note'), null, 'ei muistiinpanoa → ei rivitekstiä');
+  assert.equal(q(root, 'pos-line-note').textContent, '1 hlö', 'ilman päivää ja muistiinpanoa vain henkilömäärä');
   // sama tuote tavallisena rivinä ja uusi ilman varausta eivät yhdisty
   await openBookable(root);
   q(root, 'pos-book-add').click();
@@ -1128,7 +1128,7 @@ test('varattava tuote: määrä, vapaaehtoinen päivä ja muistiinpano kulkevat 
   assert.match(q(root, 'pos-line-note').textContent, /12\.11\.2026/);
   assert.match(q(root, 'pos-line-note').textContent, /Hoito tehty ilman varausta/);
   const checkout = await payByLink(root, mock);
-  assert.deepEqual(checkout.args.p_items, [{ product_id: 3, quantity: 3, unbooked: true, note: 'Hoito tehty ilman varausta', date: '2026-11-12' }]);
+  assert.deepEqual(checkout.args.p_items, [{ product_id: 3, quantity: 3, unbooked: true, note: '12.11.2026, 3 hlö, Hoito tehty ilman varausta' }]);
 });
 
 test('varattava tuote: määrän otsikko Määrä; per_person-tuotteella Henkilömäärä; peruutus ja Esc sulkevat', async () => {
@@ -1165,10 +1165,10 @@ test('haku: varattava tuote ilman pos-kanavaa löytyy ja sen voi lisätä koriin
   assert.equal(q(root, 'pos-book-add').disabled, false);
   assert.equal(q(root, 'pos-book-unbooked-off'), null);
   q(root, 'pos-book-add').click();
-  assert.deepEqual(cartNames(root), ['Saunahoito (ilman varausta)']);
+  assert.deepEqual(cartNames(root), ['Saunahoito (ilman varausta)1 hlö']);
 });
 
-test('kassa: ilman varausta -rivi lähtee admin_pos_checkoutiin muodossa { product_id, quantity, unbooked, note, date } ja mock hyväksyy sen', async () => {
+test('kassa: ilman varausta -rivi lähtee admin_pos_checkoutiin muodossa { product_id, quantity, unbooked, note } ja mock hyväksyy sen', async () => {
   const mock = createAdminMock({ delay: 0 });
   const root = await mount(mock.rpc);
   await openBookable(root, 'hoito90');
@@ -1177,23 +1177,50 @@ test('kassa: ilman varausta -rivi lähtee admin_pos_checkoutiin muodossa { produ
   q(root, 'pos-book-add').click();
   typeSale(root, 'vichy');
   hits(root)[0].click();
-  assert.deepEqual(cartNames(root), ['Saunahoito (ilman varausta)12.11.2026 · Jälkilaskutus', 'Vichy']);
+  assert.deepEqual(cartNames(root), ['Saunahoito (ilman varausta)12.11.2026, 1 hlö, Jälkilaskutus', 'Vichy']);
   const checkout = await payByLink(root, mock);
-  assert.deepEqual(checkout.args.p_items, [{ product_id: 10, quantity: 1, unbooked: true, note: 'Jälkilaskutus', date: '2026-11-12' }, { product_id: 101, quantity: 1 }]);
+  assert.deepEqual(checkout.args.p_items, [{ product_id: 10, quantity: 1, unbooked: true, note: '12.11.2026, 1 hlö, Jälkilaskutus' }, { product_id: 101, quantity: 1 }]);
   const order = mock.state.posOrders.at(-1);
   assert.equal(order.total, 88);
-  assert.deepEqual(order.lines[0], { product_id: 10, name: 'Saunahoito', quantity: 1, unit_price: 85, vat_rate: 25.5, line_total: 85, unbooked: true, note: 'Jälkilaskutus', date: '2026-11-12' });
+  assert.deepEqual(order.lines[0], { product_id: 10, name: 'Saunahoito — 12.11.2026, 1 hlö, Jälkilaskutus', quantity: 1, unit_price: 85, vat_rate: 25.5, line_total: 85, unbooked: true, note: '12.11.2026, 1 hlö, Jälkilaskutus' });
 });
 
-test('mock: admin_pos_checkout hyväksyy unbooked-rivin ilman pos-kanavaa, hinta kannasta; kiellot', async () => {
+test('mock: admin_pos_checkout – lopullinen sopimus (unbooked kaikille hinnoitelluille, hinta kannasta, virheet)', async () => {
   const mock = createAdminMock({ delay: 0 });
-  const r = await mock.rpc('admin_pos_checkout', { p_items: [{ product_id: 10, quantity: 2, unbooked: true, note: 'x' }], p_email: null });
-  assert.equal(r.total, 170);
-  await assert.rejects(() => mock.rpc('admin_pos_checkout', { p_items: [{ product_id: 10, quantity: 1 }] }), /pikakassassa/, 'ilman unbooked-lippua pos-kanava vaaditaan edelleen');
-  await assert.rejects(() => mock.rpc('admin_pos_checkout', { p_items: [{ product_id: 10, quantity: 1, unbooked: true, unit_price: 1 }] }), /Hintaa/);
-  await assert.rejects(() => mock.rpc('admin_pos_checkout', { p_items: [{ product_id: 101, quantity: 1, unbooked: true }] }), /varattava/, 'ei-varattava tuote ei kelpaa ilman varausta -riville');
-  await assert.rejects(() => mock.rpc('admin_pos_checkout', { p_items: [{ product_id: 104, quantity: 1, unbooked: true }] }), /./, 'lahjakortti ei kelpaa');
-  await assert.rejects(() => mock.rpc('admin_pos_checkout', { p_items: [{ product_id: 3, quantity: 1, note: 'x' }] }), /./, 'muistiinpano vain unbooked-riville');
+  const co = (items) => mock.rpc('admin_pos_checkout', { p_items: items, p_locale: 'fi', p_email: null });
+  const r = await co([{ product_id: 10, quantity: 2, unbooked: true, note: '16.11.2026, 2 hlö' }]);
+  assert.equal(r.ok, true); assert.equal(r.total, 170); assert.ok(r.order_id && r.order_no);
+  assert.deepEqual(r.lines[0].unbooked, true); assert.equal(r.lines[0].note, '16.11.2026, 2 hlö'); assert.equal(r.lines[0].name, 'Saunahoito — 16.11.2026, 2 hlö');
+  // ilman noteä nimi on tuotteen nimi; unbooked ilman pos-kanavaa ja ei-varattavalle hinnoitellulle tuotteelle kelpaa
+  assert.equal((await co([{ product_id: 10, quantity: 1, unbooked: true }])).lines[0].name, 'Saunahoito');
+  assert.equal((await co([{ product_id: 101, quantity: 1, unbooked: true }])).ok, true);
+  // ilman unbooked: varattava → not_counter_product
+  await assert.rejects(() => co([{ product_id: 10, quantity: 1 }]), /pikakassassa/);
+  // lahjakortti evätään
+  await assert.rejects(() => co([{ product_id: 104, quantity: 1, unbooked: true }]), /ei voi lisätä/);
+  // ei unit_price- eikä date-kenttää
+  await assert.rejects(() => co([{ product_id: 10, quantity: 1, unbooked: true, unit_price: 1 }]), /Hintaa/);
+  await assert.rejects(() => co([{ product_id: 10, quantity: 1, unbooked: true, date: '2026-11-16' }]), /päivää/);
+  // note: ≤ 200, ei <, vain unbooked-riville
+  assert.equal((await co([{ product_id: 10, quantity: 1, unbooked: true, note: 'x'.repeat(200) }])).ok, true);
+  await assert.rejects(() => co([{ product_id: 10, quantity: 1, unbooked: true, note: 'x'.repeat(201) }]), /Muistiinpano/);
+  await assert.rejects(() => co([{ product_id: 10, quantity: 1, unbooked: true, note: 'a<b' }]), /Muistiinpano/);
+  await assert.rejects(() => co([{ product_id: 3, quantity: 1, note: 'x' }]), /Muistiinpano/);
+});
+
+test('paneeli: <-merkki ja liian pitkä note näyttävät virheen eikä riviä lisätä', async () => {
+  const mock = createAdminMock({ delay: 0 });
+  const root = await mount(mock.rpc);
+  await openBookable(root);
+  setField(root, 'pos-book-note', 'a<b');
+  q(root, 'pos-book-add').click();
+  assert.ok(q(root, 'pos-book'), 'paneeli jää auki');
+  assert.match(q(root, 'pos-book-error').textContent, /kulmasulku/);
+  assert.deepEqual(cartNames(root), []);
+  setField(root, 'pos-book-note', 'x'.repeat(200));
+  q(root, 'pos-book-add').click();
+  assert.match(q(root, 'pos-book-error').textContent, /liian pitkä/);
+  assert.deepEqual(cartNames(root), []);
 });
 
 test('FI ja EN: hakukentän ja paneelin tekstit', async () => {

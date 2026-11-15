@@ -6,7 +6,7 @@ import { loadPosTexts, posText as tx } from './pos-texts.js';
 import { getLang } from './talous-i18n.js';
 import { searchSaleProducts, saleOptions, moveHi, enterTarget, isBookableProduct, cartAddUnbooked } from './pos-logic.js';
 import { stepper } from './stepper.js';
-import { cartAdd, cartAddCustom, cartLineKey, cartSetQty, cartTotal, cartVatBreakdown, checkoutItems, parseEuroInput, validateCustomLine, posSheetTenders, tenderAvailable, joinUrl, posCandidates, filterProducts, tillEditorOpen, moveSort, validEmail, posCustomerHits } from './pos-logic.js';
+import { cartAdd, cartAddCustom, cartLineKey, cartSetQty, cartTotal, cartVatBreakdown, checkoutItems, checkUnbookedNote, lineNote, unbookedNote, parseEuroInput, validateCustomLine, posSheetTenders, tenderAvailable, joinUrl, posCandidates, filterProducts, tillEditorOpen, moveSort, validEmail, posCustomerHits } from './pos-logic.js';
 import { searchCustomers } from './customer-hits.js';
 import { qrSvgElement } from './qrsvg.js';
 import { cxEnabled, readTerminal, saveTerminal, pickTerminal, savePending, readPending, clearPending, openAppLink, cxStateOf, cxErrorKey, CX_REGISTER_TTL_MS } from './checkoutx-pos.js';
@@ -329,7 +329,7 @@ export async function renderPos({ ctx, rpc, fn }) {
       }
       payError = '';
       draw();
-      const items = checkoutItems(cart);
+      const items = checkoutItems(cart, getLang());
       // Asiakkaalle lähtevä viesti pysyy suomenkielisenä riippumatta hallinnan kielestä (maksuvirta ennallaan).
       const res = await rpc('admin_pos_checkout', { p_items: items, p_locale: 'fi', p_email: mailTo });
       order = res;
@@ -838,6 +838,15 @@ export async function renderPos({ ctx, rpc, fn }) {
     if (!b) return;
     const note = String(document.getElementById('pos-book-note')?.value || '');
     const date = String(document.getElementById('pos-book-date')?.value || '');
+    // Tarkistetaan sekä käyttäjän muistiinpano että koko kuittiin menevä note; virhe paneeliin, riviä ei lisätä.
+    const full = unbookedNote({ date, persons: b.qty, note, lang: getLang() });
+    const chk = checkUnbookedNote(note.trim());
+    const chkFull = chk.ok ? checkUnbookedNote(full) : chk;
+    const errBox = document.getElementById('pos-book-error');
+    if (!chkFull.ok) {
+      if (errBox) { errBox.textContent = t(chkFull.error === 'note_lt' ? 'book_err_lt' : 'book_err_len'); errBox.hidden = false; }
+      return;
+    }
     bk = null;
     const go = () => { cart = cartAddUnbooked(cart, b.item, { quantity: b.qty, note, date }); showLines = true; draw(); };
     if (phase === 'paying') voidOpen().then(go); else go();
@@ -862,6 +871,7 @@ export async function renderPos({ ctx, rpc, fn }) {
         h('input', { type: 'date', id: 'pos-book-date', 'data-testid': 'pos-book-date', value: '' })),
       h('div', { class: 'fld' }, h('label', { class: 'fld-lab', for: 'pos-book-note', text: t('book_note') }),
         h('input', { type: 'text', id: 'pos-book-note', 'data-testid': 'pos-book-note', maxlength: 200, autocomplete: 'off', placeholder: t('book_note_ph'), value: '' })),
+      h('p', { id: 'pos-book-error', class: 'err pos-book-error', role: 'alert', 'data-testid': 'pos-book-error', hidden: true }),
       h('div', { class: 'pos-book-actions' },
         h('button', { type: 'button', class: 'btn primary', 'data-testid': 'pos-book-add', text: t('book_add'), onclick: () => addUnbooked() }),
         h('button', { type: 'button', class: 'btn ghost', 'data-testid': 'pos-book-cancel', text: t('book_cancel'), onclick: () => closeBooking() })));
@@ -905,7 +915,7 @@ export async function renderPos({ ctx, rpc, fn }) {
         const key = cartLineKey(r);
         lines.append(h('div', { class: 'pos-line', 'data-testid': r.kind === 'custom' ? 'pos-custom-line' : 'pos-product-line' },
           h('span', { class: 'grow' }, r.unbooked ? `${r.name} (${t('unbooked')})` : r.name,
-            r.unbooked && (r.date || r.note) ? h('small', { class: 'muted pos-line-note', 'data-testid': 'pos-line-note', text: [r.date ? r.date.split('-').reverse().map(Number).join('.') : '', r.note || ''].filter(Boolean).join(' · ') }) : null),
+            r.unbooked ? h('small', { class: 'muted pos-line-note', 'data-testid': 'pos-line-note', text: lineNote(r, getLang()) }) : null),
           h('button', { type: 'button', class: 'btn pos-step', 'aria-label': t('qty_less'), text: '−', onclick: () => { cart = cartSetQty(cart, key, r.quantity - 1); if (phase === 'paying') voidOpen(); draw(); } }),
           h('span', { class: 'pos-qty', text: String(r.quantity) }),
           h('button', { type: 'button', class: 'btn pos-step', 'aria-label': t('qty_more'), text: '+', onclick: () => { cart = cartSetQty(cart, key, r.quantity + 1); if (phase === 'paying') voidOpen(); draw(); } }),

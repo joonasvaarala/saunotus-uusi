@@ -358,5 +358,45 @@
     "max_len": 300,
     "placeholders": [],
     "reason": "HALL-KASSA-02: pikakassan myynnin haku, oma rivi hausta ja varattavan tuotteen varauspaneeli (t1808u, t1809u)"
+  },
+  {
+    "key": "ui.pos.book_err_len",
+    "lang": "fi",
+    "text": "Kuittiteksti on liian pitkä (enintään 200 merkkiä). Lyhennä muistiinpanoa.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 300,
+    "placeholders": [],
+    "reason": "HALL-KASSA-02: pikakassan myynnin haku, oma rivi hausta ja varattavan tuotteen varauspaneeli (t1808u, t1809u)"
+  },
+  {
+    "key": "ui.pos.book_err_len",
+    "lang": "en",
+    "text": "The receipt text is too long (max 200 characters). Shorten the note.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 300,
+    "placeholders": [],
+    "reason": "HALL-KASSA-02: pikakassan myynnin haku, oma rivi hausta ja varattavan tuotteen varauspaneeli (t1808u, t1809u)"
+  },
+  {
+    "key": "ui.pos.book_err_lt",
+    "lang": "fi",
+    "text": "Muistiinpano ei saa sisältää kulmasulkumerkkiä.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 300,
+    "placeholders": [],
+    "reason": "HALL-KASSA-02: pikakassan myynnin haku, oma rivi hausta ja varattavan tuotteen varauspaneeli (t1808u, t1809u)"
+  },
+  {
+    "key": "ui.pos.book_err_lt",
+    "lang": "en",
+    "text": "The note must not contain an angle bracket.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 300,
+    "placeholders": [],
+    "reason": "HALL-KASSA-02: pikakassan myynnin haku, oma rivi hausta ja varattavan tuotteen varauspaneeli (t1808u, t1809u)"
   }
 ]

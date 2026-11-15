@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 import test from 'node:test';
 import { finnishMobileMsisdn } from '../admin/phone-fi.js';
 import { searchSaleProducts, saleOptions, moveHi, enterTarget, filterProducts, isBookableProduct, posChannelIds } from '../admin/pos-logic.js';
-import { cartAdd, cartAddCustom, cartAddUnbooked, cartLineKey, cartSetQty, cartTotal, cartVatBreakdown, checkoutItems, looksLikeAlcohol, parseEuroInput, posCustomerHits, posSheetTenders, tenderAvailable, tendersFor, validEmail, validateCustomLine } from '../admin/pos-logic.js';
+import { cartAdd, cartAddCustom, cartAddUnbooked, cartLineKey, cartSetQty, cartTotal, cartVatBreakdown, checkoutItems, checkUnbookedNote, formatNoteDate, lineNote, looksLikeAlcohol, parseEuroInput, posCustomerHits, posSheetTenders, tenderAvailable, tendersFor, unbookedNote, validEmail, validateCustomLine } from '../admin/pos-logic.js';
 import { POS_TEXTS } from '../admin/pos-texts.js';
 import { qrMatrix } from '../admin/qrsvg.js';
 import { deviceFromSearch, drinksCartAdd, looksLikeAlcohol as drinksAlcohol } from '../drinks/drinks-logic.js';
@@ -342,7 +342,7 @@ test('haun valinnat: oma rivi aina viimeisenä, nuolet kiertävät, Enter valits
   assert.equal(enterTarget(opts, -1), opts[0]); assert.equal(enterTarget(opts, 1), opts[1]); assert.equal(enterTarget([], -1), null);
 });
 
-test('ilman varausta -rivi: oma rivi, ei yhdisty, checkoutItems lähettää product_id, quantity, unbooked ja note/date vain jos annettu', () => {
+test('ilman varausta -rivi: oma rivi, ei yhdisty, checkoutItems lähettää { product_id, quantity, unbooked, note } ilman date- ja unit_price-kenttää', () => {
   const prod = { product_id: 3, name: 'Yleinen saunavuoro', price: 18, vat_rate: 25.5 };
   let cart = cartAdd([], prod);
   cart = cartAddUnbooked(cart, prod, { quantity: 2 });
@@ -353,13 +353,38 @@ test('ilman varausta -rivi: oma rivi, ei yhdisty, checkoutItems lähettää prod
   assert.notEqual(cartLineKey(cart[1]), cartLineKey(cart[2]));
   assert.deepEqual(checkoutItems(cart), [
     { product_id: 3, quantity: 2 },
-    { product_id: 3, quantity: 2, unbooked: true },
-    { product_id: 3, quantity: 1, unbooked: true, note: 'jälkilaskutus', date: '2026-11-12' },
+    { product_id: 3, quantity: 2, unbooked: true, note: '2 hlö' },
+    { product_id: 3, quantity: 1, unbooked: true, note: '12.11.2026, 1 hlö, jälkilaskutus' },
   ]);
   assert.equal(cartTotal(cart), 18 * 2 + 18 * 2 + 18);
-  // määrä rajataan 1–20, huono päivä ja pitkä muistiinpano siivotaan; hintaa ei lähetetä
-  const odd = cartAddUnbooked([], prod, { quantity: 99, note: 'x'.repeat(300), date: 'huomenna' });
-  assert.equal(odd[0].quantity, 20); assert.equal(odd[0].note.length, 200); assert.equal('date' in odd[0], false);
-  assert.equal(Object.keys(checkoutItems(odd)[0]).includes('unit_price'), false);
-  assert.deepEqual(Object.keys(checkoutItems(cartAddUnbooked([], prod))[0]), ['product_id', 'quantity', 'unbooked']);
+  const odd = cartAddUnbooked([], prod, { quantity: 99, date: 'huomenna' });
+  assert.equal(odd[0].quantity, 20); assert.equal('date' in odd[0], false);
+  for (const it of checkoutItems(cart, 'en').concat(checkoutItems(odd))) { assert.equal('date' in it, false); assert.equal('unit_price' in it, false); }
+  assert.deepEqual(Object.keys(checkoutItems(cartAddUnbooked([], prod))[0]), ['product_id', 'quantity', 'unbooked', 'note']);
+  // määrän muutos korissa päivittää noten
+  assert.equal(checkoutItems(cartSetQty(cart, cartLineKey(cart[2]), 3))[2].note, '12.11.2026, 3 hlö, jälkilaskutus');
+});
+
+test('unbookedNote: päivä D.M.YYYY + henkilömäärä, ilman päivää, muistiinpano, FI ja EN', () => {
+  assert.equal(formatNoteDate('2026-11-16'), '16.11.2026');
+  assert.equal(formatNoteDate('2026-01-05'), '5.1.2026');
+  assert.equal(formatNoteDate('huomenna'), '');
+  assert.equal(unbookedNote({ date: '2026-11-16', persons: 1 }), '16.11.2026, 1 hlö');
+  assert.equal(unbookedNote({ persons: 1 }), '1 hlö');
+  assert.equal(unbookedNote({ date: '2026-11-16', persons: 3, note: ' lahjakortin tilalle ' }), '16.11.2026, 3 hlö, lahjakortin tilalle');
+  assert.equal(unbookedNote({ persons: 2, note: 'x' }), '2 hlö, x');
+  assert.equal(unbookedNote({ date: '2026-11-16', persons: 1, lang: 'en' }), '16.11.2026, 1 guest');
+  assert.equal(unbookedNote({ persons: 2, lang: 'en' }), '2 guests');
+  assert.equal(unbookedNote({}), '1 hlö');
+  assert.equal(lineNote({ quantity: 2, date: '2026-11-16' }, 'en'), '16.11.2026, 2 guests');
+  assert.ok(!unbookedNote({ date: '2026-11-16', persons: 1 }).includes('Saunahoito'), 'nimeä ei toisteta');
+});
+
+test('checkUnbookedNote: enintään 200 merkkiä, ei <-merkkiä', () => {
+  assert.deepEqual(checkUnbookedNote(''), { ok: true, error: null });
+  assert.equal(checkUnbookedNote('x'.repeat(200)).ok, true);
+  assert.deepEqual(checkUnbookedNote('x'.repeat(201)), { ok: false, error: 'note_len' });
+  assert.deepEqual(checkUnbookedNote('a<b'), { ok: false, error: 'note_lt' });
+  // koko note: päivä + hlö + muistiinpano ylittää rajan
+  assert.equal(checkUnbookedNote(unbookedNote({ date: '2026-11-16', persons: 1, note: 'x'.repeat(190) })).ok, false);
 });

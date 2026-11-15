@@ -27,18 +27,49 @@ export function cartAdd(cart, product) {
 }
 
 /**
+ * booking_322: kuitin rivinimeen liitettävä note ("Saunahoito — {note}"). Ei toista tuotteen nimeä.
+ * Päivä D.M.YYYY (vain jos annettu), henkilömäärä kielen mukaan, perään käyttäjän muistiinpano.
+ */
+export function formatNoteDate(iso) {
+  const m = /^(\d{4})-(\d\d)-(\d\d)$/.exec(String(iso || ''));
+  return m ? `${Number(m[3])}.${Number(m[2])}.${m[1]}` : '';
+}
+
+export function unbookedNote({ date = '', persons = 1, note = '', lang = 'fi' } = {}) {
+  const n = Math.max(1, Math.floor(Number(persons)) || 1);
+  const who = lang === 'en' ? `${n} ${n === 1 ? 'guest' : 'guests'}` : `${n} hlö`;
+  return [formatNoteDate(date), who, String(note ?? '').trim()].filter(Boolean).join(', ');
+}
+
+export const UNBOOKED_NOTE_MAX = 200;
+
+/** Tarkistus: pituus ≤ 200 ja ei `<`. Virhekoodi näytetään paneelissa. */
+export function checkUnbookedNote(note) {
+  const s = String(note ?? '');
+  if (s.includes('<')) return { ok: false, error: 'note_lt' };
+  if (s.length > UNBOOKED_NOTE_MAX) return { ok: false, error: 'note_len' };
+  return { ok: true, error: null };
+}
+
+/**
  * t1812u: varattava tuote vain maksuksi (ei varausta). Oma rivi (line_key), ei yhdistetä muihin.
- * Hinta tulee katalogista; määrä 1–20, muistiinpano enintään 200 merkkiä, päivä muodossa VVVV-KK-PP (vapaaehtoinen).
+ * Hinta tulee katalogista; määrä 1–20. Riville talletetaan päivä (VVVV-KK-PP, vapaaehtoinen) ja
+ * käyttäjän muistiinpano; lähetettävä note muodostetaan checkoutItemsissa (määrä voi muuttua korissa).
  */
 export function cartAddUnbooked(cart, product, { quantity = 1, note = '', date = '' } = {}) {
   const q = Math.max(1, Math.min(20, Math.floor(Number(quantity)) || 1));
-  const n = String(note ?? '').trim().slice(0, 200);
+  const n = String(note ?? '').trim();
   const d = /^\d{4}-\d\d-\d\d$/.test(String(date || '')) ? String(date) : '';
   const key = `u-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
   return [...(cart || []).map((r) => ({ ...r })), {
     product_id: product.product_id, name: product.name, name_en: product.name_en || null, unit_price: Number(product.price), vat_rate: product.vat_rate,
     quantity: q, age_restricted: !!product.age_restricted, unbooked: true, line_key: key, ...(n ? { note: n } : {}), ...(d ? { date: d } : {}),
   }];
+}
+
+/** Rivin kuittiin menevä note (sama muoto kuin RPC:lle). */
+export function lineNote(r, lang = 'fi') {
+  return unbookedNote({ date: r.date, persons: r.quantity, note: r.note, lang });
 }
 
 /** Vapaa rivi: oma line_key, ei yhdistetä muihin. */
@@ -111,7 +142,7 @@ export function validateCustomLine({ description, quantity, unit_price, vat_rate
   return { ok: true, description: name, quantity: q, unit_price: price, vat_rate: rate };
 }
 
-export function checkoutItems(cart) {
+export function checkoutItems(cart, lang = 'fi') {
   return (cart || []).filter((r) => r.quantity > 0).map((r) => {
     if (r.kind === 'custom') {
       return {
@@ -123,8 +154,9 @@ export function checkoutItems(cart) {
       };
     }
     if (r.unbooked) {
-      // booking_322: { product_id, quantity, unbooked: true, note?, date? }. Hintaa ei lähetetä.
-      return { product_id: r.product_id, quantity: r.quantity, unbooked: true, ...(r.note ? { note: r.note } : {}), ...(r.date ? { date: r.date } : {}) };
+      // booking_322 (lopullinen): { product_id, quantity, unbooked: true, note? }. Ei date- eikä unit_price-kenttää.
+      const note = lineNote(r, lang);
+      return { product_id: r.product_id, quantity: r.quantity, unbooked: true, ...(note ? { note } : {}) };
     }
     return { product_id: r.product_id, quantity: r.quantity };
   });

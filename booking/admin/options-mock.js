@@ -791,21 +791,25 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
     admin_pos_checkout: (a) => {
       need('pos.use');
       const items = Array.isArray(a.p_items) ? a.p_items : [];
-      // booking_322: ilman varausta -rivi { product_id, quantity, unbooked: true, note?, date? } sallitaan varattavalle tuotteelle myös ilman pos-kanavaa. Hinta aina katalogista.
-      const OK_KEYS = new Set(['product_id', 'quantity', 'unbooked', 'note', 'date']);
-      if (items.some((r) => Object.keys(r).some((k) => !OK_KEYS.has(k)))) throw err('price_locked', 'Hintaa ei voi antaa');
-      if (items.some((r) => (r.note != null || r.date != null) && r.unbooked !== true)) throw err('price_locked', 'Muistiinpano ja päivä vain ilman varausta -riville');
+      // booking_322 (lopullinen): { product_id, quantity, unbooked: true, note? }. Ei date- eikä unit_price-kenttää. Hinta aina katalogista.
+      // unbooked kelpaa kaikille aktiivisille hinnoitelluille tuotteille (ei lahja- eikä kausikortti), pos-kanavaa ei vaadita.
+      const OK_KEYS = new Set(['product_id', 'quantity', 'unbooked', 'note']);
+      if (items.some((r) => Object.keys(r).some((k) => !OK_KEYS.has(k)))) throw err('price_locked', 'Hintaa tai päivää ei voi antaa erikseen');
       const lines = [];
       let total = 0;
       for (const r of items) {
         const p = product(r.product_id);
         const notSellable = ['gift_card', 'season_card'].includes(p?.category);
+        if (r.note != null) {
+          if (r.unbooked !== true) throw err('invalid_note', 'Muistiinpano vain ilman varausta -riville');
+          if (typeof r.note !== 'string' || r.note.length > 200 || r.note.includes('<')) throw err('invalid_note', 'Muistiinpano on virheellinen (enintään 200 merkkiä, ei <-merkkiä)');
+        }
         if (r.unbooked === true) {
-          if (!p || !p.active || notSellable || !p.config?.bookable) throw err('not_bookable_product', 'Tuote ei ole varattava tuote');
-        } else if (!p || !p.config?.pos_enabled || notSellable) throw err('not_counter_product', 'Tuote ei ole pikakassassa');
+          if (!p || !p.active || p.price == null || notSellable) throw err('not_counter_product', 'Tuotetta ei voi lisätä pikakassaan');
+        } else if (!p || !p.config?.pos_enabled || p.config?.bookable || notSellable) throw err('not_counter_product', 'Tuote ei ole pikakassassa');
         const line = Math.round(p.price * r.quantity * 100) / 100;
         total += line;
-        lines.push({ product_id: p.id, name: p.name, quantity: r.quantity, unit_price: p.price, vat_rate: p.vat_rate, line_total: line, ...(r.unbooked === true ? { unbooked: true, note: r.note ?? null, date: r.date ?? null } : {}) });
+        lines.push({ product_id: p.id, name: r.note ? `${p.name} — ${r.note}` : p.name, quantity: r.quantity, unit_price: p.price, vat_rate: p.vat_rate, line_total: line, unbooked: r.unbooked === true, note: r.note ?? null });
       }
       const raw = a.p_email == null ? '' : String(a.p_email).trim().toLowerCase();
       if (raw && (raw.length > 254 || !EMAIL_RE.test(raw))) throw err('invalid_email', 'Sähköposti ei ole kelvollinen');
