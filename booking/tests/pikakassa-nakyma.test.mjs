@@ -925,3 +925,122 @@ test('pending-import-159: ostoskorin tekstit FI+EN vastaavat koodin sanakirjaa',
   assert.match(css, /@media\(min-width:1000px\)\{\.pos-grid\{grid-template-columns:repeat\(4,1fr\)\}/);
   assert.match(css, /@media\(min-width:800px\)\{\.pos-layout\{grid-template-columns:minmax\(0,1fr\) 300px\}/);
 });
+
+// t1818u: lähetetty maksulinkki jää voimaan; kassan seuraava toimenpide ei peru tilausta. Peruminen vain Peru-napilla (vahvistus).
+async function linkSent(mock) {
+  const root = await mount(mock.rpc);
+  q(root, 'pos-product-101').click();
+  q(root, 'pos-pay').click();
+  let dlg = document.getElementById('pos-pay-dialog');
+  all(dlg).find((n) => n.getAttribute('name') === 'tender' && n.value === 'payment_link').dispatch('change');
+  dlg = document.getElementById('pos-pay-dialog');
+  const inp = q(dlg, 'pos-email');
+  inp.value = 'asiakas@example.test';
+  inp.dispatch('input');
+  q(dlg, 'pos-confirm').click();
+  await flush();
+  assert.equal(mock.state.posOrders.length, 1);
+  assert.equal(mock.state.posOrders[0].status, 'pending');
+  return root;
+}
+async function withLinkEnv(fn) {
+  const prev = globalThis.location.search;
+  globalThis.location.search = '';
+  const origSet = globalThis.setInterval;
+  const origClear = globalThis.clearInterval;
+  globalThis.setInterval = () => 1;
+  globalThis.clearInterval = () => {};
+  try { await fn(createAdminMock({ delay: 0 })); } finally {
+    globalThis.setInterval = origSet;
+    globalThis.clearInterval = origClear;
+    globalThis.location.search = prev;
+  }
+}
+const voids = (mock) => mock.state.calls.filter((c) => c.name === 'admin_pos_void').length;
+
+test('t1818u: linkin lähetyksen jälkeen tuotteen lisäys vapauttaa kassan uuteen myyntiin perumatta tilausta', () => withLinkEnv(async (mock) => {
+  const root = await linkSent(mock);
+  let dlg = document.getElementById('pos-pay-dialog');
+  assert.ok(q(dlg, 'pos-link-new'), 'Uusi myynti -nappi');
+  assert.ok(q(dlg, 'pos-link-cancel'), 'Peru linkkitilaus -nappi');
+  assert.match(q(dlg, 'pos-link-valid').textContent, /24 tuntia/);
+  q(dlg, 'pos-pay-close').click();
+  // rivit lukittu: ei −/+/Poista -nappeja lähetetyn linkin riveillä
+  const r1 = document.body;
+  if (q(r1, 'pos-lines')?.getAttribute('aria-expanded') === 'false') q(r1, 'pos-lines').click();
+  assert.ok(q(r1, 'pos-link-locked'));
+  assert.equal(all(q(r1, 'pos-product-line')).some((n) => n.tagName === 'BUTTON'), false);
+  assert.ok(q(r1, 'pos-link-new-side'));
+  q(root, 'pos-product-101').click();
+  await flush();
+  assert.equal(voids(mock), 0);
+  assert.equal(mock.state.posOrders[0].status, 'pending');
+  assert.equal(q(document.body, 'pos-pay').textContent, 'Maksa');
+  const lines = all(document.body).filter((n) => n.getAttribute('data-testid') === 'pos-product-line');
+  assert.equal(lines.length, 1);
+  assert.match(lines[0].textContent, /1/);
+  assert.equal(q(document.body, 'pos-link-locked'), null);
+  // uusi myynti on oma tilauksensa
+  q(document.body, 'pos-pay').click();
+  dlg = document.getElementById('pos-pay-dialog');
+  all(dlg).find((n) => n.getAttribute('name') === 'tender' && n.value === 'payment_link').dispatch('change');
+  dlg = document.getElementById('pos-pay-dialog');
+  const inp = q(dlg, 'pos-email');
+  inp.value = 'toinen@example.test';
+  inp.dispatch('input');
+  q(dlg, 'pos-confirm').click();
+  await flush();
+  assert.equal(mock.state.posOrders.length, 2);
+  assert.deepEqual(mock.state.posOrders.map((o) => o.status), ['pending', 'pending']);
+  assert.equal(voids(mock), 0);
+}));
+
+test('t1818u: oma rivi ja Uusi myynti eivät peru linkkitilausta', () => withLinkEnv(async (mock) => {
+  await linkSent(mock);
+  let dlg = document.getElementById('pos-pay-dialog');
+  q(dlg, 'pos-link-new').click();
+  await flush();
+  assert.equal(document.getElementById('pos-pay-dialog'), null);
+  assert.equal(voids(mock), 0);
+  assert.equal(mock.state.posOrders[0].status, 'pending');
+  assert.equal(q(document.body, 'pos-pay').textContent, 'Maksa');
+  assert.equal(all(document.body).filter((n) => n.getAttribute('data-testid') === 'pos-product-line').length, 0);
+}));
+
+test('t1818u: Peru linkkitilaus vaatii vahvistuksen; Älä peru ei peru, Kyllä peruu kerran', () => withLinkEnv(async (mock) => {
+  await linkSent(mock);
+  let dlg = document.getElementById('pos-pay-dialog');
+  q(dlg, 'pos-link-cancel').click();
+  dlg = document.getElementById('pos-pay-dialog');
+  assert.match(q(dlg, 'pos-link-confirm').textContent, /Perutaanko tilaus/);
+  assert.equal(voids(mock), 0);
+  q(dlg, 'pos-link-cancel-no').click();
+  dlg = document.getElementById('pos-pay-dialog');
+  assert.equal(q(dlg, 'pos-link-confirm'), null);
+  assert.equal(voids(mock), 0);
+  q(dlg, 'pos-link-cancel').click();
+  dlg = document.getElementById('pos-pay-dialog');
+  q(dlg, 'pos-link-cancel-yes').click();
+  await flush();
+  assert.equal(voids(mock), 1);
+  assert.equal(mock.state.posOrders[0].status, 'cancelled');
+  assert.equal(q(document.body, 'pos-pay').textContent, 'Maksa');
+}));
+
+test('t1818u: korttimaksun (CheckoutX) ja linkin virhetilanteen peruminen ennallaan; tuonti 179 = sanakirja', () => {
+  const src = read('../admin/pos-screen.js');
+  assert.match(src, /if \(releaseLink\(\)\) \{ cart = cartAdd\(cart, p\); draw\(\); \} else if \(phase === 'paying'\) voidOpen\(\)/);
+  assert.match(src, /if \(!releaseLink\(\) && phase === 'paying'\) voidOpen\(\);/);
+  assert.match(src, /'pos-cx-cancel', text: t\('cx_cancel'\)/);
+  assert.match(src, /await voidOpen\(\);\n\s+phase = 'cart';/, 'linkin luonnin virhe peruu yhä tilauksen');
+  const imp = JSON.parse(read('../../content/site-texts.pending-import-179.json'));
+  assert.equal(imp.length, 18);
+  for (const r of imp) {
+    const k = r.key.replace('ui.pos.', '');
+    assert.equal(r.text, texts.POS_LINK_HOLD_TEXTS[r.lang][k], r.key);
+    assert.equal(r.class, 'normal');
+    assert.ok(!r.text.includes('<'));
+    assert.deepEqual(r.placeholders, r.text.match(/\{\{var:\w+\}\}/g) || []);
+  }
+  assert.deepEqual(Object.keys(texts.POS_LINK_HOLD_TEXTS.fi), Object.keys(texts.POS_LINK_HOLD_TEXTS.en));
+});

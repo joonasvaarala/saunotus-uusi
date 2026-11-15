@@ -1570,3 +1570,9 @@ a.listrow{text-decoration:none}
 .prodsavebar .btn{min-height:44px}
 @media(max-width:35em){.prodsavebar .row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px}.prodsavebar .prodsave-status{grid-column:1/-1}.prodsavebar .btn{width:100%}.prodpanel-head .btn{min-height:44px}}
 .prodtabpanel [aria-invalid=true]{border-color:var(--err);outline-color:var(--err)}
+/* t1818u: lähetetty maksulinkki jää voimaan – Uusi myynti ja Peru linkkitilaus (vahvistus) */
+.pos-link-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.pos-link-actions .btn{min-height:44px}
+.pos-link-confirm{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:10px;padding:10px 12px;border:1px solid var(--line);border-radius:8px}
+.pos-link-confirm p{flex-basis:100%;margin:0}
+.pos-link-new-side{width:100%;margin-top:8px;min-height:44px}
