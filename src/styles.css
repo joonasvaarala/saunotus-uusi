@@ -431,6 +431,8 @@ address{font-style:normal;background:var(--card);border:1px solid var(--line);bo
 @media (max-width:420px){.brand img{width:24px}.brand{gap:6px}.brand b{font-size:16px;letter-spacing:.12em}}
 @media (max-width:380px){.brand img{width:22px}.brand{gap:6px}.brand b{font-size:15px;letter-spacing:.1em}.hdr>.btn.sm{padding:0 9px}.hdr .nav-mob summary{padding:0 7px}.hdr>.lang a,.hdr>.lang span{min-width:34px}}
 @media (max-width:359px){.hdr>.btn.sm{padding:0 9px;letter-spacing:.04em}.brand img{width:22px}.brand{gap:6px}.brand b{font-size:15px;letter-spacing:.1em}.hdr{gap:6px}.lang a,.lang span{min-width:38px;padding:0 6px}.nav-mob summary{padding:0 8px;letter-spacing:.05em}}
+/* t1829u: alle 355 px ylätunnisteeseen ei mahdu FI/EN + Varaa + Valikko ja logon teksti: vain logo, teksti jää ruudunlukijalle (linkin nimi) */
+@media (max-width:354px){.brand-txt{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}}
 @media (min-width:420px) and (max-width:640px){.brand b{font-size:23px}.brand small{width:auto;min-width:0;white-space:nowrap;margin-top:6px;letter-spacing:.12em}}
 @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.card,.btn{transition:none}.card:hover{transform:none}}
 /* kultanapin hover (tumma teksti säilyy: ≥6:1) */
