@@ -1,0 +1,774 @@
+[
+  {
+    "key": "ui.admin.product.vis_title",
+    "lang": "fi",
+    "text": "Näkyvyys",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "HALL-TUOTTEET-02: tuotteen näkyvyys yhtenä valintana tuote-editorin Myynti ja näkyvyys -välilehdellä. Vain kassalla ja hallinnassa poistaa tuotteen kaikista myyntikanavista (Joonas 15.11.2026). Bottiavustus/Koodari tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.product.vis_title",
+    "lang": "en",
+    "text": "Visibility",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "HALL-TUOTTEET-02: tuotteen näkyvyys yhtenä valintana tuote-editorin Myynti ja näkyvyys -välilehdellä. Vain kassalla ja hallinnassa poistaa tuotteen kaikista myyntikanavista (Joonas 15.11.2026). Bottiavustus/Koodari tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.product.vis_lead",
+    "lang": "fi",
+    "text": "Valitse yksi tila. Tallennus asettaa tuotteen tilan ja kaikki myyntikanavat yhdessä.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "HALL-TUOTTEET-02: tuotteen näkyvyys yhtenä valintana tuote-editorin Myynti ja näkyvyys -välilehdellä. Vain kassalla ja hallinnassa poistaa tuotteen kaikista myyntikanavista (Joonas 15.11.2026). Bottiavustus/Koodari tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.product.vis_lead",
+    "lang": "en",
+    "text": "Choose one state. Saving sets the product state and all sales channels together.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "HALL-TUOTTEET-02: tuotteen näkyvyys yhtenä valintana tuote-editorin Myynti ja näkyvyys -välilehdellä. Vain kassalla ja hallinnassa poistaa tuotteen kaikista myyntikanavista (Joonas 15.11.2026). Bottiavustus/Koodari tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.product.vis_online",
+    "lang": "fi",
+    "text": "Myynnissä verkossa",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "HALL-TUOTTEET-02: tuotteen näkyvyys yhtenä valintana tuote-editorin Myynti ja näkyvyys -välilehdellä. Vain kassalla ja hallinnassa poistaa tuotteen kaikista myyntikanavista (Joonas 15.11.2026). Bottiavustus/Koodari tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.product.vis_online",
+    "lang": "en",
+    "text": "On sale online",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "HALL-TUOTTEET-02: tuotteen näkyvyys yhtenä valintana tuote-editorin Myynti ja näkyvyys -välilehdellä. Vain kassalla ja hallinnassa poistaa tuotteen kaikista myyntikanavista (Joonas 15.11.2026). Bottiavustus/Koodari tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.product.vis_online_hint",
+    "lang": "fi",
+    "text": "Näkyy verkkokaupassa ja on varattavissa. Käytettävissä myös kassalla ja hallinnassa.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "HALL-TUOTTEET-02: tuotteen näkyvyys yhtenä valintana tuote-editorin Myynti ja näkyvyys -välilehdellä. Vain kassalla ja hallinnassa poistaa tuotteen kaikista myyntikanavista (Joonas 15.11.2026). Bottiavustus/Koodari tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.product.vis_online_hint",
+    "lang": "en",
+    "text": "Shown in the online shop and bookable. Also available at the till and in the admin.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "HALL-TUOTTEET-02: tuotteen näkyvyys yhtenä valintana tuote-editorin Myynti ja näkyvyys -välilehdellä. Vain kassalla ja hallinnassa poistaa tuotteen kaikista myyntikanavista (Joonas 15.11.2026). Bottiavustus/Koodari tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.product.vis_internal",
+    "lang": "fi",
+    "text": "Vain kassalla ja hallinnassa",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "HALL-TUOTTEET-02: tuotteen näkyvyys yhtenä valintana tuote-editorin Myynti ja näkyvyys -välilehdellä. Vain kassalla ja hallinnassa poistaa tuotteen kaikista myyntikanavista (Joonas 15.11.2026). Bottiavustus/Koodari tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.product.vis_internal",
+    "lang": "en",
+    "text": "Till and admin only",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "HALL-TUOTTEET-02: tuotteen näkyvyys yhtenä valintana tuote-editorin Myynti ja näkyvyys -välilehdellä. Vain kassalla ja hallinnassa poistaa tuotteen kaikista myyntikanavista (Joonas 15.11.2026). Bottiavustus/Koodari tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.product.vis_internal_hint",
+    "lang": "fi",
+    "text": "Poistuu kaikista myyntikanavista: verkkokauppa, upotukset ja suorat linkit, lisämyynti, QR-myynti ja lahjakorttikauppa. Näkyy vain kassalla ja hallinnassa.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "HALL-TUOTTEET-02: tuotteen näkyvyys yhtenä valintana tuote-editorin Myynti ja näkyvyys -välilehdellä. Vain kassalla ja hallinnassa poistaa tuotteen kaikista myyntikanavista (Joonas 15.11.2026). Bottiavustus/Koodari tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.product.vis_internal_hint",
+    "lang": "en",
+    "text": "Removed from all sales channels: online shop, embeds and direct links, upselling, QR sales and the gift card shop. Shown only at the till and in the admin.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "HALL-TUOTTEET-02: tuotteen näkyvyys yhtenä valintana tuote-editorin Myynti ja näkyvyys -välilehdellä. Vain kassalla ja hallinnassa poistaa tuotteen kaikista myyntikanavista (Joonas 15.11.2026). Bottiavustus/Koodari tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.product.vis_hidden",
+    "lang": "fi",
+    "text": "Piilotettu",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "HALL-TUOTTEET-02: tuotteen näkyvyys yhtenä valintana tuote-editorin Myynti ja näkyvyys -välilehdellä. Vain kassalla ja hallinnassa poistaa tuotteen kaikista myyntikanavista (Joonas 15.11.2026). Bottiavustus/Koodari tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.product.vis_hidden",
+    "lang": "en",
+    "text": "Hidden",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "HALL-TUOTTEET-02: tuotteen näkyvyys yhtenä valintana tuote-editorin Myynti ja näkyvyys -välilehdellä. Vain kassalla ja hallinnassa poistaa tuotteen kaikista myyntikanavista (Joonas 15.11.2026). Bottiavustus/Koodari tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.product.vis_hidden_hint",
+    "lang": "fi",
+    "text": "Ei käytössä missään: ei myyntikanavissa, kassalla eikä hallinnan tuotevalinnoissa.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "HALL-TUOTTEET-02: tuotteen näkyvyys yhtenä valintana tuote-editorin Myynti ja näkyvyys -välilehdellä. Vain kassalla ja hallinnassa poistaa tuotteen kaikista myyntikanavista (Joonas 15.11.2026). Bottiavustus/Koodari tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.product.vis_hidden_hint",
+    "lang": "en",
+    "text": "Not in use anywhere: not in sales channels, at the till or in admin product pickers.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "HALL-TUOTTEET-02: tuotteen näkyvyys yhtenä valintana tuote-editorin Myynti ja näkyvyys -välilehdellä. Vain kassalla ja hallinnassa poistaa tuotteen kaikista myyntikanavista (Joonas 15.11.2026). Bottiavustus/Koodari tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.product.vis_step",
+    "lang": "fi",
+    "text": "Näkyvyys",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "HALL-TUOTTEET-02: tuotteen näkyvyys yhtenä valintana tuote-editorin Myynti ja näkyvyys -välilehdellä. Vain kassalla ja hallinnassa poistaa tuotteen kaikista myyntikanavista (Joonas 15.11.2026). Bottiavustus/Koodari tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.product.vis_step",
+    "lang": "en",
+    "text": "Visibility",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "HALL-TUOTTEET-02: tuotteen näkyvyys yhtenä valintana tuote-editorin Myynti ja näkyvyys -välilehdellä. Vain kassalla ja hallinnassa poistaa tuotteen kaikista myyntikanavista (Joonas 15.11.2026). Bottiavustus/Koodari tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.product.vis_step_product",
+    "lang": "fi",
+    "text": "tuotteen tila",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "HALL-TUOTTEET-02: tuotteen näkyvyys yhtenä valintana tuote-editorin Myynti ja näkyvyys -välilehdellä. Vain kassalla ja hallinnassa poistaa tuotteen kaikista myyntikanavista (Joonas 15.11.2026). Bottiavustus/Koodari tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.product.vis_step_product",
+    "lang": "en",
+    "text": "product state",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "HALL-TUOTTEET-02: tuotteen näkyvyys yhtenä valintana tuote-editorin Myynti ja näkyvyys -välilehdellä. Vain kassalla ja hallinnassa poistaa tuotteen kaikista myyntikanavista (Joonas 15.11.2026). Bottiavustus/Koodari tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.product.vis_step_config",
+    "lang": "fi",
+    "text": "kaupan asetukset",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "HALL-TUOTTEET-02: tuotteen näkyvyys yhtenä valintana tuote-editorin Myynti ja näkyvyys -välilehdellä. Vain kassalla ja hallinnassa poistaa tuotteen kaikista myyntikanavista (Joonas 15.11.2026). Bottiavustus/Koodari tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.product.vis_step_config",
+    "lang": "en",
+    "text": "shop settings",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "HALL-TUOTTEET-02: tuotteen näkyvyys yhtenä valintana tuote-editorin Myynti ja näkyvyys -välilehdellä. Vain kassalla ja hallinnassa poistaa tuotteen kaikista myyntikanavista (Joonas 15.11.2026). Bottiavustus/Koodari tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.product.vis_step_channels",
+    "lang": "fi",
+    "text": "myyntikanavat",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "HALL-TUOTTEET-02: tuotteen näkyvyys yhtenä valintana tuote-editorin Myynti ja näkyvyys -välilehdellä. Vain kassalla ja hallinnassa poistaa tuotteen kaikista myyntikanavista (Joonas 15.11.2026). Bottiavustus/Koodari tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.product.vis_step_channels",
+    "lang": "en",
+    "text": "sales channels",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "HALL-TUOTTEET-02: tuotteen näkyvyys yhtenä valintana tuote-editorin Myynti ja näkyvyys -välilehdellä. Vain kassalla ja hallinnassa poistaa tuotteen kaikista myyntikanavista (Joonas 15.11.2026). Bottiavustus/Koodari tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.product.vis_step_packages",
+    "lang": "fi",
+    "text": "lahjakorttipaketit",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "HALL-TUOTTEET-02: tuotteen näkyvyys yhtenä valintana tuote-editorin Myynti ja näkyvyys -välilehdellä. Vain kassalla ja hallinnassa poistaa tuotteen kaikista myyntikanavista (Joonas 15.11.2026). Bottiavustus/Koodari tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.product.vis_step_packages",
+    "lang": "en",
+    "text": "gift card packages",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "HALL-TUOTTEET-02: tuotteen näkyvyys yhtenä valintana tuote-editorin Myynti ja näkyvyys -välilehdellä. Vain kassalla ja hallinnassa poistaa tuotteen kaikista myyntikanavista (Joonas 15.11.2026). Bottiavustus/Koodari tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.product.vis_now_online",
+    "lang": "fi",
+    "text": "Nyt: näkyy verkossa.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "HALL-TUOTTEET-02: tuotteen näkyvyys yhtenä valintana tuote-editorin Myynti ja näkyvyys -välilehdellä. Vain kassalla ja hallinnassa poistaa tuotteen kaikista myyntikanavista (Joonas 15.11.2026). Bottiavustus/Koodari tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.product.vis_now_online",
+    "lang": "en",
+    "text": "Now: shown online.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "HALL-TUOTTEET-02: tuotteen näkyvyys yhtenä valintana tuote-editorin Myynti ja näkyvyys -välilehdellä. Vain kassalla ja hallinnassa poistaa tuotteen kaikista myyntikanavista (Joonas 15.11.2026). Bottiavustus/Koodari tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.product.vis_now_internal",
+    "lang": "fi",
+    "text": "Nyt: vain kassalla ja hallinnassa.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "HALL-TUOTTEET-02: tuotteen näkyvyys yhtenä valintana tuote-editorin Myynti ja näkyvyys -välilehdellä. Vain kassalla ja hallinnassa poistaa tuotteen kaikista myyntikanavista (Joonas 15.11.2026). Bottiavustus/Koodari tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.product.vis_now_internal",
+    "lang": "en",
+    "text": "Now: till and admin only.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "HALL-TUOTTEET-02: tuotteen näkyvyys yhtenä valintana tuote-editorin Myynti ja näkyvyys -välilehdellä. Vain kassalla ja hallinnassa poistaa tuotteen kaikista myyntikanavista (Joonas 15.11.2026). Bottiavustus/Koodari tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.product.vis_now_hidden",
+    "lang": "fi",
+    "text": "Nyt: piilotettu.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "HALL-TUOTTEET-02: tuotteen näkyvyys yhtenä valintana tuote-editorin Myynti ja näkyvyys -välilehdellä. Vain kassalla ja hallinnassa poistaa tuotteen kaikista myyntikanavista (Joonas 15.11.2026). Bottiavustus/Koodari tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.product.vis_now_hidden",
+    "lang": "en",
+    "text": "Now: hidden.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "HALL-TUOTTEET-02: tuotteen näkyvyys yhtenä valintana tuote-editorin Myynti ja näkyvyys -välilehdellä. Vain kassalla ja hallinnassa poistaa tuotteen kaikista myyntikanavista (Joonas 15.11.2026). Bottiavustus/Koodari tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.product.vis_not_met",
+    "lang": "fi",
+    "text": "Valittu tila ei toteudu vielä:",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "HALL-TUOTTEET-02: tuotteen näkyvyys yhtenä valintana tuote-editorin Myynti ja näkyvyys -välilehdellä. Vain kassalla ja hallinnassa poistaa tuotteen kaikista myyntikanavista (Joonas 15.11.2026). Bottiavustus/Koodari tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.product.vis_not_met",
+    "lang": "en",
+    "text": "The chosen state does not apply yet:",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "HALL-TUOTTEET-02: tuotteen näkyvyys yhtenä valintana tuote-editorin Myynti ja näkyvyys -välilehdellä. Vain kassalla ja hallinnassa poistaa tuotteen kaikista myyntikanavista (Joonas 15.11.2026). Bottiavustus/Koodari tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.product.vis_note",
+    "lang": "fi",
+    "text": "Huomioi:",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "HALL-TUOTTEET-02: tuotteen näkyvyys yhtenä valintana tuote-editorin Myynti ja näkyvyys -välilehdellä. Vain kassalla ja hallinnassa poistaa tuotteen kaikista myyntikanavista (Joonas 15.11.2026). Bottiavustus/Koodari tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.product.vis_note",
+    "lang": "en",
+    "text": "Note:",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "HALL-TUOTTEET-02: tuotteen näkyvyys yhtenä valintana tuote-editorin Myynti ja näkyvyys -välilehdellä. Vain kassalla ja hallinnassa poistaa tuotteen kaikista myyntikanavista (Joonas 15.11.2026). Bottiavustus/Koodari tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.product.vis_why_no_config",
+    "lang": "fi",
+    "text": "Tuotetta ei ole otettu mukaan varausjärjestelmään, joten se ei voi olla verkossa.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "HALL-TUOTTEET-02: tuotteen näkyvyys yhtenä valintana tuote-editorin Myynti ja näkyvyys -välilehdellä. Vain kassalla ja hallinnassa poistaa tuotteen kaikista myyntikanavista (Joonas 15.11.2026). Bottiavustus/Koodari tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.product.vis_why_no_config",
+    "lang": "en",
+    "text": "The product is not part of the booking system, so it cannot be online.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "HALL-TUOTTEET-02: tuotteen näkyvyys yhtenä valintana tuote-editorin Myynti ja näkyvyys -välilehdellä. Vain kassalla ja hallinnassa poistaa tuotteen kaikista myyntikanavista (Joonas 15.11.2026). Bottiavustus/Koodari tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.product.vis_why_lifecycle_old",
+    "lang": "fi",
+    "text": "Tuote on vanha tuote, eikä vanhoja tuotteita myydä verkossa.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "HALL-TUOTTEET-02: tuotteen näkyvyys yhtenä valintana tuote-editorin Myynti ja näkyvyys -välilehdellä. Vain kassalla ja hallinnassa poistaa tuotteen kaikista myyntikanavista (Joonas 15.11.2026). Bottiavustus/Koodari tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.product.vis_why_lifecycle_old",
+    "lang": "en",
+    "text": "This is an old product, and old products are not sold online.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "HALL-TUOTTEET-02: tuotteen näkyvyys yhtenä valintana tuote-editorin Myynti ja näkyvyys -välilehdellä. Vain kassalla ja hallinnassa poistaa tuotteen kaikista myyntikanavista (Joonas 15.11.2026). Bottiavustus/Koodari tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.product.vis_why_sale_closed",
+    "lang": "fi",
+    "text": "Tapahtumien verkkomyynti on suljettu, joten tuote ei näy verkossa ennen kuin myynti avataan.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "HALL-TUOTTEET-02: tuotteen näkyvyys yhtenä valintana tuote-editorin Myynti ja näkyvyys -välilehdellä. Vain kassalla ja hallinnassa poistaa tuotteen kaikista myyntikanavista (Joonas 15.11.2026). Bottiavustus/Koodari tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.product.vis_why_sale_closed",
+    "lang": "en",
+    "text": "Online sales of events are closed, so the product is not shown online until sales are opened.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "HALL-TUOTTEET-02: tuotteen näkyvyys yhtenä valintana tuote-editorin Myynti ja näkyvyys -välilehdellä. Vain kassalla ja hallinnassa poistaa tuotteen kaikista myyntikanavista (Joonas 15.11.2026). Bottiavustus/Koodari tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.product.vis_why_no_occurrences",
+    "lang": "fi",
+    "text": "Ei tulevia kertoja, joten verkossa ei ole mitään varattavaa.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "HALL-TUOTTEET-02: tuotteen näkyvyys yhtenä valintana tuote-editorin Myynti ja näkyvyys -välilehdellä. Vain kassalla ja hallinnassa poistaa tuotteen kaikista myyntikanavista (Joonas 15.11.2026). Bottiavustus/Koodari tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.product.vis_why_no_occurrences",
+    "lang": "en",
+    "text": "There are no upcoming occurrences, so there is nothing to book online.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "HALL-TUOTTEET-02: tuotteen näkyvyys yhtenä valintana tuote-editorin Myynti ja näkyvyys -välilehdellä. Vain kassalla ja hallinnassa poistaa tuotteen kaikista myyntikanavista (Joonas 15.11.2026). Bottiavustus/Koodari tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.product.vis_why_duration",
+    "lang": "fi",
+    "text": "Kesto puuttuu, joten tuote ei voi näkyä verkossa. Kestoa ei voi vielä muuttaa hallinnassa.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "HALL-TUOTTEET-02: tuotteen näkyvyys yhtenä valintana tuote-editorin Myynti ja näkyvyys -välilehdellä. Vain kassalla ja hallinnassa poistaa tuotteen kaikista myyntikanavista (Joonas 15.11.2026). Bottiavustus/Koodari tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.product.vis_why_duration",
+    "lang": "en",
+    "text": "The duration is missing, so the product cannot be shown online. The duration cannot be changed in the admin yet.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "HALL-TUOTTEET-02: tuotteen näkyvyys yhtenä valintana tuote-editorin Myynti ja näkyvyys -välilehdellä. Vain kassalla ja hallinnassa poistaa tuotteen kaikista myyntikanavista (Joonas 15.11.2026). Bottiavustus/Koodari tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.product.vis_why_channel_missing",
+    "lang": "fi",
+    "text": "Verkkokauppa-kanava ei ole päällä. Valitse Korjaa ja tallenna muutokset, niin kanava lisätään.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "HALL-TUOTTEET-02: tuotteen näkyvyys yhtenä valintana tuote-editorin Myynti ja näkyvyys -välilehdellä. Vain kassalla ja hallinnassa poistaa tuotteen kaikista myyntikanavista (Joonas 15.11.2026). Bottiavustus/Koodari tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.product.vis_why_channel_missing",
+    "lang": "en",
+    "text": "The online shop channel is off. Choose Fix and save the changes to add the channel.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "HALL-TUOTTEET-02: tuotteen näkyvyys yhtenä valintana tuote-editorin Myynti ja näkyvyys -välilehdellä. Vain kassalla ja hallinnassa poistaa tuotteen kaikista myyntikanavista (Joonas 15.11.2026). Bottiavustus/Koodari tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.product.vis_why_no_image",
+    "lang": "fi",
+    "text": "Kuva puuttuu: tuote näkyy kaupassa ilman kuvaa.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "HALL-TUOTTEET-02: tuotteen näkyvyys yhtenä valintana tuote-editorin Myynti ja näkyvyys -välilehdellä. Vain kassalla ja hallinnassa poistaa tuotteen kaikista myyntikanavista (Joonas 15.11.2026). Bottiavustus/Koodari tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.product.vis_why_no_image",
+    "lang": "en",
+    "text": "The image is missing: the product is shown in the shop without an image.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "HALL-TUOTTEET-02: tuotteen näkyvyys yhtenä valintana tuote-editorin Myynti ja näkyvyys -välilehdellä. Vain kassalla ja hallinnassa poistaa tuotteen kaikista myyntikanavista (Joonas 15.11.2026). Bottiavustus/Koodari tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.product.vis_why_packages_inactive",
+    "lang": "fi",
+    "text": "Lahjakorttikaupassa nämä tuotteen paketit eivät ole myynnissä: {{var:names}}. Ne otetaan myyntiin Lahjakortit-sivulla.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [
+      "{{var:names}}"
+    ],
+    "reason": "HALL-TUOTTEET-02: tuotteen näkyvyys yhtenä valintana tuote-editorin Myynti ja näkyvyys -välilehdellä. Vain kassalla ja hallinnassa poistaa tuotteen kaikista myyntikanavista (Joonas 15.11.2026). Bottiavustus/Koodari tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.product.vis_why_packages_inactive",
+    "lang": "en",
+    "text": "These gift card packages with this product are not on sale in the gift card shop: {{var:names}}. Put them on sale on the Gift cards page.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [
+      "{{var:names}}"
+    ],
+    "reason": "HALL-TUOTTEET-02: tuotteen näkyvyys yhtenä valintana tuote-editorin Myynti ja näkyvyys -välilehdellä. Vain kassalla ja hallinnassa poistaa tuotteen kaikista myyntikanavista (Joonas 15.11.2026). Bottiavustus/Koodari tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.product.vis_why_still_on_sale",
+    "lang": "fi",
+    "text": "Tuote on vielä myynnissä: {{var:names}}. Valitse Korjaa ja tallenna muutokset, niin se poistetaan kaikista myyntikanavista.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [
+      "{{var:names}}"
+    ],
+    "reason": "HALL-TUOTTEET-02: tuotteen näkyvyys yhtenä valintana tuote-editorin Myynti ja näkyvyys -välilehdellä. Vain kassalla ja hallinnassa poistaa tuotteen kaikista myyntikanavista (Joonas 15.11.2026). Bottiavustus/Koodari tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.product.vis_why_still_on_sale",
+    "lang": "en",
+    "text": "The product is still on sale: {{var:names}}. Choose Fix and save the changes to remove it from all sales channels.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [
+      "{{var:names}}"
+    ],
+    "reason": "HALL-TUOTTEET-02: tuotteen näkyvyys yhtenä valintana tuote-editorin Myynti ja näkyvyys -välilehdellä. Vain kassalla ja hallinnassa poistaa tuotteen kaikista myyntikanavista (Joonas 15.11.2026). Bottiavustus/Koodari tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.product.vis_why_packages_off",
+    "lang": "fi",
+    "text": "Tallennus poistaa lahjakorttikaupasta myös nämä paketit, koska niissä on tämä tuote: {{var:names}}.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [
+      "{{var:names}}"
+    ],
+    "reason": "HALL-TUOTTEET-02: tuotteen näkyvyys yhtenä valintana tuote-editorin Myynti ja näkyvyys -välilehdellä. Vain kassalla ja hallinnassa poistaa tuotteen kaikista myyntikanavista (Joonas 15.11.2026). Bottiavustus/Koodari tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.product.vis_why_packages_off",
+    "lang": "en",
+    "text": "Saving also removes these packages from the gift card shop, because they include this product: {{var:names}}.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [
+      "{{var:names}}"
+    ],
+    "reason": "HALL-TUOTTEET-02: tuotteen näkyvyys yhtenä valintana tuote-editorin Myynti ja näkyvyys -välilehdellä. Vain kassalla ja hallinnassa poistaa tuotteen kaikista myyntikanavista (Joonas 15.11.2026). Bottiavustus/Koodari tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.product.vis_why_fridge_off",
+    "lang": "fi",
+    "text": "Tallennus poistaa QR-myynnin (kylmälaite).",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "HALL-TUOTTEET-02: tuotteen näkyvyys yhtenä valintana tuote-editorin Myynti ja näkyvyys -välilehdellä. Vain kassalla ja hallinnassa poistaa tuotteen kaikista myyntikanavista (Joonas 15.11.2026). Bottiavustus/Koodari tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.product.vis_why_fridge_off",
+    "lang": "en",
+    "text": "Saving removes QR sales (fridge).",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "HALL-TUOTTEET-02: tuotteen näkyvyys yhtenä valintana tuote-editorin Myynti ja näkyvyys -välilehdellä. Vain kassalla ja hallinnassa poistaa tuotteen kaikista myyntikanavista (Joonas 15.11.2026). Bottiavustus/Koodari tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.product.vis_why_pos_off",
+    "lang": "fi",
+    "text": "Valinta Näytä pikakassassa ei ole päällä, joten tuote ei näy kassalla.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "HALL-TUOTTEET-02: tuotteen näkyvyys yhtenä valintana tuote-editorin Myynti ja näkyvyys -välilehdellä. Vain kassalla ja hallinnassa poistaa tuotteen kaikista myyntikanavista (Joonas 15.11.2026). Bottiavustus/Koodari tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.product.vis_why_pos_off",
+    "lang": "en",
+    "text": "The option Show in the quick till is off, so the product is not shown at the till.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "HALL-TUOTTEET-02: tuotteen näkyvyys yhtenä valintana tuote-editorin Myynti ja näkyvyys -välilehdellä. Vain kassalla ja hallinnassa poistaa tuotteen kaikista myyntikanavista (Joonas 15.11.2026). Bottiavustus/Koodari tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.product.vis_ch_shop",
+    "lang": "fi",
+    "text": "verkkokauppa",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "HALL-TUOTTEET-02: tuotteen näkyvyys yhtenä valintana tuote-editorin Myynti ja näkyvyys -välilehdellä. Vain kassalla ja hallinnassa poistaa tuotteen kaikista myyntikanavista (Joonas 15.11.2026). Bottiavustus/Koodari tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.product.vis_ch_shop",
+    "lang": "en",
+    "text": "online shop",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "HALL-TUOTTEET-02: tuotteen näkyvyys yhtenä valintana tuote-editorin Myynti ja näkyvyys -välilehdellä. Vain kassalla ja hallinnassa poistaa tuotteen kaikista myyntikanavista (Joonas 15.11.2026). Bottiavustus/Koodari tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.product.vis_ch_widget",
+    "lang": "fi",
+    "text": "upotus",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "HALL-TUOTTEET-02: tuotteen näkyvyys yhtenä valintana tuote-editorin Myynti ja näkyvyys -välilehdellä. Vain kassalla ja hallinnassa poistaa tuotteen kaikista myyntikanavista (Joonas 15.11.2026). Bottiavustus/Koodari tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.product.vis_ch_widget",
+    "lang": "en",
+    "text": "embed",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "HALL-TUOTTEET-02: tuotteen näkyvyys yhtenä valintana tuote-editorin Myynti ja näkyvyys -välilehdellä. Vain kassalla ja hallinnassa poistaa tuotteen kaikista myyntikanavista (Joonas 15.11.2026). Bottiavustus/Koodari tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.product.vis_ch_link",
+    "lang": "fi",
+    "text": "suora linkki",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "HALL-TUOTTEET-02: tuotteen näkyvyys yhtenä valintana tuote-editorin Myynti ja näkyvyys -välilehdellä. Vain kassalla ja hallinnassa poistaa tuotteen kaikista myyntikanavista (Joonas 15.11.2026). Bottiavustus/Koodari tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.product.vis_ch_link",
+    "lang": "en",
+    "text": "direct link",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "HALL-TUOTTEET-02: tuotteen näkyvyys yhtenä valintana tuote-editorin Myynti ja näkyvyys -välilehdellä. Vain kassalla ja hallinnassa poistaa tuotteen kaikista myyntikanavista (Joonas 15.11.2026). Bottiavustus/Koodari tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.product.vis_ch_listed",
+    "lang": "fi",
+    "text": "lisämyynti ja verkkovaraus",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "HALL-TUOTTEET-02: tuotteen näkyvyys yhtenä valintana tuote-editorin Myynti ja näkyvyys -välilehdellä. Vain kassalla ja hallinnassa poistaa tuotteen kaikista myyntikanavista (Joonas 15.11.2026). Bottiavustus/Koodari tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.product.vis_ch_listed",
+    "lang": "en",
+    "text": "upselling and online booking",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "HALL-TUOTTEET-02: tuotteen näkyvyys yhtenä valintana tuote-editorin Myynti ja näkyvyys -välilehdellä. Vain kassalla ja hallinnassa poistaa tuotteen kaikista myyntikanavista (Joonas 15.11.2026). Bottiavustus/Koodari tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.product.vis_ch_fridge",
+    "lang": "fi",
+    "text": "QR-myynti",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "HALL-TUOTTEET-02: tuotteen näkyvyys yhtenä valintana tuote-editorin Myynti ja näkyvyys -välilehdellä. Vain kassalla ja hallinnassa poistaa tuotteen kaikista myyntikanavista (Joonas 15.11.2026). Bottiavustus/Koodari tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.product.vis_ch_fridge",
+    "lang": "en",
+    "text": "QR sales",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "HALL-TUOTTEET-02: tuotteen näkyvyys yhtenä valintana tuote-editorin Myynti ja näkyvyys -välilehdellä. Vain kassalla ja hallinnassa poistaa tuotteen kaikista myyntikanavista (Joonas 15.11.2026). Bottiavustus/Koodari tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.product.vis_ch_gift_shop",
+    "lang": "fi",
+    "text": "lahjakorttikauppa",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "HALL-TUOTTEET-02: tuotteen näkyvyys yhtenä valintana tuote-editorin Myynti ja näkyvyys -välilehdellä. Vain kassalla ja hallinnassa poistaa tuotteen kaikista myyntikanavista (Joonas 15.11.2026). Bottiavustus/Koodari tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.product.vis_ch_gift_shop",
+    "lang": "en",
+    "text": "gift card shop",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "HALL-TUOTTEET-02: tuotteen näkyvyys yhtenä valintana tuote-editorin Myynti ja näkyvyys -välilehdellä. Vain kassalla ja hallinnassa poistaa tuotteen kaikista myyntikanavista (Joonas 15.11.2026). Bottiavustus/Koodari tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.product.vis_fix",
+    "lang": "fi",
+    "text": "Korjaa",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "HALL-TUOTTEET-02: tuotteen näkyvyys yhtenä valintana tuote-editorin Myynti ja näkyvyys -välilehdellä. Vain kassalla ja hallinnassa poistaa tuotteen kaikista myyntikanavista (Joonas 15.11.2026). Bottiavustus/Koodari tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.product.vis_fix",
+    "lang": "en",
+    "text": "Fix",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "HALL-TUOTTEET-02: tuotteen näkyvyys yhtenä valintana tuote-editorin Myynti ja näkyvyys -välilehdellä. Vain kassalla ja hallinnassa poistaa tuotteen kaikista myyntikanavista (Joonas 15.11.2026). Bottiavustus/Koodari tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.product.vis_events_link",
+    "lang": "fi",
+    "text": "Muuta näkyvyyttä tuotteen tiedoissa",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "HALL-TUOTTEET-02: tuotteen näkyvyys yhtenä valintana tuote-editorin Myynti ja näkyvyys -välilehdellä. Vain kassalla ja hallinnassa poistaa tuotteen kaikista myyntikanavista (Joonas 15.11.2026). Bottiavustus/Koodari tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.product.vis_events_link",
+    "lang": "en",
+    "text": "Change visibility in the product details",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "HALL-TUOTTEET-02: tuotteen näkyvyys yhtenä valintana tuote-editorin Myynti ja näkyvyys -välilehdellä. Vain kassalla ja hallinnassa poistaa tuotteen kaikista myyntikanavista (Joonas 15.11.2026). Bottiavustus/Koodari tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  }
+]

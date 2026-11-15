@@ -1,6 +1,8 @@
 // HALL-TUOTTEET-01: tuote-editorin puhdas logiikka (ei DOM:ia, ei verkkoa). node --test ajaa tämän suoraan.
 // Editori lukee lomakkeen tilan "kuvaksi" (snapshot), vertaa sitä tallennettuun kuvaan ja rakentaa tallennussuunnitelman:
 // vain muuttuneet osat, yksi RPC-jono. Näkymä (views/product-editor.js) ajaa suunnitelman ja kertoo, mikä osa epäonnistui.
+// HALL-TUOTTEET-02: näkyvyys (online / internal / hidden, product-visibility.js) on oma osansa; se korvaa lomakkeen Aktiivinen-, Varattavissa- ja Näkyy listassa -valinnat.
+import { factsFromProduct, modeOf } from './product-visibility.js';
 
 export const TAB_IDS = ['perustiedot', 'hinnat', 'myynti', 'kuva', 'valinnat', 'lisamyynti'];
 export const CONFIG_FIELDS = ['bookable', 'shop_visible', 'audience', 'sort_order', 'min_persons', 'max_persons', 'pos_enabled', 'pos_sort', 'fridge_sale', 'age_restricted'];
@@ -53,6 +55,7 @@ export function baselineFromProduct(p, { offers = [], alcohol = false } = {}) {
     variants: Object.fromEntries((p.variants || []).map((v) => [v.id, numOrNull(v.price)])),
     image: { alt: c?.image_alt || '', hasImage: !!c?.image_path, file: false, remove: false },
     suggestions: null,   // lisämyynnin tila kuvataan merkkijonona (näkymä täyttää); null = ei ladattu
+    visibility: modeOf(factsFromProduct(p)),
   };
 }
 
@@ -68,19 +71,20 @@ export function diffSnapshots(base, cur) {
     variants: Object.keys(cur.variants || {}).filter((id) => !same(base.variants?.[id], cur.variants[id])),
     image: !!(cur.image?.file || cur.image?.remove || (cur.image?.alt ?? '') !== (base.image?.alt ?? '')),
     suggestions: base.suggestions != null && cur.suggestions != null && base.suggestions !== cur.suggestions,
+    visibility: base.visibility != null && cur.visibility != null && base.visibility !== cur.visibility,
   };
   // Alt-teksti ilman kuvaa ei ole muutos
   if (d.image && !cur.image.file && !base.image.hasImage) d.image = false;
   return d;
 }
-export const isDirty = (d) => !!(d.product.length || d.config.length || d.training.length || d.variants.length || d.image || d.suggestions);
+export const isDirty = (d) => !!(d.product.length || d.config.length || d.training.length || d.variants.length || d.image || d.suggestions || d.visibility);
 
 const PRICE_KEYS = new Set(['price', 'price_text', 'vat_rate']);
 /** Välilehdet, joilla on tallentamattomia muutoksia. */
 export function dirtyTabs(d) {
   const tabs = new Set();
   for (const k of d.product) tabs.add(PRICE_KEYS.has(k) ? 'hinnat' : k === 'active' ? 'myynti' : 'perustiedot');
-  if (d.config.length) tabs.add('myynti');
+  if (d.config.length || d.visibility) tabs.add('myynti');
   for (const k of d.training) tabs.add(k === 'course_price' ? 'hinnat' : 'valinnat');
   if (d.variants.length) tabs.add('hinnat');
   if (d.image) tabs.add('kuva');
@@ -113,11 +117,14 @@ export function validateSnapshot(cur, base = null) {
 /**
  * Tallennussuunnitelma: vain muuttuneet osat, järjestyksessä tuote → koulutus → myynti → hintavariantit → kuva → lisämyynti.
  * Askel: { key, label, calls: [{ fn, args }] }. Kuva ja lisämyynti ovat näkymän omia askelia (custom: true, näkymä ajaa ne).
- * labels: { product, training, config, image, suggestions, variant: (id) => teksti }.
+ * labels: { product, training, config, image, suggestions, visibility, variant: (id) => teksti }.
+ * Näkyvyys (custom, näkymä ajaa saveVisibilityn): piilotus ensimmäisenä, näkyväksi tekeminen muiden asetusten jälkeen.
  */
 export function buildSavePlan({ productId, training = false, base, cur, labels }) {
   const d = diffSnapshots(base, cur);
   const steps = [];
+  const vis = d.visibility ? { key: 'visibility', label: labels.visibility, custom: true, mode: cur.visibility, calls: [] } : null;
+  if (vis && cur.visibility !== 'online') steps.push(vis);
   if (d.product.length) {
     const patch = {};
     for (const k of d.product) patch[k] = cur.product[k];
@@ -146,6 +153,7 @@ export function buildSavePlan({ productId, training = false, base, cur, labels }
     if (base.fridgeStored && !base.config.fridge_sale && !cur.config.fridge_sale) patch.fridge_sale = false;
     steps.push({ key: 'config', label: labels.config, calls: [{ fn: 'admin_update_product_config', args: { p_product_id: productId, p_patch: patch } }] });
   }
+  if (vis && cur.visibility === 'online') steps.push(vis);
   for (const id of d.variants) steps.push({ key: `variant:${id}`, label: labels.variant(id), calls: [{ fn: 'admin_update_price_variant', args: { p_variant_id: Number(id), p_patch: { price: cur.variants[id] } } }] });
   if (d.image) steps.push({ key: 'image', label: labels.image, custom: true, calls: [] });
   if (d.suggestions) steps.push({ key: 'suggestions', label: labels.suggestions, custom: true, calls: [] });
@@ -172,6 +180,7 @@ export function rebase(base, cur, doneKeys) {
   for (const id of Object.keys(cur.variants || {})) if (ok.has(`variant:${id}`)) next.variants[id] = cur.variants[id];
   if (ok.has('image')) next.image = { alt: cur.image.alt, hasImage: cur.image.remove ? false : (cur.image.file ? true : base.image.hasImage), file: false, remove: false };
   if (ok.has('suggestions')) next.suggestions = cur.suggestions;
+  if (ok.has('visibility')) next.visibility = cur.visibility;
   return next;
 }
 

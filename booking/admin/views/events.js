@@ -15,6 +15,8 @@ import { getLang } from '../talous-i18n.js';
 import { mountRichFields, syncRichFields } from '../rich-editor.js';
 import { loadRichTexts, richText } from '../rich-texts.js';
 import { loadProductTexts, productText } from '../product-texts.js';
+import { factsFromEvent, modeOf, explain } from '../product-visibility.js';
+import { fmt as fillVars } from '../product-editor-logic.js';
 import { buildSeries, defaultLabel, validateBlock, blockToRow, blocksPayload, timeline, selectableResources, channelsOf, normChannels, CHANNELS,
   copyArgs, copyName, conflictsOf, localParts, MAX_BLOCKS, occurrenceFlags, bookingCount, isPastMove, messageDraft, customerMessageText, participantsToCsv, weekdayIso, publicShopLink } from '../events-logic.js';
 import { eventQueueParts } from '../event-waitlist.js';
@@ -252,6 +254,19 @@ export async function render({ ctx, refs, reload, query, section = null }) {
       rows.length ? tableBlock(rows.slice(0, 8)) : h('p', { class: 'muted', text: T('no_occurrences') }));
   }
 
+  // HALL-TUOTTEET-02: tuotteen näkyvyys valitaan Tuotteet-näkymässä (yksi valinta); tässä vain nykytila ja selitys, jos se ei toteudu. Kanavat ovat tarkennus.
+  function visWhyText(x) { return fillVars(productText(`vis_why_${x.code}`), x.code === 'still_on_sale' ? { names: x.channels.map((c) => productText(`vis_ch_${c}`)).join(', ') } : (x.vars || {})); }
+  function visibilitySummary(p) {
+    const upcoming = (p.rules || []).filter((r) => { const fl = flagsOf(p, r); return !fl.past && fl.status !== 'cancelled'; }).length;
+    const f = factsFromEvent({ ...p, upcoming });
+    const mode = modeOf(f);
+    const items = explain(f, mode, { saved: true });
+    return h('div', { class: 'card stack ev-vis', 'data-testid': 'event-visibility' },
+      h('strong', { text: `${productText('vis_title')}: ${productText(`vis_${mode}`)}` }),
+      items.length ? h('ul', { class: items.some((x) => x.level === 'block') ? 'err' : 'muted' }, items.map((x) => h('li', { 'data-why': x.code, text: visWhyText(x) }))) : null,
+      h('a', { href: `#/tuotteet/${p.product_id}`, 'data-testid': 'event-visibility-link', text: productText('vis_events_link') }));
+  }
+
   function settingsPanel(p) {
     const cur = channelsOf(p);
     const boxes = CHANNELS.map((c) => h('label', { class: 'check' }, h('input', { type: 'checkbox', value: c, checked: cur.includes(c) || null, disabled: !canEdit, 'data-testid': `event-channel-${c}` }), ' ', c === 'link' ? tx('channel_link') : T(`channel_${c}`)));
@@ -261,6 +276,7 @@ export async function render({ ctx, refs, reload, query, section = null }) {
     }) }) : null;
     return h('div', { class: 'stack' },
       h('p', { class: 'muted', text: T('settings_lead') }),
+      visibilitySummary(p),
       h('div', { class: 'row wrap' },
         h('a', { class: 'btn', href: `#/tuotteet?muokkaa=${p.product_id}`, 'data-testid': 'event-edit-product', text: T('edit_product') }),
         canEdit ? h('button', { type: 'button', class: 'btn', 'data-testid': 'event-copy', text: T('copy_event'), onclick: () => copyEvent(p) }) : null),
