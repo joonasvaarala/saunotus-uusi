@@ -36,7 +36,8 @@ export function usesStartPicker(rows, product) {
   if (product?.category === 'event' || product?.category === 'training') return false;
   const list = visibleWaitlistSlots(rows);
   if (list.some((x) => Date.parse(rowOf(x).ends_at) - Date.parse(rowOf(x).starts_at) >= 24 * 36e5)) return false;
-  return groupSlotsByStart(list).some((g) => g.slots.length > 1);
+  // useita ERI kestoja samalla alulla (pelkkä sama alku samalla kestolla, esim. kaksi eri sääntöä, ei riitä)
+  return groupSlotsByStart(list).some((g) => new Set(g.slots.map(durationMinutes)).size > 1);
 }
 
 /** Yhteinen "sis. N hlö, lisähenkilö +X €" -tieto, jos kaikilla annetuilla riveillä sama; muuten null (silloin teksti riville). */

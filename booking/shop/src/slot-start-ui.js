@@ -35,14 +35,14 @@ export function createSlotPicker({ h, t, money, hm, dur, href, badge = () => nul
       const items = g.free.map((x) => {
         const r = rowOf(x), time = `${hm(r.starts_at)}–${hm(r.ends_at)}`, d = dur(durationMinutes(r));
         return h('li', { class: `bk-slot ${r.status}`, 'data-rule': r.rule_id },
-          h('div', { class: 'bk-slot-main' }, h('strong', { class: 'bk-time', text: d }), h('span', { class: 'bk-sub', text: time }), h('span', { class: 'bk-price', text: priceText(r, shared), ...priceAttrs(r) })),
+          h('div', { class: 'bk-slot-main' }, h('strong', { class: 'bk-time', text: d }), h('span', { class: 'bk-sub', text: time }), h('span', { class: 'bk-price', text: priceText(r, shared), ...priceAttrs(r, !!shared) })),
           h('div', { class: 'bk-slot-side' }, badge(r), h('a', { class: 'btn sm', href: href(r, ds) }, t.choose, h('span', { class: 'sr', text: ` ${d}, ${time}` }))));
       });
       return [heading, h('ul', { class: 'bk-slotlist', 'aria-labelledby': `${id}-h` }, items),
         shared ? h('p', { class: 'bk-note', 'data-testid': 'slot-included', text: `${t.included(shared.included)}, ${t.extra(money(shared.extra))}` }) : null];
     }
     const heading = h('h4', { id: `${id}-s`, text: t.slotStartTitle });
-    box.append(heading, h('p', { class: 'bk-note', text: t.slotStartLead }), h('ul', { class: 'bk-times', role: 'group', 'aria-labelledby': `${id}-s`, 'data-testid': 'slot-starts' }, btns.map((b) => h('li', {}, b))), out);
+    box.append(heading, h('p', { class: 'bk-note', text: t.slotStartLead }), h('div', { class: 'bk-times', role: 'group', 'aria-labelledby': `${id}-s`, 'data-testid': 'slot-starts' }, btns), out);
     paintDurations();
     return box;
   }

@@ -122,7 +122,8 @@ function quietPriceNode(el, o, kind) {
   const sr = h('span', { class: 'sr', text: fillText(t.quietSr, { pct: pctText(q.pct, S.lang), was: money(q.was), now: money(q.now) }) });
   el.classList.add('bk-quiet');
   if (m === 'per_person') { el.append(' ', qBadge(q.pct), sr); return; }   // henkilöhinta: vain merkki (palvelin laskee summan)
-  const now = m === 'fixed' ? money(q.now) : kind === 'day' ? `${t.from} ${money(q.now)}`
+  // 'dur' = oman vuoron kestorivi: sis. hlö / lisähenkilö näkyy kerran listan alla, ei joka rivillä
+  const now = m === 'fixed' || kind === 'dur' ? money(q.now) : kind === 'day' ? `${t.from} ${money(q.now)}`
     : `${money(q.now)}${o.included_persons != null && q.extraNow != null ? ` (${t.included(o.included_persons)}, ${t.extra(money(q.extraNow))})` : ''}`;
   el.replaceChildren(qBadge(q.pct), ' ', h('del', { 'aria-hidden': 'true', text: money(q.was) }), ' ', h('span', { class: 'bk-quiet-now', 'aria-hidden': 'true', text: now }), sr);
 }
@@ -742,7 +743,7 @@ function spotBadge(r, p, ok, fullText, n = r.remaining) {
 }
 // kaksivaiheinen alku → kesto -valinta (slot-start-ui.js); ds annetaan näkymälle, varauslinkki sama kuin slotItemissä
 function makeSlotPicker(p, via = '', legacy = (r, ds) => slotItem(r, ds, p)) {
-  return createSlotPicker({ h, t, money, hm, dur: fmtMinutes, href: (r, ds) => bk(`/varaa/${r.rule_id}/${ds}/${p.id}${via}`), badge: (r) => spotBadge(r, p, true, t.waitlistSessionSoldOut), priceAttrs: (r) => qAttrs(true, p, r, 'slot'), legacyItem: legacy });
+  return createSlotPicker({ h, t, money, hm, dur: fmtMinutes, href: (r, ds) => bk(`/varaa/${r.rule_id}/${ds}/${p.id}${via}`), badge: (r) => spotBadge(r, p, true, t.waitlistSessionSoldOut), priceAttrs: (r, shared) => qAttrs(true, p, r, shared ? 'dur' : 'slot'), legacyItem: legacy });
 }
 function slotItem(r, ds, p) {
   const ok = r.status === 'available';

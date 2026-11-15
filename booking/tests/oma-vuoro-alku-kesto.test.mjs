@@ -236,3 +236,23 @@ test('shop.js: tuotesivu ja päivänäkymän tuotekortti käyttävät valitsinta
   assert.match(shop, /href: \(r, ds\) => bk\(`\/varaa\/\$\{r\.rule_id\}\/\$\{ds\}\/\$\{p\.id\}\$\{via\}`\)/);
   assert.match(shop, /bk\(`\/varaa\/\$\{r\.rule_id\}\/\$\{ds\}\/\$\{p\.id\}`\) \}, t\.choose/);
 });
+
+// Katselmointikorjaukset (Koodari, PR #394)
+test('usesStartPicker: sama alku samalla kestolla (kaksi eri sääntöä) ei käynnistä valitsinta; eri kestot käynnistävät', () => {
+  const P = { id: 25, category: 'private_sauna' };
+  assert.equal(usesStartPicker([slot(13, 2), slot(13, 2, 'available', { rule_id: 99 })], P), false);
+  assert.equal(usesStartPicker([slot(13, 2), slot(13, 3)], P), true);
+});
+test('alkunapit: role=group on div-säiliössä (ei ul+li), napit suoraan ryhmässä; hiljaisen ajan hinta-attribuutti saa tiedon yhteisestä sis. hlö -tekstistä', () => {
+  const t = T.fi, seen = [];
+  const pk = createSlotPicker({ h, t, money: money('fi'), hm: (i) => clockFromIso(i, 'fi'), dur: fmtMinutes, href: () => '#', legacyItem: () => null, priceAttrs: (r, shared) => { seen.push(shared); return {}; } });
+  const box = pk.view(SAT, '2027-01-09', { id: 25 });
+  const grp = box.find((e) => e.attrs['data-testid'] === 'slot-starts');
+  assert.equal(grp.tag, 'div');
+  assert.equal(grp.attrs.role, 'group');
+  assert.ok(grp.kids.every((k) => k.tag === 'button'));
+  assert.ok(seen.length > 0 && seen.every((x) => x === true));
+  const shop = read('booking/shop/src/shop.js');
+  assert.match(shop, /priceAttrs: \(r, shared\) => qAttrs\(true, p, r, shared \? 'dur' : 'slot'\)/);
+  assert.match(shop, /m === 'fixed' \|\| kind === 'dur' \? money\(q\.now\)/);
+});
