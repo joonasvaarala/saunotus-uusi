@@ -105,10 +105,23 @@ function procountorStatus(cfg) {
 const PERMS = ['bookings.manage', 'bookings.override', 'customers.manage', 'catalog.edit', 'payments.manage', 'payments.refund', 'reports.view', 'settings.edit', 'pos.use', 'invoices.manage', 'giftcards.manage', 'messages.edit', 'blocks.manage', 'resources.edit', 'rules.edit'];
 const CODE_RE = /^[a-z0-9_]{1,40}$/;
 
+import { channelsFromConfig, applyChannelsToConfig } from './sales-channels.js';
+
+// booking_316: kanavalista kuten migraation siemen (data; kokeilutila)
+export const MOCK_SALES_CHANNELS = [
+  { code: 'shop', name: 'Verkkokauppa', name_en: 'Online shop', sort_order: 10, active: true, public_booking: true },
+  { code: 'widget', name: 'Upotus', name_en: 'Embed', sort_order: 20, active: true, public_booking: true },
+  { code: 'link', name: 'Suora linkki', name_en: 'Direct link', sort_order: 30, active: true, public_booking: true },
+  { code: 'pos', name: 'Pikakassa', name_en: 'Quick till', sort_order: 40, active: true, public_booking: false },
+  { code: 'qr', name: 'QR-myynti (kylmälaite)', name_en: 'QR sales (fridge)', sort_order: 50, active: true, public_booking: false },
+  { code: 'gift_shop', name: 'Lahjakorttikauppa', name_en: 'Gift card shop', sort_order: 60, active: true, public_booking: false },
+];
+
 export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, role = 'manager', latePaymentScenario = false, checkoutx = false } = {}) {
   const today = todayHel(now);
   const st = {
     calls: [], perms: [...perms],
+    salesChannels: MOCK_SALES_CHANNELS.map((c) => ({ ...c })), giftShop: new Set([3, 7, 10, 104]),   // booking_316
     dayNotes: [], dayBulletins: [], dayMemoSeq: 1, dayBulletinSeq: 1, ownShifts: [], staffShifts: [],
     messagesTimed: false,
     feeRules: [],
@@ -954,6 +967,34 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
       };
       st.products.push(row);
       return { ok: true, id, product: row };
+    },
+    // booking_316: myyntikanavat (peilaa admin_list_sales_channels / admin_set_product_sales_channels ja synkkatriggerit)
+    admin_list_sales_channels: () => {
+      const products = {};
+      for (const p of st.products) {
+        const codes = [...channelsFromConfig(p.category, p.config), ...(st.giftShop.has(p.id) ? ['gift_shop'] : [])];
+        if (codes.length) products[String(p.id)] = MOCK_SALES_CHANNELS.map((c) => c.code).filter((c) => codes.includes(c));
+      }
+      return { ok: true, channels: st.salesChannels.map((c) => ({ ...c })), products };
+    },
+    admin_set_product_sales_channels: (a) => {
+      need('catalog.edit');
+      const p = product(a.p_product_id);
+      if (!p) throw err('not_found', 'Tuotetta ei löydy');
+      if (!Array.isArray(a.p_codes)) throw err('invalid_param', 'Tuote tai kanavat puuttuvat');
+      const codes = [...new Set(a.p_codes.map((c) => String(c).trim().toLowerCase()).filter(Boolean))].sort();
+      const cur = new Set([...channelsFromConfig(p.category, p.config), ...(st.giftShop.has(p.id) ? ['gift_shop'] : [])]);
+      for (const c of codes) {
+        const ch = st.salesChannels.find((x) => x.code === c);
+        if (!ch) throw err('unknown_channel', 'Tuntematon myyntikanava: ' + c);
+        if (!ch.active && !cur.has(c)) throw err('channel_inactive', 'Myyntikanava ei ole käytössä: ' + c);
+      }
+      if (codes.some((c) => ['shop', 'widget', 'link', 'qr', 'pos'].includes(c)) && !p.config) throw err('not_found', 'Tuotteella ei ole varauskonfiguraatiota');
+      if (codes.includes('pos') && !cur.has('pos') && (['gift_card', 'season_card'].includes(p.category) || !p.active || p.price == null)) throw err('not_counter_product', 'Tuotetta ei voi lisätä pikakassaan');
+      if (codes.includes('qr') && p.config?.age_restricted) throw err('age_restricted', 'Ikärajallista tuotetta ei voi myydä kylmälaitteessa');
+      if (p.config) p.config = applyChannelsToConfig(p.category, p.config, codes);
+      if (codes.includes('gift_shop')) st.giftShop.add(p.id); else st.giftShop.delete(p.id);
+      return { ok: true, product_id: p.id, channels: MOCK_SALES_CHANNELS.map((c) => c.code).filter((c) => codes.includes(c)) };
     },
     admin_update_product_config: (a) => {
       need('catalog.edit');

@@ -12,6 +12,8 @@ import { productText } from '../product-texts.js';
 import { posText } from '../pos-texts.js';
 import { looksLikeAlcohol } from '../pos-logic.js';
 import { evText } from '../events-texts.js';
+import { getLang } from '../talous-i18n.js';
+import { sortCodes, channelName, channelBlock } from '../sales-channels.js';
 import { confirmAsk as confirmDialogAsk } from '../confirm.js';
 import {
   baselineFromProduct, diffSnapshots, isDirty, dirtyTabs, validateSnapshot, buildSavePlan, runPlan, rebase, saveSummary, fmt,
@@ -34,7 +36,11 @@ export async function productEditor({ p, all, ctx, isAdmin, deps, backHash, onSa
   const training = p.category === 'training';
   const offers = training ? await rpc('admin_training_addons_get', { p_product_id: p.id }).catch(() => []) : [];
   const alcohol = looksLikeAlcohol([p.name, p.name_en, p.description, p.description_en].filter(Boolean).join(' '));
-  let base = baselineFromProduct(p, { offers, alcohol });
+  // booking_316: myyntikanavat ovat dataa (booking.sales_channels); tuotteen valinnat liitostaulusta. Virhe → kanavia ei voi muuttaa.
+  const chData = await rpc('admin_list_sales_channels').catch((e) => { console.error(e); return null; });
+  const channelList = Array.isArray(chData?.channels) ? chData.channels : null;
+  const productCodes = channelList ? (chData.products?.[String(p.id)] || []) : null;
+  let base = baselineFromProduct(p, { offers, alcohol, channels: productCodes });
   const dis = !isAdmin;
   const ctl = {};   // kenttien viitteet nimen mukaan
   const errs = new Map();   // kenttä → virheviesti-elementti
@@ -82,16 +88,61 @@ export async function productEditor({ p, all, ctx, isAdmin, deps, backHash, onSa
   // ---- Myynti ja näkyvyys ----
   const c = p.config;
   const bc = base.config;
+  const lang = getLang() === 'en' ? 'en' : 'fi';
+  // Piilotettu = ei aktiivinen (erillinen valinta kanavista). Kanavat: monivalinta, kanavat ladataan datasta.
+  const hiddenBox = h('div', { class: 'stack', 'data-testid': 'product-hidden' }, chk('hidden', T('vis_hidden'), !base.product.active), h('small', { class: 'muted', text: T('vis_hidden_hint') }));
+  const chInputs = new Map();   // koodi → checkbox
+  const chHints = h('div', { class: 'stack', 'data-testid': 'product-channels-notes' });
+  const chNone = h('p', { class: 'muted', hidden: true, 'data-testid': 'product-channels-none', text: T('channels_none') });
+  const channelCtx = () => ({ category: p.category, hasConfig: !!c, ageRestricted: !!ctl.age_restricted?.checked, alcohol });
+  const channelBox = channelList
+    ? h('fieldset', { class: 'box stack prod-channels', 'data-testid': 'product-channels' },
+      h('legend', { text: T('channels_title') }),
+      h('p', { class: 'muted', text: T('channels_lead') }),
+      ...sortCodes([...channelList.filter((ch) => ch.active || base.channels.includes(ch.code)).map((ch) => ch.code)], channelList).map((code) => {
+        const ch = channelList.find((x) => x.code === code);
+        const selected = base.channels.includes(code);
+        const block = channelBlock(ch, { ...channelCtx(), selected });
+        const i = h('input', { type: 'checkbox', name: `channel_${code}`, value: code, disabled: dis || !!block, 'data-testid': `product-channel-${code}` });
+        i.checked = selected;
+        chInputs.set(code, i);
+        return h('label', { class: 'check', 'data-channel': code },
+          i, ' ' + channelName(ch, lang),
+          ch.active ? null : h('small', { class: 'muted', text: ` (${T('channels_inactive')})` }),
+          h('small', { class: 'muted', 'data-block-for': code, hidden: !block || block === 'channels_inactive' || null, text: block && block !== 'channels_inactive' ? ` – ${T(block)}` : '' }));
+      }),
+      chNone, chHints)
+    : h('p', { class: 'err', role: 'alert', 'data-testid': 'product-channels-error', text: T('channels_load_error') });
+  const readChannels = () => (channelList ? sortCodes([...chInputs].filter(([, i]) => i.checked).map(([code]) => code), channelList) : null);
+  // Huomiot valitulle Verkkokauppa-kanavalle (kanava ei yksin riitä näkymiseen)
+  function syncChannelNotes() {
+    if (!channelList) return;
+    const codes = readChannels();
+    chNone.hidden = codes.length > 0;
+    const notes = [];
+    if (codes.includes('shop') && c?.lifecycle === 'old') notes.push(T('vis_why_lifecycle_old'));
+    if (codes.includes('shop') && c && !c.image_path) notes.push(T('vis_why_no_image'));
+    if (codes.includes('gift_shop')) notes.push(T('channels_gift_hint'));
+    chHints.replaceChildren(...(notes.length ? [h('p', { class: 'muted', text: T('vis_note') }), h('ul', {}, notes.map((n) => h('li', { text: n })))] : []));
+    // QR-myynti seuraa ikärajaa ja alkoholitunnistusta kuten ennen
+    const qr = chInputs.get('qr');
+    if (qr) {
+      const blocked = !!channelBlock(channelList.find((x) => x.code === 'qr'), { ...channelCtx(), selected: qr.checked });
+      if (blocked) qr.checked = false;
+      qr.disabled = dis || blocked;
+      const why = channelBox.querySelector?.('[data-block-for="qr"]');
+      if (why) { why.hidden = !blocked; why.textContent = blocked ? ` – ${T('channels_qr_blocked')}` : ''; }
+    }
+  }
   const sales = h('div', { class: 'stack', 'data-testid': 'product-tab-sales' },
-    chk('active', 'Aktiivinen (näkyy kb:ssä)', base.product.active),
+    hiddenBox,
+    channelBox,
     c ? h('div', { class: 'stack box' }, h('h3', { text: 'Verkkokaupan asetukset' }),
-      chk('bookable', 'Varattavissa verkossa', bc.bookable), chk('shop_visible', 'Näkyy kaupan listassa', bc.shop_visible),
+      chk('bookable', 'Varattavissa verkossa', bc.bookable),
       'audience' in c ? field('Kalenteri', (ctl.audience = h('select', { name: 'audience', disabled: dis }, h('option', { value: 'consumer', text: 'Kuluttajien kalenteri' }), h('option', { value: 'business', text: 'Yrityksille' }))), 'Yrityksille-valinta näyttää vuoron vain yritysten kalenterissa.') : null,
       h('div', { class: 'row wrap' }, field('Järjestys', inp('sort_order', c.sort_order, { type: 'number' })), field('Min hlö', inp('min_persons', c.min_persons, { type: 'number', min: 1 })), field('Max hlö', inp('max_persons', c.max_persons ?? '', { type: 'number', min: 1 })), errFor('sort_order'), errFor('min_persons'), errFor('max_persons')),
       h('h3', { text: posText('nav') }),
-      chk('pos_enabled', posText('product_pos'), bc.pos_enabled),
       field(posText('product_pos_sort'), inp('pos_sort', c.pos_sort ?? 100, { type: 'number', min: 0, max: 10000 })), errFor('pos_sort'),
-      chk('fridge_sale', posText('qr_sale'), bc.fridge_sale, dis || alcohol || !!c.age_restricted),
       chk('age_restricted', posText('product_age'), bc.age_restricted),
       h('p', { class: 'muted', text: posText('qr_sale_hint') }),
       alcohol ? h('p', { class: 'err', text: posText('alcohol_qr') }) : null)
@@ -102,7 +153,7 @@ export async function productEditor({ p, all, ctx, isAdmin, deps, backHash, onSa
       h('p', { class: 'muted', text: T('qr_hint') }),
       h('a', { class: 'btn', href: '#/tuotteet?qr=1', 'data-testid': 'product-open-qr', text: T('link_qr') })) : null);
   if (c && ctl.audience) ctl.audience.value = bc.audience;
-  if (c) ctl.age_restricted.addEventListener('change', () => { if (ctl.age_restricted.checked) { ctl.fridge_sale.checked = false; ctl.fridge_sale.disabled = true; } else if (isAdmin && !alcohol) ctl.fridge_sale.disabled = false; });
+  if (c) ctl.age_restricted.addEventListener('change', () => { syncChannelNotes(); });
 
   // ---- Kuva ----
   const img = { file: null, remove: false };
@@ -174,10 +225,11 @@ export async function productEditor({ p, all, ctx, isAdmin, deps, backHash, onSa
     syncRichFields(root);
     const cur = {
       product: { name: val('name'), name_en: val('name_en'), description: val('description'), description_en: val('description_en'), short_description: val('short_description'), short_description_en: val('short_description_en'),
-        price: numOrNull(ctl.price.value), price_text: ctl.price_text.value, vat_rate: numOrNull(vat.value), active: ctl.active.checked },
-      config: c ? { bookable: ctl.bookable.checked, shop_visible: ctl.shop_visible.checked, ...(ctl.audience ? { audience: ctl.audience.value } : {}),
+        price: numOrNull(ctl.price.value), price_text: ctl.price_text.value, vat_rate: numOrNull(vat.value), active: !ctl.hidden.checked },
+      config: c ? { bookable: ctl.bookable.checked, ...(ctl.audience ? { audience: ctl.audience.value } : {}),
         sort_order: numOrNull(ctl.sort_order.value), min_persons: numOrNull(ctl.min_persons.value), max_persons: numOrNull(ctl.max_persons.value),
-        pos_enabled: ctl.pos_enabled.checked, pos_sort: numOrNull(ctl.pos_sort.value), fridge_sale: ctl.fridge_sale.checked, age_restricted: ctl.age_restricted.checked } : null,
+        pos_sort: numOrNull(ctl.pos_sort.value), age_restricted: ctl.age_restricted.checked } : null,
+      channels: readChannels(),
       training: training ? { course_price: numOrNull(ctl.course_price.value), addon_single: ctl.addon_single.checked, addon_single_price: numOrNull(ctl.addon_single_price.value), addon_intern: ctl.addon_intern.checked, addon_intern_price: numOrNull(ctl.addon_intern_price.value) } : null,
       variants: Object.fromEntries([...variantInputs].map(([id, i]) => [id, numOrNull(i.value)])),
       image: { alt: (ctl.image_alt?.value || '').trim(), hasImage: base.image.hasImage, file: !!img.file, remove: img.remove },
@@ -200,6 +252,7 @@ export async function productEditor({ p, all, ctx, isAdmin, deps, backHash, onSa
     const tabsDirty = dirtyTabs(d);
     for (const t of TAB_IDS) { const b = tabList.button(t); b.setAttribute('data-dirty', String(tabsDirty.includes(t))); }
     syncPriceText();
+    syncChannelNotes();
     const dirtyNow = isDirty(d);
     status.textContent = dirtyNow ? fmt(T('dirty'), { tabs: tabsDirty.map((t) => T(TAB_TEXT[t])).join(', ') }) : T('clean');
     status.classList.toggle('is-dirty', dirtyNow);
@@ -220,7 +273,7 @@ export async function productEditor({ p, all, ctx, isAdmin, deps, backHash, onSa
       toast(T('save_invalid'), 'err'); return;
     }
     const vlabel = new Map((p.variants || []).map((v) => [String(v.id), v.label]));
-    const labels = { product: T('step_product'), training: T('step_training'), config: T('step_config'), image: T('step_image'), suggestions: T('step_upsell'), variant: (id) => fmt(T('step_variant'), { name: vlabel.get(String(id)) || id }) };
+    const labels = { product: T('step_product'), training: T('step_training'), config: T('step_config'), channels: T('channels_title'), image: T('step_image'), suggestions: T('step_upsell'), variant: (id) => fmt(T('step_variant'), { name: vlabel.get(String(id)) || id }) };
     const steps = buildSavePlan({ productId: p.id, training, base, cur, labels });
     if (!steps.length) return;
     saving = true; saveBtn.disabled = true; discardBtn.disabled = true; saveBtn.textContent = T('saving');

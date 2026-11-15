@@ -315,6 +315,8 @@ jobs:
       - run: node --test booking/tests/paiva-muistiinpanot.test.mjs
       # HALL-TUOTTEET-01: tuote-editori omana näkymänä (#/tuotteet/<id>), yksi tallennuspalkki, poistumisvahti; tekstit pending-import-165. Ei migraatiota.
       - run: node --test booking/tests/tuote-editori-hall-tuotteet-01.test.mjs
+      # booking_316 / HALL-TUOTTEET-03: myyntikanavien monivalinta tuote-editorissa (kanavat datasta), tekstit pending-import-174
+      - run: node --test booking/tests/tuotteet-myyntikanavat-03.test.mjs
       # Paketti 07: yhdenmukainen siirtymävieritys (kauppa, lahjakortit, tilaussivu, hallinnan uusi varaus / resurssivaraus):
       # yhteiset apurit revealForm/revealSection (block start, reduced-motion → auto, fokus preventScroll) ja revealIfHidden (vain jos ei näkyvissä),
       # scroll-margin-top 84 px kiinteän yläpalkin alle. Ei migraatiota eikä tekstejä.

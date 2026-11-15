@@ -1,5 +1,6 @@
 // Hallinnan tuotelistan "Lisää tuote" -tekstit (FI+EN). Tuotannossa sama sisältö tuodaan site_texts-tauluun
-// (content/site-texts.pending-import-19.json; lyhyt kuvaus booking_156: pending-import-56.json). Sanakirja on varalla, kunnes tuonti on ajettu.
+// (content/site-texts.pending-import-19.json; lyhyt kuvaus booking_156: pending-import-56.json; myyntikanavat booking_316: pending-import-174.json).
+// Sanakirja on varalla, kunnes tuonti on ajettu.
 // public_get_site_texts peittää ui.admin.product.*-avaimet. Haku epäonnistuu tai rivi puuttuu → sanakirja.
 // Hintoja ja ALV-kantoja ei ole näissä teksteissä.
 import { getLang } from './talous-i18n.js';
@@ -77,6 +78,21 @@ export const PRODUCT_TEXTS = {
     'ui.admin.product.image_pending': 'Valittu kuva tallentuu, kun tallennat muutokset.',
     'ui.admin.product.options_note': 'Tuotevalinnat ja lisäpalvelut ovat yhteisiä kaikille tuotteille. Muokkaa niitä tämän sivun alaosan Tuotevalinnat- ja Lisäpalvelut-osioissa.',
     'ui.admin.product.upsell_missing': 'Lisämyynnin asetukset eivät ole käytettävissä.',
+    // booking_316 / HALL-TUOTTEET-03: myyntikanavien monivalinta (pending-import-174; vis_*-rivit samat kuin tuonnissa 166)
+    'ui.admin.product.channels_title': 'Myyntikanavat',
+    'ui.admin.product.channels_lead': 'Valitse kaikki kanavat, joissa tuotetta myydään. Kanavat tulevat järjestelmän kanavalistasta.',
+    'ui.admin.product.channels_none': 'Ei yhtään kanavaa: tuotetta ei myydä missään kanavassa. Hallinnassa se on edelleen käytettävissä.',
+    'ui.admin.product.channels_inactive': 'ei käytössä',
+    'ui.admin.product.channels_load_error': 'Myyntikanavia ei voitu ladata, joten niitä ei voi nyt muuttaa. Lataa sivu uudelleen.',
+    'ui.admin.product.channels_qr_blocked': 'QR-myynti ei ole mahdollinen ikärajalliselle tuotteelle eikä alkoholille.',
+    'ui.admin.product.channels_pos_blocked': 'Lahjakortteja ja kausikortteja ei myydä pikakassassa tuotepainikkeena.',
+    'ui.admin.product.channels_gift_hint': 'Lahjakorttikauppa: lahjakorttipaketti näkyy kaupassa vain, kun kaikki sen tuotteet ovat tässä kanavassa.',
+    'ui.admin.product.vis_hidden': 'Piilotettu',
+    'ui.admin.product.vis_hidden_hint': 'Ei käytössä missään: ei myyntikanavissa, kassalla eikä hallinnan tuotevalinnoissa.',
+    'ui.admin.product.vis_note': 'Huomioi:',
+    'ui.admin.product.vis_why_no_config': 'Tuotetta ei ole otettu mukaan varausjärjestelmään, joten se ei voi olla verkossa.',
+    'ui.admin.product.vis_why_lifecycle_old': 'Tuote on vanha tuote, eikä vanhoja tuotteita myydä verkossa.',
+    'ui.admin.product.vis_why_no_image': 'Kuva puuttuu: tuote näkyy kaupassa ilman kuvaa.',
   },
   en: {
     'ui.admin.product.add': 'Add product',
@@ -147,6 +163,21 @@ export const PRODUCT_TEXTS = {
     'ui.admin.product.image_pending': 'The selected image is saved when you save the changes.',
     'ui.admin.product.options_note': 'Product choices and extras are shared by all products. Edit them in the Product choices and Extras sections at the bottom of this page.',
     'ui.admin.product.upsell_missing': 'Upsell settings are not available.',
+    // booking_316 / HALL-TUOTTEET-03: myyntikanavien monivalinta (pending-import-174; vis_*-rivit samat kuin tuonnissa 166)
+    'ui.admin.product.channels_title': 'Sales channels',
+    'ui.admin.product.channels_lead': 'Select every channel where the product is sold. The channels come from the system channel list.',
+    'ui.admin.product.channels_none': 'No channels: the product is not sold in any channel. It can still be used in the admin.',
+    'ui.admin.product.channels_inactive': 'not in use',
+    'ui.admin.product.channels_load_error': 'The sales channels could not be loaded, so they cannot be changed now. Reload the page.',
+    'ui.admin.product.channels_qr_blocked': 'QR sales are not possible for age-restricted products or alcohol.',
+    'ui.admin.product.channels_pos_blocked': 'Gift cards and season cards are not sold as quick till product buttons.',
+    'ui.admin.product.channels_gift_hint': 'Gift card shop: a gift card package is shown in the shop only when all of its products are in this channel.',
+    'ui.admin.product.vis_hidden': 'Hidden',
+    'ui.admin.product.vis_hidden_hint': 'Not in use anywhere: not in sales channels, at the till or in admin product pickers.',
+    'ui.admin.product.vis_note': 'Note:',
+    'ui.admin.product.vis_why_no_config': 'The product is not part of the booking system, so it cannot be online.',
+    'ui.admin.product.vis_why_lifecycle_old': 'This is an old product, and old products are not sold online.',
+    'ui.admin.product.vis_why_no_image': 'The image is missing: the product is shown in the shop without an image.',
   },
 };
 

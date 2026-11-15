@@ -1,0 +1,282 @@
+[
+  {
+    "key": "ui.admin.product.channels_title",
+    "lang": "fi",
+    "text": "Myyntikanavat",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_316 / HALL-TUOTTEET-03: tuotteen myyntikanavat monivalintana tuote-editorin Myynti ja näkyvyys -välilehdellä; kanavat ladataan datasta (Joonas t1780u 15.11.2026 klo 9.04). Bottiavustus/Koodari tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.product.channels_title",
+    "lang": "en",
+    "text": "Sales channels",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_316 / HALL-TUOTTEET-03: tuotteen myyntikanavat monivalintana tuote-editorin Myynti ja näkyvyys -välilehdellä; kanavat ladataan datasta (Joonas t1780u 15.11.2026 klo 9.04). Bottiavustus/Koodari tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.product.channels_lead",
+    "lang": "fi",
+    "text": "Valitse kaikki kanavat, joissa tuotetta myydään. Kanavat tulevat järjestelmän kanavalistasta.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_316 / HALL-TUOTTEET-03: tuotteen myyntikanavat monivalintana tuote-editorin Myynti ja näkyvyys -välilehdellä; kanavat ladataan datasta (Joonas t1780u 15.11.2026 klo 9.04). Bottiavustus/Koodari tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.product.channels_lead",
+    "lang": "en",
+    "text": "Select every channel where the product is sold. The channels come from the system channel list.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_316 / HALL-TUOTTEET-03: tuotteen myyntikanavat monivalintana tuote-editorin Myynti ja näkyvyys -välilehdellä; kanavat ladataan datasta (Joonas t1780u 15.11.2026 klo 9.04). Bottiavustus/Koodari tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.product.channels_none",
+    "lang": "fi",
+    "text": "Ei yhtään kanavaa: tuotetta ei myydä missään kanavassa. Hallinnassa se on edelleen käytettävissä.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_316 / HALL-TUOTTEET-03: tuotteen myyntikanavat monivalintana tuote-editorin Myynti ja näkyvyys -välilehdellä; kanavat ladataan datasta (Joonas t1780u 15.11.2026 klo 9.04). Bottiavustus/Koodari tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.product.channels_none",
+    "lang": "en",
+    "text": "No channels: the product is not sold in any channel. It can still be used in the admin.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_316 / HALL-TUOTTEET-03: tuotteen myyntikanavat monivalintana tuote-editorin Myynti ja näkyvyys -välilehdellä; kanavat ladataan datasta (Joonas t1780u 15.11.2026 klo 9.04). Bottiavustus/Koodari tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.product.channels_inactive",
+    "lang": "fi",
+    "text": "ei käytössä",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_316 / HALL-TUOTTEET-03: tuotteen myyntikanavat monivalintana tuote-editorin Myynti ja näkyvyys -välilehdellä; kanavat ladataan datasta (Joonas t1780u 15.11.2026 klo 9.04). Bottiavustus/Koodari tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.product.channels_inactive",
+    "lang": "en",
+    "text": "not in use",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_316 / HALL-TUOTTEET-03: tuotteen myyntikanavat monivalintana tuote-editorin Myynti ja näkyvyys -välilehdellä; kanavat ladataan datasta (Joonas t1780u 15.11.2026 klo 9.04). Bottiavustus/Koodari tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.product.channels_load_error",
+    "lang": "fi",
+    "text": "Myyntikanavia ei voitu ladata, joten niitä ei voi nyt muuttaa. Lataa sivu uudelleen.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_316 / HALL-TUOTTEET-03: tuotteen myyntikanavat monivalintana tuote-editorin Myynti ja näkyvyys -välilehdellä; kanavat ladataan datasta (Joonas t1780u 15.11.2026 klo 9.04). Bottiavustus/Koodari tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.product.channels_load_error",
+    "lang": "en",
+    "text": "The sales channels could not be loaded, so they cannot be changed now. Reload the page.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_316 / HALL-TUOTTEET-03: tuotteen myyntikanavat monivalintana tuote-editorin Myynti ja näkyvyys -välilehdellä; kanavat ladataan datasta (Joonas t1780u 15.11.2026 klo 9.04). Bottiavustus/Koodari tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.product.channels_qr_blocked",
+    "lang": "fi",
+    "text": "QR-myynti ei ole mahdollinen ikärajalliselle tuotteelle eikä alkoholille.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_316 / HALL-TUOTTEET-03: tuotteen myyntikanavat monivalintana tuote-editorin Myynti ja näkyvyys -välilehdellä; kanavat ladataan datasta (Joonas t1780u 15.11.2026 klo 9.04). Bottiavustus/Koodari tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.product.channels_qr_blocked",
+    "lang": "en",
+    "text": "QR sales are not possible for age-restricted products or alcohol.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_316 / HALL-TUOTTEET-03: tuotteen myyntikanavat monivalintana tuote-editorin Myynti ja näkyvyys -välilehdellä; kanavat ladataan datasta (Joonas t1780u 15.11.2026 klo 9.04). Bottiavustus/Koodari tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.product.channels_pos_blocked",
+    "lang": "fi",
+    "text": "Lahjakortteja ja kausikortteja ei myydä pikakassassa tuotepainikkeena.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_316 / HALL-TUOTTEET-03: tuotteen myyntikanavat monivalintana tuote-editorin Myynti ja näkyvyys -välilehdellä; kanavat ladataan datasta (Joonas t1780u 15.11.2026 klo 9.04). Bottiavustus/Koodari tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.product.channels_pos_blocked",
+    "lang": "en",
+    "text": "Gift cards and season cards are not sold as quick till product buttons.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_316 / HALL-TUOTTEET-03: tuotteen myyntikanavat monivalintana tuote-editorin Myynti ja näkyvyys -välilehdellä; kanavat ladataan datasta (Joonas t1780u 15.11.2026 klo 9.04). Bottiavustus/Koodari tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.product.channels_gift_hint",
+    "lang": "fi",
+    "text": "Lahjakorttikauppa: lahjakorttipaketti näkyy kaupassa vain, kun kaikki sen tuotteet ovat tässä kanavassa.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_316 / HALL-TUOTTEET-03: tuotteen myyntikanavat monivalintana tuote-editorin Myynti ja näkyvyys -välilehdellä; kanavat ladataan datasta (Joonas t1780u 15.11.2026 klo 9.04). Bottiavustus/Koodari tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.product.channels_gift_hint",
+    "lang": "en",
+    "text": "Gift card shop: a gift card package is shown in the shop only when all of its products are in this channel.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_316 / HALL-TUOTTEET-03: tuotteen myyntikanavat monivalintana tuote-editorin Myynti ja näkyvyys -välilehdellä; kanavat ladataan datasta (Joonas t1780u 15.11.2026 klo 9.04). Bottiavustus/Koodari tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+  },
+  {
+    "key": "ui.admin.product.vis_hidden",
+    "lang": "fi",
+    "text": "Piilotettu",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_316 / HALL-TUOTTEET-03: sama teksti kuin tuonnissa 166 (jo DEVissä ja PRODissa); rivi on mukana, jotta sanakirja ja tuonnit vastaavat toisiaan. Tuonti ohittaa olemassa olevan rivin."
+  },
+  {
+    "key": "ui.admin.product.vis_hidden",
+    "lang": "en",
+    "text": "Hidden",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_316 / HALL-TUOTTEET-03: sama teksti kuin tuonnissa 166 (jo DEVissä ja PRODissa); rivi on mukana, jotta sanakirja ja tuonnit vastaavat toisiaan. Tuonti ohittaa olemassa olevan rivin."
+  },
+  {
+    "key": "ui.admin.product.vis_hidden_hint",
+    "lang": "fi",
+    "text": "Ei käytössä missään: ei myyntikanavissa, kassalla eikä hallinnan tuotevalinnoissa.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_316 / HALL-TUOTTEET-03: sama teksti kuin tuonnissa 166 (jo DEVissä ja PRODissa); rivi on mukana, jotta sanakirja ja tuonnit vastaavat toisiaan. Tuonti ohittaa olemassa olevan rivin."
+  },
+  {
+    "key": "ui.admin.product.vis_hidden_hint",
+    "lang": "en",
+    "text": "Not in use anywhere: not in sales channels, at the till or in admin product pickers.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_316 / HALL-TUOTTEET-03: sama teksti kuin tuonnissa 166 (jo DEVissä ja PRODissa); rivi on mukana, jotta sanakirja ja tuonnit vastaavat toisiaan. Tuonti ohittaa olemassa olevan rivin."
+  },
+  {
+    "key": "ui.admin.product.vis_note",
+    "lang": "fi",
+    "text": "Huomioi:",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_316 / HALL-TUOTTEET-03: sama teksti kuin tuonnissa 166 (jo DEVissä ja PRODissa); rivi on mukana, jotta sanakirja ja tuonnit vastaavat toisiaan. Tuonti ohittaa olemassa olevan rivin."
+  },
+  {
+    "key": "ui.admin.product.vis_note",
+    "lang": "en",
+    "text": "Note:",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_316 / HALL-TUOTTEET-03: sama teksti kuin tuonnissa 166 (jo DEVissä ja PRODissa); rivi on mukana, jotta sanakirja ja tuonnit vastaavat toisiaan. Tuonti ohittaa olemassa olevan rivin."
+  },
+  {
+    "key": "ui.admin.product.vis_why_no_config",
+    "lang": "fi",
+    "text": "Tuotetta ei ole otettu mukaan varausjärjestelmään, joten se ei voi olla verkossa.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_316 / HALL-TUOTTEET-03: sama teksti kuin tuonnissa 166 (jo DEVissä ja PRODissa); rivi on mukana, jotta sanakirja ja tuonnit vastaavat toisiaan. Tuonti ohittaa olemassa olevan rivin."
+  },
+  {
+    "key": "ui.admin.product.vis_why_no_config",
+    "lang": "en",
+    "text": "The product is not part of the booking system, so it cannot be online.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_316 / HALL-TUOTTEET-03: sama teksti kuin tuonnissa 166 (jo DEVissä ja PRODissa); rivi on mukana, jotta sanakirja ja tuonnit vastaavat toisiaan. Tuonti ohittaa olemassa olevan rivin."
+  },
+  {
+    "key": "ui.admin.product.vis_why_lifecycle_old",
+    "lang": "fi",
+    "text": "Tuote on vanha tuote, eikä vanhoja tuotteita myydä verkossa.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_316 / HALL-TUOTTEET-03: sama teksti kuin tuonnissa 166 (jo DEVissä ja PRODissa); rivi on mukana, jotta sanakirja ja tuonnit vastaavat toisiaan. Tuonti ohittaa olemassa olevan rivin."
+  },
+  {
+    "key": "ui.admin.product.vis_why_lifecycle_old",
+    "lang": "en",
+    "text": "This is an old product, and old products are not sold online.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_316 / HALL-TUOTTEET-03: sama teksti kuin tuonnissa 166 (jo DEVissä ja PRODissa); rivi on mukana, jotta sanakirja ja tuonnit vastaavat toisiaan. Tuonti ohittaa olemassa olevan rivin."
+  },
+  {
+    "key": "ui.admin.product.vis_why_no_image",
+    "lang": "fi",
+    "text": "Kuva puuttuu: tuote näkyy kaupassa ilman kuvaa.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_316 / HALL-TUOTTEET-03: sama teksti kuin tuonnissa 166 (jo DEVissä ja PRODissa); rivi on mukana, jotta sanakirja ja tuonnit vastaavat toisiaan. Tuonti ohittaa olemassa olevan rivin."
+  },
+  {
+    "key": "ui.admin.product.vis_why_no_image",
+    "lang": "en",
+    "text": "The image is missing: the product is shown in the shop without an image.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 400,
+    "placeholders": [],
+    "reason": "booking_316 / HALL-TUOTTEET-03: sama teksti kuin tuonnissa 166 (jo DEVissä ja PRODissa); rivi on mukana, jotta sanakirja ja tuonnit vastaavat toisiaan. Tuonti ohittaa olemassa olevan rivin."
+  }
+]
