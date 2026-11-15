@@ -101,7 +101,7 @@ insert into booking.staff(user_id, email, name, role) values ('00000000-0000-400
 select pg_temp.snap('before');
 
 -- ---------- 3) migraatio ----------
-\ir ../migrations/20261115091122_booking_316_sales_channels.sql
+\ir ../migrations/20261115093306_booking_316_sales_channels.sql
 create temp table t316_cnt as select count(*) n from booking.product_sales_channels;
 select pg_temp.snap('after');
 select pg_temp.ck(not exists (select 1 from t316_snap b join t316_snap a on a.k = b.k and a.phase = 'after' where b.phase = 'before' and a.v is distinct from b.v)
@@ -149,7 +149,7 @@ select pg_temp.ck(has_function_privilege('anon', 'booking.public_catalog()', 'ex
 
 -- ---------- 4) rollback ja uudelleenajo ----------
 savepoint before_rb;
-\ir ../rollbacks/20261115091122_booking_316_ROLLBACK.sql
+\ir ../rollbacks/20261115093306_booking_316_ROLLBACK.sql
 select pg_temp.ck(to_regclass('booking.sales_channels') is null and to_regclass('booking.product_sales_channels') is null and to_regprocedure('booking._in_channel(bigint,text)') is null
                   and not exists (select 1 from pg_trigger where tgname = 'zz_sales_channels_sync'), 'rollback: taulut, apufunktiot ja triggerit poistettu');
 select pg_temp.ck(count(*) = 18, 'rollback: 18 funktiota PRODin md5:llä (' || count(*) || ')') from (values
@@ -168,7 +168,7 @@ select pg_temp.ck(count(*) = 18, 'rollback: 18 funktiota PRODin md5:llä (' || c
  where md5(pg_get_functiondef(x.sig::regprocedure)) = x.m;
 select pg_temp.snap('rollback');
 select pg_temp.ck(not exists (select 1 from t316_snap b join t316_snap a on a.k = b.k and a.phase = 'rollback' where b.phase = 'before' and a.v is distinct from b.v), 'rollback: tulos sama kuin ennen migraatiota');
-\ir ../migrations/20261115091122_booking_316_sales_channels.sql
+\ir ../migrations/20261115093306_booking_316_sales_channels.sql
 select pg_temp.ck((select count(*) from booking.product_sales_channels) = (select n from t316_cnt) and (select n from t316_cnt) = 75, 'uudelleenajo rollbackin jälkeen onnistuu (' || (select n from t316_cnt) || ' kanavariviä)');
 release savepoint before_rb;
 

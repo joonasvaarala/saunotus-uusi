@@ -141,8 +141,8 @@ test('booking_316: rollback palauttaa PRODin määrittelyt ja poistaa uudet obje
 });
 
 test('booking_316: SQL-testi kattaa ekvivalenssin, rollbackin, uudelleenajon ja suoran API:n', () => {
-  assert.match(sqlTest, /\\ir \.\.\/migrations\/20261115091122_booking_316_sales_channels\.sql/);
-  assert.match(sqlTest, /\\ir \.\.\/rollbacks\/20261115091122_booking_316_ROLLBACK\.sql/);
+  assert.match(sqlTest, /\\ir \.\.\/migrations\/20261115093306_booking_316_sales_channels\.sql/);
+  assert.match(sqlTest, /\\ir \.\.\/rollbacks\/20261115093306_booking_316_ROLLBACK\.sql/);
   assert.match(sqlTest, /tulos sama kuin ennen/);
   assert.match(sqlTest, /not_bookable/);
   assert.match(sqlTest, /^rollback;$/m);
