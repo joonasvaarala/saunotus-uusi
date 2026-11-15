@@ -98,7 +98,7 @@ test('elämyskortit: nimi, hinta ja kesto tuotteesta; lahjakortti #avoin; kuva v
     assert.match(html, lang === 'fi' ? /alk\. 29 € \/ hlö · 2 h/ : /from €29 \/ person · 2 h/);
     assert.match(html, lang === 'fi' ? /alk\. 99 € · 1 h/ : /from €99 · 1 h/);
     assert.match(html, lang === 'fi' ? /alk\. 210 € · 2 h/ : /from €210 · 2 h/);
-    assert.match(html, lang === 'fi' ? /alk\. 250 € · 1–7 h vaihtoehdot/ : /from €250 · 1–7 h options/);
+    assert.match(html, lang === 'fi' ? /alk\. 250 € · 1–9 h vaihtoehdot/ : /from €250 · 1–9 h options/);
     assert.match(html, lang === 'fi' ? /alk\. 180 € · 2 h/ : /from €180 · 2 h/);
     assert.match(html, lang === 'fi' ? /alk\. 29 €/ : /from €29/);
     assert.match(html, lang === 'fi' ? /<h3>Saunahoito ja saunotus<\/h3>/ : /<h3>Sauna Treatment and Saunotus<\/h3>/);
