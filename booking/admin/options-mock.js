@@ -105,13 +105,6 @@ function procountorStatus(cfg) {
 const PERMS = ['bookings.manage', 'bookings.override', 'customers.manage', 'catalog.edit', 'payments.manage', 'payments.refund', 'reports.view', 'settings.edit', 'pos.use', 'invoices.manage', 'giftcards.manage', 'messages.edit', 'blocks.manage', 'resources.edit', 'rules.edit'];
 const CODE_RE = /^[a-z0-9_]{1,40}$/;
 
-// HALL-TUOTTEET-02: lahjakorttipaketit kokeilutilaan (keksittyä dataa; tuotteet viittaavat kokeilutilan tuotteisiin 3, 7 ja 10).
-const MOCK_GIFT_PACKAGES = [
-  { code: 'open', name: 'Avoin lahjakortti', kind: 'value', is_open: true, active: true, kb_product_id: 104, items: [] },
-  { code: 'entry_2', name: 'Savusaunavuoro', kind: 'product', is_open: false, active: true, kb_product_id: null, items: [{ label: 'Yleinen vuoro', kb_product_id: 3 }] },
-  { code: 'saunarituaali_2', name: 'Saunotusrituaali ja yleinen vuoro', kind: 'product', is_open: false, active: true, kb_product_id: null, items: [{ label: 'Saunarituaali ja savusaunavuoro', kb_product_id: 7 }] },
-  { code: 'sauna_treatment_2', name: 'Savusaunaelämys ja saunahoito', kind: 'product', is_open: false, active: true, kb_product_id: null, items: [{ label: 'Yleinen vuoro', kb_product_id: 3 }, { label: 'Saunahoito', kb_product_id: 10 }] },
-];
 export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, role = 'manager', latePaymentScenario = false, checkoutx = false } = {}) {
   const today = todayHel(now);
   const st = {
@@ -1222,49 +1215,7 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
   Object.assign(handlers, viewsMockHandlers({ st, need, err, now, resources: st.mockResources ??= EVENT_MOCK_RESOURCES.map((r) => ({ ...r })) }));   // YHT-08
   // booking_158: tapahtumat ja koulutukset (events-mock.js) + tuotteen kopio (admin_product_copy: 'Kopio: nimi', piilotettu, ei myynnissä)
   const eventsMock = createEventsMock({ today, products: st.products });
-  const eventsChannels = eventsMock.handlers.admin_event_set_channels;
-  const updateConfig = handlers.admin_update_product_config;
-  const updateProduct = handlers.admin_update_product;
   Object.assign(handlers, eventsMock.handlers, {
-    // HALL-TUOTTEET-02: tuotteen aktiivisuus myös Tapahtumat-näkymän datassa (admin_update_product, HALL-TUOTTEET-01:n kenttärajat) ja kanavat myös muille kuin tapahtumatuotteille (kuten palvelin)
-    admin_update_product: (a) => {
-      const out = updateProduct(a);
-      const ev = st.events?.events?.find((x) => x.product_id === +a.p_product_id);
-      if (ev && 'active' in (a.p_patch || {})) ev.active = !!a.p_patch.active;
-      return out;
-    },
-    admin_update_product_config: (a) => {   // tapahtumatuotteilla sama tila myös Tapahtumat-näkymän datassa
-      const out = updateConfig(a);
-      const ev = st.events?.events?.find((x) => x.product_id === a.p_product_id);
-      for (const k of ['bookable', 'shop_visible']) if (ev && k in (a.p_patch || {})) ev[k] = !!a.p_patch[k];
-      return out;
-    },
-    // HALL-TUOTTEET-02: lahjakorttikaupan paketit (rivien tuotteet kuten tuotannossa: items[].kb_product_id). Näkyvyys "Vain kassalla" ottaa paketit pois myynnistä.
-    admin_list_gift_card_packages: () => ({ packages: (st.giftPackages ??= MOCK_GIFT_PACKAGES.map((x) => ({ ...x, items: x.items.map((i) => ({ ...i })) }))).map((x) => ({ ...x })), settings: { redeem_enabled: true, johku_cards_redeemable: false, sale_enabled: false } }),
-    admin_update_gift_card_package: (a) => {
-      need('catalog.edit');
-      const list = (st.giftPackages ??= MOCK_GIFT_PACKAGES.map((x) => ({ ...x, items: x.items.map((i) => ({ ...i })) })));
-      const pk = list.find((x) => x.code === a.p_code);
-      if (!pk) throw err('not_found', 'Pakettia ei löydy');
-      const ch = a.p_changes || {};
-      const bad = Object.keys(ch).find((k) => !['name', 'name_en', 'description', 'description_en', 'price', 'min_amount', 'max_amount', 'vat_rate', 'vat_treatment', 'valid_months', 'active', 'sort_order'].includes(k));
-      if (bad || !Object.keys(ch).length) throw err('invalid_param', bad ? `Kenttää ei voi muuttaa: ${bad}` : 'Anna muutokset');
-      if ('active' in ch) pk.active = !!ch.active;
-      return { ok: true, package: { ...pk }, applies: 'new_sales_only' };
-    },
-    admin_event_set_channels: (a) => {
-      need('catalog.edit');
-      const p = product(a.p_product_id);
-      if (p?.config && !st.events?.events?.some((x) => x.product_id === p.id)) {
-        const bad = (a.p_channels || []).find((c) => !['shop', 'widget', 'link'].includes(c));
-        if (bad) throw err('invalid_param', `Tuntematon kanava: ${bad}`);
-        p.config.channels = [...new Set(a.p_channels || [])];
-        return { ok: true, product_id: p.id, channels: p.config.channels };
-      }
-      const out = eventsChannels(a);
-      if (p?.config) p.config.channels = [...out.channels];
-      return out;
-    },
     admin_product_copy: (a) => {
       const src = st.products.find((p) => p.id === +a.p_product_id);
       if (!src) throw err('not_found', 'Tuotetta ei löydy');

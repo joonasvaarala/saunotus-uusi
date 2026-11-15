@@ -4,7 +4,6 @@
 // Hintoja ja ALV-kantoja ei ole näissä teksteissä.
 import { getLang } from './talous-i18n.js';
 import { getSiteTexts, clearSiteTextsCache } from './site-texts-cache.js';
-import { VISIBILITY_TEXTS } from './product-visibility-texts.js';
 
 export const PREFIX = 'ui.admin.product.';
 
@@ -31,7 +30,7 @@ export const PRODUCT_TEXTS = {
     'ui.admin.product.link_pos': 'Avaa pikakassa',
     'ui.admin.product.link_qr': 'Avaa QR-koodin tulostus',
     'ui.admin.product.pos_hint': 'Rastita pikakassa ja tallenna asetukset.',
-    'ui.admin.product.qr_hint': 'QR-koodi tehdään Tuotteet-sivun osiossa QR-koodin tulostus.',
+    'ui.admin.product.qr_hint': 'QR-koodi tehdään tämän sivun osiossa QR-koodin tulostus.',
     'ui.admin.product.duplicate': 'Samanniminen aktiivinen tuote on jo olemassa',
     'ui.admin.product.short_fi': 'Lyhyt kuvaus (suomi)',
     'ui.admin.product.short_en': 'Lyhyt kuvaus (englanti)',
@@ -101,7 +100,7 @@ export const PRODUCT_TEXTS = {
     'ui.admin.product.link_pos': 'Open quick till',
     'ui.admin.product.link_qr': 'Open QR printing',
     'ui.admin.product.pos_hint': 'Tick the quick till box and save the settings.',
-    'ui.admin.product.qr_hint': 'The QR code is created in the QR code printing section of the Products page.',
+    'ui.admin.product.qr_hint': 'The QR code is created in the QR code printing section of this page.',
     'ui.admin.product.duplicate': 'An active product with this name already exists',
     'ui.admin.product.short_fi': 'Short description in Finnish',
     'ui.admin.product.short_en': 'Short description in English',
@@ -185,5 +184,5 @@ export function productText(key, lang = getLang()) {
   const full = key.startsWith(PREFIX) ? key : PREFIX + key;
   const live = db.get(`${full}|${lang}`);
   if (live) return live;
-  return PRODUCT_TEXTS[lang]?.[full] || PRODUCT_TEXTS.fi[full] || VISIBILITY_TEXTS[lang]?.[full] || VISIBILITY_TEXTS.fi[full] || key;
+  return PRODUCT_TEXTS[lang]?.[full] || PRODUCT_TEXTS.fi[full] || key;
 }

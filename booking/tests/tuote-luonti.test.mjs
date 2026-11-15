@@ -15,7 +15,6 @@ const rollback = read('../supabase/rollbacks/20261019081000_booking_111_ROLLBACK
 const sqlTest = read('../supabase/tests/products/t111_admin_product_create.sql');
 const productsSrc = read('../admin/views/products.js');
 const pending167 = JSON.parse(read('../../content/site-texts.pending-import-167.json'));
-const propose173 = JSON.parse(read('../../content/site-texts.pending-propose-173.json'));   // UX2-C: qr_hint v3 (Tuotteet-sivu), texts_propose
 const editorSrc = read('../admin/views/product-editor.js');
 const css = read('../admin/admin.css');
 const pages = read('../../.github/workflows/pages.yml');
@@ -227,7 +226,7 @@ test('pending-import-19 + 56 vastaa sanakirjaa, FI+EN, normal, ilman hintoja', a
     assert.deepEqual(row.placeholders, [...row.text.matchAll(/\{\{var:\w+\}\}/g)].map((m) => m[0]));
     assert.match(row.key, /^ui\.admin\.product\./);
     assert.ok(row.lang === 'fi' || row.lang === 'en');
-    const newer = propose173.find((r) => r.key === row.key && r.lang === row.lang) || pending167.find((r) => r.key === row.key && r.lang === row.lang);   // HALL-ASETUKSET-01 ja propose-173 päivittävät qr_hint
+    const newer = pending167.find((r) => r.key === row.key && r.lang === row.lang);   // HALL-ASETUKSET-01 päivittää qr_hint
     assert.equal(newer ? newer.text : row.text, PRODUCT_TEXTS[row.lang][row.key]);
     assert.doesNotMatch(row.text, /\d|€|@|https?:|www\./);
     keys.add(`${row.key}|${row.lang}`);
