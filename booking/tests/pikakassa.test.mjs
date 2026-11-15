@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import test from 'node:test';
 import { finnishMobileMsisdn } from '../admin/phone-fi.js';
+import { searchSaleProducts, saleOptions, moveHi, enterTarget, bookingHref, filterProducts, isBookableProduct, posChannelIds, minutesBetween } from '../admin/pos-logic.js';
 import { cartAdd, cartAddCustom, cartSetQty, cartTotal, cartVatBreakdown, checkoutItems, looksLikeAlcohol, parseEuroInput, posCustomerHits, posSheetTenders, tenderAvailable, tendersFor, validEmail, validateCustomLine } from '../admin/pos-logic.js';
 import { POS_TEXTS } from '../admin/pos-texts.js';
 import { qrMatrix } from '../admin/qrsvg.js';
@@ -284,4 +285,71 @@ test('vapaa rivi: UI-tekstit FI+EN ja nappi pos-screenissä', async () => {
   assert.match(screen, /cartAddCustom/);
   assert.match(screen, /admin_list_vat_rates/);
   assert.match(screen, /validateCustomLine/);
+});
+
+// ---- HALL-KASSA-02: myynnin haku (t1808u) ja varattava tuote (t1809u) ----
+const P = (id, name, extra = {}, config = {}) => ({ id, name, price: 3, vat_rate: 25.5, active: true, category: 'other', config: { bookable: false, pos_enabled: false, ...config }, ...extra });
+const SALE = [
+  P(1, 'Vichy', { name_en: 'Vichy water', code: 'VICHY', aliases: ['kivennäisvesi'] }, { pos_enabled: true }),
+  P(2, 'Vichy-vuoro', { price: 18 }, { bookable: true, lifecycle: 'current' }),
+  P(3, 'Sipsit', { name_en: 'Crisps', code: 'SIP01' }, { pos_enabled: true }),
+  P(4, 'Lahjakortti', { category: 'gift_card' }, { pos_enabled: true }),
+  P(5, 'Hoito', { price: 85 }, { bookable: true, lifecycle: 'current', resource_class: 'resourced' }),
+];
+const CAT = [{ product_id: 1, name: 'Vichy', price: 3, vat_rate: 25.5 }, { product_id: 3, name: 'Sipsit', price: 3, vat_rate: 25.5 }];
+
+test('haku: nimi, koodi ja alias löytävät tuotteen ja hinta tulee mukaan', () => {
+  const find = (q, o = {}) => searchSaleProducts({ products: SALE, catalog: CAT, ...o }, q).map((r) => r.product_id);
+  assert.deepEqual(find('sips'), [3]);
+  assert.deepEqual(find('SIP01'), [3]);
+  assert.deepEqual(find('kivennäis'), [1]);
+  assert.deepEqual(find(''), []);
+  assert.equal(searchSaleProducts({ products: SALE, catalog: CAT }, 'sipsit')[0].price, 3);
+  assert.deepEqual(find('lahja'), [], 'lahjakortti ei kelpaa');
+  assert.deepEqual(searchSaleProducts({ products: SALE, catalog: CAT, lang: 'en' }, 'crisps').map((r) => r.name), ['Crisps']);
+  assert.deepEqual(filterProducts(SALE, 'sip01').map((p) => p.id), [3]);
+});
+
+test('haku: pos-kanavan tuotteet ennen varattavia, varattava merkitään', () => {
+  const r = searchSaleProducts({ products: SALE, catalog: CAT }, 'vichy');
+  assert.deepEqual(r.map((x) => x.product_id), [1, 2]);
+  assert.deepEqual(r.map((x) => x.bookable), [false, true]);
+  assert.equal(isBookableProduct(SALE[1]), true);
+  assert.equal(isBookableProduct(SALE[0]), false);
+  assert.deepEqual(searchSaleProducts({ products: SALE, catalog: CAT }, 'hoito').map((x) => [x.product_id, x.pos]), [[5, false]]);
+});
+
+test('haku: kanavatieto on ensisijainen vanhaan pos_enabled-kenttään nähden', () => {
+  const channelData = { ok: true, products: { 3: ['pos'], 2: ['admin'], 5: ['shop'] } };
+  assert.deepEqual([...posChannelIds(channelData, SALE, [])], [3]);
+  const r = searchSaleProducts({ products: SALE, catalog: [], channelData }, 'i');
+  // 1 (Vichy) on vain vanhassa kentässä: ei pos-kanavassa eikä varattava → ei hakuun. 5 ei ole Hallinta (varaus) -kanavassa.
+  assert.deepEqual(r.map((x) => x.product_id).sort(), [2, 3]);
+  assert.equal(r.find((x) => x.product_id === 3).pos, true);
+  assert.deepEqual([...posChannelIds(null, SALE, [])].sort(), [1, 3, 4]);
+});
+
+test('haun valinnat: oma rivi aina viimeisenä, nuolet kiertävät, Enter valitsee ensimmäisen tai oman rivin', () => {
+  const opts = saleOptions(searchSaleProducts({ products: SALE, catalog: CAT }, 'sip'), 'sip');
+  assert.deepEqual(opts.map((o) => o.type), ['product', 'custom']);
+  assert.equal(opts[1].text, 'sip');
+  const none = saleOptions([], '  uusi rivi ');
+  assert.deepEqual(none, [{ type: 'custom', text: 'uusi rivi' }]);
+  assert.deepEqual(saleOptions([], '  '), []);
+  assert.equal(moveHi(-1, 1, 3), 0); assert.equal(moveHi(2, 1, 3), 0); assert.equal(moveHi(0, -1, 3), 2); assert.equal(moveHi(-1, -1, 3), 2); assert.equal(moveHi(0, 1, 0), -1);
+  assert.equal(enterTarget(opts, -1), opts[0]); assert.equal(enterTarget(opts, 1), opts[1]); assert.equal(enterTarget([], -1), null);
+});
+
+test('varauksen osoite: vuoro, resurssi, henkilömäärä ja kesto', () => {
+  assert.equal(bookingHref({ date: '2026-11-20', ruleId: 9001, startsAt: '2026-11-20T16:00:00.000Z', persons: 3 }), '#/uusi?r=9001&t=2026-11-20T16%3A00%3A00.000Z&d=2026-11-20&n=3');
+  assert.equal(bookingHref({ date: '2026-11-20', ruleId: 9001, startsAt: 'x', persons: 1 }).includes('n='), false);
+  assert.equal(bookingHref({ resourced: true, productId: 10, date: '2026-11-20', time: '16:00', persons: 2 }), '#/uusi?tyyppi=resurssi&p=10&t=16%3A00&d=2026-11-20&n=2');
+  assert.equal(minutesBetween('2026-11-20T16:00:00Z', '2026-11-20T17:30:00Z'), 90);
+  assert.equal(minutesBetween('x', 'y'), null);
+});
+
+test('ilman varausta -rivi: cartAdd merkitsee rivin, checkoutItems lähettää vain tuotteen ja määrän', () => {
+  const cart = cartAdd([], { product_id: 3, name: 'Yleinen saunavuoro', price: 18, vat_rate: 25.5 }, { unbooked: true });
+  assert.equal(cart[0].unbooked, true);
+  assert.deepEqual(checkoutItems(cart), [{ product_id: 3, quantity: 1 }]);
 });

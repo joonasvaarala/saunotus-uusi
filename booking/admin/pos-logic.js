@@ -18,11 +18,11 @@ export function cartLineKey(row) {
   return row.product_id;
 }
 
-export function cartAdd(cart, product) {
+export function cartAdd(cart, product, { unbooked = false } = {}) {
   const next = cart.map((r) => ({ ...r }));
   const row = next.find((r) => r.kind !== 'custom' && r.product_id === product.product_id);
   if (row) row.quantity += 1;
-  else next.push({ product_id: product.product_id, name: product.name, unit_price: Number(product.price), vat_rate: product.vat_rate, quantity: 1, age_restricted: !!product.age_restricted });
+  else next.push({ product_id: product.product_id, name: product.name, name_en: product.name_en || null, unit_price: Number(product.price), vat_rate: product.vat_rate, quantity: 1, age_restricted: !!product.age_restricted, ...(unbooked ? { unbooked: true } : {}) });
   return next;
 }
 
@@ -181,10 +181,129 @@ export function posCandidates(products) {
   return (products || []).filter((p) => p && p.active && p.config && p.price != null && !NOT_TILL.has(p.category));
 }
 
+/** Haettavat tekstit: nimet, koodi (code / sku / slug) ja aliakset (aliases: lista tai teksti). */
+export function productSearchFields(p) {
+  const alias = Array.isArray(p?.aliases) ? p.aliases : p?.aliases ? String(p.aliases).split(/[,;]/) : [];
+  return {
+    names: [p?.name, p?.name_en].filter(Boolean).map((x) => String(x).toLocaleLowerCase('fi')),
+    codes: [p?.code, p?.sku, p?.slug, ...alias].filter(Boolean).map((x) => String(x).trim().toLocaleLowerCase('fi')),
+  };
+}
+
 export function filterProducts(products, query) {
   const q = String(query || '').trim().toLocaleLowerCase('fi');
   if (!q) return products || [];
-  return (products || []).filter((p) => `${p.name || ''} ${p.name_en || ''}`.toLocaleLowerCase('fi').includes(q));
+  return (products || []).filter((p) => { const f = productSearchFields(p); return [...f.names, ...f.codes].some((x) => x.includes(q)); });
+}
+
+/** Varattava tuote: varauskonfiguraatio sanoo bookable, ja tuote on voimassa (lifecycle current). Lahja- ja kausikortti eivät. */
+export function isBookableProduct(p) {
+  const c = p?.config;
+  return !!(c && c.bookable && (c.lifecycle ?? 'current') === 'current' && !NOT_TILL.has(p.category));
+}
+
+/**
+ * Tuotteet pikakassan pos-kanavassa. Kanavatieto (admin_list_sales_channels, booking_316) on ensisijainen;
+ * ilman sitä vanha config.pos_enabled. Kassan oma katalogi (admin_pos_catalog) on aina mukana.
+ */
+export function posChannelIds(channelData, products, catalog = []) {
+  const ids = new Set((catalog || []).map((c) => Number(c.product_id)));
+  if (channelData && channelData.products && typeof channelData.products === 'object') {
+    for (const [id, codes] of Object.entries(channelData.products)) if (Array.isArray(codes) && codes.includes('pos')) ids.add(Number(id));
+  } else {
+    for (const p of products || []) if (p?.config?.pos_enabled) ids.add(Number(p.id));
+  }
+  return ids;
+}
+
+/** Hallinta (varaus) -kanavan tuotteet: kanavatieto ensin, muuten bookable + current. */
+export function adminChannelIds(channelData, products) {
+  const ids = new Set();
+  if (channelData && channelData.products && typeof channelData.products === 'object') {
+    for (const [id, codes] of Object.entries(channelData.products)) if (Array.isArray(codes) && codes.includes('admin')) ids.add(Number(id));
+  } else {
+    for (const p of products || []) if (isBookableProduct(p)) ids.add(Number(p.id));
+  }
+  return ids;
+}
+
+/**
+ * Myynnin haku: pos-kanavan tuotteet ensin, sitten varattavat (Hallinta (varaus) -kanava) jotka eivät ole pos-kanavassa.
+ * Järjestys: koodin tarkka osuma, nimen alku, muu osuma; tasatilanteessa pos-kanava ennen varattavia, sitten nimi.
+ * Tyhjä haku → tyhjä lista (kenttä on hakukenttä, ei selauslista).
+ */
+export function searchSaleProducts({ products = [], catalog = [], channelData = null, lang = 'fi' } = {}, query, limit = 8) {
+  const q = String(query || '').trim().toLocaleLowerCase('fi');
+  if (!q) return [];
+  const posIds = posChannelIds(channelData, products, catalog);
+  const adminIds = adminChannelIds(channelData, products);
+  const byId = new Map();
+  for (const p of posCandidates(products)) byId.set(Number(p.id), p);
+  const out = [];
+  const seen = new Set();
+  const consider = (id, p, fromCatalog) => {
+    if (seen.has(id)) return;
+    const onPos = posIds.has(id);
+    const bookable = p ? isBookableProduct(p) : false;
+    if (!onPos && !(bookable && adminIds.has(id))) return;
+    const f = productSearchFields(p || fromCatalog);
+    let rank = -1;
+    if (f.codes.some((c) => c === q)) rank = 0;
+    else if (f.names.some((n) => n.startsWith(q)) || f.codes.some((c) => c.startsWith(q))) rank = 1;
+    else if ([...f.names, ...f.codes].some((x) => x.includes(q))) rank = 2;
+    if (rank < 0) return;
+    seen.add(id);
+    const src = p || fromCatalog;
+    const en = lang === 'en' && src.name_en ? src.name_en : src.name;
+    out.push({ product_id: id, name: en, name_fi: src.name, name_en: src.name_en || null, price: Number(src.price), vat_rate: src.vat_rate, age_restricted: !!(src.age_restricted || p?.config?.age_restricted), bookable, pos: onPos, product: p || null, code: (p?.code || p?.sku || null), rank });
+  };
+  for (const c of catalog || []) consider(Number(c.product_id), byId.get(Number(c.product_id)) || null, c);
+  for (const [id, p] of byId) consider(id, p, null);
+  out.sort((a, b) => a.rank - b.rank || Number(b.pos) - Number(a.pos) || String(a.name).localeCompare(String(b.name), 'fi'));
+  return out.slice(0, Math.max(1, limit));
+}
+
+/** Hakutuloslista + «Lisää oma rivi» -valinta viimeisenä (aina, kun haku ei ole tyhjä). */
+export function saleOptions(results, query) {
+  const q = String(query || '').trim();
+  if (!q) return [];
+  return [...(results || []).map((r) => ({ type: 'product', item: r })), { type: 'custom', text: q.slice(0, 200) }];
+}
+
+/** Nuolinäppäin: -1 = ei valintaa. */
+export function moveHi(hi, dir, n) {
+  if (!n) return -1;
+  if (dir > 0) return hi < 0 ? 0 : (hi + 1) % n;
+  return hi <= 0 ? n - 1 : hi - 1;
+}
+
+/** Enter ilman nuolella valittua: ensimmäinen tuote, ei osumia → oma rivi. */
+export function enterTarget(opts, hi) {
+  if (!opts.length) return null;
+  if (hi >= 0 && opts[hi]) return opts[hi];
+  return opts[0];
+}
+
+/** Uuden varauksen osoite esitäytettynä (päivä, vuoro, henkilömäärä). Resurssituote (hoito) → resurssilomake. */
+export function bookingHref({ date, ruleId = null, startsAt = null, persons = 1, productId = null, resourced = false, time = null } = {}) {
+  const q = new URLSearchParams();
+  if (resourced) {
+    q.set('tyyppi', 'resurssi');
+    if (productId != null) q.set('p', String(productId));
+    if (time) q.set('t', time);
+  } else {
+    if (ruleId != null) q.set('r', String(ruleId));
+    if (startsAt) q.set('t', startsAt);
+  }
+  if (date) q.set('d', date);
+  if (persons > 1) q.set('n', String(persons));
+  return `#/uusi?${q.toString()}`;
+}
+
+/** Kesto minuutteina alku- ja loppuajasta. */
+export function minutesBetween(startIso, endIso) {
+  const a = Date.parse(startIso); const b = Date.parse(endIso);
+  return Number.isFinite(a) && Number.isFinite(b) && b > a ? Math.round((b - a) / 60000) : null;
 }
 
 /** Muokkaus aukeaa vain pyydettäessä. Tyhjä kassakin pysyy kiinni, jotta pikapainikkeet ovat ensimmäisenä. */
@@ -214,4 +333,11 @@ export function qrEligible(product) {
   if (product.config.age_restricted) return false;
   if (looksLikeAlcohol(productBlob(product))) return false;
   return true;
+}
+
+/** Kellonaika HH:MM Helsingin ajassa (resurssilomakkeen alkuaika). */
+export function helTime(iso) {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return null;
+  return d.toLocaleTimeString('sv-SE', { timeZone: 'Europe/Helsinki', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });
 }

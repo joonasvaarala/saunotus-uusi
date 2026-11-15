@@ -1,9 +1,13 @@
 // Pikakassa: pikapainikkeet ensin, maksurivit ja yhteensä niiden alla, muokkaus sivun lopussa.
 // Maksutapa, summa ja vahvistus avautuvat erilliseen ikkunaan. Hintoja ei lähetetä palvelimelle.
-import { h, toast, money, errMsg } from './ui.js';
+import { h, toast, money, errMsg, todayHel, addDays, fmtTime, fmtDay } from './ui.js';
 import { icon } from './icons.js';
 import { loadPosTexts, posText as tx } from './pos-texts.js';
 import { getLang } from './talous-i18n.js';
+import { searchSaleProducts, saleOptions, moveHi, enterTarget, bookingHref, minutesBetween, helTime, isBookableProduct } from './pos-logic.js';
+import { stepper } from './stepper.js';
+import { nbt } from './nb-texts.js';
+import { personsRange, staffPersonsMax, slotBookable, isPrivateConflict } from './nb-logic.js';
 import { cartAdd, cartAddCustom, cartLineKey, cartSetQty, cartTotal, cartVatBreakdown, checkoutItems, parseEuroInput, validateCustomLine, posSheetTenders, tenderAvailable, joinUrl, posCandidates, filterProducts, tillEditorOpen, moveSort, validEmail, posCustomerHits } from './pos-logic.js';
 import { searchCustomers } from './customer-hits.js';
 import { qrSvgElement } from './qrsvg.js';
@@ -21,6 +25,10 @@ export async function renderPos({ ctx, rpc, fn }) {
   const canEdit = ctx.can('pos.use') || ctx.can('catalog.edit') || ctx.can('settings.edit');
   let catalog = [];
   let allProducts = [];
+  let channelData = null;
+  // t1808u: myynnin hakukenttä (tila säilyy uudelleenpiirrossa). t1809u: varattavan tuotteen varauspaneeli.
+  const sale = { q: '', hi: -1, opts: [], focus: false };
+  let bk = null;
   let tenders = [];
   let modes = { mobilepay_mode: 'off', vismapay_mode: 'off', site_base_url: '' };
   let editing = false;
@@ -209,11 +217,12 @@ export async function renderPos({ ctx, rpc, fn }) {
 
   async function load() {
     await loadPosTexts(rpc);
-    const [cat, ten, products, vatRes] = await Promise.all([
+    const [cat, ten, products, vatRes, chans] = await Promise.all([
       rpc('admin_pos_catalog'),
       rpc('admin_pos_tenders'),
-      canEdit ? rpc('admin_list_products').catch(() => []) : Promise.resolve([]),
+      rpc('admin_list_products').catch(() => []),
       rpc('admin_list_vat_rates').catch(() => null),
+      rpc('admin_list_sales_channels').catch(() => null),
     ]);
     catalog = Array.isArray(cat) ? cat : [];
     modes = ten || modes;
@@ -236,6 +245,7 @@ export async function renderPos({ ctx, rpc, fn }) {
       cx.terminal = pickTerminal(readTerminal(store), cx.terminals);
     }
     allProducts = Array.isArray(products) ? products : [];
+    channelData = chans && chans.ok !== false && chans.products ? chans : null;
     editing = tillEditorOpen(catalog.length, editing);
   }
 
@@ -693,7 +703,246 @@ export async function renderPos({ ctx, rpc, fn }) {
     return overlay;
   }
 
+  // ---- t1808u: myynnin haku ----
+  function addProduct(p, opts) {
+    const row = { ...p, name: p.name_fi || p.name };
+    const go = () => { cart = cartAdd(cart, row, opts); draw(); };
+    if (phase === 'paying') voidOpen().then(go); else go();
+  }
+
+  function itemFromCatalog(p) {
+    const full = allProducts.find((x) => Number(x.id) === Number(p.product_id)) || null;
+    return { product_id: p.product_id, name: p.name, name_fi: p.name, name_en: p.name_en || null, price: Number(p.price), vat_rate: p.vat_rate, age_restricted: !!p.age_restricted, bookable: full ? isBookableProduct(full) : false, pos: true, product: full };
+  }
+
+  // Ruudukon painike: varattava tuote avaa varauspaneelin, muut menevät suoraan koriin.
+  function pickCatalog(p) {
+    const it = itemFromCatalog(p);
+    if (it.bookable) openBooking(it); else addProduct(it);
+  }
+
+  function clearSale() { sale.q = ''; sale.hi = -1; sale.opts = []; }
+
+  function openCustom(text) {
+    clearSale();
+    customOpen = true;
+    customError = '';
+    customForm = { ...customForm, description: String(text || '') };
+    draw();
+    queueMicrotask(() => {
+      const el = document.getElementById(text ? 'pos-custom-price' : 'pos-custom-description');
+      el?.scrollIntoView?.({ block: 'center' });
+      el?.focus?.();
+    });
+  }
+
+  function chooseSale(opt, { keyboard = false } = {}) {
+    if (!opt) return;
+    if (opt.type === 'custom') { openCustom(opt.text); return; }
+    const it = opt.item;
+    clearSale();
+    sale.focus = keyboard;
+    if (it.bookable) openBooking(it); else addProduct(it);
+  }
+
+  function saleBox() {
+    const results = () => searchSaleProducts({ products: allProducts, catalog, channelData, lang: getLang() }, sale.q);
+    const list = h('ul', { id: 'pos-sale-list', class: 'pos-suggest pos-sale-list', role: 'listbox', 'aria-label': t('sale_results'), 'data-testid': 'pos-sale-list', hidden: true });
+    const inp = h('input', {
+      id: 'pos-sale-input', type: 'search', class: 'pos-sale-input', autocomplete: 'off', autocapitalize: 'off', spellcheck: 'false', enterkeyhint: 'search',
+      role: 'combobox', 'aria-autocomplete': 'list', 'aria-expanded': 'false', 'aria-controls': 'pos-sale-list', 'aria-label': t('sale_search'),
+      placeholder: t('sale_placeholder'), value: sale.q, 'data-testid': 'pos-sale-input',
+    });
+    const clear = h('button', { type: 'button', class: 'btn ghost pos-sale-clear', 'aria-label': t('sale_clear'), 'data-testid': 'pos-sale-clear', hidden: true,
+      onclick: () => { clearSale(); paint(); inp.value = ''; inp.focus?.(); } }, icon('close', 20));
+
+    function mark() {
+      const buttons = [...list.querySelectorAll('[role="option"]')];
+      buttons.forEach((b, i) => b.setAttribute('aria-selected', i === sale.hi ? 'true' : 'false'));
+      if (sale.hi >= 0 && buttons[sale.hi]) { inp.setAttribute('aria-activedescendant', buttons[sale.hi].id || buttons[sale.hi].getAttribute('id')); buttons[sale.hi].scrollIntoView?.({ block: 'nearest' }); }
+      else inp.removeAttribute('aria-activedescendant');
+    }
+
+    function paint() {
+      sale.opts = saleOptions(results(), sale.q);
+      clear.hidden = !sale.q;
+      if (!sale.q) clear.setAttribute('hidden', ''); else clear.removeAttribute('hidden');
+      if (!sale.opts.length) {
+        list.hidden = true; list.setAttribute('hidden', ''); list.replaceChildren();
+        inp.setAttribute('aria-expanded', 'false'); inp.removeAttribute('aria-activedescendant');
+        return;
+      }
+      list.hidden = false; list.removeAttribute('hidden');
+      inp.setAttribute('aria-expanded', 'true');
+      const nProducts = sale.opts.filter((o) => o.type === 'product').length;
+      list.replaceChildren(...sale.opts.map((o, i) => {
+        const id = `pos-sale-opt-${i}`;
+        if (o.type === 'custom') {
+          return h('li', { role: 'presentation' }, h('button', {
+            type: 'button', id, role: 'option', class: 'pos-hit pos-sale-hit pos-sale-custom', 'aria-selected': 'false', 'data-testid': 'pos-sale-custom',
+            onclick: () => chooseSale(o),
+          }, h('span', { class: 'pos-sale-name' }, h('strong', { text: t('sale_custom') }), ' ', h('span', { text: `”${o.text}”` })),
+          !nProducts ? h('small', { class: 'muted', text: t('sale_none') }) : null));
+        }
+        const it = o.item;
+        return h('li', { role: 'presentation' }, h('button', {
+          type: 'button', id, role: 'option', class: 'pos-hit pos-sale-hit', 'aria-selected': 'false', 'data-testid': 'pos-sale-hit', 'data-product': String(it.product_id),
+          onclick: () => chooseSale(o),
+        }, h('span', { class: 'pos-sale-name' }, h('span', { text: it.name }), it.code ? h('small', { class: 'muted', text: ` ${it.code}` }) : null,
+          it.bookable ? h('small', { class: 'pos-sale-badge', text: t('sale_bookable') }) : null,
+          it.age_restricted ? h('small', { class: 'pos-age', text: t('age') }) : null),
+        h('strong', { class: 'pos-sale-price', text: money(it.price) })));
+      }));
+      mark();
+    }
+
+    inp.addEventListener('input', () => { sale.q = String(inp.value || ''); sale.hi = -1; paint(); });
+    inp.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+        if (!sale.opts.length) return;
+        e.preventDefault?.();
+        sale.hi = moveHi(sale.hi, e.key === 'ArrowDown' ? 1 : -1, sale.opts.length);
+        mark();
+        return;
+      }
+      if (e.key === 'Enter') {
+        const target = enterTarget(sale.opts, sale.hi);
+        if (!target) return;
+        e.preventDefault?.();
+        chooseSale(target, { keyboard: true });
+        return;
+      }
+      if (e.key === 'Escape' && sale.q) {
+        e.preventDefault?.();
+        e.stopPropagation?.();
+        clearSale(); inp.value = ''; paint();
+      }
+    });
+    paint();
+    return h('div', { class: 'fld pos-sale', 'data-testid': 'pos-sale' },
+      h('label', { for: 'pos-sale-input', text: t('sale_search') }),
+      h('div', { class: 'pos-sale-row' }, inp, clear),
+      list,
+      h('small', { class: 'muted pos-sale-help', text: t('sale_help') }));
+  }
+
+  // ---- t1809u: varattavan tuotteen varauspaneeli ----
+  function openBooking(it) {
+    const c = it.product?.config || {};
+    bk = { item: it, resourced: c.resource_class === 'resourced', date: todayHel(), slots: null, slot: null, persons: 1, err: '', gen: 0, node: null };
+    draw();
+    loadBookSlots();
+    queueMicrotask(() => bk?.node?.scrollIntoView?.({ block: 'nearest' }));
+  }
+
+  function closeBooking() { bk = null; draw(); }
+
+  async function loadBookSlots() {
+    const b = bk;
+    if (!b) return;
+    const gen = ++b.gen;
+    b.slots = null; b.slot = null; b.err = '';
+    paintBook();
+    let rows = [];
+    try {
+      if (b.resourced) {
+        const r = await rpc('admin_treatment_availability', { p_product_id: Number(b.item.product_id), p_from: b.date, p_to: b.date, p_persons: b.persons, p_override: false, p_override_reason: null });
+        rows = (r || []).filter((x) => x.status === 'available' || x.status == null)
+          .map((x) => ({ kind: 'resource', key: x.starts_at, starts_at: x.starts_at, ends_at: x.ends_at, product_id: x.product_id }));
+      } else {
+        const v = await rpc('admin_day_view', { p_date: b.date });
+        rows = (v?.sessions || []).filter((s) => Number(s.product_id) === Number(b.item.product_id) && s.status !== 'closed')
+          .map((s) => ({ ...s, kind: 'shift', key: `${s.rule_id}|${s.starts_at}` }));
+      }
+    } catch (e) { b.err = errMsg(e); }
+    if (bk !== b || gen !== b.gen) return;
+    b.slots = rows;
+    paintBook();
+  }
+
+  function slotCaption(s) {
+    if (s.kind !== 'shift') return '';
+    if (isPrivateConflict(s)) return nbt('nb.na');
+    if (s.status === 'available') return s.mode === 'exclusive' ? nbt('nb.privFree') : nbt('nb.free', { n: s.remaining });
+    return s.status === 'full' ? nbt('nb.full') : nbt('nb.na');
+  }
+
+  function bookContinue() {
+    const b = bk;
+    if (!b?.slot) return;
+    const s = b.slot;
+    location.hash = b.resourced
+      ? bookingHref({ resourced: true, productId: b.item.product_id, date: b.date, time: helTime(s.starts_at), persons: b.persons })
+      : bookingHref({ date: b.date, ruleId: s.rule_id, startsAt: s.starts_at, persons: b.persons });
+  }
+
+  function paintBook() {
+    const b = bk;
+    if (!b?.node) return;
+    const it = b.item;
+    const cfg = it.product?.config || {};
+    const shiftMax = b.slot && b.slot.kind === 'shift' ? staffPersonsMax(b.slot) : null;
+    const pMin = b.slot?.kind === 'shift' ? personsRange(b.slot).min : Math.max(1, Number(cfg.min_persons) || 1);
+    const pMax = shiftMax ?? Math.max(pMin, Number(cfg.max_persons) || 99);
+    b.persons = Math.max(pMin, Math.min(pMax, b.persons));
+    const dateIn = h('input', { type: 'date', id: 'pos-book-date', 'data-testid': 'pos-book-date', value: b.date,
+      onchange: (e) => { if (!/^\d{4}-\d\d-\d\d$/.test(e.target.value)) return; b.date = e.target.value; loadBookSlots(); } });
+    const shift = (n) => { b.date = addDays(b.date, n); loadBookSlots(); };
+    const dayCtl = h('div', { class: 'nb-dayctl' },
+      h('button', { type: 'button', class: 'btn ghost nb-daybtn', 'aria-label': nbt('nb.prevDay'), 'data-testid': 'pos-book-prev', onclick: () => shift(-1) }, icon('pgprev', 22)), dateIn,
+      h('button', { type: 'button', class: 'btn ghost nb-daybtn', 'aria-label': nbt('nb.nextDay'), 'data-testid': 'pos-book-next', onclick: () => shift(1) }, icon('pgnext', 22)));
+
+    let slotsEl;
+    if (b.err) slotsEl = h('p', { role: 'alert', class: 'err', 'data-testid': 'pos-book-error', text: b.err });
+    else if (b.slots == null) slotsEl = h('p', { class: 'muted', role: 'status', text: t('book_loading') });
+    else if (!b.slots.length) slotsEl = h('p', { class: 'muted', 'data-testid': 'pos-book-none', text: t('book_none') });
+    else {
+      slotsEl = h('div', { class: 'slotpick', role: 'radiogroup', 'aria-label': t('book_pick'), 'data-testid': 'pos-book-slots' }, b.slots.map((s) => {
+        const ok = s.kind === 'shift' ? slotBookable(s) && !isPrivateConflict(s) : true;
+        const on = b.slot?.key === s.key;
+        return h('button', { type: 'button', role: 'radio', 'aria-checked': on ? 'true' : 'false', class: `slotbtn ${s.status || 'available'}`, disabled: !ok || null, 'data-testid': 'pos-book-slot',
+          onclick: () => { b.slot = s; paintBook(); } },
+        h('strong', { text: `${fmtTime(s.starts_at)}–${fmtTime(s.ends_at)}` }), h('span', { text: it.name }), slotCaption(s) ? h('small', { text: slotCaption(s) }) : null);
+      }));
+    }
+
+    const kids = [
+      h('div', { class: 'pos-book-head' },
+        h('h2', { id: 'pos-book-title', text: `${t('book_title')}: ${it.name}` }),
+        h('button', { type: 'button', class: 'icon-btn', 'aria-label': t('book_cancel'), 'data-testid': 'pos-book-close', onclick: () => closeBooking() }, icon('close', 22))),
+      h('p', { class: 'muted pos-book-price', text: money(it.price) }),
+      h('div', { class: 'fld' }, h('label', { class: 'fld-lab', for: 'pos-book-date', text: t('book_day') }), dayCtl),
+      h('div', { class: 'fld' }, h('span', { class: 'fld-lab', text: t('book_pick') }), slotsEl),
+    ];
+    const mins = b.slot ? minutesBetween(b.slot.starts_at, b.slot.ends_at) : (Number(cfg.duration_minutes) || null);
+    if (mins) kids.push(h('p', { class: 'pos-book-duration', 'data-testid': 'pos-book-duration' }, h('strong', { text: `${t('book_duration')}: ` }), h('span', { text: `${mins} ${t('book_min')}` })));
+    if (b.slot) {
+      const pers = stepper({ label: t('book_persons'), value: b.persons, min: pMin, max: pMax, inputName: 'pos-book-n', size: 'lg', onChange: (n) => { b.persons = n; } });
+      kids.push(h('div', { class: 'fld', 'data-testid': 'pos-book-persons' }, h('span', { class: 'fld-lab', text: t('book_persons') }), pers.node));
+    }
+    kids.push(h('p', { class: 'muted', text: t('book_customer') }));
+    if (cart.length) kids.push(h('p', { class: 'muted', 'data-testid': 'pos-book-cart-note', text: t('book_cart') }));
+    if (!it.pos) kids.push(h('p', { class: 'muted', 'data-testid': 'pos-book-unbooked-off', text: t('book_unbooked_off') }));
+    kids.push(h('div', { class: 'pos-book-actions' },
+      h('button', { type: 'button', class: 'btn primary', 'data-testid': 'pos-book-continue', text: t('book_continue'), disabled: !b.slot || null, onclick: () => bookContinue() }),
+      h('button', { type: 'button', class: 'btn', 'data-testid': 'pos-book-unbooked', text: t('book_unbooked'), disabled: !it.pos || null,
+        onclick: () => { bk = null; addProduct(it, { unbooked: true }); } }),
+      h('button', { type: 'button', class: 'btn ghost', 'data-testid': 'pos-book-cancel', text: t('book_cancel'), onclick: () => closeBooking() })));
+    b.node.replaceChildren(...kids);
+  }
+
+  function bookPanel() {
+    if (!bk) return null;
+    const node = h('section', { class: 'card pos-book', role: 'group', 'aria-labelledby': 'pos-book-title', 'data-testid': 'pos-book' });
+    node.addEventListener('keydown', (e) => { if (e.key === 'Escape') { e.preventDefault?.(); closeBooking(); } });
+    bk.node = node;
+    paintBook();
+    return node;
+  }
+
   function draw() {
+    const hadSaleFocus = sale.focus || document.activeElement?.id === 'pos-sale-input';
+    sale.focus = false;
     const total = cartTotal(cart);
     const grid = h('div', { class: 'pos-grid', 'data-testid': 'pos-grid' });
     if (!catalog.length) {
@@ -703,7 +952,7 @@ export async function renderPos({ ctx, rpc, fn }) {
         canEdit ? h('button', { type: 'button', class: 'btn primary lg pos-edit', 'data-testid': 'pos-add', text: t('add'), onclick: () => { editing = true; draw(); } }) : null));
     }
     for (const p of catalog) {
-      grid.append(h('button', { type: 'button', class: 'pos-btn', 'data-testid': `pos-product-${p.product_id}`, onclick: () => { if (phase === 'paying') voidOpen().then(() => { cart = cartAdd(cart, p); draw(); }); else { cart = cartAdd(cart, p); draw(); } } },
+      grid.append(h('button', { type: 'button', class: 'pos-btn', 'data-testid': `pos-product-${p.product_id}`, onclick: () => pickCatalog(p) },
         h('span', { class: 'pos-name', text: p.name }),
         p.age_restricted ? h('small', { class: 'pos-age', text: t('age') }) : null,
         h('strong', { class: 'pos-price', text: money(p.price) })));
@@ -725,7 +974,7 @@ export async function renderPos({ ctx, rpc, fn }) {
       for (const r of cart) {
         const key = cartLineKey(r);
         lines.append(h('div', { class: 'pos-line', 'data-testid': r.kind === 'custom' ? 'pos-custom-line' : 'pos-product-line' },
-          h('span', { class: 'grow', text: r.name }),
+          h('span', { class: 'grow', text: r.unbooked ? `${r.name} (${t('unbooked')})` : r.name }),
           h('button', { type: 'button', class: 'btn pos-step', 'aria-label': t('qty_less'), text: '−', onclick: () => { cart = cartSetQty(cart, key, r.quantity - 1); if (phase === 'paying') voidOpen(); draw(); } }),
           h('span', { class: 'pos-qty', text: String(r.quantity) }),
           h('button', { type: 'button', class: 'btn pos-step', 'aria-label': t('qty_more'), text: '+', onclick: () => { cart = cartSetQty(cart, key, r.quantity + 1); if (phase === 'paying') voidOpen(); draw(); } }),
@@ -840,11 +1089,12 @@ export async function renderPos({ ctx, rpc, fn }) {
 
     const kids = [
       h('h1', { text: t('title') }),
-      h('div', { class: 'pos-layout', 'data-testid': 'pos-layout' }, h('div', { class: 'pos-main' }, grid, wide ? customBox : lines), side),
+      h('div', { class: 'pos-layout', 'data-testid': 'pos-layout' }, h('div', { class: 'pos-main' }, saleBox(), bookPanel(), grid, wide ? customBox : lines), side),
     ];
     if (tools) kids.push(tools);
     root.replaceChildren(...kids);
     syncModal();
+    if (hadSaleFocus && !payOpen) document.getElementById('pos-sale-input')?.focus?.();
   }
 
   function editor() {

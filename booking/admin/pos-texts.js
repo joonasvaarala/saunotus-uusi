@@ -250,6 +250,60 @@ export const POS_CUSTOM_TEXTS = {
 };
 
 // Kortti puhelimella (CheckoutX / Surfboard demo, booking_286): pending-import-141 (POS_CHECKOUTX_TEXTS). Näkyy vain testitilassa.
+// HALL-KASSA-02 (t1808u, t1809u): myynnin hakukenttä, oma rivi hausta ja varattavan tuotteen varauspaneeli (tuonti: content/site-texts.pending-import-178.json).
+export const POS_SALE_TEXTS = {
+  fi: {
+    sale_search: 'Hae tuote tai kirjoita oma rivi',
+    sale_placeholder: 'Tuotteen nimi, koodi tai oma rivi',
+    sale_results: 'Hakutulokset',
+    sale_clear: 'Tyhjennä haku',
+    sale_none: 'Ei osumia tuotteista',
+    sale_custom: 'Lisää oma rivi:',
+    sale_bookable: 'Varattava',
+    sale_help: 'Nuolet valitsevat, Enter lisää, Esc sulkee.',
+    book_title: 'Varauksen tiedot',
+    book_day: 'Päivä',
+    book_pick: 'Valitse vapaa aika',
+    book_none: 'Ei vapaita aikoja tälle päivälle',
+    book_loading: 'Haetaan vapaita aikoja',
+    book_duration: 'Kesto',
+    book_min: 'min',
+    book_persons: 'Henkilömäärä',
+    book_customer: 'Asiakkaan tiedot ja maksutapa täytetään seuraavaksi varauslomakkeella.',
+    book_cart: 'Kassan ostoskori tyhjenee, kun siirryt varauslomakkeelle.',
+    book_continue: 'Jatka varaukseen',
+    book_unbooked: 'Laskuta ilman varausta',
+    book_unbooked_off: 'Tuote ei ole pikakassan myyntikanavassa, joten sitä ei voi laskuttaa ilman varausta. Lisää Pikakassa-kanava tuotteen tiedoissa.',
+    book_cancel: 'Peruuta',
+    unbooked: 'ilman varausta',
+  },
+  en: {
+    sale_search: 'Search for a product or type a custom line',
+    sale_placeholder: 'Product name, code or custom line',
+    sale_results: 'Search results',
+    sale_clear: 'Clear search',
+    sale_none: 'No matching products',
+    sale_custom: 'Add custom line:',
+    sale_bookable: 'Bookable',
+    sale_help: 'Arrow keys choose, Enter adds, Esc closes.',
+    book_title: 'Booking details',
+    book_day: 'Day',
+    book_pick: 'Choose a free time',
+    book_none: 'No free times for this day',
+    book_loading: 'Looking for free times',
+    book_duration: 'Duration',
+    book_min: 'min',
+    book_persons: 'Number of people',
+    book_customer: 'Customer details and payment method are filled in next on the booking form.',
+    book_cart: 'The till cart is emptied when you move to the booking form.',
+    book_continue: 'Continue to booking',
+    book_unbooked: 'Invoice without a booking',
+    book_unbooked_off: 'The product is not in the quick till sales channel, so it cannot be invoiced without a booking. Add the Quick till channel in the product details.',
+    book_cancel: 'Cancel',
+    unbooked: 'without booking',
+  },
+};
+
 export const POS_CHECKOUTX_TEXTS = {
   fi: {
     method_checkoutx: 'Kortti puhelimella (CheckoutX)',
@@ -345,6 +399,6 @@ export function clearPosTextCache() {
 export function posText(key, lang = getLang()) {
   const live = db.get(`${PREFIX}${key}|${lang}`);
   if (live) return live;
-  return POS_TEXTS[lang]?.[key] || POS_EDIT_TEXTS[lang]?.[key] || POS_PAY_TEXTS[lang]?.[key] || POS_LINK_TEXTS[lang]?.[key] || POS_CUSTOMER_TEXTS[lang]?.[key] || POS_CUSTOM_TEXTS[lang]?.[key] || POS_CHECKOUTX_TEXTS[lang]?.[key] || POS_CART_TEXTS[lang]?.[key]
-    || POS_TEXTS.fi[key] || POS_EDIT_TEXTS.fi[key] || POS_PAY_TEXTS.fi[key] || POS_LINK_TEXTS.fi[key] || POS_CUSTOMER_TEXTS.fi[key] || POS_CUSTOM_TEXTS.fi[key] || POS_CHECKOUTX_TEXTS.fi[key] || POS_CART_TEXTS.fi[key] || key;
+  return POS_TEXTS[lang]?.[key] || POS_EDIT_TEXTS[lang]?.[key] || POS_PAY_TEXTS[lang]?.[key] || POS_LINK_TEXTS[lang]?.[key] || POS_CUSTOMER_TEXTS[lang]?.[key] || POS_CUSTOM_TEXTS[lang]?.[key] || POS_SALE_TEXTS[lang]?.[key] || POS_CHECKOUTX_TEXTS[lang]?.[key] || POS_CART_TEXTS[lang]?.[key]
+    || POS_TEXTS.fi[key] || POS_EDIT_TEXTS.fi[key] || POS_PAY_TEXTS.fi[key] || POS_LINK_TEXTS.fi[key] || POS_CUSTOMER_TEXTS.fi[key] || POS_CUSTOM_TEXTS.fi[key] || POS_SALE_TEXTS.fi[key] || POS_CHECKOUTX_TEXTS.fi[key] || POS_CART_TEXTS.fi[key] || key;
 }
