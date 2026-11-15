@@ -37,7 +37,9 @@ export async function startSite({ port, tag }) {
   const r = spawnSync('node', ['scripts/build.mjs'], {
     cwd: root, encoding: 'utf8',
     env: { PATH: process.env.PATH, HOME: process.env.HOME, DIST: dist, SITE_ENV: 'test', SITE_URL: `http://127.0.0.1:${port}`,
-      ARTICLES_CACHE_DIR: join(work, 'cache'), ARTICLES_STATE_FILE: join(work, 'state.json'), ARTICLES_IMAGES: '0' },
+      ARTICLES_CACHE_DIR: join(work, 'cache'), ARTICLES_STATE_FILE: join(work, 'state.json'), ARTICLES_IMAGES: '0',
+      // Sivutekstit: tyhjä välimuisti → repon varateksti (ei CI:n edellisen ajon kannasta tallentamaa snapshotia), jotta testi ei riipu DEVin tekstien tilasta
+      SITE_TEXTS_CACHE_DIR: join(work, 'site-texts') },
   });
   if (r.status !== 0) throw new Error(`build kaatui:\n${r.stdout}\n${r.stderr}`);
   const booking = join(dist, 'booking');
