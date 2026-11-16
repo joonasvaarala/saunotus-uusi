@@ -387,11 +387,13 @@ const SUCCESS: Record<string, Record<string, unknown>> = {
     language: "fi",
     request_id: RID,
   },
+  // vuorojen sulku (booking_321)
+  session_close: { space: "savusauna", starts_at: "2026-11-16T16:00", ends_at: "2026-11-16T19:00", reason: "ARGVALUE-123", request_id: RID },
 };
 
 Deno.test("jokaiselle spec-toiminnolle on onnistumistesti", () => {
   assertEquals(Object.keys(SUCCESS).sort(), Object.keys(ACTIONS).sort());
-  assertEquals(Object.keys(ACTIONS).length, 30); // 23 (v1) + 4 (v2 §1b) + 3 (uutiskirjeluonnokset, booking_315)
+  assertEquals(Object.keys(ACTIONS).length, 31); // 23 (v1) + 4 (v2 §1b) + 3 (uutiskirjeluonnokset, booking_315) + session_close (booking_321)
 });
 
 for (const [action, args] of Object.entries(SUCCESS)) {
@@ -663,4 +665,93 @@ Deno.test("uutiskirje: pitkät rungot mahtuvat 16 kB:n pyyntöön vain osissa", 
   assertEquals(ok.res.status, 200);
   const big = await run(req({ action: "newsletter_save", args: { id: 5, version: 2, body_fi: "x".repeat(9000), body_en: "y".repeat(9000) } }));
   assertEquals(big.res.status, 413);
+});
+
+// ---------- vuorojen sulku (booking_321) ----------
+Deno.test("session_close: muodot ennen tietokantaa", () => {
+  const S = "2026-11-16T16:00";
+  const E = "2026-11-16T19:00";
+  const ok: Record<string, unknown>[] = [
+    { space: "savusauna", starts_at: S, ends_at: E, reason: "huolto" },
+    { space_id: 1, starts_at: "2026-11-16T16:00:00+02:00", ends_at: "2026-11-16T19:00:00+02:00", reason: "huolto", request_id: RID },
+    { rule_id: 67, date: "2026-11-16", reason: "huolto" },
+    { rule_id: 67, date: "2026-11-16", starts_at: S, ends_at: E, reason: "huolto" },
+  ];
+  for (const a of ok) assertEquals(validateArgs("session_close", a), null, JSON.stringify(a));
+  const bad: [Record<string, unknown>, string][] = [
+    [{ space: "savusauna", starts_at: S, ends_at: E }, "missing_arg:reason"],
+    [{ space: "savusauna", starts_at: S, ends_at: E, reason: " " }, "missing_arg:reason"],
+    [{ space: "savusauna", starts_at: S, ends_at: E, reason: "r".repeat(201) }, "too_long:reason"],
+    [{ starts_at: S, ends_at: E, reason: "x" }, "missing_arg:space_id"],
+    [{ space: "savusauna", ends_at: E, reason: "x" }, "missing_arg:starts_at"],
+    [{ space: "savusauna", starts_at: S, reason: "x" }, "missing_arg:ends_at"],
+    [{ space: "savusauna", space_id: 1, starts_at: S, ends_at: E, reason: "x" }, "space_id tai space, ei molempia"],
+    [{ rule_id: 67, reason: "x" }, "date vaaditaan rule_id:n kanssa"],
+    [{ rule_id: 67, space: "savusauna", date: "2026-11-16", reason: "x" }, "rule_id tai space_id/space, ei molempia"],
+    [{ space: "savusauna", date: "2026-11-16", starts_at: S, ends_at: E, reason: "x" }, "date vain rule_id:n kanssa"],
+    [{ space: "Savu sauna", starts_at: S, ends_at: E, reason: "x" }, "bad_arg:space"],
+    [{ space_id: "1", starts_at: S, ends_at: E, reason: "x" }, "bad_arg:space_id"],
+    [{ space_id: 0, starts_at: S, ends_at: E, reason: "x" }, "bad_arg:space_id"],
+    [{ space: "savusauna", starts_at: "huomenna", ends_at: E, reason: "x" }, "bad_arg:starts_at"],
+    [{ rule_id: 67, date: "16.11.2026", reason: "x" }, "bad_arg:date"],
+    [{ space: "savusauna", starts_at: S, ends_at: E, reason: "x", delete: true }, "unknown_arg:delete"],
+    [{ space: "savusauna", starts_at: S, ends_at: E, reason: "x", reopen: true }, "unknown_arg:reopen"],
+  ];
+  for (const [a, err] of bad) assertEquals(validateArgs("session_close", a), err, JSON.stringify(a));
+  assertEquals(ACTIONS.session_close.write, true);
+});
+
+Deno.test("session_close: välitetään botgw_callille sellaisenaan", async () => {
+  const args = { space: "savusauna", starts_at: "2026-11-16T16:00", ends_at: "2026-11-16T19:00", reason: "ARGVALUE-123", request_id: RID };
+  const inner = { ok: true, id: 501, space_id: 1, starts_at: "2026-11-16T14:00:00+00:00", ends_at: "2026-11-16T17:00:00+00:00" };
+  const { res, body, calls, out } = await run(req({ action: "session_close", args }), { data: { ok: true, data: inner, request_id: RID } });
+  assertEquals(res.status, 200);
+  assertEquals(body, { ok: true, data: inner, request_id: RID });
+  assertEquals(calls, [{ fn: "botgw_call", args: { p_key_hash: await sha256Hex(KEY), p_action: "session_close", p_args: args } }]);
+  assert(!out.includes("ARGVALUE-123"));
+});
+
+Deno.test("session_close: varauksellinen vuoro -> 409 sellaisenaan, ei log_failurea", async () => {
+  const args = { space: "savusauna", starts_at: "2026-11-16T16:00", ends_at: "2026-11-16T19:00", reason: "x", request_id: RID };
+  const data = { ok: false, error: "has_reservations", reservation_count: 2, message: "Vuorolla on 2 asiakasvarausta, sulkua ei tehdä. Ei siirtoja eikä peruutuksia.", request_id: RID };
+  const { res, body, calls, out } = await run(req({ action: "session_close", args }), { data });
+  assertEquals(res.status, 409);
+  assertEquals(body, data);
+  assertEquals(calls.map((c) => c.fn), ["botgw_call"]);
+  assertMatch(out, /"action":"session_close".*"status":409.*"result":"db:has_reservations"/);
+});
+
+Deno.test("tuntematon ok:false tietokannalta -> edelleen 500 bad_db_response", async () => {
+  const data = { ok: false, error: "something_else ARGVALUE-123" };
+  const { res, body, calls } = await run(req({ action: "me" }), { data });
+  assertEquals(res.status, 500);
+  assertEquals(body, { ok: false, error: "internal_error" });
+  assertEquals(calls.map((c) => c.fn), ["botgw_call", "botgw_log_failure"]);
+});
+
+Deno.test("session_close: tietokannan virheet -> HTTP", async () => {
+  const args = { rule_id: 67, date: "2026-11-16", reason: "x" };
+  const cases: [RpcError, number, string][] = [
+    [{ code: "42501", message: "forbidden:sessions.close" }, 403, "forbidden:sessions.close"],
+    [{ code: "P0002", message: "not_found: rule" }, 404, "not_found: rule"],
+    [{ code: "P0002", message: "not_found: space" }, 404, "not_found: space"],
+    [{ code: "22023", message: "ends_at pitää olla starts_at jälkeen" }, 400, "ends_at pitää olla starts_at jälkeen"],
+    [{ code: "BG429", message: "rate_limited" }, 429, "rate_limited"],
+  ];
+  for (const [error, status, msg] of cases) {
+    const { res, body, calls } = await run(req({ action: "session_close", args }), { error });
+    assertEquals(res.status, status, error.message);
+    assertEquals(body.error, msg);
+    assertEquals(calls[1]?.fn, "botgw_log_failure");
+  }
+});
+
+Deno.test("sessions_list ja help eivät ole toimintoja (tietokanta ei tue) -> 400 unknown_action ilman botgw_callia", async () => {
+  for (const action of ["sessions_list", "help", "session_open", "session_delete"]) {
+    assert(!(action in ACTIONS), action);
+    const { res, body, calls } = await run(req({ action, args: {} }));
+    assertEquals(res.status, 400, action);
+    assertEquals(body, { ok: false, error: "unknown_action" });
+    assert(!calls.some((c) => c.fn === "botgw_call"), action);
+  }
 });
