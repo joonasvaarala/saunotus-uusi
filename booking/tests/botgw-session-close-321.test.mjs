@@ -1,4 +1,4 @@
-// booking_321 + edge: session_close kulkee bot-gatewayn läpi; sessions_list/help eivät ole toimintoja (eivät tietokannassa).
+// booking_321 + edge: session_close kulkee bot-gatewayn läpi (sessions_list/help: botgw-sessions-327.test.mjs).
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
@@ -15,11 +15,8 @@ test("tietokanta tuntee session_closen scopella sessions.close; edge myös, kirj
   }
 });
 
-test("sessions_list ja help puuttuvat sekä tietokannasta että edgestä", () => {
-  for (const a of ["sessions_list", "help"]) {
-    assert.doesNotMatch(mig, new RegExp(`when '${a}'`), a);
-    assert.doesNotMatch(core, new RegExp(`^  ${a}: \\{`, "m"), a);
-  }
+test("booking_321 ei vielä tuntenut sessions_listiä eikä helpiä (tulevat booking_327:ssä)", () => {
+  for (const a of ["sessions_list", "help"]) assert.doesNotMatch(mig, new RegExp(`when '${a}'`), a);
 });
 
 test("ei poisto- eikä avaustoimintoa", () => {
