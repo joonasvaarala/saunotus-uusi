@@ -99,4 +99,12 @@ ei poistoa eikä avaamista). Edge tuntee toiminnon vasta tästä versiosta läht
   - → 200 `{ok, data: {ok, id, …}}`; vuorolla asiakasvarauksia → 409 `{ok:false, error:"has_reservations", reservation_count, message}`
     (sulkua ei tehdä; tietokanta kirjaa yrityksen call_logiin, edge ei kutsu log_failurea).
   - edge: `space_id` ja `space` eivät yhdessä; `rule_id` ei yhdessä tilan kanssa; `date` vain `rule_id`:n kanssa.
-- `sessions_list` ja `help` eivät ole toimintoja (ei tietokannassa eikä edgessä) → 400 `unknown_action`.
+
+## Vuorolista ja ohje (booking_327, 16.11.2026; migraatio 20261116065919, rollback rollbacks/20261116065919_booking_327_ROLLBACK.sql)
+Molemmat ovat lukuja (ei kirjoitusrajaa). Tarkistukset: tests/t327_botgw_sessions_list_help_TARKISTUKSET.sql.
+- `sessions_list` (scope `sessions.read`; `sessions.close` riittää myös) `{date? | from? + to?, space_id? | space?, product_id?}`
+  - ilman päivämääriä tämä päivä; `from`–`to` enintään 31 päivää. Muuten 400 `bad_range: …` (edge tai tietokanta, sama viesti).
+  - → `{from, to, sessions: [{rule_id, date, product_id, product, space_id, space, starts_at, ends_at, capacity,
+    reservation_count, booked_persons, has_reservations, closed, block_id, can_close}]}` (ajat Helsingin aikaa `YYYY-MM-DD HH:MI`).
+  - Ei asiakkaiden nimiä, yhteystietoja, tilaus- tai varaus-id:itä eikä hinta- tai maksutietoja. `rule_id` + `date` käyvät suoraan `session_close`lle.
+- `help` (scope `me`, ei parametreja) → `{name, scopes, actions: [{action, scope, write, params}]}`; ei avaimia eikä salaisuuksia.

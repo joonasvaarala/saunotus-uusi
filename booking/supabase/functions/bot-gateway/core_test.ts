@@ -387,13 +387,16 @@ const SUCCESS: Record<string, Record<string, unknown>> = {
     language: "fi",
     request_id: RID,
   },
+  // vuorolista ja ohje (booking_327)
+  sessions_list: { from: "2026-11-16", to: "2026-11-22", space: "savusauna", product_id: 7 },
+  help: {},
   // vuorojen sulku (booking_321)
   session_close: { space: "savusauna", starts_at: "2026-11-16T16:00", ends_at: "2026-11-16T19:00", reason: "ARGVALUE-123", request_id: RID },
 };
 
 Deno.test("jokaiselle spec-toiminnolle on onnistumistesti", () => {
   assertEquals(Object.keys(SUCCESS).sort(), Object.keys(ACTIONS).sort());
-  assertEquals(Object.keys(ACTIONS).length, 31); // 23 (v1) + 4 (v2 §1b) + 3 (uutiskirjeluonnokset, booking_315) + session_close (booking_321)
+  assertEquals(Object.keys(ACTIONS).length, 33); // 23 (v1) + 4 (v2 §1b) + 3 (uutiskirjeluonnokset, booking_315) + session_close (booking_321) + sessions_list, help (booking_327)
 });
 
 for (const [action, args] of Object.entries(SUCCESS)) {
@@ -746,12 +749,89 @@ Deno.test("session_close: tietokannan virheet -> HTTP", async () => {
   }
 });
 
-Deno.test("sessions_list ja help eivät ole toimintoja (tietokanta ei tue) -> 400 unknown_action ilman botgw_callia", async () => {
-  for (const action of ["sessions_list", "help", "session_open", "session_delete"]) {
+Deno.test("poisto- ja avaustoimintoja ei ole -> 400 unknown_action ilman botgw_callia", async () => {
+  for (const action of ["session_open", "session_delete", "session_reopen", "sessions_close_all"]) {
     assert(!(action in ACTIONS), action);
     const { res, body, calls } = await run(req({ action, args: {} }));
     assertEquals(res.status, 400, action);
     assertEquals(body, { ok: false, error: "unknown_action" });
     assert(!calls.some((c) => c.fn === "botgw_call"), action);
   }
+});
+
+// ---------- vuorolista ja ohje (booking_327) ----------
+Deno.test("sessions_list ja help: lukutoimintoja", () => {
+  assertEquals(ACTIONS.sessions_list.write, false);
+  assertEquals(ACTIONS.help.write, false);
+});
+
+Deno.test("sessions_list: muodot ja aikaväli ennen tietokantaa", () => {
+  const ok: Record<string, unknown>[] = [
+    {},
+    { date: "2026-11-16" },
+    { date: "2026-11-16", from: "2026-11-16", to: "2026-11-16" },
+    { from: "2026-11-16", to: "2026-11-16" },
+    { from: "2026-11-01", to: "2026-12-01" }, // 31 päivää
+    { from: "2026-12-20", to: "2027-01-19", space_id: 1 },
+    { space: "rauni", product_id: 3 },
+    { request_id: RID },
+  ];
+  for (const a of ok) assertEquals(validateArgs("sessions_list", a), null, JSON.stringify(a));
+  const bad: [Record<string, unknown>, string][] = [
+    [{ from: "2026-11-01", to: "2026-12-02" }, "bad_range: enintään 31 päivää"],
+    [{ from: "2026-11-16", to: "2026-11-15" }, "bad_range: enintään 31 päivää"],
+    [{ from: "2026-11-16" }, "bad_range: from ja to vaaditaan yhdessä, tai date"],
+    [{ to: "2026-11-16" }, "bad_range: from ja to vaaditaan yhdessä, tai date"],
+    [{ date: "2026-11-16", from: "2026-11-15", to: "2026-11-20" }, "bad_range: anna joko date tai from/to"],
+    [{ date: "2026-11-16", to: "2026-11-17" }, "bad_range: anna joko date tai from/to"],
+    [{ date: "16.11.2026" }, "bad_arg:date"],
+    [{ from: "2026-11-16T10:00", to: "2026-11-17" }, "bad_arg:from"],
+    [{ space_id: 1, space: "savusauna" }, "space_id tai space, ei molempia"],
+    [{ space: "Savu sauna" }, "bad_arg:space"],
+    [{ space_id: "1" }, "bad_arg:space_id"],
+    [{ product_id: -1 }, "bad_arg:product_id"],
+    [{ customer: "x" }, "unknown_arg:customer"],
+  ];
+  for (const [a, err] of bad) assertEquals(validateArgs("sessions_list", a), err, JSON.stringify(a));
+});
+
+Deno.test("help: ei parametreja (request_id sallitaan)", () => {
+  assertEquals(validateArgs("help", {}), null);
+  assertEquals(validateArgs("help", { request_id: RID }), null);
+  assertEquals(validateArgs("help", { action: "me" }), "unknown_arg:action");
+});
+
+Deno.test("sessions_list: tietokannan bad_range ja muut virheet -> HTTP", async () => {
+  const cases: [RpcError, number, string][] = [
+    [{ code: "22023", message: "bad_range: enintään 31 päivää" }, 400, "bad_range: enintään 31 päivää"],
+    [{ code: "22023", message: "bad_param: product_id" }, 400, "bad_param: product_id"],
+    [{ code: "P0002", message: "not_found: space" }, 404, "not_found: space"],
+    [{ code: "42501", message: "unauthorized" }, 401, "unauthorized"],
+  ];
+  for (const [error, status, msg] of cases) {
+    const { res, body, calls } = await run(req({ action: "sessions_list", args: { date: "2026-11-16" } }), { error });
+    assertEquals(res.status, status, error.message);
+    assertEquals(body.error, msg);
+    assertEquals(calls.map((c) => c.fn), ["botgw_call", "botgw_log_failure"]);
+  }
+});
+
+Deno.test("sessions_list ja help: data välitetään sellaisenaan", async () => {
+  const list = {
+    from: "2026-11-16",
+    to: "2026-11-16",
+    sessions: [{
+      rule_id: 67, date: "2026-11-16", product_id: 7, product: "Savusauna", space_id: 1, space: "savusauna",
+      starts_at: "2026-11-16 16:00", ends_at: "2026-11-16 19:00", capacity: 10, reservation_count: 0, booked_persons: 0,
+      has_reservations: false, closed: false, can_close: true,
+    }],
+  };
+  const r1 = await run(req({ action: "sessions_list", args: { date: "2026-11-16" } }), { data: { ok: true, data: list } });
+  assertEquals(r1.res.status, 200);
+  assertEquals(r1.body, { ok: true, data: list });
+  const help = { name: "otto-grok-bot", scopes: ["me", "sessions.close"], actions: [{ action: "help", scope: "me", write: false, params: {} }] };
+  const r2 = await run(req({ action: "help" }), { data: { ok: true, data: help } });
+  assertEquals(r2.res.status, 200);
+  assertEquals(r2.body, { ok: true, data: help });
+  assertEquals(r2.calls[0].args.p_args, {});
 });

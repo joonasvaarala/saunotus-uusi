@@ -1,6 +1,7 @@
 // bot-gateway: Oton botin kapea yhdyskäytävä (koodari_otto.md §1–3). Ydin ilman Supabasea ja ilman Denon palvelinta.
 // Kaikki tietokantatyö tehdään public.botgw_call -funktiossa (botgw.call, migraatiot 20261025145539 + 20261025151402,
-// uutiskirjeluonnokset 20261114214038_booking_315, vuorojen sulku 20261115145705_booking_321):
+// uutiskirjeluonnokset 20261114214038_booking_315, vuorojen sulku 20261115145705_booking_321,
+// vuorolista ja ohje 20261116065919_booking_327):
 // henkilö tulee avainriviltä, scopet, rajat, idempotenssi, validoinnit, vuoromuutokset (shift_apply_change -> shift_outbox)
 // ja kirjaukset (shift_change_log, audit_log, botgw.call_log). Tämä ydin tekee vain:
 //   * kytkin BOTGW_DISABLED=1 -> 503 (tietokantaa ei kutsuta)
@@ -274,6 +275,30 @@ export const ACTIONS: Record<string, ActionSpec> = {
       return NL_CONTENT.some((k) => a[k] !== undefined) ? null : "Ei tallennettavaa";
     },
   },
+  // vuorolista (booking_327, scope sessions.read tai sessions.close): vain luku, ei kirjoitusrajaa.
+  // date TAI from+to (enintään 31 päivää); ilman niitä tämä päivä. Rajaus: space_id | space, product_id.
+  // Aikavälivirheet samoin kuin tietokanta: 400 "bad_range: …" (22023).
+  sessions_list: {
+    write: false,
+    fields: { date: f(date), from: f(date), to: f(date), space_id: f(int), space: f(str(50, SPACE_CODE_RE)), product_id: f(int) },
+    check: (a) => {
+      if (a.space_id !== undefined && a.space !== undefined) return "space_id tai space, ei molempia";
+      if (a.date !== undefined) {
+        if ((a.from !== undefined && a.from !== a.date) || (a.to !== undefined && a.to !== a.date)) {
+          return "bad_range: anna joko date tai from/to";
+        }
+        return null;
+      }
+      if ((a.from === undefined) !== (a.to === undefined)) return "bad_range: from ja to vaaditaan yhdessä, tai date";
+      if (a.from !== undefined) {
+        const days = (Date.parse(a.to as string) - Date.parse(a.from as string)) / 86_400_000;
+        if (days < 0 || days > 30) return "bad_range: enintään 31 päivää";
+      }
+      return null;
+    },
+  },
+  // ohje (booking_327, scope me): avaimen sallitut toiminnot ja parametrit; ei parametreja.
+  help: { write: false, fields: {} },
   // vuorojen sulku (booking_321, scope sessions.close): vain käsisulku booking.svc_create_space_block -funktiolla.
   // Ei poistoa eikä avaamista. Kaksi muotoa: (space_id | space) + starts_at + ends_at, tai rule_id + date
   // (aika säännöstä; starts_at/ends_at ohittavat sen). Varauksellinen vuoro -> tietokanta palauttaa
