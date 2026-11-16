@@ -82,8 +82,7 @@ function ownBlock(day, T, dayName) {
     const price = o.full ? h('b', { class: 'vk-fullword' }, T.full) : o.price ? [`${T.from} `, h('b', {}, nbsp(o.price)), dur ? [' · ', h('span', { class: 'vk-dur' }, nbsp(dur))] : ''] : null;
     parts.push(box(`vk-oma${o.full ? ' is-full' : ''}`, o.full, o.href, `${T.own}, ${dayName}${o.price ? `, ${T.from} ${o.price}${dur ? `, ${dur}` : ''}` : ''} ${T.newTab}`,
       h('span', { class: 'vk-n' }, T.own), h('span', { class: 'vk-m' }, price),
-      o.pct ? h('span', { class: 'vk-was', 'aria-hidden': 'true' }, h('span', { class: 'vk-sale' }, fillText(T.quietBadge, { pct: o.pct })), h('s', {}, nbsp(o.was))) : null,
-      o.full ? null : h('span', { class: 'vk-book', 'aria-hidden': 'true' }, T.book)));
+      o.pct ? h('span', { class: 'vk-was', 'aria-hidden': 'true' }, h('span', { class: 'vk-sale' }, fillText(T.quietBadge, { pct: o.pct })), h('s', {}, nbsp(o.was))) : null));
   }
   if (rows.length) {
     parts.push(h('div', { class: 'vk-grp' }, h('span', { class: 'vk-gn' }, T.after), rows.map((r) => {

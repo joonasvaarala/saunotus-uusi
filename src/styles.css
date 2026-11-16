@@ -145,7 +145,6 @@ ul{margin:0 0 1em;padding-left:1.2em}
 .vk-jump{display:inline-flex;align-items:center;min-height:44px;margin:0 0 0 2px;padding:0 2px;border:0;background:none;color:var(--gold);font:600 13px/1.2 var(--body);text-decoration:underline;text-underline-offset:4px;cursor:pointer;text-align:left}
 .vk-jump:hover{color:var(--ink)}
 .vk-none-m{display:inline}
-.vk-book{display:none}
 .vk-days{list-style:none;margin:0;padding:0}
 .vk-day{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 14px 8px;box-shadow:0 6px 18px rgba(60,45,30,.06);margin-bottom:12px}
 .vk-day.we{background:#f6eee2}
@@ -232,10 +231,8 @@ a.vk-pub:hover{border-color:var(--green)}
   .vk-pub .vk-m{grid-area:m;text-align:right;white-space:nowrap}
   .vk-pub .vk-chips{grid-area:c}
   .vk-chip{min-height:44px;padding:0 12px;font-size:12.5px}
-  .vk-oma{grid-template-columns:1fr auto;column-gap:10px;align-items:baseline}
+  .vk-oma{grid-template-columns:1fr auto;column-gap:10px;align-items:baseline;align-content:center;min-height:44px}
   .vk-oma .vk-was{grid-column:1/-1}
-  .vk-book{display:flex;grid-column:1/-1;align-items:center;justify-content:center;min-height:44px;margin-top:8px;border-radius:30px;background:var(--green);color:#fff;font:600 12px/1 var(--label);letter-spacing:.1em;text-transform:uppercase}
-  .vk-oma:hover .vk-book{background:#1c2720}
   .vk-cl{flex-direction:column;align-items:flex-start}
   .vk-key{display:flex}
   .vk-line{min-height:44px}
@@ -282,7 +279,7 @@ a.vk-pub:hover{border-color:var(--green)}
   .vk-legend{margin-top:16px}
 }
 @media (prefers-reduced-motion:reduce){.vk.is-loading .vk-scroll{transition:none}}
-@media (forced-colors:active){.vk-sw,.vk-step,.vk-book{border:1px solid CanvasText}.vk-tab.is-today{border-bottom:3px solid Highlight}.vk-sale{border:1px solid CanvasText}.vk-pub,.vk-oma,.vk-evt{border:1px solid CanvasText}}
+@media (forced-colors:active){.vk-sw,.vk-step{border:1px solid CanvasText}.vk-tab.is-today{border-bottom:3px solid Highlight}.vk-sale{border:1px solid CanvasText}.vk-pub,.vk-oma,.vk-evt{border:1px solid CanvasText}}
 /* ritual banner */
 .ritual{position:relative;isolation:isolate;color:#fff;border-radius:18px;overflow:hidden;background:#15110d;margin:0}
 .ritual picture,.ritual picture img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:-2}

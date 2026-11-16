@@ -768,7 +768,7 @@ test('täysi aika: ei linkkiä, «Täynnä» näkyy tekstinä (yleiset, oma saun
   assert.match(evFull, /<a class="vk-evt is-full"/);
 });
 
-test('mobiili: nauhan selite, tänään erillään valinnasta, ruudunlukijanimi palveluista, Varaa-painike, edellinen/seuraava päivä', () => {
+test('mobiili: nauhan selite, tänään erillään valinnasta, ruudunlukijanimi palveluista, oma sauna ilman Varaa-painiketta, edellinen/seuraava päivä', () => {
   const m = sunWeek({ care });
   const html = treeOf(m, { selected: 2 });
   assert.match(html, /<p class="vk-key"><span><i class="pub" aria-hidden="true"><\/i>Yleiset vuorot<\/span><span><i class="priv" aria-hidden="true"><\/i>Oma sauna<\/span><span><i class="treat" aria-hidden="true"><\/i>Hoidot ja rituaalit<\/span><\/p>/);
@@ -786,9 +786,10 @@ test('mobiili: nauhan selite, tänään erillään valinnasta, ruudunlukijanimi 
   assert.equal(tabLabel(m.days[0], 0, T, m), 'Sunnuntai 15.11., tänään: Oma sauna');
   assert.match(html, /aria-label="Torstai 19\.11\.: Yleiset vuorot"/);
   assert.match(html, /aria-label="Perjantai 20\.11\.: ei vuoroja"/);
-  // Varaa-painike omassa saunassa
-  assert.match(html, /<a class="vk-oma"[^>]*>[\s\S]*?<span class="vk-book" aria-hidden="true">Varaa<\/span><\/a>/);
-  assert.match(en, /<span class="vk-book" aria-hidden="true">Book<\/span>/);
+  // oma sauna: kortti on linkki kuten muut rivit, ei erillistä Varaa-painiketta (Joonas t1845u)
+  assert.match(html, /<a class="vk-oma" href="[^"]+"[^>]*>[\s\S]*?<span class="vk-n">Oma saunavuoro<\/span>[\s\S]*?<\/a>/);
+  assert.doesNotMatch(html, /vk-book/);
+  assert.doesNotMatch(en, /vk-book/);
   // edellinen/seuraava päivä: reunoilla pois käytöstä
   assert.match(treeOf(m, { selected: 0 }), /class="vk-step vk-step-prev" data-vk-step="-1" disabled>[\s\S]*Edellinen päivä<\/button><button type="button" class="vk-step vk-step-next" data-vk-step="1">Seuraava päivä/);
   assert.match(treeOf(m, { selected: 6 }), /data-vk-step="1" disabled>Seuraava päivä/);
