@@ -238,11 +238,15 @@ test('mobiili 390 (tänään su): tänään merkitty valitsemattomanakin, kolme 
   await page.click('.vk-day.is-on .vk-pubc .vk-jump');
   assert.equal(await page.locator('.vk-tab.is-on').getAttribute('data-vk-pick'), '4', 'linkki valitsee seuraavan päivän, jolla on yleisiä vuoroja');
   assert.match(await page.locator('.vk-day.is-on .vk-dh').innerText(), /Torstai/i);
-  // oma sauna -laatikon Varaa-painike ≥ 44 px
+  // oma sauna: koko kortti on linkki kuten muut rivit, ei erillistä Varaa-painiketta (t1845u); kosketuspinta ≥ 44 px
   await page.click('.vk-tab[data-vk-pick="6"]');
-  const book = (await boxes(page, '.vk-day.is-on .vk-oma .vk-book'))[0];
-  assert.ok(book && book.height >= 44, `Varaa-painike ${book?.height}`);
-  assert.match(await page.locator('.vk-day.is-on .vk-oma').innerText(), /Varaa/i);
+  assert.equal((await boxes(page, '.vk .vk-book')).length, 0, 'ei Varaa-painiketta mobiilissa');
+  const oma = page.locator('.vk-day.is-on a.vk-oma');
+  assert.equal(await oma.count(), 1);
+  assert.ok(await oma.getAttribute('href'), 'oma sauna -kortti on linkki');
+  const card = (await boxes(page, '.vk-day.is-on a.vk-oma'))[0];
+  assert.ok(card.height >= 44 && card.height < 90, `kortin korkeus ${card.height}`);
+  assert.doesNotMatch(await oma.innerText(), /Varaa/i);
   // edellinen/seuraava päivä
   const prev = page.locator('.vk-step-prev'), next = page.locator('.vk-step-next');
   assert.equal((await boxes(page, '.vk-daynav')).length, 1);
@@ -262,7 +266,7 @@ test('mobiili 390 (tänään su): tänään merkitty valitsemattomanakin, kolme 
   // desktopin Varaa-nappi ei näy kortissa
   await page.close();
   const desk = await site.open(1280, '/', weekMock(), { now: SUN_NOW });
-  assert.equal((await boxes(desk, '.vk .vk-book')).length, 0, 'Varaa-painike vain mobiilissa');
+  assert.equal((await boxes(desk, '.vk .vk-book')).length, 0, 'ei Varaa-painiketta desktopissa');
   assert.equal((await boxes(desk, '.vk .vk-daynav, .vk .vk-key')).length, 0, 'päivänavigointi ja nauhan selite vain mobiilissa');
   await desk.close();
 });
