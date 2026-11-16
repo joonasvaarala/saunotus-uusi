@@ -1,6 +1,6 @@
 // bot-gateway: Oton botin kapea yhdyskäytävä (koodari_otto.md §1–3). Ydin ilman Supabasea ja ilman Denon palvelinta.
 // Kaikki tietokantatyö tehdään public.botgw_call -funktiossa (botgw.call, migraatiot 20261025145539 + 20261025151402,
-// uutiskirjeluonnokset 20261114214038_booking_315):
+// uutiskirjeluonnokset 20261114214038_booking_315, vuorojen sulku 20261115145705_booking_321):
 // henkilö tulee avainriviltä, scopet, rajat, idempotenssi, validoinnit, vuoromuutokset (shift_apply_change -> shift_outbox)
 // ja kirjaukset (shift_change_log, audit_log, botgw.call_log). Tämä ydin tekee vain:
 //   * kytkin BOTGW_DISABLED=1 -> 503 (tietokantaa ei kutsuta)
@@ -105,6 +105,7 @@ const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 const TIME_RE = /^\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}(:\d{2}(\.\d{1,6})?)?(Z|z|[+-]\d{2}(:?\d{2})?)?$/;
 const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[a-z]{2,}$/i;
 const CAL_NAME_RE = /^[^&?\-]+$/;
+const SPACE_CODE_RE = /^[a-z0-9_]+$/; // booking.resources.code
 
 const f = (type: FieldType, opts: Omit<FieldSpec, "type"> = {}): FieldSpec => ({ type, ...opts });
 const uuid = { t: "uuid" } as const;
@@ -273,6 +274,36 @@ export const ACTIONS: Record<string, ActionSpec> = {
       return NL_CONTENT.some((k) => a[k] !== undefined) ? null : "Ei tallennettavaa";
     },
   },
+  // vuorojen sulku (booking_321, scope sessions.close): vain käsisulku booking.svc_create_space_block -funktiolla.
+  // Ei poistoa eikä avaamista. Kaksi muotoa: (space_id | space) + starts_at + ends_at, tai rule_id + date
+  // (aika säännöstä; starts_at/ends_at ohittavat sen). Varauksellinen vuoro -> tietokanta palauttaa
+  // {ok:false, error:"has_reservations"} -> 409 (ks. BUSINESS_409).
+  session_close: {
+    write: true,
+    fields: {
+      space_id: f(int),
+      space: f(str(50, SPACE_CODE_RE)),
+      starts_at: f(time),
+      ends_at: f(time),
+      rule_id: f(int),
+      date: f(date),
+      reason: f(str(200), REQ),
+      request_id,
+    },
+    check: (a) => {
+      const hasSpace = a.space_id !== undefined || a.space !== undefined;
+      if (a.space_id !== undefined && a.space !== undefined) return "space_id tai space, ei molempia";
+      if (a.rule_id !== undefined) {
+        if (hasSpace) return "rule_id tai space_id/space, ei molempia";
+        return a.date === undefined ? "date vaaditaan rule_id:n kanssa" : null;
+      }
+      if (a.date !== undefined) return "date vain rule_id:n kanssa";
+      if (!hasSpace) return "missing_arg:space_id";
+      if (a.starts_at === undefined) return "missing_arg:starts_at";
+      if (a.ends_at === undefined) return "missing_arg:ends_at";
+      return null;
+    },
+  },
 };
 
 function isPlainObject(v: unknown): v is Record<string, unknown> {
@@ -345,6 +376,8 @@ export interface Mapped {
 }
 
 const FORBIDDEN_403 = ["forbidden", "not_editable", "field_not_editable", "calendar_managed", "not_claimable"];
+// botgw.call palauttaa nämä {ok:false, error}-tuloksena (ei poikkeuksena) -> 409 sellaisenaan.
+export const BUSINESS_409 = ["has_reservations"];
 
 export function mapDbError(e: RpcError | null | undefined): Mapped {
   const code = String(e?.code ?? "");
@@ -515,6 +548,13 @@ export function createHandler(deps: GatewayDeps): (req: Request) => Promise<Resp
       return fail(m, m.status === 429 ? { "retry-after": "60" } : {});
     }
     const d = res.data;
+    // Tietokannan liiketoimintahylkäys (esim. session_close: vuorolla on varauksia). botgw.call on jo kirjannut sen
+    // call_logiin (ok=false), joten ei log_failurea; vastaus välitetään sellaisenaan (error, reservation_count, message).
+    if (isPlainObject(d) && d.ok === false && typeof d.error === "string" && BUSINESS_409.includes(d.error)) {
+      if (typeof d.request_id === "string") reqId = d.request_id;
+      logLine(action, 409, `db:${d.error}`, reqId);
+      return json(409, d);
+    }
     if (!isPlainObject(d) || d.ok !== true) {
       return fail({ status: 500, error: "internal_error", logCode: "edge:bad_db_response" });
     }

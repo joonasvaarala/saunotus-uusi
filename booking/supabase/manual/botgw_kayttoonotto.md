@@ -89,3 +89,14 @@ Ei lähetystä, ajastusta (`suggested_send_at`), esikatselua/testilähetystä, t
     sisältövirhe → 400 `invalid_newsletter: …`; ajastus/tila/muu kenttä → 400 `unknown_arg:*` (edge) tai 403 `field_not_editable` (tietokanta).
 - 16 kB runkoraja: pitkät FI+EN-rungot tallennetaan kahdessa kutsussa (luonti, sitten muokkaus).
 - Rollback: `rollbacks/20261114214038_booking_315_ROLLBACK.sql`; edge tuntee toiminnot, tietokanta vastaa silloin `unknown_action`.
+
+## Vuorojen sulku (booking_321, Joonas 15.11.2026; edge-läpivienti 16.11.2026)
+Scope `sessions.close` (otto-grok-botilla). Tietokanta: `botgw.call` → `booking.svc_create_space_block` (vain käsisulku;
+ei poistoa eikä avaamista). Edge tuntee toiminnon vasta tästä versiosta lähtien (aiemmin 400 `unknown_action` edgessä).
+- `session_close` (kirjoitus: 20/min ja 300/vrk yhteiset rajat, idempotentti `request_id`)
+  - joko `{space_id | space (resurssikoodi, esim. savusauna), starts_at, ends_at, reason ≤200}`
+  - tai `{rule_id, date, reason ≤200, starts_at?, ends_at?}` (tila ja aika säännöstä)
+  - → 200 `{ok, data: {ok, id, …}}`; vuorolla asiakasvarauksia → 409 `{ok:false, error:"has_reservations", reservation_count, message}`
+    (sulkua ei tehdä; tietokanta kirjaa yrityksen call_logiin, edge ei kutsu log_failurea).
+  - edge: `space_id` ja `space` eivät yhdessä; `rule_id` ei yhdessä tilan kanssa; `date` vain `rule_id`:n kanssa.
+- `sessions_list` ja `help` eivät ole toimintoja (ei tietokannassa eikä edgessä) → 400 `unknown_action`.
