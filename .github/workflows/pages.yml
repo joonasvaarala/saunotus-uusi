@@ -382,7 +382,7 @@ jobs:
       - run: node --test booking/tests/vuorotarjous-soefix.test.mjs
       # booking_315: Oton botin uutiskirjeluonnokset (scope newsletter.draft; ei lähetystä/ajastusta/lippuja). md5-vahdit, rollback, edge = tietokanta.
       # SQL: booking/supabase/tests/botgw/t315_newsletter_draft.sql paikallisessa PG:ssä (Bottiavustus ajaa migraation jälkeen).
-      - run: node --test booking/tests/botgw-uutiskirje-315.test.mjs booking/tests/botgw-session-close-321.test.mjs booking/tests/botgw-sessions-327.test.mjs
+      - run: node --test booking/tests/botgw-uutiskirje-315.test.mjs booking/tests/botgw-session-close-321.test.mjs booking/tests/botgw-sessions-327.test.mjs booking/tests/botgw-session-open-328.test.mjs
       # shift_offer_horizon (history-sync, tuotannossa 20261025165813): tarjousmoottorin käsin siirrettävä takaraja shift_offer.offer_horizon_until
       # (Europe/Helsinki, mukaan lukien; puuttuva = fail closed). SQL: thorizon_shift_offer_horizon.sql paikallisessa PG:ssä (ketju + rollback + uusinta).
       - run: node --test booking/tests/vuorotarjous-horizon.test.mjs

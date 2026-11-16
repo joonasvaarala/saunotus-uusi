@@ -19,6 +19,6 @@ test("booking_321 ei vielä tuntenut sessions_listiä eikä helpiä (tulevat boo
   for (const a of ["sessions_list", "help"]) assert.doesNotMatch(mig, new RegExp(`when '${a}'`), a);
 });
 
-test("ei poisto- eikä avaustoimintoa", () => {
-  assert.doesNotMatch(core, /^  session_(open|delete|reopen|unblock): \{/m);
+test("ei poistotoimintoa (avaus on session_open, booking_328)", () => {
+  assert.doesNotMatch(core, /^  session_(delete|reopen|unblock): \{/m);
 });

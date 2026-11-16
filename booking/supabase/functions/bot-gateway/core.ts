@@ -1,7 +1,7 @@
 // bot-gateway: Oton botin kapea yhdyskäytävä (koodari_otto.md §1–3). Ydin ilman Supabasea ja ilman Denon palvelinta.
 // Kaikki tietokantatyö tehdään public.botgw_call -funktiossa (botgw.call, migraatiot 20261025145539 + 20261025151402,
 // uutiskirjeluonnokset 20261114214038_booking_315, vuorojen sulku 20261115145705_booking_321,
-// vuorolista ja ohje 20261116065919_booking_327):
+// vuorolista ja ohje 20261116065919_booking_327, sulun avaus 20261116081050_booking_328):
 // henkilö tulee avainriviltä, scopet, rajat, idempotenssi, validoinnit, vuoromuutokset (shift_apply_change -> shift_outbox)
 // ja kirjaukset (shift_change_log, audit_log, botgw.call_log). Tämä ydin tekee vain:
 //   * kytkin BOTGW_DISABLED=1 -> 503 (tietokantaa ei kutsuta)
@@ -300,7 +300,7 @@ export const ACTIONS: Record<string, ActionSpec> = {
   // ohje (booking_327, scope me): avaimen sallitut toiminnot ja parametrit; ei parametreja.
   help: { write: false, fields: {} },
   // vuorojen sulku (booking_321, scope sessions.close): vain käsisulku booking.svc_create_space_block -funktiolla.
-  // Ei poistoa eikä avaamista. Kaksi muotoa: (space_id | space) + starts_at + ends_at, tai rule_id + date
+  // Avaus onnistuu session_open-toiminnolla vain botin omiin sulkuihin; poistoa ei ole. Kaksi muotoa: (space_id | space) + starts_at + ends_at, tai rule_id + date
   // (aika säännöstä; starts_at/ends_at ohittavat sen). Varauksellinen vuoro -> tietokanta palauttaa
   // {ok:false, error:"has_reservations"} -> 409 (ks. BUSINESS_409).
   session_close: {
@@ -329,6 +329,10 @@ export const ACTIONS: Record<string, ActionSpec> = {
       return null;
     },
   },
+  // sulun avaus (booking_328, scope sessions.close): booking.svc_open_space_block merkitsee sulun epäaktiiviseksi
+  // (ei poista riviä). Vain tämän botin omat session_close-sulut; muut -> 409 not_own_closure / closure_managed /
+  // event_managed. Jo auki -> 200 {already:true}. Tuntematon block_id -> 404 not_found: block.
+  session_open: { write: true, fields: { block_id: f(int, REQ), request_id } },
 };
 
 function isPlainObject(v: unknown): v is Record<string, unknown> {
@@ -402,7 +406,7 @@ export interface Mapped {
 
 const FORBIDDEN_403 = ["forbidden", "not_editable", "field_not_editable", "calendar_managed", "not_claimable"];
 // botgw.call palauttaa nämä {ok:false, error}-tuloksena (ei poikkeuksena) -> 409 sellaisenaan.
-export const BUSINESS_409 = ["has_reservations"];
+export const BUSINESS_409 = ["has_reservations", "not_own_closure", "closure_managed", "event_managed"];
 
 export function mapDbError(e: RpcError | null | undefined): Mapped {
   const code = String(e?.code ?? "");
