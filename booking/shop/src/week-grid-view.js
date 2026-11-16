@@ -43,24 +43,35 @@ const EN_MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep'
 export const dayMonth = (ds, lang = 'fi') => (ds ? (lang === 'en' ? `${+ds.slice(8)} ${EN_MONTHS[+ds.slice(5, 7) - 1]}` : `${+ds.slice(8)}.${+ds.slice(5, 7)}.`) : '');
 
 const leftText = (T, n) => (n === 1 ? T.leftOne : fillText(T.leftMany, { n }));
-/** Täysi aika: ei linkkiä (ei href), «Täynnä» näkyy tekstinä myös ruudunlukijalle. */
-const box = (cls, full, href, label, ...c) => (full ? h('div', { class: cls }, ...c) : link(cls, href, label, ...c));
+
+// Yksi korttimalli kaikille kolmelle palveluriville (yleiset vuorot, oma sauna ja jälkilöylyt, hoidot ja tapahtumat):
+//   ylärivi: nimi ……………… hinta
+//   alarivi: aika ja kesto … tila (Täynnä / n jäljellä), ale (−20 % ja yliviivattu hinta) tai Tapahtuma-merkki
+// Rivin erottaa vain vasemman reunan väri (sama kuin päivänauhan merkissä) ja rivin otsikko; rakenne, koko ja typografia ovat samat.
+// Ilman hrefiä (täysi aika tai alkuajat siruina) kortti on div, muuten koko kortti on linkki.
+function card(cls, href, label, { name, price = null, times = [], dur = '', state = null, more = null }) {
+  const detail = [...times.map((t) => h('span', { class: 'vk-t' }, t)), dur ? h('span', { class: 'vk-dur' }, nbsp(dur)) : null];
+  const c = [h('span', { class: 'vk-n' }, name), price ? h('span', { class: 'vk-p' }, price) : null,
+    detail.some(Boolean) ? h('span', { class: 'vk-d' }, detail) : null, state ? h('span', { class: 'vk-s' }, state) : null, more];
+  return href ? link(`vk-card ${cls}`, href, label, ...c) : h('div', { class: `vk-card ${cls}` }, ...c);
+}
+/** Hinta: «alk. 250 €», «29 € / hlö» tai «144 €». */
+const priceOf = (T, price, kind) => (price ? [kind === 'from' ? `${T.from} ` : '', h('b', {}, nbsp(price)), kind === 'per' ? ` ${T.per}` : ''] : null);
+const fullWord = (T) => h('b', { class: 'vk-fullword' }, T.full);
+/** Hiljaisen ajan ale: merkki + normaalihinta yliviivattuna (ruudunlukija saa saman linkin nimestä). */
+const sale = (T, vars) => h('span', { class: 'vk-was', 'aria-hidden': 'true' }, h('span', { class: 'vk-sale' }, fillText(T.quietBadge, vars)), h('s', {}, nbsp(vars.was)));
 
 function publicGroup(g, T, dayName) {
-  const meta = [g.price ? [h('b', {}, nbsp(g.price)), ` ${T.per}`] : '', g.dur ? `${g.price ? ' · ' : ''}${g.dur}` : '', g.low != null ? [' · ', h('span', { class: 'vk-low' }, leftText(T, g.low))] : '', g.full ? [g.price || g.dur ? ' · ' : '', h('b', { class: 'vk-fullword' }, T.full)] : ''];
   const label = `${g.name}, ${dayName}`;
-  const cls = `vk-pub${g.full ? ' is-full' : ''}`;
-  if (!g.chips.length) {
-    return box(cls, g.full, g.href, `${g.time} ${label} ${T.newTab}`.trim(),
-      h('span', { class: 'vk-t' }, g.time), h('span', { class: 'vk-n' }, g.name), h('span', { class: 'vk-m' }, meta));
-  }
-  return h('div', { class: cls },
-    h('span', { class: 'vk-t' }, g.time), h('span', { class: 'vk-n' }, g.name), h('span', { class: 'vk-m' }, meta),
-    h('span', { class: 'vk-chips' }, g.chips.map((c) => {
-      if (c.full) return h('span', { class: 'vk-chip is-full' }, c.label, sr(`, ${T.full}`));   // ei linkkiä täydelle ajalle
-      return link(`vk-chip${c.low != null ? ' is-low' : ''}`, c.href, `${c.label}, ${label}${c.low != null ? `, ${leftText(T, c.low)}` : ''} ${T.newTab}`,
-        c.label, c.low != null ? h('span', { class: 'vk-left' }, fillText(T.leftChip, { n: c.low })) : null);
-    })));
+  const cls = `vk-pub${g.full ? ' is-full' : g.low != null ? ' is-low' : ''}`;
+  const body = { name: g.name, price: priceOf(T, g.price, 'per'), times: [g.time], dur: g.dur, state: g.full ? fullWord(T) : g.low != null ? h('span', { class: 'vk-low' }, leftText(T, g.low)) : null };
+  if (!g.chips.length) return card(cls, g.full ? null : g.href, `${g.time} ${label} ${T.newTab}`.trim(), body);
+  // Useampi alkuaika: kortti ei ole linkki, sirut ovat
+  return card(cls, null, null, { ...body, more: h('span', { class: 'vk-chips' }, g.chips.map((c) => {
+    if (c.full) return h('span', { class: 'vk-chip is-full' }, c.label, sr(`, ${T.full}`));   // ei linkkiä täydelle ajalle
+    return link(`vk-chip${c.low != null ? ' is-low' : ''}`, c.href, `${c.label}, ${label}${c.low != null ? `, ${leftText(T, c.low)}` : ''} ${T.newTab}`,
+      c.label, c.low != null ? h('span', { class: 'vk-left' }, fillText(T.leftChip, { n: c.low })) : null);
+  })) });
 }
 
 /** Tunnit tekstinä: 1, 7, 1,5 (FI pilkku). */
@@ -79,20 +90,15 @@ function ownBlock(day, T, dayName) {
   const parts = [];
   if (o) {
     const dur = o.full ? '' : ownDuration(o, T);
-    const price = o.full ? h('b', { class: 'vk-fullword' }, T.full) : o.price ? [`${T.from} `, h('b', {}, nbsp(o.price)), dur ? [' · ', h('span', { class: 'vk-dur' }, nbsp(dur))] : ''] : null;
-    parts.push(box(`vk-oma${o.full ? ' is-full' : ''}`, o.full, o.href, `${T.own}, ${dayName}${o.price ? `, ${T.from} ${o.price}${dur ? `, ${dur}` : ''}` : ''} ${T.newTab}`,
-      h('span', { class: 'vk-n' }, T.own), h('span', { class: 'vk-m' }, price),
-      o.pct ? h('span', { class: 'vk-was', 'aria-hidden': 'true' }, h('span', { class: 'vk-sale' }, fillText(T.quietBadge, { pct: o.pct })), h('s', {}, nbsp(o.was))) : null));
+    parts.push(card(`vk-oma${o.full ? ' is-full' : ''}`, o.full ? null : o.href, `${T.own}, ${dayName}${o.price ? `, ${T.from} ${o.price}${dur ? `, ${dur}` : ''}` : ''} ${T.newTab}`,
+      { name: T.own, price: priceOf(T, o.price, 'from'), dur, state: o.full ? fullWord(T) : o.pct ? sale(T, { pct: o.pct, was: o.was }) : null }));
   }
-  if (rows.length) {
-    parts.push(h('div', { class: 'vk-grp' }, h('span', { class: 'vk-gn' }, T.after), rows.map((r) => {
-      const vars = { pct: r.pct, was: r.was, now: r.price };
-      return box(`vk-line${r.full ? ' is-full' : ''}${r.pct ? ' is-quiet' : ''}`, r.full, r.href,
-        `${T.after}, ${dayName}, ${r.time}, ${r.pct ? fillText(T.quietSr, vars) : r.price} ${T.newTab}`,
-        h('span', { class: 'vk-lt' }, r.time), h('span', { class: 'vk-lp' }, h('b', {}, nbsp(r.price))),
-        r.full ? h('span', { class: 'vk-lf' }, T.full) : null,
-        r.pct && !r.full ? h('span', { class: 'vk-was', 'aria-hidden': 'true' }, h('span', { class: 'vk-sale' }, fillText(T.quietBadge, vars)), h('s', {}, nbsp(r.was))) : null);
-    })));
+  // Jälkilöylyt: jokainen aika on oma korttinsa (nimi + aika), kuten yleiset vuorot
+  for (const r of rows) {
+    const vars = { pct: r.pct, was: r.was, now: r.price };
+    parts.push(card(`vk-line${r.full ? ' is-full' : ''}${r.pct ? ' is-quiet' : ''}`, r.full ? null : r.href,
+      `${T.after}, ${dayName}, ${r.time}, ${r.pct ? fillText(T.quietSr, vars) : r.price} ${T.newTab}`,
+      { name: T.after, price: priceOf(T, r.price), times: [r.time], state: r.full ? fullWord(T) : r.pct ? sale(T, vars) : null }));
   }
   return parts;
 }
@@ -108,17 +114,14 @@ const shortName = (T, wd) => (T.lang === 'en' ? dayShort(T, wd) : dayShort(T, wd
 function careBlock(day, T, dayName, jump) {
   const out = [];
   if (day.careErr && !day.care.length) out.push(h('p', { class: 'vk-care-err', role: 'status' }, T.careError));
-  if (day.care.length) {
-    out.push(h('ul', { class: 'vk-care' }, day.care.map((c) => h('li', {}, link('vk-cl', c.href, `${c.name}, ${dayName}${c.price ? `, ${c.priceKind === 'from' ? `${T.from} ` : ''}${c.price}${c.priceKind === 'per' ? ` ${T.per}` : ''}` : ''} ${T.newTab}`,
-      h('span', { class: 'vk-cn' }, c.name),
-      c.price ? h('span', { class: 'vk-cp' }, c.priceKind === 'from' ? `${T.from} ` : '', h('b', {}, nbsp(c.price)), c.priceKind === 'per' ? ` ${T.per}` : '') : null)))));
+  for (const c of day.care) {
+    out.push(card('vk-cl', c.href, `${c.name}, ${dayName}${c.price ? `, ${c.priceKind === 'from' ? `${T.from} ` : ''}${c.price}${c.priceKind === 'per' ? ` ${T.per}` : ''}` : ''} ${T.newTab}`,
+      { name: c.name, price: priceOf(T, c.price, c.priceKind) }));
   }
   for (const ev of day.events) {
     // Täysi tapahtuma pysyy linkkinä: tapahtuman sivulla on jonotus (booking_210); «Täynnä, jonoon» kerrotaan tekstinä.
-    out.push(link(`vk-evt${ev.full ? ' is-full' : ''}`, ev.href, `${T.eventTag}: ${ev.name}, ${dayName}${ev.full ? `, ${T.full}, ${T.evFull}` : ''} ${T.newTab}`,
-      h('span', { class: 'vk-tag' }, T.eventTag), h('span', { class: 'vk-n' }, ev.name),
-      ev.price ? h('span', { class: 'vk-m' }, h('b', {}, nbsp(ev.price)), ` ${T.per}`, ev.full ? [' · ', h('b', { class: 'vk-fullword' }, T.full)] : '') : (ev.full ? h('span', { class: 'vk-m' }, h('b', { class: 'vk-fullword' }, T.full)) : null),
-      ev.times.length ? h('span', { class: 'vk-etimes' }, ev.times.map((t) => h('span', { class: 'vk-et' }, t))) : null));
+    out.push(card(`vk-evt${ev.full ? ' is-full' : ''}`, ev.href, `${T.eventTag}: ${ev.name}, ${dayName}${ev.full ? `, ${T.full}, ${T.evFull}` : ''} ${T.newTab}`,
+      { name: ev.name, price: priceOf(T, ev.price, 'per'), times: ev.times, state: [h('span', { class: 'vk-tag' }, T.eventTag), ev.full ? fullWord(T) : null] }));
   }
   if (out.length) return out;
   if (day.careLater) return h('p', { class: 'vk-none' }, T.careLater);

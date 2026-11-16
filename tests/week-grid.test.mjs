@@ -342,7 +342,7 @@ test('tapahtumat näkyvät aina Hoidot ja rituaalit -solussa, myös kun careLate
   const careFri = [careEntry({ id: 10, slug: 'saunahoito-2', name: 'Saunahoito' }, new Map([['2026-12-04', [{}]]]))];
   const both = week({ start: '2026-11-30', care: careFri, careHorizon: 90, events: evDec });
   const bothHtml = weekGridTree(both, T, {}).map(toHtml).join('');
-  assert.match(bothHtml, /vk-cn">Saunahoito/);
+  assert.match(bothHtml, /vk-n">Saunahoito/);
   assert.match(bothHtml, /vk-evt/);
   assert.doesNotMatch(bothHtml, /Hoitojen ajat avautuvat/);
   // joulusauna 19.12.: viikko 14.–20.12. ikkunan ulkopuolella (14 pv), tapahtuma silti näkyvissä
@@ -383,16 +383,36 @@ test('careHorizon: public_settings.public_treatment_horizon_days (90), varalla 1
   assert.equal(await W.careHorizon({}), 14);
 });
 
-test('jälkilöyly täynnä: sana «Täynnä» näkyy (FI) / «Full» (EN), aika ja hinta yliviivataan tyylillä', () => {
+test('jälkilöyly täynnä: sana «Täynnä» näkyy (FI) / «Full» (EN), aika yliviivataan tyylillä', () => {
   const m = week();
   const html = weekGridTree(m, T, {}).map(toHtml).join('');
-  assert.match(html, /vk-line is-full[^>]*>[\s\S]*?<span class="vk-lf">Täynnä<\/span>/);
-  assert.equal((html.match(/class="vk-lf"/g) || []).length, 1, 'vain täydelle riville');
-  assert.doesNotMatch(html.match(/class="vk-line is-quiet"[^]*?<\/a>/)[0], /vk-lf/);
+  assert.match(html, /<div class="vk-card vk-line is-full">[\s\S]*?<span class="vk-s"><b class="vk-fullword">Täynnä<\/b><\/span>/);
+  assert.equal((html.match(/class="vk-card vk-line is-full"/g) || []).length, 1, 'vain täysi rivi');
+  assert.doesNotMatch(html.match(/class="vk-card vk-line is-quiet"[^]*?<\/a>/)[0], /vk-fullword/);
   const en = weekGridTree(week({ lang: 'en' }), gridTexts('en'), {}).map(toHtml).join('');
-  assert.match(en, /<span class="vk-lf">Full<\/span>/);
+  assert.match(en, /<div class="vk-card vk-line is-full">[\s\S]*?<b class="vk-fullword">Full<\/b>/);
   const css = readFileSync(new URL('../src/styles.css', import.meta.url), 'utf8');
-  assert.match(css, /\.vk-lf\{/);
+  assert.match(css, /\.vk-card\.is-full \.vk-t\{text-decoration:line-through\}/);
+});
+
+test('kortit: kaikki kolme palveluriviä käyttävät samaa korttia (nimi → hinta → aika/kesto → tila), ei erillisiä rivityylejä', () => {
+  const events = [ev('perinnesaunotusilta', 'Perinnesaunotusilta', [occ('2026-11-20', '17:00', '18:30'), occ('2026-11-20', '19:00', '20:30')])];
+  const cr = [careEntry({ id: 10, slug: 'saunahoito-2', name: 'Saunahoito', price: 99, price_type: 'base_plus_extra_person' }, new Map([['2026-11-17', [{}]]]))];
+  for (const [m, TT] of [[week({ events, care: cr }), T], [week({ events, care: cr, lang: 'en' }), gridTexts('en')]]) {
+    const html = weekGridTree(m, TT, {}).map(toHtml).join('');
+    const cards = [...html.matchAll(/<(a|div) class="vk-card (vk-\w+)[^"]*"[^>]*>(.*?)<\/\1>/g)];
+    assert.deepEqual([...new Set(cards.map((x) => x[2]))].sort(), ['vk-cl', 'vk-evt', 'vk-line', 'vk-oma', 'vk-pub'], 'yleiset, oma sauna, jälkilöylyt, hoito ja tapahtuma');
+    for (const [, , kind, body] of cards) {
+      assert.match(body, /^<span class="vk-n">[^<]+<\/span>/, `${kind}: nimi ensin`);
+      if (body.includes('vk-p')) assert.match(body, /^<span class="vk-n">[^<]+<\/span><span class="vk-p">/, `${kind}: hinta heti nimen perässä`);
+      else assert.match(body, /<b class="vk-fullword">/, `${kind}: hinnaton kortti vain täytenä`);
+    }
+    assert.doesNotMatch(html, /vk-grp|vk-gn|vk-lt|vk-lp|vk-lf|class="vk-care"|vk-cn|vk-cp|vk-etimes/, 'ei vanhoja erillisiä rivirakenteita');
+  }
+  const css = readFileSync(new URL('../src/styles.css', import.meta.url), 'utf8');
+  assert.match(css, /\.vk-pubc\{--vk-c:var\(--green\)\}\n\.vk-privc\{--vk-c:var\(--gold\)\}\n\.vk-carec\{--vk-c:var\(--accent\)\}/, 'rivin väri sama kuin merkissä');
+  assert.match(css, /\n\.vk-card\{[^}]*min-height:60px/, 'mobiilissa kortti vähintään 60 px (kosketusalue ≥ 44 px)');
+  assert.doesNotMatch(css, /\.vk-privc:not\(\.empty\)\{|\.vk-privc\{background/, 'ei oman saunan katkoviivalaatikkoa eikä taustasävyä');
 });
 
 test('otsikko: aina «Tulevat päivät saunalla» (FI) / «Upcoming days at the sauna» (EN), ei viikkonumeroa', () => {
@@ -436,10 +456,10 @@ test('oman vuoron kesto: haarukka (1–7 h), yksi pituus (2 h), tunnin vuoro muk
   assert.equal(ownDuration(c, gridTexts('en')), '1.5–2 h');
   assert.ok(!day(m, d(17)).public.some((g) => g.slug === 'tunnin-vuoro'), 'tunnin vuoroa ei yleisten vuorojen rivillä');
   const html = weekGridTree(m, T, {}).map(toHtml).join('');
-  assert.match(html, /alk\.\s*<b>250\s€<\/b> · <span class="vk-dur">1–7\sh<\/span>/);
-  assert.match(html, /alk\.\s*<b>250\s€<\/b> · <span class="vk-dur">2\sh<\/span>/);
+  assert.match(html, /alk\.\s*<b>250\s€<\/b><\/span><span class="vk-d"><span class="vk-dur">1–7\sh<\/span>/);
+  assert.match(html, /alk\.\s*<b>250\s€<\/b><\/span><span class="vk-d"><span class="vk-dur">2\sh<\/span>/);
   const en = weekGridTree(week({ rows: rr, lang: 'en' }), gridTexts('en'), {}).map(toHtml).join('');
-  assert.match(en, /from\s*<b>€250<\/b> · <span class="vk-dur">1–7\sh<\/span>/);
+  assert.match(en, /from\s*<b>€250<\/b><\/span><span class="vk-d"><span class="vk-dur">1–7\sh<\/span>/);
   // täynnä oleva oma vuoro: ei kestoa; ei kestoa jos kaikki pituudet puuttuvat
   assert.equal(ownDuration({ durMin: null, durMax: null }, T), '');
   assert.equal(day(week(), '2026-11-22').own.durMin, null, 'täynnä: ei kestoa');
@@ -482,7 +502,7 @@ test('tapahtumakortin nimi: sulkuosa pois sekä FI:ssä että EN:ssä', () => {
 
 test('tyylit: viikko-ohjelman nimet tavuttuvat sanarajoilla (hyphens:auto), ei anywhere/break-all; juuressa lang', () => {
   const css = readFileSync(new URL('../src/styles.css', import.meta.url), 'utf8');
-  for (const sel of ['.vk-n', '.vk-cl']) {
+  for (const sel of ['.vk-n']) {
     const line = css.split('\n').find((l) => l.startsWith(`${sel}{`));
     assert.ok(line, `${sel} löytyy`);
     assert.match(line, /hyphens:auto/, `${sel} hyphens:auto`);
@@ -681,11 +701,11 @@ test('hoidon hinta katalogista: alk. jos vaihtelua, / hlö jos per_person, kiint
   const m = week({ care: cr });
   assert.deepEqual(day(m, '2026-11-17').care.map((c) => [c.name, c.price.replace(/\s/g, ' '), c.priceKind]), [['Saunahoito', '99 €', 'from'], ['Saunarituaali ja savusaunavuoro', '49 €', 'per']]);
   const html = treeOf(m);
-  assert.match(html, /<span class="vk-cp">alk\. <b>99\s€<\/b><\/span>/);
-  assert.match(html, /<span class="vk-cp"><b>49\s€<\/b> \/ hlö<\/span>/);
+  assert.match(html, /<span class="vk-n">Saunahoito<\/span><span class="vk-p">alk\. <b>99\s€<\/b><\/span>/);
+  assert.match(html, /<span class="vk-p"><b>49\s€<\/b> \/ hlö<\/span>/);
   const en = treeOf(week({ care: cr, lang: 'en' }), {}, gridTexts('en'));
-  assert.match(en, /<span class="vk-cp">from <b>€99<\/b><\/span>/);
-  assert.match(en, /<span class="vk-cp"><b>€49<\/b> \/ person<\/span>/);
+  assert.match(en, /<span class="vk-p">from <b>€99<\/b><\/span>/);
+  assert.match(en, /<span class="vk-p"><b>€49<\/b> \/ person<\/span>/);
 });
 
 test('nextOffering: seuraava päivä, jolla on kyseistä tarjontaa; ikkunassa ei seuraavaa → null; täydet eivät ole tarjontaa', () => {
@@ -747,9 +767,9 @@ test('täysi aika: ei linkkiä, «Täynnä» näkyy tekstinä (yleiset, oma saun
   const mon = html.match(/<li class="vk-day is-today is-on"[\s\S]*?<\/li>/)[0];
   assert.doesNotMatch(mon, /<a /, 'ma: kaikki täynnä → ei yhtään linkkiä');
   assert.doesNotMatch(mon, /href=/);
-  assert.match(mon, /<div class="vk-pub is-full">[\s\S]*Täynnä/);
-  assert.match(mon, /<div class="vk-oma is-full">[\s\S]*<b class="vk-fullword">Täynnä<\/b>/);
-  assert.match(mon, /<div class="vk-line is-full">[\s\S]*<span class="vk-lf">Täynnä<\/span>/);
+  assert.match(mon, /<div class="vk-card vk-pub is-full">[\s\S]*Täynnä/);
+  assert.match(mon, /<div class="vk-card vk-oma is-full">[\s\S]*<b class="vk-fullword">Täynnä<\/b>/);
+  assert.match(mon, /<div class="vk-card vk-line is-full">[\s\S]*<b class="vk-fullword">Täynnä<\/b>/);
   assert.doesNotMatch(mon, /vk-book/, 'täydessä omassa saunassa ei Varaa-painiketta');
   // ti: täysi siru ei ole linkki, vapaa on; vähän jäljellä -siru näyttää tekstin
   const tue = html.match(/<li class="vk-day" data-vk-day="1"[\s\S]*?<\/li>/)[0];
@@ -765,7 +785,7 @@ test('täysi aika: ei linkkiä, «Täynnä» näkyy tekstinä (yleiset, oma saun
   assert.match(en, /Available<\/li><li><i class="vk-sw is-low" aria-hidden="true"><\/i>Few left<\/li><li><i class="vk-sw is-full" aria-hidden="true"><\/i>Full<\/li>/);
   // täysi tapahtuma pysyy linkkinä (jonotus), tämä on tietoinen poikkeus
   const evFull = treeOf(week({ events: [ev('x', 'Täysi', [occ('2026-11-20', '17:00', '18:30', 'full')])] }));
-  assert.match(evFull, /<a class="vk-evt is-full"/);
+  assert.match(evFull, /<a class="vk-card vk-evt is-full"/);
 });
 
 test('mobiili: nauhan selite, tänään erillään valinnasta, ruudunlukijanimi palveluista, oma sauna ilman Varaa-painiketta, edellinen/seuraava päivä', () => {
@@ -787,7 +807,7 @@ test('mobiili: nauhan selite, tänään erillään valinnasta, ruudunlukijanimi 
   assert.match(html, /aria-label="Torstai 19\.11\.: Yleiset vuorot"/);
   assert.match(html, /aria-label="Perjantai 20\.11\.: ei vuoroja"/);
   // oma sauna: kortti on linkki kuten muut rivit, ei erillistä Varaa-painiketta (Joonas t1845u)
-  assert.match(html, /<a class="vk-oma" href="[^"]+"[^>]*>[\s\S]*?<span class="vk-n">Oma saunavuoro<\/span>[\s\S]*?<\/a>/);
+  assert.match(html, /<a class="vk-card vk-oma" href="[^"]+"[^>]*>[\s\S]*?<span class="vk-n">Oma saunavuoro<\/span>[\s\S]*?<\/a>/);
   assert.doesNotMatch(html, /vk-book/);
   assert.doesNotMatch(en, /vk-book/);
   // edellinen/seuraava päivä: reunoilla pois käytöstä

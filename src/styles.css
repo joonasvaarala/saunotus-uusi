@@ -161,56 +161,40 @@ ul{margin:0 0 1em;padding-left:1.2em}
 .vk-none{margin:2px 0;font:italic 400 17px/1.3 var(--head);color:var(--muted)}
 .vk-none .vk-jump{display:flex;font-style:normal}
 .vk-care-err{margin:2px 0;font:italic 400 15px/1.3 var(--head);color:var(--muted)}
-.vk-pub,.vk-oma,.vk-evt{display:grid;gap:1px;min-width:0;max-width:100%;box-sizing:border-box;padding:9px 12px 10px;border-radius:9px;background:#fff;border:1px solid var(--line);border-left:3px solid var(--green);text-decoration:none;color:var(--text);box-shadow:0 2px 6px rgba(60,45,30,.05)}
-.vk-pub+.vk-pub,.vk-evt+.vk-evt{margin-top:6px}
-a.vk-pub:hover{border-color:var(--green)}
-.vk-t{font:500 18px/1.1 var(--head);color:var(--ink);font-variant-numeric:lining-nums tabular-nums}
-.vk-n{min-width:0;font:500 15.5px/1.2 var(--head);color:var(--ink);overflow-wrap:break-word;hyphens:auto}
-.vk-m{font:400 12.5px/1.35 var(--body);color:var(--muted)}
-.vk-m b{color:var(--ink);font-weight:700}
-.vk-low{color:var(--danger);font-weight:700}
-.vk-pub.is-full,.vk-oma.is-full{background:transparent;box-shadow:none;border-style:dashed;border-left-style:solid}
-.vk-pub.is-full .vk-t,.vk-pub.is-full .vk-n,.vk-oma.is-full .vk-n{color:var(--muted)}
-.vk-fullword{color:var(--muted);font-weight:700;letter-spacing:.02em}
+/* Kortti: sama rakenne kaikilla kolmella palvelurivillä (week-grid-view.js card()): nimi ja hinta ylärivillä, aika/kesto ja tila tai ale alarivillä.
+   Rivin erottaa vasemman reunan väri, sama kuin päivänauhan ja otsikon merkissä (yleiset tumma, oma sauna ruskea, hoidot vaaleanruskea). */
+.vk-pubc{--vk-c:var(--green)}
+.vk-privc{--vk-c:var(--gold)}
+.vk-carec{--vk-c:var(--accent)}
+.vk-card{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"n p" "d s" "c c";column-gap:12px;align-items:baseline;align-content:center;min-width:0;max-width:100%;min-height:60px;box-sizing:border-box;padding:10px 12px;border:1px solid var(--line);border-left:3px solid var(--vk-c,var(--green));border-radius:10px;background:#fff;color:var(--text);text-decoration:none;box-shadow:0 2px 6px rgba(60,45,30,.05)}
+.vk-card+.vk-card{margin-top:8px}
+a.vk-card:hover{border-color:var(--vk-c,var(--green))}
+.vk-n{grid-area:n;min-width:0;font:500 17px/1.2 var(--head);color:var(--ink);overflow-wrap:break-word;hyphens:auto}
+.vk-p{grid-area:p;justify-self:end;font:400 12.5px/1.3 var(--body);color:var(--muted);white-space:nowrap;text-align:right}
+.vk-p b{font-size:14.5px;font-weight:700;color:var(--ink)}
+.vk-d{grid-area:d;display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 10px;min-width:0;margin-top:3px;font:400 12.5px/1.35 var(--body);color:var(--muted)}
+.vk-t{font:600 12px/1.35 var(--label);color:var(--ink);white-space:nowrap;font-variant-numeric:lining-nums tabular-nums}
 .vk-dur{white-space:nowrap}
-.vk-chips{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
+.vk-s{grid-area:s;justify-self:end;display:flex;flex-wrap:wrap;justify-content:flex-end;align-items:center;gap:4px 6px;margin-top:3px;font:400 12px/1.3 var(--body);color:var(--muted)}
+.vk-low{color:var(--danger);font-weight:700}
+.vk-fullword{color:var(--muted);font-weight:700;letter-spacing:.02em}
+/* booking_162: hiljaisten aikojen ale viikko-ohjelmassa (booking/shop/src/week-grid.js). Paletti #2B3A30 / #F4EFE7 / #7A5530; ei sinistä.
+   Kontrastit: merkki #F4EFE7/#2B3A30 10,5:1; yliviivattu #7A5530 kortilla ≥ 5,3:1; uusi hinta #2B3A30 ≥ 9:1. */
+.vk-was{display:inline-flex;align-items:center;gap:5px;color:var(--gold)}
+.vk-sale,.vk-tag{font:700 9.5px/1 var(--label);letter-spacing:.06em;padding:3px 7px;border-radius:20px;color:#fff;white-space:nowrap}
+.vk-sale{background:var(--green);color:#f4efe7}
+.vk-tag{background:var(--gold);text-transform:uppercase;letter-spacing:.1em}
+/* Tila samoin kuin selitteessä: vähän jäljellä = punainen reuna, täynnä = katkoviiva ja yliviivattu aika (ei linkkiä) */
+.vk-card.is-low{border-color:var(--danger);border-left-color:var(--vk-c,var(--green))}
+.vk-card.is-full{background:transparent;box-shadow:none;border-style:dashed;border-color:#a89a8a;border-left:3px solid var(--vk-c,var(--green))}
+.vk-card.is-full .vk-n,.vk-card.is-full .vk-t,.vk-card.is-full .vk-p b{color:var(--muted)}
+.vk-card.is-full .vk-t{text-decoration:line-through}
+.vk-chips{grid-area:c;display:flex;flex-wrap:wrap;gap:4px;margin-top:8px}
 .vk-chip{display:inline-flex;flex-direction:column;justify-content:center;align-items:center;gap:2px;min-height:32px;font:600 11px/1 var(--label);padding:0 7px;border-radius:5px;border:1px solid rgba(43,58,48,.35);color:var(--green);text-decoration:none;background:#fff;font-variant-numeric:tabular-nums}
 .vk-chip:hover{background:var(--green);color:#fff}
 .vk-chip.is-low{border-color:var(--danger);color:var(--danger)}
 .vk-left{font:600 9.5px/1.1 var(--label);letter-spacing:.02em;text-transform:none}
 .vk-chip.is-full{border-style:dashed;color:#6f6356;text-decoration:line-through}
-.vk-privc:not(.empty){background:#fbf3e6;border:1.5px dashed rgba(122,85,48,.5);border-radius:10px;padding:10px 10px 12px;margin:8px 0 4px}
-.vk-oma{border-left-color:var(--gold);gap:2px}
-.vk-oma:hover{border-color:var(--gold)}
-.vk-oma .vk-m{font-size:13px}
-.vk-grp{margin-top:8px}
-.vk-gn{display:block;font:600 9.5px/1.2 var(--label);letter-spacing:.12em;text-transform:uppercase;color:var(--gold);margin:0 0 2px}
-.vk-line{display:grid;grid-template-columns:1fr auto;grid-template-areas:"t p" "w w";column-gap:6px;align-items:center;padding:6px 0;min-height:32px;text-decoration:none;color:var(--text);border-radius:4px}
-.vk-line:hover .vk-lt{text-decoration:underline;text-underline-offset:3px}
-.vk-lt{grid-area:t;font:600 11.5px/1.35 var(--label);color:var(--ink);white-space:nowrap;font-variant-numeric:tabular-nums}
-.vk-lp{grid-area:p;font:400 12.5px/1.35 var(--body);white-space:nowrap;text-align:right;color:var(--muted)}
-.vk-lp b{color:var(--ink)}
-/* booking_162: hiljaisten aikojen ale viikko-ohjelmassa (booking/shop/src/week-grid.js). Paletti #2B3A30 / #F4EFE7 / #7A5530; ei sinistä.
-   Kontrastit: merkki #F4EFE7/#2B3A30 10,5:1; yliviivattu #7A5530 kortilla ≥ 5,3:1; uusi hinta #2B3A30 ≥ 9:1. */
-.vk-was{grid-area:w;display:flex;justify-content:flex-end;align-items:center;gap:5px;font:400 11.5px/1.2 var(--body);color:var(--gold)}
-.vk-oma .vk-was{justify-content:flex-start}
-.vk-sale{background:var(--green);color:#f4efe7;font:700 9.5px/1 var(--label);padding:3px 6px;border-radius:8px}
-.vk-line.is-full .vk-lt,.vk-line.is-full .vk-lp,.vk-line.is-full .vk-lp b{color:#6f6356}
-.vk-line.is-full .vk-lt,.vk-line.is-full .vk-lp b{text-decoration:line-through}
-.vk-lf{grid-area:w;justify-self:end;font:600 11.5px/1.2 var(--label);letter-spacing:.04em;color:var(--muted)}
-.vk-care{list-style:none;margin:0;padding:0}
-.vk-care li+li{border-top:1px solid rgba(63,53,44,.08)}
-.vk-cl{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:1px 8px;min-height:36px;padding:6px 0;font:400 14px/1.3 var(--body);color:var(--ink);text-decoration:none;overflow-wrap:break-word;hyphens:auto}
-.vk-cp{font:400 12.5px/1.3 var(--body);color:var(--muted);white-space:nowrap}
-.vk-cp b{font-weight:700;color:var(--ink)}
-.vk-cl:hover{color:var(--gold);text-decoration:underline;text-underline-offset:3px}
-.vk-care+.vk-evt{margin-top:8px}
-.vk-evt{border-left-color:var(--gold);background:#fbf3e6}
-.vk-evt:hover{border-color:var(--gold)}
-.vk-evt.is-full{opacity:.7}
-.vk-tag{justify-self:start;margin-bottom:4px;font:600 9px/1 var(--label);letter-spacing:.12em;text-transform:uppercase;color:#fff;background:var(--gold);padding:3px 6px;border-radius:4px}
-.vk-etimes{display:grid;gap:1px;margin-top:4px}
-.vk-et{font:600 11.5px/1.35 var(--label);color:var(--ink);font-variant-numeric:tabular-nums}
 .vk-foot{display:flex;justify-content:space-between;align-items:center;gap:14px 24px;flex-wrap:wrap;margin-top:18px;font-size:15px}
 .vk-foot p{margin:0}
 .vk-hint{flex:1 1 320px}
@@ -225,20 +209,8 @@ a.vk-pub:hover{border-color:var(--green)}
   .vk-nav{margin-top:14px;width:100%}
   .vk-wk{flex:1;text-align:center}
   .vk-now{display:none}
-  .vk-pub{grid-template-columns:auto 1fr auto;grid-template-areas:"t n m" "c c c";align-items:baseline;column-gap:10px}
-  .vk-pub .vk-t{grid-area:t;font-size:18px}
-  .vk-pub .vk-n{grid-area:n}
-  .vk-pub .vk-m{grid-area:m;text-align:right;white-space:nowrap}
-  .vk-pub .vk-chips{grid-area:c}
   .vk-chip{min-height:44px;padding:0 12px;font-size:12.5px}
-  .vk-oma{grid-template-columns:1fr auto;column-gap:10px;align-items:baseline;align-content:center;min-height:44px}
-  .vk-oma .vk-was{grid-column:1/-1}
-  .vk-cl{flex-direction:column;align-items:flex-start}
   .vk-key{display:flex}
-  .vk-line{min-height:44px}
-  .vk-cl{min-height:44px}
-  .vk-evt{grid-template-columns:1fr auto;column-gap:10px;align-items:baseline}
-  .vk-evt .vk-tag,.vk-evt .vk-etimes{grid-column:1/-1}
   .vk-tab:disabled{opacity:.4}
 }
 @media (min-width:900px){
@@ -254,32 +226,30 @@ a.vk-pub:hover{border-color:var(--green)}
   .vk-dh b{font-size:22px}
   .vk-day.is-today .vk-dh{box-shadow:inset 0 4px 0 var(--accent)}
   .vk-today{margin:4px 0 0;justify-self:start}
-  .vk-cell,.vk-cell.empty:has(.vk-dash){display:block;margin:0;padding:9px 8px 10px;border-top:1px solid var(--line)}
+  .vk-cell,.vk-cell.empty:has(.vk-dash){display:block;margin:0;padding:9px 6px 10px;border-top:1px solid var(--line)}
   .vk-cell:first-of-type{border-top:1px solid var(--line)}
   .vk-lh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;margin:0}
   .vk-cell.empty:not(:has(.vk-none)){display:grid;place-items:center}
   .vk-pubc.empty{place-items:start}
-  .vk-privc:not(.empty){margin:0;padding:9px 8px 10px;border:0;border-radius:2px;outline:1.5px dashed rgba(122,85,48,.45);outline-offset:-6px}
-  .vk-privc .vk-oma,.vk-privc .vk-grp{margin-inline:3px}
-  .vk-privc{background:#fbf3e6}
   .vk-corner{border:0}
   .vk-lane{display:grid;align-content:start;gap:4px;padding:12px 14px 12px 16px;border-top:1px solid var(--line)}
   .vk-lane b{font:500 18px/1.15 var(--head);color:var(--ink)}
   .vk-lane span{font:400 11.5px/1.35 var(--body);color:var(--muted)}
   .vk-pubh{box-shadow:inset 3px 0 0 var(--green)}
-  .vk-privh{background:#fbf3e6;box-shadow:inset 3px 0 0 var(--gold)}
+  .vk-privh{box-shadow:inset 3px 0 0 var(--gold)}
   .vk-careh{box-shadow:inset 3px 0 0 var(--accent)}
-  .vk-pub,.vk-oma,.vk-evt{padding:9px 8px 10px 10px}
-  .vk-evt{padding:9px 4px 10px 7px}   /* kapea sarake: pitkä nimi (Perinnesaunotusilta) mahtuu rivittämättä kesken sanan */
-  .vk-evt .vk-n{font-size:14px}
+  /* kapea sarake: kortin osat allekkain (nimi, aika, hinta, tila), sama järjestys kaikilla riveillä; pitkä nimi (Perinnesaunotusilta) mahtuu rivittämättä kesken sanan */
+  .vk-card{grid-template-columns:minmax(0,1fr);grid-template-areas:"n" "d" "p" "s" "c";align-content:start;min-height:0;padding:9px 6px 10px 8px}
+  .vk-n{font-size:14.5px}
+  .vk-t{font-size:11.5px}
+  .vk-p,.vk-s{justify-self:start;justify-content:flex-start;text-align:left}
+  .vk-p{margin-top:4px}
   .vk-chips{gap:3px}
   .vk-chip{padding:0 6px}
-  .vk-pub .vk-t{font-size:18px}
-  .vk-cl{min-height:32px;font-size:13px;flex-direction:column;align-items:flex-start}
   .vk-legend{margin-top:16px}
 }
 @media (prefers-reduced-motion:reduce){.vk.is-loading .vk-scroll{transition:none}}
-@media (forced-colors:active){.vk-sw,.vk-step{border:1px solid CanvasText}.vk-tab.is-today{border-bottom:3px solid Highlight}.vk-sale{border:1px solid CanvasText}.vk-pub,.vk-oma,.vk-evt{border:1px solid CanvasText}}
+@media (forced-colors:active){.vk-sw,.vk-step{border:1px solid CanvasText}.vk-tab.is-today{border-bottom:3px solid Highlight}.vk-sale,.vk-tag{border:1px solid CanvasText}.vk-card{border:1px solid CanvasText}}
 /* ritual banner */
 .ritual{position:relative;isolation:isolate;color:#fff;border-radius:18px;overflow:hidden;background:#15110d;margin:0}
 .ritual picture,.ritual picture img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:-2}
