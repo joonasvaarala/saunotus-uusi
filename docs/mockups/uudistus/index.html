@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="fi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Uudistuksen luonnokset (10)</title>
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="ui.css">
+<style>
+  main { max-width: 1040px; margin: 0 auto; padding: var(--sp-6) var(--sp-4) var(--sp-8); }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: var(--sp-4); margin-top: var(--sp-5); }
+  .item { display: grid; gap: 6px; text-decoration: none; color: inherit; }
+  .item h2 { font-size: var(--fs-md); }
+  .item .ids { font-size: var(--fs-xs); color: #4C1D95; }
+  .item p { font-size: var(--fs-sm); }
+  .num { display: inline-grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: #6D28D9; color: #fff; font-weight: 700; font-size: var(--fs-sm); }
+  h3 { margin-top: var(--sp-6); font-size: var(--fs-sm); text-transform: uppercase; letter-spacing: .06em; color: var(--c-muted); }
+</style>
+</head>
+<body>
+<div class="mock-bar"><b>Uudistuksen luonnokset</b> 10 näkymää · raportti <a href="../../claude/2026-11-analyysi-sivut-ja-hallinta.md">docs/claude/2026-11-analyysi-sivut-ja-hallinta.md</a></div>
+<main>
+  <h1>Luonnokset: eniten muuttuvat ja tärkeimmät näkymät</h1>
+  <p style="margin-top:8px;max-width:70ch">Klikattavat HTML-luonnokset raportin ehdotuksista. Kaikki käyttävät samaa ehdotettua tyylijärjestelmää (<code>tokens.css</code> ja <code>ui.css</code>, raportin luku 2). Violetit numerot viittaavat kunkin sivun alalaidan selitykseen "Mitä muuttui", jossa on myös raportin tunnisteet. Kuvat samoista näkymistä ovat kansiossa <code>kuvat/</code>. Nimet, numerot ja paikkamäärät ovat keksittyjä esimerkkejä.</p>
+
+  <h3>Hallinta</h3>
+  <div class="grid">
+    <a class="card item" href="01-hallinta-paiva.html"><span class="num">1</span><h2>Päivänäkymä vastaanoton tabletilla</h2><span class="ids">HALL-PAIVA-01–05 · HALL-KUORI-01–02</span><p>Uusi valikko nimineen (Koulutukset omana kohtanaan), Kassa yläpalkissa, Valmistelu ja lisäpalvelut lajeittain ylimpänä, sisäänkirjausympyrä, täyttöaste, rivin pikatoiminnot, muistiinpano, tulostettava päivälista.</p></a>
+    <a class="card item" href="02-hallinta-tilaus.html"><span class="num">2</span><h2>Tilausnäkymä</h2><span class="ids">HALL-TILAUS-01–08</span><p>Kadonneet toiminnot takaisin (Ei saapunut, poisto, peruutuspyyntö), siirto uudella hinnalla ja ilmoituksella myös vapaaseen ajankohtaan, selkokielinen aikajana.</p></a>
+    <a class="card item" href="03-hallinta-aukiolot.html"><span class="num">3</span><h2>Aukiolot ja poikkeuspäivät (uusi)</h2><span class="ids">HALL-TILAT-01–02</span><p>Viikkopohja, vuoron muokkaus esikatselulla, kertavuorot, suljetut päivät ja päiväkohtainen kapasiteetti ilman kehittäjää.</p></a>
+    <a class="card item" href="04-hallinta-tuote.html"><span class="num">4</span><h2>Tuotteen muokkaus</h2><span class="ids">HALL-TUOTTEET-01–06</span><p>Oma näkymä välilehdillä, yksi näkyvyysvalinta, "valmis verkkomyyntiin?" -tarkistus, hintavaihtoehdot, yksi tallennuspalkki.</p></a>
+    <a class="card item" href="05-hallinta-kassa.html"><span class="num">5</span><h2>Pikakassa tabletilla</h2><span class="ids">HALL-KASSA-01–02</span><p>Ostoskori aina näkyvissä, korttipäätemaksun kuittaus, maksulinkki QR-koodina ilman sähköpostia.</p></a>
+    <a class="card item" href="06-hallinta-asetukset.html"><span class="num">6</span><h2>Asetukset puhelimella</h2><span class="ids">HALL-ASETUKSET-01–02</span><p>10 välilehteä → 5, tapahtumien myynnin kytkin, ryhmitellyt yritystiedot, kuittilogo, yksi tallennuspalkki, alapalkki.</p></a>
+    <a class="card item" href="07-hallinta-tekstit.html"><span class="num">7</span><h2>Tekstit (uusi)</h2><span class="ids">SIVU-YHT-03 · HALL-VIESTIT-01</span><p>Sivuston, kaupan ja sähköpostien tekstit FI/EN rinnakkain, paikkamerkit painikkeina, tarkistus, esikatselu, hyväksyntä ja versiot.</p></a>
+  </div>
+
+  <h3>Varauskauppa</h3>
+  <div class="grid">
+    <a class="card item" href="08-kauppa-kassa.html"><span class="num">8</span><h2>Varauslomake puhelimella</h2><span class="ids">KAUPPA-KASSA-01–03 · KAUPPA-YHT-01</span><p>Kiinteä summapalkki, virheet kentän alla, vaihepalkki, tiivis valintarivi, lahjakorttiohje ja maksutapalogot.</p></a>
+    <a class="card item" href="09-kauppa-vahvistus.html"><span class="num">9</span><h2>Vahvistussivu, kaksi tilaa</h2><span class="ids">KAUPPA-VAHVISTUS-01 · KAUPPA-MAKSU-01</span><p>Yksi otsikko ja päätoiminto, "Hallitse varausta" tilaussivulle, yksi peruutusohje, selkeä vanhentunut tila.</p></a>
+  </div>
+
+  <h3>Julkinen sivusto</h3>
+  <div class="grid">
+    <a class="card item" href="10-sivusto-etusivu.html"><span class="num">10</span><h2>Etusivu ja yleisilme</h2><span class="ids">SIVU-YHT-01–05 · SIVU-ETUSIVU-01–02 · SIVU-SAUNAVUOROT-01</span><p>Varaa-painike aina näkyvissä, yksi otsikkoserif, hero yhdellä CTA:lla ja arvosanalla, tasaiset kortit, viikko-ohjelmassa vapaat paikat.</p></a>
+  </div>
+</main>
+</body>
+</html>

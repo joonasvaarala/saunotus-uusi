@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="fi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Luonnos 07: Tekstit – hallinta</title>
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="ui.css">
+<style>
+  .layout { display: grid; grid-template-columns: 340px minmax(0, 1fr); gap: var(--sp-5); align-items: start; }
+  .tlist { padding: 0; overflow: hidden; }
+  .tlist h3 { padding: var(--sp-3) var(--sp-4) 6px; font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: .06em; color: var(--c-muted); }
+  .titem { display: grid; gap: 2px; padding: 10px var(--sp-4); border-top: 1px solid var(--c-line); text-decoration: none; color: var(--c-ink); }
+  .titem small { color: var(--c-muted); font-size: var(--fs-xs); }
+  .titem[aria-current] { background: var(--c-info-bg); box-shadow: inset 3px 0 0 var(--c-brand); }
+  .titem .row { justify-content: space-between; }
+  .langs { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-4); }
+  .ph { display: flex; gap: 6px; flex-wrap: wrap; }
+  .ph button { min-height: 32px; padding: 0 10px; border-radius: var(--r-sm); border: 1px dashed var(--c-field); background: #fff; color: var(--c-accent); font: 600 12px/1 var(--f-ui); }
+  .preview { border: 1px solid var(--c-line); border-radius: var(--r-md); background: #fff; padding: var(--sp-4); font-size: var(--fs-sm); }
+  .preview .mailhead { color: var(--c-muted); font-size: var(--fs-xs); border-bottom: 1px solid var(--c-line); padding-bottom: 8px; margin-bottom: 10px; }
+  .preview mark { background: #FFF3C4; padding: 0 2px; }
+  .hist { list-style: none; margin: 0; padding: 0; font-size: var(--fs-sm); }
+  .hist li { display: flex; gap: var(--sp-2); align-items: center; padding: 6px 0; border-top: 1px solid var(--c-line); }
+  .hist li:first-child { border-top: 0; }
+  .key { font: 12px/1.4 ui-monospace, Menlo, Consolas, monospace; color: var(--c-muted); }
+  .layout > *, .ov > *, .pos > * { min-width: 0; }
+</style>
+</head>
+<body>
+<div class="mock-bar"><b>Luonnos 07/10</b> Hallinta · Tekstit, uusi näkymä (1280 px) · <a href="index.html">kaikki luonnokset</a><span class="ids">SIVU-YHT-03 · HALL-VIESTIT-01 · HALL-KUORI-01</span></div>
+<div class="app">
+  <header class="app-top">
+    <a class="brand" href="#"><img src="../../../booking/admin/logo-haalea.svg" alt="Hallinta" width="26" height="36"></a>
+    <div class="search"><span data-icon="search" data-size="18"></span>Hae nimeä, numeroa tai koodia</div>
+    <span class="spacer"></span>
+    <a class="top-btn" href="#"><span data-icon="plus" data-size="18"></span>Uusi varaus</a>
+    <a class="top-btn" href="#"><span data-icon="till" data-size="18"></span>Kassa</a>
+    <a class="top-btn" href="#"><span data-icon="check" data-size="18"></span>Tarkista <span class="count">3</span></a>
+    <span class="user"><i>J</i>Joonas · Pääkäyttäjä</span>
+  </header>
+  <nav class="app-nav" aria-label="Päävalikko">
+    <a href="#"><span data-icon="day"></span>Päivä</a>
+    <a href="#"><span data-icon="calendar"></span>Kalenteri</a>
+    <a href="#"><span data-icon="list"></span>Tilaukset<span class="badge badge--warn">2</span></a>
+    <a href="#"><span data-icon="users"></span>Asiakkaat</a>
+    <a href="#"><span data-icon="gift"></span>Lahjakortit ja koodit</a>
+    <a href="#"><span data-icon="tag"></span>Tarjonta</a>
+    <a href="#"><span data-icon="school"></span>Koulutukset</a>
+    <a href="#"><span data-icon="chart"></span>Talous</a>
+    <a href="#" aria-current="page"><span data-icon="mail"></span>Sisältö</a>
+    <a href="#"><span data-icon="sliders"></span>Asetukset</a>
+  </nav>
+  <main class="app-main">
+    <h1 style="margin-bottom:var(--sp-3)">Sisältö</h1>
+    <div class="tabs" role="tablist" aria-label="Sisältö">
+      <a role="tab" href="#">Viestipohjat</a>
+      <a role="tab" href="#">Viesti asiakkaille</a>
+      <a role="tab" href="#" aria-selected="true">Tekstit <span class="badge badge--warn">1 odottaa</span></a>
+      <a role="tab" href="#">Saunatietoa</a>
+      <span class="pin" style="align-self:center">1</span>
+    </div>
+
+    <div class="layout">
+      <aside class="stack">
+        <div class="seg" role="group" aria-label="Tekstien ryhmä" style="width:100%"><button aria-pressed="true" style="flex:1">Sähköpostit</button><button aria-pressed="false" style="flex:1">Kauppa</button><button aria-pressed="false" style="flex:1">Sivusto</button></div>
+        <label class="field"><span class="sr">Hae tekstiä</span><input class="input" placeholder="Hae tekstiä, esim. uima-asu"></label>
+        <div class="card tlist">
+          <h3>Varausvahvistus</h3>
+          <a class="titem" href="#"><span class="row"><span>Otsikko</span><span class="badge badge--ok">Julkaistu</span></span><small>Varauksesi on vahvistettu – {{var:no}}</small></a>
+          <a class="titem" href="#" aria-current="true"><span class="row"><span>Saapumisohje</span><span class="badge badge--warn">Ehdotus</span></span><small>Saavu paikalle noin 10 minuuttia ennen…</small></a>
+          <a class="titem" href="#"><span class="row"><span>Muutos ja peruutus</span><span class="badge badge--ok">Julkaistu</span></span><small>Voit siirtää varausta viimeistään {{setting:…}}</small></a>
+          <a class="titem" href="#"><span class="row"><span>Allekirjoitus</span><span class="badge badge--ok">Julkaistu</span></span><small>Lämpimin terveisin, Tapio</small></a>
+          <h3>Maksulinkki</h3>
+          <a class="titem" href="#"><span class="row"><span>Otsikko</span><span class="badge badge--ok">Julkaistu</span></span><small>Maksa tilaus {{var:no}}</small></a>
+          <a class="titem" href="#"><span class="row"><span>Muistutus</span><span class="badge badge--neutral">EN puuttuu</span></span><small>Muistutus: maksu odottaa</small></a>
+        </div>
+      </aside>
+
+      <section class="stack-lg">
+        <div class="card">
+          <div class="card-head"><div><h2>Varausvahvistus · Saapumisohje</h2><span class="key">email.order_confirmation.arrival</span></div><span class="badge badge--info">Näkyy seuraavassa lähetettävässä viestissä</span><span class="pin">2</span></div>
+          <div class="langs">
+            <label class="field"><span>Suomi</span><textarea class="textarea" rows="6" style="min-height:150px">Saavu paikalle noin 10 minuuttia ennen vuoron alkua. Ota mukaan pyyhe ja juomapullo. Torstain turvevuorolla ja viikonloppuisin saunotaan uima-asussa. Tervetuloa, {{var:name}}!</textarea></label>
+            <label class="field"><span>English</span><textarea class="textarea" rows="6" style="min-height:150px">Please arrive about 10 minutes before your session. Bring a towel and a water bottle. On Peat Thursday and at weekends swimwear is worn. Welcome, {{var:name}}!</textarea></label>
+          </div>
+          <div class="row wrap" style="margin-top:var(--sp-3)"><span class="small muted">Lisää tieto:</span><div class="ph"><button>Asiakkaan nimi</button><button>Tilausnumero</button><button>Päivä</button><button>Kellonaika</button><button>Puhelinnumero</button></div><span class="pin">3</span></div>
+          <div class="alert alert--ok" style="margin-top:var(--sp-3)"><span data-icon="tick"></span><div><b>Tarkistettu</b>Paikkamerkit ovat kunnossa molemmilla kielillä. Pituus 186 / 400 merkkiä.</div></div>
+          <div class="row" style="margin-top:var(--sp-4)"><button class="btn btn--primary">Hyväksy ja julkaise</button><button class="btn">Tallenna ehdotuksena</button><button class="btn btn--ghost">Lähetä testi itselleni</button><span class="grow"></span><span class="pin">4</span></div>
+        </div>
+
+        <div class="layout" style="grid-template-columns:minmax(0,1fr) 300px">
+          <div class="card">
+            <h2>Esikatselu</h2>
+            <div class="preview">
+              <div class="mailhead">Aihe: Varauksesi on vahvistettu – 15123<br>Vastaanottaja: Maija Esimerkki</div>
+              <p>Hei Maija,</p>
+              <p style="margin-top:8px">kiitos varauksesta! Yleinen saunavuoro la 14.11.2026 klo 14.00–16.00, 2 henkilöä.</p>
+              <p style="margin-top:8px"><mark>Saavu paikalle noin 10 minuuttia ennen vuoron alkua. Ota mukaan pyyhe ja juomapullo. Torstain turvevuorolla ja viikonloppuisin saunotaan uima-asussa. Tervetuloa, Maija!</mark></p>
+              <p style="margin-top:8px">Lämpimin terveisin,<br>Tapio</p>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-head"><h2>Historia</h2><span class="pin">5</span></div>
+            <ol class="hist">
+              <li><span class="badge badge--warn">Ehdotus</span><span class="grow small">13.11. klo 10.20 · tekstieditori</span></li>
+              <li><span class="badge badge--ok">v3</span><span class="grow small">2.11. klo 15.04</span><button class="linkbtn">Palauta</button></li>
+              <li><span class="badge badge--neutral">v2</span><span class="grow small">18.10. klo 16.58</span><button class="linkbtn">Palauta</button></li>
+            </ol>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+</div>
+
+<section class="legend" aria-label="Mitä muuttui">
+  <h2>Mitä muuttui: tekstit ilman kehittäjää</h2>
+  <ol>
+    <li><span class="pin">1</span><div><b>Uusi välilehti Sisältö › Tekstit</b> valmiin tietokantatyönkulun päälle (ehdotus, hyväksyntä, julkaisu, versiot, palautus: booking_60 ja booking_64). Ryhmät Sähköpostit · Kauppa · Sivusto. <span class="before">Nyt tekstit kulkevat tuontitiedostoina (<code>content/site-texts.pending-import-*.json</code>), ja Koodari tuo ne.</span> <code>SIVU-YHT-03</code></div></li>
+    <li><span class="pin">2</span><div><b>Kertoo, milloin muutos näkyy:</b> sähköpostit heti seuraavassa viestissä; kaupan ja sivuston tekstit "julkaistaan seuraavassa sivustopäivityksessä", kunnes tuotantojulkaisu automatisoidaan (erillinen päätös). <code>SIVU-YHT-03</code></div></li>
+    <li><span class="pin">3</span><div><b>FI ja EN rinnakkain, paikkamerkit painikkeina</b> eikä käsin kirjoitettuina; sama paikkamerkkimuoto kaikissa viesteissä. <span class="before">Nyt viestityökaluilla on kaksi eri paikkamerkkimuotoa, ja tapahtumaviesti on yksikielinen.</span> <code>HALL-VIESTIT-01</code></div></li>
+    <li><span class="pin">4</span><div><b>Tarkistus ennen tallennusta ja testilähetys omaan osoitteeseen.</b> Virheellinen paikkamerkki estää julkaisun, kuten buildissa. <code>SIVU-YHT-03</code> <code>HALL-VIESTIT-01</code></div></li>
+    <li><span class="pin">5</span><div><b>Versiohistoria ja palautus</b> yhdellä napilla. <code>SIVU-YHT-03</code></div></li>
+  </ol>
+  <p class="small muted" style="margin-top:12px">Ei vaadi tietokantamuutosta (RPC:t ovat olemassa). Tarkistettava, että tekstieditorin rooli on tuotannossa. Viestin sanamuoto on esimerkki, ei nykyinen teksti.</p>
+</section>
+<script src="icons.js"></script>
+</body>
+</html>

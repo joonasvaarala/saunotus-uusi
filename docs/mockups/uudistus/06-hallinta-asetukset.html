@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="fi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Luonnos 06: Asetukset puhelimella – hallinta</title>
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="ui.css">
+<style>
+  .ptop { display: flex; align-items: center; gap: 4px; min-height: 56px; padding: 6px 8px; background: var(--c-brand); color: #fff; }
+  .ptop img { height: 32px; margin-right: auto; }
+  .ptop .ib { display: grid; place-items: center; width: 44px; height: 44px; border-radius: var(--r-md); border: 1px solid rgba(255,255,255,.45); color: #fff; position: relative; }
+  .ptop .ib .count { position: absolute; top: -4px; right: -4px; min-width: 18px; height: 18px; border-radius: 9px; background: #EDE3D0; color: var(--c-ink); font: 700 11px/18px var(--f-ui); text-align: center; }
+  .group-label { font: 700 var(--fs-xs)/1.4 var(--f-ui); text-transform: uppercase; letter-spacing: .06em; color: var(--c-muted); margin: var(--sp-2) 0 6px; }
+  .logo-row { display: flex; align-items: center; gap: var(--sp-3); }
+  .logo-row img { width: 64px; height: 64px; object-fit: contain; background: #fff; border: 1px solid var(--c-line); border-radius: var(--r-md); padding: 6px; }
+  .tabs { margin-left: -12px; margin-right: -12px; padding: 0 12px; }
+  .phone-page { width: 390px; margin: 0 auto; background: var(--c-bg); border-left: 1px solid #ddd5ca; border-right: 1px solid #ddd5ca; }
+</style>
+</head>
+<body>
+<div class="mock-bar"><b>Luonnos 06/10</b> Hallinta · Asetukset puhelimella (390 px) · <a href="index.html">kaikki</a><span class="ids">HALL-ASETUKSET-01 · -02 · HALL-TAPAHTUMAT-01 · HALL-KUORI-02</span></div>
+<div class="phone-page">
+  <header class="ptop">
+    <img src="../../../booking/admin/logo-haalea.svg" alt="Hallinta" width="23" height="32">
+    <span class="ib" aria-label="Haku"><span data-icon="search"></span></span>
+    <span class="ib" aria-label="Uusi varaus"><span data-icon="plus"></span></span>
+    <span class="ib" aria-label="Kassa"><span data-icon="till"></span></span>
+    <span class="ib" aria-label="Tarkista, 3 avointa"><span data-icon="check"></span><span class="count">3</span></span>
+  </header>
+  <main class="app-main" style="padding:16px 12px 24px">
+    <h1 style="font-size:var(--fs-xl);margin-bottom:var(--sp-3)">Asetukset</h1>
+    <div class="tabs" role="tablist" aria-label="Asetukset">
+      <a role="tab" href="#" aria-selected="true">Yleiset</a>
+      <a role="tab" href="#">Varaukset</a>
+      <a role="tab" href="#">Maksut ja laskutus</a>
+      <a role="tab" href="#">Käyttäjät</a>
+      <a role="tab" href="#">Järjestelmä</a>
+    </div>
+    <p class="small" style="display:flex;gap:8px;align-items:center;margin:-8px 0 12px"><span class="pin">1</span><span class="muted">5 välilehteä, ei kymmentä; Järjestelmä vain pääkäyttäjälle</span></p>
+
+    <div class="stack">
+      <section class="card">
+        <div class="card-head"><h2>Myynti</h2><span class="pin">2</span></div>
+        <div class="switch-row"><div><b>Verkkovaraus</b><p class="small muted">Pois päältä kauppa kertoo, ettei verkkovaraus ole käytössä, ja näyttää puhelinnumeron. Tehdyt varaukset säilyvät.</p></div><span class="switch" role="switch" aria-checked="true" aria-label="Verkkovaraus"></span></div>
+        <hr class="divider">
+        <div class="switch-row"><div><b>Tapahtumien myynti</b><p class="small muted">Tapahtumien kerrat näkyvät kaupassa vasta, kun myynti on päällä.</p></div><span class="switch" role="switch" aria-checked="true" aria-label="Tapahtumien myynti"></span></div>
+        <p class="small" style="color:var(--c-warn);font-weight:600">Muutettu: tallennetaan alhaalta</p>
+      </section>
+
+      <section class="card">
+        <div class="card-head"><h2>Yritys</h2><span class="pin">3</span></div>
+        <p class="group-label">Näkyy asiakkaalle</p>
+        <div class="stack">
+          <label class="field"><span>Nimi</span><input class="input" value="Sipoonjoen Perinnesauna"></label>
+          <label class="field"><span>Puhelin</span><input class="input" value="010 299 2866" inputmode="tel"></label>
+          <label class="field"><span>Sähköposti</span><input class="input" value="savusauna@saunotus.fi" inputmode="email"></label>
+        </div>
+        <p class="group-label" style="margin-top:var(--sp-4)">Viralliset tiedot (kuitit ja laskut)</p>
+        <div class="stack">
+          <label class="field"><span>Yrityksen nimi</span><input class="input" value="Havuhattu Oy"></label>
+          <label class="field"><span>Y-tunnus</span><input class="input" value="3018112-1"></label>
+          <label class="field"><span>Osoite</span><input class="input" value="Hindsbyntie 124, 04130 Sipoo"></label>
+        </div>
+        <p class="group-label" style="margin-top:var(--sp-4)">Kuittilogo</p>
+        <div class="logo-row"><img src="../../../public/img/logo-kuitti.png" alt="Nykyinen kuittilogo"><div class="grow"><button class="btn btn--sm">Vaihda logo</button><p class="xs muted" style="margin-top:4px">PNG tai SVG, enintään 1 Mt</p></div><span class="pin">4</span></div>
+      </section>
+
+      <a class="card row" href="#" style="text-decoration:none;color:var(--c-ink)"><span data-icon="gift"></span><div class="grow"><b>Lahjakorttien myynti ja lunastus</b><p class="small muted">Siirretty Lahjakortit ja koodit -osioon</p></div><span data-icon="chev"></span></a>
+      <a class="card row" href="#" style="text-decoration:none;color:var(--c-ink)"><span data-icon="mail"></span><div class="grow"><b>Sähköpostin lähettäjä ja ajastetut viestit</b><p class="small muted">Siirretty Sisältö › Viestit -osioon</p></div><span data-icon="chev"></span></a>
+      <span class="pin">5</span>
+    </div>
+
+    <div class="savebar" style="position:static" role="region" aria-label="Tallentamattomat muutokset">
+      <span class="dot"></span><span class="small"><b style="color:var(--c-ink)">1 muutos</b></span><span class="grow"></span><button class="btn btn--ghost btn--sm">Hylkää</button><button class="btn btn--primary">Tallenna</button><span class="pin">6</span>
+    </div>
+  </main>
+  <nav class="tabbar" aria-label="Päävalikko">
+    <a href="#"><span data-icon="day"></span>Päivä</a>
+    <a href="#"><span data-icon="calendar"></span>Kalenteri</a>
+    <a href="#"><span data-icon="list"></span>Tilaukset</a>
+    <a href="#"><span data-icon="users"></span>Asiakkaat</a>
+    <a href="#" aria-current="page"><span data-icon="sliders"></span>Lisää</a>
+  </nav>
+</div>
+
+<section class="legend" aria-label="Mitä muuttui" style="max-width:720px">
+  <h2>Mitä muuttui nykyisiin asetuksiin verrattuna</h2>
+  <ol>
+    <li><span class="pin">1</span><div><b>10 välilehteä → 5:</b> Yleiset, Varaukset, Maksut ja laskutus, Käyttäjät, Järjestelmä (vain pääkäyttäjä: yhteyksien tilat, Procountor-tilit, Google-vienti, tekniset rajat). <span class="before">Nyt 10 pillerivälilehteä, jotka vuotavat yli myös työpöydällä; noin puolet korteista on pelkkää tilatietoa.</span> <code>HALL-ASETUKSET-01</code></div></li>
+    <li><span class="pin">2</span><div><b>Tapahtumien myynnin kytkin</b> verkkovarauksen viereen. <span class="before">Nyt tapahtumien myyntiä ei voi avata hallinnasta lainkaan.</span> <code>HALL-TAPAHTUMAT-01</code></div></li>
+    <li><span class="pin">3</span><div><b>Yritystiedot ryhmiteltyinä</b> "Näkyy asiakkaalle" ja "Viralliset tiedot". <span class="before">Nyt neljä nimikenttää rinnakkain (Nimi kaupassa, Nimi kuitissa, Virallinen nimi, Toiminimi).</span> <code>HALL-ASETUKSET-01</code></div></li>
+    <li><span class="pin">4</span><div><b>Kuittilogon vaihto.</b> <span class="before">Nyt vain teksti "Kuittilogo on asetettu".</span> <code>HALL-ASETUKSET-02</code></div></li>
+    <li><span class="pin">5</span><div><b>Asetukset siellä, missä asiaa hoidetaan:</b> lahjakorttien kytkimet Lahjakortteihin, sähköposti ja ajastus Viesteihin, QR-tulostus Tuotteisiin. <span class="before">Nyt lahjakorttien kytkimet ovat kahdessa paikassa, QR on Asetuksissa vaikka "ei ole asetus".</span> <code>HALL-ASETUKSET-01</code> <code>HALL-LAHJAKORTIT-02</code></div></li>
+    <li><span class="pin">6</span><div><b>Yksi tallennuspalkki</b> välilehteä kohden; kytkimet tallentuvat samalla tavalla kaikkialla. Alapalkki viidellä kohdalla peukalon ulottuvilla. <span class="before">Nyt jokaisella kortilla oma Tallenna, ja kytkin tallentuu eri näkymissä eri tavalla.</span> <code>YHT-02</code> <code>HALL-KUORI-02</code></div></li>
+  </ol>
+  <p class="small muted" style="margin-top:12px">Yrityksen tiedot ovat julkisia (sivuston alatunniste). Kuittilogo: repon <code>public/img/logo-kuitti.png</code>.</p>
+</section>
+<script src="icons.js"></script>
+</body>
+</html>

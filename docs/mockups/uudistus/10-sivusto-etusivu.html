@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="fi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Luonnos 10: Etusivu – sivusto</title>
+<link rel="stylesheet" href="fonts.css">
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="ui.css">
+<style>
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 0 var(--sp-4); }
+  .s-head { position: sticky; top: 0; z-index: 10; }
+  .s-head { position: relative; }
+  .s-head .lang { display: flex; gap: 2px; font: 600 11px/1 var(--f-label); letter-spacing: .1em; }
+  .s-head .lang a { padding: 8px 6px; color: var(--c-muted); text-decoration: none; }
+  .s-head .lang a[aria-current] { color: var(--c-ink); text-decoration: underline; text-underline-offset: 4px; }
+  .menu-btn { display: none; min-height: 44px; padding: 0 12px; border: 1px solid var(--c-line); border-radius: var(--r-md); background: #fff; font: 600 11px/1 var(--f-label); letter-spacing: .1em; color: var(--c-ink); }
+  .hero { position: relative; min-height: 560px; display: flex; align-items: center; color: #fff; overflow: hidden; }
+  .hero picture, .hero img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .hero::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, rgba(20,14,10,.78) 0%, rgba(20,14,10,.45) 45%, rgba(20,14,10,0) 75%); }
+  .hero .wrap { position: relative; z-index: 1; width: 100%; }
+  .hero h1 { color: #fff; font-size: 76px; line-height: .98; max-width: 9ch; }
+  .hero p.lead { max-width: 30rem; margin: var(--sp-4) 0 var(--sp-5); font-size: 19px; line-height: 1.5; }
+  .hero .ctas { display: flex; align-items: center; gap: var(--sp-5); flex-wrap: wrap; }
+  .hero .ctas a.text { color: #fff; font-weight: 700; text-underline-offset: 4px; }
+  .rating { display: inline-flex; align-items: center; gap: 8px; margin-top: var(--sp-5); padding: 6px 12px; border-radius: var(--r-pill); background: rgba(0,0,0,.35); font-size: var(--fs-sm); }
+  .rating b { font-family: var(--f-head); font-size: 22px; font-weight: 600; }
+  section.sec { padding: var(--sp-8) 0; }
+  .sec-title { font-size: 44px; text-align: center; margin-bottom: var(--sp-6); }
+  .cards { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: var(--sp-4); }
+  .s-card .meta { font-size: var(--fs-sm); color: var(--c-muted); }
+  .s-card p { font-size: 15px; line-height: 1.5; }
+  .s-card .foot a { font: 600 11px/1 var(--f-label); letter-spacing: .1em; text-transform: uppercase; color: var(--c-accent); text-decoration: none; }
+  .week { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); background: var(--c-surface-2); border: 1px solid var(--c-line); border-radius: var(--r-lg); overflow: hidden; box-shadow: var(--shadow-card); }
+  .wd { padding: var(--sp-4) var(--sp-3); border-left: 1px solid var(--c-line); display: grid; gap: var(--sp-2); align-content: start; }
+  .wd:first-child { border-left: 0; }
+  .wd.today { background: var(--c-tint); box-shadow: inset 0 3px 0 var(--c-gold-2); }
+  .wd h3 { font: 500 11px/1.3 var(--f-label); letter-spacing: .12em; text-transform: uppercase; color: var(--c-ink); display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+  .wd .t { font: 500 26px/1.05 var(--f-head); color: var(--c-ink); }
+  .wd .n { font-size: 15px; }
+  .wd .seats { font-size: var(--fs-xs); font-weight: 700; color: var(--c-ok); }
+  .wd .seats.low { color: var(--c-warn); }
+  .wd .full { font-size: var(--fs-xs); color: var(--c-muted); }
+  .today-badge { background: var(--c-gold-2); color: #fff; font: 600 9px/1 var(--f-label); letter-spacing: .1em; padding: 4px 6px; border-radius: 4px; }
+  .sess { display: grid; gap: 6px; padding-bottom: var(--sp-3); border-bottom: 1px solid var(--c-line); }
+  .sess:last-child { border-bottom: 0; padding-bottom: 0; }
+  .sess.dim { opacity: .6; }
+  @media (max-width: 899px) {
+    .s-nav, .s-head .lang { display: none; }
+    .menu-btn { display: inline-flex; align-items: center; }
+    .s-head .varaa { margin-left: auto; }
+    .s-brand b { font-size: 17px; letter-spacing: .16em; }
+    .s-brand small { font-size: 8px; letter-spacing: .1em; }
+    .s-head { gap: var(--sp-2); padding: 8px 12px; }
+    .s-head .pin { position: absolute; top: 4px; right: 112px; }
+    .hero { min-height: 640px; align-items: flex-end; padding-bottom: var(--sp-6); }
+    .hero::after { background: linear-gradient(180deg, rgba(20,14,10,0) 30%, rgba(20,14,10,.82) 70%); }
+    .hero h1 { font-size: 52px; }
+    .hero p.lead { font-size: 17px; margin: var(--sp-3) 0 var(--sp-4); }
+    .sec-title { font-size: 34px; }
+    .cards { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: var(--sp-3); margin: 0 calc(var(--sp-4) * -1); padding: 0 var(--sp-4) var(--sp-2); scrollbar-width: none; }
+    .cards .s-card { flex: 0 0 78%; scroll-snap-align: start; }
+    .week { grid-template-columns: 1fr; }
+    .wd { border-left: 0; border-top: 1px solid var(--c-line); }
+    .wd:not(.mobile) { display: none; }
+  }
+</style>
+</head>
+<body class="site">
+<div class="mock-bar" style="font-family:var(--f-ui)"><b>Luonnos 10/10</b> Sivusto · Etusivu ja yleisilme (puhelin ja työpöytä) · <a href="index.html">kaikki luonnokset</a><span class="ids">SIVU-YHT-01 · -02 · -05 · SIVU-ETUSIVU-01 · -02 · SIVU-SAUNAVUOROT-01</span></div>
+<header class="s-head">
+  <a class="s-brand" href="#"><img src="../../../public/img/favicon.svg" alt=""><span><b>SAUNOTUS</b><small>Sipoonjoen perinnesauna</small></span></a>
+  <nav class="s-nav" aria-label="Päävalikko"><a href="#">Saunavuorot</a><a href="#">Hoidot ja rituaalit</a><a href="#">Lahjakortit</a><a href="#">Yrityksille</a><a href="#">Saunatietoa</a><a href="#">Koulutukset ↗</a></nav>
+  <span class="lang"><a href="#" aria-current="true">FI</a><a href="#">EN</a></span>
+  <a class="s-btn s-btn--sm varaa" href="#">Varaa</a><span class="pin">1</span>
+  <button class="menu-btn" aria-expanded="false">Valikko</button>
+</header>
+
+<section class="hero">
+  <picture>
+    <source media="(max-width: 719px)" srcset="../../../public/img/hero-ovi-uusi-mobiili-720.webp">
+    <img src="../../../public/img/hero-ovi-uusi-1920.webp" alt="Kaiverrettu puuovi savusaunan sisäänkäynnillä">
+  </picture>
+  <div class="wrap">
+    <h1>Savusauna Sipoossa</h1>
+    <p class="lead">Saunotus on enemmän kuin sauna. Lämpöä, löylyä ja kokonaisvaltaisia rituaaleja keholle ja mielelle.</p>
+    <div class="ctas"><a class="s-btn s-btn--gold" href="#">Varaa saunaelämys</a><a class="text" href="#">Anna lahjaksi →</a><span class="pin">2</span></div>
+    <div class="rating"><b>★ 4,6</b><span>177 Google-arvostelua</span></div>
+  </div>
+</section>
+
+<section class="sec">
+  <div class="wrap">
+    <h2 class="sec-title serif">Valitse elämys <span class="pin" style="vertical-align:middle">3</span></h2>
+    <div class="cards">
+      <article class="s-card"><img src="../../../public/img/j-yleinen-480.webp" alt=""><div class="body"><h3>Yleinen vuoro</h3><span class="meta">to, la–su · 2 h</span><p>Ota ystävät tai perhe mukaan ja tule nauttimaan yhteisöllisestä saunaelämyksestä.</p><span class="price">alk. 29 € / hlö</span></div><div class="foot"><a href="#">Varaa →</a></div></article>
+      <article class="s-card"><img src="../../../public/img/hunaja-480.webp" alt=""><div class="body"><h3>Saunahoito</h3><span class="meta">Hoitosauna Rauni · 1 h</span><p>Lempeä saunahoito: hunaja, vihta, suola tai turve. Valitset hoidon varatessa.</p><span class="price">alk. 99 €</span></div><div class="foot"><a href="#">Varaa →</a></div></article>
+      <article class="s-card"><img src="../../../public/img/j-oma-vuoro-480.webp" alt=""><div class="body"><h3>Oma savusaunavuoro</h3><span class="meta">1–7 h · koko alue</span><p>Savusauna, paljut, laavu ja hirsimökki omaan käyttöön.</p><span class="price">alk. 250 €</span></div><div class="foot"><a href="#">Varaa →</a></div></article>
+      <article class="s-card"><img src="../../../public/img/j-jalkiloylyt-480.webp" alt=""><div class="body"><h3>Jälkilöylyt</h3><span class="meta">Iltaisin · 2–3 h</span><p>Yleisten vuorojen jälkeen viipyilevät, pehmeät löylyt omalle porukalle.</p><span class="price">alk. 180 €</span></div><div class="foot"><a href="#">Varaa →</a></div></article>
+      <article class="s-card"><img src="../../../public/img/j-avoin-lahjakortti-480.webp" alt=""><div class="body"><h3>Avoin lahjakortti</h3><span class="meta">Lahjaksi</span><p>Lahjaksi aikaa ja löylyä. Saaja valitsee itse elämyksen.</p><span class="price">alk. 29 €</span></div><div class="foot"><a href="#">Osta lahjaksi →</a></div></article>
+    </div>
+  </div>
+</section>
+
+<section class="sec" style="padding-top:0">
+  <div class="wrap">
+    <p class="kicker">Viikko-ohjelma</p>
+    <h2 class="serif" style="font-size:40px;margin:6px 0 var(--sp-5)">Yleiset saunavuorot <span class="pin" style="vertical-align:middle">4</span></h2>
+    <div class="week">
+      <div class="wd"><h3>Maanantai</h3><div class="sess"><span class="t num">16.00–19.00</span><span class="n">Miestenvuoro</span><span class="seats">12 paikkaa vapaana</span><a class="s-btn s-btn--line s-btn--sm" href="#">Varaa</a></div></div>
+      <div class="wd"><h3>Tiistai</h3><div class="sess"><span class="t num">16.00–19.00</span><span class="n">Naistenvuoro</span><span class="seats">9 paikkaa vapaana</span><a class="s-btn s-btn--line s-btn--sm" href="#">Varaa</a></div></div>
+      <div class="wd"><h3>Keskiviikko</h3><div class="sess"><span class="t num">16.00–19.00</span><span class="n">Hiljainen vuoro</span><span class="seats">14 paikkaa vapaana</span><a class="s-btn s-btn--line s-btn--sm" href="#">Varaa</a></div></div>
+      <div class="wd today mobile"><h3>Torstai <span class="today-badge">Tänään</span></h3><div class="sess"><span class="t num">16.00–17.00</span><span class="n">Turvesauna</span><span class="seats low">3 paikkaa vapaana</span><a class="s-btn s-btn--line s-btn--sm" href="#">Varaa</a></div><div class="sess"><span class="t num">17.00–19.00</span><span class="n">Yleinen vuoro</span><span class="seats">7 paikkaa vapaana</span><a class="s-btn s-btn--line s-btn--sm" href="#">Varaa</a></div></div>
+      <div class="wd mobile"><h3>Perjantai</h3><p class="n" style="font-style:italic">Ei yleistä vuoroa</p><a href="#" style="font-weight:700;font-size:var(--fs-sm)">Yksityisvuorot →</a></div>
+      <div class="wd"><h3>Lauantai</h3><div class="sess dim"><span class="t num">14.00–16.00</span><span class="n">Yleinen savusauna</span><span class="full">Täynnä · katso 16.00</span></div><div class="sess"><span class="t num">16.00–19.00</span><span class="n">Saunarituaali-ilta</span><span class="seats low">2 paikkaa vapaana</span><a class="s-btn s-btn--line s-btn--sm" href="#">Varaa</a></div></div>
+      <div class="wd"><h3>Sunnuntai</h3><div class="sess"><span class="t num">14.00–19.00</span><span class="n">Yleinen savusauna</span><span class="seats">6 alkamisaikaa</span><a class="s-btn s-btn--line s-btn--sm" href="#">Varaa</a></div></div>
+    </div>
+  </div>
+</section>
+
+<section class="legend" aria-label="Mitä muuttui" style="max-width:900px">
+  <h2>Mitä muuttui sivuston etusivulla ja yleisilmeessä</h2>
+  <ol>
+    <li><span class="pin">1</span><div><b>"Varaa" näkyy aina ylätunnisteessa myös puhelimessa</b>; kielivalinta on työpöydällä kevyt tekstilinkki ja puhelimessa valikossa. Koulutukset-linkissä näkyy, että se vie toiselle sivustolle (↗). <span class="before">Nyt mobiilin ylätunnisteessa on vain FI/EN ja Valikko; Koulutukset avautuu ulkoiselle sivustolle ilman näkyvää merkkiä.</span> <code>SIVU-YHT-01</code> <code>SIVU-YHT-04</code></div></li>
+    <li><span class="pin">2</span><div><b>Hero yhdellä pääpainikkeella ja arvosana näkyvissä heti.</b> Otsikko on samaa serifiä kuin muut otsikot. <span class="before">Nyt kaksi yhtä painavaa painiketta, arvosana vasta sivun keskellä, ja hero käyttää Playfair Displayta, osio-otsikot Cormorant Garamondia.</span> <code>SIVU-ETUSIVU-02</code> <code>SIVU-YHT-02</code></div></li>
+    <li><span class="pin">3</span><div><b>Tasaiset kortit:</b> kuva jokaisessa, otsikko ilman sulkeissa olevia aikatietoja, lisätieto omalla rivillään, hinta ja painike samalla korkeudella. <span class="before">Nyt kahdella kortilla viidestä ei ole kuvaa, korttien korkeudet vaihtelevat, ja otsikko on "Yleinen vuoro (to, la-su)".</span> <code>SIVU-ETUSIVU-01</code> <code>SIVU-YHT-05</code></div></li>
+    <li><span class="pin">4</span><div><b>Viikko-ohjelmassa vapaat paikat ja yksi painiketyyli;</b> täysi vuoro näkyy himmennettynä eikä katoa. Tämä päivä erottuu taustasta, ei painikkeen väristä. <span class="before">Nyt vapaita paikkoja ei näytetä, täysi vuoro piilotetaan, ja tämän päivän painikkeet ovat täytettyjä ruskeita pillereitä.</span> <code>SIVU-SAUNAVUOROT-01</code></div></li>
+  </ol>
+  <p class="small muted" style="margin-top:12px">Painikkeita on kolme: vihreä (ensisijainen), kultainen (vain markkinointi-CTA) ja ääriviiva (toissijainen), kaikki samalla kulmapyöristyksellä (luku 2). Kuvat ovat repon <code>public/img</code>-hakemistosta, paikkamäärät esimerkkejä.</p>
+</section>
+<script src="icons.js"></script>
+</body>
+</html>

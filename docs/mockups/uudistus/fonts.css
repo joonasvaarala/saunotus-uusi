@@ -1,0 +1,5 @@
+/* Luonnos: sivuston kirjasimet repon public/fonts-hakemistosta. Ehdotus: yksi otsikkoserif (Cormorant Garamond), Playfair Display pois (SIVU-YHT-02). */
+@font-face { font-family: "Cormorant Garamond"; font-style: normal; font-weight: 400 600; font-display: swap; src: url(../../../public/fonts/CormorantGaramond-normal-400-600.woff2) format("woff2"); }
+@font-face { font-family: "Lato"; font-style: normal; font-weight: 400; font-display: swap; src: url(../../../public/fonts/Lato-normal-400.woff2) format("woff2"); }
+@font-face { font-family: "Lato"; font-style: normal; font-weight: 700; font-display: swap; src: url(../../../public/fonts/Lato-normal-700.woff2) format("woff2"); }
+@font-face { font-family: "Montserrat"; font-style: normal; font-weight: 500 600; font-display: swap; src: url(../../../public/fonts/Montserrat-normal-500.woff2) format("woff2"); }
