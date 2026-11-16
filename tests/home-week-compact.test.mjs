@@ -45,6 +45,34 @@ for (const path of ['/', '/en/', '/saunavuorot/']) {
   });
 }
 
+test('mobiili 390: kolmen rivin kortit ovat samanlaisia (leveys, hinnan paikka, korkeus ≥ 44 px, reunan väri kuin merkissä) FI ja EN', async () => {
+  const COLOR = { pub: 'rgb(43, 58, 48)', priv: 'rgb(122, 85, 48)', care: 'rgb(196, 154, 108)' };
+  for (const path of ['/', '/en/']) {
+    const page = await site.open(390, path, weekMock({ example: true }));
+    const seen = new Set();
+    for (const pick of [0, 1, 4, 5]) {
+      await page.click(`.vk-tab[data-vk-pick="${pick}"]`);
+      const cards = await page.evaluate(() => [...document.querySelectorAll('.vk-day.is-on .vk-card')].map((e) => {
+        const r = e.getBoundingClientRect(), p = e.querySelector('.vk-p')?.getBoundingClientRect(), cs = getComputedStyle(e);
+        return { cls: e.className, lane: e.closest('.vk-cell').className.match(/vk-(pub|priv|care)c/)[1], link: e.tagName === 'A', left: r.left, right: r.right, height: r.height, pRight: p ? p.right : null, bw: cs.borderLeftWidth, bc: cs.borderLeftColor, name: getComputedStyle(e.querySelector('.vk-n')).font };
+      }));
+      assert.ok(cards.length >= 2, `${path} päivä ${pick}: kortteja`);
+      const priced = cards.filter((c) => c.pRight != null);
+      for (const c of cards) {
+        seen.add(c.lane);
+        assert.ok(Math.abs(c.left - cards[0].left) < 1 && Math.abs(c.right - cards[0].right) < 1, `${path} ${c.cls}: sama leveys kuin muilla`);
+        assert.ok(c.height >= 44, `${path} ${c.cls}: korkeus ${c.height}`);
+        assert.equal(c.name, cards[0].name, `${path} ${c.cls}: sama nimen typografia`);
+        assert.equal(c.bw, '3px');
+        assert.equal(c.bc, COLOR[c.lane], `${path} ${c.cls}: reunan väri rivin merkin mukaan`);
+      }
+      for (const c of priced) assert.ok(Math.abs(c.pRight - priced[0].pRight) < 1, `${path} ${c.cls}: hinta samassa kohdassa`);
+    }
+    assert.deepEqual([...seen].sort(), ['care', 'priv', 'pub']);
+    await page.close();
+  }
+});
+
 test('työpöytä 1280: 7 saraketta, kolme palveluriviä samoilla korkeuksilla, ei päivänauhaa eikä tapahtumakaistaa', async () => {
   const page = await site.open(1280, '/', weekMock({ example: true }));
   assert.deepEqual(await visibleDays(page), [0, 1, 2, 3, 4, 5, 6]);
@@ -80,6 +108,29 @@ test('työpöytä 1280: 7 saraketta, kolme palveluriviä samoilla korkeuksilla, 
   await page.close();
 });
 
+test('työpöytä 1280: kortit samankokoisia, hinta aina alareunassa, reunan väri kuin merkissä (FI ja EN)', async () => {
+  const COLOR = { pub: 'rgb(43, 58, 48)', priv: 'rgb(122, 85, 48)', care: 'rgb(196, 154, 108)' };
+  for (const path of ['/', '/en/']) {
+    const page = await site.open(1280, path, weekMock({ example: true }));
+    const cards = await page.evaluate(() => [...document.querySelectorAll('.vk .vk-card')].map((e) => {
+      const r = e.getBoundingClientRect(), p = e.querySelector('.vk-p').getBoundingClientRect(), n = e.querySelector('.vk-n').getBoundingClientRect();
+      return { cls: e.className, lane: e.closest('.vk-cell').className.match(/vk-(pub|priv|care)c/)[1], chips: !!e.querySelector('.vk-chips'), evt: e.classList.contains('vk-evt'),
+        height: r.height, priceGap: r.bottom - p.bottom, nameGap: n.top - r.top, bc: getComputedStyle(e).borderLeftColor };
+    }));
+    assert.ok(cards.length >= 15, `${path} kortteja ${cards.length}`);
+    // tavalliset kortit (ei alkuaikasiruja eikä kahden ajan tapahtumaa): sama korkeus kaikilla kolmella rivillä
+    const plain = cards.filter((c) => !c.chips && !c.evt);
+    assert.deepEqual([...new Set(plain.map((c) => c.lane))].sort(), ['care', 'priv', 'pub']);
+    for (const c of plain) assert.ok(Math.abs(c.height - plain[0].height) < 1, `${path} ${c.cls}: korkeus ${c.height} ≠ ${plain[0].height}`);
+    for (const c of cards) {
+      assert.ok(Math.abs(c.priceGap - cards[0].priceGap) < 1, `${path} ${c.cls}: hinta alareunassa (${c.priceGap})`);
+      assert.ok(Math.abs(c.nameGap - cards[0].nameGap) < 1, `${path} ${c.cls}: nimi yläreunassa`);
+      assert.equal(c.bc, COLOR[c.lane], `${path} ${c.cls}: reunan väri`);
+    }
+    await page.close();
+  }
+});
+
 test('viikkonavigointi: nuolet, Tämä viikko, ei menneisiin viikkoihin, hoidot vain varausikkunassa', async () => {
   const page = await site.open(1280, '/saunavuorot/', { ...weekMock(), settings: { public_treatment_horizon_days: 14 } });
   const label = () => page.locator('.vk .vk-wk').innerText();
@@ -93,7 +144,7 @@ test('viikkonavigointi: nuolet, Tämä viikko, ei menneisiin viikkoihin, hoidot 
   assert.ok(!(await page.locator('[data-vk-nav="prev"]').isDisabled()));
   assert.match(await page.locator('.vk-day[data-vk-day="0"]').innerText(), /23\.11\./);
   assert.match(await page.locator('.vk-day[data-vk-day="0"] .vk-privc').innerText(), /alk\.\s*250/);
-  assert.match(await page.locator('.vk-day[data-vk-day="3"] .vk-pubc').innerText(), /16\.00–19\.00[\s\S]*29\s?€/);
+  assert.match(await page.locator('.vk-day[data-vk-day="3"] .vk-pubc').innerText(), /29\s?€[\s\S]*16\.00–19\.00/, 'kortti: nimi ja hinta, alla aika');
   const calls = await page.evaluate(() => globalThis.__RPC.filter((c) => c.name === 'public_availability_all').map((c) => [c.args.p_from, c.args.p_to]));
   assert.deepEqual(calls, [['2026-11-16', '2026-11-22'], ['2026-11-23', '2026-11-29']]);
   // seuraava viikko: public_settings antaa ikkunaksi 14 pv → viikko 49 ylittää sen: ei hoitohakuja, selite
@@ -169,7 +220,7 @@ test('viikon tapahtumavihje: ei tapahtumia → seuraavat tapahtumat alareunassa,
   const ex = await site.open(390, '/', weekMock({ example: true }));
   assert.equal(await ex.locator('.vk .vk-hint').count(), 0, 'viikolla on tapahtuma → ei vihjettä');
   await ex.click('.vk-tab[data-vk-pick="4"]');
-  assert.match(await ex.locator('.vk-day.is-on .vk-carec').innerText(), /Tapahtuma[\s\S]*Perinnesaunotusilta/i);
+  assert.match(await ex.locator('.vk-day.is-on .vk-carec').innerText(), /Perinnesaunotusilta[\s\S]*Tapahtuma/i, 'Tapahtuma-merkki samassa kohdassa kuin ale-merkki');
   await ex.close();
 });
 

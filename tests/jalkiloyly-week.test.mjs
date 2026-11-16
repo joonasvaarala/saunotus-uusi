@@ -35,7 +35,7 @@ for (const pg of pages) {
       assert.equal(await q.getAttribute('href'), '/varaa/#/varaa/22/2026-11-16/26');
       assert.match(await q.getAttribute('aria-label'), /144/);
       assert.match(norm(await mon.locator('.vk-oma').innerText()), new RegExp(`${pg.own} ${pg.from} (€|)250`), `${pg.path} oma saunavuoro alk.`);
-      assert.ok((await mon.locator('.vk-grp .vk-gn').innerText()).toLowerCase().includes(pg.after.toLowerCase()), 'jälkilöylyjen otsikko');
+      assert.ok((await q.locator('.vk-n').innerText()).toLowerCase().includes(pg.after.toLowerCase()), 'jälkilöylyjen nimi kortissa');
       // tiistai: täysi hinta ilman ale-merkkiä
       await page.click('.vk-tab[data-vk-pick="1"]');
       const tue = day(page, 1).locator('a.vk-line');
@@ -50,7 +50,7 @@ for (const pg of pages) {
       assert.equal(await day(page, 2).locator('a.vk-line.is-full').count(), 0, 'täydellä ajalla ei linkkiä');
       assert.equal(await wed.getAttribute('href'), null);
       assert.match(await wed.innerText(), /Täynnä|Full/);
-      assert.equal(await wed.evaluate((e) => getComputedStyle(e.querySelector('.vk-lt')).textDecorationLine), 'line-through');
+      assert.equal(await wed.evaluate((e) => getComputedStyle(e.querySelector('.vk-t')).textDecorationLine), 'line-through');
       // perjantai: oma sauna 300 €, ei jälkilöylyjä
       await page.click('.vk-tab[data-vk-pick="4"]');
       assert.match(norm(await day(page, 4).locator('.vk-oma').innerText()), new RegExp(`${pg.from} (€|)300`));
