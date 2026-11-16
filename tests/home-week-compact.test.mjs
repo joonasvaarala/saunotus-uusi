@@ -108,6 +108,29 @@ test('työpöytä 1280: 7 saraketta, kolme palveluriviä samoilla korkeuksilla, 
   await page.close();
 });
 
+test('työpöytä 1280: kortit samankokoisia, hinta aina alareunassa, reunan väri kuin merkissä (FI ja EN)', async () => {
+  const COLOR = { pub: 'rgb(43, 58, 48)', priv: 'rgb(122, 85, 48)', care: 'rgb(196, 154, 108)' };
+  for (const path of ['/', '/en/']) {
+    const page = await site.open(1280, path, weekMock({ example: true }));
+    const cards = await page.evaluate(() => [...document.querySelectorAll('.vk .vk-card')].map((e) => {
+      const r = e.getBoundingClientRect(), p = e.querySelector('.vk-p').getBoundingClientRect(), n = e.querySelector('.vk-n').getBoundingClientRect();
+      return { cls: e.className, lane: e.closest('.vk-cell').className.match(/vk-(pub|priv|care)c/)[1], chips: !!e.querySelector('.vk-chips'), evt: e.classList.contains('vk-evt'),
+        height: r.height, priceGap: r.bottom - p.bottom, nameGap: n.top - r.top, bc: getComputedStyle(e).borderLeftColor };
+    }));
+    assert.ok(cards.length >= 15, `${path} kortteja ${cards.length}`);
+    // tavalliset kortit (ei alkuaikasiruja eikä kahden ajan tapahtumaa): sama korkeus kaikilla kolmella rivillä
+    const plain = cards.filter((c) => !c.chips && !c.evt);
+    assert.deepEqual([...new Set(plain.map((c) => c.lane))].sort(), ['care', 'priv', 'pub']);
+    for (const c of plain) assert.ok(Math.abs(c.height - plain[0].height) < 1, `${path} ${c.cls}: korkeus ${c.height} ≠ ${plain[0].height}`);
+    for (const c of cards) {
+      assert.ok(Math.abs(c.priceGap - cards[0].priceGap) < 1, `${path} ${c.cls}: hinta alareunassa (${c.priceGap})`);
+      assert.ok(Math.abs(c.nameGap - cards[0].nameGap) < 1, `${path} ${c.cls}: nimi yläreunassa`);
+      assert.equal(c.bc, COLOR[c.lane], `${path} ${c.cls}: reunan väri`);
+    }
+    await page.close();
+  }
+});
+
 test('viikkonavigointi: nuolet, Tämä viikko, ei menneisiin viikkoihin, hoidot vain varausikkunassa', async () => {
   const page = await site.open(1280, '/saunavuorot/', { ...weekMock(), settings: { public_treatment_horizon_days: 14 } });
   const label = () => page.locator('.vk .vk-wk').innerText();

@@ -238,11 +238,14 @@ a.vk-card:hover{border-color:var(--vk-c,var(--green))}
   .vk-pubh{box-shadow:inset 3px 0 0 var(--green)}
   .vk-privh{box-shadow:inset 3px 0 0 var(--gold)}
   .vk-careh{box-shadow:inset 3px 0 0 var(--accent)}
-  /* kapea sarake: kortin osat allekkain (nimi, aika, hinta, tila), sama järjestys kaikilla riveillä; pitkä nimi (Perinnesaunotusilta) mahtuu rivittämättä kesken sanan */
-  .vk-card{grid-template-columns:minmax(0,1fr);grid-template-areas:"n" "d" "p" "s" "c";align-content:start;min-height:0;padding:9px 6px 10px 8px}
+  /* Kapea sarake: kortin osat allekkain samassa järjestyksessä kaikilla riveillä: nimi ja aika ylhäällä, hinta aina alareunassa, tila tai ale
+     (Täynnä, n jäljellä, −20 %, Tapahtuma) heti hinnan yläpuolella, alkuaikasirut ajan alla. Sama vähimmäiskorkeus → saman rivin kortit ovat samankokoisia.
+     Pitkä nimi (Perinnesaunotusilta) mahtuu 1280 px:ssä rivittämättä kesken sanan. */
+  .vk-card{grid-template-columns:minmax(0,1fr);grid-template-areas:"n" "d" "c" "s" "p";grid-template-rows:auto auto auto 1fr auto;align-content:stretch;min-height:104px;padding:9px 6px 10px 8px}
   .vk-n{font-size:14.5px}
   .vk-t{font-size:11.5px}
   .vk-p,.vk-s{justify-self:start;justify-content:flex-start;text-align:left}
+  .vk-s{align-self:end;margin-top:6px}
   .vk-p{margin-top:4px}
   .vk-chips{gap:3px}
   .vk-chip{padding:0 6px}
