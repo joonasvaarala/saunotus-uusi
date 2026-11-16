@@ -131,6 +131,39 @@ test('työpöytä 1280: kortit samankokoisia, hinta aina alareunassa, reunan vä
   }
 });
 
+test('ikonit: rivien otsikoissa (mobiili 17 px, työpöytä 22 px) rivin värissä, päivänauhassa ja selitteessä pienet merkit; valitun päivän merkit vaaleina', async () => {
+  const COLOR = { pub: 'rgb(43, 58, 48)', priv: 'rgb(122, 85, 48)', treat: 'rgb(169, 121, 74)' };
+  const look = (page, sel) => page.evaluate((s) => [...document.querySelectorAll(s)].map((e) => { const cs = getComputedStyle(e), r = e.getBoundingClientRect(); return { k: e.className, w: r.width, h: r.height, mask: cs.maskImage || cs.webkitMaskImage || 'none', bg: cs.backgroundColor, bc: cs.borderTopColor }; }), sel);
+  for (const path of ['/', '/en/']) {
+    const m = await site.open(390, path, weekMock({ example: true }));
+    await m.click('.vk-tab[data-vk-pick="5"]');
+    const heads = await look(m, '.vk-day.is-on .vk-lh i');
+    assert.deepEqual(heads.map((x) => x.k), ['pub', 'priv', 'treat']);
+    for (const x of heads) {
+      assert.match(x.mask, /data:image\/svg\+xml/, `${path} ${x.k}: ikoni`);
+      assert.ok(Math.abs(x.w - 17) < 0.5 && Math.abs(x.h - 17) < 0.5, `${path} ${x.k}: 17 px`);
+      assert.equal(x.bg, COLOR[x.k], `${path} ${x.k}: rivin väri`);
+    }
+    for (const x of [...await look(m, '.vk .vk-key i'), ...await look(m, '.vk .vk-dots em')]) {
+      assert.equal(x.mask, 'none', `${path} ${x.k}: nauhassa ja selitteessä merkki, ei ikonia`);
+      assert.ok(x.w <= 10.5, `${path} ${x.k}: pieni merkki`);
+    }
+    const on = Object.fromEntries((await look(m, '.vk-tab.is-on .vk-dots em')).map((x) => [x.k, x]));
+    assert.equal(on.pub.bg, 'rgb(244, 239, 231)', 'valitussa päivässä vaalea piste');
+    assert.equal(on.priv.bc, 'rgb(233, 217, 194)', 'valitussa päivässä vaalea katkoviiva');
+    await m.close();
+    const d = await site.open(1280, path, weekMock({ example: true }));
+    const lanes = await look(d, '.vk .vk-lane i');
+    assert.deepEqual(lanes.map((x) => x.k), ['pub', 'priv', 'treat']);
+    for (const x of lanes) {
+      assert.match(x.mask, /data:image\/svg\+xml/);
+      assert.ok(Math.abs(x.w - 22) < 0.5, `${path} työpöytä ${x.k}: 22 px`);
+      assert.equal(x.bg, COLOR[x.k]);
+    }
+    await d.close();
+  }
+});
+
 test('viikkonavigointi: nuolet, Tämä viikko, ei menneisiin viikkoihin, hoidot vain varausikkunassa', async () => {
   const page = await site.open(1280, '/saunavuorot/', { ...weekMock(), settings: { public_treatment_horizon_days: 14 } });
   const label = () => page.locator('.vk .vk-wk').innerText();

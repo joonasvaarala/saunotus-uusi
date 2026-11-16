@@ -415,6 +415,25 @@ test('kortit: kaikki kolme palveluriviä käyttävät samaa korttia (nimi → hi
   assert.doesNotMatch(css, /\.vk-privc:not\(\.empty\)\{|\.vk-privc\{background/, 'ei oman saunan katkoviivalaatikkoa eikä taustasävyä');
 });
 
+test('ikonit rivien otsikoissa (CSS-maski, sama <i>-merkintä); päivänauha ja selite pitävät pienet merkit; valitussa päivässä vaaleat merkit', () => {
+  const css = readFileSync(new URL('../src/styles.css', import.meta.url), 'utf8');
+  for (const k of ['pub', 'priv', 'treat']) assert.match(css, new RegExp(`\\.vk \\.vk-lh i\\.${k},\\.vk \\.vk-lane i\\.${k}\\{color:[^;]+;--vk-ic:url\\("data:image/svg\\+xml,%3Csvg `), `${k}: ikoni`);
+  assert.match(css, /\.vk \.vk-lh i,\.vk \.vk-lane i\{width:17px;height:17px;[^}]*mask:var\(--vk-ic\) center\/contain no-repeat\}/);
+  assert.match(css, /\n {2}\.vk \.vk-lane i\{width:22px;height:22px/, 'työpöydällä isompi');
+  assert.doesNotMatch(css.match(/--vk-ic:url\("[^"]*"\)/g).join(''), /[<>#{};]|\s,|,\s/, 'data-URI kestää minifioinnin ja <style>-upotuksen');
+  // pienet merkit päivänauhassa ja selitteessä ennallaan
+  assert.match(css, /\.vk i\.pub,\.vk-dots em\.pub\{background:var\(--green\)\}/);
+  assert.match(css, /\.vk i\.priv,\.vk-dots em\.priv\{border:1\.5px dashed var\(--gold\)/);
+  assert.match(css, /\.vk-tab\.is-on \.vk-dots em\.pub\{background:#F4EFE7\}/);
+  assert.match(css, /\.vk-tab\.is-on \.vk-dots em\.priv\{border-color:#E9D9C2\}/);
+  // merkintä ei muutu: otsikossa sama <i>, selitteessä sama <i>
+  const html = weekGridTree(week(), T, {}).map(toHtml).join('');
+  for (const [k, name] of [['pub', 'Yleiset vuorot'], ['priv', 'Oma sauna'], ['treat', 'Hoidot ja rituaalit']]) {
+    assert.match(html, new RegExp(`<h4 class="vk-lh"><i class="${k}" aria-hidden="true"></i>${name}</h4>`));
+    assert.match(html, new RegExp(`<div class="vk-lane vk-${k === 'treat' ? 'care' : k}h"><i class="${k}"></i><b>${name}</b>`));
+  }
+});
+
 test('otsikko: aina «Tulevat päivät saunalla» (FI) / «Upcoming days at the sauna» (EN), ei viikkonumeroa', () => {
   const hd = { kicker: 'K', title: T.title };
   assert.equal(T.title, 'Tulevat päivät saunalla');
