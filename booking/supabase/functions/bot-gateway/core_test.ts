@@ -391,12 +391,13 @@ const SUCCESS: Record<string, Record<string, unknown>> = {
   sessions_list: { from: "2026-11-16", to: "2026-11-22", space: "savusauna", product_id: 7 },
   help: {},
   // vuorojen sulku (booking_321)
+  session_open: { block_id: 554, request_id: RID },
   session_close: { space: "savusauna", starts_at: "2026-11-16T16:00", ends_at: "2026-11-16T19:00", reason: "ARGVALUE-123", request_id: RID },
 };
 
 Deno.test("jokaiselle spec-toiminnolle on onnistumistesti", () => {
   assertEquals(Object.keys(SUCCESS).sort(), Object.keys(ACTIONS).sort());
-  assertEquals(Object.keys(ACTIONS).length, 33); // 23 (v1) + 4 (v2 §1b) + 3 (uutiskirjeluonnokset, booking_315) + session_close (booking_321) + sessions_list, help (booking_327)
+  assertEquals(Object.keys(ACTIONS).length, 34); // 23 (v1) + 4 (v2 §1b) + 3 (uutiskirjeluonnokset, booking_315) + session_close (booking_321) + sessions_list, help (booking_327) + session_open (booking_328)
 });
 
 for (const [action, args] of Object.entries(SUCCESS)) {
@@ -749,8 +750,8 @@ Deno.test("session_close: tietokannan virheet -> HTTP", async () => {
   }
 });
 
-Deno.test("poisto- ja avaustoimintoja ei ole -> 400 unknown_action ilman botgw_callia", async () => {
-  for (const action of ["session_open", "session_delete", "session_reopen", "sessions_close_all"]) {
+Deno.test("poistotoimintoja ei ole -> 400 unknown_action ilman botgw_callia", async () => {
+  for (const action of ["session_delete", "session_reopen", "sessions_close_all", "session_unblock"]) {
     assert(!(action in ACTIONS), action);
     const { res, body, calls } = await run(req({ action, args: {} }));
     assertEquals(res.status, 400, action);
@@ -834,4 +835,56 @@ Deno.test("sessions_list ja help: data välitetään sellaisenaan", async () => 
   assertEquals(r2.res.status, 200);
   assertEquals(r2.body, { ok: true, data: help });
   assertEquals(r2.calls[0].args.p_args, {});
+});
+
+// ---------- sulun avaus (booking_328) ----------
+Deno.test("session_open: validointi", () => {
+  assertEquals(ACTIONS.session_open.write, true);
+  assertEquals(validateArgs("session_open", { block_id: 554 }), null);
+  assertEquals(validateArgs("session_open", { block_id: 554, request_id: RID }), null);
+  assertEquals(validateArgs("session_open", {}), "missing_arg:block_id");
+  assertEquals(validateArgs("session_open", { block_id: null }), "missing_arg:block_id");
+  assertEquals(validateArgs("session_open", { block_id: "x" }), "bad_arg:block_id");
+  assertEquals(validateArgs("session_open", { block_id: "554" }), "bad_arg:block_id");
+  assertEquals(validateArgs("session_open", { block_id: 0 }), "bad_arg:block_id");
+  assertEquals(validateArgs("session_open", { block_id: 1.5 }), "bad_arg:block_id");
+  assertEquals(validateArgs("session_open", { block_id: 554, delete: true }), "unknown_arg:delete");
+  assertEquals(validateArgs("session_open", { block_id: 554, space: "savusauna" }), "unknown_arg:space");
+});
+
+Deno.test("session_open: liiketoimintahylkäykset -> 409 sellaisenaan, ei log_failurea", async () => {
+  for (const error of ["not_own_closure", "closure_managed", "event_managed"]) {
+    const data = { ok: false, error, request_id: RID };
+    const { res, body, calls, out } = await run(req({ action: "session_open", args: { block_id: 554, request_id: RID } }), { data });
+    assertEquals(res.status, 409, error);
+    assertEquals(body, data);
+    assertEquals(calls.map((c) => c.fn), ["botgw_call"]);
+    assertMatch(out, new RegExp(`"action":"session_open".*"status":409.*"result":"db:${error}"`));
+  }
+});
+
+Deno.test("session_open: tuntematon sulku -> 404, block_id-virhe -> 400", async () => {
+  const r1 = await run(req({ action: "session_open", args: { block_id: 999999 } }), { error: { code: "P0002", message: "not_found: block" } });
+  assertEquals(r1.res.status, 404);
+  assertMatch(String(r1.body.error), /^not_found/);
+  assertEquals(r1.calls.map((c) => c.fn), ["botgw_call", "botgw_log_failure"]);
+  const r2 = await run(req({ action: "session_open", args: { block_id: 5 } }), { error: { code: "22023", message: "block_id vaaditaan" } });
+  assertEquals(r2.res.status, 400);
+  assertEquals(r2.body.error, "block_id vaaditaan");
+  const r3 = await run(req({ action: "session_open", args: { block_id: "x" } }));
+  assertEquals(r3.res.status, 400);
+  assertEquals(r3.body, { ok: false, error: "bad_arg:block_id" });
+  assert(!r3.calls.some((c) => c.fn === "botgw_call"));
+});
+
+Deno.test("session_open: onnistuu ja already:true välitetään 200:na", async () => {
+  const opened = { block_id: 554, active: false, space_id: 1, starts_at: "2026-11-16T14:00:00+00:00", ends_at: "2026-11-16T17:00:00+00:00", reason: "x", actor: "bot:t" };
+  const r1 = await run(req({ action: "session_open", args: { block_id: 554 } }), { data: { ok: true, data: { ok: true, ...opened } } });
+  assertEquals(r1.res.status, 200);
+  assertEquals(r1.body.data.block_id, 554);
+  const already = { ok: true, already: true, ...opened };
+  const r2 = await run(req({ action: "session_open", args: { block_id: 554 } }), { data: { ok: true, data: already } });
+  assertEquals(r2.res.status, 200);
+  assertEquals(r2.body, { ok: true, data: already });
+  assertEquals(r2.calls.length, 1);
 });

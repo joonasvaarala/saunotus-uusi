@@ -92,7 +92,7 @@ Ei lähetystä, ajastusta (`suggested_send_at`), esikatselua/testilähetystä, t
 
 ## Vuorojen sulku (booking_321, Joonas 15.11.2026; edge-läpivienti 16.11.2026)
 Scope `sessions.close` (otto-grok-botilla). Tietokanta: `botgw.call` → `booking.svc_create_space_block` (vain käsisulku;
-ei poistoa eikä avaamista). Edge tuntee toiminnon vasta tästä versiosta lähtien (aiemmin 400 `unknown_action` edgessä).
+ei poistoa; avaus `session_open`-toiminnolla vain botin omiin sulkuihin, booking_328). Edge tuntee toiminnon vasta tästä versiosta lähtien (aiemmin 400 `unknown_action` edgessä).
 - `session_close` (kirjoitus: 20/min ja 300/vrk yhteiset rajat, idempotentti `request_id`)
   - joko `{space_id | space (resurssikoodi, esim. savusauna), starts_at, ends_at, reason ≤200}`
   - tai `{rule_id, date, reason ≤200, starts_at?, ends_at?}` (tila ja aika säännöstä)
@@ -108,3 +108,15 @@ Molemmat ovat lukuja (ei kirjoitusrajaa). Tarkistukset: tests/t327_botgw_session
     reservation_count, booked_persons, has_reservations, closed, block_id, can_close}]}` (ajat Helsingin aikaa `YYYY-MM-DD HH:MI`).
   - Ei asiakkaiden nimiä, yhteystietoja, tilaus- tai varaus-id:itä eikä hinta- tai maksutietoja. `rule_id` + `date` käyvät suoraan `session_close`lle.
 - `help` (scope `me`, ei parametreja) → `{name, scopes, actions: [{action, scope, write, params}]}`; ei avaimia eikä salaisuuksia.
+
+## Sulun avaus (booking_328, Joonas 16.11.2026 klo 9.59, Bottiavustus t1838u; migraatio 20261116081050, rollback rollbacks/20261116081050_booking_328_ROLLBACK.sql)
+Scope `sessions.close` (ei uutta scopea, avainta ei muuteta). Tarkistukset: tests/t328_botgw_session_open_TARKISTUKSET.sql.
+- `session_open {block_id, request_id?}` (kirjoitus: 20/min ja 300/vrk yhteiset rajat, idempotentti `request_id`)
+  - `block_id` pakollinen positiivinen kokonaisluku (edge: merkkijono → 400 `bad_arg:block_id`, puuttuu → 400 `missing_arg:block_id`,
+    muut kentät → 400 `unknown_arg:*`). `sessions_list` palauttaa `block_id`:n vain botin omille suluille.
+  - `booking.svc_open_space_block` merkitsee sulun epäaktiiviseksi (`active=false`); riviä ei poisteta, historia säilyy.
+  - → 200 `{ok, data: {ok, block_id, active:false, space_id, starts_at, ends_at, reason, actor}}`; jo auki → 200 `data.already: true`.
+  - ei botin oma sulku → 409 `not_own_closure`; Hoidot/Rauni kiinni -sulkukalenteri → 409 `closure_managed`; tapahtumasulku → 409 `event_managed`
+    (vastaus sellaisenaan; tietokanta kirjaa yrityksen call_logiin, edge ei kutsu log_failurea).
+  - tuntematon sulku → 404 `not_found: block`; tietokannan 22023 → 400.
+- Poistoa ei ole.
