@@ -11,8 +11,8 @@ Pikakassaan on toteutettu maksutapa **Korttipääte (SumUp Solo)** SumUp Cloud A
 
 ## Tiedostot
 Migraatio (ajettu vain DEViin):
-- `booking/supabase/migrations/20261113190000_booking_295_sumup_pos.sql`
-- `booking/supabase/rollbacks/20261113190000_booking_295_ROLLBACK.sql` (pysähtyy, jos sumup-maksuja/-hyvityksiä on; palauttaa `admin_pos_tenders`in booking_286-muotoon, md5 864bc26d…)
+- `booking/supabase/migrations/20261121115144_booking_295_sumup_pos.sql (PROD-versio)`
+- `booking/supabase/rollbacks/20261121115144_booking_295_ROLLBACK.sql` (pysähtyy, jos sumup-maksuja/-hyvityksiä on; palauttaa `admin_pos_tenders`in booking_286-muotoon, md5 864bc26d…)
 - numero 295: repossa ei ole 290–294; testi varmistaa. Migraation guard vaatii `admin_pos_tenders` md5 = 864bc26d1e42f6cb36eaf06da46dd6e6 (booking_286). Avainrajoitteet (`integration_config_key_check`, `…_test_only_online`) päivitetään lukemalla nykyinen määritys ja lisäämällä `sumup`, jotta muiden migraatioiden (uutiskirje ym.) avaimet eivät katoa.
 
 Edge-funktiot (deployattu vain DEViin; API-tarkistuksen korjaukset mukana):
