@@ -13,7 +13,7 @@ const {
   mustaViikkoActive, mustaViikkoEnvOn, mustaViikkoBuildIncludes, mustaViikkoHref, mustaViikkoPrice,
   mustaViikkoOfferHref, mustaViikkoBannerHtml, mustaViikkoCardHtml, mustaViikkoBootScript,
 } = await import('../src/musta-viikko.mjs');
-const { money } = await import('../src/lib.mjs');
+const { money, pageHref } = await import('../src/lib.mjs');
 const { home, layout } = await import('../src/render.mjs');
 
 test('oletuksena pois päältä; paketin koodi yhdessä vakiossa', () => {
@@ -43,6 +43,9 @@ test('oletuksena pois päältä; paketin koodi yhdessä vakiossa', () => {
 test('bannerin ja kortin linkki on kampanjasivu, FI ja EN', () => {
   assert.equal(mustaViikkoHref('fi'), '/musta-viikko/');
   assert.equal(mustaViikkoHref('en'), '/en/black-week/');
+  assert.equal(mustaViikkoHref('fi'), pageHref('mustaViikko', 'fi'));
+  assert.equal(mustaViikkoHref('en'), pageHref('mustaViikko', 'en'));
+  assert.match(read('src/musta-viikko.mjs'), /pageHref\('mustaViikko'/);
 });
 
 test('hinta 130 € ja 50 € sivuston money-muodossa', () => {
