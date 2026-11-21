@@ -52,15 +52,16 @@ export const MUSTA_VIIKKO_TEXTS = Object.freeze({
   'ui.site.mv_title': { fi: 'Savusaunan musta viikko', en: 'Smoke Sauna Black Week' },
   'ui.site.mv_product': { fi: 'Jälkilöylylahjakortti', en: 'After Session Sauna gift card' },
   'ui.site.mv_product_b': { fi: 'Yleisten vuorojen lahjakortti 2 hengelle', en: 'Public session gift card for 2 people' },
-  'ui.site.mv_banner_text': {
-    fi: 'Jälkilöylylahjakortti {{var:price}}, voimassa 6 kk ma–to',
-    en: 'After Session Sauna gift card {{var:price}}, valid 6 months Mon–Thu',
+  'ui.site.mv_banner_offers': {
+    fi: 'jälkilöylyt ja yleiset vuorot lahjakorttina ma–to',
+    en: 'After Session and public session gift cards, Mon–Thu',
   },
   'ui.site.mv_close': { fi: 'Sulje ilmoitus', en: 'Dismiss notice' },
   'ui.site.mv_card_text': { fi: 'Voimassa 6 kk, ma–to', en: 'Valid 6 months, Mon–Thu' },
   'ui.site.mv_card_terms': { fi: 'Ei voimassa 24.–30.12.', en: 'Not valid 24–30 Dec.' },
   'ui.site.mv_cta': { fi: 'Osta lahjakortti →', en: 'Buy a gift card →' },
   'ui.site.mv_more': { fi: 'Tutustu kampanjaan', en: 'See the campaign' },
+  'ui.site.mv_see': { fi: 'Katso tarjoukset →', en: 'See the offers →' },
 });
 
 const quiet = { warn() {} };
@@ -96,29 +97,25 @@ export function mustaViikkoPicture({ alt = '', sizes = '100vw', cls = 'mv-ad-img
 export function mustaViikkoBannerHtml(lang, now = Date.now(), env = process.env.SITE_ENV) {
   if (!mustaViikkoBuildIncludes(env) || !mustaViikkoActive(now)) return '';
   const title = mvText('ui.site.mv_title', lang);
-  const price = mustaViikkoPrice(lang);
-  const text = mvText('ui.site.mv_banner_text', lang, { price });
+  const text = mvText('ui.site.mv_banner_offers', lang);
+  const see = mvText('ui.site.mv_see', lang);
   const close = mvText('ui.site.mv_close', lang);
   const hrefPage = mustaViikkoHref(lang);
-  return `<div class="mv-banner" data-mv-banner hidden role="region" aria-label="${e(title)}"><div class="wrap mv-banner-in"><a class="mv-banner-link" href="${e(hrefPage)}"><strong>${e(title)}</strong><span class="mv-banner-sep" aria-hidden="true">–</span><span class="mv-banner-text">${e(text)}</span></a><button type="button" class="mv-banner-close" data-mv-close aria-label="${e(close)}"><span aria-hidden="true">×</span></button></div></div>`;
+  return `<div class="mv-banner" data-mv-banner hidden role="region" aria-label="${e(title)}"><div class="wrap mv-banner-in"><a class="mv-banner-link" href="${e(hrefPage)}"><strong>${e(title)}</strong><span class="mv-banner-sep" aria-hidden="true">–</span><span class="mv-banner-text">${e(text)}</span><span class="mv-banner-cta">${e(see)}</span></a><button type="button" class="mv-banner-close" data-mv-close aria-label="${e(close)}"><span aria-hidden="true">×</span></button></div></div>`;
 }
 
 export function mustaViikkoCardHtml(lang, now = Date.now(), env = process.env.SITE_ENV) {
   if (!mustaViikkoBuildIncludes(env) || !mustaViikkoActive(now)) return '';
   const title = mvText('ui.site.mv_title', lang);
-  const more = mvText('ui.site.mv_more', lang);
-  const cta = mvText('ui.site.mv_cta', lang);
+  const see = mvText('ui.site.mv_see', lang);
   const page = mustaViikkoHref(lang);
-  const alt = MUSTA_VIIKKO_IMAGE_ALT[lang] || MUSTA_VIIKKO_IMAGE_ALT.fi;
-  const pic = mustaViikkoPicture({ alt, sizes: '(min-width:701px) 1100px, 100vw' });
   const offers = MUSTA_VIIKKO_OFFERS.map((o) => {
     const name = mvText(o.nameKey, lang);
     const text = mvText(o.textKey, lang);
     const price = mustaViikkoPrice(lang, o.price);
-    const buy = mustaViikkoOfferHref(o.code, lang);
-    return `<article class="mv-ad-offer"><h3>${e(name)}</h3><p class="mv-note">${e(text)}</p><p class="mv-price">${e(price)}</p><a class="btn gold sm" href="${e(buy)}">${e(cta)}</a></article>`;
+    return `<article class="mv-ad-offer"><h3>${e(name)}</h3><p class="mv-note">${e(text)}</p><p class="mv-price">${e(price)}</p></article>`;
   }).join('');
-  return `<section class="section strip mv-sec" data-mv-promo hidden><div class="wrap"><div class="mv-ad"><div class="mv-ad-visual"><div class="mv-ad-media">${pic}</div><h2 class="mv-ad-title">${e(title)}</h2></div><div class="mv-ad-body"><div class="mv-ad-offers">${offers}</div><p class="mv-ad-more"><a href="${e(page)}">${e(more)}</a></p></div></div></div></section>`;
+  return `<section class="section strip mv-sec" data-mv-promo hidden><div class="wrap"><div class="mv-ad"><div class="mv-ad-in"><h2 class="mv-ad-title"><a href="${e(page)}">${e(title)}</a></h2><div class="mv-ad-offers">${offers}</div><p class="mv-ad-cta"><a class="btn gold" href="${e(page)}">${e(see)}</a></p></div></div></div></section>`;
 }
 
 export function mustaViikkoBootScript(env = process.env.SITE_ENV) {
