@@ -308,7 +308,7 @@ ${alt_[o] && !seo ? `<meta property="og:locale:alternate" content="${ui(o).local
 <link rel="icon" href="${href('/img/favicon.svg')}" type="image/svg+xml">
 <link rel="preload" href="${href('/fonts/Lato-normal-400.woff2')}" as="font" type="font/woff2" crossorigin>${preload}
 <style>${css}${seo?.extraCss || ''}${extraCss}</style>${bannerStyle}
-${seo?.skipJsonLd ? '' : `<script type="application/ld+json">${jsonLd(lang)}</script>`}${seo?.skipJsonLd ? '' : (seo?.jsonLd || []).map((j) => `<script type="application/ld+json">${JSON.stringify(j).replace(/</g, '\u003c')}</script>`).join('')}${seo ? '' : seoSchemaForPage({ lang, key, url, body }).map(jsonLdScript).join('')}
+${seo?.skipJsonLd ? '' : `<script type="application/ld+json">${jsonLd(lang)}</script>`}${seo?.skipJsonLd ? '' : (seo?.jsonLd || []).map((j) => `<script type="application/ld+json">${JSON.stringify(j).replace(/</g, '\\u003c')}</script>`).join('')}${seo ? '' : seoSchemaForPage({ lang, key, url, body }).map(jsonLdScript).join('')}
 </head><body>
 <a class="skip" href="#main">${e(u.skip)}</a>
 ${bannerOpen}<header class="site-header"><div class="wrap hdr">
