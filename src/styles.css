@@ -594,7 +594,7 @@ html,body{max-width:100%;overflow-x:hidden}
 img,video,iframe,embed,object,table{max-width:100%}
 
 /* Savusaunan musta viikko: yläbanneri ja etusivun mainoskortti. Näkyvät vasta luokalla html.mv-on (lippu tai ?preview=musta-viikko).
-   Mustat pinnat (ei tummanvihreää); vaalea teksti, kulta-aksentti. Mainoskuva v3 (koko savusaunahuone). Otsikko, hinnat ja nappi kuvan alla (tummalla paneelilla), jotta kasvot eivät peity ja otsikko ei jää sticky-yläpalkin alle. */
+   Mustat pinnat (ei tummanvihreää); vaalea teksti, kulta-aksentti. Mainoskuva v4-extra (koko savusaunahuone, tummempi). Otsikko, hinnat ja nappi kuvan alla tummalla paneelilla (#120D0A, sopii kuvan reunan nokeen). */
 .mv-banner{background:#161311;color:var(--bg)}
 .mv-banner-in{display:flex;align-items:center;gap:8px;padding:6px 0}
 .mv-banner-link{flex:1;min-width:0;display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 14px;color:inherit;text-decoration:none}
@@ -606,8 +606,8 @@ img,video,iframe,embed,object,table{max-width:100%}
 .mv-banner-close{flex:none;width:44px;height:44px;margin-right:-8px;border:0;border-radius:8px;background:transparent;color:inherit;font:400 26px/1 var(--body);cursor:pointer}
 .mv-banner-close:hover{color:var(--accent)}
 .mv-sec{padding:28px 0}
-.mv-ad{position:relative;overflow:hidden;color:#F5F3EF;background:#1B1511;border:1px solid rgba(196,154,108,.4)}
-.mv-ad-visual{position:relative;aspect-ratio:1600/700;background:#1B1511}
+.mv-ad{position:relative;overflow:hidden;color:#F5F3EF;background:#120D0A;border:1px solid rgba(196,154,108,.4)}
+.mv-ad-visual{position:relative;aspect-ratio:1600/700;background:#120D0A}
 .mv-ad-media,.mv-ad-media picture,.mv-ad-media img{position:absolute;inset:0;width:100%;height:100%;display:block}
 .mv-ad-media img{object-fit:cover;object-position:center}
 .mv-ad-title{margin:0 0 20px;font:500 clamp(32px,4.2vw,52px)/1.08 var(--head);color:#F5F3EF}
@@ -640,7 +640,7 @@ img,video,iframe,embed,object,table{max-width:100%}
 .mvp{background:#1B1511;color:#F5F3EF;padding:0 0 80px}
 .mvp .kicker{margin:0 0 10px;color:#D2B478;letter-spacing:.2em;text-transform:uppercase;font:500 13px/1.3 var(--label)}
 .mvp h1,.mvp h2{color:#F5F3EF}
-.mvp-hero{position:relative;overflow:hidden;background:#1B1511;aspect-ratio:1600/700;margin:0 0 48px;text-align:left}
+.mvp-hero{position:relative;overflow:hidden;background:#120D0A;aspect-ratio:1600/700;margin:0 0 48px;text-align:left}
 .mvp-hero-media,.mvp-hero-media picture,.mvp-hero-media img{position:absolute;inset:0;width:100%;height:100%;display:block}
 .mvp-hero-media img{object-fit:cover;object-position:center}
 .mvp-hero-in{position:absolute;z-index:1;left:4%;top:8%;width:40%;max-width:32rem}
