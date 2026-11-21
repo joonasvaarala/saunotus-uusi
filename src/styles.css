@@ -592,3 +592,31 @@ html.co-js.co-show-sauna #yritysvuorot,html.co-js.co-show-day #tarjous{display:b
 html,body{max-width:100%;overflow-x:hidden}
 @supports (overflow-x:clip){html,body{overflow-x:clip}}
 img,video,iframe,embed,object,table{max-width:100%}
+
+/* Savusaunan musta viikko – kampanjasivu. Musta pinta, vaalea teksti, kulta-aksentti. Ei tummanvihreää. */
+.mvp{background:#161311;color:var(--bg);padding:64px 0 80px}
+.mvp .kicker{margin:0 0 10px;color:var(--accent);letter-spacing:.2em;text-transform:uppercase;font:500 13px/1.3 var(--label)}
+.mvp h1,.mvp h2{color:var(--bg)}
+.mvp-hero{text-align:center;max-width:38rem;margin:0 auto 48px}
+.mvp-hero h1{font:400 clamp(40px,6.2vw,72px)/1.08 var(--head);margin:0 0 16px;padding-bottom:16px;border-bottom:1px solid rgba(196,154,108,.7);display:inline-block}
+.mvp-lead{margin:0 auto;max-width:32rem;font:400 18px/1.55 var(--body);color:var(--bg)}
+.mvp-offers{display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:stretch}
+.mvp-offer{display:flex;flex-direction:column;gap:12px;margin:0;padding:28px 28px 24px;border:1px solid rgba(196,154,108,.4);border-radius:14px;background:transparent;color:var(--bg)}
+.mvp-offer h2{margin:0;font:500 clamp(26px,3vw,34px)/1.15 var(--head)}
+.mvp-terms{margin:0;flex:1;font:400 15px/1.55 var(--body);color:var(--bg)}
+.mvp-price{margin:8px 0 0;font:400 42px/1 var(--head);color:var(--accent);font-variant-numeric:tabular-nums}
+.mvp-cta{margin:12px 0 0}
+.mvp-cta .btn{margin:0}
+.mvp-ended{text-align:center;max-width:34rem;margin:0 auto;padding:8px 0 12px}
+.mvp-ended h2{font:400 clamp(32px,5vw,52px)/1.12 var(--head);margin:0 0 16px}
+.mvp-ended-lead{margin:0 0 28px;font:400 18px/1.55 var(--body);color:var(--bg)}
+.mvp-ended-actions{display:flex;flex-wrap:wrap;justify-content:center;gap:12px 16px;margin:0}
+.mvp-ended-actions .btn{margin:0}
+.mvp .btn.ghost{color:var(--bg);border-color:rgba(196,154,108,.55)}
+.mvp .btn.ghost:hover{background:rgba(196,154,108,.14);color:var(--bg)}
+@media (max-width:700px){
+  .mvp{padding:40px 0 56px}
+  .mvp-offers{grid-template-columns:1fr}
+  .mvp-offer{padding:22px 20px}
+  .mvp-price{font-size:36px}
+}
