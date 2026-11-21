@@ -274,3 +274,90 @@ export async function updateClaimCode({ api, token, claimNo, code, source, curre
   if (r?.notReady) return { type: 'error', code: 'notReady' };
   return r?.ok ? { type: 'updated', claimNo: r.claim_no, sourceLabel: r.source_label || '', codeMasked: r.code_masked || '', mismatch: r.source_mismatch === true, methodLabel: r.payment_method_label || '' } : { type: 'error', code: r?.code || 'generic' };
 }
+
+// Suora linkki piilotettuun pakettiin: /lahjakortti/?paketti=<koodi> (myös listed=false).
+export const packageQuery = (loc) => String(new URLSearchParams((loc || (typeof location !== 'undefined' ? location : { search: '' })).search || '').get('paketti') || '').trim();
+
+export function restrictionNote(src, lang) {
+  const r = src && (src.restrictions || ((src.note != null || src.note_en != null) ? src : null));
+  if (!r || typeof r !== 'object') return '';
+  const en = lang === 'en';
+  const raw = en && String(r.note_en || '').trim() ? r.note_en : r.note;
+  return String(raw || '').trim();
+}
+
+// Jälkilöylyt: price_breakdown.gift_cover.amount. Yleisten vuorojen kortti: gift_covers[].amount + uses.
+export function giftCoverLines(src) {
+  const pb = src?.price_breakdown && typeof src.price_breakdown === 'object' ? src.price_breakdown : {};
+  const out = [];
+  const arr = Array.isArray(pb.gift_covers) ? pb.gift_covers : [];
+  for (const x of arr) {
+    if (!x || typeof x !== 'object') continue;
+    const amount = Number.isFinite(+x.amount) ? +x.amount : 0;
+    const uses = Number.isFinite(+x.uses) ? Math.trunc(+x.uses) : 0;
+    if (amount > 0 || uses > 0) out.push({ amount, uses });
+  }
+  const one = pb.gift_cover ?? src?.gift_cover;
+  if (one != null) {
+    const amount = typeof one === 'object' ? +one.amount : +one;
+    if (Number.isFinite(amount) && amount > 0) out.push({ amount, uses: 0 });
+  }
+  return out;
+}
+export function giftCoverSummary(src) {
+  const lines = giftCoverLines(src);
+  return { amount: lines.reduce((s, x) => s + x.amount, 0), uses: lines.reduce((s, x) => s + x.uses, 0) };
+}
+export function giftCoverAmount(src) {
+  return giftCoverSummary(src).amount;
+}
+export function itemsGiftCover(items, fallback) {
+  const list = Array.isArray(items) && items.length ? items : (fallback ? [fallback] : []);
+  return list.reduce((s, x) => {
+    const u = giftCoverSummary(x);
+    return { amount: s.amount + u.amount, uses: s.uses + u.uses };
+  }, { amount: 0, uses: 0 });
+}
+// restrictions.unit_value asetettu: jäljellä olevat pääsyt floor(saldo / unit_value), esim. 1/2.
+export function remainingEntries(src) {
+  const r = src?.restrictions || src || {};
+  const unit = +r.unit_value;
+  const bal = +src?.balance;
+  if (!(unit > 0) || !Number.isFinite(bal)) return null;
+  const left = Math.floor((bal + 0.004) / unit);
+  const total = src?.initial_amount != null && Number.isFinite(+src.initial_amount) ? Math.floor((+src.initial_amount + 0.004) / unit) : null;
+  return { left, total, unit };
+}
+
+export function payableTotal(obj) {
+  if (!obj || typeof obj !== 'object') return 0;
+  const t = obj.balance && obj.balance.total != null && obj.balance.total !== '' ? obj.balance.total : obj.total;
+  return Number.isFinite(+t) ? +t : 0;
+}
+
+export function mergeFeaturedPackages(listPk, featured, onePk = null) {
+  const listed = (listPk?.ok && Array.isArray(listPk.packages)) ? listPk.packages.filter((p) => p.code !== featured.code) : [];
+  const packages = featured.listed === false ? [featured] : [featured, ...listed];
+  return {
+    ok: true,
+    sale_enabled: onePk?.sale_enabled === true || listPk?.sale_enabled === true,
+    redeem_enabled: listPk?.redeem_enabled === true || onePk?.redeem_enabled === true,
+    max_cards: listPk?.max_cards ?? onePk?.max_cards ?? onePk?.max_cards_per_order ?? 10,
+    currency: listPk?.currency || onePk?.currency || 'EUR',
+    packages,
+    featured: true,
+  };
+}
+
+export function showOfferEnded(wanted, one) {
+  if (!String(wanted || '').trim()) return false;
+  if (one?.ok && one.package) return false;
+  return !!(one && one.ok === false);   // package_inactive / ei myynnissä; verkkovirhe (one === null) → normaali valikoima
+}
+
+export function saleIsOpen(p, now = Date.now()) {
+  if (!p?.sale_ends_at) return true;
+  const t = Date.parse(p.sale_ends_at);
+  return !Number.isFinite(t) || t > now;
+}
+

@@ -13,10 +13,11 @@ export const validToken = (t) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{
 const num = (v, d = 0) => (v == null || v === '' || !Number.isFinite(+v) ? d : +v);
 // public_get_order → sivun malli
 export function normOrder(r) {
+  const bal = r.balance && typeof r.balance === 'object' ? { total: num(r.balance.total), paid: num(r.balance.paid ?? r.balance.net_paid), unpaid: num(r.balance.unpaid), refunded: num(r.balance.refunded) } : null;
   return { ok: true, order_no: r.order_no, status: r.status, payment_status: r.payment_status || 'unpaid', created_at: r.created_at ?? null, first_name: r.first_name ?? '', locale: r.locale ?? null,
-    total: num(r.total), paid: num(r.paid), unpaid: num(r.unpaid),
+    balance: bal, total: num(bal ? bal.total : r.total), paid: num(r.paid), unpaid: num(bal && r.balance.unpaid != null ? bal.unpaid : r.unpaid),
     checkout: normCheckout(r),   // booking_53 (§17): kassan pitotila; null = vanha backend (tilaussivu toimii ennallaan)
-    items: (r.items || []).map((i) => ({ name: i.name, name_en: i.name_en ?? null, quantity: num(i.quantity, 1), line_total: num(i.line_total), vat_rate: num(i.vat_rate) })),
+    items: (r.items || []).map((i) => ({ name: i.name, name_en: i.name_en ?? null, quantity: num(i.quantity, 1), line_total: num(i.line_total), vat_rate: num(i.vat_rate), price_breakdown: i.price_breakdown && typeof i.price_breakdown === 'object' ? i.price_breakdown : null })),
     // reservations: booking_50 lisää product_id, option (valittu hoito) ja option_choices (vaihtoehdot, muutosvalitsin); booking_52 option_label(_fi/_en) (valitsimen otsikko)
     reservations: (r.reservations || []).map((x) => ({ reservation_id: x.reservation_id, product_id: x.product_id ?? null, product_name: x.product_name,
       option: x.option ? { id: x.option.id ?? null, code: x.option.code, name: x.option.name, name_en: x.option.name_en ?? null } : null, option_choices: normOptions({ options: x.option_choices }).options, option_label: x.option_label ?? null, option_label_fi: x.option_label_fi ?? null, option_label_en: x.option_label_en ?? null, starts_at: x.starts_at, ends_at: x.ends_at, persons: num(x.persons, 1), status: x.status,

@@ -1,4 +1,5 @@
 // Lahjakorttisivu (/lahjakortti/, /en/gift-card/): verkkomyynti (public_gift_card_packages + public_buy_gift_card) ja saldotarkistus (public_check_gift_card).
+// ?paketti=<koodi> kutsuu public_gift_card_package ja näyttää paketin myös kun listed=false; ilman parametria piilotettua pakettia ei näytetä.
 // Näkyvyys: myyntilohko vain kun sale_enabled=true (korvaa silloin esirenderöidyt #avoin ja #paketit); saldotarkistus vain kun redeem_enabled=true.
 // API-virhe jättää esirenderöidyn julkaistun valikoiman (gift-offers.js). Vuosikortin ostolinkki vain jos public_annual_card_offer.available.
 // Sopimus: KOODARI_talous_A_D_fi.md §13.0, §13.2.
@@ -49,7 +50,8 @@ function buildSale(pk) {
     // Sisältölista: nimi linkittää tuotesivulle, jos tuotteella on sivu (booking_163). Lisäpalvelu jää tekstiksi.
     const contents = G.itemLines(p, L, S.links?.shop || '');
     const meta = h('p', { class: 'gc-meta' }, p.is_open ? tx('amountFrom', { min: p.min_amount, max: p.max_amount }) : '', p.is_open ? ' · ' : '', tx('valid', { months: p.valid_months }));
-    const kids = [h('p', { class: 'kicker', text: p.is_open ? tx('openKicker') : tx('pkgKicker') }), h('h3', { text: pick(p, 'name') }), pick(p, 'description') ? h('p', { class: 'gc-desc', text: pick(p, 'description') }) : null, !p.is_open && contents.length ? h('ul', { class: 'gc-items', 'data-testid': 'gc-items', 'aria-label': tx('contents') }, contents.map((row) => h('li', {}, row.href ? h('a', { href: row.href, text: row.label }) : row.label))) : null];
+    const note = G.restrictionNote(p, L);
+    const kids = [h('p', { class: 'kicker', text: p.is_open ? tx('openKicker') : tx('pkgKicker') }), h('h3', { text: pick(p, 'name') }), pick(p, 'description') ? h('p', { class: 'gc-desc', text: pick(p, 'description') }) : null, !p.is_open && contents.length ? h('ul', { class: 'gc-items', 'data-testid': 'gc-items', 'aria-label': tx('contents') }, contents.map((row) => h('li', {}, row.href ? h('a', { href: row.href, text: row.label }) : row.label))) : null, note ? h('p', { class: 'bk-note gc-restrict', 'data-testid': 'gc-restrict', text: note }) : null];
     if (p.is_open) {
       const amt = h('input', { type: 'text', inputmode: 'decimal', autocomplete: 'off', value: '', placeholder: '50' });
       const f = field({ label: tx('amountLabel'), control: amt, hint: tx('amountHint', { min: p.min_amount, max: p.max_amount }), name: 'open' });
@@ -291,6 +293,8 @@ function buildBalance() {
         const st = GT[L][`bst.${r.status}`] ? r.status : 'active';
         out.append(h('div', { class: 'gc-card gc-result' }, h('span', { class: `ord-badge ${r.status === 'active' ? 'st-confirmed' : r.status === 'expired' ? 'st-expired' : 'st-pending'}`, text: tx(`bst.${st}`) }),
           h('dl', { class: 'bk-sum' }, row('balCardCode', r.code), row('balBalance', money(r.balance)), r.initial_amount != null && +r.initial_amount !== +r.balance ? row('balInitial', money(r.initial_amount)) : [], r.package_name ? row('balPackage', r.package_name) : [], r.valid_to ? row('balValidTo', date(r.valid_to)) : []),
+          G.restrictionNote(r, L) ? h('p', { class: 'bk-note gc-restrict', 'data-testid': 'gc-restrict', text: G.restrictionNote(r, L) }) : null,
+          (() => { const e = G.remainingEntries(r); if (!e) return null; const text = e.total != null ? tx('entriesLeft', { left: e.left, total: e.total }) : tx('entriesLeftOnly', { left: e.left }); return h('p', { class: 'bk-note', 'data-testid': 'gc-entries', text }); })(),
           !r.redeemable && r.not_redeemable_reason && r.status === 'active' ? h('p', { class: 'bk-note', text: GT[L][`nr.${r.not_redeemable_reason}`] ? tx(`nr.${r.not_redeemable_reason}`) : '' }) : null,
           !r.redeemable && r.not_redeemable_reason && r.status !== 'active' && GT[L][`nr.${r.not_redeemable_reason}`] ? h('p', { class: 'bk-note', text: tx(`nr.${r.not_redeemable_reason}`) }) : null));
       } else if (r?.notReady) out.append(h('p', { class: 'bk-error', text: tx('notReady') }));
@@ -304,6 +308,12 @@ function buildBalance() {
     h('form', { class: 'bk-form gc-balform', novalidate: true, onsubmit: submit }, f.wrap, btn), out);
 }
 
+function buildOfferEnded() {
+  const href = (typeof location !== 'undefined' && location.pathname) ? location.pathname : (L === 'en' ? '/en/gift-card/' : '/lahjakortti/');
+  return h('div', { class: 'gc gc-ended', 'data-testid': 'gc-offer-ended' },
+    h('header', { class: 'bk-head' }, h('h2', { text: tx('offerEnded') }), h('p', { class: 'lead', text: tx('offerEndedLead') })),
+    h('p', { class: 'bk-actions' }, h('a', { class: 'btn', href, 'data-testid': 'gc-offer-ended-cta', text: tx('offerEndedCta') })));
+}
 function placeAnnual(offer) {
   const href = G.annualCardBuyHref(offer, S.links?.shop || '');
   if (!href) return;
@@ -316,14 +326,24 @@ async function main() {
   let pk = null;
   const textsReady = applyShopTexts(S);                          // sivutekstit tietokannasta (osa 3): puuttuva avain/tiedosto → repon oletus
   const annualP = api.annualOffer().catch(() => null);           // vuosikortti erikseen: ei kaada lahjakorttivalikoimaa
+  const wanted = G.packageQuery();
+  let one = null;
+  if (wanted) {
+    try { one = await api.package(wanted); } catch { one = null; }  // tuntematon/passiivinen koodi → normaali valikoima
+  }
   try { pk = await api.packages(); } catch { pk = null; }        // verkko-/palvelinvika → esirenderöity julkaistu valikoima jää
   await textsReady;
-  if (G.giftSaleReplacesStatic(pk) && saleRoot) {
+  const featured = one?.ok && one.package ? one.package : null;
+  const salePk = featured ? G.mergeFeaturedPackages(pk, featured, one) : pk;
+  if (G.showOfferEnded(wanted, one) && saleRoot) {
     document.getElementById('avoin')?.remove(); document.getElementById('paketit')?.remove();
-    saleRoot.replaceChildren(buildSale(pk)); show(saleRoot);
+    saleRoot.replaceChildren(buildOfferEnded()); show(saleRoot);
+  } else if ((featured || G.giftSaleReplacesStatic(pk)) && saleRoot) {
+    document.getElementById('avoin')?.remove(); document.getElementById('paketit')?.remove();
+    saleRoot.replaceChildren(buildSale(salePk)); show(saleRoot);
   }
   placeAnnual(await annualP);
-  if (pk?.redeem_enabled && balRoot) { balRoot.replaceChildren(buildBalance()); show(balRoot); }
+  if ((pk?.redeem_enabled || one?.redeem_enabled) && balRoot) { balRoot.replaceChildren(buildBalance()); show(balRoot); }
   if (location.hash) { const t = document.getElementById(location.hash.slice(1)); t?.scrollIntoView(); }
 }
 main();
