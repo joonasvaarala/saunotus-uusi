@@ -1,0 +1,122 @@
+[
+  {
+    "key": "ui.site.mv_title",
+    "lang": "fi",
+    "text": "Savusaunan musta viikko",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "t1867u: Savusaunan musta viikko – suljettava yläbanneri ja etusivun mainoskortti (luonnos). Uusi avain. FI+EN, sama kuin koodin varateksti (src/musta-viikko.mjs). Ei ajeta ennen julkaisua ja lopullista tuotteen slugia."
+  },
+  {
+    "key": "ui.site.mv_title",
+    "lang": "en",
+    "text": "Smoke Sauna Black Week",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "t1867u: Savusaunan musta viikko – suljettava yläbanneri ja etusivun mainoskortti (luonnos). Uusi avain. FI+EN, sama kuin koodin varateksti (src/musta-viikko.mjs). Ei ajeta ennen julkaisua ja lopullista tuotteen slugia."
+  },
+  {
+    "key": "ui.site.mv_banner_text",
+    "lang": "fi",
+    "text": "Black Friday -lahjakortti, jälkilöylyt ma–to",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 160,
+    "placeholders": [],
+    "reason": "t1867u: Savusaunan musta viikko – suljettava yläbanneri ja etusivun mainoskortti (luonnos). Uusi avain. FI+EN, sama kuin koodin varateksti (src/musta-viikko.mjs). Ei ajeta ennen julkaisua ja lopullista tuotteen slugia."
+  },
+  {
+    "key": "ui.site.mv_banner_text",
+    "lang": "en",
+    "text": "Black Friday gift card, After Session Sauna Mon–Thu",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 160,
+    "placeholders": [],
+    "reason": "t1867u: Savusaunan musta viikko – suljettava yläbanneri ja etusivun mainoskortti (luonnos). Uusi avain. FI+EN, sama kuin koodin varateksti (src/musta-viikko.mjs). Ei ajeta ennen julkaisua ja lopullista tuotteen slugia."
+  },
+  {
+    "key": "ui.site.mv_close",
+    "lang": "fi",
+    "text": "Sulje ilmoitus",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "t1867u: Savusaunan musta viikko – suljettava yläbanneri ja etusivun mainoskortti (luonnos). Uusi avain. FI+EN, sama kuin koodin varateksti (src/musta-viikko.mjs). Ei ajeta ennen julkaisua ja lopullista tuotteen slugia."
+  },
+  {
+    "key": "ui.site.mv_close",
+    "lang": "en",
+    "text": "Dismiss notice",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "t1867u: Savusaunan musta viikko – suljettava yläbanneri ja etusivun mainoskortti (luonnos). Uusi avain. FI+EN, sama kuin koodin varateksti (src/musta-viikko.mjs). Ei ajeta ennen julkaisua ja lopullista tuotteen slugia."
+  },
+  {
+    "key": "ui.site.mv_card_lead",
+    "lang": "fi",
+    "text": "Black Friday -lahjakortti",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "t1867u: Savusaunan musta viikko – suljettava yläbanneri ja etusivun mainoskortti (luonnos). Uusi avain. FI+EN, sama kuin koodin varateksti (src/musta-viikko.mjs). Ei ajeta ennen julkaisua ja lopullista tuotteen slugia."
+  },
+  {
+    "key": "ui.site.mv_card_lead",
+    "lang": "en",
+    "text": "Black Friday gift card",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "t1867u: Savusaunan musta viikko – suljettava yläbanneri ja etusivun mainoskortti (luonnos). Uusi avain. FI+EN, sama kuin koodin varateksti (src/musta-viikko.mjs). Ei ajeta ennen julkaisua ja lopullista tuotteen slugia."
+  },
+  {
+    "key": "ui.site.mv_card_text",
+    "lang": "fi",
+    "text": "Jälkilöylyt ma–to",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "t1867u: Savusaunan musta viikko – suljettava yläbanneri ja etusivun mainoskortti (luonnos). Uusi avain. FI+EN, sama kuin koodin varateksti (src/musta-viikko.mjs). Ei ajeta ennen julkaisua ja lopullista tuotteen slugia."
+  },
+  {
+    "key": "ui.site.mv_card_text",
+    "lang": "en",
+    "text": "After Session Sauna Mon–Thu",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "t1867u: Savusaunan musta viikko – suljettava yläbanneri ja etusivun mainoskortti (luonnos). Uusi avain. FI+EN, sama kuin koodin varateksti (src/musta-viikko.mjs). Ei ajeta ennen julkaisua ja lopullista tuotteen slugia."
+  },
+  {
+    "key": "ui.site.mv_cta",
+    "lang": "fi",
+    "text": "Osta lahjakortti →",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "t1867u: Savusaunan musta viikko – suljettava yläbanneri ja etusivun mainoskortti (luonnos). Uusi avain. FI+EN, sama kuin koodin varateksti (src/musta-viikko.mjs). Ei ajeta ennen julkaisua ja lopullista tuotteen slugia."
+  },
+  {
+    "key": "ui.site.mv_cta",
+    "lang": "en",
+    "text": "Buy a gift card →",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "t1867u: Savusaunan musta viikko – suljettava yläbanneri ja etusivun mainoskortti (luonnos). Uusi avain. FI+EN, sama kuin koodin varateksti (src/musta-viikko.mjs). Ei ajeta ennen julkaisua ja lopullista tuotteen slugia."
+  }
+]
