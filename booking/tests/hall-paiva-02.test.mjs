@@ -1,4 +1,4 @@
-// HALL-PAIVA-02: Saapui-painike näkyvä, kiinteä aria-label, tilamerkki "Saapunut", "Ei saapunut" ⋯-valikossa.
+// Saapumismerkintä: pallo ilman tekstiä, aria-label + title, tilamerkki "Saapunut", "Ei saapunut" ⋯-valikossa.
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
@@ -6,17 +6,23 @@ const read = (p) => readFileSync(new URL(`../../${p}`, import.meta.url), 'utf8')
 const parts = read('booking/admin/views/dayparts.js');
 const css = read('booking/admin/admin.css');
 
-test('Saapui-painike: näkyvä teksti, kiinteä aria-label ja aria-pressed', () => {
-  assert.match(parts, /ARRIVE_LABEL = 'Saapui'/);
+test('Saapumispallo: ei näkyvää tekstiä, kiinteä aria-label, title ja aria-pressed', () => {
+  assert.doesNotMatch(parts, /ARRIVE_LABEL/);
+  assert.doesNotMatch(parts, /arrive-txt/);
+  assert.doesNotMatch(parts, /text: 'Saapui'/);
   assert.match(parts, /arriveAriaLabel = \(r\) => `Saapunut, \$\{r\.customer_name/);
   assert.match(parts, /'aria-label': arriveAriaLabel\(r\)/);
   assert.match(parts, /setAttribute\('aria-pressed'/);
+  assert.match(parts, /b\.title = on \? 'Saapunut \(paina peruaksesi\)'/);
   // aria-labelia ei vaihdeta tilan mukaan (vain aria-pressed kertoo tilan)
   assert.doesNotMatch(parts, /setAttribute\('aria-label'/);
 });
-test('CSS: Saapui-painike ei ole läpinäkyvä ympyrä', () => {
-  assert.doesNotMatch(css, /\.arrive\{[^}]*color:transparent/);
+test('CSS: saapumismerkintä on 44 px pallo, merkin väri läpinäkyvä kun ei painettu', () => {
+  assert.match(css, /\.arrive\{[^}]*border-radius:50%/);
+  assert.match(css, /\.arrive\{[^}]*color:transparent/);
+  assert.match(css, /\.arrive\{[^}]*height:44px/);
   assert.match(css, /\.arrive\{[^}]*min-height:44px/);
+  assert.doesNotMatch(css, /\.arrive\{[^}]*padding:0 14px/);
 });
 test('Ei saapunut: ⋯-valikossa, no_show-RPC ja vahvistus tilausnäkymän tekstein', () => {
   assert.match(parts, /overflowMenu\(\[\['noShow'/);

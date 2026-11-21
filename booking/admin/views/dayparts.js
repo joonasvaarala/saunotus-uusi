@@ -31,16 +31,15 @@ export function capacityButton(s, date, booked) {
 }
 
 // ---- saapunut-nappi ----
-// HALL-PAIVA-02: näkyvä "Saapui"-painike (rasti kun painettu), kiinteä aria-label + aria-pressed ("Saapunut, <nimi>, ei painettu"), tilamerkki "Saapunut".
+// Pieni pyöreä pallo (rasti näkyy vihreänä kun painettu). Ei näkyvää tekstiä; aria-label + title + aria-pressed ruudunlukijalle.
 // Käyttää admin_set_reservation_status: 'completed' = saapunut (asettaa checkin_at), takaisin 'confirmed'. Oikeus bookings.manage.
 // "Ei saapunut" (no_show) on rivin ⋯-valikossa, sama vahvistus ja tekstit kuin tilausnäkymässä (HALL-TILAUS-01).
 export const ARRIVE_STATES = ['pending', 'confirmed', 'completed'];
-export const ARRIVE_LABEL = 'Saapui';
 export const arriveAriaLabel = (r) => `Saapunut, ${r.customer_name || `#${r.order_no}`}`;
 export function arrivalButton(r, { can, onState } = {}) {
   if (can && !can('bookings.manage')) return null;
   if (!ARRIVE_STATES.includes(r.status)) return null;
-  const b = h('button', { type: 'button', class: 'arrive', 'data-testid': 'arrive', 'aria-label': arriveAriaLabel(r) }, h('span', { class: 'arrive-tick', 'aria-hidden': 'true' }, icon('tick', 18)), h('span', { class: 'arrive-txt', text: ARRIVE_LABEL }));
+  const b = h('button', { type: 'button', class: 'arrive', 'data-testid': 'arrive', 'aria-label': arriveAriaLabel(r) }, icon('tick', 22));
   const paint = () => { const on = r.status === 'completed'; b.setAttribute('aria-pressed', String(on)); b.title = on ? 'Saapunut (paina peruaksesi)' : 'Merkitse saapuneeksi'; b.classList.toggle('on', on); };
   paint();
   let busy = false;
@@ -54,7 +53,7 @@ export function arrivalButton(r, { can, onState } = {}) {
   return b;
 }
 
-// Päivänäkymän saapumisalue: Saapui-painike + ⋯-valikko, jossa "Ei saapunut" (vahvistetulle varaukselle varauspäivästä alkaen).
+// Päivänäkymän saapumisalue: saapumispallo + ⋯-valikko, jossa "Ei saapunut" (vahvistetulle varaukselle varauspäivästä alkaen).
 export const NO_SHOW_LABEL = 'Ei saapunut…';
 export function arrivalControls(r, { can, onState, now = new Date() } = {}) {
   const btn = arrivalButton(r, { can, onState: (st) => { renderMenu(); onState?.(st); } });
