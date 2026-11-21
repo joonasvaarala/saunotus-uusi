@@ -115,7 +115,7 @@ export function checkoutItems(cart) {
 export function tendersFor(list, channel) {
   return (list || [])
     .filter((t) => Array.isArray(t.channels) ? t.channels.includes(channel) : false)
-    .filter((t) => t.active || t.handler === 'terminal' || t.code === 'card_terminal')
+    .filter((t) => t.active && t.handler !== 'terminal' && t.code !== 'card_terminal')   // t1865u: harmaa "Korttipääte – Tulossa" -rivi pois
     .filter((t) => t.code !== 'cash' && t.handler !== 'cash')
     .sort((a, b) => (a.sort_order ?? 100) - (b.sort_order ?? 100));
 }

@@ -1,0 +1,122 @@
+[
+ {
+  "key": "ui.pos.su_settings_title",
+  "lang": "fi",
+  "text": "SumUp-korttipääte",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "t1865u: SumUp-lukijan valinta ja paritus Asetuksiin (Maksut ja laskutus › SumUp-korttipääte), Pikakassa käyttää oletuslukijaa. Ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.su_settings_title",
+  "lang": "en",
+  "text": "SumUp card terminal",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "t1865u: SumUp-lukijan valinta ja paritus Asetuksiin (Maksut ja laskutus › SumUp-korttipääte), Pikakassa käyttää oletuslukijaa. Ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.su_settings_lead",
+  "lang": "fi",
+  "text": "Pikakassan korttimaksu käyttää aina oletuslukijaa. Täällä valitset oletuslukijan, poistat lukijan tai paritat uuden.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "t1865u: SumUp-lukijan valinta ja paritus Asetuksiin (Maksut ja laskutus › SumUp-korttipääte), Pikakassa käyttää oletuslukijaa. Ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.su_settings_lead",
+  "lang": "en",
+  "text": "Card payments in the quick till always use the default reader. Here you choose the default reader, remove a reader or pair a new one.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "t1865u: SumUp-lukijan valinta ja paritus Asetuksiin (Maksut ja laskutus › SumUp-korttipääte), Pikakassa käyttää oletuslukijaa. Ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.su_no_default",
+  "lang": "fi",
+  "text": "Oletuslukijaa ei ole valittu. Valitse se kohdassa Asetukset › Maksut ja laskutus › SumUp-korttipääte.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "t1865u: SumUp-lukijan valinta ja paritus Asetuksiin (Maksut ja laskutus › SumUp-korttipääte), Pikakassa käyttää oletuslukijaa. Ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.su_no_default",
+  "lang": "en",
+  "text": "No default reader is selected. Choose one in Settings › Payments and invoicing › SumUp card terminal.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "t1865u: SumUp-lukijan valinta ja paritus Asetuksiin (Maksut ja laskutus › SumUp-korttipääte), Pikakassa käyttää oletuslukijaa. Ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.su_open_settings",
+  "lang": "fi",
+  "text": "Avaa SumUp-asetukset",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "t1865u: SumUp-lukijan valinta ja paritus Asetuksiin (Maksut ja laskutus › SumUp-korttipääte), Pikakassa käyttää oletuslukijaa. Ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.su_open_settings",
+  "lang": "en",
+  "text": "Open SumUp settings",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "t1865u: SumUp-lukijan valinta ja paritus Asetuksiin (Maksut ja laskutus › SumUp-korttipääte), Pikakassa käyttää oletuslukijaa. Ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.su_no_readers",
+  "lang": "fi",
+  "text": "Lukijoita ei ole vielä paritettu.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "t1865u: SumUp-lukijan valinta ja paritus Asetuksiin (Maksut ja laskutus › SumUp-korttipääte), Pikakassa käyttää oletuslukijaa. Ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.su_no_readers",
+  "lang": "en",
+  "text": "No readers have been paired yet.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "t1865u: SumUp-lukijan valinta ja paritus Asetuksiin (Maksut ja laskutus › SumUp-korttipääte), Pikakassa käyttää oletuslukijaa. Ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.su_load_failed",
+  "lang": "fi",
+  "text": "SumUp-lukijoiden tietoja ei saatu ladattua. Päivitä sivu ja yritä uudelleen.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "t1865u: SumUp-lukijan valinta ja paritus Asetuksiin (Maksut ja laskutus › SumUp-korttipääte), Pikakassa käyttää oletuslukijaa. Ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.su_load_failed",
+  "lang": "en",
+  "text": "Could not load the SumUp readers. Refresh the page and try again.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "t1865u: SumUp-lukijan valinta ja paritus Asetuksiin (Maksut ja laskutus › SumUp-korttipääte), Pikakassa käyttää oletuslukijaa. Ei ylikirjoita olemassa olevia."
+ }
+]

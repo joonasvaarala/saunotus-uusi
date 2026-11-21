@@ -783,7 +783,6 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
         { code: 'payment_link', handler: 'payment_link', channels: ['pos'], active: true, sort_order: 10, unavailable_reason: null },
         { code: 'mobilepay', handler: 'mobilepay', channels: ['pos', 'drinks'], active: true, sort_order: 20, unavailable_reason: null },
         { code: 'visma_pay', handler: 'visma_pay', channels: ['drinks'], active: true, sort_order: 30, unavailable_reason: null },
-        { code: 'card_terminal', handler: 'terminal', channels: ['pos'], active: false, sort_order: 40, unavailable_reason: 'not_implemented' },
       ].concat(st.posModes.sumup_mode === 'test' || st.posModes.sumup_mode === 'live' ? [{ code: 'sumup', handler: 'sumup', channels: ['pos'], active: true, sort_order: 14, unavailable_reason: null }] : [])
         .concat(st.posModes.checkoutx_mode === 'test' ? [{ code: 'checkoutx', handler: 'checkoutx', channels: ['pos'], active: true, sort_order: 15, unavailable_reason: null }] : []) };
     },

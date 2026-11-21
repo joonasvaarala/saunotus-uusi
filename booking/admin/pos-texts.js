@@ -438,9 +438,29 @@ export const POS_SUMUP_TEXTS = {
   },
 };
 
+// t1865u: SumUp-lukijat Asetuksiin, Pikakassa käyttää oletuslukijaa: pending-import-182 (POS_SUMUP_SETTINGS_TEXTS).
+export const POS_SUMUP_SETTINGS_TEXTS = {
+  "fi": {
+    "su_settings_title": "SumUp-korttipääte",
+    "su_settings_lead": "Pikakassan korttimaksu käyttää aina oletuslukijaa. Täällä valitset oletuslukijan, poistat lukijan tai paritat uuden.",
+    "su_no_default": "Oletuslukijaa ei ole valittu. Valitse se kohdassa Asetukset › Maksut ja laskutus › SumUp-korttipääte.",
+    "su_open_settings": "Avaa SumUp-asetukset",
+    "su_no_readers": "Lukijoita ei ole vielä paritettu.",
+    "su_load_failed": "SumUp-lukijoiden tietoja ei saatu ladattua. Päivitä sivu ja yritä uudelleen."
+  },
+  "en": {
+    "su_settings_title": "SumUp card terminal",
+    "su_settings_lead": "Card payments in the quick till always use the default reader. Here you choose the default reader, remove a reader or pair a new one.",
+    "su_no_default": "No default reader is selected. Choose one in Settings › Payments and invoicing › SumUp card terminal.",
+    "su_open_settings": "Open SumUp settings",
+    "su_no_readers": "No readers have been paired yet.",
+    "su_load_failed": "Could not load the SumUp readers. Refresh the page and try again."
+  }
+};
+
 export function posText(key, lang = getLang()) {
   const live = db.get(`${PREFIX}${key}|${lang}`);
   if (live) return live;
-  return POS_TEXTS[lang]?.[key] || POS_EDIT_TEXTS[lang]?.[key] || POS_PAY_TEXTS[lang]?.[key] || POS_LINK_TEXTS[lang]?.[key] || POS_CUSTOMER_TEXTS[lang]?.[key] || POS_CUSTOM_TEXTS[lang]?.[key] || POS_CHECKOUTX_TEXTS[lang]?.[key] || POS_CART_TEXTS[lang]?.[key] || POS_LINK_HOLD_TEXTS[lang]?.[key] || POS_SUMUP_TEXTS[lang]?.[key]
-    || POS_TEXTS.fi[key] || POS_EDIT_TEXTS.fi[key] || POS_PAY_TEXTS.fi[key] || POS_LINK_TEXTS.fi[key] || POS_CUSTOMER_TEXTS.fi[key] || POS_CUSTOM_TEXTS.fi[key] || POS_CHECKOUTX_TEXTS.fi[key] || POS_CART_TEXTS.fi[key] || POS_LINK_HOLD_TEXTS.fi[key] || POS_SUMUP_TEXTS.fi[key] || key;
+  return POS_TEXTS[lang]?.[key] || POS_EDIT_TEXTS[lang]?.[key] || POS_PAY_TEXTS[lang]?.[key] || POS_LINK_TEXTS[lang]?.[key] || POS_CUSTOMER_TEXTS[lang]?.[key] || POS_CUSTOM_TEXTS[lang]?.[key] || POS_CHECKOUTX_TEXTS[lang]?.[key] || POS_CART_TEXTS[lang]?.[key] || POS_LINK_HOLD_TEXTS[lang]?.[key] || POS_SUMUP_TEXTS[lang]?.[key] || POS_SUMUP_SETTINGS_TEXTS[lang]?.[key]
+    || POS_TEXTS.fi[key] || POS_EDIT_TEXTS.fi[key] || POS_PAY_TEXTS.fi[key] || POS_LINK_TEXTS.fi[key] || POS_CUSTOMER_TEXTS.fi[key] || POS_CUSTOM_TEXTS.fi[key] || POS_CHECKOUTX_TEXTS.fi[key] || POS_CART_TEXTS.fi[key] || POS_LINK_HOLD_TEXTS.fi[key] || POS_SUMUP_TEXTS.fi[key] || POS_SUMUP_SETTINGS_TEXTS.fi[key] || key;
 }

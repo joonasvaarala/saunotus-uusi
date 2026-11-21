@@ -108,11 +108,11 @@ test('tekstit: FI+EN samat avaimet, import 150 = koodin sanakirja, kaikki avaime
     for (const k of Object.keys(fi)) assert.equal(Object.hasOwn(texts[other].fi, k), false, `${other}.${k}`);
   }
   const dir = new URL('../../content/', import.meta.url);
-  for (const f of readdirSync(dir).filter((x) => /^site-texts\.pending-import-\d+b?\.json$/.test(x) && x !== 'site-texts.pending-import-150.json')) {
+  for (const f of readdirSync(dir).filter((x) => /^site-texts\.pending-import-\d+b?\.json$/.test(x) && x !== 'site-texts.pending-import-150.json' && x !== 'site-texts.pending-import-182.json')) {
     const other = JSON.parse(readFileSync(new URL(f, dir), 'utf8'));
     for (const r of Array.isArray(other) ? other : []) assert.equal(seen.has(`${r.key}|${r.lang}`), false, `${f}: ${r.key}`);
   }
-  const src = read('../admin/pos-screen.js') + read('../admin/sumup-pos.js');
+  const src = read('../admin/pos-screen.js') + read('../admin/sumup-pos.js') + read('../admin/views/sumup-settings.js');
   for (const k of Object.keys(fi)) assert.ok(src.includes(`'${k}'`), `käyttämätön avain ${k}`);
   for (const k of ['done', 'failed', 'not_supported', 'retry_later', 'not_configured', 'none', 'off', 'forbidden', 'error']) {
     assert.ok(talous.TEXTS.fi[`refund.su.${k}`] && talous.TEXTS.en[`refund.su.${k}`], `refund.su.${k}`);
@@ -216,9 +216,10 @@ test('tila test: maksu → POST start lukijalle, tila haetaan Edge-funktiolta, m
   assert.match(radio.parent.textContent, /Korttipääte \(SumUp Solo\)/);
   radio.dispatch('change');
   dlg = document.getElementById('pos-pay-dialog');
-  assert.ok(q(dlg, 'pos-su'));
-  assert.match(q(dlg, 'pos-su-test-note').textContent, /sandbox/);
-  assert.equal(q(dlg, 'pos-su-no-reader'), null, 'ainoa lukija valitaan automaattisesti');
+  // t1865u: maksuikkunassa vain summa, maksutapa ja Vahvista maksu: ei lukijavalintaa eikä paritusta
+  assert.equal(q(dlg, 'pos-su'), null);
+  assert.equal(all(dlg).some((n) => n.tagName === 'SELECT'), false);
+  assert.equal(q(dlg, 'pos-su-pair'), null);
   q(dlg, 'pos-confirm').click();
   await flush();
   const startCall = fnCalls.find(([, b]) => b.action === 'start');
@@ -299,51 +300,39 @@ test('hylätty ja peruttu: virhe näkyy, uusi yritys käynnistää uuden checkou
   }
 });
 
-test('lukijaa ei ole → ei SumUp-kutsua; ylläpitäjä pariuttaa, tavallinen käyttäjä ei näe paritusta', async () => {
+test('ei oletuslukijaa → ei SumUp-kutsua; selkeä virhe ohjaa Asetuksiin (settings.edit) tai ylläpitäjälle (t1865u)', async () => {
   mem.clear();
-  const { rpc, st } = suRpc({ readers: [] });
   const fnCalls = [];
-  const fn = async (name, body) => {
-    fnCalls.push(body);
-    if (body.action === 'reader_pair') return { ok: true, reader_id: 'rdr_0009', name: body.name, status: 'processing' };
-    throw new Error('odottamaton');
-  };
-  const root = await mountWith(rpc, fn);
-  q(root, 'pos-product-101').click();
-  q(root, 'pos-pay').click();
-  tenderRadio(document.getElementById('pos-pay-dialog'), 'sumup').dispatch('change');
-  let dlg = document.getElementById('pos-pay-dialog');
-  assert.match(q(dlg, 'pos-su-no-reader').textContent, /Lukijaa ei ole/);
-  q(dlg, 'pos-confirm').click();
-  await flush();
-  assert.equal(fnCalls.some((b) => b.action === 'start'), false);
-  dlg = document.getElementById('pos-pay-dialog');
-  assert.match(q(dlg, 'pos-pay-error').textContent, /Lukijaa ei ole/);
-  // virheellinen koodi ei lähde palvelimelle
-  const code = q(dlg, 'pos-su-pair-code'); code.value = 'x!'; code.dispatch('input');
-  q(dlg, 'pos-su-pair').click();
-  await flush();
+  const fn = async (name, body) => { fnCalls.push(body); throw new Error('odottamaton'); };
+  for (const readers of [[], [{ reader_id: 'rdr_0001', name: 'A' }]]) {
+    const root = await mountWith(suRpc({ readers }).rpc, fn);
+    q(root, 'pos-product-101').click();
+    q(root, 'pos-pay').click();
+    tenderRadio(document.getElementById('pos-pay-dialog'), 'sumup').dispatch('change');
+    q(document.getElementById('pos-pay-dialog'), 'pos-confirm').click();
+    await flush();
+    const dlg = document.getElementById('pos-pay-dialog');
+    assert.match(q(dlg, 'pos-pay-error').textContent, /Oletuslukijaa ei ole valittu.*Asetukset/);
+    assert.equal(q(dlg, 'pos-su-open-settings').getAttribute('href'), '#/asetukset/maksut');
+    q(dlg, 'pos-pay-close').click();
+  }
   assert.equal(fnCalls.length, 0);
-  dlg = document.getElementById('pos-pay-dialog');
-  const code2 = q(dlg, 'pos-su-pair-code'); code2.value = 'abcd1234'; code2.dispatch('input');
-  const name2 = q(dlg, 'pos-su-pair-name'); name2.value = 'Tiskin lukija'; name2.dispatch('input');
-  q(dlg, 'pos-su-pair').click();
-  await flush();
-  assert.deepEqual(fnCalls, [{ action: 'reader_pair', pairing_code: 'ABCD1234', name: 'Tiskin lukija' }]);
-  assert.ok(st.calls.includes('admin_get_sumup_status'));
-  q(document.getElementById('pos-pay-dialog'), 'pos-pay-close').click();
-  // ilman settings.edit -oikeutta paritusta ei näytetä
   const root2 = await mountWith(suRpc({ readers: [] }).rpc, fn, { can: (p) => p === 'pos.use' || p === 'catalog.edit' });
   q(root2, 'pos-product-101').click();
   q(root2, 'pos-pay').click();
   tenderRadio(document.getElementById('pos-pay-dialog'), 'sumup').dispatch('change');
-  assert.equal(q(document.getElementById('pos-pay-dialog'), 'pos-su-pair'), null);
+  q(document.getElementById('pos-pay-dialog'), 'pos-confirm').click();
+  await flush();
+  const dlg2 = document.getElementById('pos-pay-dialog');
+  assert.equal(q(dlg2, 'pos-su-open-settings'), null);
+  assert.match(q(dlg2, 'pos-su-ask-admin').textContent, /ylläpitäjää/);
   document.body.replaceChildren();
   await flush();
 });
 
-test('useita lukijoita: valinta lähtee start-pyyntöön ja muistetaan; oletus valitaan ensin', async () => {
+test('useita lukijoita: korttimaksu käyttää automaattisesti oletuslukijaa (ei muistettua valintaa)', async () => {
   mem.clear();
+  mem.set(su.SU_READER_KEY, JSON.stringify({ reader_id: 'rdr_0001', name: 'A' }));
   const readers = [{ reader_id: 'rdr_0001', name: 'A' }, { reader_id: 'rdr_0002', name: 'B', is_default: true }];
   const { rpc } = suRpc({ readers });
   const fnCalls = [];
@@ -352,17 +341,28 @@ test('useita lukijoita: valinta lähtee start-pyyntöön ja muistetaan; oletus v
   q(root, 'pos-product-101').click();
   q(root, 'pos-pay').click();
   tenderRadio(document.getElementById('pos-pay-dialog'), 'sumup').dispatch('change');
-  let dlg = document.getElementById('pos-pay-dialog');
-  const sel = q(dlg, 'pos-su-reader');
-  assert.equal(all(sel).filter((n) => n.tagName === 'OPTION' && (n.selected || n.getAttribute('selected') != null)).map((n) => n.value).join(), 'rdr_0002', 'oletus valittu');
-  sel.value = 'rdr_0001'; sel.dispatch('change');
-  assert.equal(JSON.parse(mem.get(su.SU_READER_KEY)).reader_id, 'rdr_0001');
+  assert.equal(q(document.getElementById('pos-pay-dialog'), 'pos-su-reader'), null);
   q(document.getElementById('pos-pay-dialog'), 'pos-confirm').click();
   await flush();
-  assert.equal(fnCalls.find((b) => b.action === 'start').reader_id, 'rdr_0001');
+  assert.equal(fnCalls.find((b) => b.action === 'start').reader_id, 'rdr_0002');
   q(document.getElementById('pos-pay-dialog'), 'pos-su-cancel').click(); // pysäyttää kyselyajastimen
   await flush();
   document.body.replaceChildren();
+});
+
+test('Asetukset › Maksut: SumUp-korttipääte-osio (settings.edit), samat RPC- ja Edge-kutsut', () => {
+  const card = read('../admin/views/sumup-settings.js');
+  const set = read('../admin/views/settings.js');
+  assert.match(set, /import \{ sumupSettingsCard \} from '\.\/sumup-settings\.js'/);
+  assert.match(set, /sumupSettingsCard\(\{ ctx \}\)/);
+  assert.match(card, /if \(!ctx\?\.can\?\.\('settings\.edit'\)\) return null;/);
+  for (const s of ["rpc('admin_get_sumup_status')", "rpc('admin_sumup_reader_set_default', { p_reader_id:", "rpc('admin_sumup_reader_remove', { p_reader_id:", "callFn('sumup-pos', { action: 'reader_pair'", 'validPairingCode(st.pairCode)']) assert.ok(card.includes(s), s);
+  for (const id of ['set-sumup-reader', 'set-sumup-default', 'set-sumup-remove', 'set-sumup-pair-code', 'set-sumup-pair-name', 'set-sumup-pair']) assert.ok(card.includes(`'${id}'`), id);
+  const pos = read('../admin/pos-screen.js');
+  for (const gone of ['pos-su-reader', 'pos-su-pair', 'pos-su-default', 'pos-su-remove', 'admin_sumup_reader_set_default', 'reader_pair', 'terminal_later']) assert.equal(pos.includes(gone), false, gone);
+  assert.equal(su.defaultReader([{ reader_id: 'rdr_0001' }, { reader_id: 'rdr_0002', is_default: true }]).reader_id, 'rdr_0002');
+  assert.equal(su.defaultReader([{ reader_id: 'rdr_0001' }]), null);
+  assert.equal(su.defaultReader([{ reader_id: 'rdr_0003', is_default: true, active: false }]), null);
 });
 
 test('virhe aloituksessa (lukija offline): kassatilaus perutaan ja virhe näytetään suomeksi', async () => {
@@ -399,7 +399,6 @@ test('kokeilutila: oletuksena off; simuloitu maksu hylätään (?su=decline) ja 
     q(root, 'pos-pay').click();
     tenderRadio(document.getElementById('pos-pay-dialog'), 'sumup').dispatch('change');
     let dlg = document.getElementById('pos-pay-dialog');
-    assert.match(q(dlg, 'pos-su-test-note').textContent, /Simuloitu maksu/);
     q(dlg, 'pos-confirm').click();
     await flush();
     dlg = document.getElementById('pos-pay-dialog');
@@ -419,4 +418,19 @@ test('kokeilutila: oletuksena off; simuloitu maksu hylätään (?su=decline) ja 
     globalThis.location = { search: '?mock=1', hash: '', pathname: '/hallinta/' };
     document.body.replaceChildren();
   }
+});
+
+test('tekstit: import 182 = POS_SUMUP_SETTINGS_TEXTS, FI+EN, uudet avaimet käytössä', () => {
+  const T = texts.POS_SUMUP_SETTINGS_TEXTS;
+  assert.deepEqual(Object.keys(T.fi).sort(), Object.keys(T.en).sort());
+  const rows = JSON.parse(read('../../content/site-texts.pending-import-182.json'));
+  assert.equal(rows.length, Object.keys(T.fi).length * 2);
+  for (const r of rows) {
+    const k = r.key.slice('ui.pos.'.length);
+    assert.match(r.key, /^ui\.pos\.su_[a-z_]+$/);
+    assert.equal(r.text, T[r.lang][k]); assert.equal(texts.posText(k, r.lang), r.text);
+    assert.equal(Object.hasOwn(texts.POS_SUMUP_TEXTS.fi, k), false, k);
+  }
+  const src = read('../admin/pos-screen.js') + read('../admin/views/sumup-settings.js');
+  for (const k of Object.keys(T.fi)) assert.ok(src.includes(`'${k}'`), `käyttämätön avain ${k}`);
 });

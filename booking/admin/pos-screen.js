@@ -7,7 +7,7 @@ import { getLang } from './talous-i18n.js';
 import { cartAdd, cartAddCustom, cartLineKey, cartSetQty, cartTotal, cartVatBreakdown, checkoutItems, parseEuroInput, validateCustomLine, posSheetTenders, tenderAvailable, joinUrl, posCandidates, filterProducts, tillEditorOpen, moveSort, validEmail, posCustomerHits } from './pos-logic.js';
 import { searchCustomers } from './customer-hits.js';
 import { qrSvgElement } from './qrsvg.js';
-import { suEnabled, readReader, saveReader, pickReader, savePending as suSavePending, readPending as suReadPending, clearPending as suClearPending, suStateOf, suErrorKey, validPairingCode, normalizePairingCode } from './sumup-pos.js';
+import { suEnabled, defaultReader, savePending as suSavePending, readPending as suReadPending, clearPending as suClearPending, suStateOf, suErrorKey } from './sumup-pos.js';
 import { cxEnabled, readTerminal, saveTerminal, pickTerminal, savePending, readPending, clearPending, openAppLink, cxStateOf, cxErrorKey, CX_REGISTER_TTL_MS } from './checkoutx-pos.js';
 
 // booking_295: CheckoutX on piilotettu Pikakassasta (koodi ja data jäävät, ei tilakyselyjä). Palautus: true + migraatio, joka palauttaa checkoutx-rivin admin_pos_tenders-listaan.
@@ -54,7 +54,8 @@ export async function renderPos({ ctx, rpc, fn }) {
   const cx = { terminals: [], terminal: null, state: null, failure: null, reg: null, regTimer: null, regLabel: '', configureLink: null, simulated: false };
   let visHandler = null;
   // booking_295: korttipääte (SumUp Solo, Cloud API). Näkyy vain, kun palvelin kertoo tilan test tai live.
-  const su = { readers: [], reader: null, state: null, pairCode: '', pairName: '', simulated: false };
+  // t1865u: korttimaksu käyttää aina oletuslukijaa. Lukijan valinta ja paritus: Asetukset › Maksut ja laskutus › SumUp-korttipääte.
+  const su = { readers: [], reader: null, state: null, simulated: false, noDefault: false };
 
   const root = h('div', { class: 'pos', 'data-testid': 'pos' });
 
@@ -239,7 +240,7 @@ export async function renderPos({ ctx, rpc, fn }) {
         su.readers = Array.isArray(st?.readers) ? st.readers : [];
         su.simulated = st?.simulated === true;
       } catch { su.readers = []; }
-      su.reader = pickReader(readReader(store), su.readers);
+      su.reader = defaultReader(su.readers);
     }
     if (CX_VISIBLE && cxEnabled(modes)) {
       try {
@@ -370,7 +371,11 @@ export async function renderPos({ ctx, rpc, fn }) {
       if (!tender || !tenderAvailable(tenders.find((x) => x.code === tender), modes)) { payOpen = true; toast(t('choose_method')); return; }
       const chosen = tenders.find((x) => x.code === tender);
       if (!chosen || (chosen.handler !== 'payment_link' && chosen.handler !== 'checkoutx' && chosen.handler !== 'sumup')) { payOpen = true; toast(t('choose_method')); return; }
-      if (chosen.handler === 'sumup' && !su.reader) { payError = t('su_no_reader'); payOpen = true; toast(payError, 'err'); return; }
+      if (chosen.handler === 'sumup') {
+        await reloadReaders();
+        su.noDefault = !su.reader;
+        if (!su.reader) { payError = t('su_no_default'); payOpen = true; toast(payError, 'err'); return; }
+      }
       if (chosen.handler === 'checkoutx' && !cx.terminal) { payError = t('cx_no_terminal'); payOpen = true; toast(payError, 'err'); return; }
       let mailTo = null;
       if (chosen.handler === 'payment_link') {
@@ -456,72 +461,17 @@ export async function renderPos({ ctx, rpc, fn }) {
     try {
       const st = await rpc('admin_get_sumup_status');
       su.readers = Array.isArray(st?.readers) ? st.readers : su.readers;
-      su.reader = pickReader(su.reader || readReader(store), su.readers);
-    } catch { /* lista päivittyy seuraavalla latauksella */ }
+      su.simulated = st?.simulated === true;
+    } catch { /* käytetään viimeksi ladattua listaa */ }
+    su.reader = defaultReader(su.readers);
   }
 
-  async function pairReader() {
-    if (busy) return;
-    if (!validPairingCode(su.pairCode)) { payError = t('su_pair_invalid'); toast(payError, 'err'); draw(); return; }
-    busy = true; payError = ''; draw();
-    try {
-      const r = await fn('sumup-pos', { action: 'reader_pair', pairing_code: normalizePairingCode(su.pairCode), name: su.pairName || t('su_reader') });
-      su.pairCode = ''; su.pairName = '';
-      await reloadReaders();
-      su.reader = saveReader(store, { reader_id: r.reader_id, name: r.name || '' }) || su.reader;
-      toast(t('su_pair_done'));
-    } catch (e) {
-      payError = e?.code ? t(suErrorKey(e.code)) : errMsg(e);
-      toast(payError, 'err');
-    } finally { busy = false; draw(); }
-  }
-
-  async function readerAction(rpcName, readerId, okKey) {
-    if (busy) return;
-    busy = true; draw();
-    try {
-      await rpc(rpcName, { p_reader_id: readerId });
-      await reloadReaders();
-      toast(t(okKey));
-    } catch (e) { toast(errMsg(e), 'err'); }
-    finally { busy = false; draw(); }
-  }
-
-  function sumupBox() {
-    if (tender !== 'sumup' || phase !== 'cart') return null;
-    const box = h('div', { class: 'fld pos-su', 'data-testid': 'pos-su' });
-    box.append(h('p', { class: 'muted', 'data-testid': 'pos-su-test-note', text: su.simulated ? t('su_simulated') : modes?.sumup_mode === 'test' ? t('su_test_note') : '' }));
-    if (su.readers.length) {
-      const sel = h('select', {
-        'data-testid': 'pos-su-reader', 'aria-label': t('su_pick'),
-        onchange: (e) => {
-          const row = su.readers.find((x) => x.reader_id === e.target.value);
-          su.reader = row ? saveReader(store, row) : null;
-          draw();
-        },
-      }, h('option', { value: '', text: t('su_pick') }),
-      ...su.readers.map((x) => h('option', { value: x.reader_id, text: (x.name || x.reader_id) + (x.is_default ? ` (${t('su_default_badge')})` : ''), selected: su.reader?.reader_id === x.reader_id || null })));
-      box.append(h('label', { class: 'fld' }, h('span', { text: t('su_reader') }), sel));
-    }
-    if (!su.reader) box.append(h('p', { 'data-testid': 'pos-su-no-reader', text: t('su_no_reader') }));
-    if (ctx.can('settings.edit')) {
-      if (su.reader) {
-        box.append(
-          h('button', { type: 'button', class: 'btn ghost', 'data-testid': 'pos-su-default', text: t('su_default'), disabled: busy || null, onclick: () => readerAction('admin_sumup_reader_set_default', su.reader.reader_id, 'su_default_set') }),
-          h('button', { type: 'button', class: 'btn ghost', 'data-testid': 'pos-su-remove', text: t('su_remove'), disabled: busy || null, onclick: () => readerAction('admin_sumup_reader_remove', su.reader.reader_id, 'su_removed') }));
-      }
-      const code = h('input', { type: 'text', maxlength: '12', autocomplete: 'off', autocapitalize: 'characters', value: su.pairCode, 'data-testid': 'pos-su-pair-code' });
-      code.addEventListener('input', () => { su.pairCode = String(code.value || ''); });
-      const name = h('input', { type: 'text', maxlength: '60', value: su.pairName, 'data-testid': 'pos-su-pair-name' });
-      name.addEventListener('input', () => { su.pairName = String(name.value || ''); });
-      box.append(h('h3', { text: t('su_pair_title') }),
-        h('label', { class: 'fld' }, h('span', { text: t('su_pair_code') }), code),
-        h('label', { class: 'fld' }, h('span', { text: t('su_pair_name') }), name),
-        h('button', { type: 'button', class: 'btn', 'data-testid': 'pos-su-pair', text: t('su_pair'), disabled: busy || null, onclick: () => pairReader() }));
-    } else if (!su.reader) {
-      box.append(h('p', { class: 'muted', text: t('su_pair_admin') }));
-    }
-    return box;
+  // Ei oletuslukijaa: selkeä ohje Asetuksiin (settings.edit) tai ylläpitäjälle.
+  function sumupNoDefault() {
+    if (tender !== 'sumup' || phase !== 'cart' || !su.noDefault) return null;
+    return ctx.can('settings.edit')
+      ? h('a', { class: 'btn ghost', href: '#/asetukset/maksut', 'data-testid': 'pos-su-open-settings', text: t('su_open_settings') })
+      : h('p', { class: 'muted', 'data-testid': 'pos-su-ask-admin', text: t('su_pair_admin') });
   }
 
   // Välilehti saattoi latautua uudelleen lukijan odottaessa korttia: kesken jäänyt maksu jatkuu.
@@ -657,11 +607,10 @@ export async function renderPos({ ctx, rpc, fn }) {
     for (const m of tenders) {
       const available = tenderAvailable(m, modes);
       const on = available && phase === 'cart';
-      const label = m.handler === 'payment_link' ? t('method_link') : m.handler === 'terminal' ? t('method_terminal') : m.handler === 'checkoutx' ? t('method_checkoutx') : m.handler === 'sumup' ? t('method_sumup') : m.code;
+      const label = m.handler === 'payment_link' ? t('method_link') : m.handler === 'checkoutx' ? t('method_checkoutx') : m.handler === 'sumup' ? t('method_sumup') : m.code;
       box.append(h('label', { class: 'pos-method' + (available ? '' : ' is-off') },
-        h('input', { type: 'radio', name: 'tender', value: m.code, disabled: !on || null, checked: tender === m.code || null, onchange: () => { tender = m.code; draw(); } }),
+        h('input', { type: 'radio', name: 'tender', value: m.code, disabled: !on || null, checked: tender === m.code || null, onchange: () => { tender = m.code; payError = ''; su.noDefault = false; draw(); } }),
         h('span', { text: label }),
-        !available && m.handler === 'terminal' ? h('small', { text: t('terminal_later') }) : null,
         !available && m.handler === 'payment_link' ? h('small', { text: t('vismapay_off'), 'data-testid': 'pos-vismapay-off' }) : null));
     }
     return box;
@@ -864,14 +813,14 @@ export async function renderPos({ ctx, rpc, fn }) {
       dialog.append(methodBox());
       const mailField = emailBox();
       if (mailField) dialog.append(mailField);
-      const suField = sumupBox();
-      if (suField) dialog.append(suField);
       const cxField = checkoutxBox();
       if (cxField) dialog.append(cxField);
     }
     if (phase === 'cart') {
       dialog.append(h('p', { class: 'muted pos-legal', text: t('pay_legal') }));
       if (payError) dialog.append(h('p', { role: 'alert', class: 'err', 'data-testid': 'pos-pay-error', text: payError }));
+      const suHint = sumupNoDefault();
+      if (suHint) dialog.append(suHint);
       dialog.append(h('button', {
         type: 'button', class: 'btn primary pos-pay', 'data-testid': 'pos-confirm',
         text: busy ? t('wait') : t('confirm'),

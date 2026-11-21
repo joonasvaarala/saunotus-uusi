@@ -21,7 +21,9 @@ export const NAV_GROUPS = [
   { id: 'cash', path: 'talous', labelKey: 'ui.admin.nav.finance', tabs: [
     { id: 'talous', path: 'talous', labelKey: 'ui.admin.nav.finance', view: 'talous', any: ['payments.manage', 'giftcards.manage'] },
     { id: 'laskut', path: 'laskut', labelKey: 'ui.admin.nav.invoices', view: 'invoices', any: ['invoices.manage'] },
-  ] },
+  ],
+  // Joonas 21.11.2026: Pikakassa myös Talous-valikosta. Pelkkä linkki samaan reittiin (#/pikakassa), ei välilehti eikä kopio.
+  links: [{ id: 'pikakassa', path: 'pikakassa', labelKey: 'ui.admin.nav.pos', any: ['pos.use'] }] },
   { id: 'settings', path: 'asetukset', labelKey: 'ui.admin.nav.settings', tabs: [
     { id: 'asetukset', path: 'asetukset', labelKey: 'ui.admin.nav.settings', view: 'settings', any: ['settings.edit'] },
     { id: 'kayttajat', path: 'kayttajat', labelKey: 'ui.admin.nav.users', view: 'users', any: ['staff.manage'] },
@@ -58,6 +60,8 @@ export function resolveAdminPath(path) {
 export function navGroupById(id) { return GROUP_BY_ID.get(id) || null; }
 export function tabAllowed(tab, can) { return !tab.any || tab.any.some((p) => can(p)); }
 export function visibleGroupTabs(group, can) { return group ? group.tabs.filter((t) => tabAllowed(t, can)) : []; }
+/** Ryhmän lisälinkit muihin reitteihin (esim. Talous › Pikakassa). Eivät ohjaa reititystä eivätkä vaikuta ryhmän näkyvyyteen. */
+export function visibleGroupLinks(group, can) { return group?.links ? group.links.filter((l) => tabAllowed(l, can)) : []; }
 export function groupAllowed(group, can) { return visibleGroupTabs(group, can).length > 0; }
 export function selectGroupTab(group, tabId, can) {
   const tabs = visibleGroupTabs(group, can);
