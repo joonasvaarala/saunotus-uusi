@@ -1,0 +1,26 @@
+[
+  {
+    "key": "ui.gift.regular_price",
+    "lang": "fi",
+    "text": "Normaalihinta {{var:price}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:price}}"
+    ],
+    "reason": "t1885u: yliviivattu normaalihinta lahjakorttisivulla (Normaalihinta / Regular price). Uusi avain. FI+EN, sama kuin koodin varateksti (booking/shop/src/gift-texts.js)."
+  },
+  {
+    "key": "ui.gift.regular_price",
+    "lang": "en",
+    "text": "Regular price {{var:price}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:price}}"
+    ],
+    "reason": "t1885u: yliviivattu normaalihinta lahjakorttisivulla (Normaalihinta / Regular price). Uusi avain. FI+EN, sama kuin koodin varateksti (booking/shop/src/gift-texts.js)."
+  }
+]

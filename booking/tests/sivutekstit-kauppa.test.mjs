@@ -119,6 +119,7 @@ test('tuontitiedosto on generoitu koodista: scripts/site-texts-extract-shop.mjs 
     ...J('content/site-texts.pending-import-168.json').map((r) => `${r.key}|${r.lang}`),   // KAUPPA-VAHVISTUS-01
     ...J('content/site-texts.pending-import-177.json').map((r) => `${r.key}|${r.lang}`),   // oman vuoron alku → kesto
     ...J('content/site-texts.pending-import-184.json').map((r) => `${r.key}|${r.lang}`),   // suora lahjakorttilinkki, lahjakorttietu, tarjous päättynyt
+    ...J('content/site-texts.pending-import-188.json').map((r) => `${r.key}|${r.lang}`),   // t1885u: yliviivattu normaalihinta
   ]);
   const imp = new Set(PENDING.map((r) => r.key));
   writeFileSync(prod, JSON.stringify({ ok: true, texts: FALLBACK.texts.filter((r) => !imp.has(r.key)) }));   // tuotanto ennen #61:n tuontia
@@ -170,7 +171,7 @@ test('generaattori ei lisää riviä jos avain on jo tuotannossa (vain uudet ava
   const trainingOrderUi = J('content/site-texts.pending-import-114.json').filter((r) => r.key.startsWith('ui.order.'));   // booking_226
   const giftCodeHintUi = J('content/site-texts.pending-import-122.json').filter((r) => r.key.startsWith('ui.shop.'));   // lahjakorttivihje alennuskoodikentässä
   // Myöhemmät tuonnit (33–122 ym.) ovat jo tuotannon varatekstissä, joten generaattori ei lisää niitä.
-  const dialogUi = [...J('content/site-texts.pending-import-152.json'), ...J('content/site-texts.pending-import-164.json'), ...J('content/site-texts.pending-import-168.json'), ...J('content/site-texts.pending-import-177.json'), ...J('content/site-texts.pending-import-184.json')];   // KAUPPA-DIALOGI-01 + KAUPPA-KASSA-02 + KAUPPA-VAHVISTUS-01 + suora lahjakorttilinkki: ei vielä varatekstissä → generaattori lisää
+  const dialogUi = [...J('content/site-texts.pending-import-152.json'), ...J('content/site-texts.pending-import-164.json'), ...J('content/site-texts.pending-import-168.json'), ...J('content/site-texts.pending-import-177.json'), ...J('content/site-texts.pending-import-184.json'), ...J('content/site-texts.pending-import-188.json')];   // KAUPPA-DIALOGI-01 + KAUPPA-KASSA-02 + KAUPPA-VAHVISTUS-01 + suora lahjakorttilinkki + t1885u normaalihinta: ei vielä varatekstissä → generaattori lisää
   assert.equal(rows.length, PENDING.length - have.length + dialogUi.length);
   for (const d of dialogUi) assert.ok(rows.some((x) => x.key === d.key && x.lang === d.lang && x.text === d.text), `${d.key} [${d.lang}]: koodin oletus = tuontirivi`);
   assert.ok(!rows.some((x) => haveKeys.has(x.key)));
