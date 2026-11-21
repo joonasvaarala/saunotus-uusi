@@ -4,6 +4,7 @@
 // Ostolinkit: suorat ?paketti=-osoitteet. Kampanjasivu: /musta-viikko/ ja /en/black-week/.
 import { tx } from './site-texts.mjs';
 import { e, pageHref, money, href } from './lib.mjs';
+import { regularListPrice } from '../booking/shop/src/gift-logic.js';
 
 /** Lahjakorttipaketin koodi yläbannerin vanhassa vakiossa ja jälkilöylytarjouksessa (?paketti=). */
 export const MUSTA_VIIKKO_PACKAGE = 'bf_jalkiloylyt_mato';
@@ -39,8 +40,8 @@ export const MUSTA_VIIKKO_IMAGE_BP = 700;
 export const MUSTA_VIIKKO_IMAGE_SIZE = { w: 1600, h: 700 };
 export const MUSTA_VIIKKO_IMAGE_MOBILE_SIZE = { w: 900, h: 1100 };
 export const MUSTA_VIIKKO_IMAGE_ALT = Object.freeze({
-  fi: 'Hämärä savusauna, jonka etualalla musta kiuas verkkokivineen; piipusta valuu vettä, tila on täynnä lämmintä savua.',
-  en: 'A dim smoke sauna with a black stove and stones in a wire cage in the foreground; water drips from the flue into warm, smoky air.',
+  fi: 'Ihmisiä istuu noen mustaamilla lauteilla Sipoonjoen perinnesaunan savusaunassa; holvikatto, savuluukku ja palavat kynttilät.',
+  en: 'People sitting on the soot-blackened benches of the Sipoonjoki traditional smoke sauna, with its barrel vault, smoke hatch and burning candles.',
 });
 
 export const MUSTA_VIIKKO_OFFERS = Object.freeze([
@@ -52,15 +53,17 @@ export const MUSTA_VIIKKO_TEXTS = Object.freeze({
   'ui.site.mv_title': { fi: 'Savusaunan musta viikko', en: 'Smoke Sauna Black Week' },
   'ui.site.mv_product': { fi: 'Jälkilöylylahjakortti', en: 'After Session Sauna gift card' },
   'ui.site.mv_product_b': { fi: 'Yleisten vuorojen lahjakortti 2 hengelle', en: 'Public session gift card for 2 people' },
-  'ui.site.mv_banner_text': {
-    fi: 'Jälkilöylylahjakortti {{var:price}}, voimassa 6 kk ma–to',
-    en: 'After Session Sauna gift card {{var:price}}, valid 6 months Mon–Thu',
+  'ui.site.mv_banner_offers': {
+    fi: 'jälkilöylyt ja yleiset vuorot lahjakorttina ma–to',
+    en: 'After Session and public session gift cards, Mon–Thu',
   },
   'ui.site.mv_close': { fi: 'Sulje ilmoitus', en: 'Dismiss notice' },
   'ui.site.mv_card_text': { fi: 'Voimassa 6 kk, ma–to', en: 'Valid 6 months, Mon–Thu' },
   'ui.site.mv_card_terms': { fi: 'Ei voimassa 24.–30.12.', en: 'Not valid 24–30 Dec.' },
   'ui.site.mv_cta': { fi: 'Osta lahjakortti →', en: 'Buy a gift card →' },
   'ui.site.mv_more': { fi: 'Tutustu kampanjaan', en: 'See the campaign' },
+  'ui.site.mv_see': { fi: 'Katso tarjoukset →', en: 'See the offers →' },
+  'ui.site.mv_regular': { fi: 'Normaalihinta {{var:price}}', en: 'Regular price {{var:price}}' },
 });
 
 const quiet = { warn() {} };
@@ -76,6 +79,16 @@ export function mustaViikkoHref(lang) {
 
 export function mustaViikkoPrice(lang, amount = MUSTA_VIIKKO_PRICE) {
   return money(amount, lang);
+}
+
+/** Kampanjahinta + yliviivattu normaalihinta (saavutettava del). */
+export function mustaViikkoPriceCompareHtml(lang, campaign, code) {
+  const now = mustaViikkoPrice(lang, campaign);
+  const was = regularListPrice(code);
+  if (was == null || was <= campaign) return `<span class="mv-price-now">${e(now)}</span>`;
+  const wasTxt = mustaViikkoPrice(lang, was);
+  const label = mvText('ui.site.mv_regular', lang, { price: wasTxt });
+  return `<span class="mv-price-now">${e(now)}</span> <del class="mv-price-was"><span class="sr">${e(label)}</span><span aria-hidden="true">${e(wasTxt)}</span></del>`;
 }
 
 export function mustaViikkoOfferHref(code, lang) {
@@ -96,29 +109,26 @@ export function mustaViikkoPicture({ alt = '', sizes = '100vw', cls = 'mv-ad-img
 export function mustaViikkoBannerHtml(lang, now = Date.now(), env = process.env.SITE_ENV) {
   if (!mustaViikkoBuildIncludes(env) || !mustaViikkoActive(now)) return '';
   const title = mvText('ui.site.mv_title', lang);
-  const price = mustaViikkoPrice(lang);
-  const text = mvText('ui.site.mv_banner_text', lang, { price });
+  const text = mvText('ui.site.mv_banner_offers', lang);
+  const see = mvText('ui.site.mv_see', lang);
   const close = mvText('ui.site.mv_close', lang);
   const hrefPage = mustaViikkoHref(lang);
-  return `<div class="mv-banner" data-mv-banner hidden role="region" aria-label="${e(title)}"><div class="wrap mv-banner-in"><a class="mv-banner-link" href="${e(hrefPage)}"><strong>${e(title)}</strong><span class="mv-banner-sep" aria-hidden="true">–</span><span class="mv-banner-text">${e(text)}</span></a><button type="button" class="mv-banner-close" data-mv-close aria-label="${e(close)}"><span aria-hidden="true">×</span></button></div></div>`;
+  return `<div class="mv-banner" data-mv-banner hidden role="region" aria-label="${e(title)}"><div class="wrap mv-banner-in"><a class="mv-banner-link" href="${e(hrefPage)}"><strong>${e(title)}</strong><span class="mv-banner-sep" aria-hidden="true">–</span><span class="mv-banner-text">${e(text)}</span><span class="mv-banner-cta">${e(see)}</span></a><button type="button" class="mv-banner-close" data-mv-close aria-label="${e(close)}"><span aria-hidden="true">×</span></button></div></div>`;
 }
 
 export function mustaViikkoCardHtml(lang, now = Date.now(), env = process.env.SITE_ENV) {
   if (!mustaViikkoBuildIncludes(env) || !mustaViikkoActive(now)) return '';
   const title = mvText('ui.site.mv_title', lang);
-  const more = mvText('ui.site.mv_more', lang);
-  const cta = mvText('ui.site.mv_cta', lang);
+  const see = mvText('ui.site.mv_see', lang);
   const page = mustaViikkoHref(lang);
   const alt = MUSTA_VIIKKO_IMAGE_ALT[lang] || MUSTA_VIIKKO_IMAGE_ALT.fi;
   const pic = mustaViikkoPicture({ alt, sizes: '(min-width:701px) 1100px, 100vw' });
   const offers = MUSTA_VIIKKO_OFFERS.map((o) => {
     const name = mvText(o.nameKey, lang);
     const text = mvText(o.textKey, lang);
-    const price = mustaViikkoPrice(lang, o.price);
-    const buy = mustaViikkoOfferHref(o.code, lang);
-    return `<article class="mv-ad-offer"><h3>${e(name)}</h3><p class="mv-note">${e(text)}</p><p class="mv-price">${e(price)}</p><a class="btn gold sm" href="${e(buy)}">${e(cta)}</a></article>`;
+    return `<article class="mv-ad-offer"><h3>${e(name)}</h3><p class="mv-note">${e(text)}</p><p class="mv-price">${mustaViikkoPriceCompareHtml(lang, o.price, o.code)}</p></article>`;
   }).join('');
-  return `<section class="section strip mv-sec" data-mv-promo hidden><div class="wrap"><div class="mv-ad"><div class="mv-ad-visual"><div class="mv-ad-media">${pic}</div><h2 class="mv-ad-title">${e(title)}</h2></div><div class="mv-ad-body"><div class="mv-ad-offers">${offers}</div><p class="mv-ad-more"><a href="${e(page)}">${e(more)}</a></p></div></div></div></section>`;
+  return `<section class="section strip mv-sec" data-mv-promo hidden><div class="wrap"><div class="mv-ad"><div class="mv-ad-visual"><div class="mv-ad-media">${pic}</div><h2 class="mv-ad-title"><a href="${e(page)}">${e(title)}</a></h2></div><div class="mv-ad-body"><div class="mv-ad-offers">${offers}</div><p class="mv-ad-cta"><a class="btn gold" href="${e(page)}">${e(see)}</a></p></div></div></div></section>`;
 }
 
 export function mustaViikkoBootScript(env = process.env.SITE_ENV) {

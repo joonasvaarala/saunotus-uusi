@@ -1,0 +1,42 @@
+[
+  {
+    "key": "ui.site.mv_see",
+    "lang": "fi",
+    "text": "Katso tarjoukset →",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "t1867u/t1870u/t1872u/t1884u: Savusaunan musta viikko – yläbanneri mainitsee molemmat tarjoukset ja kehotteen Katso tarjoukset; etusivun mainos linkittää kampanjasivulle. FI+EN, sama kuin koodin varateksti (src/musta-viikko.mjs)."
+  },
+  {
+    "key": "ui.site.mv_see",
+    "lang": "en",
+    "text": "See the offers →",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "t1867u/t1870u/t1872u/t1884u: Savusaunan musta viikko – yläbanneri mainitsee molemmat tarjoukset ja kehotteen Katso tarjoukset; etusivun mainos linkittää kampanjasivulle. FI+EN, sama kuin koodin varateksti (src/musta-viikko.mjs)."
+  },
+  {
+    "key": "ui.site.mv_banner_offers",
+    "lang": "fi",
+    "text": "jälkilöylyt ja yleiset vuorot lahjakorttina ma–to",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 140,
+    "placeholders": [],
+    "reason": "t1867u/t1870u/t1872u/t1884u: Savusaunan musta viikko – yläbanneri mainitsee molemmat tarjoukset ja kehotteen Katso tarjoukset; etusivun mainos linkittää kampanjasivulle. FI+EN, sama kuin koodin varateksti (src/musta-viikko.mjs)."
+  },
+  {
+    "key": "ui.site.mv_banner_offers",
+    "lang": "en",
+    "text": "After Session and public session gift cards, Mon–Thu",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 140,
+    "placeholders": [],
+    "reason": "t1867u/t1870u/t1872u/t1884u: Savusaunan musta viikko – yläbanneri mainitsee molemmat tarjoukset ja kehotteen Katso tarjoukset; etusivun mainos linkittää kampanjasivulle. FI+EN, sama kuin koodin varateksti (src/musta-viikko.mjs)."
+  }
+]

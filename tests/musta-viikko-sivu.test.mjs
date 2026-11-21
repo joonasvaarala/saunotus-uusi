@@ -46,8 +46,8 @@ test('kampanja-aikana kaksi tarjousta, kannan ehtosanamuodot, hinnat ja ostolink
   assert.match(fi, /class="mvp-hero"/);
   assert.match(fi, /mv-mainos-desktop\.jpg/);
   assert.match(fi, /media="\(max-width:700px\)"/);
-  assert.match(fi, /Hämärä savusauna, jonka etualalla musta kiuas/);
-  assert.match(en, /A dim smoke sauna with a black stove/);
+  assert.match(fi, /Ihmisiä istuu noen mustaamilla lauteilla Sipoonjoen perinnesaunan savusaunassa/);
+  assert.match(en, /People sitting on the soot-blackened benches of the Sipoonjoki traditional smoke sauna/);
   assert.match(fi, /Jälkilöylylahjakortti/);
   assert.match(en, /After Session Sauna gift card/);
   assert.match(fi, /Yleisten vuorojen lahjakortti 2 hengelle/);
@@ -60,6 +60,10 @@ test('kampanja-aikana kaksi tarjousta, kannan ehtosanamuodot, hinnat ja ostolink
   assert.match(en, />€130</);
   assert.match(fi, />50 €</);
   assert.match(en, />€50</);
+  assert.match(fi, /<del class="mv-price-was">[\s\S]*Normaalihinta 180 €/);
+  assert.match(fi, /<del class="mv-price-was">[\s\S]*Normaalihinta 58 €/);
+  assert.match(en, /<del class="mv-price-was">[\s\S]*Regular price €180/);
+  assert.match(en, /<del class="mv-price-was">[\s\S]*Regular price €58/);
   assert.match(fi, /href="\/lahjakortti\/\?paketti=bf_jalkiloylyt_mato"/);
   assert.match(fi, /href="\/lahjakortti\/\?paketti=mv_yleiset_mato"/);
   assert.match(en, /href="\/en\/gift-card\/\?paketti=bf_jalkiloylyt_mato"/);

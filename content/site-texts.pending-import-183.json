@@ -40,28 +40,44 @@
     "reason": "t1867u/t1870u/t1872u: Savusaunan musta viikko – suljettava yläbanneri ja etusivun mainoskortti (luonnos). Uusi avain. FI+EN, sama kuin koodin varateksti (src/musta-viikko.mjs). Kampanjan nimi on musta viikko. Ei ajeta ennen julkaisua."
   },
   {
-    "key": "ui.site.mv_banner_text",
+    "key": "ui.site.mv_product_b",
     "lang": "fi",
-    "text": "Jälkilöylylahjakortti {{var:price}}, voimassa 6 kk ma–to",
+    "text": "Yleisten vuorojen lahjakortti 2 hengelle",
     "class": "normal",
     "kind": "plain",
-    "max_len": 160,
-    "placeholders": [
-      "{{var:price}}"
-    ],
-    "reason": "t1867u/t1870u/t1872u: Savusaunan musta viikko – suljettava yläbanneri ja etusivun mainoskortti (luonnos). Uusi avain. FI+EN, sama kuin koodin varateksti (src/musta-viikko.mjs). Kampanjan nimi on musta viikko. Ei ajeta ennen julkaisua."
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "t1867u/t1870u/t1872u/t1878u/t1879u: Savusaunan musta viikko – suljettava yläbanneri ja etusivun kuvallinen mainos (luonnos). Uusi avain. FI+EN, sama kuin koodin varateksti (src/musta-viikko.mjs). Kampanjan nimi on musta viikko. Ei ajeta tuotantoon; tuonti vain DEV-kantaan testijulkaisua varten."
   },
   {
-    "key": "ui.site.mv_banner_text",
+    "key": "ui.site.mv_product_b",
     "lang": "en",
-    "text": "After Session Sauna gift card {{var:price}}, valid 6 months Mon–Thu",
+    "text": "Public session gift card for 2 people",
     "class": "normal",
     "kind": "plain",
-    "max_len": 160,
-    "placeholders": [
-      "{{var:price}}"
-    ],
-    "reason": "t1867u/t1870u/t1872u: Savusaunan musta viikko – suljettava yläbanneri ja etusivun mainoskortti (luonnos). Uusi avain. FI+EN, sama kuin koodin varateksti (src/musta-viikko.mjs). Kampanjan nimi on musta viikko. Ei ajeta ennen julkaisua."
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "t1867u/t1870u/t1872u/t1878u/t1879u: Savusaunan musta viikko – suljettava yläbanneri ja etusivun kuvallinen mainos (luonnos). Uusi avain. FI+EN, sama kuin koodin varateksti (src/musta-viikko.mjs). Kampanjan nimi on musta viikko. Ei ajeta tuotantoon; tuonti vain DEV-kantaan testijulkaisua varten."
+  },
+  {
+    "key": "ui.site.mv_banner_offers",
+    "lang": "fi",
+    "text": "jälkilöylyt ja yleiset vuorot lahjakorttina ma–to",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 140,
+    "placeholders": [],
+    "reason": "t1867u/t1870u/t1872u/t1884u: Savusaunan musta viikko – yläbanneri mainitsee molemmat tarjoukset ja kehotteen Katso tarjoukset; etusivun mainos linkittää kampanjasivulle. FI+EN, sama kuin koodin varateksti (src/musta-viikko.mjs)."
+  },
+  {
+    "key": "ui.site.mv_banner_offers",
+    "lang": "en",
+    "text": "After Session and public session gift cards, Mon–Thu",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 140,
+    "placeholders": [],
+    "reason": "t1867u/t1870u/t1872u/t1884u: Savusaunan musta viikko – yläbanneri mainitsee molemmat tarjoukset ja kehotteen Katso tarjoukset; etusivun mainos linkittää kampanjasivulle. FI+EN, sama kuin koodin varateksti (src/musta-viikko.mjs)."
   },
   {
     "key": "ui.site.mv_close",
@@ -104,26 +120,6 @@
     "reason": "t1867u/t1870u/t1872u: Savusaunan musta viikko – suljettava yläbanneri ja etusivun mainoskortti (luonnos). Uusi avain. FI+EN, sama kuin koodin varateksti (src/musta-viikko.mjs). Kampanjan nimi on musta viikko. Ei ajeta ennen julkaisua."
   },
   {
-    "key": "ui.site.mv_cta",
-    "lang": "fi",
-    "text": "Osta lahjakortti →",
-    "class": "normal",
-    "kind": "plain",
-    "max_len": 80,
-    "placeholders": [],
-    "reason": "t1867u/t1870u/t1872u: Savusaunan musta viikko – suljettava yläbanneri ja etusivun mainoskortti (luonnos). Uusi avain. FI+EN, sama kuin koodin varateksti (src/musta-viikko.mjs). Kampanjan nimi on musta viikko. Ei ajeta ennen julkaisua."
-  },
-  {
-    "key": "ui.site.mv_cta",
-    "lang": "en",
-    "text": "Buy a gift card →",
-    "class": "normal",
-    "kind": "plain",
-    "max_len": 80,
-    "placeholders": [],
-    "reason": "t1867u/t1870u/t1872u: Savusaunan musta viikko – suljettava yläbanneri ja etusivun mainoskortti (luonnos). Uusi avain. FI+EN, sama kuin koodin varateksti (src/musta-viikko.mjs). Kampanjan nimi on musta viikko. Ei ajeta ennen julkaisua."
-  },
-  {
     "key": "ui.site.mv_card_terms",
     "lang": "fi",
     "text": "Ei voimassa 24.–30.12.",
@@ -144,24 +140,24 @@
     "reason": "t1867u/t1870u/t1872u: Savusaunan musta viikko – suljettava yläbanneri ja etusivun mainoskortti (luonnos). Uusi avain. FI+EN, sama kuin koodin varateksti (src/musta-viikko.mjs). Kampanjan nimi on musta viikko. Ei ajeta ennen julkaisua."
   },
   {
-    "key": "ui.site.mv_product_b",
+    "key": "ui.site.mv_cta",
     "lang": "fi",
-    "text": "Yleisten vuorojen lahjakortti 2 hengelle",
+    "text": "Osta lahjakortti →",
     "class": "normal",
     "kind": "plain",
     "max_len": 80,
     "placeholders": [],
-    "reason": "t1867u/t1870u/t1872u/t1878u/t1879u: Savusaunan musta viikko – suljettava yläbanneri ja etusivun kuvallinen mainos (luonnos). Uusi avain. FI+EN, sama kuin koodin varateksti (src/musta-viikko.mjs). Kampanjan nimi on musta viikko. Ei ajeta tuotantoon; tuonti vain DEV-kantaan testijulkaisua varten."
+    "reason": "t1867u/t1870u/t1872u: Savusaunan musta viikko – suljettava yläbanneri ja etusivun mainoskortti (luonnos). Uusi avain. FI+EN, sama kuin koodin varateksti (src/musta-viikko.mjs). Kampanjan nimi on musta viikko. Ei ajeta ennen julkaisua."
   },
   {
-    "key": "ui.site.mv_product_b",
+    "key": "ui.site.mv_cta",
     "lang": "en",
-    "text": "Public session gift card for 2 people",
+    "text": "Buy a gift card →",
     "class": "normal",
     "kind": "plain",
     "max_len": 80,
     "placeholders": [],
-    "reason": "t1867u/t1870u/t1872u/t1878u/t1879u: Savusaunan musta viikko – suljettava yläbanneri ja etusivun kuvallinen mainos (luonnos). Uusi avain. FI+EN, sama kuin koodin varateksti (src/musta-viikko.mjs). Kampanjan nimi on musta viikko. Ei ajeta tuotantoon; tuonti vain DEV-kantaan testijulkaisua varten."
+    "reason": "t1867u/t1870u/t1872u: Savusaunan musta viikko – suljettava yläbanneri ja etusivun mainoskortti (luonnos). Uusi avain. FI+EN, sama kuin koodin varateksti (src/musta-viikko.mjs). Kampanjan nimi on musta viikko. Ei ajeta ennen julkaisua."
   },
   {
     "key": "ui.site.mv_more",
@@ -182,5 +178,49 @@
     "max_len": 80,
     "placeholders": [],
     "reason": "t1867u/t1870u/t1872u/t1878u/t1879u: Savusaunan musta viikko – suljettava yläbanneri ja etusivun kuvallinen mainos (luonnos). Uusi avain. FI+EN, sama kuin koodin varateksti (src/musta-viikko.mjs). Kampanjan nimi on musta viikko. Ei ajeta tuotantoon; tuonti vain DEV-kantaan testijulkaisua varten."
+  },
+  {
+    "key": "ui.site.mv_see",
+    "lang": "fi",
+    "text": "Katso tarjoukset →",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "t1867u/t1870u/t1872u/t1884u: Savusaunan musta viikko – yläbanneri mainitsee molemmat tarjoukset ja kehotteen Katso tarjoukset; etusivun mainos linkittää kampanjasivulle. FI+EN, sama kuin koodin varateksti (src/musta-viikko.mjs)."
+  },
+  {
+    "key": "ui.site.mv_see",
+    "lang": "en",
+    "text": "See the offers →",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "t1867u/t1870u/t1872u/t1884u: Savusaunan musta viikko – yläbanneri mainitsee molemmat tarjoukset ja kehotteen Katso tarjoukset; etusivun mainos linkittää kampanjasivulle. FI+EN, sama kuin koodin varateksti (src/musta-viikko.mjs)."
+  },
+  {
+    "key": "ui.site.mv_regular",
+    "lang": "fi",
+    "text": "Normaalihinta {{var:price}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 140,
+    "placeholders": [
+      "{{var:price}}"
+    ],
+    "reason": "t1867u/t1870u/t1872u/t1885u: yliviivattu normaalihinta (Normaalihinta / Regular price). FI+EN, sama kuin koodin varateksti."
+  },
+  {
+    "key": "ui.site.mv_regular",
+    "lang": "en",
+    "text": "Regular price {{var:price}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 140,
+    "placeholders": [
+      "{{var:price}}"
+    ],
+    "reason": "t1867u/t1870u/t1872u/t1885u: yliviivattu normaalihinta (Normaalihinta / Regular price). FI+EN, sama kuin koodin varateksti."
   }
 ]

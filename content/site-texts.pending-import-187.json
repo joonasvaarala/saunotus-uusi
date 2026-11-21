@@ -1,0 +1,26 @@
+[
+  {
+    "key": "ui.site.mv_regular",
+    "lang": "fi",
+    "text": "Normaalihinta {{var:price}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 140,
+    "placeholders": [
+      "{{var:price}}"
+    ],
+    "reason": "t1867u/t1870u/t1872u/t1885u: yliviivattu normaalihinta (Normaalihinta / Regular price). FI+EN, sama kuin koodin varateksti."
+  },
+  {
+    "key": "ui.site.mv_regular",
+    "lang": "en",
+    "text": "Regular price {{var:price}}",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 140,
+    "placeholders": [
+      "{{var:price}}"
+    ],
+    "reason": "t1867u/t1870u/t1872u/t1885u: yliviivattu normaalihinta (Normaalihinta / Regular price). FI+EN, sama kuin koodin varateksti."
+  }
+]

@@ -70,7 +70,18 @@ function buildSale(pk) {
       const priceEl = h('p', { class: 'gc-price', 'data-testid': 'gc-price' });
       const draw = () => {
         const amt = flex ? G.packageAmount(p, head) : p.price;
-        priceEl.replaceChildren(document.createTextNode(money(amt ?? p.price)));
+        const now = amt ?? p.price;
+        const was = G.regularListPrice(p.code);
+        priceEl.replaceChildren();
+        if (was != null && Number(was) > Number(now)) {
+          priceEl.append(
+            h('span', { class: 'gc-price-now', text: money(now) }),
+            ' ',
+            h('del', { class: 'gc-price-was' }, h('span', { class: 'sr-only', text: tx('regularPrice', { price: money(was) }) }), h('span', { 'aria-hidden': 'true', text: money(was) })),
+          );
+        } else {
+          priceEl.append(document.createTextNode(money(now)));
+        }
         if (head) priceEl.append(h('span', { class: 'gc-per', text: ` · ${tx('persons', { n: head })}` }));
       };
       draw();

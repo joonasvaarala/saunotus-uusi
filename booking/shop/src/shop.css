@@ -368,7 +368,7 @@ a.bk-sd:hover{filter:brightness(.97)}
 .hero.page .bk-gift-nudge{margin:8px auto 0;max-width:28em;font-size:15px;line-height:1.4}
 .hero.page .bk-gift-nudge a{color:#f3ece2;text-decoration:underline;text-underline-offset:3px;text-decoration-thickness:1px;opacity:.78}
 .hero.page .bk-gift-nudge a:hover,.hero.page .bk-gift-nudge a:focus-visible{opacity:1;color:#fff}
-.gc-price{margin:4px 0 0;font:600 26px var(--head);color:var(--gold)}
+.gc-price{margin:4px 0 0;display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 10px;font:600 26px var(--head);color:var(--gold)}.gc-price-was{font:500 18px/1 var(--head);opacity:.7;text-decoration:line-through}
 .gc-per{font:400 15px var(--body);color:var(--muted)}
 .gc-meta{margin:0;color:var(--muted);font-size:15px}
 .gc-tile .gc-btn{align-self:flex-start;margin-top:auto}

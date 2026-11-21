@@ -2,7 +2,7 @@
 // Ei navigointi- eikä sivukarttalinkkejä. Julkaistaan suoralla osoitteella (noindex,nofollow, ei JSON-LD).
 import { tx } from './site-texts.mjs';
 import { e, pageHref, money } from './lib.mjs';
-import { mustaViikkoPicture, MUSTA_VIIKKO_IMAGE_ALT } from './musta-viikko.mjs';
+import { mustaViikkoPicture, MUSTA_VIIKKO_IMAGE_ALT, mustaViikkoPriceCompareHtml } from './musta-viikko.mjs';
 
 /** Kampanja päättyy ma 30.11.2026 klo 10 (Eurooppa/Helsinki, UTC+2). */
 export const MUSTA_VIIKKO_ENDS = '2026-11-30T10:00:00+02:00';
@@ -70,7 +70,7 @@ export function mustaViikkoMeta(lang) {
 function offersHtml(lang) {
   return `<div class="mvp-offers" data-mvp-offers>${MUSTA_VIIKKO_OFFERS.map((o) => {
     const href = mustaViikkoOfferHref(o.code, lang);
-    return `<article class="mvp-offer" data-mvp-offer="${e(o.code)}"><h2>${e(mvpText(o.nameKey, lang))}</h2><p class="mvp-terms">${e(mvpText(o.termsKey, lang))}</p><p class="mvp-price">${e(money(o.price, lang))}</p><p class="mvp-cta"><a class="btn gold" href="${e(href)}">${e(mvpText('ui.site.mvp_cta', lang))}</a></p></article>`;
+    return `<article class="mvp-offer" data-mvp-offer="${e(o.code)}"><h2>${e(mvpText(o.nameKey, lang))}</h2><p class="mvp-terms">${e(mvpText(o.termsKey, lang))}</p><p class="mvp-price">${mustaViikkoPriceCompareHtml(lang, o.price, o.code)}</p><p class="mvp-cta"><a class="btn gold" href="${e(href)}">${e(mvpText('ui.site.mvp_cta', lang))}</a></p></article>`;
   }).join('')}</div>`;
 }
 

@@ -67,7 +67,7 @@ test('pending-import-183 vastaa varatekstejä, FI+EN, ei HTML:ää', () => {
     assert.equal(row.text, MUSTA_VIIKKO_TEXTS[key][lang]);
     assert.equal(row.class, 'normal');
     assert.equal(row.kind, 'plain');
-    const ph = key === 'ui.site.mv_banner_text' ? ['{{var:price}}'] : [];
+    const ph = key === 'ui.site.mv_regular' ? ['{{var:price}}'] : [];
     assert.deepEqual(row.placeholders, ph);
     assert.ok(!row.text.includes('<'));
     assert.ok(row.reason.includes('t1867u'));
@@ -83,7 +83,7 @@ test('ei Black Friday -sanaa teksteissä eikä lähteissä', () => {
     assert.doesNotMatch(mustaViikkoBannerHtml(lang), /black\s*friday/i);
     assert.doesNotMatch(mustaViikkoCardHtml(lang), /black\s*friday/i);
   }
-  for (const f of ['src/musta-viikko.mjs', 'src/styles.css', 'src/render.mjs', 'content/site-texts.pending-import-183.json']) {
+  for (const f of ['src/musta-viikko.mjs', 'src/styles.css', 'src/render.mjs', 'content/site-texts.pending-import-183.json', 'content/site-texts.pending-import-186.json', 'content/site-texts.pending-import-187.json']) {
     assert.doesNotMatch(read(f), /black\s*friday/i, f);
   }
 });
@@ -99,30 +99,37 @@ test('banneri ja kortti ovat piilossa, sisältävät linkin, hinnan ja voimassao
     assert.ok(banner.includes(href));
     assert.ok(card.includes(href));
     assert.ok(banner.includes(MUSTA_VIIKKO_TEXTS['ui.site.mv_title'][lang]));
-    assert.ok(banner.includes(MUSTA_VIIKKO_TEXTS['ui.site.mv_product'][lang]));
-    assert.ok(banner.includes(price));
+    assert.ok(banner.includes(MUSTA_VIIKKO_TEXTS['ui.site.mv_banner_offers'][lang]));
+    assert.ok(banner.includes(MUSTA_VIIKKO_TEXTS['ui.site.mv_see'][lang]));
     assert.match(banner, /class="mv-banner-sep"[^>]*>–/);
     assert.match(banner, /class="mv-banner-text"/);
+    assert.match(banner, /class="mv-banner-cta"/);
     assert.doesNotMatch(banner, /class="mv-banner-text">–/);
     assert.match(banner, /data-mv-close/);
     assert.ok(banner.includes(MUSTA_VIIKKO_TEXTS['ui.site.mv_close'][lang]));
+    assert.doesNotMatch(banner, /\?paketti=/);
     assert.ok(card.includes(MUSTA_VIIKKO_TEXTS['ui.site.mv_title'][lang]));
     assert.ok(card.includes(MUSTA_VIIKKO_TEXTS['ui.site.mv_product'][lang]));
     assert.ok(card.includes(MUSTA_VIIKKO_TEXTS['ui.site.mv_product_b'][lang]));
     assert.ok(card.includes(MUSTA_VIIKKO_TEXTS['ui.site.mv_card_text'][lang]));
     assert.ok(card.includes(price));
     assert.ok(card.includes(mustaViikkoPrice(lang, 50)));
-    assert.ok(card.includes(MUSTA_VIIKKO_TEXTS['ui.site.mv_cta'][lang]));
-    assert.ok(card.includes(MUSTA_VIIKKO_TEXTS['ui.site.mv_more'][lang]));
-    assert.ok(card.includes(mustaViikkoOfferHref(MUSTA_VIIKKO_PACKAGE, lang)));
-    assert.ok(card.includes(mustaViikkoOfferHref(MUSTA_VIIKKO_PACKAGE_YLEISET, lang)));
+    assert.ok(card.includes(mustaViikkoPrice(lang, 180)));
+    assert.ok(card.includes(mustaViikkoPrice(lang, 58)));
+    assert.match(card, /<del class="mv-price-was">/);
+    assert.match(card, /Normaalihinta|Regular price/);
+    assert.ok(card.includes(MUSTA_VIIKKO_TEXTS['ui.site.mv_see'][lang]));
+    assert.match(card, /class="btn gold"/);
+    assert.ok(card.includes(href));
+    assert.doesNotMatch(card, /\?paketti=/);
+    assert.match(card, /mv-mainos/);
+    assert.match(card, /<img /);
+    assert.ok(card.includes(MUSTA_VIIKKO_IMAGE_ALT[lang]));
     assert.match(card, /class="mv-ad"/);
     assert.match(card, /class="mv-ad-visual"/);
-    assert.doesNotMatch(card, /mv-ad-shade/);
-    assert.match(card, /mv-mainos-desktop\.jpg/);
-    assert.match(card, /srcset="[^"]*mv-mainos-mobiili\.webp/);
-    assert.match(card, /media="\(max-width:700px\)"/);
-    assert.ok(card.includes(MUSTA_VIIKKO_IMAGE_ALT[lang]));
+    assert.match(card, /class="mv-ad-media"/);
+    assert.match(card, /class="mv-ad-body"/);
+    assert.doesNotMatch(card, /mv-ad-in|mv-ad-shade/);
     assert.doesNotMatch(banner, /<[a-z][^>]*>[^<]*(?:javascript:|on\w+=)/i);
   }
   const boot = mustaViikkoBootScript();
@@ -154,19 +161,32 @@ test('etusivu: kortti viikko-ohjelman jälkeen, banneri ylälaidassa, molemmat h
   }
   assert.ok(fi.includes('/musta-viikko/'));
   assert.ok(en.includes('/en/black-week/'));
-  assert.ok(fi.includes('?paketti=bf_jalkiloylyt_mato'));
-  assert.ok(fi.includes('?paketti=mv_yleiset_mato'));
-  assert.ok(en.includes('/en/gift-card/?paketti=bf_jalkiloylyt_mato'));
-  assert.ok(en.includes('/en/gift-card/?paketti=mv_yleiset_mato'));
   assert.doesNotMatch(fi.match(/data-mv-banner[\s\S]*?<\/div><header/)?.[0] || '', /\?paketti=/);
+  assert.ok(fi.includes('jälkilöylyt ja yleiset vuorot lahjakorttina ma–to'));
+  assert.ok(fi.includes('Katso tarjoukset →'));
   assert.ok(fi.includes('Jälkilöylylahjakortti'));
   assert.ok(fi.includes('Yleisten vuorojen lahjakortti 2 hengelle'));
   assert.ok(fi.includes('Voimassa 6 kk, ma–to'));
-  assert.ok(fi.includes('Tutustu kampanjaan'));
+  assert.ok(fi.includes('130 €'));
+  assert.ok(fi.includes('50 €'));
+  assert.ok(fi.includes('180 €'));
+  assert.ok(fi.includes('58 €'));
+  assert.match(fi, /<del class="mv-price-was">/);
+  assert.ok(fi.includes('Normaalihinta 180 €'));
+  assert.ok(fi.includes('Normaalihinta 58 €'));
+  assert.ok(en.includes('After Session and public session gift cards, Mon–Thu'));
+  assert.ok(en.includes('See the offers →'));
   assert.ok(en.includes('After Session Sauna gift card'));
   assert.ok(en.includes('Public session gift card for 2 people'));
   assert.ok(en.includes('Valid 6 months, Mon–Thu'));
-  assert.ok(en.includes('See the campaign'));
+  assert.ok(en.includes('€130'));
+  assert.ok(en.includes('€50'));
+  assert.ok(en.includes('€180'));
+  assert.ok(en.includes('€58'));
+  assert.match(en, /<del class="mv-price-was">/);
+  assert.ok(en.includes('Regular price €180'));
+  assert.ok(en.includes('Regular price €58'));
+  assert.doesNotMatch(fi + en, /\?paketti=/);
   assert.doesNotMatch(fi + en, /black\s*friday/i);
 });
 
@@ -179,6 +199,11 @@ test('CSS: musta tausta, vaalea teksti, kulta-aksentti, ei tummanvihreää', () 
   assert.match(block, /\.mv-ad\{[^}]*background:#1B1511/);
   assert.match(block, /\.mv-ad-title\{[^}]*color:#F5F3EF/);
   assert.match(block, /\.mv-price\{[^}]*color:#D2B478/);
+  assert.match(block, /\.mv-ad-cta/);
+  assert.match(block, /\.mv-banner-cta/);
+  assert.match(block, /\.mv-ad-visual\{[^}]*aspect-ratio:1600\/700/);
+  assert.match(block, /\.mv-ad-media/);
+  assert.match(block, /aspect-ratio:900\/1100/);
   assert.doesNotMatch(block, /mv-ad-shade/);
   assert.match(block, /\.mv-banner\{[^}]*color:var\(--bg\)/);
   assert.match(block, /var\(--accent\)/);
@@ -192,8 +217,6 @@ test('CSS: musta tausta, vaalea teksti, kulta-aksentti, ei tummanvihreää', () 
   assert.doesNotMatch(rest, /#[0-9a-fA-F]{3,8}/);
   assert.match(block, /@media \(max-width:640px\)/);
   assert.match(block, /@media \(max-width:700px\)/);
-  assert.match(block, /aspect-ratio:1600\/700/);
-  assert.match(block, /aspect-ratio:900\/1100/);
   assert.match(block, /\.mv-banner-link\{[^}]*flex-direction:column/);
   assert.match(block, /\.mv-banner-sep\{display:none\}/);
 });
@@ -213,8 +236,10 @@ test('mainoskuvat: art direction, desktop 1x alle 250 kt', () => {
   assert.ok(statSync(join(root, 'public/img/mv-mainos-desktop.jpg')).size < 250_000);
   assert.ok(!existsSync(join(root, 'public/img/mv-mainos-800.jpg')));
   assert.ok(!existsSync(join(root, 'public/img/mv-mainos-1200.jpg')));
-  assert.match(MUSTA_VIIKKO_IMAGE_ALT.fi, /Hämärä savusauna/);
-  assert.match(MUSTA_VIIKKO_IMAGE_ALT.en, /dim smoke sauna/i);
+  assert.match(MUSTA_VIIKKO_IMAGE_ALT.fi, /noen mustaamilla lauteilla/);
+  assert.match(MUSTA_VIIKKO_IMAGE_ALT.en, /soot-blackened benches/i);
+  assert.ok(statSync(join(root, 'public/img/mv-mainos-desktop.jpg')).size < 250_000);
+  assert.ok(statSync(join(root, 'public/img/mv-mainos-mobiili.jpg')).size < 250_000);
 });
 
 test('aikaohjaus: banneri ja etusivun kortti eivät renderöidy 30.11.2026 klo 10 (Helsinki) jälkeen', () => {
@@ -240,4 +265,24 @@ test('aikaohjaus: banneri ja etusivun kortti eivät renderöidy 30.11.2026 klo 1
   const live = home('fi', { now: before });
   assert.match(live, /data-mv-banner hidden/);
   assert.match(live, /data-mv-promo hidden/);
+});
+
+test('t1885u: normaalihinta yhdestä vakiosta, yliviivaus mainoksessa', async () => {
+  const { MUSTA_VIIKKO_REGULAR_PRICE, regularListPrice } = await import('../booking/shop/src/gift-logic.js');
+  assert.equal(regularListPrice('bf_jalkiloylyt_mato'), 180);
+  assert.equal(regularListPrice('mv_yleiset_mato'), 58);
+  assert.equal(regularListPrice('open'), null);
+  assert.equal(MUSTA_VIIKKO_REGULAR_PRICE.bf_jalkiloylyt_mato, 180);
+  const pending = JSON.parse(read('content/site-texts.pending-import-187.json'));
+  assert.equal(pending.length, 2);
+  for (const lang of ['fi', 'en']) {
+    const row = pending.find((x) => x.key === 'ui.site.mv_regular' && x.lang === lang);
+    assert.ok(row);
+    assert.equal(row.text, MUSTA_VIIKKO_TEXTS['ui.site.mv_regular'][lang]);
+    assert.deepEqual(row.placeholders, ['{{var:price}}']);
+  }
+  const css = read('src/styles.css');
+  assert.match(css, /\.mv-price-was\{[^}]*text-decoration:line-through/);
+  assert.match(read('booking/shop/src/shop.css'), /\.gc-price-was\{[^}]*text-decoration:line-through/);
+  assert.match(read('booking/shop/src/gift.js'), /regularListPrice/);
 });
