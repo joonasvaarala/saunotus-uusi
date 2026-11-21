@@ -74,7 +74,14 @@ export function redeemSection({ L, api, token, onApplied, onClaimed, bare = fals
       if (r?.ok) {
         const bal = +r.balance || 0, money = F.money;
         if (!r.redeemable && r.not_redeemable_reason && has(`nr.${r.not_redeemable_reason}`)) showError(tx(`nr.${r.not_redeemable_reason}`));
-        else msg.replaceChildren(h('p', { class: 'bk-ok', role: 'status', 'data-testid': 'gc-balance', text: unpaid > 0 ? tx('o.balanceIs', { balance: money(bal), usable: money(Math.min(bal, unpaid)) }) : tx('o.balanceIsFull', { balance: money(bal) }) }));
+        else {
+          const note = G.restrictionNote(r, L);
+          const ent = G.remainingEntries(r);
+          const entries = ent ? (ent.total != null ? tx('entriesLeft', { left: ent.left, total: ent.total }) : tx('entriesLeftOnly', { left: ent.left })) : '';
+          msg.replaceChildren(h('p', { class: 'bk-ok', role: 'status', 'data-testid': 'gc-balance', text: unpaid > 0 ? tx('o.balanceIs', { balance: money(bal), usable: money(Math.min(bal, unpaid)) }) : tx('o.balanceIsFull', { balance: money(bal) }) }),
+            note ? h('p', { class: 'bk-note gc-restrict', 'data-testid': 'gc-restrict', text: note }) : null,
+            entries ? h('p', { class: 'bk-note', 'data-testid': 'gc-entries', text: entries }) : null);
+        }
       } else if (r?.notReady) showError(tx('notReady'));
       else if (r?.code === 'invalid_code' || r?.code === 'not_found') msg.replaceChildren(h('p', { class: 'bk-note', role: 'status', 'data-testid': 'gc-balance-unknown', text: tx('o.checkUnknown') }));
       else { showError(errText(r?.code)); if (onFail) onFail(r?.code); }

@@ -61,6 +61,10 @@
    "fi": "/lahjakortti/",
    "en": "/en/gift-card/"
   },
+  "mustaViikko": {
+   "fi": "/musta-viikko/",
+   "en": "/en/black-week/"
+  },
   "book": {
    "fi": "/varaa/",
    "en": "/en/book/"

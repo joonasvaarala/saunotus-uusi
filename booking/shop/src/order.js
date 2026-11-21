@@ -10,6 +10,7 @@ import { T } from './i18n.js';
 import { createOrderApi, validToken, wantsMock } from './order-api.js';
 import { createGiftApi } from './gift-api.js';
 import { redeemSection, cardsSection, claimsSection } from './order-gift.js';
+import { giftCoverSummary, payableTotal } from './gift-logic.js';
 import { revealForm, revealIfHidden, revealHashOnce } from './gift-ui.js';
 import { createMobilepayApi } from './mobilepay-api.js';
 import { normOptions, shouldShowButton, testUiEnabled } from './mobilepay-logic.js';
@@ -252,15 +253,23 @@ async function main() {
         h('p', { class: 'bk-actions' }, h('a', { class: 'btn gold', href: newHref, 'data-testid': 'order-closed-new', text: t.closedNewBooking })));
     }
     const lines = h('section', { class: 'ord-card', 'aria-labelledby': 'ord-l' }, h('h3', { id: 'ord-l', text: t.linesTitle }),
-      h('ul', { class: 'ord-lines', 'data-testid': 'order-lines' }, o.items.map((i) => h('li', {},
-        h('span', { class: 'ord-l-main' }, h('strong', { text: i.quantity > 1 ? `${nm(i)} × ${i.quantity}` : nm(i) })),
-        h('span', { class: 'ord-l-sum', text: money(i.line_total) })))),
+      h('ul', { class: 'ord-lines', 'data-testid': 'order-lines' }, o.items.flatMap((i) => {
+        const cover = giftCoverSummary(i);
+        const row = h('li', {},
+          h('span', { class: 'ord-l-main' }, h('strong', { text: i.quantity > 1 ? `${nm(i)} × ${i.quantity}` : nm(i) })),
+          h('span', { class: 'ord-l-sum', text: money(i.line_total) }));
+        if (!(cover.amount > 0 || cover.uses > 0)) return [row];
+        const uses = cover.uses > 0 ? (cover.uses === 1 ? t.giftCoverUsesOne : t.giftCoverUses).replace('{n}', String(cover.uses)) : '';
+        const amt = cover.amount > 0 ? `−${money(cover.amount)}` : '';
+        return [row, h('li', { class: 'ord-l-gift', 'data-testid': 'order-gift-cover' },
+          h('span', { class: 'ord-l-main', text: `${t.giftCover}${amt ? ` ${amt}` : ''}${uses ? ` · ${uses}` : ''}` }))];
+      })),
       h('dl', { class: 'ord-sums' },
         o.training ? h('div', {}, h('dt', { text: t.trainingCourse }), h('dd', { 'data-testid': 'order-course', text: o.training.course_price != null ? money(o.training.course_price) : '–' })) : null,
         ...(o.training?.addons || []).map((a) => h('div', {}, h('dt', { text: a.code === 'single_room' ? t.trainingSingle : a.code === 'internship' ? t.trainingInternship : a.code }), h('dd', { text: `+${money(a.price)}` }))),
         o.training ? h('div', {}, h('dt', { text: t.trainingTotal }), h('dd', { 'data-testid': 'order-course-total', text: o.training.total != null ? money(o.training.total) : '–' })) : null,
         o.training ? h('div', {}, h('dt', { text: t.trainingRemaining }), h('dd', { 'data-testid': 'order-remaining', text: o.training.remaining != null ? money(o.training.remaining) : '–' })) : null,
-        h('div', {}, h('dt', { text: `${o.training ? t.trainingDeposit : t.total} (${t.vatIncl})` }), h('dd', { 'data-testid': 'order-total', text: money(o.total) })), h('div', {}, h('dt', { text: t.paid }), h('dd', { text: money(o.paid) })),
+        h('div', {}, h('dt', { text: `${o.training ? t.trainingDeposit : t.total} (${t.vatIncl})` }), h('dd', { 'data-testid': 'order-total', text: money(payableTotal(o)) })), h('div', {}, h('dt', { text: t.paid }), h('dd', { text: money(o.paid) })),
         h('div', { class: unpaid > 0 ? 'due' : '' }, h('dt', { text: t.unpaid }), h('dd', { 'data-testid': 'order-unpaid', text: money(unpaid) }))),
       o.training ? h('p', { class: 'bk-note', 'data-testid': 'order-training-balance', text: t.trainingBalance }) : null);
     // maksulinkki: avoin (pending) maksu + verkkomaksu käytössä → linkki; muuten maksu paikan päällä

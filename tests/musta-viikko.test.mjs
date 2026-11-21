@@ -165,7 +165,9 @@ test('etusivu: kortti viikko-ohjelman jälkeen, banneri ylälaidassa, molemmat h
 
 test('CSS: musta tausta, vaalea teksti, kulta-aksentti, ei tummanvihreää', () => {
   const css = read('src/styles.css');
-  const block = css.slice(css.indexOf('Savusaunan musta viikko'));
+  const start = css.indexOf('Savusaunan musta viikko: yläbanneri');
+  const end = css.indexOf('Savusaunan musta viikko – kampanjasivu');
+  const block = css.slice(start, end === -1 ? undefined : end);
   assert.match(block, /\.mv-banner\{[^}]*background:#161311/);
   assert.match(block, /\.mv-ad\{[^}]*background:#161311/);
   assert.match(block, /\.mv-ad-shade\{[^}]*linear-gradient/);

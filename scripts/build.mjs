@@ -32,7 +32,7 @@ const write = (urlPath, html) => {
   writeFileSync(file, html);
 };
 const render = {
-  home: R.home, sauna: R.sauna, treatments: R.treatments, gift: R.gift, book: R.book, info: R.info, companies: R.companies,
+  home: R.home, sauna: R.sauna, treatments: R.treatments, gift: R.gift, mustaViikko: R.mustaViikko, book: R.book, info: R.info, companies: R.companies,
   terms: (l) => R.policyPage('terms', 'terms', l), privacy: (l) => R.policyPage('privacy', 'privacy', l),
 };
 // Artikkelisivut ennen perussivuja (navigaatiolinkki). Etusivun tuotekortit: public_catalog + public_product_images, epäonnistuminen → kb-snapshot.
@@ -44,7 +44,7 @@ for (const [key, paths] of Object.entries(site.pages)) {
   for (const lang of ['fi', 'en']) {
     if (!paths[lang]) continue;
     write(paths[lang], render[key](lang));
-    urls.push({ key, lang, path: paths[lang] });
+    if (key !== 'mustaViikko') urls.push({ key, lang, path: paths[lang] });
   }
 }
 write('/404.html', R.notFound());

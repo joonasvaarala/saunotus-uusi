@@ -4,14 +4,30 @@
 import { resolveDelivery, guessSource, isMismatch, claimMethod, CLAIM_SOURCES, SOURCE_LABELS, packageAmount } from './gift-logic.js';
 import { PUBLISHED_GIFT_PACKAGES } from './gift-offers.js';
 export const MOCK_PACKAGES = PUBLISHED_GIFT_PACKAGES;
+// Piilotetut kampanjapaketit (listed=false): vain public_gift_card_package + ?paketti=, ei valikoimaan/esirenderöintiin.
+export const DIRECT_GIFT_PACKAGES = [
+  { code: 'bf_jalkiloylyt_mato', name: 'Jälkilöylylahjakortti', name_en: 'After Session Sauna gift card', description: 'Savusaunan musta viikko', description_en: 'Smoke Sauna Black Week',
+    kind: 'product', is_open: false, price: 130, min_amount: null, max_amount: null, persons: 6, vat_rate: 25.5, valid_months: 6, listed: false,
+    items: [{ label: 'Jälkilöylyt ma–to', label_en: 'After Session Sauna Mon–Thu', persons: 6 }],
+    sale_ends_at: '2026-11-30T10:00:00+02:00',
+    restrictions: { note: 'Voimassa 6 kk, ma–to. Ei voimassa 24.–30.12.', note_en: '', weekdays: [1, 2, 3, 4], covers_base: true, cover_max: 180, excluded_ranges: [{ from: '12-24', to: '12-30' }] } },
+  { code: 'mv_yleiset_mato', name: 'Yleisten vuorojen lahjakortti 2 hengelle', name_en: 'Public session gift card for 2 people', description: 'Savusaunan musta viikko', description_en: 'Smoke Sauna Black Week',
+    kind: 'product', is_open: false, price: 50, min_amount: null, max_amount: null, persons: 2, vat_rate: 25.5, valid_months: 6, listed: false,
+    items: [{ label: '2 × pääsy yleiselle vuorolle ma–to', label_en: '2 × admission to a public session Mon–Thu' }],
+    sale_ends_at: '2026-11-30T10:00:00+02:00',
+    restrictions: { note: 'Voimassa 6 kk, ma–to. 2 henkeä, voi käyttää kahdessa osassa. Ei voimassa 24.–30.12. Turvetorstaina maksetaan erotus.', note_en: '', weekdays: [1, 2, 3, 4], covers_base: true, cover_max: 29, unit_value: 25, excluded_ranges: [{ from: '12-24', to: '12-30' }] } },
+];
+const ALL_PACKAGES = () => MOCK_PACKAGES.concat(DIRECT_GIFT_PACKAGES);
 
 export const MOCK_TOKEN = '3f2b8c1e-5a7d-4e9f-8b6a-1c2d3e4f5a6b';
 const fmtCode = (n) => `${n.slice(0, 4)}-${n.slice(4, 8)}-${n.slice(8)}`;
 const norm = (s) => String(s ?? '').toUpperCase().replace(/[^A-Z0-9]/g, '');
 const r2 = (n) => Math.round(n * 100) / 100;
 const uuid = (i) => `00000000-0000-4000-8000-${String(i).padStart(12, '0')}`;
-export function createGiftMock({ delay = 0, settings = {}, today = new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Helsinki' }), order = null } = {}) {
+export function createGiftMock({ delay = 0, settings = {}, today = new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Helsinki' }), now = Date.now(), order = null } = {}) {
   const cfg = { sale_enabled: true, redeem_enabled: true, max_cards: 10, claims_enabled: true, ...settings };
+  const at = typeof now === 'number' ? now : Date.parse(now);
+  const saleOpen = (p) => !p.sale_ends_at || Date.parse(p.sale_ends_at) > at;
   const day = (n) => { const d = new Date(`${today}T12:00:00Z`); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); };
   const wait = () => (delay ? new Promise((ok) => setTimeout(ok, delay)) : Promise.resolve());
   const bad = (code, message) => ({ ok: false, code, message });
@@ -23,11 +39,13 @@ export function createGiftMock({ delay = 0, settings = {}, today = new Date().to
     { code: 'HHCCCCCCCCCC', pkg: 'open', initial: 40, balance: 0, status: 'used', valid_to: day(60), source: 'native' },
     { code: 'JK1234567890', pkg: null, initial: 60, balance: 40, status: 'active', valid_to: day(90), source: 'johku' },
     { code: 'HHPPPPPPPPPP', pkg: 'open', initial: 30, balance: 30, status: 'pending_payment', valid_to: null, source: 'native', hidden: true },
+    { code: 'HHBFJALK1234', pkg: 'bf_jalkiloylyt_mato', initial: 130, balance: 130, status: 'active', valid_to: day(180), source: 'native' },
+    { code: 'HHMVYLEI1234', pkg: 'mv_yleiset_mato', initial: 50, balance: 25, status: 'active', valid_to: day(180), source: 'native' },
   ];
   const fails = [];   // yksinkertainen rate limit: 10 epäonnistunutta → rate_limited
   const limited = () => fails.length >= 10;
   const find = (c) => cards.find((x) => x.code === norm(c) && !x.hidden && x.status !== 'cancelled' && x.status !== 'pending_payment');
-  const pkgName = (c) => MOCK_PACKAGES.find((p) => p.code === c.pkg)?.name ?? null;
+  const pkgName = (c) => ALL_PACKAGES().find((p) => p.code === c.pkg)?.name ?? null;
   const notRedeemable = (c) => (!cfg.redeem_enabled ? 'redeem_disabled' : c.source === 'johku' && !cfg.johku ? 'johku_cards_closed' : c.status === 'expired' ? 'expired' : c.balance <= 0 ? 'empty' : null);
   // ---- Kumppanilahjakortit (§13.12, booking_47/48): lunastuspyynnöt muistissa. Mock peilaa palvelimen virhejärjestystä ja vastausmuotoja. ----
   const claims = (cfg.claims_seed || []).map((c, i) => ({ claim_no: 100 + i, source: 'elamyslahjat', status: 'open', problem_code: null, amount: null, code: `SEED${i}ABCDEF`, created_at: `${today}T08:00:00Z`, ...c }));
@@ -41,13 +59,19 @@ export function createGiftMock({ delay = 0, settings = {}, today = new Date().to
   const myCards = [];      // ostetut kortit (mock-osto)
   let orderNo = 15400;
   const handlers = {
-    public_gift_card_packages: () => ({ ok: true, sale_enabled: cfg.sale_enabled, redeem_enabled: cfg.redeem_enabled, max_cards_per_order: cfg.max_cards, currency: 'EUR', packages: JSON.parse(JSON.stringify(MOCK_PACKAGES)) }),
+    public_gift_card_packages: () => ({ ok: true, sale_enabled: cfg.sale_enabled, redeem_enabled: cfg.redeem_enabled, max_cards_per_order: cfg.max_cards, currency: 'EUR', packages: JSON.parse(JSON.stringify(MOCK_PACKAGES.filter((p) => p.listed !== false && saleOpen(p)))) }),
+    public_gift_card_package: ({ p_code }) => {
+      const p = ALL_PACKAGES().find((x) => x.code === String(p_code || '').trim());
+      if (!p || !saleOpen(p)) return bad('package_inactive', 'Paketti ei ole myynnissä');
+      return { ok: true, sale_enabled: cfg.sale_enabled, redeem_enabled: cfg.redeem_enabled, max_cards_per_order: cfg.max_cards, currency: 'EUR', package: JSON.parse(JSON.stringify(p)) };
+    },
     public_annual_card_offer: () => (cfg.annual_available ? { available: true, product_id: 43, name: 'Vuosikortti', name_en: 'Annual card', price: 290, vat_rate: 25.5, valid_months: 12 } : { available: false }),
     public_check_gift_card: ({ p_code }) => {
       if (limited()) return bad('rate_limited', 'Liian monta yritystä');
       const c = find(p_code); if (!c) { fails.push(1); return bad('invalid_code', 'Koodia ei löytynyt'); }
       const st = c.status === 'active' && c.valid_to < today ? 'expired' : c.status;
-      return { ok: true, code: fmtCode(c.code), type: 'value', package_code: c.pkg, package_name: pkgName(c), status: st, initial_amount: c.initial, balance: c.balance, currency: 'EUR', valid_to: c.valid_to, redeemable: notRedeemable({ ...c, status: st }) === null, not_redeemable_reason: notRedeemable({ ...c, status: st }), balance_verified: true };
+      const pkg = ALL_PACKAGES().find((p) => p.code === c.pkg);
+      return { ok: true, code: fmtCode(c.code), type: 'value', package_code: c.pkg, package_name: pkgName(c), status: st, initial_amount: c.initial, balance: c.balance, currency: 'EUR', valid_to: c.valid_to, redeemable: notRedeemable({ ...c, status: st }) === null, not_redeemable_reason: notRedeemable({ ...c, status: st }), balance_verified: true, restrictions: pkg?.restrictions ? { ...pkg.restrictions } : null };
     },
     public_apply_gift_card: ({ p_token, p_code, p_amount }) => {
       if (limited()) return bad('rate_limited', 'Liian monta yritystä');
@@ -122,10 +146,12 @@ export function createGiftMock({ delay = 0, settings = {}, today = new Date().to
     },
     public_buy_gift_card: (a) => {
       const err = validateBuy(a, cfg); if (err) return err;
+      const ended = (a.p_items || []).some((it) => { const p = ALL_PACKAGES().find((x) => x.code === it.package); return p && !saleOpen(p); });
+      if (ended) return bad('sale_ended', 'Tarjouksen myynti on päättynyt');
       const items = a.p_items, cs = [];
       let total = 0;
       items.forEach((it) => {
-        const p = MOCK_PACKAGES.find((x) => x.code === it.package), q = it.quantity ?? 1;
+        const p = ALL_PACKAGES().find((x) => x.code === it.package), q = it.quantity ?? 1;
         const persons = p.is_open ? null : (Number.isInteger(it.persons) ? it.persons : (p.persons || 2));
         const amt = p.is_open ? +it.amount : (packageAmount(p, persons) ?? p.price);
         const dl = deliveryOf(it, a, p).value;
@@ -170,7 +196,7 @@ export function validateBuy(a, cfg = { max_cards: 10 }) {
   if (!Array.isArray(items) || !items.length || items.length > 10) return bad('invalid_items', 'Virheelliset rivit');
   let n = 0;
   for (const it of items) {
-    const p = MOCK_PACKAGES.find((x) => x.code === it.package); if (!p) return bad('invalid_package', 'Tuntematon paketti');
+    const p = ALL_PACKAGES().find((x) => x.code === it.package); if (!p) return bad('invalid_package', 'Tuntematon paketti');
     const q = it.quantity ?? 1; if (!Number.isInteger(q) || q < 1) return bad('invalid_quantity', 'Virheellinen määrä');
     n += q;
     if (p.is_open) { const am = Number(it.amount); if (!(am >= p.min_amount && am <= p.max_amount) || Math.round(am * 100) !== am * 100) return bad('invalid_amount', 'Virheellinen summa'); }

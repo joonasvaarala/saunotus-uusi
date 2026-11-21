@@ -1,0 +1,282 @@
+[
+  {
+    "key": "ui.site.mvp_kicker",
+    "lang": "fi",
+    "text": "Kampanja",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "t1871u: Savusaunan musta viikko -kampanjasivu /musta-viikko/ ja /en/black-week/. Uusi avain. FI+EN, sama kuin koodin varateksti (src/musta-viikko-sivu.mjs)."
+  },
+  {
+    "key": "ui.site.mvp_kicker",
+    "lang": "en",
+    "text": "Campaign",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "t1871u: Savusaunan musta viikko -kampanjasivu /musta-viikko/ ja /en/black-week/. Uusi avain. FI+EN, sama kuin koodin varateksti (src/musta-viikko-sivu.mjs)."
+  },
+  {
+    "key": "ui.site.mvp_title",
+    "lang": "fi",
+    "text": "Savusaunan musta viikko",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "t1871u: Savusaunan musta viikko -kampanjasivu /musta-viikko/ ja /en/black-week/. Uusi avain. FI+EN, sama kuin koodin varateksti (src/musta-viikko-sivu.mjs)."
+  },
+  {
+    "key": "ui.site.mvp_title",
+    "lang": "en",
+    "text": "Smoke Sauna Black Week",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "t1871u: Savusaunan musta viikko -kampanjasivu /musta-viikko/ ja /en/black-week/. Uusi avain. FI+EN, sama kuin koodin varateksti (src/musta-viikko-sivu.mjs)."
+  },
+  {
+    "key": "ui.site.mvp_lead",
+    "lang": "fi",
+    "text": "Kaksi lahjakorttia, voimassa 6 kuukautta arkisin ma–to.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 140,
+    "placeholders": [],
+    "reason": "t1871u: Savusaunan musta viikko -kampanjasivu /musta-viikko/ ja /en/black-week/. Uusi avain. FI+EN, sama kuin koodin varateksti (src/musta-viikko-sivu.mjs)."
+  },
+  {
+    "key": "ui.site.mvp_lead",
+    "lang": "en",
+    "text": "Two gift cards, valid for 6 months on weekdays Mon–Thu.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 140,
+    "placeholders": [],
+    "reason": "t1871u: Savusaunan musta viikko -kampanjasivu /musta-viikko/ ja /en/black-week/. Uusi avain. FI+EN, sama kuin koodin varateksti (src/musta-viikko-sivu.mjs)."
+  },
+  {
+    "key": "ui.site.mvp_meta_title",
+    "lang": "fi",
+    "text": "Savusaunan musta viikko | Sipoonjoen Perinnesauna",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 140,
+    "placeholders": [],
+    "reason": "t1871u: Savusaunan musta viikko -kampanjasivu /musta-viikko/ ja /en/black-week/. Uusi avain. FI+EN, sama kuin koodin varateksti (src/musta-viikko-sivu.mjs)."
+  },
+  {
+    "key": "ui.site.mvp_meta_title",
+    "lang": "en",
+    "text": "Smoke Sauna Black Week | Sipoonjoki Heritage Sauna",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 140,
+    "placeholders": [],
+    "reason": "t1871u: Savusaunan musta viikko -kampanjasivu /musta-viikko/ ja /en/black-week/. Uusi avain. FI+EN, sama kuin koodin varateksti (src/musta-viikko-sivu.mjs)."
+  },
+  {
+    "key": "ui.site.mvp_meta_desc",
+    "lang": "fi",
+    "text": "Jälkilöylylahjakortti 130 € ja yleisten vuorojen lahjakortti 2 hengelle 50 €. Voimassa 6 kk, ma–to.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 260,
+    "placeholders": [],
+    "reason": "t1871u: Savusaunan musta viikko -kampanjasivu /musta-viikko/ ja /en/black-week/. Uusi avain. FI+EN, sama kuin koodin varateksti (src/musta-viikko-sivu.mjs)."
+  },
+  {
+    "key": "ui.site.mvp_meta_desc",
+    "lang": "en",
+    "text": "After Session Sauna gift card €130 and a public session gift card for 2 people €50. Valid 6 months, Mon–Thu.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 280,
+    "placeholders": [],
+    "reason": "t1871u: Savusaunan musta viikko -kampanjasivu /musta-viikko/ ja /en/black-week/. Uusi avain. FI+EN, sama kuin koodin varateksti (src/musta-viikko-sivu.mjs)."
+  },
+  {
+    "key": "ui.site.mvp_a_name",
+    "lang": "fi",
+    "text": "Jälkilöylylahjakortti",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "t1871u: Savusaunan musta viikko -kampanjasivu /musta-viikko/ ja /en/black-week/. Uusi avain. FI+EN, sama kuin koodin varateksti (src/musta-viikko-sivu.mjs)."
+  },
+  {
+    "key": "ui.site.mvp_a_name",
+    "lang": "en",
+    "text": "After Session Sauna gift card",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "t1871u: Savusaunan musta viikko -kampanjasivu /musta-viikko/ ja /en/black-week/. Uusi avain. FI+EN, sama kuin koodin varateksti (src/musta-viikko-sivu.mjs)."
+  },
+  {
+    "key": "ui.site.mvp_a_terms",
+    "lang": "fi",
+    "text": "Voimassa 6 kk, ma–to. Ei voimassa 24.–30.12.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "t1871u: Savusaunan musta viikko -kampanjasivu /musta-viikko/ ja /en/black-week/. Uusi avain. FI+EN, sama kuin koodin varateksti (src/musta-viikko-sivu.mjs)."
+  },
+  {
+    "key": "ui.site.mvp_a_terms",
+    "lang": "en",
+    "text": "Valid 6 months, Mon–Thu. Not valid 24–30 Dec.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 120,
+    "placeholders": [],
+    "reason": "t1871u: Savusaunan musta viikko -kampanjasivu /musta-viikko/ ja /en/black-week/. Uusi avain. FI+EN, sama kuin koodin varateksti (src/musta-viikko-sivu.mjs)."
+  },
+  {
+    "key": "ui.site.mvp_b_name",
+    "lang": "fi",
+    "text": "Yleisten vuorojen lahjakortti 2 hengelle",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 100,
+    "placeholders": [],
+    "reason": "t1871u: Savusaunan musta viikko -kampanjasivu /musta-viikko/ ja /en/black-week/. Uusi avain. FI+EN, sama kuin koodin varateksti (src/musta-viikko-sivu.mjs)."
+  },
+  {
+    "key": "ui.site.mvp_b_name",
+    "lang": "en",
+    "text": "Public session gift card for 2 people",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 100,
+    "placeholders": [],
+    "reason": "t1871u: Savusaunan musta viikko -kampanjasivu /musta-viikko/ ja /en/black-week/. Uusi avain. FI+EN, sama kuin koodin varateksti (src/musta-viikko-sivu.mjs)."
+  },
+  {
+    "key": "ui.site.mvp_b_terms",
+    "lang": "fi",
+    "text": "Voimassa 6 kk, ma–to. 2 henkeä, voi käyttää kahdessa osassa. Ei voimassa 24.–30.12. Turvetorstaina maksetaan erotus.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 300,
+    "placeholders": [],
+    "reason": "t1871u: Savusaunan musta viikko -kampanjasivu /musta-viikko/ ja /en/black-week/. Uusi avain. FI+EN, sama kuin koodin varateksti (src/musta-viikko-sivu.mjs)."
+  },
+  {
+    "key": "ui.site.mvp_b_terms",
+    "lang": "en",
+    "text": "Valid 6 months, Mon–Thu. 2 people, can be used in two parts. Not valid 24–30 Dec. On Peat Thursday the difference is paid.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 320,
+    "placeholders": [],
+    "reason": "t1871u: Savusaunan musta viikko -kampanjasivu /musta-viikko/ ja /en/black-week/. Uusi avain. FI+EN, sama kuin koodin varateksti (src/musta-viikko-sivu.mjs)."
+  },
+  {
+    "key": "ui.site.mvp_cta",
+    "lang": "fi",
+    "text": "Osta lahjakortti",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "t1871u: Savusaunan musta viikko -kampanjasivu /musta-viikko/ ja /en/black-week/. Uusi avain. FI+EN, sama kuin koodin varateksti (src/musta-viikko-sivu.mjs)."
+  },
+  {
+    "key": "ui.site.mvp_cta",
+    "lang": "en",
+    "text": "Buy a gift card",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "t1871u: Savusaunan musta viikko -kampanjasivu /musta-viikko/ ja /en/black-week/. Uusi avain. FI+EN, sama kuin koodin varateksti (src/musta-viikko-sivu.mjs)."
+  },
+  {
+    "key": "ui.site.mvp_ended",
+    "lang": "fi",
+    "text": "Musta viikko on päättynyt",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "t1871u: Savusaunan musta viikko -kampanjasivu /musta-viikko/ ja /en/black-week/. Uusi avain. FI+EN, sama kuin koodin varateksti (src/musta-viikko-sivu.mjs)."
+  },
+  {
+    "key": "ui.site.mvp_ended",
+    "lang": "en",
+    "text": "Black Week has ended",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "t1871u: Savusaunan musta viikko -kampanjasivu /musta-viikko/ ja /en/black-week/. Uusi avain. FI+EN, sama kuin koodin varateksti (src/musta-viikko-sivu.mjs)."
+  },
+  {
+    "key": "ui.site.mvp_ended_lead",
+    "lang": "fi",
+    "text": "Kampanja ei ole enää käynnissä. Voit tutustua saunaan etusivulla tai ostaa lahjakortin tavallisesta valikoimasta.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 300,
+    "placeholders": [],
+    "reason": "t1871u: Savusaunan musta viikko -kampanjasivu /musta-viikko/ ja /en/black-week/. Uusi avain. FI+EN, sama kuin koodin varateksti (src/musta-viikko-sivu.mjs)."
+  },
+  {
+    "key": "ui.site.mvp_ended_lead",
+    "lang": "en",
+    "text": "This campaign is no longer running. You can explore the sauna on the homepage or buy a gift card from our regular selection.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 320,
+    "placeholders": [],
+    "reason": "t1871u: Savusaunan musta viikko -kampanjasivu /musta-viikko/ ja /en/black-week/. Uusi avain. FI+EN, sama kuin koodin varateksti (src/musta-viikko-sivu.mjs)."
+  },
+  {
+    "key": "ui.site.mvp_ended_home",
+    "lang": "fi",
+    "text": "Etusivulle",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "t1871u: Savusaunan musta viikko -kampanjasivu /musta-viikko/ ja /en/black-week/. Uusi avain. FI+EN, sama kuin koodin varateksti (src/musta-viikko-sivu.mjs)."
+  },
+  {
+    "key": "ui.site.mvp_ended_home",
+    "lang": "en",
+    "text": "To the homepage",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "t1871u: Savusaunan musta viikko -kampanjasivu /musta-viikko/ ja /en/black-week/. Uusi avain. FI+EN, sama kuin koodin varateksti (src/musta-viikko-sivu.mjs)."
+  },
+  {
+    "key": "ui.site.mvp_ended_gift",
+    "lang": "fi",
+    "text": "Lahjakortteihin",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "t1871u: Savusaunan musta viikko -kampanjasivu /musta-viikko/ ja /en/black-week/. Uusi avain. FI+EN, sama kuin koodin varateksti (src/musta-viikko-sivu.mjs)."
+  },
+  {
+    "key": "ui.site.mvp_ended_gift",
+    "lang": "en",
+    "text": "To gift cards",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "t1871u: Savusaunan musta viikko -kampanjasivu /musta-viikko/ ja /en/black-week/. Uusi avain. FI+EN, sama kuin koodin varateksti (src/musta-viikko-sivu.mjs)."
+  }
+]

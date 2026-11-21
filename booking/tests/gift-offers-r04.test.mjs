@@ -90,8 +90,8 @@ test('API-virhe ei korvaa esirenderöityä listaa; vuosikorttilinkki vain kun my
   assert.equal(annualCardBuyHref({ available: true, price: 290 }, '/varaa/'), '/varaa/#/vuosikortti');
   assert.equal(annualCardBuyHref({ available: true }, '/en/book/#/'), '/en/book/#/vuosikortti');
   const src = readFileSync(new URL('../shop/src/gift.js', import.meta.url), 'utf8');
-  const gate = src.indexOf('if (G.giftSaleReplacesStatic(pk)');
-  const remove = src.indexOf("document.getElementById('paketit')?.remove()");
+  const gate = src.indexOf('G.giftSaleReplacesStatic(pk)');
+  const remove = src.indexOf("document.getElementById('paketit')?.remove()", gate);
   const annual = src.indexOf('placeAnnual(await annualP)');
   assert.ok(gate > 0 && remove > gate && annual > remove, 'poisto vain onnistuneen myynnin haarassa, vuosikortti sen jälkeen');
 });
