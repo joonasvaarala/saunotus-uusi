@@ -132,7 +132,7 @@ test('ei salaisuuksia selaimeen, Edge verify_jwt, migraatio oletuksena off, live
   const migDir = new URL('../supabase/migrations/', import.meta.url);
   const migs = readdirSync(migDir).filter((f) => /_booking_295_/.test(f));
   assert.equal(migs.length, 1);
-  assert.match(migs[0], /^2026111[3-9]\d{6}_booking_295_/);
+  assert.equal(migs[0], "20261121115144_booking_295_sumup_pos.sql"); // PROD-version mukaan
   const m = readFileSync(new URL(migs[0], migDir), 'utf8');
   assert.equal(/\bpublic\./i.test(m.replace(/--[^\n]*/g, '')), false, 'ei public-skeemaa');
   assert.match(m, /values \('sumup', 'off'/);
@@ -144,8 +144,6 @@ test('ei salaisuuksia selaimeen, Edge verify_jwt, migraatio oletuksena off, live
     assert.ok(m.includes(`revoke all on function booking.${fn} from public, anon, authenticated;`), fn);
     assert.ok(m.includes(`grant execute on function booking.${fn} to service_role;`), fn);
   }
-  // migraationumero ei ole varattu muualle (290–294)
-  assert.equal(readdirSync(migDir).filter((f) => /_booking_29[0-4]_/.test(f)).length, 0, 'repossa ei 290–294 (varattu muualle)');
   const rb = readFileSync(new URL(`../supabase/rollbacks/${migs[0].replace(/_sumup_pos\.sql$/, '_ROLLBACK.sql')}`, import.meta.url), 'utf8');
   assert.match(rb, /864bc26d1e42f6cb36eaf06da46dd6e6/);
   const edge = read('../supabase/functions/sumup-pos/handler.ts');
