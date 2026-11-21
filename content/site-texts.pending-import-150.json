@@ -1,0 +1,622 @@
+[
+ {
+  "key": "ui.pos.method_sumup",
+  "lang": "fi",
+  "text": "Korttipääte (SumUp Solo)",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_295 Pikakassan korttipääte (SumUp Solo, Cloud API). Näkyy vain kun sumup-tila on test tai live. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.method_sumup",
+  "lang": "en",
+  "text": "Card terminal (SumUp Solo)",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_295 Pikakassan korttipääte (SumUp Solo, Cloud API). Näkyy vain kun sumup-tila on test tai live. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.su_test_note",
+  "lang": "fi",
+  "text": "Testitila: SumUpin sandbox-tili, rahaa ei veloiteta.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_295 Pikakassan korttipääte (SumUp Solo, Cloud API). Näkyy vain kun sumup-tila on test tai live. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.su_test_note",
+  "lang": "en",
+  "text": "Test mode: SumUp sandbox account, no money is charged.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_295 Pikakassan korttipääte (SumUp Solo, Cloud API). Näkyy vain kun sumup-tila on test tai live. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.su_simulated",
+  "lang": "fi",
+  "text": "Simuloitu maksu: lukijaa ei käytetä, eikä rahaa liiku. Maksu hyväksytään muutaman sekunnin kuluttua.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_295 Pikakassan korttipääte (SumUp Solo, Cloud API). Näkyy vain kun sumup-tila on test tai live. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.su_simulated",
+  "lang": "en",
+  "text": "Simulated payment: the reader is not used and no money moves. The payment is approved after a few seconds.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_295 Pikakassan korttipääte (SumUp Solo, Cloud API). Näkyy vain kun sumup-tila on test tai live. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.su_reader",
+  "lang": "fi",
+  "text": "Lukija",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_295 Pikakassan korttipääte (SumUp Solo, Cloud API). Näkyy vain kun sumup-tila on test tai live. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.su_reader",
+  "lang": "en",
+  "text": "Reader",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_295 Pikakassan korttipääte (SumUp Solo, Cloud API). Näkyy vain kun sumup-tila on test tai live. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.su_pick",
+  "lang": "fi",
+  "text": "Valitse lukija",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_295 Pikakassan korttipääte (SumUp Solo, Cloud API). Näkyy vain kun sumup-tila on test tai live. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.su_pick",
+  "lang": "en",
+  "text": "Choose reader",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_295 Pikakassan korttipääte (SumUp Solo, Cloud API). Näkyy vain kun sumup-tila on test tai live. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.su_no_reader",
+  "lang": "fi",
+  "text": "Lukijaa ei ole valittu tai paritettu.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_295 Pikakassan korttipääte (SumUp Solo, Cloud API). Näkyy vain kun sumup-tila on test tai live. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.su_no_reader",
+  "lang": "en",
+  "text": "No reader is selected or paired.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_295 Pikakassan korttipääte (SumUp Solo, Cloud API). Näkyy vain kun sumup-tila on test tai live. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.su_pair_title",
+  "lang": "fi",
+  "text": "Pariuta uusi lukija",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_295 Pikakassan korttipääte (SumUp Solo, Cloud API). Näkyy vain kun sumup-tila on test tai live. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.su_pair_title",
+  "lang": "en",
+  "text": "Pair a new reader",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_295 Pikakassan korttipääte (SumUp Solo, Cloud API). Näkyy vain kun sumup-tila on test tai live. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.su_pair_code",
+  "lang": "fi",
+  "text": "Parituskoodi (lukijan näytöllä)",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_295 Pikakassan korttipääte (SumUp Solo, Cloud API). Näkyy vain kun sumup-tila on test tai live. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.su_pair_code",
+  "lang": "en",
+  "text": "Pairing code (shown on the reader)",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_295 Pikakassan korttipääte (SumUp Solo, Cloud API). Näkyy vain kun sumup-tila on test tai live. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.su_pair_name",
+  "lang": "fi",
+  "text": "Lukijan nimi",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_295 Pikakassan korttipääte (SumUp Solo, Cloud API). Näkyy vain kun sumup-tila on test tai live. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.su_pair_name",
+  "lang": "en",
+  "text": "Reader name",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_295 Pikakassan korttipääte (SumUp Solo, Cloud API). Näkyy vain kun sumup-tila on test tai live. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.su_pair",
+  "lang": "fi",
+  "text": "Pariuta lukija",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_295 Pikakassan korttipääte (SumUp Solo, Cloud API). Näkyy vain kun sumup-tila on test tai live. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.su_pair",
+  "lang": "en",
+  "text": "Pair reader",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_295 Pikakassan korttipääte (SumUp Solo, Cloud API). Näkyy vain kun sumup-tila on test tai live. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.su_pair_done",
+  "lang": "fi",
+  "text": "Lukija on paritettu.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_295 Pikakassan korttipääte (SumUp Solo, Cloud API). Näkyy vain kun sumup-tila on test tai live. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.su_pair_done",
+  "lang": "en",
+  "text": "The reader has been paired.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_295 Pikakassan korttipääte (SumUp Solo, Cloud API). Näkyy vain kun sumup-tila on test tai live. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.su_pair_invalid",
+  "lang": "fi",
+  "text": "Anna lukijan näytöllä näkyvä parituskoodi (6–12 merkkiä).",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_295 Pikakassan korttipääte (SumUp Solo, Cloud API). Näkyy vain kun sumup-tila on test tai live. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.su_pair_invalid",
+  "lang": "en",
+  "text": "Enter the pairing code shown on the reader (6–12 characters).",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_295 Pikakassan korttipääte (SumUp Solo, Cloud API). Näkyy vain kun sumup-tila on test tai live. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.su_pair_admin",
+  "lang": "fi",
+  "text": "Pyydä ylläpitäjää paritamaan lukija.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_295 Pikakassan korttipääte (SumUp Solo, Cloud API). Näkyy vain kun sumup-tila on test tai live. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.su_pair_admin",
+  "lang": "en",
+  "text": "Ask an administrator to pair the reader.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_295 Pikakassan korttipääte (SumUp Solo, Cloud API). Näkyy vain kun sumup-tila on test tai live. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.su_default",
+  "lang": "fi",
+  "text": "Oletukseksi",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_295 Pikakassan korttipääte (SumUp Solo, Cloud API). Näkyy vain kun sumup-tila on test tai live. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.su_default",
+  "lang": "en",
+  "text": "Make default",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_295 Pikakassan korttipääte (SumUp Solo, Cloud API). Näkyy vain kun sumup-tila on test tai live. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.su_default_set",
+  "lang": "fi",
+  "text": "Oletuslukija päivitetty.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_295 Pikakassan korttipääte (SumUp Solo, Cloud API). Näkyy vain kun sumup-tila on test tai live. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.su_default_set",
+  "lang": "en",
+  "text": "Default reader updated.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_295 Pikakassan korttipääte (SumUp Solo, Cloud API). Näkyy vain kun sumup-tila on test tai live. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.su_remove",
+  "lang": "fi",
+  "text": "Poista lukija",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_295 Pikakassan korttipääte (SumUp Solo, Cloud API). Näkyy vain kun sumup-tila on test tai live. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.su_remove",
+  "lang": "en",
+  "text": "Remove reader",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_295 Pikakassan korttipääte (SumUp Solo, Cloud API). Näkyy vain kun sumup-tila on test tai live. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.su_removed",
+  "lang": "fi",
+  "text": "Lukija poistettu käytöstä.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_295 Pikakassan korttipääte (SumUp Solo, Cloud API). Näkyy vain kun sumup-tila on test tai live. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.su_removed",
+  "lang": "en",
+  "text": "The reader has been removed.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_295 Pikakassan korttipääte (SumUp Solo, Cloud API). Näkyy vain kun sumup-tila on test tai live. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.su_default_badge",
+  "lang": "fi",
+  "text": "oletus",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_295 Pikakassan korttipääte (SumUp Solo, Cloud API). Näkyy vain kun sumup-tila on test tai live. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.su_default_badge",
+  "lang": "en",
+  "text": "default",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_295 Pikakassan korttipääte (SumUp Solo, Cloud API). Näkyy vain kun sumup-tila on test tai live. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.su_waiting_help",
+  "lang": "fi",
+  "text": "Lukija näyttää summan. Asiakas koskettaa korttia tai puhelinta lukijaan. Tila päivittyy itsestään.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_295 Pikakassan korttipääte (SumUp Solo, Cloud API). Näkyy vain kun sumup-tila on test tai live. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.su_waiting_help",
+  "lang": "en",
+  "text": "The reader shows the amount. The customer taps their card or phone on the reader. The status updates by itself.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_295 Pikakassan korttipääte (SumUp Solo, Cloud API). Näkyy vain kun sumup-tila on test tai live. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.su_failed",
+  "lang": "fi",
+  "text": "Korttimaksu ei onnistunut.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_295 Pikakassan korttipääte (SumUp Solo, Cloud API). Näkyy vain kun sumup-tila on test tai live. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.su_failed",
+  "lang": "en",
+  "text": "The card payment did not go through.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_295 Pikakassan korttipääte (SumUp Solo, Cloud API). Näkyy vain kun sumup-tila on test tai live. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.su_cancelled",
+  "lang": "fi",
+  "text": "Korttimaksu peruttiin.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_295 Pikakassan korttipääte (SumUp Solo, Cloud API). Näkyy vain kun sumup-tila on test tai live. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.su_cancelled",
+  "lang": "en",
+  "text": "The card payment was cancelled.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_295 Pikakassan korttipääte (SumUp Solo, Cloud API). Näkyy vain kun sumup-tila on test tai live. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.su_retry",
+  "lang": "fi",
+  "text": "Yritä uudelleen",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_295 Pikakassan korttipääte (SumUp Solo, Cloud API). Näkyy vain kun sumup-tila on test tai live. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.su_retry",
+  "lang": "en",
+  "text": "Try again",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_295 Pikakassan korttipääte (SumUp Solo, Cloud API). Näkyy vain kun sumup-tila on test tai live. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.su_cancel",
+  "lang": "fi",
+  "text": "Peru maksu",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_295 Pikakassan korttipääte (SumUp Solo, Cloud API). Näkyy vain kun sumup-tila on test tai live. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.su_cancel",
+  "lang": "en",
+  "text": "Cancel payment",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_295 Pikakassan korttipääte (SumUp Solo, Cloud API). Näkyy vain kun sumup-tila on test tai live. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.su_already_paid",
+  "lang": "fi",
+  "text": "Asiakas ehti maksaa, joten maksua ei peruttu.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_295 Pikakassan korttipääte (SumUp Solo, Cloud API). Näkyy vain kun sumup-tila on test tai live. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.su_already_paid",
+  "lang": "en",
+  "text": "The customer had already paid, so the payment was not cancelled.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_295 Pikakassan korttipääte (SumUp Solo, Cloud API). Näkyy vain kun sumup-tila on test tai live. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.su_off",
+  "lang": "fi",
+  "text": "Korttipääte ei ole käytössä.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_295 Pikakassan korttipääte (SumUp Solo, Cloud API). Näkyy vain kun sumup-tila on test tai live. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.su_off",
+  "lang": "en",
+  "text": "The card terminal is not in use.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_295 Pikakassan korttipääte (SumUp Solo, Cloud API). Näkyy vain kun sumup-tila on test tai live. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.su_not_configured",
+  "lang": "fi",
+  "text": "SumUp-tunnukset puuttuvat. Maksua ei aloitettu.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_295 Pikakassan korttipääte (SumUp Solo, Cloud API). Näkyy vain kun sumup-tila on test tai live. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.su_not_configured",
+  "lang": "en",
+  "text": "SumUp credentials are missing. The payment was not started.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_295 Pikakassan korttipääte (SumUp Solo, Cloud API). Näkyy vain kun sumup-tila on test tai live. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.su_reader_offline",
+  "lang": "fi",
+  "text": "Lukija ei ole yhteydessä. Tarkista lukijan verkkoyhteys ja yritä uudelleen.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_295 Pikakassan korttipääte (SumUp Solo, Cloud API). Näkyy vain kun sumup-tila on test tai live. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.su_reader_offline",
+  "lang": "en",
+  "text": "The reader is not connected. Check its network connection and try again.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_295 Pikakassan korttipääte (SumUp Solo, Cloud API). Näkyy vain kun sumup-tila on test tai live. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.su_unavailable",
+  "lang": "fi",
+  "text": "SumUp ei vastaa juuri nyt. Yritä hetken kuluttua uudelleen.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_295 Pikakassan korttipääte (SumUp Solo, Cloud API). Näkyy vain kun sumup-tila on test tai live. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.su_unavailable",
+  "lang": "en",
+  "text": "SumUp is not responding right now. Please try again shortly.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_295 Pikakassan korttipääte (SumUp Solo, Cloud API). Näkyy vain kun sumup-tila on test tai live. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.su_provider_error",
+  "lang": "fi",
+  "text": "SumUp ei hyväksynyt pyyntöä. Yritä uudelleen.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_295 Pikakassan korttipääte (SumUp Solo, Cloud API). Näkyy vain kun sumup-tila on test tai live. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.su_provider_error",
+  "lang": "en",
+  "text": "SumUp did not accept the request. Please try again.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_295 Pikakassan korttipääte (SumUp Solo, Cloud API). Näkyy vain kun sumup-tila on test tai live. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.su_in_progress",
+  "lang": "fi",
+  "text": "Tilauksella on jo avoin maksu toisella maksutavalla.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_295 Pikakassan korttipääte (SumUp Solo, Cloud API). Näkyy vain kun sumup-tila on test tai live. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.su_in_progress",
+  "lang": "en",
+  "text": "The order already has an open payment with another method.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_295 Pikakassan korttipääte (SumUp Solo, Cloud API). Näkyy vain kun sumup-tila on test tai live. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.su_forbidden",
+  "lang": "fi",
+  "text": "Sinulla ei ole oikeutta tähän toimintoon.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_295 Pikakassan korttipääte (SumUp Solo, Cloud API). Näkyy vain kun sumup-tila on test tai live. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ },
+ {
+  "key": "ui.pos.su_forbidden",
+  "lang": "en",
+  "text": "You do not have permission for this action.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_295 Pikakassan korttipääte (SumUp Solo, Cloud API). Näkyy vain kun sumup-tila on test tai live. Bottiavustus tuo admin_texts_importilla; ei ylikirjoita olemassa olevia."
+ }
+]

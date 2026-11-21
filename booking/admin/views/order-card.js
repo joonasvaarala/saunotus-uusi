@@ -7,7 +7,7 @@ import { telHref, mailHref, createLatestGate } from '../reservation-dialog-logic
 import { cardActions, cardPaymentStatus, cardSectionSummaries, cardAddonLine, orderBreakdown, vatRateLabel } from '../order-card-logic.js';
 import { loadOrderTexts, orderText as tx } from '../orders-texts.js';
 import { loadRcTexts } from '../refund-cancel-texts.js';
-import { cancelReservationDialog, CX_KINDS, processOnlineRefunds } from './refund-cancel.js';
+import { cancelReservationDialog, CX_KINDS, SU_KINDS, processOnlineRefunds } from './refund-cancel.js';
 import { changeRefundStep } from './partial-refund-flow.js';
 import { prText } from '../partial-refund-texts.js';
 import { errorKey } from '../partial-refund-logic.js';
@@ -298,6 +298,11 @@ export function openOrderCard({
     toast(t(CX_KINDS[m.result] ? `refund.cx.${m.result}` : 'refund.cx.error'), CX_KINDS[m.result] || 'warn');
     return m;
   }
+  async function processSumupRefund(refundId) {
+    const m = api.sumupRefund ? await api.sumupRefund(refundId) : { result: 'none' };
+    toast(t(SU_KINDS[m.result] ? `refund.su.${m.result}` : 'refund.su.error'), SU_KINDS[m.result] || 'warn');
+    return m;
+  }
   async function processMontonioRefund(refundId) {
     const m = await api.montonioRefund(refundId);
     toast(t(MO_KINDS[m.result] ? `refund.mo.${m.result}` : 'refund.mo.error'), MO_KINDS[m.result] || 'warn');
@@ -306,7 +311,7 @@ export function openOrderCard({
   function openRefunds(p) {
     const rows = (p.refunds || []).filter((x) => ['requested', 'processing', 'failed'].includes(x.status));
     if (!rows.length) return null;
-    const canRetry = (p.provider === 'mobilepay' || p.provider === 'visma_pay' || p.provider === 'montonio' || p.provider === 'checkoutx') && !api.isMock?.('refund') && can('payments.refund');
+    const canRetry = (p.provider === 'mobilepay' || p.provider === 'visma_pay' || p.provider === 'montonio' || p.provider === 'checkoutx' || p.provider === 'sumup') && !api.isMock?.('refund') && can('payments.refund');
     return h('ul', { class: 'tl-refunds', 'data-testid': 'order-open-refunds' }, rows.map((rf) => h('li', { 'data-testid': 'open-refund', 'data-status': rf.status },
       h('span', { class: `badge ${rf.status === 'failed' ? 'st-cancelled' : 'st-pending'}`, text: t(rf.status === 'failed' ? 'refund.failed' : 'refund.pending') }), ' ',
       h('span', { text: `${money(rf.amount)}${rf.reason ? ' · ' + rf.reason : ''}` }),
@@ -314,6 +319,7 @@ export function openOrderCard({
         if (p.provider === 'visma_pay') await processVismaRefund(rf.id);
         else if (p.provider === 'montonio') await processMontonioRefund(rf.id);
         else if (p.provider === 'checkoutx') await processCheckoutxRefund(rf.id);
+        else if (p.provider === 'sumup') await processSumupRefund(rf.id);
         else await processMobilepayRefund(rf.id);
         await fetchOrder(); onChange?.();
       }) }) : null)));

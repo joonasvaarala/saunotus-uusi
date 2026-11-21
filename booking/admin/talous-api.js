@@ -463,6 +463,20 @@ export function createTalousApi({ rpc, io = {}, mock = wantsMock(), mockFactory 
         return { result: code === 'forbidden' || e?.status === 403 ? 'forbidden' : code === 'not_configured' ? 'not_configured' : 'error', code, status: e?.status ?? null };
       }
     },
+    // booking_295: korttipääte (SumUp Solo). admin_refund luo rivin status='requested' (provider='sumup'); POST sumup-pos {action:'refund', refund_id}.
+    // Palauttaa samat result-arvot kuin checkoutxRefund. Ei heitä.
+    async sumupRefund(refundId) {
+      if (!real || !io.fn) return { result: 'done', mock: true };
+      try {
+        const j = await io.fn('sumup-pos', { action: 'refund', refund_id: refundId });
+        const x = (j?.processed || []).find((p) => +p.refund_id === +refundId);
+        if (x) return { result: String(x.result || 'error'), detail: x.detail ?? null };
+        return { result: j?.mode === 'off' ? 'off' : 'none' };
+      } catch (e) {
+        const code = e?.code || e?.details?.code || null;
+        return { result: code === 'forbidden' || e?.status === 403 ? 'forbidden' : code === 'not_configured' ? 'not_configured' : 'error', code, status: e?.status ?? null };
+      }
+    },
     addToOrder: (a) => act('addToOrder', a), createPaymentLink: (a) => act('createPaymentLink', a), refund: (a) => act('refund', a), refundOrder: (a) => act('refundOrder', a), recordPayment: (a) => act('recordPayment', a),
     reservationRefundPreview: (id) => act('reservationRefundPreview', id), cancelReservation: (a) => act('cancelReservation', a),
     // booking_146: tilauksen vuosikortti (koodi, voimassaolo, sähköpostin tila). Oikeassa tilassa EI mock-varaa: puuttuva RPC → null (näkymä ei näytä mitään keksittyä koodia).

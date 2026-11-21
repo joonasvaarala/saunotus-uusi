@@ -38,16 +38,13 @@ function reset() {
 }
 
 // ---------- puhtaat apurit ----------
-test('cxEnabled ja tenderAvailable: vain tila test näyttää maksutavan', () => {
+test('cxEnabled ja tenderAvailable: CheckoutX on piilotettu Pikakassasta (booking_295), apurit säilyvät', () => {
   const t = { code: 'checkoutx', handler: 'checkoutx', channels: ['pos'], active: true };
-  assert.equal(cxm.cxEnabled({ checkoutx_mode: 'test' }), true);
-  for (const m of [undefined, null, {}, { checkoutx_mode: 'off' }, { checkoutx_mode: 'live' }]) {
-    assert.equal(cxm.cxEnabled(m), false);
-    assert.equal(tenderAvailable(t, m), false);
+  assert.equal(cxm.cxEnabled({ checkoutx_mode: 'test' }), true, 'apuri itse ennallaan');
+  for (const m of [undefined, null, {}, { checkoutx_mode: 'off' }, { checkoutx_mode: 'test' }, { checkoutx_mode: 'live' }]) {
+    assert.equal(tenderAvailable(t, m), false, 'ei koskaan käytettävissä kassalla');
   }
-  assert.equal(tenderAvailable(t, { checkoutx_mode: 'test' }), true);
-  assert.equal(tenderAvailable({ ...t, active: false }, { checkoutx_mode: 'test' }), false);
-  assert.equal(posSheetTenders([t]).length, 1, 'kassan listalle kelpaa');
+  assert.equal(posSheetTenders([t]).length, 0, 'ei kassan maksulistalla');
   // muut maksutavat ennallaan
   assert.equal(tenderAvailable({ code: 'payment_link', handler: 'payment_link', active: true }, { montonio_mode: 'test', checkoutx_mode: 'off' }), true);
   assert.equal(tenderAvailable({ code: 'card_terminal', handler: 'terminal', active: true }, { checkoutx_mode: 'test' }), false);
@@ -158,182 +155,23 @@ test('ei salaisuuksia selaimeen, Edge verify_jwt, migraatio oletuksena off eikä
 });
 
 // ---------- näkymä ----------
-function cxRpc({ mode = 'test', terminals = [{ terminal_id: 'T0001', label: 'Kassapuhelin' }] } = {}) {
-  const mock = createAdminMock({ delay: 0 });
-  const st = { paid: false, calls: [] };
-  const rpc = async (name, args) => {
-    st.calls.push(name);
-    if (name === 'admin_pos_tenders') {
-      const r = await mock.rpc(name, args);
-      const base = { ...r, checkoutx_mode: mode, tenders: (r.tenders || []).filter((x) => x.handler !== 'checkoutx') };
-      if (mode === 'test') base.tenders = [...base.tenders, { code: 'checkoutx', handler: 'checkoutx', channels: ['pos'], active: true, sort_order: 15 }];
-      return base;
-    }
-    if (name === 'admin_get_checkoutx_status') return { ok: true, mode, terminals };
-    if (name === 'admin_pos_status' && st.paid) {
-      const r = await mock.rpc(name, args);
-      return { ...r, payment_status: 'paid', receipts: [{ receipt_no: 'K-1' }] };
-    }
-    return mock.rpc(name, args);
-  };
-  return { rpc, st };
-}
 const ctx = { can: (p) => p === 'pos.use' || p === 'catalog.edit' || p === 'settings.edit' };
-async function mountWith(rpc, fn) {
-  reset();
-  const root = await renderPos({ ctx, rpc, fn });
-  document.body.append(root);
-  return root;
-}
-const tenderRadio = (dlg, v) => all(dlg).find((n) => n.getAttribute('name') === 'tender' && n.value === v);
-
-test('tila off (tuotanto): ei CheckoutX-vaihtoehtoa eikä tilakyselyä', async () => {
+test('Pikakassa ei näytä CheckoutX:ää, vaikka palvelin kertoisi checkoutx_mode = test (booking_295)', async () => {
   mem.clear();
-  const { rpc, st } = cxRpc({ mode: 'off' });
-  const root = await mountWith(rpc, async (name) => { throw new Error(`fn:${name}`); });
+  const mock = createAdminMock({ delay: 0, checkoutx: true });
+  const ten = await mock.rpc('admin_pos_tenders');
+  assert.equal(ten.checkoutx_mode, 'test');
+  assert.ok(ten.tenders.some((x) => x.code === 'checkoutx'), 'vanha vastaus sisältää rivin');
+  reset();
+  const calls = [];
+  const rpc = async (name, args) => { calls.push(name); return mock.rpc(name, args); };
+  const root = await renderPos({ ctx, rpc, fn: async () => { throw new Error('ei fn-kutsuja'); } });
+  document.body.append(root);
   q(root, 'pos-product-101').click();
   q(root, 'pos-pay').click();
   const dlg = document.getElementById('pos-pay-dialog');
-  assert.equal(tenderRadio(dlg, 'checkoutx'), undefined);
-  assert.equal(st.calls.includes('admin_get_checkoutx_status'), false);
+  assert.equal(all(dlg).find((n) => n.getAttribute('name') === 'tender' && n.value === 'checkoutx'), undefined);
   assert.equal(dlg.textContent.includes('CheckoutX'), false);
-});
-
-test('tila test: maksu käynnistää CheckoutX:n, tila haetaan Edge-funktiolta ja maksettu näkyy', async () => {
-  mem.clear();
-  const { rpc, st } = cxRpc();
-  const fnCalls = [];
-  const fn = async (name, body) => {
-    fnCalls.push([name, body]);
-    if (body.action === 'start') return { ok: true, payment_id: 77, amount: 3, deep_link: 'checkoutx://com.surfboard.checkoutx/transaction?redirectUrl=a&data=b', configure_link: 'checkoutx://com.surfboard.checkoutx/configure?redirectUrl=a' };
-    if (body.action === 'status') { st.paid = true; return { ok: true, state: 'paid' }; }
-    throw new Error('odottamaton');
-  };
-  const root = await mountWith(rpc, fn);
-  q(root, 'pos-product-101').click();
-  q(root, 'pos-pay').click();
-  let dlg = document.getElementById('pos-pay-dialog');
-  const radio = tenderRadio(dlg, 'checkoutx');
-  assert.ok(radio, 'vaihtoehto näkyy');
-  assert.match(radio.parent.textContent, /Kortti puhelimella \(CheckoutX\)/);
-  radio.dispatch('change');
-  dlg = document.getElementById('pos-pay-dialog');
-  assert.ok(q(dlg, 'pos-cx'));
-  assert.match(q(dlg, 'pos-cx-test-note').textContent, /Testiympäristö/);
-  assert.equal(q(dlg, 'pos-cx-no-terminal'), null, 'ainoa puhelin valitaan automaattisesti');
-  q(dlg, 'pos-confirm').click();
-  await flush();
-  const startCall = fnCalls.find(([, b]) => b.action === 'start');
-  assert.ok(startCall);
-  assert.equal(startCall[0], 'checkoutx-pos');
-  assert.equal(startCall[1].terminal_id, 'T0001');
-  assert.equal(startCall[1].return, 'chrome');
-  assert.ok(Number.isInteger(startCall[1].order_id));
-  assert.ok(fnCalls.some(([, b]) => b.action === 'status' && b.payment_id === 77));
-  await flush();
-  dlg = document.getElementById('pos-pay-dialog');
-  assert.ok(q(dlg, 'pos-paid-dialog'), 'maksettu');
-  assert.equal(mem.has(cxm.CX_PENDING_KEY), false, 'kesken-merkintä poistettu');
-  q(dlg, 'pos-next-dialog').click();
-});
-
-test('tila test: epäonnistunut maksu → virhe, uusi yritys ja peruutus (Surfboard ensin, sitten kassa)', async () => {
-  mem.clear();
-  const { rpc, st } = cxRpc();
-  const fnCalls = [];
-  let n = 0;
-  const fn = async (name, body) => {
-    fnCalls.push(body.action);
-    if (body.action === 'start') return { ok: true, payment_id: 80 + (++n), amount: 3, deep_link: 'checkoutx://com.surfboard.checkoutx/transaction?redirectUrl=a&data=b' };
-    if (body.action === 'status') return { ok: true, state: 'failed', failure_reason: 'DECLINED' };
-    if (body.action === 'cancel') return { ok: true, state: 'cancelled' };
-    throw new Error('odottamaton');
-  };
-  const root = await mountWith(rpc, fn);
-  q(root, 'pos-product-101').click();
-  q(root, 'pos-pay').click();
-  tenderRadio(document.getElementById('pos-pay-dialog'), 'checkoutx').dispatch('change');
-  q(document.getElementById('pos-pay-dialog'), 'pos-confirm').click();
-  await flush();
-  let dlg = document.getElementById('pos-pay-dialog');
-  assert.match(q(dlg, 'pos-cx-failed').textContent, /Korttimaksu ei onnistunut\. \(DECLINED\)/);
-  q(dlg, 'pos-cx-retry').click();
-  await flush();
-  assert.equal(fnCalls.filter((a) => a === 'start').length, 2);
-  dlg = document.getElementById('pos-pay-dialog');
-  q(dlg, 'pos-cx-cancel').click();
-  await flush();
-  assert.ok(st.calls.includes('admin_pos_void'));
-  assert.equal(fnCalls.includes('cancel'), false, 'epäonnistunutta ei tarvitse perua Surfboardista');
-  assert.equal(mem.has(cxm.CX_PENDING_KEY), false);
-});
-
-test('tila test: puhelinta ei liitetty → ei Surfboard-kutsua; ylläpitäjä voi liittää puhelimen', async () => {
-  mem.clear();
-  const { rpc } = cxRpc({ terminals: [] });
-  const fnCalls = [];
-  const fn = async (name, body) => {
-    fnCalls.push(body.action);
-    if (body.action === 'register_start') return { ok: true, registration_code: 'reg1', deep_link: 'checkoutx://com.surfboard.checkoutx/register?redirectUrl=a&data=b' };
-    throw new Error('odottamaton');
-  };
-  const root = await mountWith(rpc, fn);
-  q(root, 'pos-product-101').click();
-  q(root, 'pos-pay').click();
-  tenderRadio(document.getElementById('pos-pay-dialog'), 'checkoutx').dispatch('change');
-  let dlg = document.getElementById('pos-pay-dialog');
-  assert.match(q(dlg, 'pos-cx-no-terminal').textContent, /ei ole liitetty/);
-  q(dlg, 'pos-confirm').click();
-  await flush();
-  assert.equal(fnCalls.includes('start'), false);
-  dlg = document.getElementById('pos-pay-dialog');
-  assert.match(q(dlg, 'pos-pay-error').textContent, /ei ole liitetty/);
-  q(dlg, 'pos-cx-register').click();
-  await flush();
-  assert.deepEqual(fnCalls, ['register_start']);
-  assert.ok(q(document.getElementById('pos-pay-dialog'), 'pos-cx-register-wait'));
-  q(document.getElementById('pos-pay-dialog'), 'pos-pay-close').click();
+  assert.equal(calls.includes('admin_get_checkoutx_status'), false, 'ei CheckoutX-tilakyselyä');
   document.body.replaceChildren();
-  await flush();
-});
-
-// ---------- kokeilutila (?mock=1): simuloitu CheckoutX ilman Surfboard-tunnuksia ----------
-test('kokeilutila: simuloitu maksu hylätään (?cx=decline) ja uusi yritys hyväksytään; ei syvälinkkiä, ei verkkoa', async () => {
-  mem.clear();
-  globalThis.location = { search: '?mock=1&cx=decline', hash: '', pathname: '/hallinta/' };
-  try {
-    assert.equal((await createAdminMock({ delay: 0 }).rpc('admin_pos_tenders')).checkoutx_mode, 'off', 'oletuksena pois');
-    const mock = createAdminMock({ delay: 0, checkoutx: true });
-    const ten = await mock.rpc('admin_pos_tenders');
-    assert.equal(ten.checkoutx_mode, 'test');
-    assert.ok(ten.tenders.some((x) => x.code === 'checkoutx'));
-    await assert.rejects(mock.fn('montonio-refund', {}), (e) => e.code === 'mock_unsupported');
-    const root = await mountWith(mock.rpc, mock.fn);
-    q(root, 'pos-product-101').click();
-    q(root, 'pos-pay').click();
-    tenderRadio(document.getElementById('pos-pay-dialog'), 'checkoutx').dispatch('change');
-    let dlg = document.getElementById('pos-pay-dialog');
-    assert.match(q(dlg, 'pos-cx-test-note').textContent, /Simuloitu maksu/);
-    q(dlg, 'pos-confirm').click();
-    await flush();
-    dlg = document.getElementById('pos-pay-dialog');
-    assert.ok(q(dlg, 'pos-cx-simulated'));
-    assert.equal(q(dlg, 'pos-cx-open'), null, 'sovellusta ei avata');
-    await new Promise((r) => setTimeout(r, 2700)); await flush();
-    dlg = document.getElementById('pos-pay-dialog');
-    assert.match(q(dlg, 'pos-cx-failed').textContent, /\(DECLINED\)/);
-    q(dlg, 'pos-cx-retry').click();
-    await flush();
-    await new Promise((r) => setTimeout(r, 2700)); await flush();
-    dlg = document.getElementById('pos-pay-dialog');
-    assert.ok(q(dlg, 'pos-paid-dialog'), 'toinen yritys maksettu');
-    const calls = mock.state.calls.map((c) => c.name);
-    assert.equal(calls.filter((n) => n === 'fn:checkoutx-pos').length >= 4, true);
-    assert.equal(mock.state.cx.payments.length, 2);
-    assert.deepEqual(mock.state.cx.payments.map((x) => x.state), ['failed', 'paid']);
-    q(dlg, 'pos-next-dialog').click();
-  } finally {
-    globalThis.location = { search: '?mock=1', hash: '', pathname: '/hallinta/' };
-    document.body.replaceChildren();
-  }
 });

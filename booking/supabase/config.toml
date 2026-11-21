@@ -45,6 +45,12 @@ verify_jwt = true    # henkilökunta (payments.refund tarkistetaan funktiossa) t
 [functions.checkoutx-pos]
 verify_jwt = true    # henkilökunta (pos.use / settings.edit / payments.refund tarkistetaan funktiossa) tai service role
 
+# Pikakassan korttipääte (SumUp Solo, Cloud API, booking_295). Salaisuudet: SUMUP_API_KEY, SUMUP_AFFILIATE_KEY, SUMUP_AFFILIATE_APP_ID, SUMUP_MERCHANT_CODE, SUMUP_WEBHOOK_SECRET, SUMUP_ENV (sandbox|live), SUMUP_NOTIFY_URL. Kytkin: integration_config sumup (off/test/live).
+[functions.sumup-pos]
+verify_jwt = true    # henkilökunta (pos.use / settings.edit / payments.refund tarkistetaan funktiossa) tai service role
+[functions.sumup-notify]
+verify_jwt = false   # SumUp-webhook; tunnistus ?s=<SUMUP_WEBHOOK_SECRET>, maksu kirjataan vasta SumUpin rajapinnan vahvistuksella
+
 [functions.procountor-sync]
 verify_jwt = false   # pg_cron kutsuu; tunnistus x-sync-secret (booking._cron_secret_ok). Ei JWT:tä.
 
