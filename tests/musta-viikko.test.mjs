@@ -29,9 +29,9 @@ test('oletuksena pois päältä; paketin koodi yhdessä vakiossa', () => {
   assert.doesNotMatch(others, /bf_jalkiloylyt_mato/);
 });
 
-test('tuotelinkki on lahjakorttisivu + ?paketti=, FI ja EN', () => {
-  assert.equal(mustaViikkoHref('fi'), '/lahjakortti/?paketti=bf_jalkiloylyt_mato');
-  assert.equal(mustaViikkoHref('en'), '/en/gift-card/?paketti=bf_jalkiloylyt_mato');
+test('bannerin ja kortin linkki on kampanjasivu, FI ja EN', () => {
+  assert.equal(mustaViikkoHref('fi'), '/musta-viikko/');
+  assert.equal(mustaViikkoHref('en'), '/en/black-week/');
 });
 
 test('hinta 130 € sivuston money-muodossa', () => {
@@ -85,7 +85,9 @@ test('banneri ja kortti ovat piilossa, sisältävät linkin, hinnan ja voimassao
     assert.ok(banner.includes(MUSTA_VIIKKO_TEXTS['ui.site.mv_title'][lang]));
     assert.ok(banner.includes(MUSTA_VIIKKO_TEXTS['ui.site.mv_product'][lang]));
     assert.ok(banner.includes(price));
-    assert.ok(banner.includes('– '));
+    assert.match(banner, /class="mv-banner-sep"[^>]*>–/);
+    assert.match(banner, /class="mv-banner-text"/);
+    assert.doesNotMatch(banner, /class="mv-banner-text">–/);
     assert.match(banner, /data-mv-close/);
     assert.ok(banner.includes(MUSTA_VIIKKO_TEXTS['ui.site.mv_close'][lang]));
     assert.ok(card.includes(MUSTA_VIIKKO_TEXTS['ui.site.mv_title'][lang]));
@@ -118,8 +120,10 @@ test('etusivu: kortti viikko-ohjelman jälkeen, banneri ylälaidassa, molemmat h
     assert.ok(vk !== -1 && promo !== -1 && trad !== -1);
     assert.ok(vk < promo && promo < trad, 'kortti viikko-ohjelman ja rituaaliosion välissä');
   }
-  assert.ok(fi.includes('/lahjakortti/?paketti=bf_jalkiloylyt_mato'));
-  assert.ok(en.includes('/en/gift-card/?paketti=bf_jalkiloylyt_mato'));
+  assert.ok(fi.includes('/musta-viikko/'));
+  assert.ok(en.includes('/en/black-week/'));
+  assert.doesNotMatch(fi, /\?paketti=/);
+  assert.doesNotMatch(en, /\?paketti=/);
   assert.ok(fi.includes('Jälkilöylylahjakortti'));
   assert.ok(fi.includes('Voimassa 6 kk, ma–to'));
   assert.ok(en.includes('After Session Sauna gift card'));
@@ -139,6 +143,9 @@ test('CSS: musta tausta, vaalea teksti, kulta-aksentti, ei tummanvihreää', () 
   assert.doesNotMatch(block, /var\(--green\)/);
   assert.equal((block.match(/#161311/g) || []).length, 2);
   assert.doesNotMatch(block.replaceAll('#161311', ''), /#[0-9a-fA-F]{3,8}/);
+  assert.match(block, /@media \(max-width:640px\)/);
+  assert.match(block, /\.mv-banner-link\{[^}]*flex-direction:column/);
+  assert.match(block, /\.mv-banner-sep\{display:none\}/);
 });
 
 test('aikaohjaus: banneri ja etusivun kortti eivät renderöidy 30.11.2026 klo 10 (Helsinki) jälkeen', () => {

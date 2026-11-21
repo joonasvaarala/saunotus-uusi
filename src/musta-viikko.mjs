@@ -42,7 +42,7 @@ export const mvText = (key, lang, vars = null) => fillVars(
 );
 
 export function mustaViikkoHref(lang) {
-  return `${pageHref('gift', lang)}?paketti=${MUSTA_VIIKKO_PACKAGE}`;
+  return lang === 'en' ? '/en/black-week/' : '/musta-viikko/';
 }
 
 export function mustaViikkoPrice(lang) {
@@ -56,7 +56,7 @@ export function mustaViikkoBannerHtml(lang, now = Date.now()) {
   const text = mvText('ui.site.mv_banner_text', lang, { price });
   const close = mvText('ui.site.mv_close', lang);
   const href = mustaViikkoHref(lang);
-  return `<div class="mv-banner" data-mv-banner hidden role="region" aria-label="${e(title)}"><div class="wrap mv-banner-in"><a class="mv-banner-link" href="${e(href)}"><strong>${e(title)}</strong><span>– ${e(text)}</span></a><button type="button" class="mv-banner-close" data-mv-close aria-label="${e(close)}"><span aria-hidden="true">×</span></button></div></div>`;
+  return `<div class="mv-banner" data-mv-banner hidden role="region" aria-label="${e(title)}"><div class="wrap mv-banner-in"><a class="mv-banner-link" href="${e(href)}"><strong>${e(title)}</strong><span class="mv-banner-sep" aria-hidden="true">–</span><span class="mv-banner-text">${e(text)}</span></a><button type="button" class="mv-banner-close" data-mv-close aria-label="${e(close)}"><span aria-hidden="true">×</span></button></div></div>`;
 }
 
 export function mustaViikkoCardHtml(lang, now = Date.now()) {
