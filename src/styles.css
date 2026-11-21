@@ -594,7 +594,7 @@ html,body{max-width:100%;overflow-x:hidden}
 img,video,iframe,embed,object,table{max-width:100%}
 
 /* Savusaunan musta viikko: yläbanneri ja etusivun mainoskortti. Näkyvät vasta luokalla html.mv-on (lippu tai ?preview=musta-viikko).
-   Mustat pinnat (ei tummanvihreää); vaalea teksti, kulta-aksentti. Mainoskuva v3 (koko savusaunahuone). Otsikko holvin tekstialueella, tarjoukset kuvan alla jotta kasvot eivät peity. */
+   Mustat pinnat (ei tummanvihreää); vaalea teksti, kulta-aksentti. Mainoskuva v3 (koko savusaunahuone). Otsikko, hinnat ja nappi kuvan alla (tummalla paneelilla), jotta kasvot eivät peity ja otsikko ei jää sticky-yläpalkin alle. */
 .mv-banner{background:#161311;color:var(--bg)}
 .mv-banner-in{display:flex;align-items:center;gap:8px;padding:6px 0}
 .mv-banner-link{flex:1;min-width:0;display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 14px;color:inherit;text-decoration:none}
@@ -610,7 +610,7 @@ img,video,iframe,embed,object,table{max-width:100%}
 .mv-ad-visual{position:relative;aspect-ratio:1600/700;background:#1B1511}
 .mv-ad-media,.mv-ad-media picture,.mv-ad-media img{position:absolute;inset:0;width:100%;height:100%;display:block}
 .mv-ad-media img{object-fit:cover;object-position:center}
-.mv-ad-title{position:absolute;z-index:1;left:4%;top:8%;width:40%;max-width:28rem;margin:0;font:500 clamp(32px,4.2vw,52px)/1.08 var(--head);color:#F5F3EF}
+.mv-ad-title{margin:0 0 20px;font:500 clamp(32px,4.2vw,52px)/1.08 var(--head);color:#F5F3EF}
 .mv-ad-title a{color:inherit;text-decoration:none}
 .mv-ad-title a:hover{color:#D2B478}
 .mv-ad-body{padding:28px 32px 32px}
@@ -623,7 +623,7 @@ img,video,iframe,embed,object,table{max-width:100%}
 .mv-ad-cta .btn{display:inline-flex;align-items:center;justify-content:center;margin:0;text-decoration:none;font:600 18px/1.2 var(--label);padding:14px 28px}
 @media (max-width:700px){
   .mv-ad-visual{aspect-ratio:900/1100}
-  .mv-ad-title{left:6%;top:6%;width:88%;max-width:none;font-size:clamp(28px,8vw,40px)}
+  .mv-ad-title{font-size:clamp(28px,8vw,40px)}
   .mv-ad-body{padding:24px 18px 22px}
   .mv-ad-offers{grid-template-columns:1fr}
   .mv-price{font-size:26px}
