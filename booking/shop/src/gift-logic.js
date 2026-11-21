@@ -20,6 +20,19 @@ export const validPhone = (p) => { const s = String(p ?? '').trim(); return /^[+
 export const parseAmount = (v) => { const s = String(v ?? '').trim().replace(',', '.'); return /^\d+(\.\d{1,2})?$/.test(s) ? Math.round(parseFloat(s) * 100) / 100 : null; };
 export const round2 = (n) => Math.round((+n + Number.EPSILON) * 100) / 100;
 
+/** t1885u: yliviivattu normaalihinta, vain näyttö (myyntihinta ennallaan).
+ *  Lähde: PROD booking.public_catalog + kb.product_price_variants, sama DEV:ssä.
+ *  bf_jalkiloylyt_mato: tuote 26 (Savusaunan jälkilöylyt), variantti 14 «Ma–to 2 h», 180 € sisältää 6 hlö.
+ *  mv_yleiset_mato: 2 × tuote 1 (Yleinen vuoro) public_catalog 29 €/hlö = 58 €. */
+export const MUSTA_VIIKKO_REGULAR_PRICE = Object.freeze({
+  bf_jalkiloylyt_mato: 180,
+  mv_yleiset_mato: 58,
+});
+export const regularListPrice = (code) => {
+  const n = MUSTA_VIIKKO_REGULAR_PRICE[code];
+  return Number.isFinite(n) ? n : null;
+};
+
 // Rivi = { id, pkg: <paketin code>, amount: <merkkijono avoimelle>, qty, recipientName, recipientEmail, greeting, deliveryTo: 'buyer'|'recipient', coverMessage, sendMode: 'now'|'later', deliverOn: 'YYYY-MM-DD', deliverTime: 'HH:MM' }
 export function validateLine(line, pkg, now = new Date()) {
   const err = {};

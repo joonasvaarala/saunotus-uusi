@@ -60,6 +60,10 @@ test('kampanja-aikana kaksi tarjousta, kannan ehtosanamuodot, hinnat ja ostolink
   assert.match(en, />€130</);
   assert.match(fi, />50 €</);
   assert.match(en, />€50</);
+  assert.match(fi, /<del class="mv-price-was">[\s\S]*Normaalihinta 180 €/);
+  assert.match(fi, /<del class="mv-price-was">[\s\S]*Normaalihinta 58 €/);
+  assert.match(en, /<del class="mv-price-was">[\s\S]*Regular price €180/);
+  assert.match(en, /<del class="mv-price-was">[\s\S]*Regular price €58/);
   assert.match(fi, /href="\/lahjakortti\/\?paketti=bf_jalkiloylyt_mato"/);
   assert.match(fi, /href="\/lahjakortti\/\?paketti=mv_yleiset_mato"/);
   assert.match(en, /href="\/en\/gift-card\/\?paketti=bf_jalkiloylyt_mato"/);

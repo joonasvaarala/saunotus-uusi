@@ -67,7 +67,8 @@ test('pending-import-183 vastaa varatekstejä, FI+EN, ei HTML:ää', () => {
     assert.equal(row.text, MUSTA_VIIKKO_TEXTS[key][lang]);
     assert.equal(row.class, 'normal');
     assert.equal(row.kind, 'plain');
-    assert.deepEqual(row.placeholders, []);
+    const ph = key === 'ui.site.mv_regular' ? ['{{var:price}}'] : [];
+    assert.deepEqual(row.placeholders, ph);
     assert.ok(!row.text.includes('<'));
     assert.ok(row.reason.includes('t1867u'));
     assert.ok(row.reason.includes('t1870u'));
@@ -82,7 +83,7 @@ test('ei Black Friday -sanaa teksteissä eikä lähteissä', () => {
     assert.doesNotMatch(mustaViikkoBannerHtml(lang), /black\s*friday/i);
     assert.doesNotMatch(mustaViikkoCardHtml(lang), /black\s*friday/i);
   }
-  for (const f of ['src/musta-viikko.mjs', 'src/styles.css', 'src/render.mjs', 'content/site-texts.pending-import-183.json', 'content/site-texts.pending-import-186.json']) {
+  for (const f of ['src/musta-viikko.mjs', 'src/styles.css', 'src/render.mjs', 'content/site-texts.pending-import-183.json', 'content/site-texts.pending-import-186.json', 'content/site-texts.pending-import-187.json']) {
     assert.doesNotMatch(read(f), /black\s*friday/i, f);
   }
 });
@@ -113,6 +114,10 @@ test('banneri ja kortti ovat piilossa, sisältävät linkin, hinnan ja voimassao
     assert.ok(card.includes(MUSTA_VIIKKO_TEXTS['ui.site.mv_card_text'][lang]));
     assert.ok(card.includes(price));
     assert.ok(card.includes(mustaViikkoPrice(lang, 50)));
+    assert.ok(card.includes(mustaViikkoPrice(lang, 180)));
+    assert.ok(card.includes(mustaViikkoPrice(lang, 58)));
+    assert.match(card, /<del class="mv-price-was">/);
+    assert.match(card, /Normaalihinta|Regular price/);
     assert.ok(card.includes(MUSTA_VIIKKO_TEXTS['ui.site.mv_see'][lang]));
     assert.match(card, /class="btn gold"/);
     assert.ok(card.includes(href));
@@ -161,6 +166,11 @@ test('etusivu: kortti viikko-ohjelman jälkeen, banneri ylälaidassa, molemmat h
   assert.ok(fi.includes('Voimassa 6 kk, ma–to'));
   assert.ok(fi.includes('130 €'));
   assert.ok(fi.includes('50 €'));
+  assert.ok(fi.includes('180 €'));
+  assert.ok(fi.includes('58 €'));
+  assert.match(fi, /<del class="mv-price-was">/);
+  assert.ok(fi.includes('Normaalihinta 180 €'));
+  assert.ok(fi.includes('Normaalihinta 58 €'));
   assert.ok(en.includes('After Session and public session gift cards, Mon–Thu'));
   assert.ok(en.includes('See the offers →'));
   assert.ok(en.includes('After Session Sauna gift card'));
@@ -168,6 +178,11 @@ test('etusivu: kortti viikko-ohjelman jälkeen, banneri ylälaidassa, molemmat h
   assert.ok(en.includes('Valid 6 months, Mon–Thu'));
   assert.ok(en.includes('€130'));
   assert.ok(en.includes('€50'));
+  assert.ok(en.includes('€180'));
+  assert.ok(en.includes('€58'));
+  assert.match(en, /<del class="mv-price-was">/);
+  assert.ok(en.includes('Regular price €180'));
+  assert.ok(en.includes('Regular price €58'));
   assert.doesNotMatch(fi + en, /\?paketti=/);
   assert.doesNotMatch(fi + en, /black\s*friday/i);
 });
@@ -242,4 +257,24 @@ test('aikaohjaus: banneri ja etusivun kortti eivät renderöidy 30.11.2026 klo 1
   const live = home('fi', { now: before });
   assert.match(live, /data-mv-banner hidden/);
   assert.match(live, /data-mv-promo hidden/);
+});
+
+test('t1885u: normaalihinta yhdestä vakiosta, yliviivaus mainoksessa', async () => {
+  const { MUSTA_VIIKKO_REGULAR_PRICE, regularListPrice } = await import('../booking/shop/src/gift-logic.js');
+  assert.equal(regularListPrice('bf_jalkiloylyt_mato'), 180);
+  assert.equal(regularListPrice('mv_yleiset_mato'), 58);
+  assert.equal(regularListPrice('open'), null);
+  assert.equal(MUSTA_VIIKKO_REGULAR_PRICE.bf_jalkiloylyt_mato, 180);
+  const pending = JSON.parse(read('content/site-texts.pending-import-187.json'));
+  assert.equal(pending.length, 2);
+  for (const lang of ['fi', 'en']) {
+    const row = pending.find((x) => x.key === 'ui.site.mv_regular' && x.lang === lang);
+    assert.ok(row);
+    assert.equal(row.text, MUSTA_VIIKKO_TEXTS['ui.site.mv_regular'][lang]);
+    assert.deepEqual(row.placeholders, ['{{var:price}}']);
+  }
+  const css = read('src/styles.css');
+  assert.match(css, /\.mv-price-was\{[^}]*text-decoration:line-through/);
+  assert.match(read('booking/shop/src/shop.css'), /\.gc-price-was\{[^}]*text-decoration:line-through/);
+  assert.match(read('booking/shop/src/gift.js'), /regularListPrice/);
 });

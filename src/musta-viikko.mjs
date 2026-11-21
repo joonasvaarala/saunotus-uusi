@@ -4,6 +4,7 @@
 // Ostolinkit: suorat ?paketti=-osoitteet. Kampanjasivu: /musta-viikko/ ja /en/black-week/.
 import { tx } from './site-texts.mjs';
 import { e, pageHref, money, href } from './lib.mjs';
+import { regularListPrice } from '../booking/shop/src/gift-logic.js';
 
 /** Lahjakorttipaketin koodi yläbannerin vanhassa vakiossa ja jälkilöylytarjouksessa (?paketti=). */
 export const MUSTA_VIIKKO_PACKAGE = 'bf_jalkiloylyt_mato';
@@ -62,6 +63,7 @@ export const MUSTA_VIIKKO_TEXTS = Object.freeze({
   'ui.site.mv_cta': { fi: 'Osta lahjakortti →', en: 'Buy a gift card →' },
   'ui.site.mv_more': { fi: 'Tutustu kampanjaan', en: 'See the campaign' },
   'ui.site.mv_see': { fi: 'Katso tarjoukset →', en: 'See the offers →' },
+  'ui.site.mv_regular': { fi: 'Normaalihinta {{var:price}}', en: 'Regular price {{var:price}}' },
 });
 
 const quiet = { warn() {} };
@@ -77,6 +79,16 @@ export function mustaViikkoHref(lang) {
 
 export function mustaViikkoPrice(lang, amount = MUSTA_VIIKKO_PRICE) {
   return money(amount, lang);
+}
+
+/** Kampanjahinta + yliviivattu normaalihinta (saavutettava del). */
+export function mustaViikkoPriceCompareHtml(lang, campaign, code) {
+  const now = mustaViikkoPrice(lang, campaign);
+  const was = regularListPrice(code);
+  if (was == null || was <= campaign) return `<span class="mv-price-now">${e(now)}</span>`;
+  const wasTxt = mustaViikkoPrice(lang, was);
+  const label = mvText('ui.site.mv_regular', lang, { price: wasTxt });
+  return `<span class="mv-price-now">${e(now)}</span> <del class="mv-price-was"><span class="sr">${e(label)}</span><span aria-hidden="true">${e(wasTxt)}</span></del>`;
 }
 
 export function mustaViikkoOfferHref(code, lang) {
@@ -113,7 +125,7 @@ export function mustaViikkoCardHtml(lang, now = Date.now(), env = process.env.SI
     const name = mvText(o.nameKey, lang);
     const text = mvText(o.textKey, lang);
     const price = mustaViikkoPrice(lang, o.price);
-    return `<article class="mv-ad-offer"><h3>${e(name)}</h3><p class="mv-note">${e(text)}</p><p class="mv-price">${e(price)}</p></article>`;
+    return `<article class="mv-ad-offer"><h3>${e(name)}</h3><p class="mv-note">${e(text)}</p><p class="mv-price">${mustaViikkoPriceCompareHtml(lang, o.price, o.code)}</p></article>`;
   }).join('');
   return `<section class="section strip mv-sec" data-mv-promo hidden><div class="wrap"><div class="mv-ad"><div class="mv-ad-in"><h2 class="mv-ad-title"><a href="${e(page)}">${e(title)}</a></h2><div class="mv-ad-offers">${offers}</div><p class="mv-ad-cta"><a class="btn gold" href="${e(page)}">${e(see)}</a></p></div></div></div></section>`;
 }
