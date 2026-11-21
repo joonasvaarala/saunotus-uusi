@@ -6,6 +6,7 @@ import { articlesNav, publishedArticleCount, homeSection } from './articles/runt
 import { openingSummary } from './opening.mjs';
 import { tx } from './site-texts.mjs';
 import { seoSchemaForPage, jsonLdScript } from './seo-enhance.mjs';
+import { mustaViikkoBody, mustaViikkoMeta } from './musta-viikko-sivu.mjs';
 import { PUBLISHED_GIFT_PACKAGES, GIFT_PACKAGE_IMAGE, giftMetaDescription } from '../booking/shop/src/gift-offers.js';
 import { itemLines } from '../booking/shop/src/gift-logic.js';
 import { gtText } from '../booking/shop/src/gift-texts.js';
@@ -307,7 +308,7 @@ ${alt_[o] && !seo ? `<meta property="og:locale:alternate" content="${ui(o).local
 <link rel="icon" href="${href('/img/favicon.svg')}" type="image/svg+xml">
 <link rel="preload" href="${href('/fonts/Lato-normal-400.woff2')}" as="font" type="font/woff2" crossorigin>${preload}
 <style>${css}${seo?.extraCss || ''}${extraCss}</style>${bannerStyle}
-<script type="application/ld+json">${jsonLd(lang)}</script>${(seo?.jsonLd || []).map((j) => `<script type="application/ld+json">${JSON.stringify(j).replace(/</g, '\\u003c')}</script>`).join('')}${seo ? '' : seoSchemaForPage({ lang, key, url, body }).map(jsonLdScript).join('')}
+${seo?.skipJsonLd ? '' : `<script type="application/ld+json">${jsonLd(lang)}</script>`}${seo?.skipJsonLd ? '' : (seo?.jsonLd || []).map((j) => `<script type="application/ld+json">${JSON.stringify(j).replace(/</g, '\\u003c')}</script>`).join('')}${seo ? '' : seoSchemaForPage({ lang, key, url, body }).map(jsonLdScript).join('')}
 </head><body>
 <a class="skip" href="#main">${e(u.skip)}</a>
 ${bannerOpen}<header class="site-header"><div class="wrap hdr">
@@ -396,6 +397,27 @@ function giftOfferCard(p, lang) {
 <p>${e(text)}</p>${list}
 <ul class="meta"><li class="pr">${e(price)}</li>${unit}<li>${e(gtText(lang, 'valid', { months: p.valid_months }))}</li></ul></div></li>`;
 }
+export function mustaViikko(lang, opt = {}) {
+  const now = opt.now ?? Date.now();
+  const fi = abs(pagePath('mustaViikko', 'fi'));
+  const en = abs(pagePath('mustaViikko', 'en'));
+  return layout({
+    lang,
+    key: 'mustaViikko',
+    meta: mustaViikkoMeta(lang),
+    body: mustaViikkoBody(lang, now),
+    seo: {
+      robots: 'noindex,nofollow',
+      skipJsonLd: true,
+      hreflangs: [
+        { hreflang: 'fi', href: fi },
+        { hreflang: 'en', href: en },
+        { hreflang: 'x-default', href: fi },
+      ],
+    },
+  });
+}
+
 export function gift(lang) {
   const d = P('gift')[lang], u = ui(lang);
   const openPkg = PUBLISHED_GIFT_PACKAGES.find((p) => p.is_open);
