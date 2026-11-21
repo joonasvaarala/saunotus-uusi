@@ -610,6 +610,7 @@ img,video,iframe,embed,object,table{max-width:100%}
 .mv-copy .kicker{margin:0 0 6px;color:var(--accent)}
 .mv-copy h2{margin:0 0 6px;font:500 clamp(26px,3.2vw,34px)/1.15 var(--head);color:var(--bg)}
 .mv-note{margin:0;color:var(--bg)}
+.mv-terms{margin:8px 0 0;font:500 13px/1.4 var(--body);color:var(--accent)}
 .mv-actions{display:flex;flex-wrap:wrap;align-items:center;gap:14px 18px}
 .mv-price{margin:0;font:500 30px/1 var(--head);color:var(--accent);font-variant-numeric:tabular-nums}
 .mv-card .btn{margin:0;text-decoration:none}

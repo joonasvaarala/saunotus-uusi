@@ -9,7 +9,7 @@ const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const read = (p) => readFileSync(join(root, p), 'utf8');
 const {
   MUSTA_VIIKKO_PACKAGE, MUSTA_VIIKKO_ENABLED, MUSTA_VIIKKO_PREVIEW, MUSTA_VIIKKO_STORAGE_KEY,
-  MUSTA_VIIKKO_PRICE, MUSTA_VIIKKO_TEXTS, mustaViikkoHref, mustaViikkoPrice,
+  MUSTA_VIIKKO_PRICE, MUSTA_VIIKKO_ENDS, MUSTA_VIIKKO_TEXTS, mustaViikkoActive, mustaViikkoHref, mustaViikkoPrice,
   mustaViikkoBannerHtml, mustaViikkoCardHtml, mustaViikkoBootScript,
 } = await import('../src/musta-viikko.mjs');
 const { money } = await import('../src/lib.mjs');
@@ -91,6 +91,7 @@ test('banneri ja kortti ovat piilossa, sisältävät linkin, hinnan ja voimassao
     assert.ok(card.includes(MUSTA_VIIKKO_TEXTS['ui.site.mv_title'][lang]));
     assert.ok(card.includes(MUSTA_VIIKKO_TEXTS['ui.site.mv_product'][lang]));
     assert.ok(card.includes(MUSTA_VIIKKO_TEXTS['ui.site.mv_card_text'][lang]));
+    assert.ok(card.includes(MUSTA_VIIKKO_TEXTS['ui.site.mv_card_terms'][lang]));
     assert.ok(card.includes(price));
     assert.ok(card.includes(MUSTA_VIIKKO_TEXTS['ui.site.mv_cta'][lang]));
     assert.doesNotMatch(banner, /<[a-z][^>]*>[^<]*(?:javascript:|on\w+=)/i);
@@ -100,6 +101,7 @@ test('banneri ja kortti ovat piilossa, sisältävät linkin, hinnan ja voimassao
   assert.ok(boot.includes('preview'));
   assert.ok(boot.includes(MUSTA_VIIKKO_PREVIEW));
   assert.ok(boot.includes(MUSTA_VIIKKO_STORAGE_KEY));
+  assert.ok(boot.includes(MUSTA_VIIKKO_ENDS));
   assert.ok(boot.includes('localStorage'));
 });
 
@@ -137,4 +139,29 @@ test('CSS: musta tausta, vaalea teksti, kulta-aksentti, ei tummanvihreää', () 
   assert.doesNotMatch(block, /var\(--green\)/);
   assert.equal((block.match(/#161311/g) || []).length, 2);
   assert.doesNotMatch(block.replaceAll('#161311', ''), /#[0-9a-fA-F]{3,8}/);
+});
+
+test('aikaohjaus: banneri ja etusivun kortti eivät renderöidy 30.11.2026 klo 10 (Helsinki) jälkeen', () => {
+  assert.equal(MUSTA_VIIKKO_ENDS, '2026-11-30T10:00:00+02:00');
+  const before = Date.parse('2026-11-30T09:59:59+02:00');
+  const at = Date.parse('2026-11-30T10:00:00+02:00');
+  const after = Date.parse('2026-11-30T10:00:01+02:00');
+  assert.equal(mustaViikkoActive(before), true);
+  assert.equal(mustaViikkoActive(at), false);
+  assert.equal(mustaViikkoActive(after), false);
+  assert.match(mustaViikkoBannerHtml('fi', before), /data-mv-banner/);
+  assert.match(mustaViikkoCardHtml('fi', before), /data-mv-promo/);
+  assert.equal(mustaViikkoBannerHtml('fi', at), '');
+  assert.equal(mustaViikkoCardHtml('en', at), '');
+  assert.equal(mustaViikkoBannerHtml('en', after), '');
+  assert.equal(mustaViikkoCardHtml('fi', after), '');
+  const ended = home('fi', { now: at });
+  assert.doesNotMatch(ended, /class="mv-banner"/);
+  assert.doesNotMatch(ended, /class="card mv-card"/);
+  assert.doesNotMatch(ended, /data-mv-banner hidden/);
+  assert.doesNotMatch(ended, /data-mv-promo hidden/);
+  assert.doesNotMatch(ended, /mustaViikkoBootScript|saunotus:musta-viikko:dismissed/);
+  const live = home('fi', { now: before });
+  assert.match(live, /data-mv-banner hidden/);
+  assert.match(live, /data-mv-promo hidden/);
 });

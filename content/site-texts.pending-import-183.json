@@ -7,7 +7,7 @@
     "kind": "plain",
     "max_len": 80,
     "placeholders": [],
-    "reason": "t1867u/t1870u: Savusaunan musta viikko – suljettava yläbanneri ja etusivun mainoskortti (luonnos). Uusi avain. FI+EN, sama kuin koodin varateksti (src/musta-viikko.mjs). Kampanjan nimi on musta viikko. Ei ajeta ennen julkaisua."
+    "reason": "t1867u/t1870u/t1872u: Savusaunan musta viikko – suljettava yläbanneri ja etusivun mainoskortti (luonnos). Uusi avain. FI+EN, sama kuin koodin varateksti (src/musta-viikko.mjs). Kampanjan nimi on musta viikko. Ei ajeta ennen julkaisua."
   },
   {
     "key": "ui.site.mv_title",
@@ -17,7 +17,7 @@
     "kind": "plain",
     "max_len": 80,
     "placeholders": [],
-    "reason": "t1867u/t1870u: Savusaunan musta viikko – suljettava yläbanneri ja etusivun mainoskortti (luonnos). Uusi avain. FI+EN, sama kuin koodin varateksti (src/musta-viikko.mjs). Kampanjan nimi on musta viikko. Ei ajeta ennen julkaisua."
+    "reason": "t1867u/t1870u/t1872u: Savusaunan musta viikko – suljettava yläbanneri ja etusivun mainoskortti (luonnos). Uusi avain. FI+EN, sama kuin koodin varateksti (src/musta-viikko.mjs). Kampanjan nimi on musta viikko. Ei ajeta ennen julkaisua."
   },
   {
     "key": "ui.site.mv_product",
@@ -27,7 +27,7 @@
     "kind": "plain",
     "max_len": 80,
     "placeholders": [],
-    "reason": "t1867u/t1870u: Savusaunan musta viikko – suljettava yläbanneri ja etusivun mainoskortti (luonnos). Uusi avain. FI+EN, sama kuin koodin varateksti (src/musta-viikko.mjs). Kampanjan nimi on musta viikko. Ei ajeta ennen julkaisua."
+    "reason": "t1867u/t1870u/t1872u: Savusaunan musta viikko – suljettava yläbanneri ja etusivun mainoskortti (luonnos). Uusi avain. FI+EN, sama kuin koodin varateksti (src/musta-viikko.mjs). Kampanjan nimi on musta viikko. Ei ajeta ennen julkaisua."
   },
   {
     "key": "ui.site.mv_product",
@@ -37,7 +37,7 @@
     "kind": "plain",
     "max_len": 80,
     "placeholders": [],
-    "reason": "t1867u/t1870u: Savusaunan musta viikko – suljettava yläbanneri ja etusivun mainoskortti (luonnos). Uusi avain. FI+EN, sama kuin koodin varateksti (src/musta-viikko.mjs). Kampanjan nimi on musta viikko. Ei ajeta ennen julkaisua."
+    "reason": "t1867u/t1870u/t1872u: Savusaunan musta viikko – suljettava yläbanneri ja etusivun mainoskortti (luonnos). Uusi avain. FI+EN, sama kuin koodin varateksti (src/musta-viikko.mjs). Kampanjan nimi on musta viikko. Ei ajeta ennen julkaisua."
   },
   {
     "key": "ui.site.mv_banner_text",
@@ -49,7 +49,7 @@
     "placeholders": [
       "{{var:price}}"
     ],
-    "reason": "t1867u/t1870u: Savusaunan musta viikko – suljettava yläbanneri ja etusivun mainoskortti (luonnos). Uusi avain. FI+EN, sama kuin koodin varateksti (src/musta-viikko.mjs). Kampanjan nimi on musta viikko. Ei ajeta ennen julkaisua."
+    "reason": "t1867u/t1870u/t1872u: Savusaunan musta viikko – suljettava yläbanneri ja etusivun mainoskortti (luonnos). Uusi avain. FI+EN, sama kuin koodin varateksti (src/musta-viikko.mjs). Kampanjan nimi on musta viikko. Ei ajeta ennen julkaisua."
   },
   {
     "key": "ui.site.mv_banner_text",
@@ -61,7 +61,7 @@
     "placeholders": [
       "{{var:price}}"
     ],
-    "reason": "t1867u/t1870u: Savusaunan musta viikko – suljettava yläbanneri ja etusivun mainoskortti (luonnos). Uusi avain. FI+EN, sama kuin koodin varateksti (src/musta-viikko.mjs). Kampanjan nimi on musta viikko. Ei ajeta ennen julkaisua."
+    "reason": "t1867u/t1870u/t1872u: Savusaunan musta viikko – suljettava yläbanneri ja etusivun mainoskortti (luonnos). Uusi avain. FI+EN, sama kuin koodin varateksti (src/musta-viikko.mjs). Kampanjan nimi on musta viikko. Ei ajeta ennen julkaisua."
   },
   {
     "key": "ui.site.mv_close",
@@ -71,7 +71,7 @@
     "kind": "plain",
     "max_len": 80,
     "placeholders": [],
-    "reason": "t1867u/t1870u: Savusaunan musta viikko – suljettava yläbanneri ja etusivun mainoskortti (luonnos). Uusi avain. FI+EN, sama kuin koodin varateksti (src/musta-viikko.mjs). Kampanjan nimi on musta viikko. Ei ajeta ennen julkaisua."
+    "reason": "t1867u/t1870u/t1872u: Savusaunan musta viikko – suljettava yläbanneri ja etusivun mainoskortti (luonnos). Uusi avain. FI+EN, sama kuin koodin varateksti (src/musta-viikko.mjs). Kampanjan nimi on musta viikko. Ei ajeta ennen julkaisua."
   },
   {
     "key": "ui.site.mv_close",
@@ -81,7 +81,7 @@
     "kind": "plain",
     "max_len": 80,
     "placeholders": [],
-    "reason": "t1867u/t1870u: Savusaunan musta viikko – suljettava yläbanneri ja etusivun mainoskortti (luonnos). Uusi avain. FI+EN, sama kuin koodin varateksti (src/musta-viikko.mjs). Kampanjan nimi on musta viikko. Ei ajeta ennen julkaisua."
+    "reason": "t1867u/t1870u/t1872u: Savusaunan musta viikko – suljettava yläbanneri ja etusivun mainoskortti (luonnos). Uusi avain. FI+EN, sama kuin koodin varateksti (src/musta-viikko.mjs). Kampanjan nimi on musta viikko. Ei ajeta ennen julkaisua."
   },
   {
     "key": "ui.site.mv_card_text",
@@ -91,7 +91,7 @@
     "kind": "plain",
     "max_len": 80,
     "placeholders": [],
-    "reason": "t1867u/t1870u: Savusaunan musta viikko – suljettava yläbanneri ja etusivun mainoskortti (luonnos). Uusi avain. FI+EN, sama kuin koodin varateksti (src/musta-viikko.mjs). Kampanjan nimi on musta viikko. Ei ajeta ennen julkaisua."
+    "reason": "t1867u/t1870u/t1872u: Savusaunan musta viikko – suljettava yläbanneri ja etusivun mainoskortti (luonnos). Uusi avain. FI+EN, sama kuin koodin varateksti (src/musta-viikko.mjs). Kampanjan nimi on musta viikko. Ei ajeta ennen julkaisua."
   },
   {
     "key": "ui.site.mv_card_text",
@@ -101,7 +101,7 @@
     "kind": "plain",
     "max_len": 80,
     "placeholders": [],
-    "reason": "t1867u/t1870u: Savusaunan musta viikko – suljettava yläbanneri ja etusivun mainoskortti (luonnos). Uusi avain. FI+EN, sama kuin koodin varateksti (src/musta-viikko.mjs). Kampanjan nimi on musta viikko. Ei ajeta ennen julkaisua."
+    "reason": "t1867u/t1870u/t1872u: Savusaunan musta viikko – suljettava yläbanneri ja etusivun mainoskortti (luonnos). Uusi avain. FI+EN, sama kuin koodin varateksti (src/musta-viikko.mjs). Kampanjan nimi on musta viikko. Ei ajeta ennen julkaisua."
   },
   {
     "key": "ui.site.mv_cta",
@@ -111,7 +111,7 @@
     "kind": "plain",
     "max_len": 80,
     "placeholders": [],
-    "reason": "t1867u/t1870u: Savusaunan musta viikko – suljettava yläbanneri ja etusivun mainoskortti (luonnos). Uusi avain. FI+EN, sama kuin koodin varateksti (src/musta-viikko.mjs). Kampanjan nimi on musta viikko. Ei ajeta ennen julkaisua."
+    "reason": "t1867u/t1870u/t1872u: Savusaunan musta viikko – suljettava yläbanneri ja etusivun mainoskortti (luonnos). Uusi avain. FI+EN, sama kuin koodin varateksti (src/musta-viikko.mjs). Kampanjan nimi on musta viikko. Ei ajeta ennen julkaisua."
   },
   {
     "key": "ui.site.mv_cta",
@@ -121,6 +121,26 @@
     "kind": "plain",
     "max_len": 80,
     "placeholders": [],
-    "reason": "t1867u/t1870u: Savusaunan musta viikko – suljettava yläbanneri ja etusivun mainoskortti (luonnos). Uusi avain. FI+EN, sama kuin koodin varateksti (src/musta-viikko.mjs). Kampanjan nimi on musta viikko. Ei ajeta ennen julkaisua."
+    "reason": "t1867u/t1870u/t1872u: Savusaunan musta viikko – suljettava yläbanneri ja etusivun mainoskortti (luonnos). Uusi avain. FI+EN, sama kuin koodin varateksti (src/musta-viikko.mjs). Kampanjan nimi on musta viikko. Ei ajeta ennen julkaisua."
+  },
+  {
+    "key": "ui.site.mv_card_terms",
+    "lang": "fi",
+    "text": "Ei voimassa 24.–30.12.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "t1867u/t1870u/t1872u: Savusaunan musta viikko – suljettava yläbanneri ja etusivun mainoskortti (luonnos). Uusi avain. FI+EN, sama kuin koodin varateksti (src/musta-viikko.mjs). Kampanjan nimi on musta viikko. Ei ajeta ennen julkaisua."
+  },
+  {
+    "key": "ui.site.mv_card_terms",
+    "lang": "en",
+    "text": "Not valid 24–30 Dec.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "t1867u/t1870u/t1872u: Savusaunan musta viikko – suljettava yläbanneri ja etusivun mainoskortti (luonnos). Uusi avain. FI+EN, sama kuin koodin varateksti (src/musta-viikko.mjs). Kampanjan nimi on musta viikko. Ei ajeta ennen julkaisua."
   }
 ]
