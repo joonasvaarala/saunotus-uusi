@@ -43,6 +43,11 @@ test('kampanja-aikana kaksi tarjousta, kannan ehtosanamuodot, hinnat ja ostolink
   const en = mustaViikko('en', { now: BEFORE });
   assert.match(fi, /<h1>Savusaunan musta viikko<\/h1>/);
   assert.match(en, /<h1>Smoke Sauna Black Week<\/h1>/);
+  assert.match(fi, /class="mvp-hero"/);
+  assert.match(fi, /mv-mainos-desktop\.jpg/);
+  assert.match(fi, /media="\(max-width:700px\)"/);
+  assert.match(fi, /Hämärä savusauna, jonka etualalla musta kiuas/);
+  assert.match(en, /A dim smoke sauna with a black stove/);
   assert.match(fi, /Jälkilöylylahjakortti/);
   assert.match(en, /After Session Sauna gift card/);
   assert.match(fi, /Yleisten vuorojen lahjakortti 2 hengelle/);
@@ -147,13 +152,18 @@ test('CSS: musta tausta, vaalea teksti, kulta-aksentti, ei tummanvihreää', () 
   const start = css.indexOf('/* Savusaunan musta viikko – kampanjasivu');
   assert.ok(start >= 0);
   const block = css.slice(start);
-  assert.match(block, /\.mvp\{[^}]*background:#161311/);
-  assert.match(block, /color:var\(--bg\)/);
-  assert.match(block, /color:var\(--accent\)/);
+  assert.match(block, /\.mvp\{[^}]*background:#1B1511/);
+  assert.match(block, /color:#F5F3EF/);
+  assert.match(block, /color:#D2B478/);
+  assert.match(block, /aspect-ratio:1600\/700/);
+  assert.match(block, /aspect-ratio:900\/1100/);
   assert.match(block, /font-family:var\(--head\)|font:[^;]*var\(--head\)/);
   assert.doesNotMatch(block, /--green/);
-  assert.equal((block.match(/#161311/g) || []).length, 1);
-  assert.doesNotMatch(block.replaceAll('#161311', ''), /#[0-9a-fA-F]{3,8}/);
+  assert.doesNotMatch(block, /#161311/);
+  const allowed = ['#1B1511', '#F5F3EF', '#D2B478'];
+  let rest = block;
+  for (const c of allowed) rest = rest.replaceAll(c, '');
+  assert.doesNotMatch(rest, /#[0-9a-fA-F]{3,8}/);
 });
 
 test('build jättää kampanjasivun pois sivukartasta; sivu syntyy noindexilla', () => {

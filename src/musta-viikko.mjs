@@ -33,10 +33,15 @@ export function mustaViikkoBuildIncludes(env = process.env.SITE_ENV) {
   return String(env ?? '').trim() !== 'prod';
 }
 
-/** Etusivun mainoksen (ja kampanjasivun heron) kuva. Paikkamerkki: yleinen-saunakuva, kunnes kuvankäsittelijän tiedosto on valmis. */
+/** Etusivun mainoksen ja kampanjasivun heron kuva (kuvankäsittelijän tumma toimitus). */
 export const MUSTA_VIIKKO_IMAGE = 'mv-mainos';
-export const MUSTA_VIIKKO_IMAGE_WIDTHS = [800, 1200];
-export const MUSTA_VIIKKO_IMAGE_SIZE = { w: 1200, h: 801 };
+export const MUSTA_VIIKKO_IMAGE_BP = 700;
+export const MUSTA_VIIKKO_IMAGE_SIZE = { w: 1600, h: 700 };
+export const MUSTA_VIIKKO_IMAGE_MOBILE_SIZE = { w: 900, h: 1100 };
+export const MUSTA_VIIKKO_IMAGE_ALT = Object.freeze({
+  fi: 'Hämärä savusauna, jonka etualalla musta kiuas verkkokivineen; piipusta valuu vettä, tila on täynnä lämmintä savua.',
+  en: 'A dim smoke sauna with a black stove and stones in a wire cage in the foreground; water drips from the flue into warm, smoky air.',
+});
 
 export const MUSTA_VIIKKO_OFFERS = Object.freeze([
   { code: MUSTA_VIIKKO_PACKAGE, price: MUSTA_VIIKKO_PRICE, nameKey: 'ui.site.mv_product', textKey: 'ui.site.mv_card_text' },
@@ -79,12 +84,13 @@ export function mustaViikkoOfferHref(code, lang) {
   return base.includes('?') ? `${base}&${q}` : `${base}?${q}`;
 }
 
-export function mustaViikkoPicture({ alt = '', sizes = '100vw', cls = 'mv-ad-img' } = {}) {
+export function mustaViikkoPicture({ alt = '', sizes = '100vw', cls = 'mv-ad-img', loading = 'lazy', fetchpriority } = {}) {
   const id = MUSTA_VIIKKO_IMAGE;
-  const set = (ext) => MUSTA_VIIKKO_IMAGE_WIDTHS.map((w) => `${href(`/img/${id}-${w}.${ext}`)} ${w}w`).join(', ');
-  const last = MUSTA_VIIKKO_IMAGE_WIDTHS[MUSTA_VIIKKO_IMAGE_WIDTHS.length - 1];
+  const bp = `(max-width:${MUSTA_VIIKKO_IMAGE_BP}px)`;
+  const set = (kind, ext, w1, w2) => `${href(`/img/${id}-${kind}.${ext}`)} ${w1}w, ${href(`/img/${id}-${kind}@2x.${ext}`)} ${w2}w`;
   const { w, h } = MUSTA_VIIKKO_IMAGE_SIZE;
-  return `<picture><source type="image/webp" srcset="${set('webp')}" sizes="${sizes}"><img src="${href(`/img/${id}-${last}.jpg`)}" srcset="${set('jpg')}" sizes="${sizes}" width="${w}" height="${h}" alt="${e(alt)}" class="${e(cls)}" loading="lazy" decoding="async"></picture>`;
+  const prio = fetchpriority ? ` fetchpriority="${e(fetchpriority)}"` : '';
+  return `<picture><source type="image/webp" media="${bp}" srcset="${set('mobiili', 'webp', 900, 1800)}" sizes="${sizes}"><source type="image/jpeg" media="${bp}" srcset="${set('mobiili', 'jpg', 900, 1800)}" sizes="${sizes}"><source type="image/webp" srcset="${set('desktop', 'webp', 1600, 3200)}" sizes="${sizes}"><img src="${href(`/img/${id}-desktop.jpg`)}" srcset="${set('desktop', 'jpg', 1600, 3200)}" sizes="${sizes}" width="${w}" height="${h}" alt="${e(alt)}" class="${e(cls)}" loading="${e(loading)}" decoding="async"${prio}></picture>`;
 }
 
 export function mustaViikkoBannerHtml(lang, now = Date.now(), env = process.env.SITE_ENV) {
@@ -103,7 +109,8 @@ export function mustaViikkoCardHtml(lang, now = Date.now(), env = process.env.SI
   const more = mvText('ui.site.mv_more', lang);
   const cta = mvText('ui.site.mv_cta', lang);
   const page = mustaViikkoHref(lang);
-  const pic = mustaViikkoPicture({ alt: '', sizes: '(min-width:800px) 1100px, 100vw' });
+  const alt = MUSTA_VIIKKO_IMAGE_ALT[lang] || MUSTA_VIIKKO_IMAGE_ALT.fi;
+  const pic = mustaViikkoPicture({ alt, sizes: '(min-width:701px) 1100px, 100vw' });
   const offers = MUSTA_VIIKKO_OFFERS.map((o) => {
     const name = mvText(o.nameKey, lang);
     const text = mvText(o.textKey, lang);
@@ -111,7 +118,7 @@ export function mustaViikkoCardHtml(lang, now = Date.now(), env = process.env.SI
     const buy = mustaViikkoOfferHref(o.code, lang);
     return `<article class="mv-ad-offer"><h3>${e(name)}</h3><p class="mv-note">${e(text)}</p><p class="mv-price">${e(price)}</p><a class="btn gold sm" href="${e(buy)}">${e(cta)}</a></article>`;
   }).join('');
-  return `<section class="section strip mv-sec" data-mv-promo hidden><div class="wrap"><div class="mv-ad"><div class="mv-ad-media" aria-hidden="true">${pic}</div><div class="mv-ad-shade" aria-hidden="true"></div><div class="mv-ad-in"><h2>${e(title)}</h2><div class="mv-ad-offers">${offers}</div><p class="mv-ad-more"><a href="${e(page)}">${e(more)}</a></p></div></div></div></section>`;
+  return `<section class="section strip mv-sec" data-mv-promo hidden><div class="wrap"><div class="mv-ad"><div class="mv-ad-visual"><div class="mv-ad-media">${pic}</div><h2 class="mv-ad-title">${e(title)}</h2></div><div class="mv-ad-body"><div class="mv-ad-offers">${offers}</div><p class="mv-ad-more"><a href="${e(page)}">${e(more)}</a></p></div></div></div></section>`;
 }
 
 export function mustaViikkoBootScript(env = process.env.SITE_ENV) {

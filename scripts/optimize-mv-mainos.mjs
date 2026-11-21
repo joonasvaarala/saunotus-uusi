@@ -1,31 +1,24 @@
-// Paikkamerkki tai kuvankäsittelijän kuva → public/img/mv-mainos-{w}.webp/jpg.
-// Lähde: ensimmäinen kuva kansiossa /workspace/kuvat/musta-viikko/mainoskuva/ jos niitä on,
-// muuten sivuston tumma yleinen-saunakuva (public/img/yleinen-1200.webp).
-import sharp from 'sharp';
-import { readdirSync, mkdirSync } from 'node:fs';
-import { join, extname } from 'node:path';
+// Kopioi kuvankäsittelijän tumma toimitus public/img/mv-mainos-{desktop,mobiili}[@2x].{jpg,webp}.
+// Lähde: /workspace/kuvat/musta-viikko/mainoskuva/musta-viikko-{desktop,mobiili}[@2x].{jpg,webp}.
+// Tiedostot on jo optimoitu (desktop 1x jpg ~38 kt, alle 250 kt); ei uudelleenpakata.
+import { copyFileSync, existsSync, mkdirSync, unlinkSync } from 'node:fs';
+import { join } from 'node:path';
 
 const OUT = 'public/img';
-const WIDTHS = [800, 1200];
-const CUSTOM = '/workspace/kuvat/musta-viikko/mainoskuva';
-const FALLBACK = 'public/img/yleinen-1200.webp';
-const ok = new Set(['.jpg', '.jpeg', '.png', '.webp', '.avif', '.tif', '.tiff']);
+const SRC = '/workspace/kuvat/musta-viikko/mainoskuva';
+const KIND = ['desktop', 'mobiili'];
+const SCALE = ['', '@2x'];
+const EXT = ['jpg', 'webp'];
 
-function pick() {
-  try {
-    const files = readdirSync(CUSTOM).filter((f) => ok.has(extname(f).toLowerCase()) && !f.startsWith('.'));
-    if (files.length) return join(CUSTOM, files.sort()[0]);
-  } catch { /* kansiota ei vielä ole */ }
-  return FALLBACK;
-}
-
-const input = pick();
 mkdirSync(OUT, { recursive: true });
-const meta = await sharp(input, { limitInputPixels: 300e6 }).rotate().metadata();
-const ratio = meta.height / meta.width;
-for (const w of WIDTHS.filter((x) => x <= meta.width + 1)) {
-  const pipe = () => sharp(input, { limitInputPixels: 300e6 }).rotate().resize({ width: w, withoutEnlargement: true });
-  await pipe().jpeg({ quality: 80, mozjpeg: true }).toFile(join(OUT, `mv-mainos-${w}.jpg`));
-  await pipe().webp({ quality: 74, effort: 5 }).toFile(join(OUT, `mv-mainos-${w}.webp`));
+for (const kind of KIND) for (const scale of SCALE) for (const ext of EXT) {
+  const src = join(SRC, `musta-viikko-${kind}${scale}.${ext}`);
+  if (!existsSync(src)) throw new Error(`puuttuva lähdekuva: ${src}`);
+  copyFileSync(src, join(OUT, `mv-mainos-${kind}${scale}.${ext}`));
 }
-console.log('mv-mainos', input, WIDTHS.join(','), `${meta.width}x${meta.height}`, 'ratio', ratio.toFixed(3));
+// Poista vanha paikkamerkki (leveyspohjaiset tiedostot).
+for (const w of [800, 1200]) for (const ext of EXT) {
+  const stale = join(OUT, `mv-mainos-${w}.${ext}`);
+  if (existsSync(stale)) unlinkSync(stale);
+}
+console.log('mv-mainos', SRC, 'desktop 1600x700 + @2x, mobiili 900x1100 + @2x');

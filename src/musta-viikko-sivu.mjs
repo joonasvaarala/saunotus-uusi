@@ -2,6 +2,7 @@
 // Ei navigointi- eikä sivukarttalinkkejä. Julkaistaan suoralla osoitteella (noindex,nofollow, ei JSON-LD).
 import { tx } from './site-texts.mjs';
 import { e, pageHref, money } from './lib.mjs';
+import { mustaViikkoPicture, MUSTA_VIIKKO_IMAGE_ALT } from './musta-viikko.mjs';
 
 /** Kampanja päättyy ma 30.11.2026 klo 10 (Eurooppa/Helsinki, UTC+2). */
 export const MUSTA_VIIKKO_ENDS = '2026-11-30T10:00:00+02:00';
@@ -85,9 +86,11 @@ export function mustaViikkoBootScript() {
 export function mustaViikkoBody(lang, now = Date.now()) {
   const active = mustaViikkoActive(now);
   const title = mvpText('ui.site.mvp_title', lang);
-  const hero = `<header class="mvp-hero"><p class="kicker">${e(mvpText('ui.site.mvp_kicker', lang))}</p><h1>${e(title)}</h1><p class="mvp-lead">${e(mvpText('ui.site.mvp_lead', lang))}</p></header>`;
+  const alt = MUSTA_VIIKKO_IMAGE_ALT[lang] || MUSTA_VIIKKO_IMAGE_ALT.fi;
+  const pic = mustaViikkoPicture({ alt, cls: 'mvp-hero-img', loading: 'eager', fetchpriority: 'high', sizes: '100vw' });
+  const hero = `<header class="mvp-hero"><div class="mvp-hero-media">${pic}</div><div class="mvp-hero-in"><p class="kicker">${e(mvpText('ui.site.mvp_kicker', lang))}</p><h1>${e(title)}</h1><p class="mvp-lead">${e(mvpText('ui.site.mvp_lead', lang))}</p></div></header>`;
   const inner = active
-    ? `${hero}${offersHtml(lang)}${endedHtml(lang, { hidden: true })}${mustaViikkoBootScript()}`
-    : `${hero}${endedHtml(lang)}`;
-  return `<section class="mvp" data-mvp aria-label="${e(title)}"><div class="wrap">${inner}</div></section>`;
+    ? `${offersHtml(lang)}${endedHtml(lang, { hidden: true })}${mustaViikkoBootScript()}`
+    : `${endedHtml(lang)}`;
+  return `<section class="mvp" data-mvp aria-label="${e(title)}">${hero}<div class="wrap">${inner}</div></section>`;
 }
