@@ -1,14 +1,13 @@
 // Savusaunan musta viikko: suljettava yläbanneri (koko julkinen sivusto) ja etusivun mainoskortti.
 // Oletuksena pois päältä. Näkyviin: MUSTA_VIIKKO_ENABLED = true TAI osoiteparametri ?preview=musta-viikko.
-// Tuote ostettavissa vain suoralla linkillä. Vaihda slug yhdestä paikasta: MUSTA_VIIKKO_SLUG.
+// Tuote ostettavissa vain suoralla lahjakorttilinkillä. Vaihda paketin koodi yhdestä paikasta: MUSTA_VIIKKO_PACKAGE.
 import { tx } from './site-texts.mjs';
 import { e, pageHref, money } from './lib.mjs';
-import { shopHash } from './event-cards.mjs';
 
-/** Kaupan tuotesivun slug. Vaihda tämä, kun Bottiavustus toimittaa lopullisen slugin. */
-export const MUSTA_VIIKKO_SLUG = 'savusaunan-musta-viikko';
+/** Lahjakorttipaketin koodi (?paketti=). listed=false, näkyy vain suoralla linkillä. */
+export const MUSTA_VIIKKO_PACKAGE = 'bf_jalkiloylyt_mato';
 
-/** Kampanja valmiina kaikille kävijöille. Pidä false kunnes slug ja tuote ovat valmiit. */
+/** Kampanja valmiina kaikille kävijöille. Pidä false kunnes tuote on julkaistu linkillä. */
 export const MUSTA_VIIKKO_ENABLED = false;
 
 export const MUSTA_VIIKKO_PREVIEW = 'musta-viikko';
@@ -17,21 +16,25 @@ export const MUSTA_VIIKKO_PRICE = 130;
 
 export const MUSTA_VIIKKO_TEXTS = Object.freeze({
   'ui.site.mv_title': { fi: 'Savusaunan musta viikko', en: 'Smoke Sauna Black Week' },
+  'ui.site.mv_product': { fi: 'Jälkilöylylahjakortti', en: 'After Session Sauna gift card' },
   'ui.site.mv_banner_text': {
-    fi: 'Black Friday -lahjakortti, jälkilöylyt ma–to',
-    en: 'Black Friday gift card, After Session Sauna Mon–Thu',
+    fi: 'Jälkilöylylahjakortti {{var:price}}, voimassa 6 kk ma–to',
+    en: 'After Session Sauna gift card {{var:price}}, valid 6 months Mon–Thu',
   },
   'ui.site.mv_close': { fi: 'Sulje ilmoitus', en: 'Dismiss notice' },
-  'ui.site.mv_card_lead': { fi: 'Black Friday -lahjakortti', en: 'Black Friday gift card' },
-  'ui.site.mv_card_text': { fi: 'Jälkilöylyt ma–to', en: 'After Session Sauna Mon–Thu' },
+  'ui.site.mv_card_text': { fi: 'Voimassa 6 kk, ma–to', en: 'Valid 6 months, Mon–Thu' },
   'ui.site.mv_cta': { fi: 'Osta lahjakortti →', en: 'Buy a gift card →' },
 });
 
 const quiet = { warn() {} };
-export const mvText = (key, lang) => tx(key, lang, { fallback: MUSTA_VIIKKO_TEXTS[key][lang] ?? MUSTA_VIIKKO_TEXTS[key].fi, log: quiet });
+const fillVars = (s, vars) => String(s ?? '').replace(/\{\{var:(\w+)\}\}/g, (_, k) => (vars && vars[k] != null ? vars[k] : `{{var:${k}}}`));
+export const mvText = (key, lang, vars = null) => fillVars(
+  tx(key, lang, { fallback: MUSTA_VIIKKO_TEXTS[key][lang] ?? MUSTA_VIIKKO_TEXTS[key].fi, log: quiet, vars }),
+  vars,
+);
 
 export function mustaViikkoHref(lang) {
-  return pageHref('book', lang, shopHash(MUSTA_VIIKKO_SLUG));
+  return `${pageHref('gift', lang)}?paketti=${MUSTA_VIIKKO_PACKAGE}`;
 }
 
 export function mustaViikkoPrice(lang) {
@@ -40,21 +43,21 @@ export function mustaViikkoPrice(lang) {
 
 export function mustaViikkoBannerHtml(lang) {
   const title = mvText('ui.site.mv_title', lang);
-  const text = mvText('ui.site.mv_banner_text', lang);
   const price = mustaViikkoPrice(lang);
+  const text = mvText('ui.site.mv_banner_text', lang, { price });
   const close = mvText('ui.site.mv_close', lang);
   const href = mustaViikkoHref(lang);
-  return `<div class="mv-banner" data-mv-banner hidden role="region" aria-label="${e(title)}"><div class="wrap mv-banner-in"><a class="mv-banner-link" href="${e(href)}"><strong>${e(title)}</strong><span>${e(text)} · ${e(price)}</span></a><button type="button" class="mv-banner-close" data-mv-close aria-label="${e(close)}"><span aria-hidden="true">×</span></button></div></div>`;
+  return `<div class="mv-banner" data-mv-banner hidden role="region" aria-label="${e(title)}"><div class="wrap mv-banner-in"><a class="mv-banner-link" href="${e(href)}"><strong>${e(title)}</strong><span>– ${e(text)}</span></a><button type="button" class="mv-banner-close" data-mv-close aria-label="${e(close)}"><span aria-hidden="true">×</span></button></div></div>`;
 }
 
 export function mustaViikkoCardHtml(lang) {
   const title = mvText('ui.site.mv_title', lang);
-  const lead = mvText('ui.site.mv_card_lead', lang);
+  const product = mvText('ui.site.mv_product', lang);
   const text = mvText('ui.site.mv_card_text', lang);
   const cta = mvText('ui.site.mv_cta', lang);
   const price = mustaViikkoPrice(lang);
   const href = mustaViikkoHref(lang);
-  return `<section class="section strip mv-sec" data-mv-promo hidden><div class="wrap"><a class="card mv-card" href="${e(href)}"><div class="mv-copy"><p class="kicker">${e(lead)}</p><h2>${e(title)}</h2><p class="mv-note">${e(text)}</p></div><div class="mv-actions"><p class="mv-price">${e(price)}</p><span class="btn gold sm">${e(cta)}</span></div></a></div></section>`;
+  return `<section class="section strip mv-sec" data-mv-promo hidden><div class="wrap"><a class="card mv-card" href="${e(href)}"><div class="mv-copy"><p class="kicker">${e(title)}</p><h2>${e(product)}</h2><p class="mv-note">${e(text)}</p></div><div class="mv-actions"><p class="mv-price">${e(price)}</p><span class="btn gold sm">${e(cta)}</span></div></a></div></section>`;
 }
 
 export function mustaViikkoBootScript() {
