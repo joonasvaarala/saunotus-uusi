@@ -142,5 +142,45 @@
     "max_len": 80,
     "placeholders": [],
     "reason": "t1867u/t1870u/t1872u: Savusaunan musta viikko – suljettava yläbanneri ja etusivun mainoskortti (luonnos). Uusi avain. FI+EN, sama kuin koodin varateksti (src/musta-viikko.mjs). Kampanjan nimi on musta viikko. Ei ajeta ennen julkaisua."
+  },
+  {
+    "key": "ui.site.mv_product_b",
+    "lang": "fi",
+    "text": "Yleisten vuorojen lahjakortti 2 hengelle",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "t1867u/t1870u/t1872u/t1878u/t1879u: Savusaunan musta viikko – suljettava yläbanneri ja etusivun kuvallinen mainos (luonnos). Uusi avain. FI+EN, sama kuin koodin varateksti (src/musta-viikko.mjs). Kampanjan nimi on musta viikko. Ei ajeta tuotantoon; tuonti vain DEV-kantaan testijulkaisua varten."
+  },
+  {
+    "key": "ui.site.mv_product_b",
+    "lang": "en",
+    "text": "Public session gift card for 2 people",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "t1867u/t1870u/t1872u/t1878u/t1879u: Savusaunan musta viikko – suljettava yläbanneri ja etusivun kuvallinen mainos (luonnos). Uusi avain. FI+EN, sama kuin koodin varateksti (src/musta-viikko.mjs). Kampanjan nimi on musta viikko. Ei ajeta tuotantoon; tuonti vain DEV-kantaan testijulkaisua varten."
+  },
+  {
+    "key": "ui.site.mv_more",
+    "lang": "fi",
+    "text": "Tutustu kampanjaan",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "t1867u/t1870u/t1872u/t1878u/t1879u: Savusaunan musta viikko – suljettava yläbanneri ja etusivun kuvallinen mainos (luonnos). Uusi avain. FI+EN, sama kuin koodin varateksti (src/musta-viikko.mjs). Kampanjan nimi on musta viikko. Ei ajeta tuotantoon; tuonti vain DEV-kantaan testijulkaisua varten."
+  },
+  {
+    "key": "ui.site.mv_more",
+    "lang": "en",
+    "text": "See the campaign",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 80,
+    "placeholders": [],
+    "reason": "t1867u/t1870u/t1872u/t1878u/t1879u: Savusaunan musta viikko – suljettava yläbanneri ja etusivun kuvallinen mainos (luonnos). Uusi avain. FI+EN, sama kuin koodin varateksti (src/musta-viikko.mjs). Kampanjan nimi on musta viikko. Ei ajeta tuotantoon; tuonti vain DEV-kantaan testijulkaisua varten."
   }
 ]

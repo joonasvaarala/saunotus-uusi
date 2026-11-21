@@ -604,21 +604,28 @@ img,video,iframe,embed,object,table{max-width:100%}
 .mv-banner-close{flex:none;width:44px;height:44px;margin-right:-8px;border:0;border-radius:8px;background:transparent;color:inherit;font:400 26px/1 var(--body);cursor:pointer}
 .mv-banner-close:hover{color:var(--accent)}
 .mv-sec{padding:28px 0}
-.mv-card{display:flex;flex-direction:row;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px 28px;padding:22px 24px;text-decoration:none;color:var(--bg);background:#161311;border-color:rgba(196,154,108,.35)}
-.mv-card:hover{color:var(--bg);box-shadow:0 10px 26px rgba(0,0,0,.35)}
-.mv-copy{flex:1;min-width:min(100%,16rem)}
-.mv-copy .kicker{margin:0 0 6px;color:var(--accent)}
-.mv-copy h2{margin:0 0 6px;font:500 clamp(26px,3.2vw,34px)/1.15 var(--head);color:var(--bg)}
+.mv-ad{position:relative;overflow:hidden;min-height:420px;color:var(--bg);background:#161311;border:1px solid rgba(196,154,108,.4)}
+.mv-ad-media,.mv-ad-media picture,.mv-ad-media img{position:absolute;inset:0;width:100%;height:100%;display:block}
+.mv-ad-media img{object-fit:cover;object-position:center}
+.mv-ad-shade{position:absolute;inset:0;background:linear-gradient(180deg,rgba(22,19,17,.58) 0%,rgba(22,19,17,.78) 42%,rgba(22,19,17,.92) 100%);pointer-events:none}
+.mv-ad-in{position:relative;z-index:1;padding:36px 32px 28px}
+.mv-ad-in h2{margin:0 0 24px;font:500 clamp(32px,5vw,56px)/1.08 var(--head);color:var(--bg)}
+.mv-ad-offers{display:grid;grid-template-columns:1fr 1fr;gap:16px 20px}
+.mv-ad-offer{display:flex;flex-direction:column;align-items:flex-start;gap:8px;padding:18px 20px;background:rgba(22,19,17,.45);border:1px solid rgba(196,154,108,.35)}
+.mv-ad-offer h3{margin:0;font:500 clamp(20px,2.4vw,26px)/1.2 var(--head);color:var(--bg)}
 .mv-note{margin:0;color:var(--bg)}
-.mv-terms{margin:8px 0 0;font:500 13px/1.4 var(--body);color:var(--accent)}
-.mv-actions{display:flex;flex-wrap:wrap;align-items:center;gap:14px 18px}
 .mv-price{margin:0;font:500 30px/1 var(--head);color:var(--accent);font-variant-numeric:tabular-nums}
-.mv-card .btn{margin:0;text-decoration:none}
+.mv-ad-offer .btn{margin:8px 0 0;text-decoration:none}
+.mv-ad-more{margin:22px 0 0}
+.mv-ad-more a{color:var(--accent);font:500 16px/1.4 var(--body)}
+.mv-ad-more a:hover{color:var(--bg)}
 @media (max-width:640px){
   .mv-banner-in{width:min(100% - 16px,var(--w))}
   .mv-banner-link{flex-direction:column;align-items:flex-start;flex-wrap:nowrap;gap:1px 0}
   .mv-banner-sep{display:none}
   .mv-banner-link strong{font-size:17px}
-  .mv-card{flex-direction:column;align-items:stretch;padding:18px 18px}
+  .mv-ad{min-height:0}
+  .mv-ad-in{padding:24px 18px 20px}
+  .mv-ad-offers{grid-template-columns:1fr}
   .mv-price{font-size:26px}
 }

@@ -8,9 +8,10 @@ import { dirname, join } from 'node:path';
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const read = (p) => readFileSync(join(root, p), 'utf8');
 const {
-  MUSTA_VIIKKO_PACKAGE, MUSTA_VIIKKO_ENABLED, MUSTA_VIIKKO_PREVIEW, MUSTA_VIIKKO_STORAGE_KEY,
-  MUSTA_VIIKKO_PRICE, MUSTA_VIIKKO_ENDS, MUSTA_VIIKKO_TEXTS, mustaViikkoActive, mustaViikkoHref, mustaViikkoPrice,
-  mustaViikkoBannerHtml, mustaViikkoCardHtml, mustaViikkoBootScript,
+  MUSTA_VIIKKO_PACKAGE, MUSTA_VIIKKO_PACKAGE_YLEISET, MUSTA_VIIKKO_ENABLED, MUSTA_VIIKKO_PREVIEW, MUSTA_VIIKKO_STORAGE_KEY,
+  MUSTA_VIIKKO_PRICE, MUSTA_VIIKKO_PRICE_YLEISET, MUSTA_VIIKKO_ENDS, MUSTA_VIIKKO_TEXTS, MUSTA_VIIKKO_IMAGE,
+  mustaViikkoActive, mustaViikkoEnvOn, mustaViikkoBuildIncludes, mustaViikkoHref, mustaViikkoPrice,
+  mustaViikkoOfferHref, mustaViikkoBannerHtml, mustaViikkoCardHtml, mustaViikkoBootScript,
 } = await import('../src/musta-viikko.mjs');
 const { money } = await import('../src/lib.mjs');
 const { home, layout } = await import('../src/render.mjs');
@@ -18,8 +19,17 @@ const { home, layout } = await import('../src/render.mjs');
 test('oletuksena pois päältä; paketin koodi yhdessä vakiossa', () => {
   assert.equal(MUSTA_VIIKKO_ENABLED, false);
   assert.equal(MUSTA_VIIKKO_PACKAGE, 'bf_jalkiloylyt_mato');
+  assert.equal(MUSTA_VIIKKO_PACKAGE_YLEISET, 'mv_yleiset_mato');
   assert.equal(MUSTA_VIIKKO_PREVIEW, 'musta-viikko');
   assert.equal(MUSTA_VIIKKO_PRICE, 130);
+  assert.equal(MUSTA_VIIKKO_PRICE_YLEISET, 50);
+  assert.equal(MUSTA_VIIKKO_IMAGE, 'mv-mainos');
+  assert.equal(mustaViikkoEnvOn('test'), true);
+  assert.equal(mustaViikkoEnvOn('prod'), false);
+  assert.equal(mustaViikkoEnvOn(''), false);
+  assert.equal(mustaViikkoBuildIncludes('prod'), false);
+  assert.equal(mustaViikkoBuildIncludes('test'), true);
+  assert.equal(mustaViikkoBuildIncludes(''), true);
   const src = read('src/musta-viikko.mjs');
   const others = [
     'src/render.mjs', 'src/home-front.mjs', 'src/styles.css',
@@ -34,11 +44,13 @@ test('bannerin ja kortin linkki on kampanjasivu, FI ja EN', () => {
   assert.equal(mustaViikkoHref('en'), '/en/black-week/');
 });
 
-test('hinta 130 € sivuston money-muodossa', () => {
+test('hinta 130 € ja 50 € sivuston money-muodossa', () => {
   assert.equal(mustaViikkoPrice('fi'), money(130, 'fi'));
   assert.equal(mustaViikkoPrice('en'), money(130, 'en'));
   assert.equal(mustaViikkoPrice('fi'), '130 €');
   assert.equal(mustaViikkoPrice('en'), '€130');
+  assert.equal(mustaViikkoPrice('fi', 50), '50 €');
+  assert.equal(mustaViikkoPrice('en', 50), '€50');
 });
 
 test('pending-import-183 vastaa varatekstejä, FI+EN, ei HTML:ää', () => {
@@ -92,15 +104,28 @@ test('banneri ja kortti ovat piilossa, sisältävät linkin, hinnan ja voimassao
     assert.ok(banner.includes(MUSTA_VIIKKO_TEXTS['ui.site.mv_close'][lang]));
     assert.ok(card.includes(MUSTA_VIIKKO_TEXTS['ui.site.mv_title'][lang]));
     assert.ok(card.includes(MUSTA_VIIKKO_TEXTS['ui.site.mv_product'][lang]));
+    assert.ok(card.includes(MUSTA_VIIKKO_TEXTS['ui.site.mv_product_b'][lang]));
     assert.ok(card.includes(MUSTA_VIIKKO_TEXTS['ui.site.mv_card_text'][lang]));
-    assert.ok(card.includes(MUSTA_VIIKKO_TEXTS['ui.site.mv_card_terms'][lang]));
     assert.ok(card.includes(price));
+    assert.ok(card.includes(mustaViikkoPrice(lang, 50)));
     assert.ok(card.includes(MUSTA_VIIKKO_TEXTS['ui.site.mv_cta'][lang]));
+    assert.ok(card.includes(MUSTA_VIIKKO_TEXTS['ui.site.mv_more'][lang]));
+    assert.ok(card.includes(mustaViikkoOfferHref(MUSTA_VIIKKO_PACKAGE, lang)));
+    assert.ok(card.includes(mustaViikkoOfferHref(MUSTA_VIIKKO_PACKAGE_YLEISET, lang)));
+    assert.match(card, /class="mv-ad"/);
+    assert.match(card, /class="mv-ad-shade"/);
+    assert.match(card, /mv-mainos-1200\.jpg/);
+    assert.match(card, /srcset="[^"]*mv-mainos-800\.webp/);
     assert.doesNotMatch(banner, /<[a-z][^>]*>[^<]*(?:javascript:|on\w+=)/i);
   }
   const boot = mustaViikkoBootScript();
   assert.ok(boot.includes('false'));
   assert.ok(boot.includes('preview'));
+  const bootTest = mustaViikkoBootScript('test');
+  assert.match(bootTest, /var on=true/);
+  assert.equal(mustaViikkoBootScript('prod'), '');
+  assert.equal(mustaViikkoBannerHtml('fi', Date.now(), 'prod'), '');
+  assert.equal(mustaViikkoCardHtml('en', Date.now(), 'prod'), '');
   assert.ok(boot.includes(MUSTA_VIIKKO_PREVIEW));
   assert.ok(boot.includes(MUSTA_VIIKKO_STORAGE_KEY));
   assert.ok(boot.includes(MUSTA_VIIKKO_ENDS));
@@ -122,12 +147,19 @@ test('etusivu: kortti viikko-ohjelman jälkeen, banneri ylälaidassa, molemmat h
   }
   assert.ok(fi.includes('/musta-viikko/'));
   assert.ok(en.includes('/en/black-week/'));
-  assert.doesNotMatch(fi, /\?paketti=/);
-  assert.doesNotMatch(en, /\?paketti=/);
+  assert.ok(fi.includes('?paketti=bf_jalkiloylyt_mato'));
+  assert.ok(fi.includes('?paketti=mv_yleiset_mato'));
+  assert.ok(en.includes('/en/gift-card/?paketti=bf_jalkiloylyt_mato'));
+  assert.ok(en.includes('/en/gift-card/?paketti=mv_yleiset_mato'));
+  assert.doesNotMatch(fi.match(/data-mv-banner[\s\S]*?<\/div><header/)?.[0] || '', /\?paketti=/);
   assert.ok(fi.includes('Jälkilöylylahjakortti'));
+  assert.ok(fi.includes('Yleisten vuorojen lahjakortti 2 hengelle'));
   assert.ok(fi.includes('Voimassa 6 kk, ma–to'));
+  assert.ok(fi.includes('Tutustu kampanjaan'));
   assert.ok(en.includes('After Session Sauna gift card'));
+  assert.ok(en.includes('Public session gift card for 2 people'));
   assert.ok(en.includes('Valid 6 months, Mon–Thu'));
+  assert.ok(en.includes('See the campaign'));
   assert.doesNotMatch(fi + en, /black\s*friday/i);
 });
 
@@ -135,7 +167,8 @@ test('CSS: musta tausta, vaalea teksti, kulta-aksentti, ei tummanvihreää', () 
   const css = read('src/styles.css');
   const block = css.slice(css.indexOf('Savusaunan musta viikko'));
   assert.match(block, /\.mv-banner\{[^}]*background:#161311/);
-  assert.match(block, /\.mv-card\{[^}]*background:#161311/);
+  assert.match(block, /\.mv-ad\{[^}]*background:#161311/);
+  assert.match(block, /\.mv-ad-shade\{[^}]*linear-gradient/);
   assert.match(block, /\.mv-banner\{[^}]*color:var\(--bg\)/);
   assert.match(block, /var\(--accent\)/);
   assert.match(block, /var\(--head\)/);
@@ -164,7 +197,7 @@ test('aikaohjaus: banneri ja etusivun kortti eivät renderöidy 30.11.2026 klo 1
   assert.equal(mustaViikkoCardHtml('fi', after), '');
   const ended = home('fi', { now: at });
   assert.doesNotMatch(ended, /class="mv-banner"/);
-  assert.doesNotMatch(ended, /class="card mv-card"/);
+  assert.doesNotMatch(ended, /class="mv-ad"/);
   assert.doesNotMatch(ended, /data-mv-banner hidden/);
   assert.doesNotMatch(ended, /data-mv-promo hidden/);
   assert.doesNotMatch(ended, /mustaViikkoBootScript|saunotus:musta-viikko:dismissed/);
