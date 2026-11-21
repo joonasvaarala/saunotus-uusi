@@ -71,7 +71,7 @@ export const mvText = (key, lang, vars = null) => fillVars(
 );
 
 export function mustaViikkoHref(lang) {
-  return lang === 'en' ? '/en/black-week/' : '/musta-viikko/';
+  return pageHref('mustaViikko', lang);
 }
 
 export function mustaViikkoPrice(lang, amount = MUSTA_VIIKKO_PRICE) {
