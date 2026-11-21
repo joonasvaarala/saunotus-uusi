@@ -593,29 +593,73 @@ html,body{max-width:100%;overflow-x:hidden}
 @supports (overflow-x:clip){html,body{overflow-x:clip}}
 img,video,iframe,embed,object,table{max-width:100%}
 
+/* Savusaunan musta viikko: yläbanneri ja etusivun mainoskortti. Näkyvät vasta luokalla html.mv-on (lippu tai ?preview=musta-viikko).
+   Mustat pinnat (ei tummanvihreää); vaalea teksti, kulta-aksentti. Yläbanneri ennallaan; mainoksen ja kampanjasivun tausta, kerma ja kulta kuvankäsittelijän ohjeen mukaan. */
+.mv-banner{background:#161311;color:var(--bg)}
+.mv-banner-in{display:flex;align-items:center;gap:8px;padding:6px 0}
+.mv-banner-link{flex:1;min-width:0;display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 14px;color:inherit;text-decoration:none}
+.mv-banner-link:hover{color:var(--accent)}
+.mv-banner-link strong{font:500 18px/1.25 var(--head);color:inherit}
+.mv-banner-link span{font:500 14px/1.4 var(--body)}
+.mv-banner-close{flex:none;width:44px;height:44px;margin-right:-8px;border:0;border-radius:8px;background:transparent;color:inherit;font:400 26px/1 var(--body);cursor:pointer}
+.mv-banner-close:hover{color:var(--accent)}
+.mv-sec{padding:28px 0}
+.mv-ad{position:relative;overflow:hidden;color:#F5F3EF;background:#1B1511;border:1px solid rgba(196,154,108,.4)}
+.mv-ad-visual{position:relative;aspect-ratio:1600/700;background:#1B1511}
+.mv-ad-media,.mv-ad-media picture,.mv-ad-media img{position:absolute;inset:0;width:100%;height:100%;display:block}
+.mv-ad-media img{object-fit:cover;object-position:center}
+.mv-ad-title{position:absolute;z-index:1;left:5%;top:10%;width:42%;max-width:28rem;margin:0;font:500 clamp(32px,4.2vw,52px)/1.08 var(--head);color:#F5F3EF}
+.mv-ad-body{position:absolute;z-index:1;left:5%;top:34%;width:42%;max-width:34rem}
+.mv-ad-offers{display:grid;grid-template-columns:1fr 1fr;gap:12px 14px}
+.mv-ad-offer{display:flex;flex-direction:column;align-items:flex-start;gap:4px;padding:12px 14px;background:rgba(27,21,17,.4);border:1px solid rgba(210,180,120,.4)}
+.mv-ad-offer h3{margin:0;font:500 clamp(18px,2.1vw,22px)/1.2 var(--head);color:#F5F3EF}
+.mv-note{margin:0;color:#F5F3EF}
+.mv-price{margin:0;font:500 26px/1 var(--head);color:#D2B478;font-variant-numeric:tabular-nums}
+.mv-ad-offer .btn{margin:8px 0 0;text-decoration:none}
+.mv-ad-more{margin:16px 0 0}
+.mv-ad-more a{color:#D2B478;font:500 16px/1.4 var(--body)}
+.mv-ad-more a:hover{color:#F5F3EF}
+@media (max-width:700px){
+  .mv-ad-visual{aspect-ratio:900/1100}
+  .mv-ad-title{left:6%;top:7%;width:88%;max-width:none;font-size:clamp(28px,8vw,40px)}
+  .mv-ad-body{position:relative;left:auto;top:auto;width:auto;max-width:none;padding:20px 18px 22px}
+  .mv-ad-offers{grid-template-columns:1fr}
+  .mv-price{font-size:26px}
+}
+@media (max-width:640px){
+  .mv-banner-in{width:min(100% - 16px,var(--w))}
+  .mv-banner-link{flex-direction:column;align-items:flex-start;flex-wrap:nowrap;gap:1px 0}
+  .mv-banner-sep{display:none}
+  .mv-banner-link strong{font-size:17px}
+}
 /* Savusaunan musta viikko – kampanjasivu. Musta pinta, vaalea teksti, kulta-aksentti. Ei tummanvihreää. */
-.mvp{background:#161311;color:var(--bg);padding:64px 0 80px}
-.mvp .kicker{margin:0 0 10px;color:var(--accent);letter-spacing:.2em;text-transform:uppercase;font:500 13px/1.3 var(--label)}
-.mvp h1,.mvp h2{color:var(--bg)}
-.mvp-hero{text-align:center;max-width:38rem;margin:0 auto 48px}
-.mvp-hero h1{font:400 clamp(40px,6.2vw,72px)/1.08 var(--head);margin:0 0 16px;padding-bottom:16px;border-bottom:1px solid rgba(196,154,108,.7);display:inline-block}
-.mvp-lead{margin:0 auto;max-width:32rem;font:400 18px/1.55 var(--body);color:var(--bg)}
+.mvp{background:#1B1511;color:#F5F3EF;padding:0 0 80px}
+.mvp .kicker{margin:0 0 10px;color:#D2B478;letter-spacing:.2em;text-transform:uppercase;font:500 13px/1.3 var(--label)}
+.mvp h1,.mvp h2{color:#F5F3EF}
+.mvp-hero{position:relative;overflow:hidden;background:#1B1511;aspect-ratio:1600/700;margin:0 0 48px;text-align:left}
+.mvp-hero-media,.mvp-hero-media picture,.mvp-hero-media img{position:absolute;inset:0;width:100%;height:100%;display:block}
+.mvp-hero-media img{object-fit:cover;object-position:center}
+.mvp-hero-in{position:absolute;z-index:1;left:5%;top:12%;width:42%;max-width:32rem}
+.mvp-hero h1{font:400 clamp(36px,5vw,64px)/1.08 var(--head);margin:0 0 16px;padding-bottom:16px;border-bottom:1px solid rgba(210,180,120,.7);display:inline-block}
+.mvp-lead{margin:0;max-width:32rem;font:400 18px/1.55 var(--body);color:#F5F3EF}
 .mvp-offers{display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:stretch}
-.mvp-offer{display:flex;flex-direction:column;gap:12px;margin:0;padding:28px 28px 24px;border:1px solid rgba(196,154,108,.4);border-radius:14px;background:transparent;color:var(--bg)}
+.mvp-offer{display:flex;flex-direction:column;gap:12px;margin:0;padding:28px 28px 24px;border:1px solid rgba(196,154,108,.4);border-radius:14px;background:transparent;color:#F5F3EF}
 .mvp-offer h2{margin:0;font:500 clamp(26px,3vw,34px)/1.15 var(--head)}
-.mvp-terms{margin:0;flex:1;font:400 15px/1.55 var(--body);color:var(--bg)}
-.mvp-price{margin:8px 0 0;font:400 42px/1 var(--head);color:var(--accent);font-variant-numeric:tabular-nums}
+.mvp-terms{margin:0;flex:1;font:400 15px/1.55 var(--body);color:#F5F3EF}
+.mvp-price{margin:8px 0 0;font:400 42px/1 var(--head);color:#D2B478;font-variant-numeric:tabular-nums}
 .mvp-cta{margin:12px 0 0}
 .mvp-cta .btn{margin:0}
 .mvp-ended{text-align:center;max-width:34rem;margin:0 auto;padding:8px 0 12px}
 .mvp-ended h2{font:400 clamp(32px,5vw,52px)/1.12 var(--head);margin:0 0 16px}
-.mvp-ended-lead{margin:0 0 28px;font:400 18px/1.55 var(--body);color:var(--bg)}
+.mvp-ended-lead{margin:0 0 28px;font:400 18px/1.55 var(--body);color:#F5F3EF}
 .mvp-ended-actions{display:flex;flex-wrap:wrap;justify-content:center;gap:12px 16px;margin:0}
 .mvp-ended-actions .btn{margin:0}
-.mvp .btn.ghost{color:var(--bg);border-color:rgba(196,154,108,.55)}
-.mvp .btn.ghost:hover{background:rgba(196,154,108,.14);color:var(--bg)}
+.mvp .btn.ghost{color:#F5F3EF;border-color:rgba(196,154,108,.55)}
+.mvp .btn.ghost:hover{background:rgba(196,154,108,.14);color:#F5F3EF}
 @media (max-width:700px){
-  .mvp{padding:40px 0 56px}
+  .mvp{padding:0 0 56px}
+  .mvp-hero{aspect-ratio:900/1100;margin:0 0 32px}
+  .mvp-hero-in{left:6%;top:7%;width:88%;max-width:none}
   .mvp-offers{grid-template-columns:1fr}
   .mvp-offer{padding:22px 20px}
   .mvp-price{font-size:36px}

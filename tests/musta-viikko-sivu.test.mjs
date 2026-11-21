@@ -43,6 +43,11 @@ test('kampanja-aikana kaksi tarjousta, kannan ehtosanamuodot, hinnat ja ostolink
   const en = mustaViikko('en', { now: BEFORE });
   assert.match(fi, /<h1>Savusaunan musta viikko<\/h1>/);
   assert.match(en, /<h1>Smoke Sauna Black Week<\/h1>/);
+  assert.match(fi, /class="mvp-hero"/);
+  assert.match(fi, /mv-mainos-desktop\.jpg/);
+  assert.match(fi, /media="\(max-width:700px\)"/);
+  assert.match(fi, /Hämärä savusauna, jonka etualalla musta kiuas/);
+  assert.match(en, /A dim smoke sauna with a black stove/);
   assert.match(fi, /Jälkilöylylahjakortti/);
   assert.match(en, /After Session Sauna gift card/);
   assert.match(fi, /Yleisten vuorojen lahjakortti 2 hengelle/);
@@ -95,16 +100,20 @@ test('noindex,nofollow, ei JSON-LD:tä, hreflang FI↔EN', () => {
   assert.match(en, /rel="alternate" hreflang="fi" href="https:\/\/saunotus\.fi\/musta-viikko\/"/);
 });
 
-test('etusivu, lahjakorttisivu ja valikko eivät linkitä kampanjasivulle', () => {
+test('lahjakorttisivu ja valikko eivät linkitä kampanjasivulle; etusivun mainos/banneri saa linkittää', () => {
   const h = home('fi');
   const g = gift('fi');
   const hen = home('en');
-  for (const [name, html] of [['home-fi', h], ['home-en', hen], ['gift-fi', g]]) {
-    assert.doesNotMatch(html, /\/musta-viikko\//, name);
-    assert.doesNotMatch(html, /\/en\/black-week\//, name);
+  // valikko ja lahjakorttisivu: ei saapuvia linkkejä (kampanjasivu on noindex)
+  for (const html of [h, hen, g]) {
+    const nav = html.includes('<nav') ? html.slice(html.indexOf('<nav'), html.indexOf('</nav>')) : '';
+    assert.doesNotMatch(nav, /musta-viikko|black-week/);
   }
-  const nav = h.slice(h.indexOf('<nav'), h.indexOf('</nav>'));
-  assert.doesNotMatch(nav, /musta-viikko|black-week/);
+  const giftBody = g.replace(/<div class="mv-banner"[\s\S]*?<\/button><\/div><\/div>/, '');
+  assert.doesNotMatch(giftBody, /\/musta-viikko\/|\/en\/black-week\//);
+  // etusivulla linkki vain piilotetussa bannerissa/mainoksessa (tuotantobuild jättää ne pois)
+  assert.match(h, /data-mv-banner[\s\S]*\/musta-viikko\//);
+  assert.match(hen, /data-mv-banner[\s\S]*\/en\/black-week\//);
 });
 
 test('ei Black Friday -sanaa teksteissä eikä lähteissä', () => {
@@ -143,13 +152,18 @@ test('CSS: musta tausta, vaalea teksti, kulta-aksentti, ei tummanvihreää', () 
   const start = css.indexOf('/* Savusaunan musta viikko – kampanjasivu');
   assert.ok(start >= 0);
   const block = css.slice(start);
-  assert.match(block, /\.mvp\{[^}]*background:#161311/);
-  assert.match(block, /color:var\(--bg\)/);
-  assert.match(block, /color:var\(--accent\)/);
+  assert.match(block, /\.mvp\{[^}]*background:#1B1511/);
+  assert.match(block, /color:#F5F3EF/);
+  assert.match(block, /color:#D2B478/);
+  assert.match(block, /aspect-ratio:1600\/700/);
+  assert.match(block, /aspect-ratio:900\/1100/);
   assert.match(block, /font-family:var\(--head\)|font:[^;]*var\(--head\)/);
   assert.doesNotMatch(block, /--green/);
-  assert.equal((block.match(/#161311/g) || []).length, 1);
-  assert.doesNotMatch(block.replaceAll('#161311', ''), /#[0-9a-fA-F]{3,8}/);
+  assert.doesNotMatch(block, /#161311/);
+  const allowed = ['#1B1511', '#F5F3EF', '#D2B478'];
+  let rest = block;
+  for (const c of allowed) rest = rest.replaceAll(c, '');
+  assert.doesNotMatch(rest, /#[0-9a-fA-F]{3,8}/);
 });
 
 test('build jättää kampanjasivun pois sivukartasta; sivu syntyy noindexilla', () => {
@@ -168,10 +182,13 @@ test('build jättää kampanjasivun pois sivukartasta; sivu syntyy noindexilla',
   const en = readFileSync(join(dist, 'en/black-week/index.html'), 'utf8');
   const sm = readFileSync(join(dist, 'sitemap.xml'), 'utf8');
   const homeFi = readFileSync(join(dist, 'index.html'), 'utf8');
+  const giftFi = readFileSync(join(dist, 'lahjakortti/index.html'), 'utf8');
   assert.match(fi, /noindex,nofollow/);
   assert.match(en, /noindex,nofollow/);
   assert.doesNotMatch(fi, /application\/ld\+json/);
   assert.doesNotMatch(sm, /musta-viikko|black-week/);
   assert.doesNotMatch(homeFi, /\/musta-viikko\/|\/en\/black-week\//);
+  assert.doesNotMatch(homeFi, /data-mv-banner|data-mv-promo|class="mv-ad"/);
+  assert.doesNotMatch(giftFi, /\/musta-viikko\/|\/en\/black-week\/|data-mv-banner/);
   rmSync(dist, { recursive: true, force: true });
 });

@@ -14,6 +14,7 @@ import { privacyAnalyticsHtml, policyHasAnalyticsSection } from './privacy-analy
 import { policyText, privacyDocFor, linkContacts } from './policy-lang.mjs';
 import { weekGrid, trainingUrl } from './week-grid.mjs';
 import { experienceHtml, traditionHtml, infoStrip, companyStrip, homeText, homeBookCta } from './home-front.mjs';
+import { mustaViikkoActive, mustaViikkoBannerHtml, mustaViikkoCardHtml, mustaViikkoBootScript } from './musta-viikko.mjs';
 import { treatmentsBody } from './treatments-page.mjs';
 import { faqFor, policyFor, eventTimeFor } from './kb-en.mjs';
 import { selectHomeEvents, shopEventsHtml, shopHash, eventWaitlistPath } from './event-cards.mjs';
@@ -270,7 +271,7 @@ function jsonLd(lang) {
     openingHoursSpecification: spec, sameAs: site.social.map((s) => s.url), priceRange: '€€', inLanguage: lang,
   });
 }
-export function layout({ lang, key, meta, body, preload = '', robotsOnly = false, seo = null, extraCss = '' }) {
+export function layout({ lang, key, meta, body, preload = '', robotsOnly = false, seo = null, extraCss = '', now = Date.now() }) {
   const u = ui(lang);
   const path = pagePath(key, lang);
   // seo (valinnainen, sisältöosio): { url, hreflangs:[{hreflang,href}], robots, ogType, ogImage:{url,width,height,alt}, ogExtra, extraHead, extraCss, jsonLd:[object], switchHref, navCurrent }
@@ -311,7 +312,7 @@ ${alt_[o] && !seo ? `<meta property="og:locale:alternate" content="${ui(o).local
 ${seo?.skipJsonLd ? '' : `<script type="application/ld+json">${jsonLd(lang)}</script>`}${seo?.skipJsonLd ? '' : (seo?.jsonLd || []).map((j) => `<script type="application/ld+json">${JSON.stringify(j).replace(/</g, '\\u003c')}</script>`).join('')}${seo ? '' : seoSchemaForPage({ lang, key, url, body }).map(jsonLdScript).join('')}
 </head><body>
 <a class="skip" href="#main">${e(u.skip)}</a>
-${bannerOpen}<header class="site-header"><div class="wrap hdr">
+${bannerOpen}${mustaViikkoBannerHtml(lang, now)}<header class="site-header"><div class="wrap hdr">
 <a class="brand" href="${pageHref('home', lang)}"><img src="${href('/img/favicon.svg')}" width="27" height="37" alt=""><span class="brand-txt"><b>SAUNOTUS</b> <small>${e(headerTagline(lang, u))}</small></span></a>
 <nav class="nav-desk" aria-label="${e(u.menuLabel)}">${nav}</nav>
 ${langSw}
@@ -331,6 +332,7 @@ ${body}
 <div class="fbottom"><p class="fpay"><span>${e(u.footerPayOnline)}</span><span class="fpay-marks">${['bank', 'card', 'apple-pay', 'google-pay', 'mobilepay'].map((id) => `<img src="${href(`/img/pay/${id}.svg`)}" alt="" height="18" width="${id === 'bank' || id === 'card' ? 18 : 48}" loading="lazy" decoding="async">`).join('')}</span></p><span>© ${new Date().getFullYear()} ${e(kb.business.legal_name)} · ${e(ui(lang).businessId)} ${e(kb.business.business_id)}</span><ul><li><a href="${fl('terms', lang)}">${e(u.legal)}</a></li><li>${pagePath('privacy', lang) ? `<a href="${fl('privacy', lang)}">${e(lang === 'en' ? privacyDocFor(P('privacy').fi, kb.policies, 'en')?.hero.title || u.privacy : u.privacy)}` : `<a href="${pageHref('privacy', 'fi')}"${lang === 'en' ? ' hreflang="fi" lang="fi"' : ''}>${e(u.privacy)}`}</a></li></ul></div>
 </div></footer>
 ${chat}
+${mustaViikkoActive(now) ? mustaViikkoBootScript() : ""}
 </body></html>`;
 }
 
@@ -355,8 +357,9 @@ export function home(lang, opt = {}) {
   const faqs = HOME_FAQ.map((id) => faqFor(id, lang)).filter(Boolean).map((f) => `<details${f.lang !== lang ? ` lang="${e(f.lang)}"` : ''}><summary>${e(f.question)}</summary><p>${e(clean(f.answer))}</p></details>`).join('');
   const faq = sec('faq home-tight', `<header class="center"><h2 class="sec-title">${e(u.faqKicker)}</h2></header><div class="narrow faq">${faqs}</div>`);
   const pre = heroPreload();
-  const body = (opt.previewNote ? `<p class="prev-note" role="note">${e(opt.previewNote)}</p>` : '') + hero + choose + wk + tradition + reviewsSection(lang) + homeBookCta(lang) + ev + infoStripSec + comp + faq;
-  return layout({ lang, key: 'home', meta: opt.meta || d.meta, preload: pre, body, seo: opt.seo || null, extraCss: art && String(art).includes('home-art') ? homeArticlesCss : '' });
+  const now = opt.now ?? Date.now();
+  const body = (opt.previewNote ? `<p class="prev-note" role="note">${e(opt.previewNote)}</p>` : '') + hero + choose + wk + mustaViikkoCardHtml(lang, now) + tradition + reviewsSection(lang) + homeBookCta(lang) + ev + infoStripSec + comp + faq;
+  return layout({ lang, key: 'home', meta: opt.meta || d.meta, preload: pre, body, seo: opt.seo || null, extraCss: art && String(art).includes('home-art') ? homeArticlesCss : '', now });
 }
 
 export function sauna(lang) {
