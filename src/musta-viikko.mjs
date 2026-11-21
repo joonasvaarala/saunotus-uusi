@@ -128,7 +128,7 @@ export function mustaViikkoCardHtml(lang, now = Date.now(), env = process.env.SI
     const text = mvText(o.textKey, lang);
     return `<article class="mv-ad-offer"><h3>${e(name)}</h3><p class="mv-note">${e(text)}</p><p class="mv-price">${mustaViikkoPriceCompareHtml(lang, o.price, o.code)}</p></article>`;
   }).join('');
-  return `<section class="section strip mv-sec" data-mv-promo hidden><div class="wrap"><div class="mv-ad"><div class="mv-ad-visual"><div class="mv-ad-media">${pic}</div><h2 class="mv-ad-title"><a href="${e(page)}">${e(title)}</a></h2></div><div class="mv-ad-body"><div class="mv-ad-offers">${offers}</div><p class="mv-ad-cta"><a class="btn gold" href="${e(page)}">${e(see)}</a></p></div></div></div></section>`;
+  return `<section class="section strip mv-sec" data-mv-promo hidden><div class="wrap"><div class="mv-ad"><div class="mv-ad-visual"><div class="mv-ad-media">${pic}</div></div><div class="mv-ad-body"><h2 class="mv-ad-title"><a href="${e(page)}">${e(title)}</a></h2><div class="mv-ad-offers">${offers}</div><p class="mv-ad-cta"><a class="btn gold" href="${e(page)}">${e(see)}</a></p></div></div></div></section>`;
 }
 
 export function mustaViikkoBootScript(env = process.env.SITE_ENV) {
