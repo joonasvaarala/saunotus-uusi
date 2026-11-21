@@ -164,7 +164,7 @@ test('CSS: musta tausta, vaalea teksti, kulta-aksentti, ei tummanvihreää', () 
   assert.match(block, /font-family:var\(--head\)|font:[^;]*var\(--head\)/);
   assert.doesNotMatch(block, /--green/);
   assert.doesNotMatch(block, /#161311/);
-  const allowed = ['#1B1511', '#F5F3EF', '#D2B478'];
+  const allowed = ['#1B1511', '#120D0A', '#F5F3EF', '#D2B478'];
   let rest = block;
   for (const c of allowed) rest = rest.replaceAll(c, '');
   assert.doesNotMatch(rest, /#[0-9a-fA-F]{3,8}/);

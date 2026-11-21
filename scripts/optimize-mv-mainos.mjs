@@ -1,23 +1,22 @@
-// Kopioi kuvankäsittelijän v3-toimitus public/img/mv-mainos-{desktop,mobiili}[@2x].{jpg,webp}.
-// Lähde: /workspace/kuvat/musta-viikko/mainoskuva-v3/musta-viikko-v3-{desktop,mobiili}[@2x].{jpg,webp}.
-// Desktop/mobiili 1x jpg pakataan alle 250 kt tarvittaessa (laatu 89).
-import { copyFileSync, existsSync, mkdirSync, unlinkSync, statSync, writeFileSync } from 'node:fs';
+// Kopioi kuvankäsittelijän v4-extra-toimitus public/img/mv-mainos-{desktop,mobiili}[@2x].{jpg,webp}.
+// Lähde: /workspace/kuvat/musta-viikko/mainoskuva-v4/musta-viikko-v4-{desktop,mobiili}-extra[@2x].{jpg,webp}.
+// Desktop/mobiili 1x jpg pakataan alle 250 kt tarvittaessa.
+import { copyFileSync, existsSync, mkdirSync, unlinkSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
 
 const OUT = 'public/img';
-const SRC = '/workspace/kuvat/musta-viikko/mainoskuva-v3';
+const SRC = '/workspace/kuvat/musta-viikko/mainoskuva-v4';
 const KIND = ['desktop', 'mobiili'];
 const SCALE = ['', '@2x'];
 const EXT = ['jpg', 'webp'];
 
 mkdirSync(OUT, { recursive: true });
 for (const kind of KIND) for (const scale of SCALE) for (const ext of EXT) {
-  const src = join(SRC, `musta-viikko-v3-${kind}${scale}.${ext}`);
+  const src = join(SRC, `musta-viikko-v4-${kind}-extra${scale}.${ext}`);
   if (!existsSync(src)) throw new Error(`puuttuva lähdekuva: ${src}`);
   copyFileSync(src, join(OUT, `mv-mainos-${kind}${scale}.${ext}`));
 }
-// 1x jpg alle 250 kt
 const pack = `
 from pathlib import Path
 from PIL import Image
@@ -51,4 +50,4 @@ for (const w of [800, 1200]) for (const ext of EXT) {
   if (existsSync(stale)) unlinkSync(stale);
 }
 const desk = statSync(join(OUT, 'mv-mainos-desktop.jpg')).size;
-console.log('mv-mainos v3', SRC, 'desktop 1600x700 + @2x, mobiili 900x1100 + @2x; desktop 1x jpg', desk, 'tavua');
+console.log('mv-mainos v4-extra', SRC, 'desktop 1600x700 + @2x, mobiili 900x1100 + @2x; desktop 1x jpg', desk, 'tavua');

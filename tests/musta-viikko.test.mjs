@@ -196,7 +196,7 @@ test('CSS: musta tausta, vaalea teksti, kulta-aksentti, ei tummanvihreää', () 
   const end = css.indexOf('Savusaunan musta viikko – kampanjasivu');
   const block = css.slice(start, end === -1 ? undefined : end);
   assert.match(block, /\.mv-banner\{[^}]*background:#161311/);
-  assert.match(block, /\.mv-ad\{[^}]*background:#1B1511/);
+  assert.match(block, /\.mv-ad\{[^}]*background:#120D0A/);
   assert.match(block, /\.mv-ad-title\{[^}]*color:#F5F3EF/);
   assert.match(block, /\.mv-price\{[^}]*color:#D2B478/);
   assert.match(block, /\.mv-ad-cta/);
@@ -211,7 +211,7 @@ test('CSS: musta tausta, vaalea teksti, kulta-aksentti, ei tummanvihreää', () 
   assert.match(block, /\.mv-banner-close\{[^}]*width:44px/);
   assert.doesNotMatch(block, /var\(--green\)/);
   assert.equal((block.match(/#161311/g) || []).length, 1);
-  const allowed = ['#161311', '#1B1511', '#F5F3EF', '#D2B478'];
+  const allowed = ['#161311', '#1B1511', '#120D0A', '#F5F3EF', '#D2B478'];
   let rest = block;
   for (const c of allowed) rest = rest.replaceAll(c, '');
   assert.doesNotMatch(rest, /#[0-9a-fA-F]{3,8}/);
