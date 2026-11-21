@@ -40,7 +40,7 @@ test('ostoskori lisää, vähentää ja laskee katalogin hinnalla', () => {
   assert.equal(cart.length, 0);
 });
 
-test('maksutavat: ei käteistä, korttipääte näkyy mutta ei ole valittavissa', () => {
+test('maksutavat: ei käteistä, harmaata korttipääte-riviä ei näytetä (t1865u)', () => {
   const list = [
     { code: 'cash', handler: 'cash', channels: ['pos'], active: true, sort_order: 1 },
     { code: 'payment_link', handler: 'payment_link', channels: ['pos'], active: true, sort_order: 10 },
@@ -49,8 +49,8 @@ test('maksutavat: ei käteistä, korttipääte näkyy mutta ei ole valittavissa'
     { code: 'visma_pay', handler: 'visma_pay', channels: ['drinks'], active: true, sort_order: 30 },
   ];
   const pos = tendersFor(list, 'pos').map((t) => t.code);
-  assert.deepEqual(pos, ['payment_link', 'mobilepay', 'card_terminal']);
-  assert.deepEqual(posSheetTenders(list).map((t) => t.code), ['payment_link', 'card_terminal']);
+  assert.deepEqual(pos, ['payment_link', 'mobilepay']);
+  assert.deepEqual(posSheetTenders(list).map((t) => t.code), ['payment_link']);
   assert.equal(tenderAvailable(list.find((t) => t.code === 'card_terminal'), { mobilepay_mode: 'test' }), false);
   assert.equal(tenderAvailable(list.find((t) => t.code === 'mobilepay'), { mobilepay_mode: 'off' }), false);
   assert.equal(tenderAvailable(list.find((t) => t.code === 'mobilepay'), { mobilepay_mode: 'test' }), false);

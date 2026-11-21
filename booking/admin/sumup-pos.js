@@ -49,6 +49,12 @@ export function pickReader(saved, list) {
   return null;
 }
 
+/** t1865u: Pikakassa käyttää aina oletuslukijaa (is_default, aktiivinen). Ei oletusta → null (ohje Asetuksiin). */
+export function defaultReader(list) {
+  const row = (Array.isArray(list) ? list : []).find((x) => x && x.is_default && x.active !== false && ID_RE.test(String(x.reader_id || '')));
+  return row ? { reader_id: row.reader_id, name: row.name || '' } : null;
+}
+
 export function normalizePairingCode(raw) {
   return String(raw ?? '').replace(/\s+/g, '').toUpperCase();
 }

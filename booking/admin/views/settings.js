@@ -13,6 +13,7 @@ import { TECHNICAL_LIMITS, overviewNotices } from '../settings-logic.js';
 import { createSaveBar } from '../settings-savebar.js';
 import { tx, modeBadge, onOff, stat, toggle, num, textField, card, fold, read, group } from '../settings-widgets.js';
 import { feeRulesCard } from './fee-rules-panel.js';
+import { sumupSettingsCard } from './sumup-settings.js';
 
 const MANUAL = ['pay_later', 'card_terminal', 'bank_transfer', 'invoice', 'partner_voucher', 'other'];
 const LIMIT_FIELDS = [
@@ -193,7 +194,7 @@ function bookingPanel(bundle, bar) {
     card(tx('group_title'), tx('group_help'), grp.node, daysWrap, annual.node, h('p', { class: 'muted', text: tx('annual_help') })));
 }
 
-function paymentsPanel(bundle, bar) {
+function paymentsPanel(bundle, bar, ctx) {
   const s = bundle.settings || {};
   const holdMode = s.public_payment_mode === 'hold_until_paid';
   const company = toggle(tx('inv_co_label'), tx('inv_co_help'), s.checkout_company_invoice_enabled === true, { testid: 'company-invoice' });
@@ -226,6 +227,7 @@ function paymentsPanel(bundle, bar) {
     holdMode
       ? card(tx('hold_title'), tx('hold_help'), hold.node, grace.node, wait.node)
       : h('p', { class: 'muted', 'data-testid': 'hold-hidden-note', text: tx('hold_hidden_note') }),
+    sumupSettingsCard({ ctx }),
     feeRulesCard());
 }
 
@@ -305,7 +307,7 @@ export async function render({ ctx, rest, reload }) {
   else if (bundleFailed || !bundle) panel = h('p', { class: 'err', role: 'alert', text: tx('load_failed') });
   else if (tab === 'yleiset') panel = generalPanel(bundle, bar);
   else if (tab === 'varaukset') panel = bookingPanel(bundle, bar);
-  else if (tab === 'maksut') panel = paymentsPanel(bundle, bar);
+  else if (tab === 'maksut') panel = paymentsPanel(bundle, bar, ctx);
   else if (tab === 'jarjestelma') panel = systemPanel(bundle, bar, sys);
   const content = h('div', { role: 'tabpanel', id: 'settings-panel', 'aria-labelledby': `set-tab-${tab}`, 'data-testid': 'settings-panel' }, panel, bar.node);
   bar.watch(content);

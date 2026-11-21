@@ -2,16 +2,18 @@
 // yksi päänavigaation kohta, välilehdet sivun yläreunassa. Vanha osoite (#/pikakassa, #/kayttajat, …) valitsee välilehden.
 import { h, tabs, skeleton } from '../ui.js';
 import { navText } from '../nav-texts.js';
-import { navGroupById, visibleGroupTabs, selectGroupTab } from '../admin-navigation.js';
+import { navGroupById, visibleGroupTabs, visibleGroupLinks, selectGroupTab } from '../admin-navigation.js';
 
 export async function render({ ctx, refs, reload, query, rest, groupId, tabId, loadView }) {
   const group = navGroupById(groupId);
   const can = (p) => ctx.can(p);
   const groupTabs = visibleGroupTabs(group, can);
+  const groupLinks = visibleGroupLinks(group, can);
   const selected = selectGroupTab(group, tabId, can);
   const heading = h('h1', { text: navText(group.labelKey) });
-  const tablist = tabs({ label: navText(group.labelKey), testid: 'nav-group-tabs', idPrefix: 'nav-group-tab', hidden: groupTabs.length < 2, selected: selected?.id,
-    items: groupTabs.map((tab) => ({ id: tab.id, text: navText(tab.labelKey), href: `#/${tab.path}`, controls: 'nav-group-panel', testid: `nav-group-tab-${tab.id}` })) });
+  const tablist = tabs({ label: navText(group.labelKey), testid: 'nav-group-tabs', idPrefix: 'nav-group-tab', hidden: groupTabs.length + groupLinks.length < 2, selected: selected?.id,
+    items: groupTabs.map((tab) => ({ id: tab.id, text: navText(tab.labelKey), href: `#/${tab.path}`, controls: 'nav-group-panel', testid: `nav-group-tab-${tab.id}` }))
+      .concat(groupLinks.map((l) => ({ id: `link-${l.id}`, text: navText(l.labelKey), href: `#/${l.path}`, testid: `nav-group-link-${l.id}` }))) });
   const host = h('div', { class: 'nav-group', 'data-testid': `nav-group-${group.id}`, 'data-active-tab': selected?.id || '' }, heading, tablist);
   const panel = h('section', { class: 'nav-group-panel', role: 'tabpanel', id: 'nav-group-panel', 'data-testid': 'nav-group-panel', 'aria-labelledby': selected ? `nav-group-tab-${selected.id}` : null });
   host.append(panel);

@@ -350,13 +350,12 @@ test('Maksa avaa popupin; Escape, tausta ja sulku palauttavat fokuksen ja scroll
   assert.equal(document.body.classList.contains('pos-modal-open'), true);
   assert.equal(document.activeElement, dlg);
   const radios = all(dlg).filter((n) => n.getAttribute('name') === 'tender');
-  assert.deepEqual(radios.map((n) => n.value), ['payment_link', 'card_terminal']);
-  assert.equal(radios.find((n) => n.value === 'card_terminal').hasAttribute('disabled'), true);
+  assert.deepEqual(radios.map((n) => n.value), ['payment_link']);   // t1865u: harmaa Korttipääte – Tulossa -rivi poistettu
   assert.equal(radios.find((n) => n.value === 'payment_link').hasAttribute('disabled'), false);
   assert.equal(dlg.textContent.includes('MobilePay'), false);
   assert.equal(all(root).some((n) => n.getAttribute('name') === 'tender'), false);
   assert.equal(dlg.textContent.includes('Käteinen'), false);
-  assert.match(dlg.textContent, /Tulossa/);
+  assert.equal(dlg.textContent.includes('Tulossa'), false);
   assert.equal(q(dlg, 'pos-confirm').textContent, 'Vahvista maksu');
   dlg.click();
   assert.ok(document.getElementById('pos-pay-dialog'));
@@ -469,8 +468,7 @@ test('MobilePay-maksutapaa ei näytetä pikakassan maksuikkunassa', async () => 
     const dlg = document.getElementById('pos-pay-dialog');
     assert.equal(all(dlg).find((n) => n.getAttribute('name') === 'tender' && n.value === 'mobilepay'), undefined);
     assert.match(dlg.textContent, /Maksulinkki/);
-    assert.match(dlg.textContent, /Korttipääte/);
-    assert.match(dlg.textContent, /Tulossa/);
+    assert.equal(dlg.textContent.includes('Tulossa'), false);
     assert.equal(dlg.textContent.includes('MobilePay'), false);
     const src = read('../admin/pos-screen.js');
     assert.equal(src.includes('mobilepay-start'), false);
