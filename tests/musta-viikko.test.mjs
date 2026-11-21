@@ -122,11 +122,14 @@ test('banneri ja kortti ovat piilossa, sisältävät linkin, hinnan ja voimassao
     assert.match(card, /class="btn gold"/);
     assert.ok(card.includes(href));
     assert.doesNotMatch(card, /\?paketti=/);
-    assert.doesNotMatch(card, /mv-mainos/);
-    assert.doesNotMatch(card, /<img /);
+    assert.match(card, /mv-mainos/);
+    assert.match(card, /<img /);
+    assert.ok(card.includes(MUSTA_VIIKKO_IMAGE_ALT[lang]));
     assert.match(card, /class="mv-ad"/);
-    assert.match(card, /class="mv-ad-in"/);
-    assert.doesNotMatch(card, /mv-ad-visual|mv-ad-media|mv-ad-shade/);
+    assert.match(card, /class="mv-ad-visual"/);
+    assert.match(card, /class="mv-ad-media"/);
+    assert.match(card, /class="mv-ad-body"/);
+    assert.doesNotMatch(card, /mv-ad-in|mv-ad-shade/);
     assert.doesNotMatch(banner, /<[a-z][^>]*>[^<]*(?:javascript:|on\w+=)/i);
   }
   const boot = mustaViikkoBootScript();
@@ -198,7 +201,10 @@ test('CSS: musta tausta, vaalea teksti, kulta-aksentti, ei tummanvihreää', () 
   assert.match(block, /\.mv-price\{[^}]*color:#D2B478/);
   assert.match(block, /\.mv-ad-cta/);
   assert.match(block, /\.mv-banner-cta/);
-  assert.doesNotMatch(block, /mv-ad-shade|mv-ad-visual|mv-ad-media/);
+  assert.match(block, /\.mv-ad-visual\{[^}]*aspect-ratio:1600\/700/);
+  assert.match(block, /\.mv-ad-media/);
+  assert.match(block, /aspect-ratio:900\/1100/);
+  assert.doesNotMatch(block, /mv-ad-shade/);
   assert.match(block, /\.mv-banner\{[^}]*color:var\(--bg\)/);
   assert.match(block, /var\(--accent\)/);
   assert.match(block, /var\(--head\)/);
@@ -230,8 +236,10 @@ test('mainoskuvat: art direction, desktop 1x alle 250 kt', () => {
   assert.ok(statSync(join(root, 'public/img/mv-mainos-desktop.jpg')).size < 250_000);
   assert.ok(!existsSync(join(root, 'public/img/mv-mainos-800.jpg')));
   assert.ok(!existsSync(join(root, 'public/img/mv-mainos-1200.jpg')));
-  assert.match(MUSTA_VIIKKO_IMAGE_ALT.fi, /Hämärä savusauna/);
-  assert.match(MUSTA_VIIKKO_IMAGE_ALT.en, /dim smoke sauna/i);
+  assert.match(MUSTA_VIIKKO_IMAGE_ALT.fi, /noen mustaamilla lauteilla/);
+  assert.match(MUSTA_VIIKKO_IMAGE_ALT.en, /soot-blackened benches/i);
+  assert.ok(statSync(join(root, 'public/img/mv-mainos-desktop.jpg')).size < 250_000);
+  assert.ok(statSync(join(root, 'public/img/mv-mainos-mobiili.jpg')).size < 250_000);
 });
 
 test('aikaohjaus: banneri ja etusivun kortti eivät renderöidy 30.11.2026 klo 10 (Helsinki) jälkeen', () => {

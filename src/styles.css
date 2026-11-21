@@ -594,7 +594,7 @@ html,body{max-width:100%;overflow-x:hidden}
 img,video,iframe,embed,object,table{max-width:100%}
 
 /* Savusaunan musta viikko: yläbanneri ja etusivun mainoskortti. Näkyvät vasta luokalla html.mv-on (lippu tai ?preview=musta-viikko).
-   Mustat pinnat (ei tummanvihreää); vaalea teksti, kulta-aksentti. Mainoksen kuva vaihdetaan v2:een kun se on valmis; sillä välin pelkkä musta tausta. */
+   Mustat pinnat (ei tummanvihreää); vaalea teksti, kulta-aksentti. Mainoskuva v3 (koko savusaunahuone). Otsikko holvin tekstialueella, tarjoukset kuvan alla jotta kasvot eivät peity. */
 .mv-banner{background:#161311;color:var(--bg)}
 .mv-banner-in{display:flex;align-items:center;gap:8px;padding:6px 0}
 .mv-banner-link{flex:1;min-width:0;display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 14px;color:inherit;text-decoration:none}
@@ -606,11 +606,14 @@ img,video,iframe,embed,object,table{max-width:100%}
 .mv-banner-close{flex:none;width:44px;height:44px;margin-right:-8px;border:0;border-radius:8px;background:transparent;color:inherit;font:400 26px/1 var(--body);cursor:pointer}
 .mv-banner-close:hover{color:var(--accent)}
 .mv-sec{padding:28px 0}
-.mv-ad{color:#F5F3EF;background:#1B1511;border:1px solid rgba(196,154,108,.4)}
-.mv-ad-in{padding:36px 32px 32px}
-.mv-ad-title{margin:0 0 24px;font:500 clamp(32px,5vw,56px)/1.08 var(--head);color:#F5F3EF}
+.mv-ad{position:relative;overflow:hidden;color:#F5F3EF;background:#1B1511;border:1px solid rgba(196,154,108,.4)}
+.mv-ad-visual{position:relative;aspect-ratio:1600/700;background:#1B1511}
+.mv-ad-media,.mv-ad-media picture,.mv-ad-media img{position:absolute;inset:0;width:100%;height:100%;display:block}
+.mv-ad-media img{object-fit:cover;object-position:center}
+.mv-ad-title{position:absolute;z-index:1;left:4%;top:8%;width:40%;max-width:28rem;margin:0;font:500 clamp(32px,4.2vw,52px)/1.08 var(--head);color:#F5F3EF}
 .mv-ad-title a{color:inherit;text-decoration:none}
 .mv-ad-title a:hover{color:#D2B478}
+.mv-ad-body{padding:28px 32px 32px}
 .mv-ad-offers{display:grid;grid-template-columns:1fr 1fr;gap:16px 20px}
 .mv-ad-offer{display:flex;flex-direction:column;align-items:flex-start;gap:4px;padding:16px 18px;background:rgba(27,21,17,.4);border:1px solid rgba(210,180,120,.4)}
 .mv-ad-offer h3{margin:0;font:500 clamp(18px,2.1vw,24px)/1.2 var(--head);color:#F5F3EF}
@@ -619,7 +622,9 @@ img,video,iframe,embed,object,table{max-width:100%}
 .mv-ad-cta{margin:28px 0 0}
 .mv-ad-cta .btn{display:inline-flex;align-items:center;justify-content:center;margin:0;text-decoration:none;font:600 18px/1.2 var(--label);padding:14px 28px}
 @media (max-width:700px){
-  .mv-ad-in{padding:24px 18px 22px}
+  .mv-ad-visual{aspect-ratio:900/1100}
+  .mv-ad-title{left:6%;top:6%;width:88%;max-width:none;font-size:clamp(28px,8vw,40px)}
+  .mv-ad-body{padding:24px 18px 22px}
   .mv-ad-offers{grid-template-columns:1fr}
   .mv-price{font-size:26px}
   .mv-ad-cta .btn{width:100%}
@@ -638,7 +643,7 @@ img,video,iframe,embed,object,table{max-width:100%}
 .mvp-hero{position:relative;overflow:hidden;background:#1B1511;aspect-ratio:1600/700;margin:0 0 48px;text-align:left}
 .mvp-hero-media,.mvp-hero-media picture,.mvp-hero-media img{position:absolute;inset:0;width:100%;height:100%;display:block}
 .mvp-hero-media img{object-fit:cover;object-position:center}
-.mvp-hero-in{position:absolute;z-index:1;left:5%;top:12%;width:42%;max-width:32rem}
+.mvp-hero-in{position:absolute;z-index:1;left:4%;top:8%;width:40%;max-width:32rem}
 .mvp-hero h1{font:400 clamp(36px,5vw,64px)/1.08 var(--head);margin:0 0 16px;padding-bottom:16px;border-bottom:1px solid rgba(210,180,120,.7);display:inline-block}
 .mvp-lead{margin:0;max-width:32rem;font:400 18px/1.55 var(--body);color:#F5F3EF}
 .mvp-offers{display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:stretch}
@@ -658,7 +663,7 @@ img,video,iframe,embed,object,table{max-width:100%}
 @media (max-width:700px){
   .mvp{padding:0 0 56px}
   .mvp-hero{aspect-ratio:900/1100;margin:0 0 32px}
-  .mvp-hero-in{left:6%;top:7%;width:88%;max-width:none}
+  .mvp-hero-in{left:6%;top:6%;width:88%;max-width:none}
   .mvp-offers{grid-template-columns:1fr}
   .mvp-offer{padding:22px 20px}
   .mvp-price{font-size:36px}

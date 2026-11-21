@@ -40,8 +40,8 @@ export const MUSTA_VIIKKO_IMAGE_BP = 700;
 export const MUSTA_VIIKKO_IMAGE_SIZE = { w: 1600, h: 700 };
 export const MUSTA_VIIKKO_IMAGE_MOBILE_SIZE = { w: 900, h: 1100 };
 export const MUSTA_VIIKKO_IMAGE_ALT = Object.freeze({
-  fi: 'Hämärä savusauna, jonka etualalla musta kiuas verkkokivineen; piipusta valuu vettä, tila on täynnä lämmintä savua.',
-  en: 'A dim smoke sauna with a black stove and stones in a wire cage in the foreground; water drips from the flue into warm, smoky air.',
+  fi: 'Ihmisiä istuu noen mustaamilla lauteilla Sipoonjoen perinnesaunan savusaunassa; holvikatto, savuluukku ja palavat kynttilät.',
+  en: 'People sitting on the soot-blackened benches of the Sipoonjoki traditional smoke sauna, with its barrel vault, smoke hatch and burning candles.',
 });
 
 export const MUSTA_VIIKKO_OFFERS = Object.freeze([
@@ -121,13 +121,14 @@ export function mustaViikkoCardHtml(lang, now = Date.now(), env = process.env.SI
   const title = mvText('ui.site.mv_title', lang);
   const see = mvText('ui.site.mv_see', lang);
   const page = mustaViikkoHref(lang);
+  const alt = MUSTA_VIIKKO_IMAGE_ALT[lang] || MUSTA_VIIKKO_IMAGE_ALT.fi;
+  const pic = mustaViikkoPicture({ alt, sizes: '(min-width:701px) 1100px, 100vw' });
   const offers = MUSTA_VIIKKO_OFFERS.map((o) => {
     const name = mvText(o.nameKey, lang);
     const text = mvText(o.textKey, lang);
-    const price = mustaViikkoPrice(lang, o.price);
     return `<article class="mv-ad-offer"><h3>${e(name)}</h3><p class="mv-note">${e(text)}</p><p class="mv-price">${mustaViikkoPriceCompareHtml(lang, o.price, o.code)}</p></article>`;
   }).join('');
-  return `<section class="section strip mv-sec" data-mv-promo hidden><div class="wrap"><div class="mv-ad"><div class="mv-ad-in"><h2 class="mv-ad-title"><a href="${e(page)}">${e(title)}</a></h2><div class="mv-ad-offers">${offers}</div><p class="mv-ad-cta"><a class="btn gold" href="${e(page)}">${e(see)}</a></p></div></div></div></section>`;
+  return `<section class="section strip mv-sec" data-mv-promo hidden><div class="wrap"><div class="mv-ad"><div class="mv-ad-visual"><div class="mv-ad-media">${pic}</div><h2 class="mv-ad-title"><a href="${e(page)}">${e(title)}</a></h2></div><div class="mv-ad-body"><div class="mv-ad-offers">${offers}</div><p class="mv-ad-cta"><a class="btn gold" href="${e(page)}">${e(see)}</a></p></div></div></div></section>`;
 }
 
 export function mustaViikkoBootScript(env = process.env.SITE_ENV) {
