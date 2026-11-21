@@ -39,6 +39,7 @@ import { createFormErrors, validateCustomer } from './form-errors.js';
 import { richHost } from './rich-view.js';
 import { softenSpaces } from './text-spaces.js';
 import { revealForm, revealIfHidden, bookingJump } from './gift-ui.js';
+import { itemsGiftCover, payableTotal, restrictionNote } from './gift-logic.js';
 import { normalizeCode, quoteSignature, isAnnualQuote, isCodeError, codeFailText } from './discount-code-logic.js';
 import { createQuietOfferCache, indexOffers, findOffer, dayMaxPercent, productMaxPercent, quietPrices, quietCheckout, quietBase, pctText, fillText, quietWindow, offerKey } from './quiet-offers-logic.js';
 import { normalizeOffer, ritualPrice, ritualMax, cardQty, reconcileCard, ritualAddonArg, ritualSig, splitItems, isRitualError } from './ritual-addon-logic.js';
@@ -1251,9 +1252,11 @@ async function viewConfirmation({ refresh = false, notice = null, host = null, n
       h('dt', { text: S.lang === 'en' ? 'Course total' : 'Loppusumma' }), h('dd', { 'data-testid': 'conf-course-total', text: b.training.total != null ? money(b.training.total) : '–' }),
       h('dt', { text: S.lang === 'en' ? 'To be invoiced later' : 'Laskutetaan myöhemmin' }), h('dd', { 'data-testid': 'conf-balance', text: b.training.remaining != null ? money(b.training.remaining) : '–' }),
     ] : []),
-    h('dt', { text: b.training ? (S.lang === 'en' ? 'Reservation fee' : 'Varausmaksu') : t.total }), h('dd', { text: `${money(b.total)} (${t.vatIncl})` }), h('dt', { text: t.payStatus }), h('dd', { text: b.training && b.payment_status === 'paid' ? (S.lang === 'en' ? 'Reservation fee paid' : 'Varausmaksu maksettu') : pay }),
+    ...( (() => { const cover = itemsGiftCover(b.items, it); if (!(cover.amount > 0 || cover.uses > 0)) return []; const uses = cover.uses > 0 ? (cover.uses === 1 ? t.giftCoverUsesOne : t.giftCoverUses).replace('{n}', String(cover.uses)) : ''; const amt = cover.amount > 0 ? `−${money(cover.amount)}` : ''; return [h('dt', { text: t.giftCover }), h('dd', { 'data-testid': 'conf-gift-cover', text: [amt, uses].filter(Boolean).join(' · ') })]; })() ),
+    h('dt', { text: b.training ? (S.lang === 'en' ? 'Reservation fee' : 'Varausmaksu') : t.total }), h('dd', { 'data-testid': 'conf-total', text: `${money(payableTotal(b))} (${t.vatIncl})` }), h('dt', { text: t.payStatus }), h('dd', { text: b.training && b.payment_status === 'paid' ? (S.lang === 'en' ? 'Reservation fee paid' : 'Varausmaksu maksettu') : pay }),
     holdV && co.awaiting && co.remaining > 0 ? [h('dt', { text: ht(S.lang, 'summary.remaining') }), h('dd', { 'data-testid': 'conf-remaining', text: money(co.remaining) })] : null);   // pitotilassa: maksettavaa jäljellä (lahjakorttiosuuden jälkeen)
   dl.dataset.testid = 'conf-summary';
+  const giftNote = restrictionNote(it, S.lang) || restrictionNote(b, S.lang);
   const trainingNote = b.training ? h('p', { class: 'bk-note', 'data-testid': 'conf-training-balance', text: S.lang === 'en' ? 'The balance is invoiced later. Only the reservation fee is paid online.' : 'Loppusumma laskutetaan myöhemmin. Verkossa maksetaan vain varausmaksu.' }) : null;
   const actions = h('div', { class: 'bk-actions' });
   const primary = primaryAction(pageKind, { hasRetry: unpaidEnd });   // KAUPPA-VAHVISTUS-01: yksi päätoiminto per tila (kulta); muut toissijaisia
@@ -1275,7 +1278,7 @@ async function viewConfirmation({ refresh = false, notice = null, host = null, n
   } }, t.cancelBooking));
   if (b.status === 'pending' && inv.locked) actions.append(h('p', { class: 'bk-note', role: 'status', 'data-testid': 'invoiced-cancel-note', text: t.invoicedCancelNote }, ' ', h('a', { href: `mailto:${S.email}`, text: S.email })));
   mount(h('div', { class: `bk-conf ${b.status}` }, showsThanksHeading(pageKind) && b.status === 'confirmed' ? h('h2', { 'data-testid': 'conf-thanks', text: t.confTitle }) : null, h('p', { class: 'bk-status', role: 'status', 'data-testid': 'conf-status', text: head }),   // yksi otsikko: sivun H1 (+ kiitos-H2 vain vahvistetussa), yksi tilamerkki
-    b.status === 'confirmed' && pageKind === 'confirmed' ? h('p', { class: 'bk-note', 'data-testid': 'conf-email-sent', text: t.confEmailSent }) : null, holdHost, mpHost, dl, trainingNote,   // pitotilassa: otsikko + tilabadge → pitopaneeli → tiivis tilausyhteenveto → maksuosio (secEl lisätään yhteenvedon jälkeen)
+    b.status === 'confirmed' && pageKind === 'confirmed' ? h('p', { class: 'bk-note', 'data-testid': 'conf-email-sent', text: t.confEmailSent }) : null, holdHost, mpHost, dl, giftNote ? h('p', { class: 'bk-note', 'data-testid': 'conf-gift-note', text: giftNote }) : null, trainingNote,   // pitotilassa: otsikko + tilabadge → pitopaneeli → tiivis tilausyhteenveto → maksuosio (secEl lisätään yhteenvedon jälkeen)
     swimKey ? h('p', { class: 'bk-note bk-swim', 'data-testid': 'conf-swim', text: t[swimKey] }) : null,
     b.status === 'confirmed' && paysByInvoice(b) && b.payment_status !== 'paid' ? h('p', { class: 'bk-pay', text: t.companyInvoiceMethodNote }) : null,
     b.status === 'confirmed' && b.payment_status !== 'paid' && b.payment_status !== 'invoiced' && !paysByInvoice(b) && !isTreatmentBooking(b) && !online ? h('p', { class: 'bk-pay', text: t.payLater }) : null, optNote && b.status === 'confirmed' ? h('p', { class: 'bk-note', 'data-testid': 'conf-option-note', text: optNote }) : null, actions, out,

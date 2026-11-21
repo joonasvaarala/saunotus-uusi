@@ -77,8 +77,8 @@ test('tekstit: FI/EN-avaimet samat, paikkamerkit samat, ei tyhjiä', () => {
   assert.equal(gtText('fi', 'counter', { n: 5, max: 300 }), '5 / 300');
 });
 test('kaikilla sopimuksen virhekoodeilla on selkeä FI- ja EN-teksti', () => {
-  const codes = ['sale_disabled', 'rate_limited', 'invalid_name', 'invalid_email', 'invalid_phone', 'invalid_items', 'invalid_package', 'package_inactive', 'invalid_quantity', 'too_many_cards', 'invalid_amount', 'invalid_greeting', 'invalid_code',
-    'redeem_disabled', 'johku_cards_closed', 'gift_card_not_found', 'gift_card_inactive', 'gift_card_expired', 'gift_card_empty', 'insufficient_balance', 'amount_exceeds_unpaid', 'nothing_to_pay', 'invalid_amount', 'order_not_editable', 'gift_card_not_allowed', 'not_found', 'forbidden'];
+  const codes = ['sale_disabled', 'sale_ended', 'rate_limited', 'invalid_name', 'invalid_email', 'invalid_phone', 'invalid_items', 'invalid_package', 'package_inactive', 'invalid_quantity', 'too_many_cards', 'invalid_amount', 'invalid_greeting', 'invalid_code',
+    'redeem_disabled', 'johku_cards_closed', 'gift_card_not_found', 'gift_card_inactive', 'gift_card_expired', 'gift_card_empty', 'insufficient_balance', 'amount_exceeds_unpaid', 'nothing_to_pay', 'invalid_amount', 'order_not_editable', 'gift_card_not_allowed', 'gift_card_not_applicable', 'not_found', 'forbidden'];
   for (const c of codes) for (const l of ['fi', 'en']) assert.ok(GT[l][`err.${c}`], `${l} err.${c}`);
   for (const r of ['redeem_disabled', 'johku_cards_closed', 'expired', 'empty', 'verification_pending']) for (const l of ['fi', 'en']) assert.ok(GT[l][`nr.${r}`], `${l} nr.${r}`);
   for (const st of ['active', 'used', 'expired', 'pending_verification']) assert.ok(GT.fi[`bst.${st}`]);

@@ -1,0 +1,336 @@
+[
+  {
+    "key": "ui.gift.err.gift_card_not_applicable",
+    "lang": "fi",
+    "text": "Tämä lahjakortti ei käy tähän varaukseen.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "t1867u/t1871u/t1872u: suora lahjakorttilinkki ?paketti=, rajausteksti, kassan lahjakorttietu, pääsyjen saldo, tarjous päättynyt / sale_ended. Uusi avain. FI+EN, sama kuin koodin varateksti."
+  },
+  {
+    "key": "ui.gift.err.gift_card_not_applicable",
+    "lang": "en",
+    "text": "This gift card cannot be used for this booking.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "t1867u/t1871u/t1872u: suora lahjakorttilinkki ?paketti=, rajausteksti, kassan lahjakorttietu, pääsyjen saldo, tarjous päättynyt / sale_ended. Uusi avain. FI+EN, sama kuin koodin varateksti."
+  },
+  {
+    "key": "ui.gift.err.sale_ended",
+    "lang": "fi",
+    "text": "Tarjouksen myynti on päättynyt.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "t1867u/t1871u/t1872u: suora lahjakorttilinkki ?paketti=, rajausteksti, kassan lahjakorttietu, pääsyjen saldo, tarjous päättynyt / sale_ended. Uusi avain. FI+EN, sama kuin koodin varateksti."
+  },
+  {
+    "key": "ui.gift.err.sale_ended",
+    "lang": "en",
+    "text": "This offer has ended.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "t1867u/t1871u/t1872u: suora lahjakorttilinkki ?paketti=, rajausteksti, kassan lahjakorttietu, pääsyjen saldo, tarjous päättynyt / sale_ended. Uusi avain. FI+EN, sama kuin koodin varateksti."
+  },
+  {
+    "key": "ui.gift.entries_left",
+    "lang": "fi",
+    "text": "{{var:left}}/{{var:total}} pääsyä jäljellä",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:left}}",
+      "{{var:total}}"
+    ],
+    "reason": "t1867u/t1871u/t1872u: suora lahjakorttilinkki ?paketti=, rajausteksti, kassan lahjakorttietu, pääsyjen saldo, tarjous päättynyt / sale_ended. Uusi avain. FI+EN, sama kuin koodin varateksti."
+  },
+  {
+    "key": "ui.gift.entries_left",
+    "lang": "en",
+    "text": "{{var:left}}/{{var:total}} entries left",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:left}}",
+      "{{var:total}}"
+    ],
+    "reason": "t1867u/t1871u/t1872u: suora lahjakorttilinkki ?paketti=, rajausteksti, kassan lahjakorttietu, pääsyjen saldo, tarjous päättynyt / sale_ended. Uusi avain. FI+EN, sama kuin koodin varateksti."
+  },
+  {
+    "key": "ui.gift.entries_left_only",
+    "lang": "fi",
+    "text": "{{var:left}} pääsyä jäljellä",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:left}}"
+    ],
+    "reason": "t1867u/t1871u/t1872u: suora lahjakorttilinkki ?paketti=, rajausteksti, kassan lahjakorttietu, pääsyjen saldo, tarjous päättynyt / sale_ended. Uusi avain. FI+EN, sama kuin koodin varateksti."
+  },
+  {
+    "key": "ui.gift.entries_left_only",
+    "lang": "en",
+    "text": "{{var:left}} entries left",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:left}}"
+    ],
+    "reason": "t1867u/t1871u/t1872u: suora lahjakorttilinkki ?paketti=, rajausteksti, kassan lahjakorttietu, pääsyjen saldo, tarjous päättynyt / sale_ended. Uusi avain. FI+EN, sama kuin koodin varateksti."
+  },
+  {
+    "key": "ui.gift.gift_cover_uses",
+    "lang": "fi",
+    "text": "{{var:n}} pääsyä",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:n}}"
+    ],
+    "reason": "t1867u/t1871u/t1872u: suora lahjakorttilinkki ?paketti=, rajausteksti, kassan lahjakorttietu, pääsyjen saldo, tarjous päättynyt / sale_ended. Uusi avain. FI+EN, sama kuin koodin varateksti."
+  },
+  {
+    "key": "ui.gift.gift_cover_uses",
+    "lang": "en",
+    "text": "{{var:n}} entries",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:n}}"
+    ],
+    "reason": "t1867u/t1871u/t1872u: suora lahjakorttilinkki ?paketti=, rajausteksti, kassan lahjakorttietu, pääsyjen saldo, tarjous päättynyt / sale_ended. Uusi avain. FI+EN, sama kuin koodin varateksti."
+  },
+  {
+    "key": "ui.gift.gift_cover_uses_one",
+    "lang": "fi",
+    "text": "{{var:n}} pääsy",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:n}}"
+    ],
+    "reason": "t1867u/t1871u/t1872u: suora lahjakorttilinkki ?paketti=, rajausteksti, kassan lahjakorttietu, pääsyjen saldo, tarjous päättynyt / sale_ended. Uusi avain. FI+EN, sama kuin koodin varateksti."
+  },
+  {
+    "key": "ui.gift.gift_cover_uses_one",
+    "lang": "en",
+    "text": "{{var:n}} entry",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:n}}"
+    ],
+    "reason": "t1867u/t1871u/t1872u: suora lahjakorttilinkki ?paketti=, rajausteksti, kassan lahjakorttietu, pääsyjen saldo, tarjous päättynyt / sale_ended. Uusi avain. FI+EN, sama kuin koodin varateksti."
+  },
+  {
+    "key": "ui.gift.offer_ended",
+    "lang": "fi",
+    "text": "Tarjous on päättynyt",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "t1867u/t1871u/t1872u: suora lahjakorttilinkki ?paketti=, rajausteksti, kassan lahjakorttietu, pääsyjen saldo, tarjous päättynyt / sale_ended. Uusi avain. FI+EN, sama kuin koodin varateksti."
+  },
+  {
+    "key": "ui.gift.offer_ended",
+    "lang": "en",
+    "text": "This offer has ended",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "t1867u/t1871u/t1872u: suora lahjakorttilinkki ?paketti=, rajausteksti, kassan lahjakorttietu, pääsyjen saldo, tarjous päättynyt / sale_ended. Uusi avain. FI+EN, sama kuin koodin varateksti."
+  },
+  {
+    "key": "ui.gift.offer_ended_lead",
+    "lang": "fi",
+    "text": "Tätä lahjakorttia ei voi enää ostaa.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "t1867u/t1871u/t1872u: suora lahjakorttilinkki ?paketti=, rajausteksti, kassan lahjakorttietu, pääsyjen saldo, tarjous päättynyt / sale_ended. Uusi avain. FI+EN, sama kuin koodin varateksti."
+  },
+  {
+    "key": "ui.gift.offer_ended_lead",
+    "lang": "en",
+    "text": "This gift card is no longer available to buy.",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "t1867u/t1871u/t1872u: suora lahjakorttilinkki ?paketti=, rajausteksti, kassan lahjakorttietu, pääsyjen saldo, tarjous päättynyt / sale_ended. Uusi avain. FI+EN, sama kuin koodin varateksti."
+  },
+  {
+    "key": "ui.gift.offer_ended_cta",
+    "lang": "fi",
+    "text": "Katso muut lahjakortit",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "t1867u/t1871u/t1872u: suora lahjakorttilinkki ?paketti=, rajausteksti, kassan lahjakorttietu, pääsyjen saldo, tarjous päättynyt / sale_ended. Uusi avain. FI+EN, sama kuin koodin varateksti."
+  },
+  {
+    "key": "ui.gift.offer_ended_cta",
+    "lang": "en",
+    "text": "See other gift cards",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "t1867u/t1871u/t1872u: suora lahjakorttilinkki ?paketti=, rajausteksti, kassan lahjakorttietu, pääsyjen saldo, tarjous päättynyt / sale_ended. Uusi avain. FI+EN, sama kuin koodin varateksti."
+  },
+  {
+    "key": "ui.shop.gift_cover",
+    "lang": "fi",
+    "text": "Lahjakorttietu",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "t1867u/t1871u/t1872u: suora lahjakorttilinkki ?paketti=, rajausteksti, kassan lahjakorttietu, pääsyjen saldo, tarjous päättynyt / sale_ended. Uusi avain. FI+EN, sama kuin koodin varateksti."
+  },
+  {
+    "key": "ui.shop.gift_cover",
+    "lang": "en",
+    "text": "Gift card benefit",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "t1867u/t1871u/t1872u: suora lahjakorttilinkki ?paketti=, rajausteksti, kassan lahjakorttietu, pääsyjen saldo, tarjous päättynyt / sale_ended. Uusi avain. FI+EN, sama kuin koodin varateksti."
+  },
+  {
+    "key": "ui.shop.gift_cover_uses",
+    "lang": "fi",
+    "text": "{{var:n}} pääsyä",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:n}}"
+    ],
+    "reason": "t1867u/t1871u/t1872u: suora lahjakorttilinkki ?paketti=, rajausteksti, kassan lahjakorttietu, pääsyjen saldo, tarjous päättynyt / sale_ended. Uusi avain. FI+EN, sama kuin koodin varateksti."
+  },
+  {
+    "key": "ui.shop.gift_cover_uses",
+    "lang": "en",
+    "text": "{{var:n}} entries",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:n}}"
+    ],
+    "reason": "t1867u/t1871u/t1872u: suora lahjakorttilinkki ?paketti=, rajausteksti, kassan lahjakorttietu, pääsyjen saldo, tarjous päättynyt / sale_ended. Uusi avain. FI+EN, sama kuin koodin varateksti."
+  },
+  {
+    "key": "ui.shop.gift_cover_uses_one",
+    "lang": "fi",
+    "text": "{{var:n}} pääsy",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:n}}"
+    ],
+    "reason": "t1867u/t1871u/t1872u: suora lahjakorttilinkki ?paketti=, rajausteksti, kassan lahjakorttietu, pääsyjen saldo, tarjous päättynyt / sale_ended. Uusi avain. FI+EN, sama kuin koodin varateksti."
+  },
+  {
+    "key": "ui.shop.gift_cover_uses_one",
+    "lang": "en",
+    "text": "{{var:n}} entry",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:n}}"
+    ],
+    "reason": "t1867u/t1871u/t1872u: suora lahjakorttilinkki ?paketti=, rajausteksti, kassan lahjakorttietu, pääsyjen saldo, tarjous päättynyt / sale_ended. Uusi avain. FI+EN, sama kuin koodin varateksti."
+  },
+  {
+    "key": "ui.order.gift_cover",
+    "lang": "fi",
+    "text": "Lahjakorttietu",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "t1867u/t1871u/t1872u: suora lahjakorttilinkki ?paketti=, rajausteksti, kassan lahjakorttietu, pääsyjen saldo, tarjous päättynyt / sale_ended. Uusi avain. FI+EN, sama kuin koodin varateksti."
+  },
+  {
+    "key": "ui.order.gift_cover",
+    "lang": "en",
+    "text": "Gift card benefit",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [],
+    "reason": "t1867u/t1871u/t1872u: suora lahjakorttilinkki ?paketti=, rajausteksti, kassan lahjakorttietu, pääsyjen saldo, tarjous päättynyt / sale_ended. Uusi avain. FI+EN, sama kuin koodin varateksti."
+  },
+  {
+    "key": "ui.order.gift_cover_uses",
+    "lang": "fi",
+    "text": "{{var:n}} pääsyä",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:n}}"
+    ],
+    "reason": "t1867u/t1871u/t1872u: suora lahjakorttilinkki ?paketti=, rajausteksti, kassan lahjakorttietu, pääsyjen saldo, tarjous päättynyt / sale_ended. Uusi avain. FI+EN, sama kuin koodin varateksti."
+  },
+  {
+    "key": "ui.order.gift_cover_uses",
+    "lang": "en",
+    "text": "{{var:n}} entries",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:n}}"
+    ],
+    "reason": "t1867u/t1871u/t1872u: suora lahjakorttilinkki ?paketti=, rajausteksti, kassan lahjakorttietu, pääsyjen saldo, tarjous päättynyt / sale_ended. Uusi avain. FI+EN, sama kuin koodin varateksti."
+  },
+  {
+    "key": "ui.order.gift_cover_uses_one",
+    "lang": "fi",
+    "text": "{{var:n}} pääsy",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:n}}"
+    ],
+    "reason": "t1867u/t1871u/t1872u: suora lahjakorttilinkki ?paketti=, rajausteksti, kassan lahjakorttietu, pääsyjen saldo, tarjous päättynyt / sale_ended. Uusi avain. FI+EN, sama kuin koodin varateksti."
+  },
+  {
+    "key": "ui.order.gift_cover_uses_one",
+    "lang": "en",
+    "text": "{{var:n}} entry",
+    "class": "normal",
+    "kind": "plain",
+    "max_len": 200,
+    "placeholders": [
+      "{{var:n}}"
+    ],
+    "reason": "t1867u/t1871u/t1872u: suora lahjakorttilinkki ?paketti=, rajausteksti, kassan lahjakorttietu, pääsyjen saldo, tarjous päättynyt / sale_ended. Uusi avain. FI+EN, sama kuin koodin varateksti."
+  }
+]
