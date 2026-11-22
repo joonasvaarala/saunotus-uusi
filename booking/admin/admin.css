@@ -1574,3 +1574,9 @@ a.listrow{text-decoration:none}
 .pos-link-confirm{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:10px;padding:10px 12px;border:1px solid var(--line);border-radius:8px}
 .pos-link-confirm p{flex-basis:100%;margin:0}
 .pos-link-new-side{width:100%;margin-top:8px;min-height:44px}
+/* Johku refunds: wide desktop table scrolls inside the section, existing labelled cards on mobile. */
+.tl-johku-refunds{min-width:0}
+.tl-johku-refunds-scroll{max-width:100%;overflow-x:auto}
+.tl-johku-refunds .tl-table td,.tl-johku-refunds .tl-table th{vertical-align:top;overflow-wrap:break-word;word-break:normal;hyphens:auto}
+@media(min-width:43.75em){.tl-johku-refunds-scroll .tl-table[data-testid="r-johku-refunds-rows"]{min-width:72rem}.tl-johku-refunds .tl-table th[scope=row]{min-width:6.5rem}.tl-johku-refunds [data-label="Selite"],.tl-johku-refunds [data-label="Note"]{min-width:12rem}}
+@media(max-width:43.6875em){.tl-johku-refunds-scroll{overflow:visible}.tl-johku-refunds .tl-table td::before{flex:0 0 43%}.tl-johku-refunds .btn{max-width:100%;white-space:normal}}
