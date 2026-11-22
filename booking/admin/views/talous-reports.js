@@ -2,11 +2,12 @@
 import { h, toast, errMsg, todayHel, addDays } from '../ui.js';
 import { icon } from '../icons.js';
 import { t, fmt, has } from '../talous-i18n.js';
-import { downloadCsv } from '../csv.js';
+import { downloadCsv as saveCsv } from '../csv.js';
 import { methodLabel, loading, emptyBox, errorBox } from './talous-ui.js';
 import { TEXTS } from '../talous-texts.js';
 import { reportText as rt } from '../reports-texts.js';
 import { accrualText as at } from '../accrual-texts.js';
+import { renderJohkuRefunds } from './johku-refunds.js';
 import { methodNet, methodsNetTotal } from '../report-method-net.js';
 
 const REPORTS = ['sales', 'service', 'giftcards', 'invoices', 'methods', 'fees', 'transactions', 'refunds', 'stats'];
@@ -284,7 +285,12 @@ export function createReportsTab({ api, canFull = true, ctx = null }) {
       current = data;
       pdfBtn.disabled = !data && st.report === 'fees';
       csvBtn.disabled = !canFull || !data;
-      out.replaceChildren(render(data));
+      const view = render(data);
+      if (data?.johku_refunds) view.append(renderJohkuRefunds(data.johku_refunds, { canExport: canFull, onCsv: async () => {
+        const res = await api.reportCsv({ period: span }, 'johku_refunds');
+        saveCsv(res.filename, res.content);
+      } }));
+      out.replaceChildren(view);
     } catch (e) { if (my === seq) out.replaceChildren(errorBox(e, load)); }
   }
   function setReport(id) {
@@ -353,14 +359,14 @@ export function createReportsTab({ api, canFull = true, ctx = null }) {
     csvBtn.disabled = true;
     try {
       const span = spanOf();
-      if (st.report === 'service') { const res = await api.reportAccrualCsv(span.from, span.to); downloadCsv(res.filename, res.content); }
-      else if (st.report === 'giftcards') { const res = await api.reportGiftCards(st.gc, 'csv', span.from, span.to); downloadCsv(res.filename, res.content); }
-      else if (st.report === 'fees') { const res = await api.reportProviderFees(span.from, span.to, 'csv'); if (res?.content) downloadCsv(res.filename, res.content); }
-      else if (st.report === 'invoices') { const res = await api.reportInvoices(span.from, span.to, 'csv'); downloadCsv(res.filename, res.content); }
-      else if (st.report === 'transactions') { const res = await api.reportCsv({ period: span }, 'lines'); downloadCsv(res.filename, res.content); }
-      else if (st.report === 'methods') { const res = await api.reportCsv({ period: span }, 'methods'); downloadCsv(res.filename, res.content); }
-      else if (st.report === 'stats') { downloadCsv(`${fileStem()}.csv`, `\uFEFFosio;brutto\r\noma;${current.totals?.gross_after_refunds ?? 0}\r\njohku;${current.statistics?.johku?.gross ?? 0}\r\n`); }
-      else { const res = await api.reportCsv({ period: span }, 'summary'); downloadCsv(res.filename, res.content); }
+      if (st.report === 'service') { const res = await api.reportAccrualCsv(span.from, span.to); saveCsv(res.filename, res.content); }
+      else if (st.report === 'giftcards') { const res = await api.reportGiftCards(st.gc, 'csv', span.from, span.to); saveCsv(res.filename, res.content); }
+      else if (st.report === 'fees') { const res = await api.reportProviderFees(span.from, span.to, 'csv'); if (res?.content) saveCsv(res.filename, res.content); }
+      else if (st.report === 'invoices') { const res = await api.reportInvoices(span.from, span.to, 'csv'); saveCsv(res.filename, res.content); }
+      else if (st.report === 'transactions') { const res = await api.reportCsv({ period: span }, 'lines'); saveCsv(res.filename, res.content); }
+      else if (st.report === 'methods') { const res = await api.reportCsv({ period: span }, 'methods'); saveCsv(res.filename, res.content); }
+      else if (st.report === 'stats') { saveCsv(`${fileStem()}.csv`, `\uFEFFosio;brutto\r\noma;${current.totals?.gross_after_refunds ?? 0}\r\njohku;${current.statistics?.johku?.gross ?? 0}\r\n`); }
+      else { const res = await api.reportCsv({ period: span }, 'summary'); saveCsv(res.filename, res.content); }
     } catch (e) { toast(errMsg(e), 'err'); } finally { csvBtn.disabled = !canFull; }
   }
   const pdfBtn = btn('r-pdf-server', rt('ui.admin.reports.export_pdf'), downloadPdf, true);

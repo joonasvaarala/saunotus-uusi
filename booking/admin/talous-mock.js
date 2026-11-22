@@ -265,6 +265,16 @@ const PREPAID_ON = '2026-10-15';
     const m = new Map(); for (const o of sold) { const x = m.get(o.johku.method) || { method: o.johku.method, orders: 0, gross: 0 }; x.orders++; x.gross = round2(x.gross + o.johku.amount); m.set(o.johku.method, x); }
     return { label: 'Johku (ei kirjanpitoon)', accounting: false, basis: 'johku_paid_at', orders: sold.length, gross: round2(sold.reduce((s, o) => s + o.johku.amount, 0)), refunded_orders: ref.length, refunded_gross: round2(ref.reduce((s, o) => s + o.johku.amount, 0)), by_method: [...m.values()].sort((a, b) => b.gross - a.gross) };
   }
+  // booking_336: Johku-hyvitykset ovat oma tietolohkonsa, eivät kuitteja, maksutapoja eivätkä totals-lukuja.
+  const johkuRefundRows = [
+    { id: 1, refund_date: dayAdd(today, -1), johku_order_no: '13529', order_id: null, order_no: null, customer_name: 'Anne Esimerkki', amount: 116, original_payment_method: 'MobilePay (Johku)', refund_method: 'Pankkisiirto', note: 'Mock: peruttu sairastumisen vuoksi', created_by: 'Asiakaspalvelu', created_at: `${dayAdd(today, -1)}T09:15:00Z` },
+    { id: 2, refund_date: dayAdd(today, -8), johku_order_no: '13602', order_id: 15210, order_no: 15210, customer_name: 'Matti Malli', amount: 58, original_payment_method: 'Verkkopankki (Johku)', refund_method: 'Pankkisiirto', note: 'Mock: kaksi yleistä vuoroa', created_by: 'Asiakaspalvelu', created_at: `${dayAdd(today, -8)}T12:40:00Z` },
+  ];
+  function johkuRefunds(from, to) {
+    const rows = johkuRefundRows.filter((x) => x.refund_date >= from && x.refund_date <= to);
+    const by = new Map(); for (const x of rows) { const m = by.get(x.refund_method) || { refund_method: x.refund_method, count: 0, total: 0 }; m.count++; m.total = round2(m.total + x.amount); by.set(x.refund_method, m); }
+    return { label: 'Johkun kautta tulleiden varausten hyvitykset', accounting: false, basis: 'refund_date', info: 'Johkussa maksettujen varausten käsin tehdyt hyvitykset. Eivät sisälly uuden järjestelmän kuitteihin, maksutapoihin eikä hyvityksiin.', count: rows.length, total: round2(rows.reduce((s, x) => s + x.amount, 0)), by_refund_method: [...by.values()], rows };
+  }
   // booking_222: avoin = brutto − maksettujen maksujen summa. Hyvitys ei avaa saatavaa. Vahvistuspäivä <= jakson loppu, ei Johkua.
   function openAmount(o) {
     if (!o.is_native || orderStatus(o) !== 'confirmed' || o.created_date == null) return 0;
@@ -320,6 +330,7 @@ const PREPAID_ON = '2026-10-15';
       by_category: by(lines, (l) => `${l.group}|${l.vat_rate}`, (a, l) => ({ category: l.group, label: GROUP_LABELS[l.group] || l.group, rate: l.vat_rate, quantity: (a?.quantity || 0) + (l.kind === 'receipt' ? l.quantity : -l.quantity), gross: sum(a, 'gross', l), net: sum(a, 'net', l), vat: sum(a, 'vat', l) })),
       open: { orders: new Set(openList.map((r) => r.voucher)).size, unpaid: round2(openList.reduce((s, r) => s + r.gross, 0)), rows: openList },
       statistics: { johku: johkuStats(from, to) },   // booking_41: EI totals-lukuihin
+      johku_refunds: johkuRefunds(from, to),   // booking_336: EI totals-lukuihin
       lines,   // vain mock: oikea palvelin ei (vielä) palauta rivejä → CSV tulee admin_report_csv:stä
     };
     for (const m of rep.by_method) m.payments = new Set(receipts.filter((x) => x.method === m.method && x.kind === 'receipt').map((x) => x.receipt_no)).size;
@@ -405,6 +416,12 @@ const PREPAID_ON = '2026-10-15';
       rows.push(['tasmaytys', rec.rounding_code || 'alv_pyoristys', '', '', '', csvMoney(rec.vat_rounding), ''].join(';'));
       const sumName = a.p_from === a.p_to ? `myynti_${a.p_from}.csv` : `myynti_${a.p_from}_${a.p_to}.csv`;
       return csvFile(sumName, 'osio;nimi;alv_%;maara;netto;alv_eur;brutto', rows);
+    }
+    if (kind === 'johku_refunds') {
+      const rep = johkuRefunds(a.p_from, a.p_to);
+      const rows = rep.rows.map((x) => [dmy(x.refund_date), csvQ(x.johku_order_no), x.order_no ?? '', csvQ(x.customer_name), csvMoney(x.amount), csvQ(x.original_payment_method), csvQ(x.refund_method), csvQ(x.note)].join(';'));
+      rows.push(['yhteensa', '', '', '', csvMoney(rep.total), '', '', ''].join(';'));
+      return csvFile(a.p_from === a.p_to ? `johku_hyvitykset_${a.p_from}.csv` : `johku_hyvitykset_${a.p_from}_${a.p_to}.csv`, 'hyvityspvm;johku_tilaus;tilaus;asiakas;summa;alkuperainen_maksutapa;hyvitystapa;selite', rows);
     }
     if (kind === 'methods') {
       const rep = buildReport(a.p_from, a.p_to, 'range');

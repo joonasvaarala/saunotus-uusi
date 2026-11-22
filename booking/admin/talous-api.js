@@ -110,6 +110,18 @@ export function normJohkuStats(j) {
   return { label: j.label ?? 'Johku (ei kirjanpitoon)', accounting: false, basis: j.basis ?? 'johku_paid_at', orders: num(j.orders), gross: num(j.gross), refunded_orders: num(j.refunded_orders), refunded_gross: num(j.refunded_gross),
     by_method: L(j.by_method).map((m) => ({ method: m.method ?? 'unknown', orders: num(m.orders), gross: num(m.gross) })) };
 }
+export function normJohkuRefunds(j) {
+  if (!j || typeof j !== 'object' || Array.isArray(j)) return null;
+  return {
+    label: j.label ?? '', info: j.info ?? '', accounting: false, basis: 'refund_date',
+    count: num(j.count), total: num(j.total),
+    by_refund_method: L(j.by_refund_method).map((x) => ({ refund_method: x.refund_method ?? '', count: num(x.count), total: num(x.total) })),
+    rows: L(j.rows).map((x) => ({ id: x.id ?? null, refund_date: x.refund_date ?? null, johku_order_no: x.johku_order_no ?? '',
+      order_id: x.order_id ?? null, order_no: x.order_no ?? null, customer_name: x.customer_name ?? '', amount: num(x.amount),
+      original_payment_method: x.original_payment_method ?? '', refund_method: x.refund_method ?? '', note: x.note ?? '',
+      created_by: x.created_by ?? '', created_at: x.created_at ?? null })),
+  };
+}
 export function normReport(r) {
   const tt = r.totals || {};
   const per = r.period || {};   // sopimus (booking_35): period {from,to,tz,kind:'day'|'month'}; kind puuttuessa päätellään (sama päivä = päivä)
@@ -159,6 +171,7 @@ export function normReport(r) {
     receipts: Array.isArray(r.receipts) ? r.receipts.map((x) => ({ receipt_no: x.receipt_no, kind: x.kind, issued_at: x.issued_at, order_no: x.order_no ?? null, method: x.method, gross: num(x.gross), net: num(x.net), vat: num(x.vat) })) : null,
     by_day: Array.isArray(r.by_day) ? r.by_day.map((d) => ({ date: d.date, receipts: num(d.receipts), gross: num(d.gross), vat: num(d.vat), refunds: num(d.refunds) })) : null,
     open: { orders: num(r.open?.orders), unpaid: num(r.open?.unpaid), rows: L(r.open?.rows).map((x) => ({ voucher: x.voucher ?? '', date: x.date ?? '', customer: x.customer ?? '', product: x.product ?? '', quantity: num(x.quantity), net: num(x.net), vat_rate: num(x.vat_rate), vat: num(x.vat), gross: num(x.gross), method: x.method ?? '', method_label: x.method_label ?? '', status: x.status === 'open' ? 'open' : 'paid', kind: x.kind === 'refund' ? 'refund' : x.kind === 'redemption' ? 'redemption' : 'sale' })) },
+    johku_refunds: normJohkuRefunds(r.johku_refunds),
     statistics: { johku: normJohkuStats(r.statistics?.johku) },
     lines: Array.isArray(r.lines) ? r.lines : null };   // rivitaso: vain mock (asiakaspuolen CSV); oikea palvelin ei sitä vielä palauta
 }
