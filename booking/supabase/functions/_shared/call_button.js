@@ -1,4 +1,4 @@
-// Terassin hälytysnappi (booking_340/341/342): call-button-press ja call-button-hangup -funktioiden logiikka.
+// Terassin kutsunappi (booking_340/341/342): call-button-press ja call-button-hangup -funktioiden logiikka.
 // Puhdas ES-moduuli (Deno + Node >= 20, Web Crypto). Ei omia riippuvuuksia, jotta yksikkötestit ajetaan node --testillä.
 //
 // Säännöt (Joonas 23.11.2026 t1913u, t1922u, t1923u, t1926u):
@@ -34,17 +34,28 @@ export async function hmacHex(secret, message) {
 }
 export const hangupSigMessage = (pressId, attempt) => `${pressId}.${attempt}`;
 
-/** place_name → mp3-tiedoston nimi. Tuntematon paikka → yleinen hälytys ilman paikkaa. */
+/** place_name → mp3-tiedoston nimi, tai null tuntemattomalle paikalle (silloin ei toisteta mitään). */
 export function audioFileFor(placeName) {
   const p = String(placeName ?? '').trim().toLowerCase().normalize('NFC');
-  if (p === 'mökki' || p === 'mokki') return 'mokki.mp3';
-  if (p === 'yläterassi' || p === 'ylaterassi') return 'ylaterassi.mp3';
-  return 'halytys.mp3';
+  // perusmuoto tai sijamuoto (jos place_name joskus vaihdetaan muotoon 'mökissä' / 'yläterassilla')
+  if (p === 'mökki' || p === 'mokki' || p === 'mökissä' || p === 'mokissa') return 'mokki.mp3';
+  if (p === 'yläterassi' || p === 'ylaterassi' || p === 'yläterassilla' || p === 'ylaterassilla') return 'ylaterassi.mp3';
+  return null;
 }
 export function audioUrlFor(placeName, base) {
+  const f = audioFileFor(placeName);
+  if (!f) return null;
   let b = String(base || DEFAULT_AUDIO_BASE);
   if (!b.endsWith('/')) b += '/';
-  return b + audioFileFor(placeName);
+  return b + f;
+}
+/**
+ * 46elks voice_start (pakollinen kenttä). Tunnettu paikka → {"play": mp3}. Tuntematon paikka → {"hangup":"reject"}:
+ * puhelin soi normaalisti, mutta vastattaessa ei toisteta mitään ja puhelu päättyy (Joonas t1928u: pelkkä soitto riittää).
+ */
+export function voiceStartFor(placeName, base) {
+  const url = audioUrlFor(placeName, base);
+  return JSON.stringify(url ? { play: url } : { hangup: 'reject' });
 }
 
 /** 46elks-virheteksti lyhyeksi ja ilman numeroita (vastaanottajan numero voi olla virheviestissä). */
@@ -145,7 +156,7 @@ export async function handlePress(req, deps) {
   const whenhangup = `${base}/functions/v1/call-button-hangup?press_id=${encodeURIComponent(String(pressId))}&attempt=${attempt}&sig=${sig}`;
   const form = new URLSearchParams({
     from, to: phone, timeout: String(CALL_TIMEOUT_SECONDS), whenhangup,
-    voice_start: JSON.stringify({ play: audioUrlFor(r.place_name, envGet(deps.env, 'CALL_BUTTON_AUDIO_BASE')) }),
+    voice_start: voiceStartFor(r.place_name, envGet(deps.env, 'CALL_BUTTON_AUDIO_BASE')),
   });
 
   // Yksi POST, ei uusintaa (Joonas t1923u). Epäonnistuminen kirjataan failed-tilaksi.

@@ -63,7 +63,7 @@ jobs:
       - run: SITE_TEXTS_FIXTURE=1 ARTICLES_FIXTURE=1 SITE_ENV=prod SITE_URL=https://example.test DIST=$RUNNER_TEMP/dist-fixture-prod node scripts/build.mjs
       - run: DIST=$RUNNER_TEMP/dist-fixture-prod SITE_ENV=prod SITE_URL=https://example.test node scripts/check-articles.mjs
       - run: node --test booking/supabase/functions/admin-users/logic.test.js
-      # terassin hälytysnappi (booking_340–342): call-button-press/-hangup mockatulla RPC:llä ja 46elks-mockilla + Shelly-skriptin BTHome-jäsennys
+      # terassin kutsunappi (booking_340–342): call-button-press/-hangup mockatulla RPC:llä ja 46elks-mockilla + Shelly-skriptin BTHome-jäsennys
       - run: node --test booking/tests/call-button.test.mjs
       - run: node --test booking/tests/mobilepay-shop.test.mjs booking/tests/vismapay-shop.test.mjs
       # maksuvalinta kassalle/vahvistussivulle (MobilePay + lahjakortti): tekstit, tarjontapäätökset, mock-skenaario, paluuosoite

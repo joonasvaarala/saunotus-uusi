@@ -1,4 +1,4 @@
-// call-button-press (verify_jwt = false). Terassin hälytysnappi, booking_340–342. Logiikka: ../_shared/call_button.js
+// call-button-press (verify_jwt = false). Terassin kutsunappi, booking_340–342. Logiikka: ../_shared/call_button.js
 // Salaisuudet vain Edge-ympäristössä: CALL_BUTTON_WEBHOOK_SECRET, ELKS_API_USERNAME, ELKS_API_PASSWORD, ELKS_FROM_NUMBER
 // (valinnainen CALL_BUTTON_AUDIO_BASE). Puhelinnumeroa tai salaisuuksia ei lokiteta.
 import { createClient } from "npm:@supabase/supabase-js@2";

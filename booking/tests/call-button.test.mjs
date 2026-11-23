@@ -1,12 +1,12 @@
-// Terassin hälytysnappi (booking_340–342): call-button-press / call-button-hangup ja Shelly-skriptin jäsennys.
+// Terassin kutsunappi (booking_340–342): call-button-press / call-button-hangup ja Shelly-skriptin jäsennys.
 // Mockattu RPC ja 46elks-mock: ei verkkoa, ei kantaa, ei oikeita soittoja.
 // Ajo: node --test booking/tests/call-button.test.mjs
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
 import vm from 'node:vm';
 import {
-  handlePress, handleHangup, hmacHex, hangupSigMessage, safeEqual, mapHangupState, audioUrlFor, ELKS_CALLS_URL,
+  voiceStartFor, handlePress, handleHangup, hmacHex, hangupSigMessage, safeEqual, mapHangupState, audioUrlFor, ELKS_CALLS_URL,
 } from '../supabase/functions/_shared/call_button.js';
 
 const SECRET = 'test-webhook-secret-123';
@@ -44,7 +44,7 @@ const pressReq = (body, secret = SECRET) => new Request('https://x/functions/v1/
 });
 const BODY = { mac: 'aa:bb:cc:dd:ee:01', pid: 12, event: 'single_push', gateway: 'gw-mokki', rssi: -70, battery: 95 };
 const callRes = (id, extra = {}) => ({ data: { ok: true, duplicate: false, call: true, call_status: 'pending', press_id: id, repeat_of: null,
-  device: 'Mökki', place_name: 'mökki', message: 'Hälytys: asiakas pyytää apua, paikka mökki.', staff_id: 's1', staff_name: 'X',
+  device: 'Mökki', place_name: 'mökki', message: 'Asiakas odottaa mökissä.', staff_id: 's1', staff_name: 'X',
   role: 'reception', phone: PHONE, phone_masked: '+358…67', attempt_no: 1, ...extra }, error: null });
 const noLeak = (calls, res) => {
   const all = calls.logs.join('\n') + (res ?? '');
@@ -125,14 +125,27 @@ test('call=true → tasan yksi 46elks-POST ja result calling', async () => {
   noLeak(calls, JSON.stringify(j));
 });
 
-test('yläterassi ja tuntematon paikka valitsevat oikean mp3:n; CALL_BUTTON_AUDIO_BASE', async () => {
+test('yläterassi valitsee oman mp3:n; tuntematon paikka → ei toistoa (hangup), CALL_BUTTON_AUDIO_BASE', async () => {
   assert.equal(audioUrlFor('yläterassi'), 'https://saunotus.fi/call-button/ylaterassi.mp3');
   assert.equal(audioUrlFor('Mökki'), 'https://saunotus.fi/call-button/mokki.mp3');
-  assert.equal(audioUrlFor('sauna 3'), 'https://saunotus.fi/call-button/halytys.mp3');
+  assert.equal(audioUrlFor('mökissä'), 'https://saunotus.fi/call-button/mokki.mp3');
+  assert.equal(audioUrlFor('yläterassilla'), 'https://saunotus.fi/call-button/ylaterassi.mp3');
+  assert.equal(audioUrlFor('sauna 3'), null);
+  assert.equal(audioUrlFor(null), null);
   assert.equal(audioUrlFor('mökki', 'https://cdn.test/a'), 'https://cdn.test/a/mokki.mp3');
+  assert.deepEqual(JSON.parse(voiceStartFor('sauna 3')), { hangup: 'reject' });
   const { deps, calls } = mocks({ press: callRes(22, { place_name: 'yläterassi' }) });
   await handlePress(pressReq(BODY), deps);
   assert.deepEqual(JSON.parse(new URLSearchParams(calls.fetch[0].init.body).get('voice_start')), { play: 'https://saunotus.fi/call-button/ylaterassi.mp3' });
+});
+
+test('tuntematon paikka → soitto silti kerran, voice_start ilman play-toimintoa', async () => {
+  const { deps, calls } = mocks({ press: callRes(23, { place_name: 'piha' }) });
+  const j = await (await handlePress(pressReq(BODY), deps)).json();
+  assert.equal(j.call_status, 'calling'); assert.equal(calls.fetch.length, 1);
+  const vs = new URLSearchParams(calls.fetch[0].init.body).get('voice_start');
+  assert.deepEqual(JSON.parse(vs), { hangup: 'reject' });
+  assert.ok(!vs.includes('play') && !vs.includes('.mp3'));
 });
 
 test('kaksi eri painallusta → kaksi soittoa; kahden gatewayn sama pid → yksi soitto', async () => {
@@ -334,10 +347,20 @@ test('Shelly: gateway-oletus laitteen id, KVS-puute ei lähetä', () => {
   assert.equal(b.posts.length, 0);
 });
 
-test('mp3-tiedostot ovat olemassa ja ovat MP3:ia', () => {
-  for (const f of ['mokki', 'ylaterassi', 'halytys']) {
+test('mp3-tiedostot: vain mokki ja ylaterassi, MP3-muotoa; vanha yleistiedosto poistettu (t1928u)', () => {
+  for (const f of ['mokki', 'ylaterassi']) {
     const b = readFileSync(new URL(`../../public/call-button/${f}.mp3`, import.meta.url));
     assert.ok(b.length > 10000 && b.length < 200000, f);
     assert.ok((b[0] === 0x49 && b[1] === 0x44 && b[2] === 0x33) || (b[0] === 0xff && (b[1] & 0xe0) === 0xe0), f + ' ei MP3');
+  }
+  assert.deepEqual(readdirSync(new URL('../../public/call-button/', import.meta.url)).sort(), ['mokki.mp3', 'ylaterassi.mp3']);
+});
+
+test('puhelun ja asennusohjeen teksteissä ei Joonaksen kieltämiä sanoja (t1928u)', () => {
+  for (const rel of ['../supabase/functions/_shared/call_button.js', '../shelly/call-button-gateway.js', '../shelly/README.md',
+    '../supabase/functions/call-button-press/index.ts', '../supabase/functions/call-button-hangup/index.ts']) {
+    const t = readFileSync(new URL(rel, import.meta.url), 'utf8').toLowerCase();
+    const banned = [['h', '\u00e4lyty'], ['h', 'alyty'], ['ap', 'ua']].map((x) => x.join(''));
+    for (const w of banned) assert.ok(!t.includes(w), rel + ': ' + w);
   }
 });
