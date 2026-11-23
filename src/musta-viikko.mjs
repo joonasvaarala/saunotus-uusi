@@ -25,13 +25,15 @@ export function mustaViikkoActive(now = Date.now()) {
   return Number.isFinite(t) && t < Date.parse(MUSTA_VIIKKO_ENDS);
 }
 
-/** Testibuildissa banneri ja mainos ovat päällä. Tuotannossa eivät. */
+/** Banneri ja mainos ovat päällä testi- ja tuotantobuildissa (tuotannossa 23.11.2026 alkaen, Joonas t1892u). */
 export function mustaViikkoEnvOn(env = process.env.SITE_ENV) {
-  return String(env ?? '').trim() === 'test';
+  const v = String(env ?? '').trim();
+  return v === 'test' || v === 'prod';
 }
-/** Tuotantobuild ei sisällä bannerin tai mainoksen HTML:ää eikä boot-skriptiä. */
+/** Banneri, mainos ja boot-skripti kirjoitetaan sivuun kaikissa buildeissa; kampanja päättyy aikaohjauksella (MUSTA_VIIKKO_ENDS). */
 export function mustaViikkoBuildIncludes(env = process.env.SITE_ENV) {
-  return String(env ?? '').trim() !== 'prod';
+  void env;
+  return true;
 }
 
 /** Etusivun mainoksen ja kampanjasivun heron kuva (kuvankäsittelijän tumma toimitus). */

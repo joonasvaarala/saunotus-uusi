@@ -191,8 +191,9 @@ test('build jättää kampanjasivun pois sivukartasta; sivu syntyy noindexilla',
   assert.match(en, /noindex,nofollow/);
   assert.doesNotMatch(fi, /application\/ld\+json/);
   assert.doesNotMatch(sm, /musta-viikko|black-week/);
-  assert.doesNotMatch(homeFi, /\/musta-viikko\/|\/en\/black-week\//);
-  assert.doesNotMatch(homeFi, /data-mv-banner|data-mv-promo|class="mv-ad"/);
-  assert.doesNotMatch(giftFi, /\/musta-viikko\/|\/en\/black-week\/|data-mv-banner/);
+  assert.match(homeFi, /\/musta-viikko\//);
+  assert.match(homeFi, /data-mv-banner/);
+  assert.match(homeFi, /data-mv-promo/);
+  assert.match(giftFi, /data-mv-banner/);
   rmSync(dist, { recursive: true, force: true });
 });
