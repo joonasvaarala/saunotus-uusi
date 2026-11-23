@@ -26,9 +26,9 @@ test('oletuksena pois päältä; paketin koodi yhdessä vakiossa', () => {
   assert.equal(MUSTA_VIIKKO_IMAGE, 'mv-mainos');
   assert.deepEqual(MUSTA_VIIKKO_IMAGE_SIZE, { w: 1600, h: 700 });
   assert.equal(mustaViikkoEnvOn('test'), true);
-  assert.equal(mustaViikkoEnvOn('prod'), false);
+  assert.equal(mustaViikkoEnvOn('prod'), true);
   assert.equal(mustaViikkoEnvOn(''), false);
-  assert.equal(mustaViikkoBuildIncludes('prod'), false);
+  assert.equal(mustaViikkoBuildIncludes('prod'), true);
   assert.equal(mustaViikkoBuildIncludes('test'), true);
   assert.equal(mustaViikkoBuildIncludes(''), true);
   const src = read('src/musta-viikko.mjs');
@@ -137,9 +137,10 @@ test('banneri ja kortti ovat piilossa, sisältävät linkin, hinnan ja voimassao
   assert.ok(boot.includes('preview'));
   const bootTest = mustaViikkoBootScript('test');
   assert.match(bootTest, /var on=true/);
-  assert.equal(mustaViikkoBootScript('prod'), '');
-  assert.equal(mustaViikkoBannerHtml('fi', Date.now(), 'prod'), '');
-  assert.equal(mustaViikkoCardHtml('en', Date.now(), 'prod'), '');
+  assert.match(mustaViikkoBootScript('prod'), /var on=true/);
+  assert.match(mustaViikkoBannerHtml('fi', Date.now(), 'prod'), /data-mv-banner/);
+  assert.match(mustaViikkoCardHtml('en', Date.now(), 'prod'), /data-mv-promo/);
+  assert.equal(mustaViikkoBannerHtml('fi', Date.parse('2026-11-30T10:00:01+02:00'), 'prod'), '');
   assert.ok(boot.includes(MUSTA_VIIKKO_PREVIEW));
   assert.ok(boot.includes(MUSTA_VIIKKO_STORAGE_KEY));
   assert.ok(boot.includes(MUSTA_VIIKKO_ENDS));
