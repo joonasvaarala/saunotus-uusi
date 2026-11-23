@@ -1,4 +1,4 @@
-// Saunotus – terassin hälytysnappi: Shelly BLU Gateway Gen3 -skripti (mJS). booking_340–342.
+// Saunotus – terassin kutsunappi: Shelly BLU Gateway Gen3 -skripti (mJS). booking_340–342.
 // Kuuntelee BLE-mainoksia, jäsentää BTHome v2 -paketit (service data UUID fcd2) ja välittää VAIN button-objektit (0x3A)
 // Supabasen call-button-press-funktioon. Muut BLE-laitteet ja muut BTHome-objektit jätetään huomiotta.
 // Kaikki button-tapahtumat välitetään (Joonas t1926u), vain 0 (none) jätetään pois.

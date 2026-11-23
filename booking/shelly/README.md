@@ -1,4 +1,4 @@
-# Terassin hälytysnappi – Shelly BLU Gateway Gen3 -asennus
+# Terassin kutsunappi – Shelly BLU Gateway Gen3 -asennus
 
 Skripti: `call-button-gateway.js` (booking_340–342, sopimus KOODARI.md). Laitteet: 2 × Shelly BLU Button Tough ZB
 (Mökki, Yläterassi) ja 2 × Shelly BLU Gateway Gen3 (vastaanottimet). **Molemmat napit paritetaan molempiin
