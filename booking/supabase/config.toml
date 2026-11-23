@@ -88,3 +88,11 @@ verify_jwt = false
 # Ainoat RPC:t: public.botgw_call ja public.botgw_log_failure (vain service_role). Ei deployata tästä haarasta.
 [functions.bot-gateway]
 verify_jwt = false
+
+# Terassin hälytysnappi (booking_340–342). Shelly BLU Gateway Gen3 kutsuu call-button-press-funktiota otsakkeella x-call-button-secret;
+# 46elks kutsuu call-button-hangup-funktiota (whenhangup, ?sig = HMAC-SHA256). Ei JWT:tä. Soitto vain kun kanta palauttaa call=true
+# (lippu call_button_enabled). Salaisuudet vain Edge-ympäristössä: CALL_BUTTON_WEBHOOK_SECRET, ELKS_API_USERNAME, ELKS_API_PASSWORD, ELKS_FROM_NUMBER.
+[functions.call-button-press]
+verify_jwt = false
+[functions.call-button-hangup]
+verify_jwt = false
