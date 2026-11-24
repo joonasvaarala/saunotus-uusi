@@ -141,7 +141,7 @@ test('booking_347 (K5): ALV-pyöristystili asetuskortissa, migraatio ja päivät
   assert.match(settings, /ui\.admin\.procountor\.vat_rounding_hint/);
   const m347 = readFileSync(join(root, 'supabase/migrations/20261125000300_booking_347_report_procountor_k5_k10.sql'), 'utf8');
   assert.match(m347, /accounts,vat_rounding/);
-  assert.match(m347, /'ALV-pyöristys'/);
+  assert.match(m347, /'ALV-pyöristys, päivätosite ' \|\| to_char\(p_date, 'DD\.MM\.'\)/);
   assert.match(m347, /array_append\(v_missing, 'vat_rounding'\)/);
   assert.match(m347, /'receipt_range'/);
   assert.match(m347, /'attachments'/);

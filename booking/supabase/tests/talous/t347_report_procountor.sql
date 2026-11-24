@@ -19,7 +19,8 @@ begin
   perform pg_temp.ck((b ->> 'vat_rounding')::numeric = -0.01, 'A2: erotus −0,01 (raportti − Procountor)');
   b := booking._procountor_daily_build('2031-03-03', rep, jsonb_set(st, '{accounts,vat_rounding}', '"8790"'));
   perform pg_temp.ck((b ->> 'ready')::boolean, 'A3: tilillä valmis ' || (b -> 'missing')::text);
-  select e into r from jsonb_array_elements(b #> '{request,transactions}') e where e ->> 'description' = 'ALV-pyöristys';
+  select e into r from jsonb_array_elements(b #> '{request,transactions}') e where e ->> 'description' like 'ALV-pyöristys%';
+  perform pg_temp.ck(r ->> 'description' = 'ALV-pyöristys, päivätosite 03.03.', 'A4b: selite ALV-pyöristys, päivätosite pp.kk. ' || coalesce(r ->> 'description', 'null'));
   perform pg_temp.ck(r ->> 'account' = '8790' and (r ->> 'accountingValue')::numeric = 0.01 and (r ->> 'vatPercent')::numeric = 0, 'A4: rivi tilille 8790, +0,01, ALV 0 ' || coalesce(r::text, 'null'));
   -- tasapaino: veloitus (maksutavat) = hyvitys (netto + Procountorin ALV) + pyöristysrivi
   perform pg_temp.ck((select sum((e ->> 'accountingValue')::numeric + case when (e ->> 'vatPercent')::numeric > 0 then round((e ->> 'accountingValue')::numeric * (e ->> 'vatPercent')::numeric / 100, 2) else 0 end)
@@ -29,7 +30,7 @@ begin
   rep := jsonb_set(rep, '{by_method,0,gross}', '12.60');
   b := booking._procountor_daily_build('2031-03-03', rep, st);
   perform pg_temp.ck((b ->> 'ready')::boolean and (b ->> 'vat_rounding')::numeric = 0
-                     and not exists (select 1 from jsonb_array_elements(b #> '{request,transactions}') e where e ->> 'description' = 'ALV-pyöristys'), 'B1: ei erotusta → ei riviä ' || (b -> 'missing')::text);
+                     and not exists (select 1 from jsonb_array_elements(b #> '{request,transactions}') e where e ->> 'description' like 'ALV-pyöristys%'), 'B1: ei erotusta → ei riviä ' || (b -> 'missing')::text);
   perform pg_temp.ck(b #>> '{request,name}' = 'Saunotus 2031-03-03', 'B2: ilman kuitteja nimi ennallaan ' || (b #>> '{request,name}'));
   perform pg_temp.ck(b #>> '{attachments,0,kind}' = 'daily_report_pdf' and b #>> '{attachments,0,name}' = 'Saunotus-paivaraportti-2031-03-03.pdf', 'B3: liitekuvaus');
   perform pg_temp.ck(not (b -> 'request') ? 'attachments' and not (b -> 'request') ? 'receipt_range', 'B4: Procountorin request-runko ei saa uusia kenttiä');

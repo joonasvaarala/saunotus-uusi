@@ -77,6 +77,7 @@ Pyöristys ei ole `by_vat`-taulukossa.
 - Selvittely- ja pyöristysrivit ovat ensin. Niistä ensimmäinen on `REVERSING_ENTRY` (`vatPercent` 0). Myyntirivit ovat aina `ENTRY`, `accountingValue` = raportin neton vastaluku, `vatPercent` = raportin kanta.
 - Maksutaparivin `accountingValue` = `gross + refunds`, `vatPercent` 0.
 - Pyöristysrivi, jos `totals.rounding <> 0`: `accountingValue` = pyöristyksen vastaluku, `vatPercent` 0.
+- ALV-pyöristysrivi (booking_347), jos raportin ALV ≠ Procountorin nettosummasta kannoittain laskema ALV. Raportin ALV on kuittikohtaisten ALV-summien summa (jokainen kuitti pyöristetty kannoittain erikseen), joten sentin erotus on mahdollinen. `accountingValue` = erotuksen vastaluku, `vatPercent` 0, tili `settings.accounts.vat_rounding`, selite `ALV-pyöristys, päivätosite pp.kk.`. Puuttuva tili → `missing: vat_rounding`.
 - Tilit tulevat asetuksesta, eivät koodista:
   - `settings.vat_status` (1–4 numeroa)
   - `settings.accounts.sales_by_vat` avaimena kannan teksti (`25.5`, `13.5`, `0`)
