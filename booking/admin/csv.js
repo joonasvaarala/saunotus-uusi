@@ -17,7 +17,7 @@ export function csvText(v) {
 export function csvQuote(s) { return /[";\r\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s; }
 const TEXT_COLS = new Set(['tosite', 'pvm', 'asiakas', 'tuote', 'maksutapa', 'tila', 'laji']);
 const statusFi = (l) => (l.status === 'open' || l.status === 'avoin' ? 'avoin' : 'maksettu');
-const kindFi = (l) => (l.kind === 'refund' || l.kind === 'refund_receipt' || l.kind === 'hyvitys' ? 'hyvitys' : l.kind === 'redemption' || l.kind === 'lunastus' ? 'lunastus' : 'myynti');
+const kindFi = (l) => (l.doc_kind === 'correction' ? 'oikaisu' : l.kind === 'refund' || l.kind === 'refund_receipt' || l.kind === 'hyvitys' ? 'hyvitys' : l.kind === 'redemption' || l.kind === 'lunastus' ? 'lunastus' : 'myynti');
 // Tapahtumaraportin rivi. Hyvitysrivin määrä, netto, ALV ja brutto ovat etumerkillisiä kuten kuitissa.
 export function lineToRow(l, methodLabel = (c) => c) {
   const qty = l.kind === 'refund_receipt' ? -Math.abs(l.quantity ?? 1) : (l.quantity ?? 1);

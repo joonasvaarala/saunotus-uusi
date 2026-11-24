@@ -61,6 +61,7 @@ export const REPORT_PDF_TEXTS: TextTable = {
   "ui.admin.reports.status_paid": { fi: "Maksettu", en: "Paid"},
   "ui.admin.reports.kind_sale": { fi: "Myynti", en: "Sale"},
   "ui.admin.reports.kind_refund": { fi: "Hyvitys", en: "Refund"},
+  "ui.admin.reports.kind_correction": { fi: "Oikaisu", en: "Correction"},
   "ui.admin.reports.kind_redemption": { fi: "Lunastus", en: "Redemption"},
   "ui.admin.reports.prepaid_title": { fi: "Ennakkoon maksetun lahjakortin lunastus", en: "Redemption of a prepaid gift card"},
   "ui.admin.reports.prepaid_note": { fi: "Nämä lunastukset eivät ole myyntiä. Arvonlisävero on kirjattu kortin myynnissä, eikä sitä kirjata uudelleen. Erittely on vain tiedoksi.", en: "These redemptions are not sales. VAT was recorded when the card was sold and is not recorded again. The breakdown is for information only."},

@@ -1,0 +1,82 @@
+[
+ {
+  "key": "email.receipt_pdf.title_correction",
+  "lang": "fi",
+  "text": "OIKAISUKUITTI",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_348 (K1): oikaisukuitin PDF-otsikko, syy ja muutosrivi. Kuitti on tosite → luokka protected (hyväksyjät Joonas ja Otto). Tuo admin_texts_importilla."
+ },
+ {
+  "key": "email.receipt_pdf.title_correction",
+  "lang": "en",
+  "text": "CORRECTION RECEIPT",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_348 (K1): oikaisukuitin PDF-otsikko, syy ja muutosrivi. Kuitti on tosite → luokka protected (hyväksyjät Joonas ja Otto). Tuo admin_texts_importilla."
+ },
+ {
+  "key": "email.receipt_pdf.reason_correction",
+  "lang": "fi",
+  "text": "Oikaisun syy",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_348 (K1): oikaisukuitin PDF-otsikko, syy ja muutosrivi. Kuitti on tosite → luokka protected (hyväksyjät Joonas ja Otto). Tuo admin_texts_importilla."
+ },
+ {
+  "key": "email.receipt_pdf.reason_correction",
+  "lang": "en",
+  "text": "Reason for correction",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_348 (K1): oikaisukuitin PDF-otsikko, syy ja muutosrivi. Kuitti on tosite → luokka protected (hyväksyjät Joonas ja Otto). Tuo admin_texts_importilla."
+ },
+ {
+  "key": "email.receipt_pdf.correction_change",
+  "lang": "fi",
+  "text": "Muutos (ei maksua)",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_348 (K1): oikaisukuitin PDF-otsikko, syy ja muutosrivi. Kuitti on tosite → luokka protected (hyväksyjät Joonas ja Otto). Tuo admin_texts_importilla."
+ },
+ {
+  "key": "email.receipt_pdf.correction_change",
+  "lang": "en",
+  "text": "Change (no payment)",
+  "class": "protected",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_348 (K1): oikaisukuitin PDF-otsikko, syy ja muutosrivi. Kuitti on tosite → luokka protected (hyväksyjät Joonas ja Otto). Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.reports.kind_correction",
+  "lang": "fi",
+  "text": "Oikaisu",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_348 (K1): tapahtumaraportin laji ”Oikaisu” (oikaisukuitin rivit). FI+EN, luokka normal. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.reports.kind_correction",
+  "lang": "en",
+  "text": "Correction",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_348 (K1): tapahtumaraportin laji ”Oikaisu” (oikaisukuitin rivit). FI+EN, luokka normal. Tuo admin_texts_importilla."
+ }
+]

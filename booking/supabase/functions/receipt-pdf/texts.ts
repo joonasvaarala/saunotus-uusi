@@ -10,6 +10,7 @@ export const RECEIPT_PDF_TEXTS: TextTable = {
   "email.receipt_pdf.business_id": { fi: "Y-tunnus {{var:id}}", en: "Business ID {{var:id}}", cls: P },
   "email.receipt_pdf.vat_id": { fi: "ALV-tunnus {{var:id}}", en: "VAT ID {{var:id}}", cls: P },
   "email.receipt_pdf.title_refund": { fi: "HYVITYSKUITTI", en: "REFUND RECEIPT", cls: P },
+  "email.receipt_pdf.title_correction": { fi: "OIKAISUKUITTI", en: "CORRECTION RECEIPT", cls: P },
   "email.receipt_pdf.title_invoice": { fi: "KUITTI / LASKU", en: "RECEIPT / INVOICE", cls: P },
   "email.receipt_pdf.title": { fi: "KUITTI", en: "RECEIPT", cls: P },
   "email.receipt_pdf.date": { fi: "Päivämäärä", en: "Date", cls: P },
@@ -18,6 +19,7 @@ export const RECEIPT_PDF_TEXTS: TextTable = {
   "email.receipt_pdf.payment_method": { fi: "Maksutapa", en: "Payment method", cls: P },
   "email.receipt_pdf.original": { fi: "Alkuperäinen kuitti", en: "Original receipt", cls: P },
   "email.receipt_pdf.reason": { fi: "Hyvityksen syy", en: "Reason", cls: P },
+  "email.receipt_pdf.reason_correction": { fi: "Oikaisun syy", en: "Reason for correction", cls: P },
   "email.receipt_pdf.buyer": { fi: "Ostaja", en: "Buyer", cls: P },
   "email.receipt_pdf.reference": { fi: "Viitteenne: {{var:ref}}", en: "Your reference: {{var:ref}}", cls: P },
   "email.receipt_pdf.col_item": { fi: "Tuote", en: "Item", cls: P },
@@ -40,5 +42,6 @@ export const RECEIPT_PDF_TEXTS: TextTable = {
   "email.receipt_pdf.of_which_vat": { fi: "josta ALV", en: "of which VAT", cls: P },
   "email.receipt_pdf.rounding": { fi: "Käteispyöristys", en: "Cash rounding", cls: P },
   "email.receipt_pdf.refunded": { fi: "Hyvitetty", en: "Refunded", cls: P },
+  "email.receipt_pdf.correction_change": { fi: "Muutos (ei maksua)", en: "Change (no payment)", cls: P },
   "email.receipt_pdf.paid": { fi: "Maksettu", en: "Paid", cls: P },
 };

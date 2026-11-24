@@ -18,7 +18,7 @@ export function pdfLink({ api, token, no, short = false, testid = 'receipt-dl' }
 // kuitin yksi rivi: numero, laji, päivä, summa + toiminnot
 export function receiptItem({ api, ctx, receipt: r }) {
   return h('li', { 'data-testid': 'receipt-item', 'data-receipt-no': r.receipt_no },
-    h('span', { class: 'tl-sub-main' }, h('strong', { 'data-testid': 'receipt-no', text: r.receipt_no }), ' ', h('span', { class: `badge${r.kind === 'refund_receipt' ? ' warn' : ''}`, text: t(`receipt.${r.kind}`) })),
+    h('span', { class: 'tl-sub-main' }, h('strong', { 'data-testid': 'receipt-no', text: r.receipt_no }), ' ', h('span', { class: `badge${r.kind === 'refund_receipt' || r.kind === 'correction' ? ' warn' : ''}`, text: t(`receipt.${r.kind}`) })),
     h('span', { class: 'tl-sub-meta', text: [fmt.dt(r.issued_at), r.sent_at ? `${t('receipts.sent')} ${fmt.date(r.sent_at)}` : t('receipts.notSent')].join(' · ') }),
     h('span', { class: 'tl-sub-sum' }, r.total != null ? h('strong', { 'data-testid': 'receipt-total', text: fmt.money(r.total) }) : null),
     h('div', { class: 'tl-rc-actions' }, ...receiptActions({ api, ctx, receipt: r })));

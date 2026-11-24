@@ -86,7 +86,7 @@ export async function buildReceiptPdf(s: any, tfn: TFn = DEFAULT_T): Promise<Uin
   for (const l of sellerLines) { text(page, l, M, y, 9, font, grey); y -= 12; }
   y = Math.min(y, 841.89 - M - logoH - 8) - 14;
 
-  const title = s.document === "refund_receipt" ? TX("email.receipt_pdf.title_refund") : s.invoice_required ? TX("email.receipt_pdf.title_invoice") : TX("email.receipt_pdf.title");
+  const title = s.document === "correction_receipt" ? TX("email.receipt_pdf.title_correction") : s.document === "refund_receipt" ? TX("email.receipt_pdf.title_refund") : s.invoice_required ? TX("email.receipt_pdf.title_invoice") : TX("email.receipt_pdf.title");
   text(page, `${title} ${s.receipt_no}`, M, y, 16, bold); y -= 22;
   const meta: [string, string][] = [
     [TX("email.receipt_pdf.date"), (() => { const dl = `${s.issued_local}`, i = dl.indexOf(" "); return i < 0 ? dl : TX("email.receipt_pdf.date_value", { date: dl.slice(0, i), time: dl.slice(i + 1) }); })()],
@@ -94,7 +94,7 @@ export async function buildReceiptPdf(s: any, tfn: TFn = DEFAULT_T): Promise<Uin
     [TX("email.receipt_pdf.payment_method"), s.payment?.method_label ?? s.payment?.method ?? ""],
   ];
   if (s.original) meta.push([TX("email.receipt_pdf.original"), `${s.original.receipt_no} (${s.original.issued_local ?? fmtLocal(s.original.issued_at)})`]);
-  if (s.reason) meta.push([TX("email.receipt_pdf.reason"), s.reason]);
+  if (s.reason) meta.push([s.document === "correction_receipt" ? TX("email.receipt_pdf.reason_correction") : TX("email.receipt_pdf.reason"), s.reason]);
   for (const [k, v] of meta) { text(page, k + ":", M, y, 10, bold); text(page, v, M + 120, y, 10); y -= 14; }
   if (s.buyer) {
     y -= 4; text(page, TX("email.receipt_pdf.buyer"), M, y, 10, bold); y -= 14;
@@ -145,7 +145,7 @@ export async function buildReceiptPdf(s: any, tfn: TFn = DEFAULT_T): Promise<Uin
   ];
   const rnd = Number(s.rounding ?? 0);
   if (rnd !== 0) tot.push([TX("email.receipt_pdf.rounding"), (rnd > 0 ? "+" : "") + money(rnd, loc), false]);
-  tot.push([s.document === "refund_receipt" ? TX("email.receipt_pdf.refunded") : TX("email.receipt_pdf.paid"), money(Number(s.total_paid), loc), true]);
+  tot.push([s.document === "correction_receipt" ? TX("email.receipt_pdf.correction_change") : s.document === "refund_receipt" ? TX("email.receipt_pdf.refunded") : TX("email.receipt_pdf.paid"), money(Number(s.total_paid), loc), true]);
   for (const [k, v, b] of tot) { need(16); text(page, k, M + 250, y, 10, b ? bold : font); right(page, v, M + W, y, 10, b ? bold : font); y -= 15; }
   if (sel.footer) { y -= 14; need(20); for (const l of wrap(sel.footer, font, 9, W)) { text(page, l, M, y, 9, font, grey); y -= 12; } }
   return await pdf.save();
