@@ -7,7 +7,7 @@
 -- Edellyttää booking_347:ää (ja 346:ta testissä). Rollback: booking/supabase/rollbacks/20261125000400_booking_348_ROLLBACK.sql.
 do $pre$
 begin
-  if md5(pg_get_functiondef('booking._procountor_daily_build(date,jsonb,jsonb)'::regprocedure)) <> '9be553db339f7856d1746e7920497119'
+  if md5(pg_get_functiondef('booking._procountor_daily_build(date,jsonb,jsonb)'::regprocedure)) <> 'fdd09f4ef5cb572018a448d643127559'
      or md5(pg_get_functiondef('booking._accrual_json(date,date,date)'::regprocedure)) <> '4b048aa734226c27875076457e790165' then
     raise exception 'booking_348 edellyttää booking_347:ää (_procountor_daily_build / _accrual_json)';
   end if;
@@ -1152,7 +1152,8 @@ begin
       'transactionType', 'ENTRY', 'account', v_acct, 'accountingValue', round(-r.net, 2),
       'vatPercent', r.rate, 'description', 'Myynti ALV ' || trim_scale(r.rate)::text));
   end loop;
-  -- booking_347 (K5): ALV-pyöristys. Procountor laskee ALV:n nettosummasta kannoittain; raportin ALV on rivikohtaisten summa.
+  -- booking_347 (K5): ALV-pyöristys. Procountor laskee ALV:n nettosummasta kannoittain; raportin ALV on kuittikohtaisten ALV-summien summa
+  -- (kuitin snapshotin vat-ryhmät kannoittain, jokainen kuitti pyöristetty erikseen).
   -- Erotus kirjataan tilille accounts.vat_rounding (puuttuu → missing 'vat_rounding').
   select coalesce(round(sum(round(coalesce((e ->> 'vat')::numeric, 0), 2) - round(round(coalesce((e ->> 'net')::numeric, 0), 2) * (e ->> 'rate')::numeric / 100, 2)), 2), 0)
     into v_vat_round
@@ -1162,7 +1163,7 @@ begin
     v_acct := nullif(btrim(coalesce(p_settings #>> '{accounts,vat_rounding}', '')), '');
     if v_acct is null or v_acct !~ '^[0-9A-Za-z]{1,20}$' then v_missing := array_append(v_missing, 'vat_rounding'); v_acct := null; end if;
     v_tx := v_tx || jsonb_build_array(jsonb_build_object(
-      'transactionType', 'ENTRY', 'account', v_acct, 'accountingValue', round(-v_vat_round, 2), 'vatPercent', 0, 'description', 'ALV-pyöristys'));
+      'transactionType', 'ENTRY', 'account', v_acct, 'accountingValue', round(-v_vat_round, 2), 'vatPercent', 0, 'description', 'ALV-pyöristys, päivätosite ' || to_char(p_date, 'DD.MM.')));
   end if;
   if jsonb_array_length(v_tx) = 0 then v_missing := array_append(v_missing, 'no_lines'); end if;
   -- booking_347 (K5): kuittinumerot selitteeseen (myyntikuitit ja hyvityskuitit päivältä)
