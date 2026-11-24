@@ -1,7 +1,7 @@
 // Kirjanpitoraporttien tekstit: sanakirja, PDF-oletukset ja pending-import-27 täsmäävät. FI+EN, ei hintoja eikä osoitteita.
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { readFileSync, existsSync } from 'node:fs';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { dirname, join } from 'node:path';
 
@@ -15,7 +15,8 @@ const pending108 = JSON.parse(readFileSync(join(repo, 'content/site-texts.pendin
 const pending119 = JSON.parse(readFileSync(join(repo, 'content/site-texts.pending-import-119.json'), 'utf8'));
 const pending120 = JSON.parse(readFileSync(join(repo, 'content/site-texts.pending-import-120.json'), 'utf8'));
 const pending121 = JSON.parse(readFileSync(join(repo, 'content/site-texts.pending-import-121.json'), 'utf8'));
-const pending194 = JSON.parse(readFileSync(join(repo, 'content/site-texts.pending-import-194.json'), 'utf8')).filter((r) => r.key.startsWith('ui.admin.reports.'));   // booking_348 (K1)
+// booking_347 (K7) ja booking_348 (K1): uudet raporttiavaimet. Tiedosto, jota haarassa ei vielä ole, ohitetaan (sama rivi molemmissa PR:issä → ei merge-konfliktia).
+const pendingNew = [193, 194].map((n) => join(repo, `content/site-texts.pending-import-${n}.json`)).filter((f) => existsSync(f)).flatMap((f) => JSON.parse(readFileSync(f, 'utf8'))).filter((r) => r.key.startsWith('ui.admin.reports.'));
 
 function tsTable(file) {
   const src = readFileSync(file, 'utf8');
@@ -36,9 +37,9 @@ const SHOP_TEXTS = {
 
 test('pending-import-27 vastaa sanakirjoja, FI+EN, ilman hintoja ja osoitteita', () => {
   const by = new Map(pending.map((r) => [`${r.key}|${r.lang}`, r]));
-  const over = new Map([...pending104, ...pending108, ...pending119, ...pending120, ...pending121, ...pending194].map((r) => [`${r.key}|${r.lang}`, r]));
+  const over = new Map([...pending104, ...pending108, ...pending119, ...pending120, ...pending121, ...pendingNew].map((r) => [`${r.key}|${r.lang}`, r]));
   assert.equal(by.size, pending.length);
-  assert.equal(over.size, pending104.length + pending108.length + pending119.length + pending120.length + pending121.length + pending194.length);
+  assert.equal(over.size, pending104.length + pending108.length + pending119.length + pending120.length + pending121.length + pendingNew.length);
   assert.equal(pending.length % 2, 0);
   assert.equal(pending104.length % 2, 0);
   assert.equal(pending108.length % 2, 0);
@@ -59,7 +60,7 @@ test('pending-import-27 vastaa sanakirjoja, FI+EN, ilman hintoja ja osoitteita',
       if (!over.has(`${key}|${lang}`)) assert.equal(by.get(`${key}|${lang}`).text, text, key);
     }
   }
-  for (const r of [...pending104, ...pending108, ...pending119, ...pending120, ...pending121, ...pending194]) assert.equal(REPORT_TEXTS[r.lang][r.key], r.text, r.key);
+  for (const r of [...pending104, ...pending108, ...pending119, ...pending120, ...pending121, ...pendingNew]) assert.equal(REPORT_TEXTS[r.lang][r.key], r.text, r.key);
   for (const key of RECEIPT_KEYS) {
     for (const lang of ['fi', 'en']) {
       const row = by.get(`${key}|${lang}`);
@@ -78,7 +79,7 @@ test('pending-import-27 vastaa sanakirjoja, FI+EN, ilman hintoja ja osoitteita',
     }
   }
   assert.equal(Object.keys(REPORT_TEXTS.fi).length, Object.keys(REPORT_TEXTS.en).length);
-  const covered = new Set([...pending, ...pending104, ...pending108, ...pending119, ...pending120, ...pending121, ...pending194].filter((r) => r.key.startsWith('ui.admin.reports.') || r.key.startsWith('ui.admin.giftcards.vat_') || r.key.startsWith('ui.gift.') || RECEIPT_KEYS.includes(r.key)).map((r) => `${r.key}|${r.lang}`));
+  const covered = new Set([...pending, ...pending104, ...pending108, ...pending119, ...pending120, ...pending121, ...pendingNew].filter((r) => r.key.startsWith('ui.admin.reports.') || r.key.startsWith('ui.admin.giftcards.vat_') || r.key.startsWith('ui.gift.') || RECEIPT_KEYS.includes(r.key)).map((r) => `${r.key}|${r.lang}`));
   for (const lang of ['fi', 'en']) for (const key of Object.keys(REPORT_TEXTS[lang])) assert.ok(covered.has(`${key}|${lang}`), key);
 });
 

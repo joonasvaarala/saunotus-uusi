@@ -60,6 +60,31 @@ test('pending-import-108 vastaa sanakirjaa, FI+EN, ei päällekkäin', () => {
   for (const r of rows) assert.match(pdf, new RegExp(r.text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
 });
 
+test('booking_348 (K1): oikaisukuitti – migraatio, raporttien etumerkki ja näkymät', () => {
+  const m = src('supabase/migrations/20261125000400_booking_348_correction_receipt.sql');
+  assert.match(m, /'receipt'::text, 'refund_receipt'::text, 'correction'::text/);
+  assert.match(m, /kind = 'correction'::text\) and \(refund_id is null\) and \(original_receipt_id is not null\)/);
+  assert.match(m, /create trigger receipts_refund_cap before insert on booking\.receipts/);
+  assert.match(m, /refund_receipts_exceed_refunded/);
+  assert.match(m, /FUNCTION booking\.svc_issue_correction_receipt/);
+  assert.match(m, /_require_permission\('payments\.refund'\)/);
+  assert.match(m, /-sum\(net\) n, -sum\(vat\) v, -sum\(gross\) g from vat_rows where kind = 'refund_receipt'/);
+  assert.doesNotMatch(m, /sum\(abs\(net\)\)|-abs\(\(e ->> 'net'\)/);
+  assert.doesNotMatch(m, /email_outbox|accounting_outbox\(kind, order_id, payment_id, receipt_id, dedupe_key, payload, environment\)\s*values \('correction'/);
+  const rb = src('supabase/rollbacks/20261125000400_booking_348_ROLLBACK.sql');
+  assert.match(rb, /drop trigger if exists receipts_refund_cap/);
+  assert.match(rb, /sum\(abs\(net\)\) n/);
+  const tx = src('admin/views/talous-reports.js');
+  assert.match(tx, /x\?\.doc_kind === 'correction' \? rt\('ui\.admin\.reports\.kind_correction'\)/);
+  assert.equal(REPORT_TEXTS.fi['ui.admin.reports.kind_correction'], 'Oikaisu');
+  const pdf = src('supabase/functions/receipt-pdf/render.ts');
+  assert.match(pdf, /s\.document === "correction_receipt" \? TX\("email\.receipt_pdf\.title_correction"\)/);
+  assert.match(pdf, /TX\("email\.receipt_pdf\.correction_change"\)/);
+  const rows = JSON.parse(readFileSync(join(repo, 'content/site-texts.pending-import-194.json'), 'utf8'));
+  assert.equal(rows.length, 8);
+  for (const r of rows) assert.equal(r.class, r.key.startsWith('email.receipt_pdf.') ? 'protected' : 'normal', r.key);
+});
+
 test('myynti-CSV ja laskuraportti mockissa, PDF-lajit', async () => {
   const api = createTalousApi({ mock: true });
   const csv = await api.reportCsv({ period: { from: '2026-10-01', to: '2026-10-31' } }, 'summary');
@@ -460,29 +485,4 @@ test('lahjakortti-PDF näyttää Johku-osion, myynti-PDF ei', () => {
   assert.match(act, /Arvolahjakortti/);
   assert.match(act, /Vain tiedoksi/);
   assert.match(act, /15020/);
-});
-
-test('booking_348 (K1): oikaisukuitti – migraatio, raporttien etumerkki ja näkymät', () => {
-  const m = src('supabase/migrations/20261125000400_booking_348_correction_receipt.sql');
-  assert.match(m, /'receipt'::text, 'refund_receipt'::text, 'correction'::text/);
-  assert.match(m, /kind = 'correction'::text\) and \(refund_id is null\) and \(original_receipt_id is not null\)/);
-  assert.match(m, /create trigger receipts_refund_cap before insert on booking\.receipts/);
-  assert.match(m, /refund_receipts_exceed_refunded/);
-  assert.match(m, /FUNCTION booking\.svc_issue_correction_receipt/);
-  assert.match(m, /_require_permission\('payments\.refund'\)/);
-  assert.match(m, /-sum\(net\) n, -sum\(vat\) v, -sum\(gross\) g from vat_rows where kind = 'refund_receipt'/);
-  assert.doesNotMatch(m, /sum\(abs\(net\)\)|-abs\(\(e ->> 'net'\)/);
-  assert.doesNotMatch(m, /email_outbox|accounting_outbox\(kind, order_id, payment_id, receipt_id, dedupe_key, payload, environment\)\s*values \('correction'/);
-  const rb = src('supabase/rollbacks/20261125000400_booking_348_ROLLBACK.sql');
-  assert.match(rb, /drop trigger if exists receipts_refund_cap/);
-  assert.match(rb, /sum\(abs\(net\)\) n/);
-  const tx = src('admin/views/talous-reports.js');
-  assert.match(tx, /x\?\.doc_kind === 'correction' \? rt\('ui\.admin\.reports\.kind_correction'\)/);
-  assert.equal(REPORT_TEXTS.fi['ui.admin.reports.kind_correction'], 'Oikaisu');
-  const pdf = src('supabase/functions/receipt-pdf/render.ts');
-  assert.match(pdf, /s\.document === "correction_receipt" \? TX\("email\.receipt_pdf\.title_correction"\)/);
-  assert.match(pdf, /TX\("email\.receipt_pdf\.correction_change"\)/);
-  const rows = JSON.parse(readFileSync(join(repo, 'content/site-texts.pending-import-194.json'), 'utf8'));
-  assert.equal(rows.length, 8);
-  for (const r of rows) assert.equal(r.class, r.key.startsWith('email.receipt_pdf.') ? 'protected' : 'normal', r.key);
 });
