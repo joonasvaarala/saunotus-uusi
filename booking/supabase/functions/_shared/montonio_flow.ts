@@ -82,9 +82,32 @@ async function fail(db: Db, refundId: number, error: unknown) {
 }
 
 async function complete(db: Db, claim: Claim, refundUuid: string, raw: Record<string, unknown>) {
-  const { error } = await db.rpc("montonio_refund_complete", { p_refund_id: claim.refund_id, p_provider_refund_id: refundUuid, p_raw: raw });
+  const { data, error } = await db.rpc("montonio_refund_complete", { p_refund_id: claim.refund_id, p_provider_refund_id: refundUuid, p_raw: raw });
   if (error) return { result: "db_error" as const, detail: dbError(error)!.code };
+  // booking_343: maksu ylittyisi → hyvitys jää käsin tarkistettavaksi (ei kuittia, ei viestiä). Ilmoitus kuitataan (200), ei uudelleenyritystä.
+  if (data?.needs_review) return { result: "needs_review" as const, detail: { reason: data.reason ?? null } };
   return { result: "done" as const };
+}
+
+/** booking_343: hyvityksen tila Montoniosta (vain luku). GET /orders/:orderUuid → refunds[] uuid:n mukaan. Ei kirjoita kantaan. */
+export async function refundStatusFromApi(api: PayApi, info: { order_uuid?: string | null; provider_refund_id?: string | null }) {
+  if (!info.order_uuid) return { ok: false as const, code: "no_order_uuid" };
+  if (!info.provider_refund_id) return { ok: false as const, code: "no_provider_refund_id" };
+  let got: Record<string, unknown>;
+  try { got = await api.getOrder(info.order_uuid); }
+  catch (e) {
+    if (e instanceof PayError) return { ok: false as const, code: e.transient ? "retry_later" : "provider_error", status: e.status };
+    return { ok: false as const, code: "retry_later" };
+  }
+  const order = (got.refunds || got.paymentStatus) ? got : (got.data as Record<string, unknown> | undefined) || got;
+  const list = Array.isArray(order.refunds) ? order.refunds as Record<string, unknown>[] : [];
+  const hit = list.find((r) => String(r.uuid || "") === info.provider_refund_id) || null;
+  return {
+    ok: true as const,
+    found: !!hit,
+    refund: hit ? { uuid: String(hit.uuid), status: String(hit.status || "").toUpperCase() || null, amount: hit.amount != null ? Number(hit.amount) : null, currency: hit.currency ?? null, createdAt: hit.createdAt ?? null, type: hit.type ?? null } : null,
+    order: { paymentStatus: order.paymentStatus ?? null, availableForRefund: order.availableForRefund ?? null, refunds: list.length },
+  };
 }
 
 /** SUCCESSFUL kirjaa hyvityksen kerran. PENDING/PROCESSING ja selvittämätön tila jättävät rivin uudelleen yritettäväksi. */
