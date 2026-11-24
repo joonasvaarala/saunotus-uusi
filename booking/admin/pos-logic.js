@@ -97,6 +97,20 @@ export function validateCustomLine({ description, quantity, unit_price, vat_rate
   return { ok: true, description: name, quantity: q, unit_price: price, vat_rate: rate };
 }
 
+// booking_346 (K3): kirjan ALV on 13,5 %. Pikavalinta "Kirja 13,5 %" ja varoitus, jos kuvaus on kirja mutta kanta muu.
+export const BOOK_VAT = 13.5;
+export const looksLikeBook = (description) => /(^|[^a-zåäö])(kirja|kirjan|kirjat|book|books)([^a-zåäö]|$)|-kirja\b/i.test(String(description ?? ''));
+export function bookVatWarning(description, vat_rate, allowedRates = []) {
+  const allowed = (allowedRates || []).map(Number);
+  return looksLikeBook(description) && allowed.includes(BOOK_VAT) && Number(vat_rate) !== BOOK_VAT;
+}
+/** Pikavalinta: ALV 13,5 % ja kuvaus "Kirja", jos kuvaus on tyhjä. Palauttaa uuden lomakkeen tai null, jos 13,5 % ei ole sallittu. */
+export function applyBookPreset(form, allowedRates = [], defaultDescription = 'Kirja') {
+  if (!(allowedRates || []).map(Number).includes(BOOK_VAT)) return null;
+  const description = String(form?.description ?? '').trim() ? form.description : defaultDescription;
+  return { ...form, description, vat_rate: String(BOOK_VAT) };
+}
+
 export function checkoutItems(cart) {
   return (cart || []).filter((r) => r.quantity > 0).map((r) => {
     if (r.kind === 'custom') {

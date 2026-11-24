@@ -1,4 +1,6 @@
 -- t235: booking_235 service_role-työkalut (siirto, ulkoinen maksu, käännös).
+-- HUOM booking_346 (K4): svc_mark_order_paid_external vaatii nyt summan, maksupäivän ja maksutavan; vanha kutsu → external_payment_details_required.
+--   Tämän testin F-osio kuvaa booking_235-tilaa. Nykykäytös: supabase/tests/talous/t346_external_payment.sql.
 -- Aja migraatioiden ja fixtures/10_test_helpers.sql:n jälkeen. Yksi transaktio, lopussa TESTRESULT + ROLLBACK.
 -- psql -X -v ON_ERROR_STOP=0 -f booking/supabase/tests/t235_svc_bot_tools.sql
 begin;

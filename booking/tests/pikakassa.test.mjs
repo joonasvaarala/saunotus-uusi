@@ -285,3 +285,39 @@ test('vapaa rivi: UI-tekstit FI+EN ja nappi pos-screenissä', async () => {
   assert.match(screen, /admin_list_vat_rates/);
   assert.match(screen, /validateCustomLine/);
 });
+
+// booking_346 (K3 + K4): kirjan ALV 13,5 % pikakassan vapaalla rivillä; ulkoinen maksu kirjaa maksun. SQL: supabase/tests/talous/t346_external_payment.sql (23/23).
+test('booking_346 K3: kirjan ALV – tunnistus, varoitus, pikavalinta, tekstit (import 192)', async () => {
+  const L = await import('../admin/pos-logic.js');
+  const T = await import('../admin/pos-texts.js');
+  const rates = [0, 13.5, 25.5];
+  for (const d of ['Vuosi saunassa -kirja', 'Kirja', 'kirjan lisäkappale', 'Sauna book', 'BOOKS']) assert.equal(L.looksLikeBook(d), true, d);
+  for (const d of ['Turvenaamio', 'Kirjanpito', 'Lisähenkilö', 'Facebook', '']) assert.equal(L.looksLikeBook(d), false, d);
+  assert.equal(L.bookVatWarning('Vuosi saunassa -kirja', '25.5', rates), true);
+  assert.equal(L.bookVatWarning('Vuosi saunassa -kirja', '13.5', rates), false);
+  assert.equal(L.bookVatWarning('Turvenaamio', '25.5', rates), false);
+  assert.equal(L.bookVatWarning('Kirja', '25.5', [0, 25.5]), false, '13,5 % ei käytössä → ei varoitusta');
+  assert.deepEqual(L.applyBookPreset({ description: '', quantity: '1', price: '29', vat_rate: '25.5' }, rates, 'Kirja'), { description: 'Kirja', quantity: '1', price: '29', vat_rate: '13.5' });
+  assert.equal(L.applyBookPreset({ description: 'Vuosi saunassa -kirja', vat_rate: '25.5' }, rates).description, 'Vuosi saunassa -kirja');
+  assert.equal(L.applyBookPreset({ description: '' }, [25.5]), null);
+  assert.equal(L.validateCustomLine({ description: 'Kirja', quantity: 1, unit_price: 29, vat_rate: '13.5' }, rates).vat_rate, 13.5);
+  const rows = JSON.parse(readFileSync(new URL('../../content/site-texts.pending-import-192.json', import.meta.url), 'utf8'));
+  assert.equal(rows.length, 8);
+  for (const r of rows) {
+    assert.equal(r.text, T.POS_CUSTOM_TEXTS[r.lang][r.key.replace('ui.pos.', '')], r.key);
+    assert.ok(r.text.length <= r.max_len); assert.equal(r.class, 'normal'); assert.doesNotMatch(r.text, /<|>|https?:/);
+  }
+  const s = readFileSync(new URL('../admin/pos-screen.js', import.meta.url), 'utf8');
+  assert.match(s, /'data-testid': 'pos-custom-book'/); assert.match(s, /'data-testid': 'pos-custom-book-hint'/); assert.match(s, /rate === BOOK_VAT \? t\('custom_vat_opt_book'\)/);
+});
+
+test('booking_346 K4: migraatio + rollback rakenteena (ulkoinen maksu → payments-rivi + kuitti, 0 € estetty)', () => {
+  const m = readFileSync(new URL('../supabase/migrations/20261125000200_booking_346_external_payment_records_payment.sql', import.meta.url), 'utf8');
+  const r = readFileSync(new URL('../supabase/rollbacks/20261125000200_booking_346_ROLLBACK.sql', import.meta.url), 'utf8');
+  for (const x of ["external_payment_details_required", 'p_amount numeric, p_paid_on date, p_method text', "'nothing_to_pay'", "'invalid_paid_on'", "p_method not in ('bank_transfer', 'card_terminal', 'mobilepay', 'other')",
+    "insert into booking.payments(order_id, method, provider, status, amount", 'perform booking._alloc_payment_lines(v_id)', "set status = 'skipped'",
+    'grant execute on function booking.svc_mark_order_paid_external(bigint, text, numeric, date, text, text) to service_role']) assert.ok(m.includes(x), x);
+  assert.doesNotMatch(m, /\bpublic\.|update booking\.settings|where order_no = 1508|procountor_daily_(prepare|dispatch)/);
+  assert.ok(r.includes('drop function if exists booking.svc_mark_order_paid_external(bigint, text, numeric, date, text, text)'));
+  assert.ok(r.includes("perform booking._err('payment_row', 'Ulkoista maksua ei kirjata maksujen tauluun')"), 'rollback palauttaa vanhan rungon');
+});

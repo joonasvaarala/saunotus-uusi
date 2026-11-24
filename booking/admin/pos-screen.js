@@ -4,7 +4,7 @@ import { h, toast, money, errMsg } from './ui.js';
 import { icon } from './icons.js';
 import { loadPosTexts, posText as tx } from './pos-texts.js';
 import { getLang } from './talous-i18n.js';
-import { cartAdd, cartAddCustom, cartLineKey, cartSetQty, cartTotal, cartVatBreakdown, checkoutItems, parseEuroInput, validateCustomLine, posSheetTenders, tenderAvailable, joinUrl, posCandidates, filterProducts, tillEditorOpen, moveSort, validEmail, posCustomerHits } from './pos-logic.js';
+import { cartAdd, cartAddCustom, cartLineKey, cartSetQty, cartTotal, cartVatBreakdown, checkoutItems, parseEuroInput, validateCustomLine, bookVatWarning, applyBookPreset, BOOK_VAT, posSheetTenders, tenderAvailable, joinUrl, posCandidates, filterProducts, tillEditorOpen, moveSort, validEmail, posCustomerHits } from './pos-logic.js';
 import { searchCustomers } from './customer-hits.js';
 import { qrSvgElement } from './qrsvg.js';
 import { suEnabled, defaultReader, savePending as suSavePending, readPending as suReadPending, clearPending as suClearPending, suStateOf, suErrorKey } from './sumup-pos.js';
@@ -919,21 +919,30 @@ export async function renderPos({ ctx, rpc, fn }) {
     } else {
       const vatSelect = h('select', {
         id: 'pos-custom-vat', 'data-testid': 'pos-custom-vat', 'aria-label': t('custom_vat'),
-        onchange: (e) => { customForm = { ...customForm, vat_rate: e.target.value }; },
+        onchange: (e) => { customForm = { ...customForm, vat_rate: e.target.value }; syncBookHint(); },
       });
+      // booking_346 (K3): kirjan ALV 13,5 % – pikavalinta ja varoitus
+      const bookHint = h('p', { class: 'muted pos-book-vat-hint', role: 'status', 'data-testid': 'pos-custom-book-hint', text: t('custom_vat_book_hint') });
+      function syncBookHint() { bookHint.hidden = !bookVatWarning(customForm.description, customForm.vat_rate, vatRates); }
+      syncBookHint();
+      const bookPreset = vatRates.includes(BOOK_VAT) ? h('button', {
+        type: 'button', class: 'btn ghost sm pos-book-preset', 'data-testid': 'pos-custom-book', text: t('custom_preset_book'),
+        onclick: () => { const f = applyBookPreset(customForm, vatRates, t('custom_preset_book_desc')); if (f) { customForm = f; customError = ''; draw(); } },
+      }) : null;
       for (const rate of vatRates) {
-        const opt = h('option', { value: String(rate), text: `${String(rate).replace('.', ',')} %` });
+        const opt = h('option', { value: String(rate), text: rate === BOOK_VAT ? t('custom_vat_opt_book') : `${String(rate).replace('.', ',')} %` });
         if (String(rate) === String(customForm.vat_rate)) opt.selected = true;
         vatSelect.append(opt);
       }
       customBox.append(
         h('h2', { class: 'pos-custom-title', text: t('custom_title') }),
+        bookPreset,
         h('label', { class: 'fld', for: 'pos-custom-description' }, h('span', { text: t('custom_description') }),
           h('input', {
             id: 'pos-custom-description', type: 'text', maxlength: '200', autocomplete: 'off',
             'data-testid': 'pos-custom-description', 'aria-label': t('custom_description'),
             value: customForm.description,
-            oninput: (e) => { customForm = { ...customForm, description: e.target.value }; },
+            oninput: (e) => { customForm = { ...customForm, description: e.target.value }; syncBookHint(); },
           })),
         h('div', { class: 'pos-custom-row' },
           h('label', { class: 'fld', for: 'pos-custom-qty' }, h('span', { text: t('custom_qty') }),
@@ -949,6 +958,7 @@ export async function renderPos({ ctx, rpc, fn }) {
               oninput: (e) => { customForm = { ...customForm, price: e.target.value }; },
             })),
           h('label', { class: 'fld', for: 'pos-custom-vat' }, h('span', { text: t('custom_vat') }), vatSelect)),
+        bookHint,
         customError ? h('p', { role: 'alert', class: 'err', 'data-testid': 'pos-custom-error', text: customError }) : null,
         h('div', { class: 'pos-custom-actions' },
           h('button', { type: 'button', class: 'btn primary', 'data-testid': 'pos-custom-save', text: t('custom_save'), onclick: () => submitCustom() }),
