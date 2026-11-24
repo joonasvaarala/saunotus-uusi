@@ -264,3 +264,67 @@ Deno.test("webhook vie provision JSON:iin, ei asiakkaan vastaukseen eikä tiliä
   assertEquals("senderIban" in apply[1].p_raw, false);
   assertEquals(JSON.stringify({ body: "OK", raw: apply[1].p_raw }).toLowerCase().includes("montonio"), false);
 });
+
+Deno.test("booking_343: needs_review-vastaus kuitataan ilman kuittia (ei uudelleenyritystä)", async () => {
+  const { db, calls } = routed((name) => {
+    if (name === "montonio_refund_complete") return { data: { ok: true, needs_review: true, reason: "payment_over_refunded", refund_id: 7 }, error: null };
+    return { data: { ok: true }, error: null };
+  });
+  const r = await applyRefundStatus(db, { refund_id: 7, amount: 10, order_uuid: "ord-7", provider_refund_id: "rf-7" }, { refundStatus: "SUCCESSFUL", refundUuid: "rf-7" });
+  assertEquals(r.result, "needs_review");
+  assertEquals((r.detail as { reason: string }).reason, "payment_over_refunded");
+  assertEquals(calls.filter((c) => (c as [string])[0] === "montonio_refund_complete").length, 1);
+});
+
+Deno.test("booking_343: tilakysely on vain luku (GET /orders/:uuid), ei claim/stamp/complete eikä POST-pyyntöä", async () => {
+  const { db, calls } = routed((name) => {
+    if (name === "montonio_refund_info") return { data: { found: true, refund_id: 68, status: "processing", provider_status: "PENDING", amount: 18, provider_refund_id: "rf-68", order_uuid: "ord-68" }, error: null };
+    return { data: { ok: true }, error: null };
+  });
+  const seen: { method: string; url: string; auth: string | null }[] = [];
+  const fetchMock: Fetch = async (url, init) => {
+    seen.push({ method: String(init?.method || "GET"), url: String(url), auth: new Headers(init?.headers).get("authorization") });
+    return asJson(200, { uuid: "ord-68", paymentStatus: "PARTIALLY_REFUNDED", availableForRefund: 18, refunds: [
+      { uuid: "rf-69", amount: "162", status: "SUCCESSFUL" }, { uuid: "rf-68", amount: "18", status: "REJECTED", currency: "EUR", createdAt: "2026-11-22T08:43:40Z", type: "PARTIAL_REFUND" }] });
+  };
+  const r = await refund(post("https://f/montonio-refund", { action: "status", refund_id: 68 }), { db, env: testEnv(), fetch: fetchMock, authorize: async () => true });
+  const j = await r.json();
+  assertEquals(r.status, 200);
+  assertEquals(j.local.refund_id, 68);
+  assertEquals(j.montonio.found, true);
+  assertEquals(j.montonio.refund.status, "REJECTED");
+  assertEquals(j.montonio.refund.amount, 18);
+  assertEquals(seen.length, 1);
+  assertEquals(seen[0].method, "GET");
+  assertEquals(seen[0].url, "https://sandbox-stargate.montonio.com/api/orders/ord-68");
+  assertEquals(!!seen[0].auth?.startsWith("Bearer "), true);
+  assertEquals(calls.map((c) => (c as [string])[0]), ["montonio_refund_info"]);
+
+  const denied = await refund(post("https://f/montonio-refund", { action: "status", refund_id: 68 }), { db, env: testEnv(), fetch: fetchMock, authorize: async () => false });
+  assertEquals(denied.status, 403);
+  const bad = await refund(post("https://f/montonio-refund", { action: "status" }), { db, env: testEnv(), fetch: fetchMock, authorize: async () => true });
+  assertEquals(bad.status, 400);
+  const { db: off } = routed((name) => name === "montonio_refund_info" ? { data: { found: true, refund_id: 68, amount: 18, provider_refund_id: "rf-68", order_uuid: "ord-68" }, error: null } : { data: null, error: null }, "off");
+  seen.length = 0;
+  const offR = await (await refund(post("https://f/montonio-refund", { action: "status", refund_id: 68 }), { db: off, env: testEnv(), fetch: fetchMock, authorize: async () => true })).json();
+  assertEquals(offR.code, "off");
+  assertEquals(seen.length, 0);
+});
+
+Deno.test("booking_343: tapaus 1037/68/69 — SUCCESSFUL-ilmoitus kuitataan 200, kun valmistuminen onnistuu (ennen 503 payment_lines_check)", async () => {
+  const { db, calls } = routed((name) => {
+    if (name === "montonio_refund_lookup") return { data: { found: true, refund_id: 68, status: "processing", amount: 18, order_uuid: "ord-1213", provider_refund_id: "rf-68" }, error: null };
+    if (name === "montonio_refund_complete") return { data: { ok: true, refund_id: 68 }, error: null };
+    return { data: { ok: true }, error: null };
+  });
+  const token = await signJwt({ accessKey: ACCESS, refundUuid: "rf-68", refundStatus: "SUCCESSFUL", refundAmount: 18, orderUuid: "ord-1213", exp: 4_000_000_000 }, SECRET);
+  const r = await notify(post("https://f/montonio-notify", { refundToken: token }), { db, env: testEnv(), fetch: async () => asJson(500, {}) });
+  assertEquals(r.status, 200);
+  assertEquals(calls.filter((c) => (c as [string])[0] === "montonio_refund_complete").length, 1);
+  // kantavirhe (vanha käytös) → 503 ja Montonio yrittää uudelleen
+  const { db: broken } = routed((name) => name === "montonio_refund_lookup"
+    ? { data: { found: true, refund_id: 68, amount: 18, order_uuid: "ord-1213", provider_refund_id: "rf-68" }, error: null }
+    : { data: null, error: { message: "new row violates check constraint \"payment_lines_check\"", code: "23514" } });
+  const r2 = await notify(post("https://f/montonio-notify", { refundToken: token }), { db: broken, env: testEnv(), fetch: async () => asJson(500, {}) });
+  assertEquals(r2.status, 503);
+});
