@@ -16,6 +16,8 @@
 -- Ajo: psql -X -v ON_ERROR_STOP=0 -f t175_yrityslaskutus.sql   (tai liitä koko tiedosto SQL-editoriin; tulos virheviestissä TESTRESULT …)
 -- Jälkitarkistus ROLLBACKin jälkeen (erillinen SELECT tiedoston lopussa): t175 leftover rows = 0.
 begin;
+-- booking_345 (K8): lunastus vaatii partner_ref:n (trigger). Tämä testi kohdistuu muuhun, joten trigger pois tämän transaktion ajaksi; K8 testataan t345:ssä.
+do $k8$ begin if exists (select 1 from pg_trigger where tgname = 'voucher_claims_partner_ref_guard') then execute 'alter table booking.voucher_claims disable trigger voucher_claims_partner_ref_guard'; end if; end $k8$;
 insert into booking.invoice_counters(series, last_seq) values ('L', 0) on conflict do nothing;  -- PATCH: kuten t185 (dev: invoices_series_fkey)
 set local lock_timeout = '3s';
 set local statement_timeout = '120s';

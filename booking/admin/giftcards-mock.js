@@ -132,7 +132,7 @@ export function createGiftMock({ today = new Date().toLocaleDateString('sv-SE', 
     admin_redeem_gift_card: (a) => {
       if (!sett.redeem_enabled) throw err('redeem_disabled', 'Lunastus ei ole käytössä'); const c = cards.find((x) => norm(x.code) === norm(a.p_code)); if (!c) throw err('gift_card_not_found', 'Lahjakorttia ei löydy');
       if (c.source === 'johku' && !sett.johku_cards_redeemable) throw err('johku_cards_closed', 'Johku-korttien lunastus on suljettu');
-      if (c.status === 'cancelled' || c.status === 'pending_payment' || c.status === 'pending_verification') throw err('gift_card_inactive', 'Kortti ei ole käytettävissä');
+      if (c.status === 'cancelled' || c.status === 'pending_payment' || c.status === 'pending_verification' || c.status === 'suspended') throw err('gift_card_inactive', 'Kortti ei ole käytettävissä');
       if (eff(c) === 'expired') throw err('gift_card_expired', 'Kortti on vanhentunut'); if (c.balance <= 0) throw err('gift_card_empty', 'Saldo on nolla');
       const amt = a.p_amount == null ? c.balance : round2(a.p_amount); if (!(amt > 0)) throw err('invalid_amount', 'Virheellinen summa'); if (amt > c.balance + 0.005) throw err('insufficient_balance', 'Saldo ei riitä');
       c.balance = round2(c.balance - amt); if (c.balance === 0) c.status = 'used'; c.last_used_at = `${today}T12:00:00Z`; const pid = 1000 + ledgerId;

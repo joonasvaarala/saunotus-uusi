@@ -66,13 +66,17 @@ test('vahvistus: arvokenttä (oletus maksettava), erotuksen huomautus, virheet e
   assert.match(el.q('vcr-diff').textContent, /Lahjakortti 50,00\s€, varauksen summa 80,00\s€\. Erotus 30,00\s€ lähetetään asiakkaalle maksulinkkinä/);
   assert.match(el.q('vcr-ask').textContent, /Kirjataan maksu 50,00\s€/);
   assert.equal(calls.length, 0);
+  // booking_345 (K8): ilman kumppanin viitettä ei kutsua, virhe näkyviin
   el.q('vcr-mark-yes').click(); await tick();
-  assert.deepEqual(calls, [['admin_mark_voucher_claim_redeemed', { p_id: 3, p_amount: 50 }]]);
+  assert.equal(calls.length, 0); assert.match(el.q('vcr-value-err').textContent, /kumppanin viite/i); assert.equal(el.q('vcr-ref').attrs['aria-invalid'], 'true');
+  typeIn(el.q('vcr-ref'), ' EL-778899 ');
+  el.q('vcr-mark-yes').click(); await tick();
+  assert.deepEqual(calls, [['admin_mark_voucher_claim_redeemed', { p_id: 3, p_amount: 50, p_partner_ref: 'EL-778899' }]]);
   assert.doesNotMatch(el.textContent, /null|undefined|NaN/);
   // täysi arvo → ei p_amount (sama kutsu kuin booking_173)
   const calls2 = []; const el2 = claimRow(row(), { rpc: async (n, a) => { calls2.push([n, a]); return { ok: true, amount: 80 }; }, canManage: true });
-  el2.q('vcr-mark').click(); el2.q('vcr-mark-yes').click(); await tick();
-  assert.deepEqual(calls2, [['admin_mark_voucher_claim_redeemed', { p_id: 3 }]]);
+  el2.q('vcr-mark').click(); typeIn(el2.q('vcr-ref'), 'KK-1'); el2.q('vcr-mark-yes').click(); await tick();
+  assert.deepEqual(calls2, [['admin_mark_voucher_claim_redeemed', { p_id: 3, p_partner_ref: 'KK-1' }]]);
   // maksamaton summa tuntematon → ei kenttää, vanha vahvistus
   const el3 = claimRow(row({ unpaid: 0, voucher_value: 40 }), { rpc, canManage: true }); el3.q('vcr-mark').click();
   assert.equal(el3.q('vcr-value'), null); assert.match(el3.q('vcr-ask').textContent, /40,00/);
@@ -85,11 +89,12 @@ test('kokeilutila: osittainen arvo → maksulinkki + sähköposti, täysi → ei
   await assert.rejects(m.rpc('admin_mark_voucher_claim_redeemed', { p_id: a.id, p_amount: 0 }), (e) => e.code === 'invalid_amount');
   await assert.rejects(m.rpc('admin_mark_voucher_claim_redeemed', { p_id: a.id, p_amount: a.unpaid + 0.01 }), (e) => e.code === 'voucher_exceeds_total');
   const part = Math.round((a.unpaid - 10) * 100) / 100;
-  const r1 = await m.rpc('admin_mark_voucher_claim_redeemed', { p_id: a.id, p_amount: part });
+  await assert.rejects(m.rpc('admin_mark_voucher_claim_redeemed', { p_id: a.id, p_amount: part }), (e) => e.code === 'partner_ref_required');   // booking_345 (K8)
+  const r1 = await m.rpc('admin_mark_voucher_claim_redeemed', { p_id: a.id, p_amount: part, p_partner_ref: 'R1' });
   assert.equal(r1.amount, part); assert.equal(r1.difference, 10); assert.equal(r1.payment_link.amount, 10); assert.equal(r1.email_queued, true); assert.match(r1.payment_link.link_path, /^\/maksa\/\?p=/);
-  const r2 = await m.rpc('admin_mark_voucher_claim_redeemed', { p_id: b.id, p_amount: b.unpaid });
+  const r2 = await m.rpc('admin_mark_voucher_claim_redeemed', { p_id: b.id, p_amount: b.unpaid, p_partner_ref: 'R2' });
   assert.equal(r2.payment_link, null); assert.equal(r2.email_queued, false);
-  const r3 = await m.rpc('admin_mark_voucher_claim_redeemed', { p_id: c.id });
+  const r3 = await m.rpc('admin_mark_voucher_claim_redeemed', { p_id: c.id, p_partner_ref: 'R3' });
   assert.equal(r3.payment_link, null); assert.equal(r3.amount, c.unpaid);
 });
 
@@ -132,7 +137,7 @@ test('CSS ja näkymä: vain teeman muuttujat (ei sinistä, ei heksoja), ei emoje
   for (const [fg, bg] of [['ink', 'card'], ['ink', 'bg'], ['err', 'bg'], ['err', 'card'], ['muted', 'bg'], ['gold', 'bg'], ['card', 'green']]) assert.ok(ratio(val(fg), val(bg)) >= 4.5, `${fg}/${bg} ${ratio(val(fg), val(bg)).toFixed(2)}`);
   const v = rd('admin/views/voucher-redeem.js');
   assert.doesNotMatch(v, /\p{Extended_Pictographic}/u);
-  assert.match(v, /voucherValueCheck\(input\.value, due\)/); assert.match(v, /markArgsWithValue\(row, check, due\)/);
+  assert.match(v, /voucherValueCheck\(input\.value, due\)/); assert.match(v, /markArgsWithValue\(row, check, due, ref\)/);
 });
 
 test('migraatio + rollback: vartijat, kuittisähköposti pois kumppanimaksulta, erotus maksulinkkinä olemassa olevalla mekanismilla; rollback palauttaa tuotannon md5:t', () => {

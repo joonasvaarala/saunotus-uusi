@@ -78,9 +78,10 @@ test('kokeilutila vastaa palvelimen muotoa: KK534536G5 → Kokemuskauppa, myyjä
   assert.equal(ch.payment_method, 'partner_voucher_offerilla');
   await assert.rejects(m.rpc('admin_set_voucher_claim_source', { p_id: kk.id, p_source: 'offerilla' }), (e) => e.code === 'unchanged');
   await assert.rejects(m.rpc('admin_set_voucher_claim_source', { p_id: kk.id, p_source: 'kiitoskauppa' }), (e) => e.code === 'invalid_source');
-  const r1 = await m.rpc('admin_mark_voucher_claim_redeemed', { p_id: kk.id });
+  await assert.rejects(m.rpc('admin_mark_voucher_claim_redeemed', { p_id: kk.id }), (e) => e.code === 'partner_ref_required');   // booking_345 (K8)
+  const r1 = await m.rpc('admin_mark_voucher_claim_redeemed', { p_id: kk.id, p_partner_ref: 'OF-1' });
   assert.equal(r1.already, false); assert.equal(r1.redeemed_via, 'staff'); assert.equal(r1.payment_method_label, 'Lahjakortti – Offerilla');
-  const r2 = await m.rpc('admin_mark_voucher_claim_redeemed', { p_id: kk.id });
+  const r2 = await m.rpc('admin_mark_voucher_claim_redeemed', { p_id: kk.id, p_partner_ref: 'OF-1' });
   assert.equal(r2.already, true); assert.equal(r2.payment_id, r1.payment_id, 'idempotentti');
   await assert.rejects(m.rpc('admin_set_voucher_claim_source', { p_id: kk.id, p_source: 'kokemuskauppa' }), (e) => e.code === 'invalid_state');
   const o = await m.rpc('admin_order_voucher_claims', { p_order_id: kk.order_id });
@@ -117,9 +118,11 @@ test('rivi: koodi + Kopioi, arvaus ja valinta nimettyinä, Lunasta uuteen välil
   el.q('vcr-mark').click();
   assert.equal(calls.length, 0, 'ensimmäinen painallus vain kysyy');
   assert.match(el.q('vcr-confirm').textContent, /Lahjakortti – Kokemuskauppa/);
+  assert.ok(el.q('vcr-ref'), 'kumppanin viite -kenttä (booking_345)'); assert.ok('required' in el.q('vcr-ref').attrs);
+  el.q('vcr-ref').value = 'KK-998877';
   el.q('vcr-mark-yes').click();
   await new Promise((r) => setTimeout(r, 0));
-  assert.deepEqual(calls, [['admin_mark_voucher_claim_redeemed', { p_id: 1 }]]); assert.equal(changed, 1);
+  assert.deepEqual(calls, [['admin_mark_voucher_claim_redeemed', { p_id: 1, p_partner_ref: 'KK-998877' }]]); assert.equal(changed, 1);
   // ristiriita + ei URL:ia + ei arvausta + ei oikeutta
   const b = claimRow(row({ source: 'offerilla', redeem_url: null, payment_method_label: null }), { rpc, canManage: false });
   assert.ok(b.q('vcr-differs')); assert.ok(b.q('vcr-no-url')); assert.equal(b.q('vcr-mark'), null); assert.equal(b.q('vcr-source'), null);
@@ -138,7 +141,7 @@ test('rivi: koodi + Kopioi, arvaus ja valinta nimettyinä, Lunasta uuteen välil
 test('tekstit: FI = EN avaimet, pending-import-68 (+ 69, booking_174; + 134 tila/ongelma) täsmää, ei <-merkkiä, ei emojeja, ei sinistä', () => {
   assert.deepEqual(Object.keys(VCR_TEXTS.fi).sort(), Object.keys(VCR_TEXTS.en).sort());
   const rows = [...JSON.parse(rd('../content/site-texts.pending-import-68.json')), ...JSON.parse(rd('../content/site-texts.pending-import-69.json')).filter((r) => r.key.startsWith('ui.admin.vcr.')),   // booking_174: arvo käsin
-    ...JSON.parse(rd('../content/site-texts.pending-import-134.json'))];   // tila + ongelman syy (11.11.2026)
+    ...JSON.parse(rd('../content/site-texts.pending-import-134.json')), ...JSON.parse(rd('../content/site-texts.pending-import-191.json')).filter((r) => r.key.startsWith('ui.admin.vcr.'))];   // + 191 kumppanin viite (booking_345)   // tila + ongelman syy (11.11.2026)
   assert.equal(new Set(rows.map((r) => `${r.key}|${r.lang}`)).size, rows.length);
   for (const lang of ['fi', 'en']) for (const [k, v] of Object.entries(VCR_TEXTS[lang])) {
     const r = rows.find((x) => x.key === k && x.lang === lang); assert.ok(r, `${k} ${lang}`);

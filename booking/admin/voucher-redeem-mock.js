@@ -78,9 +78,10 @@ export function voucherRedeemMockHandlers({ st, need, err, now = new Date() }) {
       const r = res(c), due = Number(r.total_gross ?? 0);
       if (a.p_amount != null && (!(+a.p_amount > 0) || Math.round(+a.p_amount * 100) !== +a.p_amount * 100)) throw err('invalid_amount', 'Lahjakortin arvon pitää olla yli 0 €');
       if (a.p_amount != null && +a.p_amount > due) throw err('voucher_exceeds_total', 'Lahjakortin arvo ylittää maksettavan summan');
+      if (!String(a.p_partner_ref ?? '').trim()) throw err('partner_ref_required', 'Anna kumppanin viite');   // booking_345 (K8)
       const amount = a.p_amount != null ? +a.p_amount : due;
       const difference = Math.round((due - amount) * 100) / 100;
-      Object.assign(c, { status: 'redeemed', problem_code: null, resolved_at: new Date().toISOString(), resolved_by: 'staff', amount, payment_id: 70000 + c.id });
+      Object.assign(c, { status: 'redeemed', problem_code: null, resolved_at: new Date().toISOString(), resolved_by: 'staff', amount, payment_id: 70000 + c.id, partner_ref: String(a.p_partner_ref).trim() });
       if (r.reservation_id) r.payment_status = difference > 0 ? 'partial' : 'paid';
       const link = difference > 0 ? { payment_id: 80000 + c.id, amount: difference, link_token: `mock-${c.id}`, link_path: `/maksa/?p=mock-${c.id}`, link_expires_at: null, status: 'pending', online_payment_enabled: true } : null;
       return { ok: true, already: false, id: c.id, payment_id: c.payment_id, amount, redeemed_via: 'staff', resolved_at: c.resolved_at, payment_method: METHOD(c.source), payment_method_label: METHOD_LABEL(c.source),

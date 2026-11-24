@@ -274,3 +274,19 @@ test('Toimitusvalinta: tekstit FI/EN jokaiselle virhekoodille ja toimitustiloill
   for (const k of ['gc.d.delivered', 'gc.d.scheduled', 'gc.d.dlvWaiting', 'gc.row.delivered', 'gc.row.scheduled', 'gc.d.cover', 'gc.d.delivery', 'gc.n.dlv', 'gc.n.cover', 'gc.n.greetingCard']) assert.ok(TEXTS.fi[k] && TEXTS.en[k], k);
   assert.match(TEXTS.fi['gc.n.cover'], /ei näy kortissa/); assert.match(TEXTS.fi['gc.n.greetingCard'], /näkyy kortissa/);
 });
+
+// booking_345 (K2 + K8): lahjakortin oston hyvitys lukitsee kortit (suspended), kumppanikoodin lunastus vaatii viitteen. SQL: supabase/tests/talous/t345_gc_refund_hold.sql (paikallinen PG17, 33/33).
+test('booking_345: migraatio + rollback rakenteena; hallinta tuntee tilan suspended', async () => {
+  const m = readFileSync(join(root, 'supabase/migrations/20261125000100_booking_345_gc_refund_hold_partner_ref.sql'), 'utf8');
+  const r = readFileSync(join(root, 'supabase/rollbacks/20261125000100_booking_345_ROLLBACK.sql'), 'utf8');
+  for (const s of ["'suspended'::text", 'refund_hold_id bigint references booking.refunds(id)', 'create trigger gift_cards_suspended_guard', 'create trigger refunds_gc_guard before insert',
+    'create trigger refunds_gc_hold after insert or update of status', "booking._err('gift_card_in_use'", 'grant execute on function booking.svc_refund_gift_card_hold(bigint, text) to service_role',
+    "'pending_verification', 'suspended') then perform booking._err('gift_card_inactive'", 'create trigger voucher_claims_partner_ref_guard', "booking._err('partner_ref_required'"]) assert.ok(m.includes(s), s);
+  assert.doesNotMatch(m, /\bpublic\.|procountor_daily_(prepare|dispatch)|procountor_export_mark|update booking\.settings|insert into booking\.settings/i);
+  for (const s of ['drop trigger if exists voucher_claims_partner_ref_guard', 'drop function if exists booking.svc_refund_gift_card_hold(bigint, text)', 'drop column if exists refund_hold_id',
+    "'pending_verification'::text, 'pending_payment'::text]))", "if g.status in ('cancelled', 'pending_payment', 'pending_verification') then perform booking._err('gift_card_inactive'"]) assert.ok(r.includes(s), s);
+  const G = await imp('admin/giftcards-api.js'); const T = await imp('admin/giftcards-texts.js');
+  assert.ok(G.GC_STATUSES.includes('suspended'));
+  assert.equal(T.GC_FI['gcst.suspended'], 'Lukittu (osto hyvityksessä)'); assert.equal(T.GC_EN['gcst.suspended'], 'Locked (purchase being refunded)');
+  assert.match(readFileSync(join(root, 'admin/views/talous-giftcards.js'), 'utf8'), /suspended: 'pay-pending'/);
+});

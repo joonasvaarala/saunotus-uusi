@@ -111,9 +111,10 @@ export function createVouchersTab({ api, vouchers, ctx, onOpenOrder = () => {} }
   function redeemDialog(c, d) {
     const amount = h('input', { name: 'amount', type: 'text', inputmode: 'decimal', autocomplete: 'off', 'data-testid': 'vcl-r-amount', 'aria-describedby': 'vcl-r-amount-hint' });
     formDialog(t('vcl.r.title'), [h('p', { class: 'muted', text: t('vcl.r.text') }), h('p', { class: 'gc-bigcode' }, h('strong', { text: `${c.source_label || srcLabel(c.source)} ${c.code_masked}` })),
-      fld(t('vcl.r.amount'), amount, h('small', { id: 'vcl-r-amount-hint', text: t('vcl.r.amountHint') })), fld(t('vcl.r.ref'), h('input', { name: 'ref', maxlength: 100, 'data-testid': 'vcl-r-ref' })),
+      fld(t('vcl.r.amount'), amount, h('small', { id: 'vcl-r-amount-hint', text: t('vcl.r.amountHint') })), fld(t('vcl.r.ref'), h('input', { name: 'ref', maxlength: 100, required: true, 'data-testid': 'vcl-r-ref' })),
       fld(t('vcl.r.note'), h('input', { name: 'note', maxlength: VC_NOTE_MAX, 'data-testid': 'vcl-r-note' })), h('p', { class: 'muted tl-hint', text: t('vcl.r.acct') })], t('vcl.r.submit'), async (fd) => {
       const a = parseAmount(fd.get('amount')); if (a.bad) throw new Error(t('vcl.badAmount'));
+      if (!String(fd.get('ref') || '').trim()) throw new Error(t('vcl.r.refRequired'));   // booking_345 (K8): viite pakollinen
       const res = await vouchers.resolve({ id: c.id, status: 'redeemed', amount: a.empty ? undefined : a.n, partnerRef: String(fd.get('ref') || '').trim() || undefined, note: checkNote(fd.get('note')) });
       doneToast(vouchers, 'admin_resolve_voucher_claim');
       toast(res.payment_id ? t('vcl.r.done', { amount: fmt.money(res.amount), unpaid: fmt.money(res.balance?.unpaid ?? 0) }) : t('vcl.r.doneNone'), 'ok');

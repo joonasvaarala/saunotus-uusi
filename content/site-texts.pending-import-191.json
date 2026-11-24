@@ -1,0 +1,62 @@
+[
+ {
+  "key": "ui.admin.vcr.ref_label",
+  "lang": "fi",
+  "text": "Kumppanin viite",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 60,
+  "placeholders": [],
+  "reason": "booking_345 (K8): kumppanikoodin lunastus vaatii kumppanin viitteen (partner_ref). FI+EN, luokka normal. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.vcr.ref_label",
+  "lang": "en",
+  "text": "Partner reference",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 60,
+  "placeholders": [],
+  "reason": "booking_345 (K8): kumppanikoodin lunastus vaatii kumppanin viitteen (partner_ref). FI+EN, luokka normal. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.vcr.ref_hint",
+  "lang": "fi",
+  "text": "Kumppanin tilaus- tai lunastusnumero myyjän sivulta. Pakollinen.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 140,
+  "placeholders": [],
+  "reason": "booking_345 (K8): kumppanikoodin lunastus vaatii kumppanin viitteen (partner_ref). FI+EN, luokka normal. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.vcr.ref_hint",
+  "lang": "en",
+  "text": "The partner’s order or redemption number from the seller’s page. Required.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 140,
+  "placeholders": [],
+  "reason": "booking_345 (K8): kumppanikoodin lunastus vaatii kumppanin viitteen (partner_ref). FI+EN, luokka normal. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.vcr.err_partner_ref_required",
+  "lang": "fi",
+  "text": "Anna kumppanin viite ennen kuin merkitset koodin lunastetuksi.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 140,
+  "placeholders": [],
+  "reason": "booking_345 (K8): kumppanikoodin lunastus vaatii kumppanin viitteen (partner_ref). FI+EN, luokka normal. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.vcr.err_partner_ref_required",
+  "lang": "en",
+  "text": "Enter the partner reference before marking the code as redeemed.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 140,
+  "placeholders": [],
+  "reason": "booking_345 (K8): kumppanikoodin lunastus vaatii kumppanin viitteen (partner_ref). FI+EN, luokka normal. Tuo admin_texts_importilla."
+ }
+]

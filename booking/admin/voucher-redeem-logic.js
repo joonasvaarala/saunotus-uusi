@@ -94,7 +94,9 @@ export function voucherValueCheck(input, due) {
 export const voucherValueDefault = (due) => (due != null && Number.isFinite(Number(due)) ? Number(due).toFixed(2).replace('.', ',') : '');
 
 /** Lunastuksen argumentit arvokentästä: arvo sama kuin maksettava → ei p_amount (koko summa, kuten ennen); muuten p_amount. */
-export function markArgsWithValue(row, check, due) {
-  if (!check?.ok || Math.round(check.value * 100) === Math.round(Number(due) * 100)) return markArgs(row);
-  return markArgs(row, { amount: check.value });
+export function markArgsWithValue(row, check, due, ref) {
+  if (!check?.ok || Math.round(check.value * 100) === Math.round(Number(due) * 100)) return markArgs(row, { ref });
+  return markArgs(row, { amount: check.value, ref });
 }
+/** booking_345 (K8): kumppanin viite on pakollinen lunastuksessa (palvelin: partner_ref_required). */
+export const partnerRefOk = (ref) => String(ref ?? '').trim().length > 0;

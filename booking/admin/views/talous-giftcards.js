@@ -13,7 +13,7 @@ import { GC_MODE_LINK, GC_LOCALES, gcLocale, createCardAndLink, tryLink, linkSta
 import { absLink } from '../talous-api.js';
 
 const fld = (label, ...kids) => h('label', { class: 'fld' }, h('span', { text: label }), ...kids);
-const STATUS_BADGE = { active: 'pay-paid', used: 'muted', expired: 'pay-refunded', cancelled: 'pay-failed', pending_verification: 'pay-pending', pending_payment: 'pay-pending' };
+const STATUS_BADGE = { active: 'pay-paid', used: 'muted', expired: 'pay-refunded', cancelled: 'pay-failed', pending_verification: 'pay-pending', pending_payment: 'pay-pending', suspended: 'pay-pending' };
 export const gcStatusLabel = (c) => t(`gcst.${c}`);
 export const gcStatusBadge = (c) => { const b = badge(STATUS_BADGE[c] || 'muted', gcStatusLabel(c)); b.dataset.status = c; return b; };
 const fmtDay = (d) => (d ? fmt.date(d) : '–');
