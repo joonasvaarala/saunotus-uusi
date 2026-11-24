@@ -1,6 +1,6 @@
 // Asiakkaan oma pienennys + automaattinen osahyvitys (booking_284): tilaussivun muutosnäkymän tekstit FI + EN.
 // Erillinen moduuli (ei i18n.js:n T-sanakirjaa), koska T-sanakirjan lehdet kuuluvat text-registryyn. Avaimet vastaavat
-// content/site-texts.pending-import-139.json -tiedoston ui.public.order_change.reduce.*-rivejä (booking_307: lisäksi pending-import-153, booking_308: pending-import-154); paikkamerkit {{var:nimi}}.
+// content/site-texts.pending-import-139.json -tiedoston ui.public.order_change.reduce.*-rivejä (booking_307: lisäksi pending-import-153, booking_308: pending-import-154; booking_343: refund_in_progress pending-import-190); paikkamerkit {{var:nimi}}.
 export const REDUCE_TEXTS = {
   fi: {
     preview_refund: 'Uusi hinta on {{var:total}}. Hyvitämme {{var:amount}} alkuperäiseen maksutapaan, yleensä 1–3 pankkipäivässä.',
@@ -20,6 +20,7 @@ export const REDUCE_TEXTS = {
     already_moved: 'Tämän varauksen voi siirtää verkossa vain kerran. Ota yhteyttä sähköpostilla, jos haluat siirtää sitä uudelleen.',
     preview_refund_partial: 'Uusi hinta on {{var:total}}. Hyvitämme rahana maksetusta osuudesta {{var:amount}} alkuperäiseen maksutapaan, yleensä 1–3 pankkipäivässä. Lahjakortilla tai koodilla maksettua osuutta ({{var:kept}}) ei hyvitetä.',
     move_too_late_private: 'Tämän varauksen voi siirtää verkossa viimeistään {{var:days}} vrk ennen alkua. Ota yhteyttä sähköpostilla.',
+    refund_in_progress: 'Edellinen hyvitys on vielä käsittelyssä. Yritä hetken päästä uudelleen.',
   },
   en: {
     preview_refund: 'The new price is {{var:total}}. We will refund {{var:amount}} to your original payment method, usually within 1–3 bank days.',
@@ -39,6 +40,7 @@ export const REDUCE_TEXTS = {
     already_moved: 'This booking can be moved online only once. Please contact us by email if you want to move it again.',
     preview_refund_partial: 'The new price is {{var:total}}. We will refund {{var:amount}} of the part paid with money to your original payment method, usually within 1–3 bank days. The part paid with a gift card or code ({{var:kept}}) is not refunded.',
     move_too_late_private: 'This booking can be moved online no later than {{var:days}} days before it starts. Please contact us by email.',
+    refund_in_progress: 'A previous refund is still being processed. Please try again in a moment.',
   },
 };
 /** rt('fi', 'confirm', { amount: '29,00 €' }) */

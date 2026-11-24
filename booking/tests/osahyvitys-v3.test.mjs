@@ -104,7 +104,7 @@ test('tekstit: FI = EN, paikkamerkit, ei HTML:ää, pending-import-139 täsmää
   const pubFi = rows.filter((r) => r.key.startsWith('ui.public.order_change.reduce.') && r.lang === 'fi').map((r) => r.key).sort();
   const pubEn = rows.filter((r) => r.key.startsWith('ui.public.order_change.reduce.') && r.lang === 'en').map((r) => r.key).sort();
   assert.deepEqual(pubFi, pubEn);
-  for (const f of readdirSync(join(root, 'content')).filter((n) => /^site-texts\.(pending-import|imported).*\.json$/.test(n) && n !== 'site-texts.pending-import-139.json' && n !== 'site-texts.pending-import-153.json' && n !== 'site-texts.pending-import-154.json')) {
+  for (const f of readdirSync(join(root, 'content')).filter((n) => /^site-texts\.(pending-import|imported).*\.json$/.test(n) && n !== 'site-texts.pending-import-139.json' && n !== 'site-texts.pending-import-153.json' && n !== 'site-texts.pending-import-154.json' && n !== 'site-texts.pending-import-190.json')) {
     const j = JSON.parse(read(`content/${f}`)); const other = Array.isArray(j) ? j : j.texts || [];
     for (const r of other) assert.ok(!String(r.key).startsWith(PREFIX) && !String(r.key).startsWith('ui.public.order_change.reduce.'), `${r.key} myös ${f}`);
   }
@@ -142,7 +142,7 @@ test('asiakkaan tilaussivu: ennakkohyvitys vahvistetaan summalla, lippu pois →
   assert.doesNotMatch(read('booking/shop/src/i18n.js'), /reduce:/, 'asiakasteksit omassa moduulissa (text-registry ei tunne uusia T-lehtiä)');
   assert.deepEqual(Object.keys(REDUCE_TEXTS.fi).sort(), Object.keys(REDUCE_TEXTS.en).sort());
   // booking_307: uudet avaimet tuonnissa 153 (tuonti ei päivitä olemassa olevia rivejä, joten 139:n rivit eivät muutu)
-  const pub = ['139', '153', '154'].flatMap((n) => JSON.parse(read(`content/site-texts.pending-import-${n}.json`))).filter((r) => r.key.startsWith('ui.public.order_change.reduce.'));
+  const pub = ['139', '153', '154', '190'].flatMap((n) => JSON.parse(read(`content/site-texts.pending-import-${n}.json`))).filter((r) => r.key.startsWith('ui.public.order_change.reduce.'));
   assert.equal(new Set(pub.map((r) => `${r.key}|${r.lang}`)).size, pub.length, 'sama avain ei kahdessa tuonnissa');
   assert.equal(pub.length, Object.keys(REDUCE_TEXTS.fi).length * 2);
   for (const r of pub) assert.equal(r.text, REDUCE_TEXTS[r.lang][r.key.replace('ui.public.order_change.reduce.', '')], r.key);
@@ -180,4 +180,30 @@ test('migraatiot 282–284: tiedostot, aikaleimat, rollbackit, liput oletuksena 
   assert.equal(mig(288), '20261112174809_booking_288_cancelled_order_close_payment_links.sql');
   // admin_refund-polku: ei uutta rajapintakutsua, Montonio käyttää refunds.status = requested
   assert.match(s284, /'requested', 'montonio'/);
+});
+
+// booking_343: asiakkaan oma pienennys, kun samalla maksulla/rivillä on kesken toinen hyvitys. Esikatselu antaa syyn already_refunding;
+// vahvistus voi kilpatilanteessa kaatua rivirajaan (refunds_lines_guard → amount_exceeds_refundable). Kumpikin → ymmärrettävä teksti refund_in_progress (pending-import-190).
+const KEY_343 = 'ui.public.order_change.reduce.refund_in_progress';
+
+test('tekstit 190: refund_in_progress FI + EN, täsmää REDUCE_TEXTS:iin, uusi avain', () => {
+  const rows = JSON.parse(read('content/site-texts.pending-import-190.json')).filter((r) => r.key === KEY_343);
+  assert.deepEqual(rows.map((r) => r.lang).sort(), ['en', 'fi']);
+  for (const r of rows) {
+    assert.equal(r.text, REDUCE_TEXTS[r.lang].refund_in_progress);
+    assert.equal(r.class, 'normal'); assert.equal(r.kind, 'plain'); assert.deepEqual(r.placeholders, []);
+    assert.ok(r.text.length <= r.max_len); assert.doesNotMatch(r.text, /<|>|https?:|\p{Extended_Pictographic}/u);
+  }
+  assert.equal(rt('fi', 'refund_in_progress'), 'Edellinen hyvitys on vielä käsittelyssä. Yritä hetken päästä uudelleen.');
+  assert.equal(rt('en', 'refund_in_progress'), 'A previous refund is still being processed. Please try again in a moment.');
+  for (const f of readdirSync(join(root, 'content')).filter((n) => /^site-texts\.(pending-import|imported).*\.json$/.test(n) && n !== 'site-texts.pending-import-190.json')) {
+    const j = JSON.parse(read(`content/${f}`)); const rs = Array.isArray(j) ? j : j.texts || [];
+    for (const r of rs) assert.notEqual(r?.key, KEY_343, `${KEY_343} myös ${f}`);
+  }
+});
+
+test('kauppa: already_refunding (esikatselu) ja amount_exceeds_refundable / already_refunding (vahvistus) → refund_in_progress, ei yleistä virhettä', () => {
+  const s = read('booking/shop/src/shop.js');
+  assert.match(s, /reason === 'already_refunding'\) return rt\(S\.lang, 'refund_in_progress'\)/);
+  assert.match(s, /\(r\.code === 'amount_exceeds_refundable' \|\| r\.code === 'already_refunding'\) \? rt\(S\.lang, 'refund_in_progress'\)/);
 });

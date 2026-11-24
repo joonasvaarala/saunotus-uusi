@@ -1417,6 +1417,7 @@ async function viewChange(token, b) {
     if (reason === 'too_late_private') return rt(S.lang, 'not_allowed_deadline_private_both', { days: prvDays });   // booking_307: koskee myös uutta päivää
     if (reason === 'not_classified') return rt(S.lang, 'not_allowed_not_classified');
     if (reason === 'payment_method') return rt(S.lang, 'not_allowed_payment_method');
+    if (reason === 'already_refunding') return rt(S.lang, 'refund_in_progress');   // booking_343: edellinen hyvitys kesken
     if (reason === 'feature_disabled') return t.changePaidPrice;   // lippu pois: täsmälleen entinen viesti
     return rt(S.lang, 'contact_staff');
   }
@@ -1456,7 +1457,7 @@ async function viewChange(token, b) {
       const r = await rpc('public_change_booking', args);
       if (!r.ok) {
         if (r.code === 'refund_confirmation_required') st.reduce = null;
-        throw Object.assign(new Error((r.code === 'order_invoiced' ? t.errors.order_invoiced_persons : r.code === 'refund_confirmation_required' ? rt(S.lang, 'changed') : r.code === 'already_moved' ? rt(S.lang, 'already_moved') : r.code === 'move_too_late_private' ? rt(S.lang, 'move_too_late_private', { days: state.settings?.customer_move_min_days_private || 7 }) : t.errors[r.code]) || t.errorGeneric), { code: r.code, mapped: true });
+        throw Object.assign(new Error((r.code === 'order_invoiced' ? t.errors.order_invoiced_persons : r.code === 'refund_confirmation_required' ? rt(S.lang, 'changed') : r.code === 'already_moved' ? rt(S.lang, 'already_moved') : (r.code === 'amount_exceeds_refundable' || r.code === 'already_refunding') ? rt(S.lang, 'refund_in_progress') : r.code === 'move_too_late_private' ? rt(S.lang, 'move_too_late_private', { days: state.settings?.customer_move_min_days_private || 7 }) : t.errors[r.code]) || t.errorGeneric), { code: r.code, mapped: true });
       }
       state.months.clear();
       if (r.refund_amount > 0) {   // booking_284: näytetään hyvitysvahvistus (muutoksen jälkeen varaussivu näyttää uuden summan)

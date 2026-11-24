@@ -1,0 +1,22 @@
+[
+ {
+  "key": "ui.public.order_change.reduce.refund_in_progress",
+  "lang": "fi",
+  "text": "Edellinen hyvitys on vielä käsittelyssä. Yritä hetken päästä uudelleen.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_343: asiakkaan oma pienennys, kun samalla maksulla/rivillä on kesken toinen hyvitys (esikatselu already_refunding tai vahvistuksen amount_exceeds_refundable). FI+EN, luokka normal. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.public.order_change.reduce.refund_in_progress",
+  "lang": "en",
+  "text": "A previous refund is still being processed. Please try again in a moment.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_343: asiakkaan oma pienennys, kun samalla maksulla/rivillä on kesken toinen hyvitys (esikatselu already_refunding tai vahvistuksen amount_exceeds_refundable). FI+EN, luokka normal. Tuo admin_texts_importilla."
+ }
+]
