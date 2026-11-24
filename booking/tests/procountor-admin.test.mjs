@@ -12,6 +12,7 @@ const imported = JSON.parse(readFileSync(join(repo, 'content/site-texts.pending-
 const pending = JSON.parse(readFileSync(join(repo, 'content/site-texts.pending-import-15.json'), 'utf8'));
 const sellers = JSON.parse(readFileSync(join(repo, 'content/site-texts.pending-import-68.json'), 'utf8'));   // booking_173: myyjäkohtaiset tilit
 const montonio = JSON.parse(readFileSync(join(repo, 'content/site-texts.pending-import-84.json'), 'utf8'));   // booking_188: verkkomaksun tili
+const k347 = JSON.parse(readFileSync(join(repo, 'content/site-texts.pending-import-193.json'), 'utf8'));   // booking_347 (K5): ALV-pyöristystili
 const settings = readFileSync(join(root, 'admin/views/settings.js'), 'utf8');
 const migration = readFileSync(join(root, 'supabase/migrations/20261019010300_booking_103_procountor_settings.sql'), 'utf8');
 const ACCOUNTS = { rounding: '3740', sales_by_vat: { '25.5': '3000' }, clearing_by_method: { cash: '1910' } };
@@ -30,6 +31,12 @@ test('sanakirjan avaimet ovat joko tuodussa 11:ssä tai vain uudessa 15:ssä', (
       if (s188) {
         assert.equal(s188.text, text); assert.equal(s188.class, 'normal'); assert.deepEqual(s188.placeholders, []); assert.equal(s188.text.includes('http'), false);
         assert.equal(imported.some((r) => r.key === key) || pending.some((r) => r.key === key) || sellers.some((r) => r.key === key), false, key);
+        continue;
+      }
+      const s347 = k347.find((r) => r.key === key && r.lang === lang);
+      if (s347) {
+        assert.equal(s347.text, text); assert.equal(s347.class, 'normal'); assert.deepEqual(s347.placeholders, []); assert.equal(s347.text.includes('http'), false);
+        assert.equal(imported.some((r) => r.key === key) || pending.some((r) => r.key === key) || sellers.some((r) => r.key === key) || montonio.some((r) => r.key === key), false, key);
         continue;
       }
       const pool = oldKeys.has(key) ? imported : pending;
@@ -116,13 +123,30 @@ test('tilit tallentuvat, tila ja päiväkirjaus pysyvät', async () => {
     vat_status: '13',
     api_prefix: before.api_prefix,
     bank_account: before.bank_account,
-    accounts: { rounding: '1910', sales_by_vat: { '25.5': '3000' }, clearing_by_method: { card_terminal: '1910' } },
+    accounts: { rounding: '1910', vat_rounding: '8790', sales_by_vat: { '25.5': '3000' }, clearing_by_method: { card_terminal: '1910' } },
   } });
   assert.equal(saved.mode, 'dry_run');
   assert.equal(saved.environment, 'prod');
   assert.equal(saved.daily_enabled, true);
   assert.equal(saved.vat_status, '13');
   assert.equal(saved.accounts.rounding, '1910');
+  assert.equal(saved.accounts.vat_rounding, '8790');   // booking_347 (K5)
   assert.equal(saved.accounts.sales_by_vat['25.5'], '3000');
   assert.equal(saved.accounts.clearing_by_method.card_terminal, '1910');
+});
+
+test('booking_347 (K5): ALV-pyöristystili asetuskortissa, migraatio ja päivätosite', () => {
+  assert.match(settings, /data-testid': 'procountor-vat-rounding'/);
+  assert.match(settings, /vat_rounding: vatRounding\.value\.trim\(\)/);
+  assert.match(settings, /ui\.admin\.procountor\.vat_rounding_hint/);
+  const m347 = readFileSync(join(root, 'supabase/migrations/20261125000300_booking_347_report_procountor_k5_k10.sql'), 'utf8');
+  assert.match(m347, /accounts,vat_rounding/);
+  assert.match(m347, /'ALV-pyöristys'/);
+  assert.match(m347, /array_append\(v_missing, 'vat_rounding'\)/);
+  assert.match(m347, /'receipt_range'/);
+  assert.match(m347, /'attachments'/);
+  assert.doesNotMatch(m347, /daily_enabled'\s*,\s*true|set\s+mode\s*=\s*'live'/i);
+  assert.doesNotMatch(m347, /25\.5 \/ 125\.5/);
+  assert.match(m347, /sale_vat_rate as rate/);
+  for (const r of k347) assert.ok(r.text.length <= r.max_len, r.key);
 });

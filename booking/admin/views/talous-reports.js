@@ -117,6 +117,7 @@ export function createReportsTab({ api, canFull = true, ctx = null }) {
     const rec = r.reconciliation || {};
     const gcRed = rec.gift_card_redemptions ?? methods.filter((m) => m.method === 'gift_card').reduce((s, m) => s + m.gross + m.refunds, 0);
     const gcSales = rec.gift_card_sales || 0;
+    const johkuRed = r.statistics?.gift_cards?.redeemed_johku || null;   // booking_347 (K7): näkyvä Johku-korttien lunastukset -rivi
     const invoiced = rec.invoiced || 0;
     const money = rec.money_received ?? (sum(methods, 'gross') + sum(methods, 'refunds') - gcRed);
     const expected = rec.expected ?? ((T.gross_after_refunds || 0) - gcRed + gcSales);
@@ -126,6 +127,7 @@ export function createReportsTab({ api, canFull = true, ctx = null }) {
       [rt('ui.admin.reports.money_received'), M(money)],
       [rt('ui.admin.reports.pdf_after'), M(T.gross_after_refunds)],
       [rt('ui.admin.reports.gc_redemptions_row'), M(gcRed)],
+      ...(johkuRed ? [[rt('ui.admin.reports.gc_johku_redemptions_row'), M(johkuRed.net)]] : []),
       [rt('ui.admin.reports.gc_sales_row'), M(gcSales)],
       [rt('ui.admin.reports.invoiced_line'), M(invoiced)],
       [rt('ui.admin.reports.reconcile_diff'), ok ? `${M(diff)} · ${rt('ui.admin.reports.reconcile_ok')}` : M(diff)],

@@ -110,6 +110,12 @@ export function normJohkuStats(j) {
   return { label: j.label ?? 'Johku (ei kirjanpitoon)', accounting: false, basis: j.basis ?? 'johku_paid_at', orders: num(j.orders), gross: num(j.gross), refunded_orders: num(j.refunded_orders), refunded_gross: num(j.refunded_gross),
     by_method: L(j.by_method).map((m) => ({ method: m.method ?? 'unknown', orders: num(m.orders), gross: num(m.gross) })) };
 }
+// booking_347 (K7): statistics.gift_cards.redeemed_johku = Johku-korttien lunastukset kaudella (maksut, brutto, hyvitetty, netto).
+export function normGcStats(g) {
+  if (!g || typeof g !== 'object' || Array.isArray(g)) return null;
+  const b = (x) => (x && typeof x === 'object' ? { payments: num(x.payments), gross: num(x.gross), refunded: num(x.refunded), net: Math.round((num(x.gross) - num(x.refunded)) * 100) / 100 } : null);
+  return { redeemed_johku: b(g.redeemed_johku) };
+}
 export function normJohkuRefunds(j) {
   if (!j || typeof j !== 'object' || Array.isArray(j)) return null;
   return {
@@ -172,7 +178,7 @@ export function normReport(r) {
     by_day: Array.isArray(r.by_day) ? r.by_day.map((d) => ({ date: d.date, receipts: num(d.receipts), gross: num(d.gross), vat: num(d.vat), refunds: num(d.refunds) })) : null,
     open: { orders: num(r.open?.orders), unpaid: num(r.open?.unpaid), rows: L(r.open?.rows).map((x) => ({ voucher: x.voucher ?? '', date: x.date ?? '', customer: x.customer ?? '', product: x.product ?? '', quantity: num(x.quantity), net: num(x.net), vat_rate: num(x.vat_rate), vat: num(x.vat), gross: num(x.gross), method: x.method ?? '', method_label: x.method_label ?? '', status: x.status === 'open' ? 'open' : 'paid', kind: x.kind === 'refund' ? 'refund' : x.kind === 'redemption' ? 'redemption' : 'sale' })) },
     johku_refunds: normJohkuRefunds(r.johku_refunds),
-    statistics: { johku: normJohkuStats(r.statistics?.johku) },
+    statistics: { johku: normJohkuStats(r.statistics?.johku), gift_cards: normGcStats(r.statistics?.gift_cards) },
     lines: Array.isArray(r.lines) ? r.lines : null };   // rivitaso: vain mock (asiakaspuolen CSV); oikea palvelin ei sitä vielä palauta
 }
 // admin_sales_chart(p_year) → 12 kuukautta. Johku on mukana VAIN tässä (ei raportin totals/CSV). Puuttuva RPC ei vaihda sivua mock-dataan.
