@@ -1,0 +1,62 @@
+[
+ {
+  "key": "ui.admin.procountor.vat_rounding",
+  "lang": "fi",
+  "text": "ALV-pyöristys",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_347 (K5, K7): Procountorin ALV-pyöristystili asetuksiin ja raporttiin näkyvä Johku-korttien lunastukset -rivi. FI+EN, luokka normal. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.procountor.vat_rounding",
+  "lang": "en",
+  "text": "VAT rounding",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_347 (K5, K7): Procountorin ALV-pyöristystili asetuksiin ja raporttiin näkyvä Johku-korttien lunastukset -rivi. FI+EN, luokka normal. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.procountor.vat_rounding_hint",
+  "lang": "fi",
+  "text": "Tilille kirjataan sentin erot, jotka syntyvät kun Procountor laskee ALV:n nettosummasta. Kysy tilinumero kirjanpitäjältä.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_347 (K5, K7): Procountorin ALV-pyöristystili asetuksiin ja raporttiin näkyvä Johku-korttien lunastukset -rivi. FI+EN, luokka normal. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.procountor.vat_rounding_hint",
+  "lang": "en",
+  "text": "Cent differences that arise when Procountor calculates VAT from the net amount are posted to this account. Ask your accountant for the account number.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "booking_347 (K5, K7): Procountorin ALV-pyöristystili asetuksiin ja raporttiin näkyvä Johku-korttien lunastukset -rivi. FI+EN, luokka normal. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.reports.gc_johku_redemptions_row",
+  "lang": "fi",
+  "text": "josta Johku-korttien lunastukset",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 60,
+  "placeholders": [],
+  "reason": "booking_347 (K5, K7): Procountorin ALV-pyöristystili asetuksiin ja raporttiin näkyvä Johku-korttien lunastukset -rivi. FI+EN, luokka normal. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.reports.gc_johku_redemptions_row",
+  "lang": "en",
+  "text": "of which Johku card redemptions",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 60,
+  "placeholders": [],
+  "reason": "booking_347 (K5, K7): Procountorin ALV-pyöristystili asetuksiin ja raporttiin näkyvä Johku-korttien lunastukset -rivi. FI+EN, luokka normal. Tuo admin_texts_importilla."
+ }
+]

@@ -461,3 +461,30 @@ test('lahjakortti-PDF näyttää Johku-osion, myynti-PDF ei', () => {
   assert.match(act, /Vain tiedoksi/);
   assert.match(act, /15020/);
 });
+
+test('booking_347 (K7, K10): Johku-korttien lunastukset näkyvät täsmäytyksessä, korttien ALV omasta kannasta', async () => {
+  const { normReport } = await import(pathToFileURL(join(root, 'admin/talous-api.js')));
+  const n = normReport({ totals: {}, statistics: { gift_cards: { redeemed_johku: { payments: 3, gross: '120.00', refunded: '20.00' } } } });
+  assert.deepEqual(n.statistics.gift_cards.redeemed_johku, { payments: 3, gross: 120, refunded: 20, net: 100 });
+  assert.equal(normReport({ totals: {} }).statistics.gift_cards, null);
+  const ui = src('admin/views/talous-reports.js');
+  assert.match(ui, /r\.statistics\?\.gift_cards\?\.redeemed_johku/);
+  assert.match(ui, /ui\.admin\.reports\.gc_johku_redemptions_row'\), M\(johkuRed\.net\)/);
+  assert.equal(REPORT_TEXTS.fi['ui.admin.reports.gc_johku_redemptions_row'], 'josta Johku-korttien lunastukset');
+  assert.equal(REPORT_TEXTS.en['ui.admin.reports.gc_johku_redemptions_row'], 'of which Johku card redemptions');
+  const rows = JSON.parse(readFileSync(join(repo, 'content/site-texts.pending-import-193.json'), 'utf8'));
+  for (const lang of ['fi', 'en']) {
+    const r = rows.find((x) => x.key === 'ui.admin.reports.gc_johku_redemptions_row' && x.lang === lang);
+    assert.equal(r.text, REPORT_TEXTS[lang]['ui.admin.reports.gc_johku_redemptions_row']);
+    assert.equal(r.class, 'normal');
+  }
+  for (const f of readdirSync(join(repo, 'content'))) {
+    if (f === 'site-texts.pending-import-193.json' || !/^site-texts\.(pending-import-|imported)/.test(f) || !f.endsWith('.json')) continue;
+    const other = JSON.parse(readFileSync(join(repo, 'content', f), 'utf8'));
+    if (Array.isArray(other)) assert.equal(other.some((x) => rows.some((y) => y.key === x.key)), false, f);
+  }
+  const m = src('supabase/migrations/20261125000300_booking_347_report_procountor_k5_k10.sql');
+  assert.match(m, /sum\(round\(bal \* rate \/ \(100 \+ rate\), 2\)\)/);
+  assert.match(m, /'by_rate'/);
+  assert.match(m, /'cards_without_rate'/);
+});

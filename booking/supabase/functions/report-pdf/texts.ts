@@ -221,6 +221,7 @@ export const REPORT_PDF_TEXTS: TextTable = {
   "ui.admin.reports.gc_comp_stats": { fi: "Maksuttomat lahjakortit, vain tieto", en: "Complimentary gift cards, information only"},
   "ui.admin.reports.money_received": { fi: "Saatu raha", en: "Money received"},
   "ui.admin.reports.gc_redemptions_row": { fi: "Lahjakortilla maksettu", en: "Paid with a gift card"},
+  "ui.admin.reports.gc_johku_redemptions_row": { fi: "josta Johku-korttien lunastukset", en: "of which Johku card redemptions"},
   "ui.admin.reports.gc_sales_row": { fi: "Myydyt lahjakortit", en: "Gift cards sold"},
   "ui.admin.reports.invoiced_line": { fi: "Laskutettu, kirjataan Procountorissa", en: "Invoiced, recorded in Procountor"},
   "ui.admin.reports.inv_no": { fi: "Numero", en: "Number"},

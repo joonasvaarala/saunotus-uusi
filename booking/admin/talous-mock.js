@@ -329,7 +329,7 @@ const PREPAID_ON = '2026-10-15';
       by_method_vat: by(lines, (l) => `${l.method}|${l.vat_rate}`, (a, l) => ({ method: l.method, rate: l.vat_rate, net: sum(a, 'net', l), vat: sum(a, 'vat', l), gross: sum(a, 'gross', l) })),
       by_category: by(lines, (l) => `${l.group}|${l.vat_rate}`, (a, l) => ({ category: l.group, label: GROUP_LABELS[l.group] || l.group, rate: l.vat_rate, quantity: (a?.quantity || 0) + (l.kind === 'receipt' ? l.quantity : -l.quantity), gross: sum(a, 'gross', l), net: sum(a, 'net', l), vat: sum(a, 'vat', l) })),
       open: { orders: new Set(openList.map((r) => r.voucher)).size, unpaid: round2(openList.reduce((s, r) => s + r.gross, 0)), rows: openList },
-      statistics: { johku: johkuStats(from, to) },   // booking_41: EI totals-lukuihin
+      statistics: { johku: johkuStats(from, to), gift_cards: { redeemed_johku: { payments: 0, gross: 0, refunded: 0 } } },   // booking_41: EI totals-lukuihin; booking_347 (K7): Johku-korttien lunastukset
       johku_refunds: johkuRefunds(from, to),   // booking_336: EI totals-lukuihin
       lines,   // vain mock: oikea palvelin ei (vielä) palauta rivejä → CSV tulee admin_report_csv:stä
     };

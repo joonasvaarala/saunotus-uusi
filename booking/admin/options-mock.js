@@ -70,6 +70,8 @@ function normalizeProcountor(raw, prev) {
   const accounts = raw.accounts || {};
   const rounding = String(accounts.rounding ?? '').trim();
   if (rounding && !/^[0-9A-Za-z]{1,20}$/.test(rounding)) throw err('invalid_setting', 'Tilinumero ei kelpaa');
+  const vatRounding = String(accounts.vat_rounding ?? '').trim();   // booking_347 (K5)
+  if (vatRounding && !/^[0-9A-Za-z]{1,20}$/.test(vatRounding)) throw err('invalid_setting', 'Tilinumero ei kelpaa');
   const sales = {};
   for (const [k, v] of Object.entries(accounts.sales_by_vat || {})) {
     if (!SALES_RATES.includes(k)) throw err('invalid_setting', 'Tuntematon ALV-kanta');
@@ -89,7 +91,7 @@ function normalizeProcountor(raw, prev) {
   }
   return {
     mode, environment, daily_enabled: raw.daily_enabled === true, api_prefix: prefix, vat_status: vat, approved_by: approved, bank_account: bank,
-    accounts: { rounding, sales_by_vat: sales, clearing_by_method: clearing },
+    accounts: { rounding, vat_rounding: vatRounding, sales_by_vat: sales, clearing_by_method: clearing },
   };
 }
 function procountorStatus(cfg) {
@@ -153,7 +155,7 @@ export function createAdminMock({ now = new Date(), delay = 0, perms = PERMS, ro
     ],
     procountor: {
       mode: 'off', environment: 'pts', daily_enabled: false, api_prefix: '/supported/api', vat_status: '', approved_by: '', bank_account: '',
-      accounts: { rounding: '', sales_by_vat: {}, clearing_by_method: {} },
+      accounts: { rounding: '', vat_rounding: '', sales_by_vat: {}, clearing_by_method: {} },
     },
     closureCalendarIds: ['sulku-test@group.calendar.google.com'],
     shiftCalendarIds: ['vuoro-test@group.calendar.google.com'],

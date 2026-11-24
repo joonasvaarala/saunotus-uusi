@@ -82,6 +82,7 @@ function procountorForm(cfg, isAdmin, reload) {
   const prefix = h('input', { type: 'text', value: cfg.api_prefix || '/supported/api', disabled: !isAdmin, 'data-testid': 'procountor-prefix' });
   const bank = h('input', { type: 'text', value: cfg.bank_account || '', disabled: !isAdmin, 'data-testid': 'procountor-bank', autocomplete: 'off' });
   const rounding = h('input', { type: 'text', value: s.rounding || '', disabled: !isAdmin, 'data-testid': 'procountor-rounding' });
+  const vatRounding = h('input', { type: 'text', value: s.vat_rounding || '', disabled: !isAdmin, 'data-testid': 'procountor-vat-rounding' });   // booking_347 (K5)
   const salesInputs = Object.fromEntries(SALES.map(([rate]) => [rate, h('input', { type: 'text', value: sales[rate] || '', disabled: !isAdmin, 'data-testid': `procountor-sales-${rate}` })]));
   const methodInputs = Object.fromEntries(METHODS.map(([code]) => [code, h('input', { type: 'text', value: methods[code] || '', disabled: !isAdmin, 'data-testid': `procountor-method-${code}` })]));
   const previewDate = h('input', { type: 'date', value: todayHel(), 'data-testid': 'procountor-preview-date' });
@@ -96,6 +97,7 @@ function procountorForm(cfg, isAdmin, reload) {
     bank_account: bank.value.trim(),
     accounts: {
       rounding: rounding.value.trim(),
+      vat_rounding: vatRounding.value.trim(),
       sales_by_vat: Object.fromEntries(SALES.map(([rate]) => [rate, salesInputs[rate].value.trim()])),
       clearing_by_method: Object.fromEntries(METHODS.map(([code]) => [code, methodInputs[code].value.trim()])),
     },
@@ -118,7 +120,8 @@ function procountorForm(cfg, isAdmin, reload) {
       field(procountorText('ui.admin.procountor.vat_status'), vat),
       field(procountorText('ui.admin.procountor.api_prefix'), prefix),
       field(procountorText('ui.admin.procountor.bank_account'), bank, procountorText('ui.admin.procountor.bank_keep')),
-      field(procountorText('ui.admin.procountor.rounding'), rounding)),
+      field(procountorText('ui.admin.procountor.rounding'), rounding),
+      field(procountorText('ui.admin.procountor.vat_rounding'), vatRounding, procountorText('ui.admin.procountor.vat_rounding_hint'))),
     h('h3', { text: procountorText('ui.admin.procountor.sales_title') }),
     h('div', { class: 'stack' }, SALES.map(([rate, key]) => field(procountorText(`ui.admin.procountor.${key}`), salesInputs[rate]))),
     h('h3', { text: procountorText('ui.admin.procountor.methods_title') }),

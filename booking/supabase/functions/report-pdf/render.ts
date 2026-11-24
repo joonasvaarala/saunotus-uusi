@@ -161,6 +161,7 @@ export async function buildReportPdf(rep: any, kind: string, lang = "fi", tfn: T
       [TX("ui.admin.reports.money_received"), eur(money)],
       [TX("ui.admin.reports.pdf_after"), eur(rep.totals?.gross_after_refunds)],
       [TX("ui.admin.reports.gc_redemptions_row"), eur(rec.gift_card_redemptions)],
+      ...(rep.statistics?.gift_cards?.redeemed_johku ? [[TX("ui.admin.reports.gc_johku_redemptions_row"), eur(Number(rep.statistics.gift_cards.redeemed_johku.gross ?? 0) - Number(rep.statistics.gift_cards.redeemed_johku.refunded ?? 0))]] : []),   // booking_347 (K7)
       [TX("ui.admin.reports.gc_sales_row"), eur(rec.gift_card_sales)],
       [TX("ui.admin.reports.invoiced_line"), eur(rec.invoiced)],
       [TX("ui.admin.reports.reconcile_diff"), eur(diff)],
