@@ -8,6 +8,7 @@ import { TEXTS } from '../talous-texts.js';
 import { reportText as rt } from '../reports-texts.js';
 import { accrualText as at } from '../accrual-texts.js';
 import { renderJohkuRefunds } from './johku-refunds.js';
+import { renderSettlements } from './settlements.js';   // booking_349 (K9)
 import { methodNet, methodsNetTotal } from '../report-method-net.js';
 
 const REPORTS = ['sales', 'service', 'giftcards', 'invoices', 'methods', 'fees', 'transactions', 'refunds', 'stats'];
@@ -253,7 +254,8 @@ export function createReportsTab({ api, canFull = true, ctx = null }) {
     const M = fmt.money;
     const cols = [rt('ui.admin.reports.fee_col_provider'), rt('ui.admin.reports.fee_col_method'), rt('ui.admin.reports.fee_col_count'), rt('ui.admin.reports.fee_col_gross'), rt('ui.admin.reports.fee_col_fee')];
     const rowsOf = (dir) => (r.rows || []).filter((x) => x.direction === dir).map((x) => [x.provider_label || x.provider, x.method_label || x.method, fmt.int(x.count), M(x.gross), x.fee == null ? '–' : M(x.fee)]);
-    return frame(h('div', { 'data-testid': 'r-fees' }, table('r-fees-sales', rt('ui.admin.reports.fee_sales'), cols, rowsOf('sale')), table('r-fees-refunds', rt('ui.admin.reports.fee_refunds'), cols, rowsOf('refund')), h('p', { 'data-testid': 'r-fees-body', text: r.totals?.settlement == null ? rt('ui.admin.reports.fee_missing_note') : `${rt('ui.admin.reports.fee_settlement')}: ${M(r.totals.settlement)}` })));
+    return frame(h('div', { 'data-testid': 'r-fees' }, table('r-fees-sales', rt('ui.admin.reports.fee_sales'), cols, rowsOf('sale')), table('r-fees-refunds', rt('ui.admin.reports.fee_refunds'), cols, rowsOf('refund')), h('p', { 'data-testid': 'r-fees-body', text: r.totals?.settlement == null ? rt('ui.admin.reports.fee_missing_note') : `${rt('ui.admin.reports.fee_settlement')}: ${M(r.totals.settlement)}` }),
+      renderSettlements({ api, span: spanOf(), canImport: !!ctx?.can?.('settings.edit') || ctx?.role === 'admin' })));
   }
   function render(data) {
     if (st.report === 'methods') return methodsView(data);

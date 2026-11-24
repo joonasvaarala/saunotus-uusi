@@ -4,6 +4,7 @@
 import { getLang } from './talous-i18n.js';
 import { getSiteTexts, clearSiteTextsCache } from './site-texts-cache.js';
 import { FEE_TEXTS } from './fee-report-texts.js';
+import { STL_TEXTS } from './settlement-texts.js';   // booking_349 (K9)
 
 export const PREFIXES = ['ui.admin.reports.', 'ui.admin.giftcards.vat_'];
 
@@ -490,7 +491,7 @@ export function reportText(key, vars, lang = getLang()) {
   const live = db.get(`${key}|${lang}`);
   const filled = live != null ? applyLive(live, vars) : null;
   if (filled != null) return String(filled);
-  const raw = REPORT_TEXTS[lang]?.[key] ?? FEE_TEXTS[lang]?.[key] ?? REPORT_TEXTS.fi[key] ?? FEE_TEXTS.fi[key] ?? key;
+  const raw = REPORT_TEXTS[lang]?.[key] ?? FEE_TEXTS[lang]?.[key] ?? STL_TEXTS[lang]?.[key] ?? REPORT_TEXTS.fi[key] ?? FEE_TEXTS.fi[key] ?? STL_TEXTS.fi[key] ?? key;
   const out = vars ? fillReportText(raw, vars) : raw;
   return out == null ? '' : String(out);
 }

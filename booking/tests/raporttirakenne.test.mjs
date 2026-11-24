@@ -461,3 +461,57 @@ test('lahjakortti-PDF näyttää Johku-osion, myynti-PDF ei', () => {
   assert.match(act, /Vain tiedoksi/);
   assert.match(act, /15020/);
 });
+
+// booking_349 (K9): tilitykset ja CSV-tuonti. SQL: booking/supabase/tests/talous/t349_settlements.sql (paikallinen PG).
+test('booking_349: tilitykset, CSV-tuonti, kulutili asetuksista, ei kirjausta', async () => {
+  const mig = src('supabase/migrations/20261125000500_booking_349_settlements.sql');
+  const rb = src('supabase/rollbacks/20261125000500_booking_349_ROLLBACK.sql');
+  for (const t of ['booking.settlements', 'booking.settlement_items']) {
+    assert.match(mig, new RegExp(`create table if not exists ${t.replace('.', '\\.')}`));
+    assert.match(rb, new RegExp(`drop table if exists ${t.replace('.', '\\.')}`));
+  }
+  assert.match(mig, /batch_ref text not null/);
+  assert.match(mig, /settled_on date not null/);
+  assert.match(mig, /gross numeric\(12,2\) not null,\n  fee numeric\(12,2\) not null,\n  net numeric\(12,2\) not null/);
+  assert.match(mig, /constraint settlements_batch_key unique \(provider, batch_ref\)/);
+  assert.match(mig, /posted boolean not null default false/);
+  assert.match(mig, /revoke all on booking\.settlements, booking\.settlement_items from public, anon, authenticated/);
+  assert.match(mig, /update booking\.payments set provider_fee = /);
+  assert.match(mig, /settings #>> '\{accounts,provider_fee\}'/);
+  assert.match(mig, /'fee_posting', 'not_posted'/);
+  assert.doesNotMatch(mig, /procountor_daily_(prepare|dispatch)|procountor_export_mark|net\.http/);
+  assert.match(mig, /grant execute on function booking\.svc_import_settlement_csv\(text, text, text, boolean, boolean, text\) to service_role/);
+  assert.doesNotMatch(mig, /svc_import_settlement_csv\([^)]*\) to authenticated/);
+  assert.match(mig, /p_dry_run boolean DEFAULT true/);
+  assert.match(mig, /booking_349 edellyttää booking_347:ää/);
+  for (const f of ['admin_import_settlement_csv', 'svc_import_settlement_csv', 'admin_list_settlements', 'admin_get_settlement', 'admin_set_provider_fee_account', '_settlement_import', '_settlement_parse_csv', '_settlement_num']) {
+    assert.match(mig, new RegExp(`FUNCTION booking\\.${f}\\(`), f);
+    assert.match(rb, new RegExp(`drop function if exists booking\\.${f}\\(`), f);
+  }
+  assert.match(rb, /CREATE OR REPLACE FUNCTION booking\.admin_get_procountor_settings\(\)/);
+  assert.match(rb, /CREATE OR REPLACE FUNCTION booking\.admin_set_procountor_settings\(p jsonb\)/);
+  assert.doesNotMatch(rb.split('admin_get_procountor_settings')[1], /provider_fee/);
+  // dokumentoitu muoto
+  const doc = readFileSync(join(root, 'docs/tilitys-csv.md'), 'utf8');
+  for (const w of ['erä', 'päivä', 'laji', 'viite', 'brutto', 'kulu', 'netto', 'p_dry_run', 'accounts.provider_fee', 'Kuluja ei vielä kirjata']) assert.ok(doc.includes(w), w);
+  // tekstit FI+EN + import 195
+  const { STL_TEXTS } = await import(pathToFileURL(join(root, 'admin/settlement-texts.js')));
+  const rows = JSON.parse(readFileSync(join(repo, 'content/site-texts.pending-import-195.json'), 'utf8'));
+  assert.deepEqual(Object.keys(STL_TEXTS.fi).sort(), Object.keys(STL_TEXTS.en).sort());
+  assert.equal(rows.length, Object.keys(STL_TEXTS.fi).length * 2);
+  for (const r of rows) { assert.equal(STL_TEXTS[r.lang][r.key], r.text, r.key); assert.equal(r.class, 'normal'); }
+  const view = src('admin/views/settlements.js');
+  for (const k of view.match(/stl_[a-z_]+/g)) assert.ok(STL_TEXTS.fi[`ui.admin.reports.${k}`], k);
+  assert.match(src('admin/views/talous-reports.js'), /renderSettlements\(\{ api, span: spanOf\(\)/);
+  assert.match(view, /dryRun: true/);
+  // API: oikeat RPC-nimet, mockissa null
+  const calls = [];
+  const api = createTalousApi({ rpc: async (n, a) => { calls.push([n, a]); return n === 'admin_list_settlements' ? { rows: [{ id: 1, provider: 'montonio', batch_ref: 'B', settled_on: '2026-11-20', gross: '95', fee: '7.05', net: '87.95', unmatched: 1 }], totals: { fee: 7.05 }, fee_account: '8460' } : { ok: true, dry_run: true }; }, mock: false });
+  const l = await api.listSettlements('2026-11-01', '2026-11-30');
+  assert.equal(l.rows[0].fee, 7.05); assert.equal(l.fee_account, '8460');
+  await api.importSettlementCsv({ provider: 'montonio', csv: 'x', filename: 'a.csv' });
+  await api.setProviderFeeAccount('8460');
+  assert.deepEqual(calls[1], ['admin_import_settlement_csv', { p_provider: 'montonio', p_csv: 'x', p_filename: 'a.csv', p_dry_run: true, p_overwrite_fees: false }]);
+  assert.deepEqual(calls[2], ['admin_set_provider_fee_account', { p_account: '8460' }]);
+  assert.equal(await createTalousApi({ mock: true }).listSettlements('2026-11-01', '2026-11-30'), null);
+});

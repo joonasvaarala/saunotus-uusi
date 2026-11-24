@@ -14,7 +14,7 @@ const lazyMockModule = () => import(new URL('./talous-mock.js' + new URL(import.
 export const RPC = {
   listOrders: 'admin_list_orders', getOrder: 'admin_get_order', listPayments: 'admin_list_payments', listAddons: 'admin_list_addons',
   addToOrder: 'admin_add_to_order', createPaymentLink: 'admin_create_payment_link', refund: 'admin_refund', refundOrder: 'admin_refund_order', reservationRefundPreview: 'admin_reservation_refund_preview', cancelReservation: 'admin_cancel_reservation', recordPayment: 'admin_record_payment', listVatRates: 'admin_list_vat_rates',
-  reportDaily: 'admin_report_daily', reportMonthly: 'admin_report_month', reportRange: 'admin_report_range', reportTransactions: 'admin_report_transactions', reportGiftCards: 'admin_report_gift_cards', reportCsv: 'admin_report_csv', reportAccrual: 'admin_report_accrual', reportAccrualCsv: 'admin_report_accrual_csv', reportInvoices: 'admin_report_invoices', reportProviderFees: 'admin_report_provider_fees', salesChart: 'admin_sales_chart',
+  reportDaily: 'admin_report_daily', reportMonthly: 'admin_report_month', reportRange: 'admin_report_range', reportTransactions: 'admin_report_transactions', reportGiftCards: 'admin_report_gift_cards', reportCsv: 'admin_report_csv', reportAccrual: 'admin_report_accrual', reportAccrualCsv: 'admin_report_accrual_csv', reportInvoices: 'admin_report_invoices', reportProviderFees: 'admin_report_provider_fees', listSettlements: 'admin_list_settlements', getSettlement: 'admin_get_settlement', importSettlementCsv: 'admin_import_settlement_csv', setProviderFeeAccount: 'admin_set_provider_fee_account', salesChart: 'admin_sales_chart',
   getReceipt: 'admin_get_receipt', resendReceipt: 'admin_resend_receipt',
   annualCardForOrder: 'admin_annual_card_for_order',   // booking_146: tilauksen vuosikortti + koodin sähköpostin tila
   orderDeleteCheck: 'admin_order_delete_check', deleteUnpaidOrder: 'admin_delete_unpaid_order',   // booking_279: maksamattoman tilauksen poisto (arkistointi)
@@ -257,6 +257,11 @@ export function rpcBackend(rpc) {
     reportGiftCards: (a) => call('reportGiftCards', compact({ p_filter: a.filter, p_format: a.format || 'json', p_from: a.from, p_to: a.to })),
     reportCsv: (a) => call('reportCsv', compact({ p_from: a.from, p_to: a.to, p_kind: a.kind || 'lines' })),
     reportProviderFees: (a) => call('reportProviderFees', { p_from: a.from, p_to: a.to, p_format: a.format || 'json' }),
+    // booking_349 (K9): tilitykset
+    listSettlements: (a) => call('listSettlements', { p_from: a.from, p_to: a.to }),
+    getSettlement: (id) => call('getSettlement', { p_id: id }),
+    importSettlementCsv: (a) => call('importSettlementCsv', { p_provider: a.provider, p_csv: a.csv, p_filename: a.filename ?? null, p_dry_run: a.dryRun !== false, p_overwrite_fees: a.overwriteFees === true }),
+    setProviderFeeAccount: (account) => call('setProviderFeeAccount', { p_account: account ?? '' }),
     reportAccrual: (a) => call('reportAccrual', { p_from: a.from, p_to: a.to }),
     reportAccrualCsv: (a) => call('reportAccrualCsv', { p_from: a.from, p_to: a.to }),
     reportInvoices: (a) => call('reportInvoices', compact({ p_from: a.from, p_to: a.to, p_format: a.format || 'json' })),
@@ -392,6 +397,19 @@ export function createTalousApi({ rpc, io = {}, mock = wantsMock(), mockFactory 
       try { return norm(await real.reportProviderFees({ from, to, format })); }
       catch (e) { if (isMissingRpc(e)) return null; throw e; }
     },
+    // booking_349 (K9): tilitykset. Mockissa ja vanhemmassa kannassa ei ole → null (näkymä piilottaa osion).
+    async listSettlements(from, to) {
+      if (!real) return null;
+      try {
+        const r = await real.listSettlements({ from, to });
+        const row = (x) => ({ id: x.id, provider: x.provider || '', provider_label: x.provider_label || x.provider || '', batch_ref: x.batch_ref || '', settled_on: x.settled_on || null,
+          gross: num(x.gross), fee: num(x.fee), net: num(x.net), payments: num(x.payments), refunds: num(x.refunds), matched: num(x.matched), unmatched: num(x.unmatched), posted: x.posted === true });
+        return { fee_account: r?.fee_account || null, rows: L(r?.rows).map(row), totals: { batches: num(r?.totals?.batches), gross: num(r?.totals?.gross), fee: num(r?.totals?.fee), net: num(r?.totals?.net), unmatched: num(r?.totals?.unmatched) } };
+      } catch (e) { if (isMissingRpc(e)) return null; throw e; }
+    },
+    getSettlement: async (id) => (real ? real.getSettlement(id) : null),
+    importSettlementCsv: (a) => act('importSettlementCsv', a),
+    setProviderFeeAccount: (account) => act('setProviderFeeAccount', account),
     async reportGiftCards(filter = 'open', format = 'json', from = null, to = null) {
       const res = await run('reportGiftCards', { filter, format, from, to });
       if (format === 'csv') return { source: 'server', filename: res.filename || `lahjakortit_${to || 'tilanne'}_${filter}.csv`, content: String(res.content ?? ''), mime: res.mime || 'text/csv' };

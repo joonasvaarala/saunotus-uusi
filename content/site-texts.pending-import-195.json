@@ -1,0 +1,476 @@
+[
+ {
+  "key": "ui.admin.reports.stl_title",
+  "lang": "fi",
+  "text": "Tilitykset",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_349 (K9): maksuvälittäjän tilitykset ja CSV-tuonti provisioraportin alla. FI+EN, luokka normal. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.reports.stl_help",
+  "lang": "fi",
+  "text": "Maksuvälittäjän tilityserät. Tuo välittäjän tilitysraportti CSV-tiedostona. Kulut täytetään maksuille, mutta kirjanpitoon niitä ei vielä viedä.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_349 (K9): maksuvälittäjän tilitykset ja CSV-tuonti provisioraportin alla. FI+EN, luokka normal. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.reports.stl_col_date",
+  "lang": "fi",
+  "text": "Päivä",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_349 (K9): maksuvälittäjän tilitykset ja CSV-tuonti provisioraportin alla. FI+EN, luokka normal. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.reports.stl_col_provider",
+  "lang": "fi",
+  "text": "Palvelu",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_349 (K9): maksuvälittäjän tilitykset ja CSV-tuonti provisioraportin alla. FI+EN, luokka normal. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.reports.stl_col_batch",
+  "lang": "fi",
+  "text": "Erä",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_349 (K9): maksuvälittäjän tilitykset ja CSV-tuonti provisioraportin alla. FI+EN, luokka normal. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.reports.stl_col_gross",
+  "lang": "fi",
+  "text": "Brutto",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_349 (K9): maksuvälittäjän tilitykset ja CSV-tuonti provisioraportin alla. FI+EN, luokka normal. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.reports.stl_col_fee",
+  "lang": "fi",
+  "text": "Kulu",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_349 (K9): maksuvälittäjän tilitykset ja CSV-tuonti provisioraportin alla. FI+EN, luokka normal. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.reports.stl_col_net",
+  "lang": "fi",
+  "text": "Netto",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_349 (K9): maksuvälittäjän tilitykset ja CSV-tuonti provisioraportin alla. FI+EN, luokka normal. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.reports.stl_col_unmatched",
+  "lang": "fi",
+  "text": "Kohdistamatta",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_349 (K9): maksuvälittäjän tilitykset ja CSV-tuonti provisioraportin alla. FI+EN, luokka normal. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.reports.stl_none",
+  "lang": "fi",
+  "text": "Ei tilityksiä tällä jaksolla.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_349 (K9): maksuvälittäjän tilitykset ja CSV-tuonti provisioraportin alla. FI+EN, luokka normal. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.reports.stl_fee_account",
+  "lang": "fi",
+  "text": "Kulutili",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_349 (K9): maksuvälittäjän tilitykset ja CSV-tuonti provisioraportin alla. FI+EN, luokka normal. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.reports.stl_fee_account_missing",
+  "lang": "fi",
+  "text": "Kulutiliä ei ole asetettu. Kysy tilinumero kirjanpitäjältä.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_349 (K9): maksuvälittäjän tilitykset ja CSV-tuonti provisioraportin alla. FI+EN, luokka normal. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.reports.stl_fee_account_save",
+  "lang": "fi",
+  "text": "Tallenna tili",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_349 (K9): maksuvälittäjän tilitykset ja CSV-tuonti provisioraportin alla. FI+EN, luokka normal. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.reports.stl_saved",
+  "lang": "fi",
+  "text": "Tallennettu",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_349 (K9): maksuvälittäjän tilitykset ja CSV-tuonti provisioraportin alla. FI+EN, luokka normal. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.reports.stl_import",
+  "lang": "fi",
+  "text": "Tuo tilitys (CSV)",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_349 (K9): maksuvälittäjän tilitykset ja CSV-tuonti provisioraportin alla. FI+EN, luokka normal. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.reports.stl_provider",
+  "lang": "fi",
+  "text": "Palvelu",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_349 (K9): maksuvälittäjän tilitykset ja CSV-tuonti provisioraportin alla. FI+EN, luokka normal. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.reports.stl_file",
+  "lang": "fi",
+  "text": "Tiedosto",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_349 (K9): maksuvälittäjän tilitykset ja CSV-tuonti provisioraportin alla. FI+EN, luokka normal. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.reports.stl_overwrite",
+  "lang": "fi",
+  "text": "Korvaa maksuilla jo olevat eri suuruiset kulut",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_349 (K9): maksuvälittäjän tilitykset ja CSV-tuonti provisioraportin alla. FI+EN, luokka normal. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.reports.stl_preview",
+  "lang": "fi",
+  "text": "Esikatsele",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_349 (K9): maksuvälittäjän tilitykset ja CSV-tuonti provisioraportin alla. FI+EN, luokka normal. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.reports.stl_confirm",
+  "lang": "fi",
+  "text": "Tuo",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_349 (K9): maksuvälittäjän tilitykset ja CSV-tuonti provisioraportin alla. FI+EN, luokka normal. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.reports.stl_preview_summary",
+  "lang": "fi",
+  "text": "Rivejä {{var:rows}}, eriä {{var:batches}}, kohdistamatta {{var:unmatched}}, kuluristiriitoja {{var:conflicts}}.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [
+   "{{var:rows}}",
+   "{{var:batches}}",
+   "{{var:unmatched}}",
+   "{{var:conflicts}}"
+  ],
+  "reason": "booking_349 (K9): maksuvälittäjän tilitykset ja CSV-tuonti provisioraportin alla. FI+EN, luokka normal. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.reports.stl_imported",
+  "lang": "fi",
+  "text": "Tilitys tuotu. Kuluja täytetty {{var:fees}}.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [
+   "{{var:fees}}"
+  ],
+  "reason": "booking_349 (K9): maksuvälittäjän tilitykset ja CSV-tuonti provisioraportin alla. FI+EN, luokka normal. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.reports.stl_not_posted",
+  "lang": "fi",
+  "text": "Kuluja ei kirjata kirjanpitoon.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_349 (K9): maksuvälittäjän tilitykset ja CSV-tuonti provisioraportin alla. FI+EN, luokka normal. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.reports.stl_title",
+  "lang": "en",
+  "text": "Settlements",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_349 (K9): maksuvälittäjän tilitykset ja CSV-tuonti provisioraportin alla. FI+EN, luokka normal. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.reports.stl_help",
+  "lang": "en",
+  "text": "Payment provider settlement batches. Import the provider’s settlement report as a CSV file. Fees are filled in on the payments but are not posted to accounting yet.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_349 (K9): maksuvälittäjän tilitykset ja CSV-tuonti provisioraportin alla. FI+EN, luokka normal. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.reports.stl_col_date",
+  "lang": "en",
+  "text": "Date",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_349 (K9): maksuvälittäjän tilitykset ja CSV-tuonti provisioraportin alla. FI+EN, luokka normal. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.reports.stl_col_provider",
+  "lang": "en",
+  "text": "Provider",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_349 (K9): maksuvälittäjän tilitykset ja CSV-tuonti provisioraportin alla. FI+EN, luokka normal. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.reports.stl_col_batch",
+  "lang": "en",
+  "text": "Batch",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_349 (K9): maksuvälittäjän tilitykset ja CSV-tuonti provisioraportin alla. FI+EN, luokka normal. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.reports.stl_col_gross",
+  "lang": "en",
+  "text": "Gross",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_349 (K9): maksuvälittäjän tilitykset ja CSV-tuonti provisioraportin alla. FI+EN, luokka normal. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.reports.stl_col_fee",
+  "lang": "en",
+  "text": "Fee",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_349 (K9): maksuvälittäjän tilitykset ja CSV-tuonti provisioraportin alla. FI+EN, luokka normal. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.reports.stl_col_net",
+  "lang": "en",
+  "text": "Net",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_349 (K9): maksuvälittäjän tilitykset ja CSV-tuonti provisioraportin alla. FI+EN, luokka normal. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.reports.stl_col_unmatched",
+  "lang": "en",
+  "text": "Unmatched",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_349 (K9): maksuvälittäjän tilitykset ja CSV-tuonti provisioraportin alla. FI+EN, luokka normal. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.reports.stl_none",
+  "lang": "en",
+  "text": "No settlements in this period.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_349 (K9): maksuvälittäjän tilitykset ja CSV-tuonti provisioraportin alla. FI+EN, luokka normal. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.reports.stl_fee_account",
+  "lang": "en",
+  "text": "Fee account",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_349 (K9): maksuvälittäjän tilitykset ja CSV-tuonti provisioraportin alla. FI+EN, luokka normal. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.reports.stl_fee_account_missing",
+  "lang": "en",
+  "text": "No fee account set. Ask your accountant for the account number.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_349 (K9): maksuvälittäjän tilitykset ja CSV-tuonti provisioraportin alla. FI+EN, luokka normal. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.reports.stl_fee_account_save",
+  "lang": "en",
+  "text": "Save account",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_349 (K9): maksuvälittäjän tilitykset ja CSV-tuonti provisioraportin alla. FI+EN, luokka normal. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.reports.stl_saved",
+  "lang": "en",
+  "text": "Saved",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_349 (K9): maksuvälittäjän tilitykset ja CSV-tuonti provisioraportin alla. FI+EN, luokka normal. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.reports.stl_import",
+  "lang": "en",
+  "text": "Import settlement (CSV)",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_349 (K9): maksuvälittäjän tilitykset ja CSV-tuonti provisioraportin alla. FI+EN, luokka normal. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.reports.stl_provider",
+  "lang": "en",
+  "text": "Provider",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_349 (K9): maksuvälittäjän tilitykset ja CSV-tuonti provisioraportin alla. FI+EN, luokka normal. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.reports.stl_file",
+  "lang": "en",
+  "text": "File",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_349 (K9): maksuvälittäjän tilitykset ja CSV-tuonti provisioraportin alla. FI+EN, luokka normal. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.reports.stl_overwrite",
+  "lang": "en",
+  "text": "Replace different fees already on payments",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_349 (K9): maksuvälittäjän tilitykset ja CSV-tuonti provisioraportin alla. FI+EN, luokka normal. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.reports.stl_preview",
+  "lang": "en",
+  "text": "Preview",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_349 (K9): maksuvälittäjän tilitykset ja CSV-tuonti provisioraportin alla. FI+EN, luokka normal. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.reports.stl_confirm",
+  "lang": "en",
+  "text": "Import",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_349 (K9): maksuvälittäjän tilitykset ja CSV-tuonti provisioraportin alla. FI+EN, luokka normal. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.reports.stl_preview_summary",
+  "lang": "en",
+  "text": "Rows {{var:rows}}, batches {{var:batches}}, unmatched {{var:unmatched}}, fee conflicts {{var:conflicts}}.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [
+   "{{var:rows}}",
+   "{{var:batches}}",
+   "{{var:unmatched}}",
+   "{{var:conflicts}}"
+  ],
+  "reason": "booking_349 (K9): maksuvälittäjän tilitykset ja CSV-tuonti provisioraportin alla. FI+EN, luokka normal. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.reports.stl_imported",
+  "lang": "en",
+  "text": "Settlement imported. Fees filled in: {{var:fees}}.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [
+   "{{var:fees}}"
+  ],
+  "reason": "booking_349 (K9): maksuvälittäjän tilitykset ja CSV-tuonti provisioraportin alla. FI+EN, luokka normal. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.reports.stl_not_posted",
+  "lang": "en",
+  "text": "Fees are not posted to accounting.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 400,
+  "placeholders": [],
+  "reason": "booking_349 (K9): maksuvälittäjän tilitykset ja CSV-tuonti provisioraportin alla. FI+EN, luokka normal. Tuo admin_texts_importilla."
+ }
+]
