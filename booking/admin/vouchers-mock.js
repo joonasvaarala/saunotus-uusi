@@ -60,6 +60,7 @@ export function createVoucherMock({ now = new Date(), delay = 0, remindHours = 2
       const c = find(p_id);
       if (!ACTIVE.includes(c.status)) throw err('invalid_state', `Pyyntöä ei voi enää muuttaa (tila ${c.status})`);
       if (p_amount != null && (+p_amount < 0 || +p_amount !== round2(p_amount))) throw err('invalid_amount', 'Virheellinen summa');
+      if (p_status === 'redeemed' && !String(p_partner_ref ?? c.partner_ref ?? '').trim()) throw err('partner_ref_required', 'Anna kumppanin viite');   // booking_345 (K8)
       const note = String(p_note ?? '').trim() || null, stamp = 'staff';
       let pay = null;
       if (p_status === 'redeemed') {

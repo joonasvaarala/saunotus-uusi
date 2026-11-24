@@ -13,6 +13,8 @@
 -- (id, status, amount, refunded_amount, link_token, link_expires_at; payments-taulussa ei ole amount_gross-saraketta),
 -- payment_lines, refunds, invoices ja invoice_lines.
 begin;
+-- booking_345 (K8): lunastus vaatii partner_ref:n (trigger). Tämä testi kohdistuu muuhun, joten trigger pois tämän transaktion ajaksi; K8 testataan t345:ssä.
+do $k8$ begin if exists (select 1 from pg_trigger where tgname = 'voucher_claims_partner_ref_guard') then execute 'alter table booking.voucher_claims disable trigger voucher_claims_partner_ref_guard'; end if; end $k8$;
 set local lock_timeout = '5s';
 set local statement_timeout = '120s';
 

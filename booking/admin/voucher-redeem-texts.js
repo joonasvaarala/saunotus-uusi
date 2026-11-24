@@ -1,6 +1,6 @@
 // booking_173: kumppanilahjakorttien lunastus hallinnassa (FI + EN). Avaimet ui.admin.vcr.* (§18).
 // Sama mekanismi kuin Tarkista-sivu (review-texts.js): public_get_site_texts, kieli talous-i18n. Sanakirja on varalla.
-// Tuonti: content/site-texts.pending-import-68.json (booking_174: arvo käsin + erotuksen maksulinkki → pending-import-69; tila ja ongelman syy → pending-import-134). Arvoissa ei '<'-merkkiä.
+// Tuonti: content/site-texts.pending-import-68.json (booking_174: arvo käsin + erotuksen maksulinkki → pending-import-69; tila ja ongelman syy → pending-import-134; booking_345 kumppanin viite → pending-import-191). Arvoissa ei '<'-merkkiä.
 import { getLang } from './talous-i18n.js';
 import { getSiteTexts, clearSiteTextsCache } from './site-texts-cache.js';
 
@@ -62,6 +62,9 @@ export const VCR_TEXTS = {
     'ui.admin.vcr.marked_link': 'Merkitty lunastetuksi: {{var:method}} {{var:amount}}. Erotus {{var:difference}} lähetetty asiakkaalle maksulinkkinä.',
     'ui.admin.vcr.marked_link_nomail': 'Merkitty lunastetuksi: {{var:method}} {{var:amount}}. Erotuksen {{var:difference}} maksulinkki luotiin, mutta sähköpostia ei voitu lähettää. Lähetä linkki tilaukselta.',
     'ui.admin.vcr.err_invalid_amount': 'Anna lahjakortin arvo euroina, yli 0 € (enintään 2 desimaalia).',
+    'ui.admin.vcr.ref_label': 'Kumppanin viite',
+    'ui.admin.vcr.ref_hint': 'Kumppanin tilaus- tai lunastusnumero myyjän sivulta. Pakollinen.',
+    'ui.admin.vcr.err_partner_ref_required': 'Anna kumppanin viite ennen kuin merkitset koodin lunastetuksi.',
     'ui.admin.vcr.err_voucher_exceeds_total': 'Lahjakortin arvo ei voi olla suurempi kuin maksettava summa.',
     'ui.admin.vcr.st_open': 'Avoin',
     'ui.admin.vcr.st_processing': 'Käsittelyssä',
@@ -129,6 +132,9 @@ export const VCR_TEXTS = {
     'ui.admin.vcr.marked_link': 'Marked as redeemed: {{var:method}} {{var:amount}}. The difference of {{var:difference}} was sent to the customer as a payment link.',
     'ui.admin.vcr.marked_link_nomail': 'Marked as redeemed: {{var:method}} {{var:amount}}. A payment link for the difference of {{var:difference}} was created, but the email could not be sent. Send the link from the order.',
     'ui.admin.vcr.err_invalid_amount': 'Enter the gift card value in euros, more than 0 € (at most 2 decimals).',
+    'ui.admin.vcr.ref_label': 'Partner reference',
+    'ui.admin.vcr.ref_hint': 'The partner’s order or redemption number from the seller’s page. Required.',
+    'ui.admin.vcr.err_partner_ref_required': 'Enter the partner reference before marking the code as redeemed.',
     'ui.admin.vcr.err_voucher_exceeds_total': 'The gift card value cannot be greater than the amount due.',
     'ui.admin.vcr.st_open': 'Open',
     'ui.admin.vcr.st_processing': 'Processing',

@@ -53,10 +53,11 @@ test('tiedot: koko koodi vain admin_get_voucher_claim:ssa; arvaus muodosta', asy
 
 test('ratkaisu: lunastettu kirjaa maksun, ongelma/peruttu/avaus, päätetyn tilan suojaus, validoinnit', async () => {
   const { api } = mk();
-  const r = await api.resolve({ id: 41, status: 'redeemed', amount: 40 });
+  await assert.rejects(() => api.resolve({ id: 41, status: 'redeemed', amount: 40 }), (e) => e.code === 'partner_ref_required');   // booking_345 (K8)
+  const r = await api.resolve({ id: 41, status: 'redeemed', amount: 40, partnerRef: 'EL-1' });
   assert.equal(r.claim.status, 'redeemed'); assert.equal(r.amount, 40); assert.ok(r.payment_id); assert.equal(r.balance.unpaid, 22);
   await assert.rejects(() => api.resolve({ id: 41, status: 'cancelled' }), (e) => e.code === 'invalid_state', 'päätettyä ei muuteta');
-  assert.equal((await api.resolve({ id: 42, status: 'redeemed' })).amount, 62, 'tyhjä summa = koko maksamaton');
+  assert.equal((await api.resolve({ id: 42, status: 'redeemed', partnerRef: 'EL-2' })).amount, 62, 'tyhjä summa = koko maksamaton');
   assert.equal((await api.resolve({ id: 43, status: 'problem', problemCode: 'already_used' })).claim.problem_code, 'already_used');
   await assert.rejects(() => api.resolve({ id: 45, status: 'problem' }), (e) => e.code === 'invalid_problem_code');
   assert.equal((await api.resolve({ id: 44, status: 'open' })).claim.status, 'open', 'ongelma → uudelleen jonoon');

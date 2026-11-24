@@ -6,9 +6,9 @@
 import { h, toast, run, badge, money, fmtDT, errMsg } from '../ui.js';
 import { icon } from '../icons.js';
 import { vcrText as vt, loadVcrTexts } from '../voucher-redeem-texts.js';
-import { VCR_CHOICES, VCR_RPC, sellerLabel, safeRedeemUrl, guessDiffers, groupBySource, filterChips, orderHref, reservationHref, setSourceArgs, markArgs, markArgsWithValue, voucherValueCheck, voucherValueDefault } from '../voucher-redeem-logic.js';
+import { VCR_CHOICES, VCR_RPC, sellerLabel, safeRedeemUrl, guessDiffers, groupBySource, filterChips, orderHref, reservationHref, setSourceArgs, markArgs, markArgsWithValue, partnerRefOk, voucherValueCheck, voucherValueDefault } from '../voucher-redeem-logic.js';
 
-const errText = (e) => (e?.code && ['invalid_state', 'forbidden', 'unchanged', 'invalid_amount', 'voucher_exceeds_total'].includes(e.code) ? vt(`ui.admin.vcr.err_${e.code}`) : errMsg(e));
+const errText = (e) => (e?.code && ['invalid_state', 'forbidden', 'unchanged', 'invalid_amount', 'voucher_exceeds_total', 'partner_ref_required'].includes(e.code) ? vt(`ui.admin.vcr.err_${e.code}`) : errMsg(e));
 const conf = (c) => (['high', 'medium', 'low'].includes(c) ? vt(`ui.admin.vcr.conf_${c}`) : null);
 const methodOf = (row) => String(row.payment_method_label || '').trim() || vt('ui.admin.vcr.method');
 const PROBLEM_CODES = ['invalid_code', 'expired_code', 'already_used', 'other'];   // booking.voucher_claims.problem_code (_vc_resolve)
@@ -115,10 +115,22 @@ export function claimRow(row, { rpc, canManage = false, showOrder = true, onChan
             h('label', { for: fid, class: 'vcr-k', text: vt('ui.admin.vcr.value_label') }), input,
             h('span', { id: `${fid}-hint`, class: 'vcr-hint muted', text: vt('ui.admin.vcr.value_hint', { due: money(due) }) }));
         }
+        // booking_345 (K8): kumppanin viite pakollinen (palvelin: partner_ref_required)
+        const rid = `vcr-ref-${row.id}`;
+        const refIn = h('input', { id: rid, class: 'vcr-value', type: 'text', maxlength: 100, autocomplete: 'off', required: true, 'data-testid': 'vcr-ref', 'aria-describedby': `${rid}-hint` });
+        const refField = h('div', { class: 'vcr-field' },
+          h('label', { for: rid, class: 'vcr-k', text: vt('ui.admin.vcr.ref_label') }), refIn,
+          h('span', { id: `${rid}-hint`, class: 'vcr-hint muted', text: vt('ui.admin.vcr.ref_hint') }));
+        refIn.addEventListener('input', () => { if (partnerRefOk(refIn.value)) { refIn.removeAttribute?.('aria-invalid'); if (bad.dataset.ref) { bad.hidden = true; bad.textContent = ''; delete bad.dataset.ref; } } });
         yes.addEventListener('click', () => run(yes, async () => {
           if (check && !check.ok) { input.focus(); return; }
+          if (!partnerRefOk(refIn.value)) {
+            bad.textContent = vt('ui.admin.vcr.err_partner_ref_required'); bad.hidden = false; bad.dataset.ref = '1';
+            refIn.setAttribute('aria-invalid', 'true'); refIn.focus(); return;
+          }
           try {
-            const res = await rpc(VCR_RPC.markRedeemed, check ? markArgsWithValue(row, check, due) : markArgs(row));
+            const ref = refIn.value;
+            const res = await rpc(VCR_RPC.markRedeemed, check ? markArgsWithValue(row, check, due, ref) : markArgs(row, { ref }));
             const base = { method: String(res?.payment_method_label || methodOf(row)), amount: money(res?.amount ?? (check?.value ?? amt)) };
             toast(res?.already ? vt('ui.admin.vcr.already')
               : res?.payment_link ? vt(res.email_queued ? 'ui.admin.vcr.marked_link' : 'ui.admin.vcr.marked_link_nomail', { ...base, difference: money(res.difference ?? res.payment_link.amount) })
@@ -126,9 +138,9 @@ export function claimRow(row, { rpc, canManage = false, showOrder = true, onChan
             onChanged();
           } catch (e) { toast(errText(e), 'err'); }
         }));
-        confirmBox.replaceChildren(...[field, note, bad, ask, h('div', { class: 'row wrap' }, yes, no)].filter(Boolean));
+        confirmBox.replaceChildren(...[field, refField, note, bad, ask, h('div', { class: 'row wrap' }, yes, no)].filter(Boolean));
         refresh();
-        confirmBox.hidden = false; mark.hidden = true; (input || yes).focus();
+        confirmBox.hidden = false; mark.hidden = true; (input || refIn).focus();
       });
       actions.append(mark);
     }
