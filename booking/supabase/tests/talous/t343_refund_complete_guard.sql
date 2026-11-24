@@ -1,4 +1,6 @@
 begin;
+-- booking_348: kiinnike luo tuotannon tilanteen (hyvityskuitit > refunded_amount, maksu 1213 / hyvitys 68), jonka receipts_refund_cap nyt estää → ohitetaan tässä testissä
+do $$ begin if exists (select 1 from pg_trigger where tgname = 'receipts_refund_cap' and tgrelid = 'booking.receipts'::regclass) then execute 'alter table booking.receipts disable trigger receipts_refund_cap'; end if; end $$;
 -- t343: hyvityksen valmistuminen ja hyvityskuitit (booking_343, 24.11.2026).
 -- Vaatii migraation 343 + fixtures/10_test_helpers.sql. Yksi transaktio; lopuksi rollback. Montonio mockattu: eteneminen
 -- montonio_refund_claim/stamp/complete-funktioilla. Tapaus "maksu 1213": 18 € kesken + 162 € valmis, jonka kuitti (−180 €) kattaa molemmat.

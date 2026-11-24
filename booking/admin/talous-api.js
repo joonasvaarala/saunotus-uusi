@@ -129,7 +129,7 @@ export function normReport(r) {
   // gross_after_refunds = brutto hyvitysten jälkeen (booking_35). net_after_refunds on DEPRECATED (sama arvo) → ei käytetä; puuttuessa lasketaan gross + refunds_gross.
   const grossAfter = tt.gross_after_refunds ?? (num(tt.gross) + num(tt.refunds_gross));
   return { period: { ...per, from: per.from ?? null, to: per.to ?? null, kind }, generated_at: r.generated_at ?? null,
-    totals: { receipts: num(tt.receipts), refund_receipts: num(tt.refund_receipts), gross: num(tt.gross), net: num(tt.net), vat: num(tt.vat), refunds_gross: num(tt.refunds_gross), gross_after_refunds: num(grossAfter), vat_after_refunds: num(tt.vat_after_refunds ?? tt.vat), net_ex_vat_after_refunds: num(tt.net_ex_vat_after_refunds ?? tt.net), rounding: num(tt.rounding) },
+    totals: { receipts: num(tt.receipts), refund_receipts: num(tt.refund_receipts), correction_receipts: num(tt.correction_receipts), corrections_gross: num(tt.corrections_gross), gross: num(tt.gross), net: num(tt.net), vat: num(tt.vat), refunds_gross: num(tt.refunds_gross), gross_after_refunds: num(grossAfter), vat_after_refunds: num(tt.vat_after_refunds ?? tt.vat), net_ex_vat_after_refunds: num(tt.net_ex_vat_after_refunds ?? tt.net), rounding: num(tt.rounding) },
     by_method: L(r.by_method).map((m) => ({ method: m.method, label: m.label ?? null, payments: num(m.payments), gross: num(m.gross), refunds: num(m.refunds), rounding: num(m.rounding) })),
     by_vat: L(r.by_vat).map((v) => ({ rate: num(v.rate), net: num(v.net), vat: num(v.vat), gross: num(v.gross) })),
     by_vat_sales: L(r.by_vat_sales).map((v) => ({ rate: num(v.rate), net: num(v.net), vat: num(v.vat), gross: num(v.gross) })),
@@ -168,7 +168,7 @@ export function normReport(r) {
       lines: L(r.prepaid_redemptions.lines).map((p) => ({ product: p.product ?? '', rate: num(p.rate), quantity: num(p.quantity), net: num(p.net), vat: num(p.vat), gross: num(p.gross) })),
       by_vat: L(r.prepaid_redemptions.by_vat).map((v) => ({ rate: num(v.rate), quantity: num(v.quantity), net: num(v.net), vat: num(v.vat), gross: num(v.gross) })),
     } : null,
-    receipts: Array.isArray(r.receipts) ? r.receipts.map((x) => ({ receipt_no: x.receipt_no, kind: x.kind, issued_at: x.issued_at, order_no: x.order_no ?? null, method: x.method, gross: num(x.gross), net: num(x.net), vat: num(x.vat) })) : null,
+    receipts: Array.isArray(r.receipts) ? r.receipts.map((x) => ({ receipt_no: x.receipt_no, kind: x.kind, corrects: x.corrects ?? null, issued_at: x.issued_at, order_no: x.order_no ?? null, method: x.method, gross: num(x.gross), net: num(x.net), vat: num(x.vat) })) : null,
     by_day: Array.isArray(r.by_day) ? r.by_day.map((d) => ({ date: d.date, receipts: num(d.receipts), gross: num(d.gross), vat: num(d.vat), refunds: num(d.refunds) })) : null,
     open: { orders: num(r.open?.orders), unpaid: num(r.open?.unpaid), rows: L(r.open?.rows).map((x) => ({ voucher: x.voucher ?? '', date: x.date ?? '', customer: x.customer ?? '', product: x.product ?? '', quantity: num(x.quantity), net: num(x.net), vat_rate: num(x.vat_rate), vat: num(x.vat), gross: num(x.gross), method: x.method ?? '', method_label: x.method_label ?? '', status: x.status === 'open' ? 'open' : 'paid', kind: x.kind === 'refund' ? 'refund' : x.kind === 'redemption' ? 'redemption' : 'sale' })) },
     johku_refunds: normJohkuRefunds(r.johku_refunds),
@@ -353,7 +353,7 @@ export function createTalousApi({ rpc, io = {}, mock = wantsMock(), mockFactory 
     },
     reportTransactions: (from, to) => run('reportTransactions', { from, to }, (r) => ({ period: r.period || { from, to, kind: 'transactions' }, rows: L(r.rows).map((x) => ({
       voucher: x.voucher ?? '', date: x.date ?? '', customer: x.customer ?? '', product: x.product ?? '', quantity: num(x.quantity), net: num(x.net), vat_rate: num(x.vat_rate), vat: num(x.vat), gross: num(x.gross),
-      method: x.method ?? '', method_label: x.method_label ?? '', status: x.status === 'open' ? 'open' : 'paid', kind: x.kind === 'refund' ? 'refund' : x.kind === 'redemption' ? 'redemption' : 'sale' })) })),
+      method: x.method ?? '', method_label: x.method_label ?? '', status: x.status === 'open' ? 'open' : 'paid', kind: x.kind === 'refund' ? 'refund' : x.kind === 'redemption' ? 'redemption' : 'sale', doc_kind: x.doc_kind === 'correction' ? 'correction' : null })) })),   // booking_348: oikaisu (laji = alkuperäisen luokka)
     // Käyrä: oikeassa tilassa puuttuva RPC ei pudota mock-myyntilukuihin (väärä raha hallinnassa). ?mock=1 käyttää mockia.
     async salesChart(year) {
       if (!real) return normSalesChart(await getMock().salesChart(year));

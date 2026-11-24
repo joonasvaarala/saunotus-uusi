@@ -53,5 +53,5 @@ Deno.serve(async (req) => {
     }
   }
   const no = String(data.receipt_no ?? data.id);
-  return new Response(bytes, { headers: { ...cors, "content-type": "application/pdf", "content-disposition": `inline; filename="${data.kind === "refund_receipt" ? "hyvityskuitti" : "kuitti"}-${no}.pdf"`, "cache-control": "private, no-store" } });
+  return new Response(bytes, { headers: { ...cors, "content-type": "application/pdf", "content-disposition": `inline; filename="${data.kind === "correction" ? "oikaisukuitti" : data.kind === "refund_receipt" ? "hyvityskuitti" : "kuitti"}-${no}.pdf"`, "cache-control": "private, no-store" } });
 });
