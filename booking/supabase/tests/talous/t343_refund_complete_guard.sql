@@ -79,7 +79,8 @@ begin
                    p1, o1, 'x', 'requested', 'manual', jsonb_build_array(jsonb_build_object('payment_line_id', l1, 'amount', 1))));
   perform pg_temp.ck(v ? 'err' and v ->> 'err' ilike '%amount_exceeds_refundable%' or v ->> 'msg' ilike '%ylittää%', 'G2: rivin ylitys (kesken olevat mukana) hylätään ' || v::text);
 
-  -- tuotannon tila ennen korjausta: 69 valmis, rivi 1037 = koko rivi, kuitti −koko maksu
+  -- tuotannon tila (maksu 1213, rivi 1037, hyvitykset 68/69, kuitti H-2026-000006): 69 valmis, rivi = koko rivi, kuitti −koko maksu.
+  -- Ennen booking_343:a 68:n valmistuminen kaatui payment_lines_check-virheeseen (webhook 503, Montonio yrittää uudelleen).
   update booking.refunds set status = 'done', provider_status = 'refunded', done_at = now(),
          lines = jsonb_build_array(jsonb_build_object('payment_line_id', l1, 'amount', a1)) where id = r69;
   update booking.payment_lines set refunded_gross = a1 where id = l1;

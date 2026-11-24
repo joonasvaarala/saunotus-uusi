@@ -310,3 +310,21 @@ Deno.test("booking_343: tilakysely on vain luku (GET /orders/:uuid), ei claim/st
   assertEquals(offR.code, "off");
   assertEquals(seen.length, 0);
 });
+
+Deno.test("booking_343: tapaus 1037/68/69 — SUCCESSFUL-ilmoitus kuitataan 200, kun valmistuminen onnistuu (ennen 503 payment_lines_check)", async () => {
+  const { db, calls } = routed((name) => {
+    if (name === "montonio_refund_lookup") return { data: { found: true, refund_id: 68, status: "processing", amount: 18, order_uuid: "ord-1213", provider_refund_id: "rf-68" }, error: null };
+    if (name === "montonio_refund_complete") return { data: { ok: true, refund_id: 68 }, error: null };
+    return { data: { ok: true }, error: null };
+  });
+  const token = await signJwt({ accessKey: ACCESS, refundUuid: "rf-68", refundStatus: "SUCCESSFUL", refundAmount: 18, orderUuid: "ord-1213", exp: 4_000_000_000 }, SECRET);
+  const r = await notify(post("https://f/montonio-notify", { refundToken: token }), { db, env: testEnv(), fetch: async () => asJson(500, {}) });
+  assertEquals(r.status, 200);
+  assertEquals(calls.filter((c) => (c as [string])[0] === "montonio_refund_complete").length, 1);
+  // kantavirhe (vanha käytös) → 503 ja Montonio yrittää uudelleen
+  const { db: broken } = routed((name) => name === "montonio_refund_lookup"
+    ? { data: { found: true, refund_id: 68, amount: 18, order_uuid: "ord-1213", provider_refund_id: "rf-68" }, error: null }
+    : { data: null, error: { message: "new row violates check constraint \"payment_lines_check\"", code: "23514" } });
+  const r2 = await notify(post("https://f/montonio-notify", { refundToken: token }), { db: broken, env: testEnv(), fetch: async () => asJson(500, {}) });
+  assertEquals(r2.status, 503);
+});
