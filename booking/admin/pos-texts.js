@@ -228,6 +228,10 @@ export const POS_CUSTOM_TEXTS = {
     price_invalid: 'Anna hinta euroina (esim. 5,50)',
     vat_invalid: 'Valitse sallittu ALV-kanta',
     vat_breakdown: 'ALV-erittely',
+    custom_preset_book: 'Kirja 13,5 %',
+    custom_preset_book_desc: 'Kirja',
+    custom_vat_opt_book: '13,5 % (kirjat)',
+    custom_vat_book_hint: 'Kirjan ALV on 13,5 %. Tarkista ALV-kanta.',
   },
   en: {
     custom_add: 'Add custom line',
@@ -246,6 +250,10 @@ export const POS_CUSTOM_TEXTS = {
     price_invalid: 'Enter the price in euros (e.g. 5.50)',
     vat_invalid: 'Choose an allowed VAT rate',
     vat_breakdown: 'VAT breakdown',
+    custom_preset_book: 'Book 13.5 %',
+    custom_preset_book_desc: 'Book',
+    custom_vat_opt_book: '13.5 % (books)',
+    custom_vat_book_hint: 'The VAT rate for books is 13.5 %. Check the VAT rate.',
   },
 };
 

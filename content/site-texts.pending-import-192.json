@@ -1,0 +1,82 @@
+[
+ {
+  "key": "ui.pos.custom_preset_book",
+  "lang": "fi",
+  "text": "Kirja 13,5 %",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_346 (K3): pikakassan vapaa rivi – kirjan ALV 13,5 % (pikavalinta, valinnan nimi ja varoitus). FI+EN, luokka normal. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.pos.custom_preset_book",
+  "lang": "en",
+  "text": "Book 13.5 %",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_346 (K3): pikakassan vapaa rivi – kirjan ALV 13,5 % (pikavalinta, valinnan nimi ja varoitus). FI+EN, luokka normal. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.pos.custom_preset_book_desc",
+  "lang": "fi",
+  "text": "Kirja",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_346 (K3): pikakassan vapaa rivi – kirjan ALV 13,5 % (pikavalinta, valinnan nimi ja varoitus). FI+EN, luokka normal. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.pos.custom_preset_book_desc",
+  "lang": "en",
+  "text": "Book",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_346 (K3): pikakassan vapaa rivi – kirjan ALV 13,5 % (pikavalinta, valinnan nimi ja varoitus). FI+EN, luokka normal. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.pos.custom_vat_opt_book",
+  "lang": "fi",
+  "text": "13,5 % (kirjat)",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_346 (K3): pikakassan vapaa rivi – kirjan ALV 13,5 % (pikavalinta, valinnan nimi ja varoitus). FI+EN, luokka normal. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.pos.custom_vat_opt_book",
+  "lang": "en",
+  "text": "13.5 % (books)",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 40,
+  "placeholders": [],
+  "reason": "booking_346 (K3): pikakassan vapaa rivi – kirjan ALV 13,5 % (pikavalinta, valinnan nimi ja varoitus). FI+EN, luokka normal. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.pos.custom_vat_book_hint",
+  "lang": "fi",
+  "text": "Kirjan ALV on 13,5 %. Tarkista ALV-kanta.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_346 (K3): pikakassan vapaa rivi – kirjan ALV 13,5 % (pikavalinta, valinnan nimi ja varoitus). FI+EN, luokka normal. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.pos.custom_vat_book_hint",
+  "lang": "en",
+  "text": "The VAT rate for books is 13.5 %. Check the VAT rate.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 120,
+  "placeholders": [],
+  "reason": "booking_346 (K3): pikakassan vapaa rivi – kirjan ALV 13,5 % (pikavalinta, valinnan nimi ja varoitus). FI+EN, luokka normal. Tuo admin_texts_importilla."
+ }
+]
