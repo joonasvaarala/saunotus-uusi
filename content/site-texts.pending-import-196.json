@@ -1,0 +1,446 @@
+[
+ {
+  "key": "ui.admin.refund_watch.status_check.button",
+  "lang": "fi",
+  "text": "Tarkista tila Montoniosta",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Hallinta › Tilaukset › Avoimet maksut › Hyvitykset: nappi Tarkista tila Montoniosta (vain luku, montonio-refund action status, booking_343). FI+EN, luokka normal. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.refund_watch.status_check.title",
+  "lang": "fi",
+  "text": "Hyvityksen tila Montoniossa",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Hallinta › Tilaukset › Avoimet maksut › Hyvitykset: nappi Tarkista tila Montoniosta (vain luku, montonio-refund action status, booking_343). FI+EN, luokka normal. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.refund_watch.status_check.read_only",
+  "lang": "fi",
+  "text": "Vain tarkistus. Mitään ei muuteta, eikä hyvitystä käynnistetä.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Hallinta › Tilaukset › Avoimet maksut › Hyvitykset: nappi Tarkista tila Montoniosta (vain luku, montonio-refund action status, booking_343). FI+EN, luokka normal. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.refund_watch.status_check.checking",
+  "lang": "fi",
+  "text": "Tarkistetaan…",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Hallinta › Tilaukset › Avoimet maksut › Hyvitykset: nappi Tarkista tila Montoniosta (vain luku, montonio-refund action status, booking_343). FI+EN, luokka normal. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.refund_watch.status_check.local",
+  "lang": "fi",
+  "text": "Saunotuksen tiedot",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Hallinta › Tilaukset › Avoimet maksut › Hyvitykset: nappi Tarkista tila Montoniosta (vain luku, montonio-refund action status, booking_343). FI+EN, luokka normal. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.refund_watch.status_check.montonio",
+  "lang": "fi",
+  "text": "Montonion tiedot",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Hallinta › Tilaukset › Avoimet maksut › Hyvitykset: nappi Tarkista tila Montoniosta (vain luku, montonio-refund action status, booking_343). FI+EN, luokka normal. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.refund_watch.status_check.status",
+  "lang": "fi",
+  "text": "Tila",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Hallinta › Tilaukset › Avoimet maksut › Hyvitykset: nappi Tarkista tila Montoniosta (vain luku, montonio-refund action status, booking_343). FI+EN, luokka normal. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.refund_watch.status_check.provider_status",
+  "lang": "fi",
+  "text": "Välittäjän tila",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Hallinta › Tilaukset › Avoimet maksut › Hyvitykset: nappi Tarkista tila Montoniosta (vain luku, montonio-refund action status, booking_343). FI+EN, luokka normal. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.refund_watch.status_check.amount",
+  "lang": "fi",
+  "text": "Summa",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Hallinta › Tilaukset › Avoimet maksut › Hyvitykset: nappi Tarkista tila Montoniosta (vain luku, montonio-refund action status, booking_343). FI+EN, luokka normal. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.refund_watch.status_check.created",
+  "lang": "fi",
+  "text": "Luotu",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Hallinta › Tilaukset › Avoimet maksut › Hyvitykset: nappi Tarkista tila Montoniosta (vain luku, montonio-refund action status, booking_343). FI+EN, luokka normal. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.refund_watch.status_check.order_status",
+  "lang": "fi",
+  "text": "Tilauksen maksutila",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Hallinta › Tilaukset › Avoimet maksut › Hyvitykset: nappi Tarkista tila Montoniosta (vain luku, montonio-refund action status, booking_343). FI+EN, luokka normal. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.refund_watch.status_check.off",
+  "lang": "fi",
+  "text": "Montonio-yhteys ei ole käytössä, joten Montonion tilaa ei voitu tarkistaa.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Hallinta › Tilaukset › Avoimet maksut › Hyvitykset: nappi Tarkista tila Montoniosta (vain luku, montonio-refund action status, booking_343). FI+EN, luokka normal. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.refund_watch.status_check.not_configured",
+  "lang": "fi",
+  "text": "Montonion tunnuksia ei ole asetettu, joten Montonion tilaa ei voitu tarkistaa.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Hallinta › Tilaukset › Avoimet maksut › Hyvitykset: nappi Tarkista tila Montoniosta (vain luku, montonio-refund action status, booking_343). FI+EN, luokka normal. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.refund_watch.status_check.not_found",
+  "lang": "fi",
+  "text": "Hyvitystä ei löytynyt.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Hallinta › Tilaukset › Avoimet maksut › Hyvitykset: nappi Tarkista tila Montoniosta (vain luku, montonio-refund action status, booking_343). FI+EN, luokka normal. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.refund_watch.status_check.forbidden",
+  "lang": "fi",
+  "text": "Sinulla ei ole oikeutta tarkistaa hyvityksen tilaa.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Hallinta › Tilaukset › Avoimet maksut › Hyvitykset: nappi Tarkista tila Montoniosta (vain luku, montonio-refund action status, booking_343). FI+EN, luokka normal. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.refund_watch.status_check.montonio_missing",
+  "lang": "fi",
+  "text": "Montonion tilauksella ei ole tätä hyvitystä.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Hallinta › Tilaukset › Avoimet maksut › Hyvitykset: nappi Tarkista tila Montoniosta (vain luku, montonio-refund action status, booking_343). FI+EN, luokka normal. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.refund_watch.status_check.no_provider_refund_id",
+  "lang": "fi",
+  "text": "Hyvitystä ei ole vielä lähetetty Montoniolle, joten Montonion tunnusta ei ole.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Hallinta › Tilaukset › Avoimet maksut › Hyvitykset: nappi Tarkista tila Montoniosta (vain luku, montonio-refund action status, booking_343). FI+EN, luokka normal. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.refund_watch.status_check.no_order_uuid",
+  "lang": "fi",
+  "text": "Maksulta puuttuu Montonion tilaustunnus.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Hallinta › Tilaukset › Avoimet maksut › Hyvitykset: nappi Tarkista tila Montoniosta (vain luku, montonio-refund action status, booking_343). FI+EN, luokka normal. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.refund_watch.status_check.retry_later",
+  "lang": "fi",
+  "text": "Montonioon ei saatu yhteyttä. Yritä hetken päästä uudelleen.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Hallinta › Tilaukset › Avoimet maksut › Hyvitykset: nappi Tarkista tila Montoniosta (vain luku, montonio-refund action status, booking_343). FI+EN, luokka normal. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.refund_watch.status_check.provider_error",
+  "lang": "fi",
+  "text": "Montonio palautti virheen. Yritä myöhemmin uudelleen.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Hallinta › Tilaukset › Avoimet maksut › Hyvitykset: nappi Tarkista tila Montoniosta (vain luku, montonio-refund action status, booking_343). FI+EN, luokka normal. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.refund_watch.status_check.error",
+  "lang": "fi",
+  "text": "Tilaa ei voitu tarkistaa: {{var:error}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:error}}"
+  ],
+  "reason": "Hallinta › Tilaukset › Avoimet maksut › Hyvitykset: nappi Tarkista tila Montoniosta (vain luku, montonio-refund action status, booking_343). FI+EN, luokka normal. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.refund_watch.status_check.close",
+  "lang": "fi",
+  "text": "Sulje",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Hallinta › Tilaukset › Avoimet maksut › Hyvitykset: nappi Tarkista tila Montoniosta (vain luku, montonio-refund action status, booking_343). FI+EN, luokka normal. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.refund_watch.status_check.button",
+  "lang": "en",
+  "text": "Check status from Montonio",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Hallinta › Tilaukset › Avoimet maksut › Hyvitykset: nappi Tarkista tila Montoniosta (vain luku, montonio-refund action status, booking_343). FI+EN, luokka normal. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.refund_watch.status_check.title",
+  "lang": "en",
+  "text": "Refund status in Montonio",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Hallinta › Tilaukset › Avoimet maksut › Hyvitykset: nappi Tarkista tila Montoniosta (vain luku, montonio-refund action status, booking_343). FI+EN, luokka normal. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.refund_watch.status_check.read_only",
+  "lang": "en",
+  "text": "Check only. Nothing is changed and no refund is started.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Hallinta › Tilaukset › Avoimet maksut › Hyvitykset: nappi Tarkista tila Montoniosta (vain luku, montonio-refund action status, booking_343). FI+EN, luokka normal. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.refund_watch.status_check.checking",
+  "lang": "en",
+  "text": "Checking…",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Hallinta › Tilaukset › Avoimet maksut › Hyvitykset: nappi Tarkista tila Montoniosta (vain luku, montonio-refund action status, booking_343). FI+EN, luokka normal. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.refund_watch.status_check.local",
+  "lang": "en",
+  "text": "Saunotus records",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Hallinta › Tilaukset › Avoimet maksut › Hyvitykset: nappi Tarkista tila Montoniosta (vain luku, montonio-refund action status, booking_343). FI+EN, luokka normal. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.refund_watch.status_check.montonio",
+  "lang": "en",
+  "text": "Montonio records",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Hallinta › Tilaukset › Avoimet maksut › Hyvitykset: nappi Tarkista tila Montoniosta (vain luku, montonio-refund action status, booking_343). FI+EN, luokka normal. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.refund_watch.status_check.status",
+  "lang": "en",
+  "text": "Status",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Hallinta › Tilaukset › Avoimet maksut › Hyvitykset: nappi Tarkista tila Montoniosta (vain luku, montonio-refund action status, booking_343). FI+EN, luokka normal. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.refund_watch.status_check.provider_status",
+  "lang": "en",
+  "text": "Provider status",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Hallinta › Tilaukset › Avoimet maksut › Hyvitykset: nappi Tarkista tila Montoniosta (vain luku, montonio-refund action status, booking_343). FI+EN, luokka normal. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.refund_watch.status_check.amount",
+  "lang": "en",
+  "text": "Amount",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Hallinta › Tilaukset › Avoimet maksut › Hyvitykset: nappi Tarkista tila Montoniosta (vain luku, montonio-refund action status, booking_343). FI+EN, luokka normal. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.refund_watch.status_check.created",
+  "lang": "en",
+  "text": "Created",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Hallinta › Tilaukset › Avoimet maksut › Hyvitykset: nappi Tarkista tila Montoniosta (vain luku, montonio-refund action status, booking_343). FI+EN, luokka normal. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.refund_watch.status_check.order_status",
+  "lang": "en",
+  "text": "Order payment status",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Hallinta › Tilaukset › Avoimet maksut › Hyvitykset: nappi Tarkista tila Montoniosta (vain luku, montonio-refund action status, booking_343). FI+EN, luokka normal. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.refund_watch.status_check.off",
+  "lang": "en",
+  "text": "The Montonio connection is turned off, so the Montonio status could not be checked.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Hallinta › Tilaukset › Avoimet maksut › Hyvitykset: nappi Tarkista tila Montoniosta (vain luku, montonio-refund action status, booking_343). FI+EN, luokka normal. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.refund_watch.status_check.not_configured",
+  "lang": "en",
+  "text": "Montonio credentials are not set, so the Montonio status could not be checked.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Hallinta › Tilaukset › Avoimet maksut › Hyvitykset: nappi Tarkista tila Montoniosta (vain luku, montonio-refund action status, booking_343). FI+EN, luokka normal. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.refund_watch.status_check.not_found",
+  "lang": "en",
+  "text": "Refund not found.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Hallinta › Tilaukset › Avoimet maksut › Hyvitykset: nappi Tarkista tila Montoniosta (vain luku, montonio-refund action status, booking_343). FI+EN, luokka normal. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.refund_watch.status_check.forbidden",
+  "lang": "en",
+  "text": "You do not have permission to check the refund status.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Hallinta › Tilaukset › Avoimet maksut › Hyvitykset: nappi Tarkista tila Montoniosta (vain luku, montonio-refund action status, booking_343). FI+EN, luokka normal. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.refund_watch.status_check.montonio_missing",
+  "lang": "en",
+  "text": "The Montonio order does not have this refund.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Hallinta › Tilaukset › Avoimet maksut › Hyvitykset: nappi Tarkista tila Montoniosta (vain luku, montonio-refund action status, booking_343). FI+EN, luokka normal. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.refund_watch.status_check.no_provider_refund_id",
+  "lang": "en",
+  "text": "The refund has not been sent to Montonio yet, so there is no Montonio ID.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Hallinta › Tilaukset › Avoimet maksut › Hyvitykset: nappi Tarkista tila Montoniosta (vain luku, montonio-refund action status, booking_343). FI+EN, luokka normal. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.refund_watch.status_check.no_order_uuid",
+  "lang": "en",
+  "text": "The payment has no Montonio order ID.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Hallinta › Tilaukset › Avoimet maksut › Hyvitykset: nappi Tarkista tila Montoniosta (vain luku, montonio-refund action status, booking_343). FI+EN, luokka normal. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.refund_watch.status_check.retry_later",
+  "lang": "en",
+  "text": "Could not reach Montonio. Try again in a moment.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Hallinta › Tilaukset › Avoimet maksut › Hyvitykset: nappi Tarkista tila Montoniosta (vain luku, montonio-refund action status, booking_343). FI+EN, luokka normal. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.refund_watch.status_check.provider_error",
+  "lang": "en",
+  "text": "Montonio returned an error. Try again later.",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Hallinta › Tilaukset › Avoimet maksut › Hyvitykset: nappi Tarkista tila Montoniosta (vain luku, montonio-refund action status, booking_343). FI+EN, luokka normal. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.refund_watch.status_check.error",
+  "lang": "en",
+  "text": "The status could not be checked: {{var:error}}",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [
+   "{{var:error}}"
+  ],
+  "reason": "Hallinta › Tilaukset › Avoimet maksut › Hyvitykset: nappi Tarkista tila Montoniosta (vain luku, montonio-refund action status, booking_343). FI+EN, luokka normal. Tuo admin_texts_importilla."
+ },
+ {
+  "key": "ui.admin.refund_watch.status_check.close",
+  "lang": "en",
+  "text": "Close",
+  "class": "normal",
+  "kind": "plain",
+  "max_len": 200,
+  "placeholders": [],
+  "reason": "Hallinta › Tilaukset › Avoimet maksut › Hyvitykset: nappi Tarkista tila Montoniosta (vain luku, montonio-refund action status, booking_343). FI+EN, luokka normal. Tuo admin_texts_importilla."
+ }
+]

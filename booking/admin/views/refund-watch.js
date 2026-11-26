@@ -1,12 +1,14 @@
 // Kassa ja talous › Hyvitysten seuranta (booking_218). Oikeus bookings.manage tai admin.
 import { prText, loadPrTexts } from '../partial-refund-texts.js';
-import { h, toast, errMsg, badge } from '../ui.js';
+import { h, toast, errMsg, badge, dialog } from '../ui.js';
 import { fmt, getLang } from '../talous-i18n.js';
 import { formDialog } from './talous-ui.js';
 import { createRefundWatchApi } from '../refund-watch-api.js';
 import { rw } from '../refund-watch-texts.js';
 import { rpc, fn } from '../sb.js';
 import { notifyOpenPaymentsChanged } from '../open-payments-logic.js';
+import { rs } from '../refund-status-texts.js';
+import { canCheckStatus, statusCheckView } from '../refund-status-logic.js';
 
 const fld = (label, input) => h('label', { class: 'fld' }, h('span', { text: label }), input);
 
@@ -47,6 +49,9 @@ export async function render({ ctx, embedded = false, title = '' }) {
     if (row.can_retry) {
       actions.append(h('button', { type: 'button', class: 'btn', 'data-testid': 'refund-watch-retry', onclick: () => retry(row) }, rw('ui.admin.refund_watch.retry')));
     }
+    if (canCheckStatus(row)) {
+      actions.append(h('button', { type: 'button', class: 'btn ghost', 'data-testid': 'refund-watch-status', onclick: (e) => statusCheck(row, e.currentTarget) }, rs('ui.admin.refund_watch.status_check.button')));
+    }
     actions.append(h('button', { type: 'button', class: 'btn', 'data-testid': 'refund-watch-manual', onclick: () => manual(row) }, rw('ui.admin.refund_watch.manual')));
     // Mobiilissa rivi on kortti: data-label näyttää kentän nimen (.tl-table td::before).
     const L = (k) => rw(`ui.admin.refund_watch.col.${k}`);
@@ -74,6 +79,21 @@ export async function render({ ctx, embedded = false, title = '' }) {
       await load();
       notifyOpenPaymentsChanged();
     } catch (e) { toast(errMsg(e), 'err'); }
+  }
+  // Vain luku: näyttää paikallisen ja Montonion tilan. Ei lataa listaa uudelleen eikä muuta mitään.
+  async function statusCheck(row, btn) {
+    const body = h('div', { 'data-testid': 'refund-status-result', 'aria-live': 'polite' }, h('p', { class: 'muted', text: rs('ui.admin.refund_watch.status_check.checking') }));
+    dialog(`${rs('ui.admin.refund_watch.status_check.title')}${row.order_no != null ? ` · #${row.order_no}` : ''}`, h('div', {}, h('p', { class: 'muted', text: rs('ui.admin.refund_watch.status_check.read_only') }), body));
+    if (btn) btn.disabled = true;
+    try {
+      const v = statusCheckView(await api.statusCheck(row.refund_id), { money: fmt.money, date: (d) => new Date(d).toLocaleString(lang === 'en' ? 'en-GB' : 'fi-FI', { timeZone: 'Europe/Helsinki' }) });
+      const dl = (title, pairs, tid) => (pairs ? h('section', { 'data-testid': tid }, h('h3', { text: title }), h('dl', { class: 'tl-stats' }, pairs.map(([k, val]) => h('div', { class: 'tl-stat' }, h('dt', { text: rs(k) }), h('dd', { text: String(val) }))))) : null);
+      body.replaceChildren(
+        dl(rs('ui.admin.refund_watch.status_check.local'), v.local, 'refund-status-local'),
+        dl(rs('ui.admin.refund_watch.status_check.montonio'), v.montonio, 'refund-status-montonio'),
+        ...v.notes.map((n) => h('p', { class: 'tl-banner', role: 'status', text: rs(n.key, n.vars || {}) })),
+      );
+    } finally { if (btn) btn.disabled = false; }
   }
   function manual(row) {
     const amount = h('input', { name: 'amount', type: 'number', step: '0.01', min: '0.01', max: String(row.amount), value: String(row.amount), required: true, 'data-testid': 'refund-manual-amount' });
