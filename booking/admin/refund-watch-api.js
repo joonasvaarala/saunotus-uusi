@@ -1,4 +1,5 @@
 // Hyvitysten seurannan RPC-kerros. Näkymä ei tunne parametrien nimiä.
+import { checkRefundStatus } from './refund-status-logic.js';
 export function createRefundWatchApi({ rpc, fn }) {
   return {
     list(search) {
@@ -15,6 +16,11 @@ export function createRefundWatchApi({ rpc, fn }) {
         p_provider_ref: providerRef,
         p_note: note,
       });
+    },
+    // Vain luku: montonio-refund {action:'status'} (booking_343). Ei claimia, ei hyvitystä, ei kantamuutosta.
+    statusCheck(refundId) {
+      if (!fn) return Promise.resolve({ ok: false, code: 'not_configured' });
+      return checkRefundStatus(fn, refundId);
     },
     async providerRefund(provider, refundId) {
       const supported = provider === 'montonio' || provider === 'visma_pay' || provider === 'mobilepay';
